@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-OSPREY Backend B2C Authentication System Tests
-Tests complete user authentication, profiles, applications, and AI integration
+OSPREY Backend B2C System Tests
+Tests complete user authentication, profiles, applications, document management, and AI integration
 """
 
 import requests
@@ -9,6 +9,7 @@ import json
 import uuid
 from datetime import datetime
 import os
+import base64
 from dotenv import load_dotenv
 
 # Load environment variables
