@@ -397,6 +397,301 @@ def test_mongodb_persistence():
         print(f"❌ MongoDB persistence test error: {str(e)}")
         return False
 
+def test_document_upload():
+    """Test document upload with AI analysis"""
+    print("\n📄 Testing Document Upload...")
+    global DOCUMENT_ID
+    
+    if not AUTH_TOKEN:
+        print("❌ No auth token available for document upload test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        # Create a simple test image in base64 (1x1 pixel PNG)
+        test_image_base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+        test_image_bytes = base64.b64decode(test_image_base64)
+        
+        # Prepare multipart form data
+        files = {
+            'file': ('passport.png', test_image_bytes, 'image/png')
+        }
+        
+        data = {
+            'document_type': 'passport',
+            'tags': 'test,passport,brazil',
+            'expiration_date': '2025-12-31T23:59:59Z',
+            'issue_date': '2020-01-01T00:00:00Z'
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/documents/upload", 
+            files=files, 
+            data=data, 
+            headers=headers, 
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            DOCUMENT_ID = result.get('document_id')
+            print(f"✅ Document upload successful")
+            print(f"   Document ID: {DOCUMENT_ID}")
+            print(f"   Filename: {result.get('filename')}")
+            print(f"   Status: {result.get('status')}")
+            print(f"   AI Analysis: {result.get('ai_analysis_status')}")
+            return True
+        else:
+            print(f"❌ Document upload failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Document upload error: {str(e)}")
+        return False
+
+def test_document_list():
+    """Test listing user documents"""
+    print("\n📋 Testing Document List...")
+    
+    if not AUTH_TOKEN:
+        print("❌ No auth token available for document list test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        response = requests.get(f"{API_BASE}/documents", headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            documents = data.get('documents', [])
+            stats = data.get('stats', {})
+            expirations = data.get('upcoming_expirations', [])
+            
+            print(f"✅ Document list retrieved successfully")
+            print(f"   Total documents: {stats.get('total', 0)}")
+            print(f"   Approved: {stats.get('approved', 0)}")
+            print(f"   Pending: {stats.get('pending', 0)}")
+            print(f"   Completion rate: {stats.get('completion_rate', 0)}%")
+            print(f"   Upcoming expirations: {len(expirations)}")
+            
+            if documents:
+                doc = documents[0]
+                print(f"   First document type: {doc.get('document_type')}")
+                print(f"   First document status: {doc.get('status')}")
+            
+            return True
+        else:
+            print(f"❌ Document list failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Document list error: {str(e)}")
+        return False
+
+def test_document_details():
+    """Test getting document details with AI analysis"""
+    print("\n🔍 Testing Document Details...")
+    
+    if not AUTH_TOKEN or not DOCUMENT_ID:
+        print("❌ No auth token or document ID available for details test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        response = requests.get(f"{API_BASE}/documents/{DOCUMENT_ID}", headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            document = response.json()
+            print(f"✅ Document details retrieved successfully")
+            print(f"   Document type: {document.get('document_type')}")
+            print(f"   Status: {document.get('status')}")
+            print(f"   Priority: {document.get('priority')}")
+            print(f"   File size: {document.get('file_size')} bytes")
+            print(f"   Tags: {document.get('tags', [])}")
+            
+            # Check AI analysis
+            ai_analysis = document.get('ai_analysis')
+            if ai_analysis:
+                print(f"   AI Analysis present: ✅")
+                print(f"   Completeness score: {ai_analysis.get('completeness_score', 'N/A')}")
+                print(f"   Validity status: {ai_analysis.get('validity_status', 'N/A')}")
+                print(f"   Suggestions count: {len(ai_analysis.get('suggestions', []))}")
+            else:
+                print(f"   AI Analysis: ❌ Not found")
+            
+            return True
+        else:
+            print(f"❌ Document details failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Document details error: {str(e)}")
+        return False
+
+def test_document_reanalyze():
+    """Test document reanalysis with AI"""
+    print("\n🔄 Testing Document Reanalysis...")
+    
+    if not AUTH_TOKEN or not DOCUMENT_ID:
+        print("❌ No auth token or document ID available for reanalysis test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        response = requests.post(f"{API_BASE}/documents/{DOCUMENT_ID}/reanalyze", headers=headers, timeout=30)
+        
+        if response.status_code == 200:
+            result = response.json()
+            analysis = result.get('analysis', {})
+            
+            print(f"✅ Document reanalysis successful")
+            print(f"   New status: {result.get('status')}")
+            print(f"   Completeness score: {analysis.get('completeness_score', 'N/A')}")
+            print(f"   Validity status: {analysis.get('validity_status', 'N/A')}")
+            print(f"   Key information count: {len(analysis.get('key_information', []))}")
+            print(f"   Suggestions count: {len(analysis.get('suggestions', []))}")
+            print(f"   Next steps count: {len(analysis.get('next_steps', []))}")
+            
+            return True
+        else:
+            print(f"❌ Document reanalysis failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Document reanalysis error: {str(e)}")
+        return False
+
+def test_document_update():
+    """Test document update"""
+    print("\n✏️ Testing Document Update...")
+    
+    if not AUTH_TOKEN or not DOCUMENT_ID:
+        print("❌ No auth token or document ID available for update test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        update_data = {
+            "tags": ["updated", "passport", "brazil", "test"],
+            "priority": "high",
+            "expiration_date": "2026-01-31T23:59:59Z"
+        }
+        
+        response = requests.put(f"{API_BASE}/documents/{DOCUMENT_ID}", json=update_data, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            result = response.json()
+            document = result.get('document', {})
+            
+            print(f"✅ Document update successful")
+            print(f"   Updated tags: {document.get('tags', [])}")
+            print(f"   Updated priority: {document.get('priority')}")
+            print(f"   Updated expiration: {document.get('expiration_date', 'N/A')}")
+            
+            return True
+        else:
+            print(f"❌ Document update failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Document update error: {str(e)}")
+        return False
+
+def test_dashboard_with_documents():
+    """Test updated dashboard with document stats"""
+    print("\n📊 Testing Updated Dashboard with Documents...")
+    
+    if not AUTH_TOKEN:
+        print("❌ No auth token available for dashboard test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        response = requests.get(f"{API_BASE}/dashboard", headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            user_info = data.get('user', {})
+            stats = data.get('stats', {})
+            applications = data.get('applications', [])
+            recent_activity = data.get('recent_activity', {})
+            upcoming_expirations = data.get('upcoming_expirations', [])
+            
+            print(f"✅ Updated dashboard loaded successfully")
+            print(f"   User: {user_info.get('name')} ({user_info.get('email')})")
+            print(f"   Total Applications: {stats.get('total_applications', 0)}")
+            print(f"   Total Documents: {stats.get('total_documents', 0)}")
+            print(f"   Approved Documents: {stats.get('approved_documents', 0)}")
+            print(f"   Pending Documents: {stats.get('pending_documents', 0)}")
+            print(f"   Document Completion Rate: {stats.get('document_completion_rate', 0)}%")
+            print(f"   Upcoming Expirations: {len(upcoming_expirations)}")
+            print(f"   Recent Chats: {len(recent_activity.get('chats', []))}")
+            print(f"   Recent Translations: {len(recent_activity.get('translations', []))}")
+            
+            # Verify document stats are present
+            has_doc_stats = all(key in stats for key in ['total_documents', 'approved_documents', 'pending_documents', 'document_completion_rate'])
+            if has_doc_stats:
+                print("✅ Document statistics properly integrated in dashboard")
+            else:
+                print("⚠️  Some document statistics missing from dashboard")
+            
+            return True
+        else:
+            print(f"❌ Updated dashboard failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Updated dashboard test error: {str(e)}")
+        return False
+
+def test_document_delete():
+    """Test document deletion"""
+    print("\n🗑️ Testing Document Deletion...")
+    
+    if not AUTH_TOKEN or not DOCUMENT_ID:
+        print("❌ No auth token or document ID available for delete test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        response = requests.delete(f"{API_BASE}/documents/{DOCUMENT_ID}", headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            result = response.json()
+            print(f"✅ Document deletion successful")
+            print(f"   Message: {result.get('message')}")
+            
+            # Verify document is actually deleted
+            verify_response = requests.get(f"{API_BASE}/documents/{DOCUMENT_ID}", headers=headers, timeout=10)
+            if verify_response.status_code == 404:
+                print("✅ Document deletion verified - document not found")
+                return True
+            else:
+                print("⚠️  Document still exists after deletion")
+                return False
+                
+        else:
+            print(f"❌ Document deletion failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Document deletion error: {str(e)}")
+        return False
+
 def run_all_tests():
     """Run all B2C backend tests"""
     print("🚀 Starting OSPREY B2C Backend Authentication Tests")
