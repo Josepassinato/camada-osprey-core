@@ -209,7 +209,7 @@ const Dashboard = () => {
 
       <div className="container-responsive section-padding">
         {/* Stats Overview */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <Card className="glass border-0 card-hover">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -261,14 +261,30 @@ const Dashboard = () => {
           <Card className="glass border-0 card-hover">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
+                  <FileText className="h-6 w-6 text-accent" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-foreground">
+                    {dashboardData.stats.total_documents || 0}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Documentos</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass border-0 card-hover">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center">
                   <TrendingUp className="h-6 w-6 text-green-500" />
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-foreground">
-                    {dashboardData.stats.success_rate}%
+                    {dashboardData.stats.document_completion_rate || 0}%
                   </div>
-                  <div className="text-sm text-muted-foreground">Taxa de Sucesso</div>
+                  <div className="text-sm text-muted-foreground">Docs Aprovados</div>
                 </div>
               </div>
             </CardContent>
