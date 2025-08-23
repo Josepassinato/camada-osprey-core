@@ -31,6 +31,7 @@ TEST_USER = {
 }
 AUTH_TOKEN = None
 USER_ID = None
+DOCUMENT_ID = None  # For document tests
 
 def test_basic_connectivity():
     """Test basic API connectivity"""
