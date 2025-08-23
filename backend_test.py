@@ -693,41 +693,78 @@ def test_document_delete():
         return False
 
 def run_all_tests():
-    """Run all B2C backend tests"""
-    print("🚀 Starting OSPREY B2C Backend Authentication Tests")
+    """Run all B2C backend tests including document management"""
+    print("🚀 Starting OSPREY B2C Backend Complete System Tests")
     print(f"⏰ Test started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
-    results = {
+    # Authentication and basic system tests
+    auth_results = {
         "basic_connectivity": test_basic_connectivity(),
         "user_signup": test_user_signup(),
         "user_login": test_user_login(),
         "user_profile": test_user_profile(),
         "visa_application": test_visa_application(),
-        "dashboard": test_dashboard(),
         "authenticated_chat": test_authenticated_chat(),
         "chat_history": test_chat_history(),
         "mongodb_persistence": test_mongodb_persistence()
     }
     
+    # Document management tests (NEW)
+    document_results = {
+        "document_upload": test_document_upload(),
+        "document_list": test_document_list(),
+        "document_details": test_document_details(),
+        "document_reanalyze": test_document_reanalyze(),
+        "document_update": test_document_update(),
+        "dashboard_with_documents": test_dashboard_with_documents(),
+        "document_delete": test_document_delete()
+    }
+    
+    # Combine all results
+    all_results = {**auth_results, **document_results}
+    
     print("\n" + "=" * 60)
     print("📊 TEST RESULTS SUMMARY")
     print("=" * 60)
     
-    passed = sum(results.values())
-    total = len(results)
+    # Authentication System Results
+    print("\n🔐 AUTHENTICATION SYSTEM:")
+    auth_passed = sum(auth_results.values())
+    auth_total = len(auth_results)
     
-    for test_name, result in results.items():
+    for test_name, result in auth_results.items():
         status = "✅ PASS" if result else "❌ FAIL"
-        print(f"{test_name.replace('_', ' ').title()}: {status}")
+        print(f"  {test_name.replace('_', ' ').title()}: {status}")
     
-    print(f"\nOverall: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
+    print(f"  Auth System: {auth_passed}/{auth_total} tests passed ({auth_passed/auth_total*100:.1f}%)")
     
-    if passed == total:
-        print("🎉 All tests passed! B2C authentication system is working correctly.")
+    # Document Management Results
+    print("\n📄 DOCUMENT MANAGEMENT SYSTEM:")
+    doc_passed = sum(document_results.values())
+    doc_total = len(document_results)
+    
+    for test_name, result in document_results.items():
+        status = "✅ PASS" if result else "❌ FAIL"
+        print(f"  {test_name.replace('_', ' ').title()}: {status}")
+    
+    print(f"  Document System: {doc_passed}/{doc_total} tests passed ({doc_passed/doc_total*100:.1f}%)")
+    
+    # Overall Results
+    total_passed = sum(all_results.values())
+    total_tests = len(all_results)
+    
+    print(f"\n🎯 OVERALL: {total_passed}/{total_tests} tests passed ({total_passed/total_tests*100:.1f}%)")
+    
+    if total_passed == total_tests:
+        print("🎉 All tests passed! Complete B2C system with document management is working correctly.")
+    elif doc_passed == doc_total and auth_passed >= auth_total - 1:
+        print("✅ Document management system is working correctly. Minor auth issues detected.")
+    elif auth_passed == auth_total and doc_passed >= doc_total - 1:
+        print("✅ Authentication system is working correctly. Minor document issues detected.")
     else:
-        print("⚠️  Some tests failed. Check the details above.")
+        print("⚠️  Some critical tests failed. Check the details above.")
     
-    return results
+    return all_results
 
 if __name__ == "__main__":
     run_all_tests()
