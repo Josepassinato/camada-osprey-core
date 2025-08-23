@@ -91,6 +91,17 @@ class DocumentPriority(str, Enum):
     medium = "medium"
     low = "low"
 
+class DifficultyLevel(str, Enum):
+    beginner = "beginner"
+    intermediate = "intermediate"
+    advanced = "advanced"
+
+class InterviewType(str, Enum):
+    consular = "consular"
+    adjustment_of_status = "adjustment_of_status"
+    asylum = "asylum"
+    naturalization = "naturalization"
+
 # User Models (keeping existing ones)
 class UserCreate(BaseModel):
     email: EmailStr
@@ -145,7 +156,7 @@ class ApplicationUpdate(BaseModel):
     progress_percentage: Optional[int] = None
     current_step: Optional[str] = None
 
-# Document Models
+# Document Models (keeping existing ones)
 class UserDocument(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
@@ -178,6 +189,71 @@ class DocumentUpdate(BaseModel):
     issue_date: Optional[str] = None
     tags: Optional[List[str]] = None
     priority: Optional[DocumentPriority] = None
+
+# Education Models (NEW)
+class VisaGuide(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    visa_type: VisaType
+    title: str
+    description: str
+    difficulty_level: DifficultyLevel
+    estimated_time_minutes: int
+    sections: List[Dict[str, Any]]
+    requirements: List[str]
+    common_mistakes: List[str]
+    success_tips: List[str]
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class InterviewSession(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    interview_type: InterviewType
+    visa_type: VisaType
+    questions: List[Dict[str, Any]]
+    answers: List[Dict[str, Any]]
+    ai_feedback: Optional[Dict[str, Any]] = None
+    score: Optional[int] = None
+    duration_minutes: Optional[int] = None
+    completed: bool = False
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class InterviewStart(BaseModel):
+    interview_type: InterviewType
+    visa_type: VisaType
+    difficulty_level: Optional[DifficultyLevel] = DifficultyLevel.beginner
+
+class InterviewAnswer(BaseModel):
+    question_id: str
+    answer: str
+
+class PersonalizedTip(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    tip_category: str  # document, application, interview, etc.
+    title: str
+    content: str
+    priority: str  # high, medium, low
+    visa_type: Optional[VisaType] = None
+    is_read: bool = False
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class KnowledgeBaseQuery(BaseModel):
+    query: str
+    visa_type: Optional[VisaType] = None
+    category: Optional[str] = None
+
+class UserProgress(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    guides_completed: List[str] = []
+    interviews_completed: List[str] = []
+    knowledge_queries: int = 0
+    total_study_time_minutes: int = 0
+    achievement_badges: List[str] = []
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 # Existing models (keeping them)
 class StatusCheck(BaseModel):
@@ -245,7 +321,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-# Document helper functions
+# Document helper functions (keeping existing ones)
 def extract_text_from_base64_image(base64_content: str) -> str:
     """Extract text from base64 image using OCR simulation"""
     # In a real implementation, you would use OCR libraries like pytesseract
@@ -362,6 +438,298 @@ def determine_document_priority(document_type: DocumentType, expiration_date: Op
     
     return DocumentPriority.low
 
+# Education helper functions (NEW)
+async def generate_interview_questions(interview_type: InterviewType, visa_type: VisaType, difficulty_level: DifficultyLevel) -> List[Dict[str, Any]]:
+    """Generate interview questions using AI"""
+    try:
+        difficulty_map = {
+            DifficultyLevel.beginner: "perguntas básicas e introdutórias",
+            DifficultyLevel.intermediate: "perguntas moderadas com alguns detalhes",
+            DifficultyLevel.advanced: "perguntas complexas e cenários desafiadores"
+        }
+        
+        prompt = f"""
+        Gere 10 perguntas de entrevista para imigração americana:
+        
+        Tipo de entrevista: {interview_type.value}
+        Tipo de visto: {visa_type.value}
+        Nível: {difficulty_map[difficulty_level]}
+        
+        Para cada pergunta, forneça:
+        - A pergunta em inglês (como seria feita pelo oficial)
+        - Tradução em português
+        - Dicas de como responder
+        - Pontos importantes a mencionar
+        
+        Retorne APENAS um JSON array:
+        [
+            {{
+                "id": "q1",
+                "question_en": "pergunta em inglês",
+                "question_pt": "pergunta em português", 
+                "category": "categoria",
+                "difficulty": "{difficulty_level.value}",
+                "tips": ["dica1", "dica2"],
+                "key_points": ["ponto1", "ponto2"]
+            }}
+        ]
+        
+        IMPORTANTE: Estas são perguntas educativas para preparação. Para casos reais, recomende consultoria jurídica.
+        """
+
+        response = openai.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Você é um especialista em entrevistas de imigração. Responda APENAS em JSON válido."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            max_tokens=2000,
+            temperature=0.3
+        )
+
+        questions_text = response.choices[0].message.content.strip()
+        questions_text = questions_text.replace('```json', '').replace('```', '').strip()
+        
+        try:
+            questions = json.loads(questions_text)
+            return questions
+        except json.JSONDecodeError:
+            # Fallback questions
+            return [
+                {
+                    "id": "q1",
+                    "question_en": "What is the purpose of your visit to the United States?",
+                    "question_pt": "Qual é o propósito da sua visita aos Estados Unidos?",
+                    "category": "purpose",
+                    "difficulty": difficulty_level.value,
+                    "tips": ["Seja claro e direto", "Mencione detalhes específicos"],
+                    "key_points": ["Propósito específico", "Duração planejada"]
+                }
+            ]
+
+    except Exception as e:
+        logger.error(f"Error generating interview questions: {str(e)}")
+        return []
+
+async def evaluate_interview_answer(question: Dict[str, Any], answer: str, visa_type: VisaType) -> Dict[str, Any]:
+    """Evaluate interview answer using AI"""
+    try:
+        prompt = f"""
+        Avalie esta resposta de entrevista de imigração:
+
+        Pergunta: {question.get('question_pt')}
+        Resposta do usuário: {answer}
+        Tipo de visto: {visa_type.value}
+        
+        Forneça feedback APENAS em JSON:
+        {{
+            "score": [0-100],
+            "strengths": ["ponto forte 1", "ponto forte 2"],
+            "weaknesses": ["ponto fraco 1", "ponto fraco 2"],
+            "suggestions": ["sugestão 1", "sugestão 2"],
+            "improved_answer": "exemplo de resposta melhorada",
+            "confidence_level": "baixo|médio|alto"
+        }}
+        
+        IMPORTANTE: Esta é uma ferramenta educativa. Para preparação real, recomende consultoria jurídica.
+        """
+
+        response = openai.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Você é um especialista em avaliação de entrevistas de imigração. Responda APENAS em JSON."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            max_tokens=1000,
+            temperature=0.3
+        )
+
+        feedback_text = response.choices[0].message.content.strip()
+        feedback_text = feedback_text.replace('```json', '').replace('```', '').strip()
+        
+        try:
+            feedback = json.loads(feedback_text)
+            return feedback
+        except json.JSONDecodeError:
+            return {
+                "score": 70,
+                "strengths": ["Resposta fornecida"],
+                "weaknesses": ["Análise automática não disponível"],
+                "suggestions": ["Revise sua resposta"],
+                "improved_answer": "Desenvolva mais detalhes na sua resposta",
+                "confidence_level": "médio"
+            }
+
+    except Exception as e:
+        logger.error(f"Error evaluating interview answer: {str(e)}")
+        return {
+            "score": 50,
+            "strengths": ["Tentativa de resposta"],
+            "weaknesses": ["Análise não disponível"],
+            "suggestions": ["Tente novamente"],
+            "improved_answer": "Resposta mais detalhada seria ideal",
+            "confidence_level": "baixo"
+        }
+
+async def generate_personalized_tips(user_id: str, user_profile: dict, applications: List[dict], documents: List[dict]) -> List[PersonalizedTip]:
+    """Generate personalized tips based on user profile and progress"""
+    tips = []
+    
+    try:
+        # Analyze user's current status
+        active_applications = [app for app in applications if app.get('status') in ['in_progress', 'document_review']]
+        pending_docs = [doc for doc in documents if doc.get('status') == 'pending_review']
+        expiring_docs = [doc for doc in documents if doc.get('expiration_date') and 
+                        (datetime.fromisoformat(doc['expiration_date'].replace('Z', '+00:00')) - datetime.utcnow()).days <= 30]
+        
+        # Generate tips based on user's situation
+        user_context = f"""
+        Usuário: {user_profile.get('first_name', '')} {user_profile.get('last_name', '')}
+        País de nascimento: {user_profile.get('country_of_birth', 'Não informado')}
+        Aplicações ativas: {len(active_applications)}
+        Documentos pendentes: {len(pending_docs)}
+        Documentos expirando: {len(expiring_docs)}
+        
+        Gere 5 dicas personalizadas para este usuário em formato JSON:
+        [
+            {{
+                "category": "document|application|interview|preparation",
+                "title": "Título da dica",
+                "content": "Conteúdo detalhado da dica",
+                "priority": "high|medium|low"
+            }}
+        ]
+        """
+
+        response = openai.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Você é um consultor educativo de imigração. Forneça dicas práticas em português. Sempre mencione que não oferece consultoria jurídica."
+                },
+                {
+                    "role": "user",
+                    "content": user_context
+                }
+            ],
+            max_tokens=1500,
+            temperature=0.7
+        )
+
+        tips_text = response.choices[0].message.content.strip()
+        tips_text = tips_text.replace('```json', '').replace('```', '').strip()
+        
+        try:
+            tips_data = json.loads(tips_text)
+            for tip_data in tips_data:
+                tip = PersonalizedTip(
+                    user_id=user_id,
+                    tip_category=tip_data.get('category', 'general'),
+                    title=tip_data.get('title', ''),
+                    content=tip_data.get('content', ''),
+                    priority=tip_data.get('priority', 'medium')
+                )
+                tips.append(tip)
+        except json.JSONDecodeError:
+            pass
+
+    except Exception as e:
+        logger.error(f"Error generating personalized tips: {str(e)}")
+    
+    # Add fallback tips if generation failed
+    if not tips:
+        tips.append(PersonalizedTip(
+            user_id=user_id,
+            tip_category="preparation",
+            title="Organize seus documentos",
+            content="Mantenha todos os seus documentos organizados e atualizados para facilitar o processo de aplicação.",
+            priority="high"
+        ))
+    
+    return tips
+
+async def search_knowledge_base(query: str, visa_type: Optional[VisaType] = None) -> Dict[str, Any]:
+    """Search knowledge base using AI"""
+    try:
+        context_filter = f"para visto {visa_type.value}" if visa_type else "para imigração americana"
+        
+        prompt = f"""
+        Responda esta pergunta sobre imigração americana {context_filter}:
+        
+        Pergunta: {query}
+        
+        Forneça uma resposta educativa e informativa em JSON:
+        {{
+            "answer": "resposta detalhada e precisa",
+            "related_topics": ["tópico1", "tópico2", "tópico3"],
+            "next_steps": ["passo1", "passo2"],
+            "resources": ["recurso1", "recurso2"],
+            "warnings": ["aviso importante se aplicável"],
+            "confidence": "alto|médio|baixo"
+        }}
+        
+        IMPORTANTE: 
+        - Esta é informação educativa para auto-aplicação
+        - Sempre mencione que não substitui consultoria jurídica
+        - Para casos complexos, recomende consultar um advogado
+        """
+
+        response = openai.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Você é uma base de conhecimento educativa sobre imigração americana. Forneça informações precisas em português, sempre com disclaimers sobre consultoria jurídica."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            max_tokens=1500,
+            temperature=0.3
+        )
+
+        result_text = response.choices[0].message.content.strip()
+        result_text = result_text.replace('```json', '').replace('```', '').strip()
+        
+        try:
+            result = json.loads(result_text)
+            return result
+        except json.JSONDecodeError:
+            return {
+                "answer": "Desculpe, não foi possível processar sua pergunta no momento. Tente reformulá-la ou consulte nossa seção de guias interativos.",
+                "related_topics": ["Guias de Visto", "Simulador de Entrevista", "Gestão de Documentos"],
+                "next_steps": ["Explore os guias interativos", "Use o simulador de entrevista"],
+                "resources": ["Centro de Ajuda", "Chat com IA"],
+                "warnings": ["Esta é uma ferramenta educativa - não substitui consultoria jurídica"],
+                "confidence": "baixo"
+            }
+
+    except Exception as e:
+        logger.error(f"Error searching knowledge base: {str(e)}")
+        return {
+            "answer": "Erro ao processar consulta. Tente novamente.",
+            "related_topics": [],
+            "next_steps": [],
+            "resources": [],
+            "warnings": ["Sistema temporariamente indisponível"],
+            "confidence": "baixo"
+        }
+
 # Authentication routes (keeping existing ones)
 @api_router.post("/auth/signup")
 async def signup(user_data: UserCreate):
@@ -392,6 +760,10 @@ async def signup(user_data: UserCreate):
         }
         
         await db.users.insert_one(user_doc)
+        
+        # Initialize user progress
+        progress = UserProgress(user_id=user_id)
+        await db.user_progress.insert_one(progress.dict())
         
         # Create JWT token
         token = create_jwt_token(user_id, user_data.email)
@@ -463,7 +835,387 @@ async def update_profile(profile_data: UserProfileUpdate, current_user = Depends
         logger.error(f"Error updating profile: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error updating profile: {str(e)}")
 
-# Document routes (NEW)
+# Education routes (NEW)
+@api_router.get("/education/guides")
+async def get_visa_guides(visa_type: Optional[VisaType] = None, current_user = Depends(get_current_user)):
+    """Get available visa guides"""
+    try:
+        # Predefined guides data (in production, this would come from database)
+        guides_data = {
+            VisaType.h1b: {
+                "title": "Guia Completo H1-B",
+                "description": "Tudo sobre o visto de trabalho H1-B",
+                "difficulty_level": "intermediate",
+                "estimated_time_minutes": 45,
+                "sections": [
+                    {"title": "Requisitos Básicos", "content": "Lista de requisitos essenciais"},
+                    {"title": "Processo de Aplicação", "content": "Passo a passo detalhado"},
+                    {"title": "Documentos Necessários", "content": "Checklist completo"},
+                    {"title": "Timeline", "content": "Cronograma típico"},
+                    {"title": "Dicas de Sucesso", "content": "Conselhos práticos"}
+                ],
+                "requirements": ["Oferta de emprego", "Graduação superior", "Especialização na área"],
+                "common_mistakes": ["Documentação incompleta", "Não demonstrar especialização"],
+                "success_tips": ["Prepare documentação detalhada", "Demonstre expertise única"]
+            },
+            VisaType.f1: {
+                "title": "Guia Completo F1",
+                "description": "Visto de estudante para universidades americanas",
+                "difficulty_level": "beginner",
+                "estimated_time_minutes": 30,
+                "sections": [
+                    {"title": "Elegibilidade", "content": "Critérios de elegibilidade"},
+                    {"title": "Escolha da Escola", "content": "Como escolher instituição"},
+                    {"title": "Processo I-20", "content": "Obtenção do formulário I-20"},
+                    {"title": "Entrevista Consular", "content": "Preparação para entrevista"},
+                    {"title": "Vida nos EUA", "content": "Dicas para estudantes"}
+                ],
+                "requirements": ["Aceitação em escola aprovada", "Recursos financeiros", "Intenção de retorno"],
+                "common_mistakes": ["Demonstrar intenção imigratória", "Recursos financeiros insuficientes"],
+                "success_tips": ["Demonstre laços com país de origem", "Tenha recursos financeiros claros"]
+            },
+            VisaType.family: {
+                "title": "Reunificação Familiar",
+                "description": "Processos de imigração baseados em família",
+                "difficulty_level": "intermediate",
+                "estimated_time_minutes": 50,
+                "sections": [
+                    {"title": "Tipos de Petição", "content": "Diferentes categorias familiares"},
+                    {"title": "Processo I-130", "content": "Petição para parente"},
+                    {"title": "Documentos Familiares", "content": "Comprovação de relacionamento"},
+                    {"title": "Prioridades", "content": "Sistema de prioridades"},
+                    {"title": "Adjustment vs Consular", "content": "Diferentes caminhos"}
+                ],
+                "requirements": ["Relacionamento qualificado", "Documentos comprobatórios", "Sponsor qualificado"],
+                "common_mistakes": ["Documentos familiares inadequados", "Não comprovar relacionamento genuíno"],
+                "success_tips": ["Documente bem o relacionamento", "Mantenha registros detalhados"]
+            }
+        }
+        
+        if visa_type:
+            guide_data = guides_data.get(visa_type)
+            if guide_data:
+                guide = VisaGuide(
+                    visa_type=visa_type,
+                    **guide_data
+                )
+                return {"guide": guide.dict()}
+            else:
+                raise HTTPException(status_code=404, detail="Guide not found")
+        else:
+            # Return all guides
+            all_guides = []
+            for v_type, guide_data in guides_data.items():
+                guide = VisaGuide(
+                    visa_type=v_type,
+                    **guide_data
+                )
+                all_guides.append(guide.dict())
+            return {"guides": all_guides}
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting visa guides: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error getting guides: {str(e)}")
+
+@api_router.post("/education/guides/{visa_type}/complete")
+async def complete_guide(visa_type: VisaType, current_user = Depends(get_current_user)):
+    """Mark a guide as completed"""
+    try:
+        # Update user progress
+        await db.user_progress.update_one(
+            {"user_id": current_user["id"]},
+            {
+                "$addToSet": {"guides_completed": visa_type.value},
+                "$inc": {"total_study_time_minutes": 30},  # Estimated time
+                "$set": {"updated_at": datetime.utcnow()}
+            },
+            upsert=True
+        )
+        
+        return {"message": f"Guide {visa_type.value} marked as completed"}
+        
+    except Exception as e:
+        logger.error(f"Error completing guide: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error completing guide: {str(e)}")
+
+@api_router.post("/education/interview/start")
+async def start_interview_simulation(request: InterviewStart, current_user = Depends(get_current_user)):
+    """Start a new interview simulation"""
+    try:
+        # Generate questions
+        questions = await generate_interview_questions(
+            request.interview_type,
+            request.visa_type,
+            request.difficulty_level or DifficultyLevel.beginner
+        )
+        
+        # Create interview session
+        session = InterviewSession(
+            user_id=current_user["id"],
+            interview_type=request.interview_type,
+            visa_type=request.visa_type,
+            questions=questions
+        )
+        
+        await db.interview_sessions.insert_one(session.dict())
+        
+        return {
+            "session_id": session.id,
+            "questions": questions,
+            "total_questions": len(questions),
+            "estimated_duration": len(questions) * 2  # 2 minutes per question
+        }
+        
+    except Exception as e:
+        logger.error(f"Error starting interview simulation: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error starting interview: {str(e)}")
+
+@api_router.post("/education/interview/{session_id}/answer")
+async def submit_interview_answer(
+    session_id: str, 
+    answer_data: InterviewAnswer, 
+    current_user = Depends(get_current_user)
+):
+    """Submit an answer to interview question"""
+    try:
+        # Get interview session
+        session = await db.interview_sessions.find_one({
+            "id": session_id,
+            "user_id": current_user["id"]
+        })
+        
+        if not session:
+            raise HTTPException(status_code=404, detail="Interview session not found")
+        
+        # Find the question
+        question = next((q for q in session["questions"] if q["id"] == answer_data.question_id), None)
+        if not question:
+            raise HTTPException(status_code=404, detail="Question not found")
+        
+        # Evaluate answer
+        feedback = await evaluate_interview_answer(
+            question,
+            answer_data.answer,
+            VisaType(session["visa_type"])
+        )
+        
+        # Update session with answer
+        answer_record = {
+            "question_id": answer_data.question_id,
+            "answer": answer_data.answer,
+            "feedback": feedback,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+        await db.interview_sessions.update_one(
+            {"id": session_id},
+            {
+                "$push": {"answers": answer_record},
+                "$set": {"updated_at": datetime.utcnow()}
+            }
+        )
+        
+        return {
+            "feedback": feedback,
+            "next_question_index": len(session.get("answers", [])) + 1
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error submitting interview answer: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error submitting answer: {str(e)}")
+
+@api_router.post("/education/interview/{session_id}/complete")
+async def complete_interview_session(session_id: str, current_user = Depends(get_current_user)):
+    """Complete interview session and get final feedback"""
+    try:
+        # Get interview session
+        session = await db.interview_sessions.find_one({
+            "id": session_id,
+            "user_id": current_user["id"]
+        })
+        
+        if not session:
+            raise HTTPException(status_code=404, detail="Interview session not found")
+        
+        answers = session.get("answers", [])
+        if not answers:
+            raise HTTPException(status_code=400, detail="No answers submitted")
+        
+        # Calculate overall score
+        scores = [answer.get("feedback", {}).get("score", 0) for answer in answers]
+        overall_score = sum(scores) // len(scores) if scores else 0
+        
+        # Generate overall feedback
+        overall_feedback = {
+            "overall_score": overall_score,
+            "questions_answered": len(answers),
+            "average_confidence": "médio",  # Simplified for demo
+            "strengths": ["Respostas completas", "Boa preparação"],
+            "areas_for_improvement": ["Desenvolver mais detalhes", "Praticar mais"],
+            "recommendations": [
+                "Continue praticando com diferentes cenários",
+                "Revise os guias interativos relacionados",
+                "Considere praticar com diferentes níveis de dificuldade"
+            ]
+        }
+        
+        # Update session as completed
+        await db.interview_sessions.update_one(
+            {"id": session_id},
+            {
+                "$set": {
+                    "completed": True,
+                    "score": overall_score,
+                    "ai_feedback": overall_feedback,
+                    "duration_minutes": 15,  # Simplified
+                    "updated_at": datetime.utcnow()
+                }
+            }
+        )
+        
+        # Update user progress
+        await db.user_progress.update_one(
+            {"user_id": current_user["id"]},
+            {
+                "$addToSet": {"interviews_completed": session_id},
+                "$inc": {"total_study_time_minutes": 15},
+                "$set": {"updated_at": datetime.utcnow()}
+            },
+            upsert=True
+        )
+        
+        return {
+            "overall_feedback": overall_feedback,
+            "session_completed": True
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error completing interview session: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error completing interview: {str(e)}")
+
+@api_router.get("/education/tips")
+async def get_personalized_tips(current_user = Depends(get_current_user)):
+    """Get personalized tips for user"""
+    try:
+        # Get existing tips
+        existing_tips = await db.personalized_tips.find(
+            {"user_id": current_user["id"]}, {"_id": 0}
+        ).sort("created_at", -1).limit(10).to_list(10)
+        
+        # If no recent tips, generate new ones
+        if not existing_tips:
+            # Get user data for context
+            applications = await db.applications.find({"user_id": current_user["id"]}, {"_id": 0}).to_list(100)
+            documents = await db.documents.find(
+                {"user_id": current_user["id"]}, 
+                {"_id": 0, "content_base64": 0}
+            ).to_list(100)
+            
+            # Generate new tips
+            tips = await generate_personalized_tips(current_user["id"], current_user, applications, documents)
+            
+            # Save tips to database
+            for tip in tips:
+                await db.personalized_tips.insert_one(tip.dict())
+            
+            existing_tips = [tip.dict() for tip in tips]
+        
+        return {"tips": existing_tips}
+        
+    except Exception as e:
+        logger.error(f"Error getting personalized tips: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error getting tips: {str(e)}")
+
+@api_router.post("/education/tips/{tip_id}/read")
+async def mark_tip_as_read(tip_id: str, current_user = Depends(get_current_user)):
+    """Mark a tip as read"""
+    try:
+        await db.personalized_tips.update_one(
+            {"id": tip_id, "user_id": current_user["id"]},
+            {"$set": {"is_read": True}}
+        )
+        
+        return {"message": "Tip marked as read"}
+        
+    except Exception as e:
+        logger.error(f"Error marking tip as read: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error marking tip as read: {str(e)}")
+
+@api_router.post("/education/knowledge-base/search")
+async def search_knowledge(query_data: KnowledgeBaseQuery, current_user = Depends(get_current_user)):
+    """Search the knowledge base"""
+    try:
+        # Search knowledge base
+        result = await search_knowledge_base(query_data.query, query_data.visa_type)
+        
+        # Update user progress
+        await db.user_progress.update_one(
+            {"user_id": current_user["id"]},
+            {
+                "$inc": {"knowledge_queries": 1},
+                "$set": {"updated_at": datetime.utcnow()}
+            },
+            upsert=True
+        )
+        
+        # Log the search for analytics
+        search_log = {
+            "id": str(uuid.uuid4()),
+            "user_id": current_user["id"],
+            "query": query_data.query,
+            "visa_type": query_data.visa_type.value if query_data.visa_type else None,
+            "category": query_data.category,
+            "timestamp": datetime.utcnow()
+        }
+        await db.knowledge_searches.insert_one(search_log)
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error searching knowledge base: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error searching knowledge base: {str(e)}")
+
+@api_router.get("/education/progress")
+async def get_user_progress(current_user = Depends(get_current_user)):
+    """Get user's education progress"""
+    try:
+        progress = await db.user_progress.find_one(
+            {"user_id": current_user["id"]}, {"_id": 0}
+        )
+        
+        if not progress:
+            # Initialize progress if doesn't exist
+            progress = UserProgress(user_id=current_user["id"])
+            await db.user_progress.insert_one(progress.dict())
+            progress = progress.dict()
+        
+        # Get additional stats
+        total_interviews = await db.interview_sessions.count_documents({
+            "user_id": current_user["id"],
+            "completed": True
+        })
+        
+        recent_tips = await db.personalized_tips.count_documents({
+            "user_id": current_user["id"],
+            "is_read": False
+        })
+        
+        progress["total_completed_interviews"] = total_interviews
+        progress["unread_tips_count"] = recent_tips
+        
+        return {"progress": progress}
+        
+    except Exception as e:
+        logger.error(f"Error getting user progress: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error getting progress: {str(e)}")
+
+# Document routes (keeping existing ones with modifications for education integration)
 @api_router.post("/documents/upload")
 async def upload_document(
     file: UploadFile = File(...),
@@ -835,7 +1587,7 @@ async def update_application(application_id: str, update_data: ApplicationUpdate
         logger.error(f"Error updating application: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error updating application: {str(e)}")
 
-# Dashboard route (updated to include document stats)
+# Dashboard route (updated to include education stats)
 @api_router.get("/dashboard")
 async def get_dashboard(current_user = Depends(get_current_user)):
     """Get user dashboard data"""
@@ -858,6 +1610,17 @@ async def get_dashboard(current_user = Depends(get_current_user)):
             {"user_id": current_user["id"]}, 
             {"_id": 0, "content_base64": 0}
         ).to_list(100)
+        
+        # Get education progress
+        progress = await db.user_progress.find_one(
+            {"user_id": current_user["id"]}, {"_id": 0}
+        )
+        
+        # Get unread tips
+        unread_tips = await db.personalized_tips.count_documents({
+            "user_id": current_user["id"],
+            "is_read": False
+        })
         
         # Document stats
         total_docs = len(documents)
@@ -898,7 +1661,11 @@ async def get_dashboard(current_user = Depends(get_current_user)):
                 "total_documents": total_docs,
                 "approved_documents": approved_docs,
                 "pending_documents": pending_docs,
-                "document_completion_rate": int((approved_docs / total_docs * 100)) if total_docs > 0 else 0
+                "document_completion_rate": int((approved_docs / total_docs * 100)) if total_docs > 0 else 0,
+                "guides_completed": len(progress.get("guides_completed", [])) if progress else 0,
+                "interviews_completed": len(progress.get("interviews_completed", [])) if progress else 0,
+                "total_study_time": progress.get("total_study_time_minutes", 0) if progress else 0,
+                "unread_tips": unread_tips
             },
             "applications": applications,
             "recent_activity": {
