@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-OSPREY Backend OpenAI Integration Tests
-Tests all AI-powered endpoints with realistic immigration scenarios
+OSPREY Backend B2C Authentication System Tests
+Tests complete user authentication, profiles, applications, and AI integration
 """
 
 import requests
@@ -18,8 +18,18 @@ load_dotenv('/app/frontend/.env')
 BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://acesso-github.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
-print(f"Testing OSPREY Backend at: {API_BASE}")
+print(f"Testing OSPREY B2C Backend at: {API_BASE}")
 print("=" * 60)
+
+# Global variables for test data
+TEST_USER = {
+    "email": "test@osprey.com",
+    "password": "TestUser123",
+    "first_name": "João",
+    "last_name": "Silva"
+}
+AUTH_TOKEN = None
+USER_ID = None
 
 def test_basic_connectivity():
     """Test basic API connectivity"""
