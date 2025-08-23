@@ -446,6 +446,43 @@ const Dashboard = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* Document Expiration Alerts */}
+            {dashboardData.upcoming_expirations && dashboardData.upcoming_expirations.length > 0 && (
+              <Card className="glass border-0 border-l-4 border-l-orange-500">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2 text-orange-600">
+                    <AlertCircle className="h-5 w-5" />
+                    Documentos Expirando
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {dashboardData.upcoming_expirations.slice(0, 3).map((exp, index) => (
+                    <div key={index} className="flex items-start gap-3 p-3 bg-orange-50 rounded-lg">
+                      <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                        <FileText className="h-4 w-4 text-orange-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-orange-800">
+                          {exp.document_type.replace('_', ' ').toUpperCase()}
+                        </p>
+                        <p className="text-xs text-orange-600">
+                          {exp.days_to_expire} dia{exp.days_to_expire !== 1 ? 's' : ''} restante{exp.days_to_expire !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full mt-3 border-orange-200 text-orange-600 hover:bg-orange-50"
+                    onClick={() => navigate('/documents')}
+                  >
+                    Ver Todos os Documentos
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>
