@@ -359,15 +359,13 @@ metadata:
 
 test_plan:
   current_focus:
-    - "B2C User Authentication System"
-    - "User Profile Management"
-    - "Visa Application Management"
-    - "User Dashboard"
-    - "Authenticated AI Chat Integration"
-    - "Chat History Management"
-    - "MongoDB Data Persistence with User Association"
-    - "B2C Self-Application Disclaimers"
-    - "Backend Service Connectivity"
+    - "Document Upload with AI Analysis"
+    - "Document List and Statistics"
+    - "Document Details with AI Analysis"
+    - "Document AI Reanalysis"
+    - "Document Update and Management"
+    - "Document Deletion and Cleanup"
+    - "Dashboard Integration with Document Stats"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
