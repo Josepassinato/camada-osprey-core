@@ -1083,7 +1083,7 @@ def test_dashboard_with_education():
         return False
 
 def run_all_tests():
-    """Run all B2C backend tests including document management"""
+    """Run all B2C backend tests including document management and education system"""
     print("🚀 Starting OSPREY B2C Backend Complete System Tests")
     print(f"⏰ Test started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
@@ -1099,7 +1099,7 @@ def run_all_tests():
         "mongodb_persistence": test_mongodb_persistence()
     }
     
-    # Document management tests (NEW)
+    # Document management tests
     document_results = {
         "document_upload": test_document_upload(),
         "document_list": test_document_list(),
@@ -1110,8 +1110,20 @@ def run_all_tests():
         "document_delete": test_document_delete()
     }
     
+    # Education system tests (NEW)
+    education_results = {
+        "education_guides": test_education_guides(),
+        "interview_simulator_start": test_interview_simulator_start(),
+        "interview_answer_submission": test_interview_answer_submission(),
+        "interview_completion": test_interview_completion(),
+        "personalized_tips": test_personalized_tips(),
+        "knowledge_base_search": test_knowledge_base_search(),
+        "user_progress": test_user_progress(),
+        "dashboard_with_education": test_dashboard_with_education()
+    }
+    
     # Combine all results
-    all_results = {**auth_results, **document_results}
+    all_results = {**auth_results, **document_results, **education_results}
     
     print("\n" + "=" * 60)
     print("📊 TEST RESULTS SUMMARY")
@@ -1139,6 +1151,17 @@ def run_all_tests():
     
     print(f"  Document System: {doc_passed}/{doc_total} tests passed ({doc_passed/doc_total*100:.1f}%)")
     
+    # Education System Results (NEW)
+    print("\n🎓 EDUCATION SYSTEM:")
+    edu_passed = sum(education_results.values())
+    edu_total = len(education_results)
+    
+    for test_name, result in education_results.items():
+        status = "✅ PASS" if result else "❌ FAIL"
+        print(f"  {test_name.replace('_', ' ').title()}: {status}")
+    
+    print(f"  Education System: {edu_passed}/{edu_total} tests passed ({edu_passed/edu_total*100:.1f}%)")
+    
     # Overall Results
     total_passed = sum(all_results.values())
     total_tests = len(all_results)
@@ -1146,11 +1169,11 @@ def run_all_tests():
     print(f"\n🎯 OVERALL: {total_passed}/{total_tests} tests passed ({total_passed/total_tests*100:.1f}%)")
     
     if total_passed == total_tests:
-        print("🎉 All tests passed! Complete B2C system with document management is working correctly.")
-    elif doc_passed == doc_total and auth_passed >= auth_total - 1:
-        print("✅ Document management system is working correctly. Minor auth issues detected.")
-    elif auth_passed == auth_total and doc_passed >= doc_total - 1:
-        print("✅ Authentication system is working correctly. Minor document issues detected.")
+        print("🎉 All tests passed! Complete B2C system with education and document management is working correctly.")
+    elif edu_passed == edu_total:
+        print("✅ Education system is working perfectly! Minor issues in other systems.")
+    elif edu_passed >= edu_total - 1:
+        print("✅ Education system is working correctly with minor issues.")
     else:
         print("⚠️  Some critical tests failed. Check the details above.")
     
