@@ -458,13 +458,15 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Document Upload with AI Analysis"
-    - "Document List and Statistics"
-    - "Document Details with AI Analysis"
-    - "Document AI Reanalysis"
-    - "Document Update and Management"
-    - "Document Deletion and Cleanup"
-    - "Dashboard Integration with Document Stats"
+    - "Interactive Visa Guides System"
+    - "Interview Simulator System"
+    - "Interview Answer Submission and Evaluation"
+    - "Interview Session Completion"
+    - "Personalized Tips Generation"
+    - "Knowledge Base Search System"
+    - "User Education Progress Tracking"
+    - "Dashboard Integration with Education Stats"
+    - "OpenAI GPT-4 Integration for Education"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
