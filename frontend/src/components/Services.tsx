@@ -1,97 +1,176 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plane, GraduationCap, Heart, Briefcase, Users, ArrowRight } from "lucide-react";
+import { 
+  Plane, 
+  GraduationCap, 
+  Heart, 
+  Briefcase, 
+  Users, 
+  ArrowRight, 
+  TrendingUp,
+  Star
+} from "lucide-react";
 
 const services = [
   {
     icon: Briefcase,
     title: "Visto de Trabalho",
-    description: "Processo completo para obtenção de visto de trabalho em diversos países.",
+    description: "Processo completo para obtenção de visto de trabalho nos EUA com suporte especializado.",
     types: ["H1-B", "L1", "O1", "EB-5"],
-    popular: true
+    popular: true,
+    color: "blue",
+    features: ["Análise de Elegibilidade", "Preparação de Documentos", "Acompanhamento USCIS"]
   },
   {
     icon: GraduationCap,
     title: "Visto de Estudante",
-    description: "Suporte completo para aplicações de visto de estudante e intercâmbio.",
+    description: "Suporte completo para aplicações acadêmicas e programas de intercâmbio.",
     types: ["F1", "M1", "J1", "F2"],
-    popular: false
+    popular: false,
+    color: "purple",
+    features: ["Escolha de Instituição", "I-20 Processing", "Entrevista Consular"]
   },
   {
     icon: Heart,
     title: "Reunificação Familiar",
-    description: "Processos de imigração baseados em laços familiares.",
+    description: "Processos especializados em imigração baseada em laços familiares.",
     types: ["CR1", "IR1", "K1", "F2A"],
-    popular: false
+    popular: false,
+    color: "pink",
+    features: ["Petição Familiar", "Documentos Comprobatórios", "Timeline Otimizado"]
   },
   {
     icon: Users,
     title: "Residência Permanente",
-    description: "Caminhos para obtenção de residência permanente e cidadania.",
+    description: "Caminhos estratégicos para obtenção de Green Card e cidadania americana.",
     types: ["Green Card", "EB-1", "EB-2", "EB-3"],
-    popular: true
+    popular: true,
+    color: "green",
+    features: ["Estratégia Personalizada", "Priority Date", "Adjustment of Status"]
   },
   {
     icon: Plane,
     title: "Visto de Turismo",
-    description: "Aplicações rápidas para vistos de turismo e negócios.",
+    description: "Aplicações rápidas para turismo, negócios e visitas de curta duração.",
     types: ["B1/B2", "ESTA", "VWP"],
-    popular: false
+    popular: false,
+    color: "orange",
+    features: ["DS-160 Otimizado", "Prep. Entrevista", "Aprovação Expressa"]
   },
   {
-    icon: Briefcase,
+    icon: TrendingUp,
     title: "Visto de Investidor",
-    description: "Processos para empreendedores e investidores.",
+    description: "Soluções completas para empreendedores e investidores qualificados.",
     types: ["E2", "EB-5", "L1A"],
-    popular: false
+    popular: false,
+    color: "emerald",
+    features: ["Business Plan", "Documentação Financeira", "Due Diligence"]
   }
 ];
 
+const colorSchemes = {
+  blue: "from-blue-500/20 to-cyan-500/20 border-blue-200/30",
+  purple: "from-purple-500/20 to-pink-500/20 border-purple-200/30",
+  pink: "from-pink-500/20 to-rose-500/20 border-pink-200/30",
+  green: "from-green-500/20 to-emerald-500/20 border-green-200/30",
+  orange: "from-orange-500/20 to-yellow-500/20 border-orange-200/30",
+  emerald: "from-emerald-500/20 to-teal-500/20 border-emerald-200/30",
+};
+
 const Services = () => {
   return (
-    <section id="services" className="py-20 bg-background">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="services" className="section-padding bg-gradient-subtle">
+      <div className="container-responsive">
+        
+        {/* Header */}
         <div className="text-center space-y-4 mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-            Nossos Serviços
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20 mb-4">
+            <Star className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium text-primary">Nossos Serviços</span>
+          </div>
+          
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground max-w-4xl mx-auto">
+            <span className="text-gradient">Soluções Completas</span> para Cada Jornada
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Oferecemos suporte completo para todos os tipos de processos imigratórios,
-            com especialistas dedicados para cada categoria.
+          
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Oferecemos suporte especializado para todos os tipos de processos imigratórios,
+            com tecnologia avançada e expertise jurídica.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Services Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service, index) => {
             const IconComponent = service.icon;
+            const colorClass = colorSchemes[service.color as keyof typeof colorSchemes];
+            
             return (
-              <Card key={index} className="relative hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
+              <Card 
+                key={index} 
+                className={`relative card-hover glass border-0 bg-gradient-to-br ${colorClass} overflow-hidden group`}
+              >
+                {/* Popular badge */}
                 {service.popular && (
-                  <Badge className="absolute -top-2 -right-2 bg-gradient-hero text-primary-foreground">
-                    Popular
-                  </Badge>
+                  <div className="absolute -top-2 -right-2 z-10">
+                    <Badge className="bg-gradient-primary text-primary-foreground font-medium border-0 shadow-glow">
+                      ⭐ Popular
+                    </Badge>
+                  </div>
                 )}
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <div className="p-3 bg-gradient-subtle rounded-lg">
-                      <IconComponent className="h-6 w-6 text-primary" />
+
+                <CardHeader className="pb-4 relative">
+                  {/* Icon */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="relative">
+                      <div className="w-14 h-14 bg-white/80 rounded-2xl flex items-center justify-center shadow-soft group-hover:shadow-glow transition-all duration-300">
+                        <IconComponent className="h-7 w-7 text-primary" />
+                      </div>
                     </div>
                   </div>
-                  <CardTitle className="text-xl">{service.title}</CardTitle>
+                  
+                  <CardTitle className="text-xl font-bold text-foreground">
+                    {service.title}
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-muted-foreground">
+
+                <CardContent className="space-y-6">
+                  <p className="text-muted-foreground leading-relaxed">
                     {service.description}
                   </p>
+                  
+                  {/* Visa types */}
                   <div className="flex flex-wrap gap-2">
                     {service.types.map((type, typeIndex) => (
-                      <Badge key={typeIndex} variant="secondary" className="text-xs">
+                      <Badge 
+                        key={typeIndex} 
+                        variant="secondary" 
+                        className="bg-white/50 text-foreground border-0 font-medium"
+                      >
                         {type}
                       </Badge>
                     ))}
                   </div>
-                  <Button variant="ghost" className="w-full justify-between group">
+
+                  {/* Features */}
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium text-foreground">Incluído:</div>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      {service.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0"></div>
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  {/* CTA Button */}
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-between group bg-white/50 hover:bg-white/80 border-0 font-medium"
+                  >
                     Saiba Mais
                     <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </Button>
@@ -101,10 +180,11 @@ const Services = () => {
           })}
         </div>
 
-        <div className="text-center mt-12">
-          <Button variant="professional" size="lg">
+        {/* Bottom CTA */}
+        <div className="text-center mt-16">
+          <Button size="lg" className="btn-gradient text-lg font-medium">
             Ver Todos os Serviços
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-5 w-5" />
           </Button>
         </div>
       </div>
