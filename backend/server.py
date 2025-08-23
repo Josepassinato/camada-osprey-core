@@ -400,7 +400,7 @@ async def get_chat_history(current_user = Depends(get_current_user)):
     """Get user's chat history with AI"""
     try:
         sessions = await db.chat_sessions.find(
-            {"user_id": current_user["id"]}
+            {"user_id": current_user["id"]}, {"_id": 0}
         ).sort("last_updated", -1).to_list(50)
         
         return {"chat_sessions": sessions}
