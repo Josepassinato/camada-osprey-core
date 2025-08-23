@@ -1,7 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle, Sparkles, MessageSquare } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const CTA = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="section-padding bg-gradient-subtle relative overflow-hidden">
       {/* Background decorations */}
@@ -63,6 +66,7 @@ const CTA = () => {
                 <Button 
                   size="xl" 
                   className="btn-gradient text-lg font-medium group flex-1"
+                  onClick={() => navigate('/signup')}
                 >
                   Iniciar Processo Gratuito
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -72,9 +76,10 @@ const CTA = () => {
                   variant="outline" 
                   size="xl" 
                   className="text-lg font-medium btn-glass hover:border-primary/30 flex-1"
+                  onClick={() => navigate('/chat')}
                 >
                   <MessageSquare className="h-5 w-5" />
-                  Falar com Especialista
+                  Falar com Especialista IA
                 </Button>
               </div>
 
