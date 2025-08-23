@@ -1,7 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle, Sparkles, Shield, Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative min-h-screen flex items-center bg-gradient-subtle overflow-hidden">
       {/* Background decoration */}
@@ -73,6 +76,7 @@ const Hero = () => {
               <Button 
                 size="xl" 
                 className="btn-gradient text-lg font-medium group"
+                onClick={() => navigate('/signup')}
               >
                 Iniciar Aplicação Agora
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
