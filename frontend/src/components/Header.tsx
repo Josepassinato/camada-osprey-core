@@ -1,19 +1,35 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Sparkles, ChevronDown } from "lucide-react";
+import { Menu, X, Sparkles, ChevronDown, User, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
 
+    // Check for logged in user
+    const userData = localStorage.getItem('osprey_user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('osprey_token');
+    localStorage.removeItem('osprey_user');
+    setUser(null);
+    navigate('/');
+  };
 
   const navigation = [
     { name: "Serviços", href: "#services", hasDropdown: true },
@@ -34,7 +50,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 lg:h-20">
           
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
             <div className="relative">
               <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
                 <Sparkles className="h-6 w-6 text-white" />
@@ -77,12 +93,41 @@ const Header = () => {
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-4">
-            <Button variant="ghost" className="font-medium">
-              Entrar
-            </Button>
-            <Button className="btn-gradient font-medium">
-              Começar Agora
-            </Button>
+            {user ? (
+              <>
+                <Button 
+                  variant="ghost" 
+                  className="font-medium"
+                  onClick={() => navigate('/dashboard')}
+                >
+                  <User className="h-4 w-4" />
+                  Dashboard
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sair
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button 
+                  variant="ghost" 
+                  className="font-medium"
+                  onClick={() => navigate('/login')}
+                >
+                  Entrar
+                </Button>
+                <Button 
+                  className="btn-gradient font-medium"
+                  onClick={() => navigate('/signup')}
+                >
+                  Começar Agora
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -116,12 +161,54 @@ const Header = () => {
               ))}
               
               <div className="pt-4 border-t border-white/20 space-y-3">
-                <Button variant="ghost" className="w-full justify-start font-medium">
-                  Entrar
-                </Button>
-                <Button className="w-full btn-gradient font-medium">
-                  Começar Agora
-                </Button>
+                {user ? (
+                  <>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start font-medium"
+                      onClick={() => {
+                        navigate('/dashboard');
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      <User className="h-4 w-4" />
+                      Dashboard
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => {
+                        handleLogout();
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sair
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start font-medium"
+                      onClick={() => {
+                        navigate('/login');
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      Entrar
+                    </Button>
+                    <Button 
+                      className="w-full btn-gradient font-medium"
+                      onClick={() => {
+                        navigate('/signup');
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      Começar Agora
+                    </Button>
+                  </>
+                )}
               </div>
             </nav>
           </div>
