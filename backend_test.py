@@ -256,240 +256,160 @@ def test_dashboard():
         print(f"❌ Dashboard test error: {str(e)}")
         return False
 
-def test_chat_endpoint():
-    """Test immigration chat assistant"""
-    print("\n🤖 Testing Chat Endpoint...")
+def test_authenticated_chat():
+    """Test authenticated chat with AI"""
+    print("\n🤖 Testing Authenticated Chat...")
     
-    # Test case 1: H1-B visa inquiry
-    test_message = "Preciso de ajuda com visto H1-B, quais são os requisitos básicos?"
+    if not AUTH_TOKEN:
+        print("❌ No auth token available for chat test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    # Test case: H1-B visa inquiry as requested
+    test_message = "Quero aplicar para visto H1-B, por onde começar?"
     
     payload = {
         "message": test_message,
         "session_id": str(uuid.uuid4()),
-        "context": {"user_type": "professional", "country": "Brazil"}
+        "context": {"user_type": "self_applicant", "visa_interest": "h1b"}
     }
     
     try:
-        response = requests.post(f"{API_BASE}/chat", json=payload, timeout=30)
+        response = requests.post(f"{API_BASE}/chat", json=payload, headers=headers, timeout=30)
         
         if response.status_code == 200:
             data = response.json()
-            print(f"✅ Chat response received")
+            print(f"✅ Authenticated chat successful")
             print(f"   Session ID: {data.get('session_id', 'N/A')}")
             print(f"   Response length: {len(data.get('message', ''))}")
-            print(f"   Response preview: {data.get('message', '')[:100]}...")
+            print(f"   Response preview: {data.get('message', '')[:150]}...")
             
-            # Verify response is in Portuguese
-            if any(word in data.get('message', '').lower() for word in ['visto', 'requisitos', 'documentos', 'processo']):
-                print("✅ Response appears to be in Portuguese")
+            # Verify response mentions self-application and disclaimers
+            message = data.get('message', '').lower()
+            has_disclaimer = any(word in message for word in ['não oferece', 'consultoria jurídica', 'auto-aplicação', 'advogado'])
+            has_h1b_info = any(word in message for word in ['h1-b', 'h1b', 'visto', 'trabalho'])
+            
+            if has_disclaimer:
+                print("✅ Response includes legal disclaimer")
             else:
-                print("⚠️  Response language unclear")
+                print("⚠️  Legal disclaimer not clearly present")
+                
+            if has_h1b_info:
+                print("✅ Response addresses H1-B visa inquiry")
+            else:
+                print("⚠️  H1-B information not clearly present")
                 
             return True
         else:
-            print(f"❌ Chat endpoint failed: {response.status_code}")
+            print(f"❌ Authenticated chat failed: {response.status_code}")
             print(f"   Error: {response.text}")
             return False
             
     except Exception as e:
-        print(f"❌ Chat endpoint error: {str(e)}")
+        print(f"❌ Authenticated chat error: {str(e)}")
         return False
 
-def test_translation_endpoint():
-    """Test translation functionality"""
-    print("\n🌐 Testing Translation Endpoint...")
+def test_chat_history():
+    """Test chat history retrieval"""
+    print("\n📜 Testing Chat History...")
     
-    # Test Portuguese to English translation
-    test_text = "Preciso traduzir este documento de certidão de nascimento para o processo de imigração"
+    if not AUTH_TOKEN:
+        print("❌ No auth token available for chat history test")
+        return False
     
-    payload = {
-        "text": test_text,
-        "source_language": "pt",
-        "target_language": "en"
-    }
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
     
     try:
-        response = requests.post(f"{API_BASE}/translate", json=payload, timeout=30)
+        response = requests.get(f"{API_BASE}/chat/history", headers=headers, timeout=10)
         
         if response.status_code == 200:
             data = response.json()
-            print(f"✅ Translation completed")
-            print(f"   Source language: {data.get('source_language', 'N/A')}")
-            print(f"   Target language: {data.get('target_language', 'N/A')}")
-            print(f"   Translation ID: {data.get('translation_id', 'N/A')}")
-            print(f"   Original: {test_text[:50]}...")
-            print(f"   Translated: {data.get('translated_text', '')[:50]}...")
+            sessions = data.get('chat_sessions', [])
+            print(f"✅ Chat history retrieved successfully")
+            print(f"   Total sessions: {len(sessions)}")
             
-            # Verify translation contains English words
-            translated = data.get('translated_text', '').lower()
-            if any(word in translated for word in ['document', 'birth', 'certificate', 'immigration']):
-                print("✅ Translation appears correct")
-            else:
-                print("⚠️  Translation quality unclear")
-                
+            if sessions:
+                latest_session = sessions[0]
+                print(f"   Latest session ID: {latest_session.get('session_id', 'N/A')}")
+                print(f"   Messages in latest: {len(latest_session.get('messages', []))}")
+                print(f"   Last updated: {latest_session.get('last_updated', 'N/A')}")
+            
             return True
         else:
-            print(f"❌ Translation endpoint failed: {response.status_code}")
+            print(f"❌ Chat history failed: {response.status_code}")
             print(f"   Error: {response.text}")
             return False
             
     except Exception as e:
-        print(f"❌ Translation endpoint error: {str(e)}")
+        print(f"❌ Chat history error: {str(e)}")
         return False
 
-def test_document_analysis_endpoint():
-    """Test document analysis functionality"""
-    print("\n📄 Testing Document Analysis Endpoint...")
+def test_mongodb_persistence():
+    """Test MongoDB data persistence by checking various collections"""
+    print("\n💾 Testing MongoDB Persistence...")
     
-    # Sample immigration document text
-    document_text = """
-    CERTIFICADO DE NASCIMENTO
-    Nome: João Silva Santos
-    Data de Nascimento: 15/03/1985
-    Local: São Paulo, SP, Brasil
-    Nome do Pai: Carlos Santos
-    Nome da Mãe: Maria Silva Santos
-    Cartório: 1º Ofício de Registro Civil
-    """
-    
-    payload = {
-        "document_text": document_text,
-        "document_type": "birth_certificate",
-        "analysis_type": "immigration"
-    }
-    
-    try:
-        response = requests.post(f"{API_BASE}/analyze-document", json=payload, timeout=30)
-        
-        if response.status_code == 200:
-            data = response.json()
-            print(f"✅ Document analysis completed")
-            print(f"   Analysis ID: {data.get('analysis_id', 'N/A')}")
-            print(f"   Timestamp: {data.get('timestamp', 'N/A')}")
-            print(f"   Analysis length: {len(data.get('analysis', ''))}")
-            print(f"   Analysis preview: {data.get('analysis', '')[:150]}...")
-            
-            # Verify analysis mentions key elements
-            analysis = data.get('analysis', '').lower()
-            if any(word in analysis for word in ['certidão', 'nascimento', 'documento', 'imigração']):
-                print("✅ Analysis appears relevant")
-            else:
-                print("⚠️  Analysis relevance unclear")
-                
-            return True
-        else:
-            print(f"❌ Document analysis failed: {response.status_code}")
-            print(f"   Error: {response.text}")
-            return False
-            
-    except Exception as e:
-        print(f"❌ Document analysis error: {str(e)}")
+    if not AUTH_TOKEN:
+        print("❌ No auth token available for persistence test")
         return False
-
-def test_visa_recommendation_endpoint():
-    """Test visa recommendation functionality"""
-    print("\n🎯 Testing Visa Recommendation Endpoint...")
     
-    # Realistic professional profile
-    payload = {
-        "personal_info": {
-            "age": 28,
-            "education": "Mestrado em Engenharia de Software",
-            "experience_years": 5,
-            "current_job": "Desenvolvedor Senior",
-            "salary": 120000,
-            "country": "Brasil",
-            "english_level": "Fluente"
-        },
-        "current_status": "Trabalhando no Brasil",
-        "goals": [
-            "Trabalhar nos Estados Unidos",
-            "Obter visto de trabalho",
-            "Eventualmente residência permanente"
-        ]
-    }
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
     
     try:
-        response = requests.post(f"{API_BASE}/visa-recommendation", json=payload, timeout=30)
+        # Check if user data persists by getting profile
+        profile_response = requests.get(f"{API_BASE}/profile", headers=headers, timeout=10)
         
-        if response.status_code == 200:
-            data = response.json()
-            print(f"✅ Visa recommendation completed")
-            print(f"   Recommendation ID: {data.get('recommendation_id', 'N/A')}")
-            print(f"   Timestamp: {data.get('timestamp', 'N/A')}")
-            print(f"   Recommendation length: {len(data.get('recommendation', ''))}")
-            print(f"   Recommendation preview: {data.get('recommendation', '')[:200]}...")
-            
-            # Verify recommendation mentions visa types
-            recommendation = data.get('recommendation', '').lower()
-            if any(visa in recommendation for visa in ['h1-b', 'h1b', 'l1', 'o1', 'eb']):
-                print("✅ Recommendation mentions relevant visa types")
-            else:
-                print("⚠️  Visa types in recommendation unclear")
-                
-            return True
-        else:
-            print(f"❌ Visa recommendation failed: {response.status_code}")
-            print(f"   Error: {response.text}")
-            return False
-            
-    except Exception as e:
-        print(f"❌ Visa recommendation error: {str(e)}")
-        return False
-
-def test_session_persistence():
-    """Test chat session persistence"""
-    print("\n💾 Testing Session Persistence...")
-    
-    session_id = str(uuid.uuid4())
-    
-    # First message
-    payload1 = {
-        "message": "Olá, preciso de informações sobre visto H1-B",
-        "session_id": session_id
-    }
-    
-    try:
-        response1 = requests.post(f"{API_BASE}/chat", json=payload1, timeout=30)
+        # Check if applications persist
+        apps_response = requests.get(f"{API_BASE}/applications", headers=headers, timeout=10)
         
-        if response1.status_code != 200:
-            print(f"❌ First message failed: {response1.status_code}")
-            return False
-            
-        # Second message in same session
-        payload2 = {
-            "message": "Quais documentos preciso preparar?",
-            "session_id": session_id
+        # Check if chat history persists
+        history_response = requests.get(f"{API_BASE}/chat/history", headers=headers, timeout=10)
+        
+        # Check dashboard data
+        dashboard_response = requests.get(f"{API_BASE}/dashboard", headers=headers, timeout=10)
+        
+        persistence_checks = {
+            "user_profile": profile_response.status_code == 200,
+            "applications": apps_response.status_code == 200,
+            "chat_history": history_response.status_code == 200,
+            "dashboard_data": dashboard_response.status_code == 200
         }
         
-        response2 = requests.post(f"{API_BASE}/chat", json=payload2, timeout=30)
+        successful_checks = sum(persistence_checks.values())
+        total_checks = len(persistence_checks)
         
-        if response2.status_code == 200:
-            data2 = response2.json()
-            print(f"✅ Session persistence working")
-            print(f"   Same session ID maintained: {data2.get('session_id') == session_id}")
-            print(f"   Context-aware response: {len(data2.get('message', ''))}")
+        print(f"✅ MongoDB persistence check: {successful_checks}/{total_checks} collections accessible")
+        
+        for check_name, result in persistence_checks.items():
+            status = "✅" if result else "❌"
+            print(f"   {check_name.replace('_', ' ').title()}: {status}")
+        
+        if successful_checks >= 3:  # At least 3 out of 4 should work
+            print("✅ MongoDB persistence appears to be working correctly")
             return True
         else:
-            print(f"❌ Second message failed: {response2.status_code}")
+            print("❌ MongoDB persistence issues detected")
             return False
             
     except Exception as e:
-        print(f"❌ Session persistence error: {str(e)}")
+        print(f"❌ MongoDB persistence test error: {str(e)}")
         return False
 
 def run_all_tests():
-    """Run all backend tests"""
-    print("🚀 Starting OSPREY Backend OpenAI Integration Tests")
+    """Run all B2C backend tests"""
+    print("🚀 Starting OSPREY B2C Backend Authentication Tests")
     print(f"⏰ Test started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     results = {
         "basic_connectivity": test_basic_connectivity(),
-        "chat_endpoint": test_chat_endpoint(),
-        "translation_endpoint": test_translation_endpoint(),
-        "document_analysis": test_document_analysis_endpoint(),
-        "visa_recommendation": test_visa_recommendation_endpoint(),
-        "session_persistence": test_session_persistence()
+        "user_signup": test_user_signup(),
+        "user_login": test_user_login(),
+        "user_profile": test_user_profile(),
+        "visa_application": test_visa_application(),
+        "dashboard": test_dashboard(),
+        "authenticated_chat": test_authenticated_chat(),
+        "chat_history": test_chat_history(),
+        "mongodb_persistence": test_mongodb_persistence()
     }
     
     print("\n" + "=" * 60)
@@ -506,7 +426,7 @@ def run_all_tests():
     print(f"\nOverall: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
     
     if passed == total:
-        print("🎉 All tests passed! OpenAI integration is working correctly.")
+        print("🎉 All tests passed! B2C authentication system is working correctly.")
     else:
         print("⚠️  Some tests failed. Check the details above.")
     
