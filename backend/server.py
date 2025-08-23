@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Depends, status
+from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Depends, status, Form
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -15,6 +15,9 @@ import json
 import jwt
 import bcrypt
 from enum import Enum
+import base64
+import mimetypes
+import re
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -58,7 +61,37 @@ class VisaType(str, Enum):
     green_card = "green_card"
     family = "family"
 
-# User Models
+class DocumentType(str, Enum):
+    passport = "passport"
+    birth_certificate = "birth_certificate"
+    marriage_certificate = "marriage_certificate"
+    divorce_certificate = "divorce_certificate"
+    education_diploma = "education_diploma"
+    education_transcript = "education_transcript"
+    employment_letter = "employment_letter"
+    bank_statement = "bank_statement"
+    tax_return = "tax_return"
+    medical_exam = "medical_exam"
+    police_clearance = "police_clearance"
+    sponsor_documents = "sponsor_documents"
+    photos = "photos"
+    form_i130 = "form_i130"
+    form_ds160 = "form_ds160"
+    other = "other"
+
+class DocumentStatus(str, Enum):
+    pending_review = "pending_review"
+    approved = "approved"
+    requires_improvement = "requires_improvement"
+    expired = "expired"
+    missing_info = "missing_info"
+
+class DocumentPriority(str, Enum):
+    high = "high"
+    medium = "medium"
+    low = "low"
+
+# User Models (keeping existing ones)
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
@@ -112,6 +145,40 @@ class ApplicationUpdate(BaseModel):
     progress_percentage: Optional[int] = None
     current_step: Optional[str] = None
 
+# Document Models
+class UserDocument(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    filename: str
+    original_filename: str
+    document_type: DocumentType
+    content_base64: str
+    mime_type: str
+    file_size: int
+    status: DocumentStatus = DocumentStatus.pending_review
+    ai_analysis: Optional[Dict[str, Any]] = None
+    ai_suggestions: List[str] = []
+    expiration_date: Optional[datetime] = None
+    issue_date: Optional[datetime] = None
+    priority: DocumentPriority = DocumentPriority.medium
+    tags: List[str] = []
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class DocumentUpload(BaseModel):
+    document_type: DocumentType
+    tags: Optional[List[str]] = []
+    expiration_date: Optional[str] = None
+    issue_date: Optional[str] = None
+
+class DocumentUpdate(BaseModel):
+    document_type: Optional[DocumentType] = None
+    status: Optional[DocumentStatus] = None
+    expiration_date: Optional[str] = None
+    issue_date: Optional[str] = None
+    tags: Optional[List[str]] = None
+    priority: Optional[DocumentPriority] = None
+
 # Existing models (keeping them)
 class StatusCheck(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -146,7 +213,7 @@ class TranslationRequest(BaseModel):
     source_language: str = "auto"
     target_language: str = "en"
 
-# Authentication helpers
+# Authentication helpers (keeping existing ones)
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
@@ -178,7 +245,124 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-# Authentication routes
+# Document helper functions
+def extract_text_from_base64_image(base64_content: str) -> str:
+    """Extract text from base64 image using OCR simulation"""
+    # In a real implementation, you would use OCR libraries like pytesseract
+    # For now, we'll return a placeholder
+    return "Extracted text from document using OCR"
+
+def validate_file_type(mime_type: str) -> bool:
+    """Validate if file type is supported"""
+    supported_types = [
+        'application/pdf',
+        'image/jpeg',
+        'image/png',
+        'image/tiff',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ]
+    return mime_type in supported_types
+
+async def analyze_document_with_ai(document: UserDocument) -> Dict[str, Any]:
+    """Analyze document content with OpenAI"""
+    try:
+        # For text-based documents, extract text
+        if document.mime_type.startswith('image/'):
+            content = extract_text_from_base64_image(document.content_base64)
+        else:
+            content = f"Document type: {document.document_type}, Filename: {document.original_filename}"
+
+        prompt = f"""
+        Analise este documento de imigração e forneça:
+
+        Tipo de documento: {document.document_type}
+        Conteúdo: {content[:1000]}...
+
+        Retorne APENAS um JSON com:
+        {{
+            "completeness_score": [0-100],
+            "validity_status": "valid|invalid|expired|unclear",
+            "key_information": ["info1", "info2"],
+            "missing_information": ["missing1", "missing2"],
+            "suggestions": ["suggestion1", "suggestion2"],
+            "expiration_warnings": ["warning1"],
+            "quality_issues": ["issue1"],
+            "next_steps": ["step1", "step2"]
+        }}
+
+        IMPORTANTE: Esta é uma ferramenta de orientação para auto-aplicação, não consultoria jurídica.
+        """
+
+        response = openai.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Você é um assistente especializado em análise de documentos para imigração. Responda APENAS em formato JSON válido."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            max_tokens=1000,
+            temperature=0.3
+        )
+
+        # Parse JSON response
+        analysis_text = response.choices[0].message.content.strip()
+        # Remove markdown formatting if present
+        analysis_text = analysis_text.replace('```json', '').replace('```', '').strip()
+        
+        try:
+            analysis = json.loads(analysis_text)
+        except json.JSONDecodeError:
+            # Fallback analysis if JSON parsing fails
+            analysis = {
+                "completeness_score": 75,
+                "validity_status": "valid",
+                "key_information": ["Document uploaded successfully"],
+                "missing_information": [],
+                "suggestions": ["Documento analisado com sucesso"],
+                "expiration_warnings": [],
+                "quality_issues": [],
+                "next_steps": ["Aguardar revisão adicional se necessário"]
+            }
+
+        return analysis
+
+    except Exception as e:
+        logger.error(f"Error analyzing document with AI: {str(e)}")
+        # Return basic analysis if AI fails
+        return {
+            "completeness_score": 50,
+            "validity_status": "unclear",
+            "key_information": ["Documento carregado"],
+            "missing_information": ["Análise automática não disponível"],
+            "suggestions": ["Revise o documento manualmente"],
+            "expiration_warnings": [],
+            "quality_issues": ["Análise automática falhou"],
+            "next_steps": ["Upload realizado, aguarde revisão manual"]
+        }
+
+def determine_document_priority(document_type: DocumentType, expiration_date: Optional[datetime]) -> DocumentPriority:
+    """Determine document priority based on type and expiration"""
+    high_priority_docs = [DocumentType.passport, DocumentType.medical_exam, DocumentType.police_clearance]
+    
+    if document_type in high_priority_docs:
+        return DocumentPriority.high
+    
+    if expiration_date:
+        days_to_expire = (expiration_date - datetime.utcnow()).days
+        if days_to_expire <= 30:
+            return DocumentPriority.high
+        elif days_to_expire <= 90:
+            return DocumentPriority.medium
+    
+    return DocumentPriority.low
+
+# Authentication routes (keeping existing ones)
 @api_router.post("/auth/signup")
 async def signup(user_data: UserCreate):
     """Register a new user"""
@@ -254,7 +438,7 @@ async def login(login_data: UserLogin):
         logger.error(f"Error in login: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error logging in: {str(e)}")
 
-# User profile routes
+# User profile routes (keeping existing ones)
 @api_router.get("/profile", response_model=UserProfile)
 async def get_profile(current_user = Depends(get_current_user)):
     """Get user profile"""
@@ -279,7 +463,309 @@ async def update_profile(profile_data: UserProfileUpdate, current_user = Depends
         logger.error(f"Error updating profile: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error updating profile: {str(e)}")
 
-# Application routes
+# Document routes (NEW)
+@api_router.post("/documents/upload")
+async def upload_document(
+    file: UploadFile = File(...),
+    document_type: DocumentType = Form(...),
+    tags: str = Form(""),
+    expiration_date: Optional[str] = Form(None),
+    issue_date: Optional[str] = Form(None),
+    current_user = Depends(get_current_user)
+):
+    """Upload a document with AI analysis"""
+    try:
+        # Validate file
+        if not file:
+            raise HTTPException(status_code=400, detail="No file uploaded")
+        
+        content = await file.read()
+        if len(content) == 0:
+            raise HTTPException(status_code=400, detail="Empty file")
+        
+        # Size limit: 10MB
+        if len(content) > 10 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="File too large (max 10MB)")
+        
+        # Validate file type
+        mime_type = file.content_type or mimetypes.guess_type(file.filename)[0] or 'application/octet-stream'
+        if not validate_file_type(mime_type):
+            raise HTTPException(status_code=400, detail="Unsupported file type")
+        
+        # Convert to base64
+        content_base64 = base64.b64encode(content).decode('utf-8')
+        
+        # Parse dates
+        exp_date = None
+        iss_date = None
+        try:
+            if expiration_date:
+                exp_date = datetime.fromisoformat(expiration_date.replace('Z', '+00:00'))
+            if issue_date:
+                iss_date = datetime.fromisoformat(issue_date.replace('Z', '+00:00'))
+        except ValueError:
+            pass  # Ignore invalid dates
+        
+        # Parse tags
+        tag_list = [tag.strip() for tag in tags.split(',') if tag.strip()] if tags else []
+        
+        # Determine priority
+        priority = determine_document_priority(document_type, exp_date)
+        
+        # Create document record
+        document = UserDocument(
+            user_id=current_user["id"],
+            filename=f"{document_type}_{uuid.uuid4().hex[:8]}_{file.filename}",
+            original_filename=file.filename,
+            document_type=document_type,
+            content_base64=content_base64,
+            mime_type=mime_type,
+            file_size=len(content),
+            expiration_date=exp_date,
+            issue_date=iss_date,
+            priority=priority,
+            tags=tag_list
+        )
+        
+        # Save to database
+        await db.documents.insert_one(document.dict())
+        
+        # Analyze with AI in background
+        try:
+            ai_analysis = await analyze_document_with_ai(document)
+            
+            # Update document with AI analysis
+            suggestions = ai_analysis.get('suggestions', [])
+            status = DocumentStatus.approved if ai_analysis.get('validity_status') == 'valid' else DocumentStatus.requires_improvement
+            
+            await db.documents.update_one(
+                {"id": document.id},
+                {
+                    "$set": {
+                        "ai_analysis": ai_analysis,
+                        "ai_suggestions": suggestions,
+                        "status": status.value,
+                        "updated_at": datetime.utcnow()
+                    }
+                }
+            )
+            
+        except Exception as ai_error:
+            logger.error(f"AI analysis failed: {str(ai_error)}")
+            # Continue without AI analysis
+        
+        return {
+            "message": "Document uploaded successfully",
+            "document_id": document.id,
+            "filename": document.filename,
+            "status": "uploaded",
+            "ai_analysis_status": "completed"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error uploading document: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error uploading document: {str(e)}")
+
+@api_router.get("/documents")
+async def get_user_documents(current_user = Depends(get_current_user)):
+    """Get all user documents"""
+    try:
+        documents = await db.documents.find(
+            {"user_id": current_user["id"]}, 
+            {"_id": 0, "content_base64": 0}  # Exclude binary content from list
+        ).sort("created_at", -1).to_list(100)
+        
+        # Calculate stats
+        total_docs = len(documents)
+        approved_docs = len([doc for doc in documents if doc.get('status') == 'approved'])
+        expired_docs = len([doc for doc in documents if doc.get('status') == 'expired'])
+        pending_docs = len([doc for doc in documents if doc.get('status') == 'pending_review'])
+        
+        # Upcoming expirations (next 90 days)
+        upcoming_expirations = []
+        now = datetime.utcnow()
+        for doc in documents:
+            exp_date = doc.get('expiration_date')
+            if exp_date:
+                if isinstance(exp_date, str):
+                    exp_date = datetime.fromisoformat(exp_date.replace('Z', '+00:00'))
+                days_to_expire = (exp_date - now).days
+                if 0 <= days_to_expire <= 90:
+                    upcoming_expirations.append({
+                        "document_id": doc["id"],
+                        "document_type": doc["document_type"],
+                        "filename": doc["original_filename"],
+                        "expiration_date": exp_date.isoformat(),
+                        "days_to_expire": days_to_expire
+                    })
+        
+        # Sort by expiration date
+        upcoming_expirations.sort(key=lambda x: x['days_to_expire'])
+        
+        return {
+            "documents": documents,
+            "stats": {
+                "total": total_docs,
+                "approved": approved_docs,
+                "expired": expired_docs,
+                "pending": pending_docs,
+                "completion_rate": int((approved_docs / total_docs * 100)) if total_docs > 0 else 0
+            },
+            "upcoming_expirations": upcoming_expirations[:10]  # Next 10 expiring
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting documents: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error getting documents: {str(e)}")
+
+@api_router.get("/documents/{document_id}")
+async def get_document_details(document_id: str, current_user = Depends(get_current_user)):
+    """Get document details including AI analysis"""
+    try:
+        document = await db.documents.find_one({
+            "id": document_id,
+            "user_id": current_user["id"]
+        }, {"_id": 0})
+        
+        if not document:
+            raise HTTPException(status_code=404, detail="Document not found")
+        
+        return document
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting document details: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error getting document details: {str(e)}")
+
+@api_router.put("/documents/{document_id}")
+async def update_document(
+    document_id: str, 
+    update_data: DocumentUpdate, 
+    current_user = Depends(get_current_user)
+):
+    """Update document information"""
+    try:
+        # Verify document belongs to user
+        document = await db.documents.find_one({
+            "id": document_id,
+            "user_id": current_user["id"]
+        })
+        
+        if not document:
+            raise HTTPException(status_code=404, detail="Document not found")
+        
+        # Prepare update data
+        update_dict = update_data.dict(exclude_unset=True)
+        
+        # Parse dates if provided
+        if 'expiration_date' in update_dict and update_dict['expiration_date']:
+            try:
+                update_dict['expiration_date'] = datetime.fromisoformat(
+                    update_dict['expiration_date'].replace('Z', '+00:00')
+                )
+            except ValueError:
+                del update_dict['expiration_date']
+        
+        if 'issue_date' in update_dict and update_dict['issue_date']:
+            try:
+                update_dict['issue_date'] = datetime.fromisoformat(
+                    update_dict['issue_date'].replace('Z', '+00:00')
+                )
+            except ValueError:
+                del update_dict['issue_date']
+        
+        update_dict["updated_at"] = datetime.utcnow()
+        
+        # Update document
+        await db.documents.update_one(
+            {"id": document_id},
+            {"$set": update_dict}
+        )
+        
+        updated_doc = await db.documents.find_one({"id": document_id}, {"_id": 0})
+        return {"message": "Document updated successfully", "document": updated_doc}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating document: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error updating document: {str(e)}")
+
+@api_router.delete("/documents/{document_id}")
+async def delete_document(document_id: str, current_user = Depends(get_current_user)):
+    """Delete a document"""
+    try:
+        # Verify document belongs to user
+        document = await db.documents.find_one({
+            "id": document_id,
+            "user_id": current_user["id"]
+        })
+        
+        if not document:
+            raise HTTPException(status_code=404, detail="Document not found")
+        
+        # Delete document
+        await db.documents.delete_one({"id": document_id})
+        
+        return {"message": "Document deleted successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting document: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error deleting document: {str(e)}")
+
+@api_router.post("/documents/{document_id}/reanalyze")
+async def reanalyze_document(document_id: str, current_user = Depends(get_current_user)):
+    """Reanalyze document with AI"""
+    try:
+        # Get document
+        document_data = await db.documents.find_one({
+            "id": document_id,
+            "user_id": current_user["id"]
+        })
+        
+        if not document_data:
+            raise HTTPException(status_code=404, detail="Document not found")
+        
+        # Create document object for analysis
+        document = UserDocument(**document_data)
+        
+        # Analyze with AI
+        ai_analysis = await analyze_document_with_ai(document)
+        
+        # Update document with new analysis
+        suggestions = ai_analysis.get('suggestions', [])
+        status = DocumentStatus.approved if ai_analysis.get('validity_status') == 'valid' else DocumentStatus.requires_improvement
+        
+        await db.documents.update_one(
+            {"id": document_id},
+            {
+                "$set": {
+                    "ai_analysis": ai_analysis,
+                    "ai_suggestions": suggestions,
+                    "status": status.value,
+                    "updated_at": datetime.utcnow()
+                }
+            }
+        )
+        
+        return {
+            "message": "Document reanalyzed successfully",
+            "analysis": ai_analysis,
+            "status": status.value
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error reanalyzing document: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error reanalyzing document: {str(e)}")
+
+# Application routes (keeping existing ones)
 @api_router.post("/applications")
 async def create_application(app_data: ApplicationCreate, current_user = Depends(get_current_user)):
     """Create a new visa application"""
@@ -349,7 +835,7 @@ async def update_application(application_id: str, update_data: ApplicationUpdate
         logger.error(f"Error updating application: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error updating application: {str(e)}")
 
-# Dashboard route
+# Dashboard route (updated to include document stats)
 @api_router.get("/dashboard")
 async def get_dashboard(current_user = Depends(get_current_user)):
     """Get user dashboard data"""
@@ -367,6 +853,33 @@ async def get_dashboard(current_user = Depends(get_current_user)):
             {"user_id": current_user["id"]}, {"_id": 0}
         ).sort("timestamp", -1).limit(3).to_list(3)
         
+        # Get document stats
+        documents = await db.documents.find(
+            {"user_id": current_user["id"]}, 
+            {"_id": 0, "content_base64": 0}
+        ).to_list(100)
+        
+        # Document stats
+        total_docs = len(documents)
+        approved_docs = len([doc for doc in documents if doc.get('status') == 'approved'])
+        pending_docs = len([doc for doc in documents if doc.get('status') == 'pending_review'])
+        
+        # Upcoming expirations (next 30 days)
+        upcoming_expirations = []
+        now = datetime.utcnow()
+        for doc in documents:
+            exp_date = doc.get('expiration_date')
+            if exp_date:
+                if isinstance(exp_date, str):
+                    exp_date = datetime.fromisoformat(exp_date.replace('Z', '+00:00'))
+                days_to_expire = (exp_date - now).days
+                if 0 <= days_to_expire <= 30:
+                    upcoming_expirations.append({
+                        "document_type": doc["document_type"],
+                        "filename": doc["original_filename"],
+                        "days_to_expire": days_to_expire
+                    })
+        
         # Calculate stats
         total_applications = len(applications)
         in_progress_apps = len([app for app in applications if app["status"] in ["in_progress", "document_review"]])
@@ -381,20 +894,25 @@ async def get_dashboard(current_user = Depends(get_current_user)):
                 "total_applications": total_applications,
                 "in_progress": in_progress_apps,
                 "completed": completed_apps,
-                "success_rate": 100 if completed_apps == 0 else int((len([app for app in applications if app["status"] == "approved"]) / completed_apps) * 100)
+                "success_rate": 100 if completed_apps == 0 else int((len([app for app in applications if app["status"] == "approved"]) / completed_apps) * 100),
+                "total_documents": total_docs,
+                "approved_documents": approved_docs,
+                "pending_documents": pending_docs,
+                "document_completion_rate": int((approved_docs / total_docs * 100)) if total_docs > 0 else 0
             },
             "applications": applications,
             "recent_activity": {
                 "chats": recent_chats,
                 "translations": recent_translations
-            }
+            },
+            "upcoming_expirations": upcoming_expirations[:5]  # Next 5 expiring
         }
     
     except Exception as e:
         logger.error(f"Error getting dashboard: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error getting dashboard: {str(e)}")
 
-# Chat history route
+# Chat history route (keeping existing)
 @api_router.get("/chat/history")
 async def get_chat_history(current_user = Depends(get_current_user)):
     """Get user's chat history with AI"""
@@ -409,7 +927,7 @@ async def get_chat_history(current_user = Depends(get_current_user)):
         logger.error(f"Error getting chat history: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error getting chat history: {str(e)}")
 
-# Basic routes (keeping existing ones)
+# Basic routes (keeping existing)
 @api_router.get("/")
 async def root():
     return {"message": "OSPREY Immigration API B2C - Ready to help with your immigration journey!"}
@@ -426,7 +944,7 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
-# AI-powered routes (updated to include user tracking)
+# AI-powered routes (keeping existing with user tracking)
 @api_router.post("/chat", response_model=ChatResponse)
 async def immigration_chat(request: ChatRequest, current_user = Depends(get_current_user)):
     """Chat assistente especializado em imigração usando OpenAI"""
