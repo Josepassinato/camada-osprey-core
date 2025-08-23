@@ -312,7 +312,7 @@ async def create_application(app_data: ApplicationCreate, current_user = Depends
 async def get_user_applications(current_user = Depends(get_current_user)):
     """Get all user applications"""
     try:
-        applications = await db.applications.find({"user_id": current_user["id"]}).to_list(100)
+        applications = await db.applications.find({"user_id": current_user["id"]}, {"_id": 0}).to_list(100)
         return {"applications": applications}
     
     except Exception as e:
