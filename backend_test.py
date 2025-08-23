@@ -693,6 +693,395 @@ def test_document_delete():
         print(f"❌ Document deletion error: {str(e)}")
         return False
 
+# ============================================================================
+# EDUCATION SYSTEM TESTS (NEW)
+# ============================================================================
+
+def test_education_guides():
+    """Test interactive visa guides"""
+    print("\n📚 Testing Interactive Visa Guides...")
+    
+    if not AUTH_TOKEN:
+        print("❌ No auth token available for guides test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        # Test getting all guides
+        response = requests.get(f"{API_BASE}/education/guides", headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            guides = data.get('guides', [])
+            print(f"✅ All guides retrieved successfully")
+            print(f"   Total guides available: {len(guides)}")
+            
+            # Check for specific visa types
+            visa_types = [guide.get('visa_type') for guide in guides]
+            expected_types = ['h1b', 'f1', 'family']
+            
+            for visa_type in expected_types:
+                if visa_type in visa_types:
+                    print(f"   ✅ {visa_type.upper()} guide available")
+                else:
+                    print(f"   ❌ {visa_type.upper()} guide missing")
+            
+            # Test getting specific guide (H1-B)
+            h1b_response = requests.get(f"{API_BASE}/education/guides?visa_type=h1b", headers=headers, timeout=10)
+            
+            if h1b_response.status_code == 200:
+                h1b_data = h1b_response.json()
+                guide = h1b_data.get('guide', {})
+                print(f"✅ H1-B specific guide retrieved")
+                print(f"   Title: {guide.get('title')}")
+                print(f"   Difficulty: {guide.get('difficulty_level')}")
+                print(f"   Estimated time: {guide.get('estimated_time_minutes')} minutes")
+                print(f"   Sections: {len(guide.get('sections', []))}")
+                print(f"   Requirements: {len(guide.get('requirements', []))}")
+                print(f"   Success tips: {len(guide.get('success_tips', []))}")
+                
+                return True
+            else:
+                print(f"❌ H1-B specific guide failed: {h1b_response.status_code}")
+                return False
+                
+        else:
+            print(f"❌ Guides retrieval failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Guides test error: {str(e)}")
+        return False
+
+def test_interview_simulator_start():
+    """Test starting interview simulation"""
+    print("\n🎤 Testing Interview Simulator Start...")
+    global INTERVIEW_SESSION_ID
+    
+    if not AUTH_TOKEN:
+        print("❌ No auth token available for interview simulator test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        # Start consular interview for H1-B visa (beginner level)
+        payload = {
+            "interview_type": "consular",
+            "visa_type": "h1b",
+            "difficulty_level": "beginner"
+        }
+        
+        response = requests.post(f"{API_BASE}/education/interview/start", json=payload, headers=headers, timeout=30)
+        
+        if response.status_code == 200:
+            data = response.json()
+            INTERVIEW_SESSION_ID = data.get('session_id')
+            questions = data.get('questions', [])
+            
+            print(f"✅ Interview simulation started successfully")
+            print(f"   Session ID: {INTERVIEW_SESSION_ID}")
+            print(f"   Total questions: {data.get('total_questions', 0)}")
+            print(f"   Estimated duration: {data.get('estimated_duration', 0)} minutes")
+            print(f"   Questions generated: {len(questions)}")
+            
+            if questions:
+                first_q = questions[0]
+                print(f"   First question (EN): {first_q.get('question_en', 'N/A')[:100]}...")
+                print(f"   First question (PT): {first_q.get('question_pt', 'N/A')[:100]}...")
+                print(f"   Question category: {first_q.get('category', 'N/A')}")
+                print(f"   Tips provided: {len(first_q.get('tips', []))}")
+            
+            return True
+        else:
+            print(f"❌ Interview simulation start failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Interview simulator start error: {str(e)}")
+        return False
+
+def test_interview_answer_submission():
+    """Test submitting interview answer"""
+    print("\n💬 Testing Interview Answer Submission...")
+    
+    if not AUTH_TOKEN or not INTERVIEW_SESSION_ID:
+        print("❌ No auth token or session ID available for answer submission test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        # Submit answer to first question (assuming q1 exists)
+        payload = {
+            "question_id": "q1",
+            "answer": "Eu venho aos Estados Unidos para trabalhar como engenheiro de software em uma empresa de tecnologia. Tenho uma oferta de emprego válida e pretendo contribuir com minhas habilidades técnicas para o desenvolvimento de software inovador."
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/education/interview/{INTERVIEW_SESSION_ID}/answer", 
+            json=payload, 
+            headers=headers, 
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            feedback = data.get('feedback', {})
+            
+            print(f"✅ Interview answer submitted successfully")
+            print(f"   Score: {feedback.get('score', 'N/A')}/100")
+            print(f"   Confidence level: {feedback.get('confidence_level', 'N/A')}")
+            print(f"   Strengths: {len(feedback.get('strengths', []))}")
+            print(f"   Weaknesses: {len(feedback.get('weaknesses', []))}")
+            print(f"   Suggestions: {len(feedback.get('suggestions', []))}")
+            print(f"   Next question index: {data.get('next_question_index', 'N/A')}")
+            
+            # Check if feedback is in Portuguese
+            improved_answer = feedback.get('improved_answer', '')
+            if any(word in improved_answer.lower() for word in ['você', 'sua', 'mais', 'para', 'com']):
+                print("✅ Feedback provided in Portuguese")
+            else:
+                print("⚠️  Feedback language unclear")
+            
+            return True
+        else:
+            print(f"❌ Interview answer submission failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Interview answer submission error: {str(e)}")
+        return False
+
+def test_interview_completion():
+    """Test completing interview session"""
+    print("\n🏁 Testing Interview Completion...")
+    
+    if not AUTH_TOKEN or not INTERVIEW_SESSION_ID:
+        print("❌ No auth token or session ID available for interview completion test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        response = requests.post(
+            f"{API_BASE}/education/interview/{INTERVIEW_SESSION_ID}/complete", 
+            headers=headers, 
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            feedback = data.get('overall_feedback', {})
+            
+            print(f"✅ Interview session completed successfully")
+            print(f"   Session completed: {data.get('session_completed', False)}")
+            print(f"   Overall score: {feedback.get('overall_score', 'N/A')}/100")
+            print(f"   Questions answered: {feedback.get('questions_answered', 'N/A')}")
+            print(f"   Average confidence: {feedback.get('average_confidence', 'N/A')}")
+            print(f"   Strengths: {len(feedback.get('strengths', []))}")
+            print(f"   Areas for improvement: {len(feedback.get('areas_for_improvement', []))}")
+            print(f"   Recommendations: {len(feedback.get('recommendations', []))}")
+            
+            return True
+        else:
+            print(f"❌ Interview completion failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Interview completion error: {str(e)}")
+        return False
+
+def test_personalized_tips():
+    """Test personalized tips generation"""
+    print("\n💡 Testing Personalized Tips...")
+    
+    if not AUTH_TOKEN:
+        print("❌ No auth token available for tips test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        response = requests.get(f"{API_BASE}/education/tips", headers=headers, timeout=30)
+        
+        if response.status_code == 200:
+            data = response.json()
+            tips = data.get('tips', [])
+            
+            print(f"✅ Personalized tips retrieved successfully")
+            print(f"   Total tips: {len(tips)}")
+            
+            if tips:
+                tip = tips[0]
+                print(f"   First tip category: {tip.get('tip_category', 'N/A')}")
+                print(f"   First tip title: {tip.get('title', 'N/A')}")
+                print(f"   First tip priority: {tip.get('priority', 'N/A')}")
+                print(f"   Content length: {len(tip.get('content', ''))}")
+                print(f"   Is read: {tip.get('is_read', False)}")
+                
+                # Check if content is in Portuguese
+                content = tip.get('content', '').lower()
+                if any(word in content for word in ['você', 'seus', 'para', 'com', 'documentos']):
+                    print("✅ Tips provided in Portuguese")
+                else:
+                    print("⚠️  Tips language unclear")
+            
+            return True
+        else:
+            print(f"❌ Personalized tips failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Personalized tips error: {str(e)}")
+        return False
+
+def test_knowledge_base_search():
+    """Test knowledge base search"""
+    print("\n🔍 Testing Knowledge Base Search...")
+    
+    if not AUTH_TOKEN:
+        print("❌ No auth token available for knowledge base test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        # Search for H1-B application information
+        payload = {
+            "query": "Como aplicar para H1-B?",
+            "visa_type": "h1b",
+            "category": "application"
+        }
+        
+        response = requests.post(f"{API_BASE}/education/knowledge-base/search", json=payload, headers=headers, timeout=30)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Knowledge base search successful")
+            print(f"   Answer length: {len(data.get('answer', ''))}")
+            print(f"   Related topics: {len(data.get('related_topics', []))}")
+            print(f"   Next steps: {len(data.get('next_steps', []))}")
+            print(f"   Resources: {len(data.get('resources', []))}")
+            print(f"   Warnings: {len(data.get('warnings', []))}")
+            print(f"   Confidence: {data.get('confidence', 'N/A')}")
+            
+            # Check for legal disclaimers
+            answer = data.get('answer', '').lower()
+            warnings = ' '.join(data.get('warnings', [])).lower()
+            
+            has_disclaimer = any(phrase in (answer + warnings) for phrase in [
+                'consultoria jurídica', 'advogado', 'não substitui', 'educativa'
+            ])
+            
+            if has_disclaimer:
+                print("✅ Legal disclaimers present in response")
+            else:
+                print("⚠️  Legal disclaimers not clearly present")
+            
+            # Check if answer is in Portuguese
+            if any(word in answer for word in ['para', 'como', 'você', 'processo', 'aplicação']):
+                print("✅ Answer provided in Portuguese")
+            else:
+                print("⚠️  Answer language unclear")
+            
+            return True
+        else:
+            print(f"❌ Knowledge base search failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Knowledge base search error: {str(e)}")
+        return False
+
+def test_user_progress():
+    """Test user education progress tracking"""
+    print("\n📈 Testing User Progress Tracking...")
+    
+    if not AUTH_TOKEN:
+        print("❌ No auth token available for progress test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        response = requests.get(f"{API_BASE}/education/progress", headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            progress = data.get('progress', {})
+            
+            print(f"✅ User progress retrieved successfully")
+            print(f"   Guides completed: {len(progress.get('guides_completed', []))}")
+            print(f"   Interviews completed: {len(progress.get('interviews_completed', []))}")
+            print(f"   Knowledge queries: {progress.get('knowledge_queries', 0)}")
+            print(f"   Total study time: {progress.get('total_study_time_minutes', 0)} minutes")
+            print(f"   Achievement badges: {len(progress.get('achievement_badges', []))}")
+            print(f"   Total completed interviews: {progress.get('total_completed_interviews', 0)}")
+            print(f"   Unread tips count: {progress.get('unread_tips_count', 0)}")
+            
+            return True
+        else:
+            print(f"❌ User progress failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ User progress error: {str(e)}")
+        return False
+
+def test_dashboard_with_education():
+    """Test dashboard with education stats"""
+    print("\n📊 Testing Dashboard with Education Stats...")
+    
+    if not AUTH_TOKEN:
+        print("❌ No auth token available for dashboard test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        response = requests.get(f"{API_BASE}/dashboard", headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            user_info = data.get('user', {})
+            stats = data.get('stats', {})
+            
+            print(f"✅ Dashboard with education stats loaded successfully")
+            print(f"   User: {user_info.get('name')} ({user_info.get('email')})")
+            print(f"   Guides completed: {stats.get('guides_completed', 0)}")
+            print(f"   Interviews completed: {stats.get('interviews_completed', 0)}")
+            print(f"   Total study time: {stats.get('total_study_time', 0)} minutes")
+            print(f"   Unread tips: {stats.get('unread_tips', 0)}")
+            print(f"   Total applications: {stats.get('total_applications', 0)}")
+            print(f"   Total documents: {stats.get('total_documents', 0)}")
+            
+            # Verify education stats are present
+            has_education_stats = all(key in stats for key in ['guides_completed', 'interviews_completed', 'total_study_time', 'unread_tips'])
+            if has_education_stats:
+                print("✅ Education statistics properly integrated in dashboard")
+            else:
+                print("⚠️  Some education statistics missing from dashboard")
+            
+            return True
+        else:
+            print(f"❌ Dashboard with education stats failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Dashboard with education stats error: {str(e)}")
+        return False
+
 def run_all_tests():
     """Run all B2C backend tests including document management"""
     print("🚀 Starting OSPREY B2C Backend Complete System Tests")
