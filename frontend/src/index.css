@@ -2,119 +2,133 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Modern OSPREY Design System - Clean & Intuitive
+All colors optimized for professional immigration platform
 */
 
 @layer base {
   :root {
-    --background: 248 250 252;
+    /* Base colors - Clean whites and soft grays */
+    --background: 255 255 255;
     --foreground: 15 23 42;
 
     --card: 255 255 255;
-    --card-foreground: 15 23 42;
+    --card-foreground: 51 65 85;
 
     --popover: 255 255 255;
-    --popover-foreground: 15 23 42;
+    --popover-foreground: 51 65 85;
 
-    --primary: 219 92% 55%;
-    --primary-foreground: 248 250 252;
-    --primary-glow: 219 100% 60%;
+    /* Primary - Professional blue-teal gradient */
+    --primary: 14 165 233;        /* Sky blue 500 */
+    --primary-foreground: 255 255 255;
+    --primary-glow: 6 182 212;    /* Cyan 500 */
 
-    --secondary: 241 245 249;
-    --secondary-foreground: 51 65 85;
+    /* Secondary - Soft neutral */
+    --secondary: 248 250 252;     /* Slate 50 */
+    --secondary-foreground: 71 85 105;
 
+    /* Muted - Light grays for subtle elements */
     --muted: 248 250 252;
     --muted-foreground: 100 116 139;
 
-    --accent: 219 92% 55%;
-    --accent-foreground: 248 250 252;
+    /* Accent - Complementary teal */
+    --accent: 6 182 212;          /* Cyan 500 */
+    --accent-foreground: 255 255 255;
 
-    --success: 142 76% 36%;
-    --success-foreground: 248 250 252;
+    /* Success - Fresh green */
+    --success: 34 197 94;         /* Green 500 */
+    --success-foreground: 255 255 255;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 248 250 252;
+    /* Destructive - Clean red */
+    --destructive: 239 68 68;     /* Red 500 */
+    --destructive-foreground: 255 255 255;
 
-    --border: 226 232 240;
-    --input: 226 232 240;
-    --ring: 219 92% 55%;
+    /* Borders and inputs */
+    --border: 226 232 240;        /* Slate 200 */
+    --input: 241 245 249;         /* Slate 100 */
+    --ring: 14 165 233;           /* Sky 500 */
 
-    /* Custom design tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(219 92% 55%), hsl(219 100% 60%));
-    --gradient-hero: linear-gradient(135deg, hsl(219 92% 55%) 0%, hsl(142 76% 36%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(248 250 252) 0%, hsl(241 245 249) 100%);
+    /* Modern gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(14 165 233 / 1) 0%, hsl(6 182 212 / 1) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(14 165 233 / 1) 0%, hsl(6 182 212 / 1) 50%, hsl(34 197 94 / 1) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(255 255 255 / 1) 0%, hsl(248 250 252 / 1) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(255 255 255 / 1) 0%, hsl(248 250 252 / 0.5) 100%);
     
-    --shadow-elegant: 0 10px 30px -10px hsl(219 92% 55% / 0.3);
-    --shadow-soft: 0 4px 20px -4px hsl(15 23 42 / 0.1);
-    --shadow-glow: 0 0 40px hsl(219 100% 60% / 0.4);
+    /* Enhanced shadows for depth */
+    --shadow-elegant: 0 10px 25px -5px hsl(14 165 233 / 0.15), 0 8px 10px -6px hsl(14 165 233 / 0.1);
+    --shadow-soft: 0 4px 6px -1px hsl(0 0 0 / 0.1), 0 2px 4px -2px hsl(0 0 0 / 0.1);
+    --shadow-glow: 0 0 20px hsl(14 165 233 / 0.3);
+    --shadow-card: 0 1px 3px 0 hsl(0 0 0 / 0.1), 0 1px 2px -1px hsl(0 0 0 / 0.1);
 
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Smooth transitions */
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar colors */
+    --sidebar-background: 255 255 255;
+    --sidebar-foreground: 51 65 85;
+    --sidebar-primary: 14 165 233;
+    --sidebar-primary-foreground: 255 255 255;
+    --sidebar-accent: 248 250 252;
+    --sidebar-accent-foreground: 71 85 105;
+    --sidebar-border: 226 232 240;
+    --sidebar-ring: 14 165 233;
   }
 
   .dark {
-    --background: 15 23 42;
-    --foreground: 248 250 252;
+    /* Dark mode - Sophisticated dark theme */
+    --background: 9 9 11;          /* Zinc 950 */
+    --foreground: 250 250 250;     /* Neutral 50 */
 
-    --card: 30 41 59;
-    --card-foreground: 248 250 252;
+    --card: 24 24 27;              /* Zinc 900 */
+    --card-foreground: 228 228 231; /* Zinc 300 */
 
-    --popover: 30 41 59;
-    --popover-foreground: 248 250 252;
+    --popover: 24 24 27;
+    --popover-foreground: 228 228 231;
 
-    --primary: 219 92% 55%;
-    --primary-foreground: 15 23 42;
-    --primary-glow: 219 100% 60%;
+    --primary: 56 189 248;         /* Sky 400 */
+    --primary-foreground: 9 9 11;
+    --primary-glow: 34 211 238;    /* Cyan 400 */
 
-    --secondary: 51 65 85;
-    --secondary-foreground: 248 250 252;
+    --secondary: 39 39 42;         /* Zinc 800 */
+    --secondary-foreground: 228 228 231;
 
-    --muted: 51 65 85;
-    --muted-foreground: 148 163 184;
+    --muted: 39 39 42;
+    --muted-foreground: 161 161 170; /* Zinc 400 */
 
-    --accent: 219 92% 55%;
-    --accent-foreground: 15 23 42;
+    --accent: 34 211 238;          /* Cyan 400 */
+    --accent-foreground: 9 9 11;
 
-    --success: 142 76% 36%;
-    --success-foreground: 248 250 252;
+    --success: 74 222 128;         /* Green 400 */
+    --success-foreground: 9 9 11;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 248 250 252;
+    --destructive: 248 113 113;    /* Red 400 */
+    --destructive-foreground: 9 9 11;
 
-    --border: 51 65 85;
-    --input: 51 65 85;
-    --ring: 219 92% 55%;
+    --border: 63 63 70;            /* Zinc 700 */
+    --input: 63 63 70;
+    --ring: 56 189 248;
 
-    --gradient-primary: linear-gradient(135deg, hsl(219 92% 55%), hsl(219 100% 60%));
-    --gradient-hero: linear-gradient(135deg, hsl(219 92% 55%) 0%, hsl(142 76% 36%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(15 23 42) 0%, hsl(30 41 59) 100%);
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --gradient-primary: linear-gradient(135deg, hsl(56 189 248 / 1) 0%, hsl(34 211 238 / 1) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(56 189 248 / 1) 0%, hsl(34 211 238 / 1) 50%, hsl(74 222 128 / 1) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(9 9 11 / 1) 0%, hsl(24 24 27 / 1) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(24 24 27 / 1) 0%, hsl(39 39 42 / 0.5) 100%);
+    
+    --shadow-elegant: 0 10px 25px -5px hsl(0 0 0 / 0.25), 0 8px 10px -6px hsl(0 0 0 / 0.1);
+    --shadow-soft: 0 4px 6px -1px hsl(0 0 0 / 0.1), 0 2px 4px -2px hsl(0 0 0 / 0.1);
+    --shadow-glow: 0 0 20px hsl(56 189 248 / 0.5);
+    --shadow-card: 0 1px 3px 0 hsl(0 0 0 / 0.12), 0 1px 2px -1px hsl(0 0 0 / 0.1);
+
+    --sidebar-background: 24 24 27;
+    --sidebar-foreground: 228 228 231;
+    --sidebar-primary: 56 189 248;
+    --sidebar-primary-foreground: 9 9 11;
+    --sidebar-accent: 39 39 42;
+    --sidebar-accent-foreground: 228 228 231;
+    --sidebar-border: 63 63 70;
+    --sidebar-ring: 56 189 248;
   }
 }
 
@@ -124,6 +138,61 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Smooth scrolling */
+  html {
+    @apply scroll-smooth;
+  }
+
+  /* Enhanced focus states */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+/* Custom utility classes for OSPREY */
+@layer utilities {
+  /* Glass morphism effect */
+  .glass {
+    @apply bg-white/80 backdrop-blur-md border border-white/20;
+  }
+
+  .glass-dark {
+    @apply dark:bg-zinc-900/80 dark:backdrop-blur-md dark:border-zinc-700/20;
+  }
+
+  /* Enhanced button variants */
+  .btn-gradient {
+    @apply bg-gradient-primary text-primary-foreground shadow-elegant hover:shadow-glow transition-all duration-300;
+  }
+
+  .btn-glass {
+    @apply glass hover:bg-white/90 transition-all duration-200;
+  }
+
+  /* Card enhancements */
+  .card-hover {
+    @apply hover:shadow-elegant hover:-translate-y-1 transition-all duration-300;
+  }
+
+  .card-glass {
+    @apply glass shadow-card;
+  }
+
+  /* Text gradients */
+  .text-gradient {
+    @apply bg-gradient-primary bg-clip-text text-transparent;
+  }
+
+  /* Professional spacing */
+  .section-padding {
+    @apply py-16 px-4 sm:px-6 lg:px-8;
+  }
+
+  .container-responsive {
+    @apply container mx-auto max-w-7xl;
   }
 }
