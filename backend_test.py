@@ -47,6 +47,215 @@ def test_basic_connectivity():
         print(f"❌ Basic connectivity error: {str(e)}")
         return False
 
+def test_user_signup():
+    """Test user registration"""
+    print("\n👤 Testing User Signup...")
+    global AUTH_TOKEN, USER_ID
+    
+    payload = {
+        "email": TEST_USER["email"],
+        "password": TEST_USER["password"],
+        "first_name": TEST_USER["first_name"],
+        "last_name": TEST_USER["last_name"],
+        "phone": "+55 11 99999-9999"
+    }
+    
+    try:
+        response = requests.post(f"{API_BASE}/auth/signup", json=payload, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            AUTH_TOKEN = data.get('token')
+            USER_ID = data.get('user', {}).get('id')
+            print(f"✅ User signup successful")
+            print(f"   User ID: {USER_ID}")
+            print(f"   Email: {data.get('user', {}).get('email')}")
+            print(f"   Name: {data.get('user', {}).get('first_name')} {data.get('user', {}).get('last_name')}")
+            print(f"   Token received: {'Yes' if AUTH_TOKEN else 'No'}")
+            return True
+        elif response.status_code == 400 and "already registered" in response.text:
+            print("⚠️  User already exists, proceeding to login test")
+            return True
+        else:
+            print(f"❌ User signup failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ User signup error: {str(e)}")
+        return False
+
+def test_user_login():
+    """Test user authentication"""
+    print("\n🔐 Testing User Login...")
+    global AUTH_TOKEN, USER_ID
+    
+    payload = {
+        "email": TEST_USER["email"],
+        "password": TEST_USER["password"]
+    }
+    
+    try:
+        response = requests.post(f"{API_BASE}/auth/login", json=payload, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            AUTH_TOKEN = data.get('token')
+            USER_ID = data.get('user', {}).get('id')
+            print(f"✅ User login successful")
+            print(f"   User ID: {USER_ID}")
+            print(f"   Email: {data.get('user', {}).get('email')}")
+            print(f"   Name: {data.get('user', {}).get('first_name')} {data.get('user', {}).get('last_name')}")
+            print(f"   Token received: {'Yes' if AUTH_TOKEN else 'No'}")
+            return True
+        else:
+            print(f"❌ User login failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ User login error: {str(e)}")
+        return False
+
+def test_user_profile():
+    """Test user profile operations"""
+    print("\n👤 Testing User Profile...")
+    
+    if not AUTH_TOKEN:
+        print("❌ No auth token available for profile test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        # Test GET profile
+        response = requests.get(f"{API_BASE}/profile", headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            profile = response.json()
+            print(f"✅ Profile retrieval successful")
+            print(f"   Name: {profile.get('first_name')} {profile.get('last_name')}")
+            print(f"   Email: {profile.get('email')}")
+            print(f"   Created: {profile.get('created_at', 'N/A')}")
+            
+            # Test UPDATE profile
+            update_payload = {
+                "country_of_birth": "Brazil",
+                "current_country": "Brazil",
+                "phone": "+55 11 98765-4321"
+            }
+            
+            update_response = requests.put(f"{API_BASE}/profile", json=update_payload, headers=headers, timeout=10)
+            
+            if update_response.status_code == 200:
+                print("✅ Profile update successful")
+                return True
+            else:
+                print(f"❌ Profile update failed: {update_response.status_code}")
+                return False
+                
+        else:
+            print(f"❌ Profile retrieval failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Profile test error: {str(e)}")
+        return False
+
+def test_visa_application():
+    """Test visa application creation"""
+    print("\n📋 Testing Visa Application...")
+    
+    if not AUTH_TOKEN:
+        print("❌ No auth token available for application test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        # Create H1-B application
+        payload = {
+            "visa_type": "h1b"
+        }
+        
+        response = requests.post(f"{API_BASE}/applications", json=payload, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            app = data.get('application', {})
+            print(f"✅ H1-B application created successfully")
+            print(f"   Application ID: {app.get('id')}")
+            print(f"   Visa Type: {app.get('visa_type')}")
+            print(f"   Status: {app.get('status')}")
+            print(f"   Progress: {app.get('progress_percentage')}%")
+            
+            # Test getting applications
+            get_response = requests.get(f"{API_BASE}/applications", headers=headers, timeout=10)
+            if get_response.status_code == 200:
+                apps = get_response.json().get('applications', [])
+                print(f"✅ Retrieved {len(apps)} application(s)")
+                return True
+            else:
+                print(f"❌ Failed to retrieve applications: {get_response.status_code}")
+                return False
+                
+        elif response.status_code == 400 and "already exists" in response.text:
+            print("⚠️  Application already exists, testing retrieval")
+            get_response = requests.get(f"{API_BASE}/applications", headers=headers, timeout=10)
+            if get_response.status_code == 200:
+                apps = get_response.json().get('applications', [])
+                print(f"✅ Retrieved {len(apps)} existing application(s)")
+                return True
+            return False
+        else:
+            print(f"❌ Application creation failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Application test error: {str(e)}")
+        return False
+
+def test_dashboard():
+    """Test user dashboard"""
+    print("\n📊 Testing Dashboard...")
+    
+    if not AUTH_TOKEN:
+        print("❌ No auth token available for dashboard test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        response = requests.get(f"{API_BASE}/dashboard", headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            user_info = data.get('user', {})
+            stats = data.get('stats', {})
+            applications = data.get('applications', [])
+            recent_activity = data.get('recent_activity', {})
+            
+            print(f"✅ Dashboard loaded successfully")
+            print(f"   User: {user_info.get('name')} ({user_info.get('email')})")
+            print(f"   Total Applications: {stats.get('total_applications', 0)}")
+            print(f"   In Progress: {stats.get('in_progress', 0)}")
+            print(f"   Completed: {stats.get('completed', 0)}")
+            print(f"   Success Rate: {stats.get('success_rate', 0)}%")
+            print(f"   Recent Chats: {len(recent_activity.get('chats', []))}")
+            print(f"   Recent Translations: {len(recent_activity.get('translations', []))}")
+            
+            return True
+        else:
+            print(f"❌ Dashboard failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Dashboard test error: {str(e)}")
+        return False
+
 def test_chat_endpoint():
     """Test immigration chat assistant"""
     print("\n🤖 Testing Chat Endpoint...")
