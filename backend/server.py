@@ -211,7 +211,7 @@ class InterviewSession(BaseModel):
     interview_type: InterviewType
     visa_type: VisaType
     questions: List[Dict[str, Any]]
-    answers: List[Dict[str, Any]]
+    answers: List[Dict[str, Any]] = []
     ai_feedback: Optional[Dict[str, Any]] = None
     score: Optional[int] = None
     duration_minutes: Optional[int] = None
