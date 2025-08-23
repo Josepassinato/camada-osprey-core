@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Teste o novo sistema de gestão de documentos B2C implementado no backend OSPREY. Sistema completo de documentos implementado com upload, análise IA automática, gestão pessoal de documentos por usuário, timeline de validade e sugestões IA, 7 novos endpoints de documentos."
+user_problem_statement: "Teste o novo sistema de educação e preparo B2C implementado no backend OSPREY. Sistema educacional completo implementado com 4 módulos principais: Guias Interativos, Simulador de Entrevista, Dicas Personalizadas, Base de Conhecimento, 9 novos endpoints educacionais, integração com IA (OpenAI GPT-4), sistema de progresso do usuário."
 
 backend:
   - task: "B2C User Authentication System"
