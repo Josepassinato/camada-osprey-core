@@ -136,9 +136,10 @@ Responda sempre em português, seja claro e objetivo."""
         ai_response = response.choices[0].message.content
         
         # Save conversation to MongoDB
+        current_time = datetime.utcnow()
         new_messages = [
-            {"role": "user", "content": request.message, "timestamp": datetime.utcnow()},
-            {"role": "assistant", "content": ai_response, "timestamp": datetime.utcnow()}
+            {"role": "user", "content": request.message, "timestamp": current_time.isoformat()},
+            {"role": "assistant", "content": ai_response, "timestamp": current_time.isoformat()}
         ]
         
         await db.chat_sessions.update_one(
