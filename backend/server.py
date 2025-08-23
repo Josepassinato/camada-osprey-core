@@ -355,16 +355,16 @@ async def get_dashboard(current_user = Depends(get_current_user)):
     """Get user dashboard data"""
     try:
         # Get applications
-        applications = await db.applications.find({"user_id": current_user["id"]}).to_list(100)
+        applications = await db.applications.find({"user_id": current_user["id"]}, {"_id": 0}).to_list(100)
         
         # Get recent chat sessions
         recent_chats = await db.chat_sessions.find(
-            {"user_id": current_user["id"]}
+            {"user_id": current_user["id"]}, {"_id": 0}
         ).sort("last_updated", -1).limit(5).to_list(5)
         
         # Get recent translations
         recent_translations = await db.translations.find(
-            {"user_id": current_user["id"]}
+            {"user_id": current_user["id"]}, {"_id": 0}
         ).sort("timestamp", -1).limit(3).to_list(3)
         
         # Calculate stats
