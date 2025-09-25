@@ -494,10 +494,10 @@ const Education = () => {
                     )}
 
                     {searchResult.warnings && searchResult.warnings.length > 0 && (
-                      <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-                        <h5 className="font-medium text-orange-800 mb-1">⚠️ Importante:</h5>
+                      <div className="bg-gray-100 border border-gray-300 rounded-lg p-3">
+                        <h5 className="font-medium text-gray-800 mb-1">⚠️ Importante:</h5>
                         {searchResult.warnings.map((warning: string, index: number) => (
-                          <p key={index} className="text-orange-700 text-sm">{warning}</p>
+                          <p key={index} className="text-gray-700 text-sm">{warning}</p>
                         ))}
                       </div>
                     )}
