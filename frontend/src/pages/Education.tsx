@@ -400,15 +400,15 @@ const Education = () => {
                       
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4 text-sm">
                         <div className="flex items-center gap-2">
-                          <Sparkles className="h-4 w-4 text-primary" />
+                          <Sparkles className="h-4 w-4 text-gray-700" />
                           <span>Perguntas com IA</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Target className="h-4 w-4 text-success" />
+                          <Target className="h-4 w-4 text-gray-700" />
                           <span>Feedback detalhado</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-accent" />
+                          <User className="h-4 w-4 text-gray-700" />
                           <span>Múltiplos cenários</span>
                         </div>
                       </div>
