@@ -113,18 +113,18 @@ const Education = () => {
 
   const getDifficultyColor = (level: string) => {
     const colors = {
-      'beginner': 'bg-green-100 text-green-800 border-green-200',
-      'intermediate': 'bg-orange-100 text-orange-800 border-orange-200',
-      'advanced': 'bg-red-100 text-red-800 border-red-200',
+      'beginner': 'bg-gray-100 text-gray-800 border-gray-200',
+      'intermediate': 'bg-gray-200 text-gray-900 border-gray-300',
+      'advanced': 'bg-gray-300 text-black border-gray-400',
     };
     return colors[level as keyof typeof colors] || 'bg-gray-100 text-gray-800 border-gray-200';
   };
 
   const getPriorityColor = (priority: string) => {
     const colors = {
-      'high': 'border-l-red-500 bg-red-50',
-      'medium': 'border-l-orange-500 bg-orange-50',
-      'low': 'border-l-green-500 bg-green-50',
+      'high': 'border-l-black bg-gray-50',
+      'medium': 'border-l-gray-600 bg-gray-50',
+      'low': 'border-l-gray-400 bg-gray-50',
     };
     return colors[priority as keyof typeof colors] || 'border-l-gray-500 bg-gray-50';
   };
