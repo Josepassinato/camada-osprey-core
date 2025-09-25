@@ -431,7 +431,7 @@ const Education = () => {
             <Card className="glass border-0">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Search className="h-5 w-5 text-orange-500" />
+                  <Search className="h-5 w-5 text-gray-700" />
                   Base de Conhecimento Inteligente
                 </CardTitle>
               </CardHeader>
