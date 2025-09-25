@@ -16,7 +16,8 @@ import {
   ArrowRight,
   BarChart,
   Calendar,
-  Bell
+  Bell,
+  GraduationCap
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
