@@ -504,17 +504,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Interactive Visa Guides System"
-    - "Interview Simulator System"
-    - "Interview Answer Submission and Evaluation"
-    - "Interview Session Completion"
-    - "Personalized Tips Generation"
-    - "Knowledge Base Search System"
-    - "User Education Progress Tracking"
-    - "Dashboard Integration with Education Stats"
-    - "OpenAI GPT-4 Integration for Education"
+    - "Education Module Frontend Integration"
+    - "Guide Detail Page Implementation" 
+    - "Interview Simulator Implementation"
+    - "UI Color Scheme Update"
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
