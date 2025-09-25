@@ -520,7 +520,7 @@ const Education = () => {
               <CardContent className="space-y-4">
                 {tips.length === 0 ? (
                   <div className="text-center py-4">
-                    <Lightbulb className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
+                    <Lightbulb className="h-8 w-8 text-gray-700 mx-auto mb-2" />
                     <p className="text-sm text-muted-foreground">Gerando dicas personalizadas...</p>
                   </div>
                 ) : (
