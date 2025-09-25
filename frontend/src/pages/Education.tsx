@@ -321,8 +321,8 @@ const Education = () => {
                       )}
                       
                       <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                          <BookOpen className="h-6 w-6 text-primary" />
+                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <BookOpen className="h-6 w-6 text-gray-700" />
                         </div>
                         
                         <div className="flex-1">
