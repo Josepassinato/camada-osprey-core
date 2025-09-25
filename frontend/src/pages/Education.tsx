@@ -384,10 +384,10 @@ const Education = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="bg-gradient-to-r from-accent/5 to-primary/5 rounded-lg p-6">
+                <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-6">
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
-                      <MessageSquare className="h-6 w-6 text-accent" />
+                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <MessageSquare className="h-6 w-6 text-gray-700" />
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-foreground mb-2">
