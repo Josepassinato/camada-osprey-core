@@ -385,6 +385,14 @@ const Dashboard = () => {
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
+                  onClick={() => navigate('/education')}
+                >
+                  <GraduationCap className="h-4 w-4" />
+                  Centro Educacional
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
                   onClick={() => navigate('/translate')}
                 >
                   <Globe className="h-4 w-4" />
