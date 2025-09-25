@@ -10,6 +10,8 @@ import Dashboard from "./pages/Dashboard";
 import Documents from "./pages/Documents";
 import DocumentUpload from "./pages/DocumentUpload";
 import Education from "./pages/Education";
+import GuideDetail from "./pages/GuideDetail";
+import InterviewSimulator from "./pages/InterviewSimulator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
