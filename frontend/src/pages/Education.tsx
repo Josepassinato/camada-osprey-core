@@ -513,7 +513,7 @@ const Education = () => {
             <Card className="glass border-0">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Lightbulb className="h-5 w-5 text-yellow-500" />
+                  <Lightbulb className="h-5 w-5 text-gray-700" />
                   Dicas Personalizadas
                 </CardTitle>
               </CardHeader>
