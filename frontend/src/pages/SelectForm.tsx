@@ -136,6 +136,58 @@ const SelectForm = () => {
         'Comprovar que o casamento é genuíno',
         'Arquivo dentro de 90 dias antes da expiração'
       ]
+    },
+    {
+      code: 'I-589',
+      title: 'I-589: Pedido de Asilo',
+      description: 'Para pessoas que buscam proteção nos EUA devido à perseguição',
+      icon: <Users className="h-6 w-6" />,
+      category: 'Asilo',
+      processingTime: '2-5 anos',
+      uscisfee: '$0',
+      complexity: 'Avançado',
+      eligibility: [
+        'Estar fisicamente presente nos EUA',
+        'Aplicar dentro de 1 ano da chegada (salvo exceções)',
+        'Demonstrar perseguição ou medo bem fundamentado',
+        'Perseguição baseada em motivos protegidos',
+        'Não ter cometido crimes graves'
+      ],
+      popular: false
+    },
+    {
+      code: 'O-1',
+      title: 'O-1: Habilidade Extraordinária',
+      description: 'Para indivíduos com habilidades extraordinárias em sua área',
+      icon: <GraduationCap className="h-6 w-6" />,
+      category: 'Trabalho Especializado',
+      processingTime: '2-4 meses',
+      uscisfee: '$460',
+      complexity: 'Avançado',
+      eligibility: [
+        'Habilidade extraordinária comprovada',
+        'Reconhecimento nacional ou internacional',
+        'Oferta de emprego ou contrato nos EUA',
+        'Carta de consulta de organização apropriada'
+      ],
+      popular: false
+    },
+    {
+      code: 'H-1B',
+      title: 'H-1B: Trabalho Especializado',
+      description: 'Para profissionais especializados com oferta de emprego',
+      icon: <Briefcase className="h-6 w-6" />,
+      category: 'Trabalho',
+      processingTime: '3-8 meses',
+      uscisfee: '$460+',
+      complexity: 'Intermediário',
+      eligibility: [
+        'Diploma de bacharel ou equivalente',
+        'Oferta de emprego em specialty occupation',
+        'LCA (Labor Condition Application) aprovada',
+        'Salário no nível prevalente da área'
+      ],
+      popular: true
     }
   ];
 
