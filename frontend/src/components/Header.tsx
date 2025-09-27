@@ -79,7 +79,7 @@ const Header = () => {
                 {/* Dropdown menu simulation */}
                 {item.hasDropdown && (
                   <div className="absolute top-full left-0 w-64 glass border border-white/20 rounded-xl shadow-elegant opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 mt-2 p-4 space-y-3">
-                    <div className="text-xs font-medium text-primary mb-3">Tipos de Visto</div>
+                    <div className="text-xs font-medium text-black mb-3">Tipos de Visto</div>
                     {["Visto H1-B", "Visto L1", "Green Card", "Visto de Estudante"].map((service) => (
                       <a key={service} href="#" className="block text-sm text-muted-foreground hover:text-foreground transition-colors py-1">
                         {service}

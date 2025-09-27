@@ -90,7 +90,7 @@ const Footer = () => {
                 <div className="px-3 py-1 bg-success/10 text-success text-xs font-medium rounded-full">
                   SOC 2 Certified
                 </div>
-                <div className="px-3 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">
+                <div className="px-3 py-1 bg-primary/10 text-black text-xs font-medium rounded-full">
                   USCIS Approved
                 </div>
               </div>
@@ -161,7 +161,7 @@ const Footer = () => {
                 placeholder="Seu melhor email"
                 className="flex-1 px-4 py-3 bg-white/80 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent text-sm"
               />
-              <button className="px-6 py-3 bg-gradient-primary text-primary-foreground rounded-lg font-medium hover:shadow-glow transition-all duration-300 text-sm">
+              <button className="px-6 py-3 bg-gradient-primary text-black-foreground rounded-lg font-medium hover:shadow-glow transition-all duration-300 text-sm">
                 Inscrever
               </button>
             </div>

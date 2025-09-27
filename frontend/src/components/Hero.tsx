@@ -52,7 +52,7 @@ const Hero = () => {
 
               <div className="flex items-center gap-3 p-4 rounded-xl glass-dark hover:bg-white/90 transition-colors">
                 <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <Shield className="h-6 w-6 text-primary" />
+                  <Shield className="h-6 w-6 text-black" />
                 </div>
                 <div>
                   <div className="text-sm font-medium text-foreground">98% Aprovação</div>
@@ -149,7 +149,7 @@ const Hero = () => {
                 </div>
                 
                 <div className="absolute -bottom-4 -left-4 glass border border-primary/20 rounded-full p-3">
-                  <Sparkles className="h-6 w-6 text-primary animate-pulse" />
+                  <Sparkles className="h-6 w-6 text-black animate-pulse" />
                 </div>
               </div>
             </div>

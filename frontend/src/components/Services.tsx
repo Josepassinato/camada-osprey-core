@@ -86,8 +86,8 @@ const Services = () => {
         {/* Header */}
         <div className="text-center space-y-4 mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20 mb-4">
-            <Star className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Nossos Serviços</span>
+            <Star className="h-4 w-4 text-black" />
+            <span className="text-sm font-medium text-black">Nossos Serviços</span>
           </div>
           
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground max-w-4xl mx-auto">
@@ -114,7 +114,7 @@ const Services = () => {
                 {/* Popular badge */}
                 {service.popular && (
                   <div className="absolute -top-2 -right-2 z-10">
-                    <Badge className="bg-gradient-primary text-primary-foreground font-medium border-0 shadow-glow">
+                    <Badge className="bg-gradient-primary text-black-foreground font-medium border-0 shadow-glow">
                       ⭐ Popular
                     </Badge>
                   </div>
@@ -125,7 +125,7 @@ const Services = () => {
                   <div className="flex items-center justify-between mb-4">
                     <div className="relative">
                       <div className="w-14 h-14 bg-white/80 rounded-2xl flex items-center justify-center shadow-soft group-hover:shadow-glow transition-all duration-300">
-                        <IconComponent className="h-7 w-7 text-primary" />
+                        <IconComponent className="h-7 w-7 text-black" />
                       </div>
                     </div>
                   </div>

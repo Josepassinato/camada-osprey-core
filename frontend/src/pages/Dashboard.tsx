@@ -215,7 +215,7 @@ const Dashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <FileText className="h-6 w-6 text-primary" />
+                  <FileText className="h-6 w-6 text-black" />
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-foreground">
@@ -310,7 +310,7 @@ const Dashboard = () => {
                 {dashboardData.applications.length === 0 ? (
                   <div className="text-center py-8 space-y-4">
                     <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                      <FileText className="h-8 w-8 text-primary" />
+                      <FileText className="h-8 w-8 text-black" />
                     </div>
                     <div>
                       <h3 className="font-medium text-foreground mb-2">
@@ -418,7 +418,7 @@ const Dashboard = () => {
                 {dashboardData.recent_activity.chats.slice(0, 3).map((chat, index) => (
                   <div key={chat.session_id} className="flex items-start gap-3">
                     <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                      <MessageSquare className="h-4 w-4 text-primary" />
+                      <MessageSquare className="h-4 w-4 text-black" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-foreground line-clamp-2">

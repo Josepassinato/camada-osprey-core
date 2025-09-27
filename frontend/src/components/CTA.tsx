@@ -27,8 +27,8 @@ const CTA = () => {
               
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/30">
-                <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-                <span className="text-sm font-medium text-primary">Comece sua Jornada Agora</span>
+                <Sparkles className="h-4 w-4 text-black animate-pulse" />
+                <span className="text-sm font-medium text-black">Comece sua Jornada Agora</span>
               </div>
 
               {/* Main heading */}
@@ -106,7 +106,7 @@ const CTA = () => {
             </div>
             
             <div className="absolute -bottom-6 -right-6 glass border border-primary/20 rounded-2xl p-4 -rotate-12">
-              <Sparkles className="h-8 w-8 text-primary animate-pulse" />
+              <Sparkles className="h-8 w-8 text-black animate-pulse" />
             </div>
           </div>
 

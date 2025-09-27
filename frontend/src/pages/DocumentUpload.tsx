@@ -244,7 +244,7 @@ const DocumentUpload = () => {
             </Button>
             <div>
               <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
-                <Upload className="h-8 w-8 text-primary" />
+                <Upload className="h-8 w-8 text-black" />
                 Upload de Documentos
               </h1>
               <p className="text-muted-foreground">
@@ -311,7 +311,7 @@ const DocumentUpload = () => {
                   
                   <div className="space-y-4">
                     <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                      <Upload className="h-8 w-8 text-primary" />
+                      <Upload className="h-8 w-8 text-black" />
                     </div>
                     
                     <div>
@@ -458,7 +458,7 @@ const DocumentUpload = () => {
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <Sparkles className="h-6 w-6 text-primary" />
+                    <Sparkles className="h-6 w-6 text-black" />
                   </div>
                   <div className="flex-1">
                     <h4 className="font-medium text-foreground mb-2">

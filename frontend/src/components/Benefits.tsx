@@ -85,8 +85,8 @@ const Benefits = () => {
         {/* Header */}
         <div className="text-center space-y-6 mb-20">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20">
-            <Award className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Por que OSPREY?</span>
+            <Award className="h-4 w-4 text-black" />
+            <span className="text-sm font-medium text-black">Por que OSPREY?</span>
           </div>
           
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground max-w-5xl mx-auto">
@@ -123,7 +123,7 @@ const Benefits = () => {
                   
                   {/* Content */}
                   <div className="space-y-3">
-                    <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                    <h3 className="text-xl font-bold text-foreground group-hover:text-black transition-colors">
                       {benefit.title}
                     </h3>
                     

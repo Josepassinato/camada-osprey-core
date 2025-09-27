@@ -155,7 +155,7 @@ const Login = () => {
               <div className="text-right">
                 <Link 
                   to="/forgot-password" 
-                  className="text-sm text-primary hover:text-primary/80 transition-colors"
+                  className="text-sm text-black hover:text-black/80 transition-colors"
                 >
                   Esqueceu a senha?
                 </Link>
