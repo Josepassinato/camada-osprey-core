@@ -467,9 +467,9 @@ const Dashboard = () => {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {dashboardData.upcoming_expirations.slice(0, 3).map((exp, index) => (
-                    <div key={index} className="flex items-start gap-3 p-3 bg-orange-50 rounded-lg">
-                      <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center flex-shrink-0">
-                        <FileText className="h-4 w-4 text-orange-600" />
+                    <div key={index} className="flex items-start gap-3 p-3 bg-gray-100 rounded-lg">
+                      <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                        <FileText className="h-4 w-4 text-gray-700" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-orange-800">
