@@ -117,10 +117,10 @@ const Documents = () => {
 
   const getStatusColor = (status: string) => {
     const colors = {
-      'approved': 'bg-green-100 text-green-800 border-green-200',
-      'pending_review': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      'requires_improvement': 'bg-orange-100 text-orange-800 border-orange-200',
-      'expired': 'bg-red-100 text-red-800 border-red-200',
+      'approved': 'bg-gray-100 text-black border-gray-200',
+      'pending_review': 'bg-gray-200 text-black border-gray-300',
+      'requires_improvement': 'bg-gray-300 text-black border-gray-400',
+      'expired': 'bg-gray-400 text-white border-gray-500',
       'missing_info': 'bg-gray-100 text-gray-800 border-gray-200',
     };
     return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800 border-gray-200';
