@@ -11,7 +11,9 @@ import {
   User,
   CreditCard,
   Download,
-  Target
+  Target,
+  Users,
+  Globe
 } from "lucide-react";
 
 const AutoApplicationStart = () => {
