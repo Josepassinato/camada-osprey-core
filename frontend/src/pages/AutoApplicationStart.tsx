@@ -92,14 +92,14 @@ const AutoApplicationStart = () => {
                 <FileText className="h-10 w-10" />
               </div>
               <h2 className="text-3xl font-bold text-foreground mb-4">
-                Prepare sua Aplicação USCIS com IA
+                Ferramenta Tecnológica para Auto-Aplicação USCIS
               </h2>
               <p className="text-lg text-muted-foreground mb-6 max-w-3xl mx-auto">
-                Nossa plataforma utiliza inteligência artificial para simplificar o processo de aplicação 
-                aos serviços de imigração americanos, garantindo precisão e conformidade.
+                Somos uma ferramenta de ajuda tecnológica que simplifica o processo de auto-aplicação 
+                para quem deseja preencher seus próprios formulários USCIS com precisão e organização.
               </p>
               <Badge className="bg-gray-100 text-black border-gray-300 mb-4">
-                🤖 Tecnologia de Ponta + Orientação Educacional
+                🤖 Ferramenta Tecnológica + Você faz sua própria aplicação
               </Badge>
             </CardContent>
           </Card>
