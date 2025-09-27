@@ -140,9 +140,9 @@ const Documents = () => {
 
   const getPriorityColor = (priority: string) => {
     const colors = {
-      'high': 'text-red-600 bg-red-50 border-red-200',
-      'medium': 'text-orange-600 bg-orange-50 border-orange-200',
-      'low': 'text-green-600 bg-green-50 border-green-200',
+      'high': 'text-black bg-gray-200 border-gray-300',
+      'medium': 'text-black bg-gray-100 border-gray-200',
+      'low': 'text-gray-600 bg-gray-50 border-gray-100',
     };
     return colors[priority as keyof typeof colors] || 'text-gray-600 bg-gray-50 border-gray-200';
   };
