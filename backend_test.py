@@ -2139,7 +2139,11 @@ def run_all_tests():
     print(f"\n🎯 OVERALL: {total_passed}/{total_tests} tests passed ({total_passed/total_tests*100:.1f}%)")
     
     if total_passed == total_tests:
-        print("🎉 All tests passed! Complete B2C system with education, document management, and auto-application is working correctly.")
+        print("🎉 All tests passed! Complete B2C system with voice agent, education, document management, and auto-application is working correctly.")
+    elif voice_passed == voice_total:
+        print("🎤 Voice Agent system is working perfectly! Minor issues in other systems.")
+    elif voice_passed >= voice_total - 1:
+        print("✅ Voice Agent system is working correctly with minor issues.")
     elif auto_passed == auto_total:
         print("🚀 Auto-application system is working perfectly! Minor issues in other systems.")
     elif auto_passed >= auto_total - 1:
