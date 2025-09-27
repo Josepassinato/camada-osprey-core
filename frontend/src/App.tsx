@@ -20,6 +20,7 @@ import AutoApplicationStart from "./pages/AutoApplicationStart";
 import SelectForm from "./pages/SelectForm";
 import BasicData from "./pages/BasicData";
 import DocumentUploadAuto from "./pages/DocumentUploadAuto";
+import StoryTelling from "./pages/StoryTelling";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
