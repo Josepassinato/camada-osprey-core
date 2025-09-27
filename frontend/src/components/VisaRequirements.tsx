@@ -196,6 +196,145 @@ const VisaRequirements = ({ visaType, onClose }: VisaRequirementsProps) => {
           'Renovável indefinidamente',
           'Pode levar ao green card EB-1A'
         ]
+      },
+      'B-2': {
+        title: 'B-2: Visto de Turista/Visitante',
+        description: 'Para turismo, visitas familiares, tratamento médico ou eventos sociais',
+        processingTime: '2-4 semanas (consulado) ou alguns dias (ESTA)',
+        uscisfee: '$185 (consulado) ou $21 (ESTA)',
+        eligibility: [
+          'Propósito temporário (turismo, visitas, tratamento)',
+          'Intenção de retornar ao Brasil',
+          'Vínculos fortes com país de origem',
+          'Recursos financeiros suficientes para a viagem'
+        ],
+        documents: [
+          {
+            id: 'passport',
+            name: 'Passaporte Válido',
+            description: 'Passaporte com pelo menos 6 meses de validade',
+            required: true,
+            needsTranslation: false,
+            examples: ['Passaporte brasileiro válido', 'Páginas com informações pessoais']
+          },
+          {
+            id: 'financial_proof',
+            name: 'Comprovantes Financeiros',
+            description: 'Evidência de recursos para custear a viagem',
+            required: true,
+            needsTranslation: true,
+            examples: ['Extratos bancários (3 meses)', 'Declaração de Imposto de Renda', 'Carta do empregador com salário']
+          },
+          {
+            id: 'employment_letter',
+            name: 'Carta do Empregador',
+            description: 'Comprovação de vínculo empregatício no Brasil',
+            required: true,
+            needsTranslation: true,
+            examples: ['Carta em papel timbrado', 'Contrato de trabalho', 'Declaração de férias aprovadas']
+          },
+          {
+            id: 'travel_itinerary',
+            name: 'Itinerário da Viagem',
+            description: 'Planos detalhados da viagem nos EUA',
+            required: true,
+            needsTranslation: false,
+            examples: ['Reservas de hotel', 'Passagens aéreas', 'Roteiro turístico detalhado']
+          },
+          {
+            id: 'invitation_letter',
+            name: 'Carta Convite (se aplicável)',
+            description: 'Se visitando familiares ou amigos nos EUA',
+            required: false,
+            needsTranslation: false,
+            examples: ['Carta de familiar americano', 'Cópia do green card do anfitrião', 'Comprovante de residência do anfitrião']
+          },
+          {
+            id: 'property_docs',
+            name: 'Documentos de Propriedades',
+            description: 'Comprovação de vínculos com o Brasil',
+            required: false,
+            needsTranslation: true,
+            examples: ['Escritura de imóvel', 'IPTU', 'Financiamento imobiliário']
+          },
+          {
+            id: 'family_ties',
+            name: 'Vínculos Familiares no Brasil',
+            description: 'Evidência de família e responsabilidades no Brasil',
+            required: true,
+            needsTranslation: true,
+            examples: ['Certidão de casamento', 'Certidão de nascimento dos filhos', 'Atestado escolar dos filhos']
+          }
+        ],
+        tips: [
+          'Demonstre vínculos fortes com o Brasil (emprego, família, propriedades)',
+          'Tenha recursos financeiros comprovados para toda a viagem',
+          'Seja honesto sobre o propósito da viagem na entrevista',
+          'ESTA disponível para brasileiros (válido por 2 anos)',
+          'Visto B-2 pode ser válido por até 10 anos (múltiplas entradas)',
+          'Permanência máxima: 6 meses por entrada'
+        ]
+      },
+      'F-1': {
+        title: 'F-1: Visto de Estudante',
+        description: 'Para estudos acadêmicos em instituições americanas',
+        processingTime: '2-6 semanas',
+        uscisfee: '$185 + $350 (SEVIS)',
+        eligibility: [
+          'Aceito em instituição educacional aprovada pelo SEVP',
+          'Cursando programa acadêmico ou de idiomas',
+          'Recursos financeiros para custear estudos',
+          'Intenção de retornar ao país de origem após estudos'
+        ],
+        documents: [
+          {
+            id: 'passport',
+            name: 'Passaporte Válido',
+            description: 'Passaporte com validade além do período de estudos',
+            required: true,
+            needsTranslation: false,
+            examples: ['Passaporte brasileiro válido']
+          },
+          {
+            id: 'i20_form',
+            name: 'Formulário I-20',
+            description: 'Emitido pela instituição de ensino americana',
+            required: true,
+            needsTranslation: false,
+            examples: ['I-20 original assinado', 'Cópia para records']
+          },
+          {
+            id: 'financial_support',
+            name: 'Comprovante de Recursos Financeiros',
+            description: 'Evidência de capacidade para custear estudos',
+            required: true,
+            needsTranslation: true,
+            examples: ['Extratos bancários', 'Carta de patrocínio', 'Bolsa de estudos']
+          },
+          {
+            id: 'academic_records',
+            name: 'Histórico Acadêmico',
+            description: 'Comprovação de estudos anteriores',
+            required: true,
+            needsTranslation: true,
+            examples: ['Histórico escolar', 'Diploma universitário', 'Certificados de cursos']
+          },
+          {
+            id: 'english_proficiency',
+            name: 'Comprovação de Inglês',
+            description: 'Teste de proficiência em inglês (se exigido)',
+            required: false,
+            needsTranslation: false,
+            examples: ['TOEFL', 'IELTS', 'Duolingo English Test']
+          }
+        ],
+        tips: [
+          'Pague a taxa SEVIS antes da entrevista',
+          'Demonstre vínculos com o Brasil para retorno',
+          'Tenha recursos financeiros para todo o período de estudos',
+          'Pode trabalhar no campus após 9 meses de estudos',
+          'Válido durante todo o programa + 60 dias de grace period'
+        ]
       }
     };
 
