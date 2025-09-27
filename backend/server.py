@@ -61,6 +61,28 @@ class VisaType(str, Enum):
     green_card = "green_card"
     family = "family"
 
+class USCISForm(str, Enum):
+    N400 = "N-400"  # Application for Naturalization
+    I130 = "I-130"  # Petition for Alien Relative
+    I765 = "I-765"  # Application for Employment Authorization
+    I485 = "I-485"  # Application to Register or Adjust Status
+    I90 = "I-90"    # Application to Replace Permanent Resident Card
+    I751 = "I-751"  # Petition to Remove Conditions on Residence
+    I131 = "I-131"  # Application for Travel Document
+    I129 = "I-129"  # Nonimmigrant Worker Petition
+    AR11 = "AR-11"  # Change of Address
+
+class CaseStatus(str, Enum):
+    created = "created"
+    form_selected = "form_selected"
+    basic_data = "basic_data"
+    documents_uploaded = "documents_uploaded"
+    story_completed = "story_completed"
+    form_filled = "form_filled"
+    reviewed = "reviewed"
+    paid = "paid"
+    completed = "completed"
+
 class DocumentType(str, Enum):
     passport = "passport"
     birth_certificate = "birth_certificate"
