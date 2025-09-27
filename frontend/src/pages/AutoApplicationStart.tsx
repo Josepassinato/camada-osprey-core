@@ -119,9 +119,24 @@ const AutoApplicationStart = () => {
           {/* CTA */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
             <Button 
-              onClick={startApplication}
+              onClick={(e) => {
+                e.preventDefault();
+                console.log('🔘 Button onClick triggered - agreed:', agreed, 'isCreating:', isCreating);
+                if (!agreed) {
+                  console.log('❌ Terms not agreed');
+                  alert('Por favor, aceite os termos primeiro.');
+                  return;
+                }
+                if (isCreating) {
+                  console.log('❌ Already creating');
+                  return;
+                }
+                console.log('✅ Starting application...');
+                startApplication();
+              }}
               disabled={!agreed || isCreating}
               className="bg-black text-white hover:bg-gray-800 px-8 py-4 text-lg font-medium rounded-full"
+              type="button"
             >
               {isCreating ? (
                 <>
