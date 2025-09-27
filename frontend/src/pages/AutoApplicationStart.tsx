@@ -326,19 +326,6 @@ const AutoApplicationStart = () => {
               Esta é uma ferramenta de apoio tecnológico, não consultoria jurídica. 
               Organizamos e preenchemos formulários baseados nas suas informações e fornecemos orientações gerais sobre o processo.
             </p>
-            <div className="flex items-start gap-3">
-              <input
-                type="checkbox"
-                id="terms-footer"
-                checked={agreed}
-                onChange={(e) => setAgreed(e.target.checked)}
-                className="h-4 w-4 mt-1 accent-black"
-              />
-              <label htmlFor="terms-footer" className="text-sm text-gray-600">
-                Entendo que esta é uma ferramenta de apoio e não constitui consultoria jurídica. 
-                Aceito os termos e condições de uso.
-              </label>
-            </div>
           </div>
         </div>
       </section>
