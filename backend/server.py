@@ -2295,13 +2295,16 @@ async def voice_websocket_endpoint(websocket: WebSocket, session_id: str):
 
 @api_router.post("/validate")
 async def validate_form_step(request: dict):
-    """Validate form data for a specific step"""
+    """Validate form data for a specific step (Osprey Owl Tutor)"""
     try:
         step_id = request.get("stepId", "")
         form_data = request.get("formData", {})
         
         if not step_id:
             raise HTTPException(status_code=400, detail="stepId is required")
+        
+        # Import form validator
+        from validate_endpoint import form_validator
         
         # Validate using form validator
         result = form_validator.validate_step(step_id, form_data)
