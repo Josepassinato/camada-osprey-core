@@ -146,12 +146,13 @@ const AutoApplicationStart = () => {
                 <div className="flex items-start gap-3">
                   <CheckCircle className="h-5 w-5 text-black flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-semibold text-foreground mb-2">O que oferecemos:</h4>
+                    <h4 className="font-semibold text-foreground mb-2">O que nossa ferramenta oferece:</h4>
                     <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• Ferramenta educacional para preparação de formulários USCIS</li>
-                      <li>• Análise automática de documentos para verificação de completude</li>
-                      <li>• Orientação passo a passo baseada em regulamentações públicas</li>
-                      <li>• Sistema inteligente para organização e validação de dados</li>
+                      <li>• Ferramenta tecnológica para organizar informações de formulários USCIS</li>
+                      <li>• Sistema de validação de dados e formatos</li>
+                      <li>• Checklist personalizada e instruções passo a passo</li>
+                      <li>• Organização automática de documentos e informações</li>
+                      <li>• Você revisa, aprova e envia sua própria aplicação</li>
                     </ul>
                   </div>
                 </div>
