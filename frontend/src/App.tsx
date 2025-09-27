@@ -16,6 +16,8 @@ import Chat from "./pages/Chat";
 import Applications from "./pages/Applications";
 import NewApplication from "./pages/NewApplication";
 import ApplicationDetail from "./pages/ApplicationDetail";
+import AutoApplicationStart from "./pages/AutoApplicationStart";
+import SelectForm from "./pages/SelectForm";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
