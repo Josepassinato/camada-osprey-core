@@ -493,7 +493,7 @@ const Education = () => {
                       </div>
                     )}
 
-                    {searchResult.warnings && searchResult.warnings.length > 0 && (
+                    {searchResult?.warnings && searchResult.warnings.length > 0 && (
                       <div className="bg-gray-100 border border-gray-300 rounded-lg p-3">
                         <h5 className="font-medium text-gray-800 mb-1">⚠️ Importante:</h5>
                         {searchResult.warnings.map((warning: string, index: number) => (
