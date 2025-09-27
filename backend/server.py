@@ -1522,14 +1522,15 @@ async def reanalyze_document(document_id: str, current_user = Depends(get_curren
 async def create_application(app_data: ApplicationCreate, current_user = Depends(get_current_user)):
     """Create a new visa application"""
     try:
-        # Check if user already has an application for this visa type
+        # Check if user already has an active application for this visa type
         existing_app = await db.applications.find_one({
             "user_id": current_user["id"],
-            "visa_type": app_data.visa_type.value
+            "visa_type": app_data.visa_type.value,
+            "status": {"$in": ["in_progress", "document_review", "ready_to_submit", "submitted"]}
         })
         
         if existing_app:
-            raise HTTPException(status_code=400, detail="Application already exists for this visa type")
+            raise HTTPException(status_code=400, detail="You already have an active application for this visa type")
         
         application = UserApplication(
             user_id=current_user["id"],
