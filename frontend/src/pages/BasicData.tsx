@@ -617,23 +617,21 @@ const BasicData = () => {
                     <span className="text-sm text-black">Pagamento & Download</span>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Auto Save Info */}
-            <Card className="glass border-0 bg-gray-50">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="h-5 w-5 text-gray-700" />
-                  <div>
-                    <p className="text-sm font-medium text-black">Salvamento Automático</p>
-                    <p className="text-xs text-muted-foreground">
-                      Suas informações são salvas automaticamente a cada 30 segundos
-                    </p>
-                  </div>
+            <div className="bg-gray-50 border border-black rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="h-5 w-5 text-black" />
+                <div>
+                  <p className="text-sm font-medium text-black">Salvamento Automático</p>
+                  <p className="text-xs text-black">
+                    Suas informações são salvas automaticamente a cada 30 segundos
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
       </div>
