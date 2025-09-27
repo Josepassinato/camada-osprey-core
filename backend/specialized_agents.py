@@ -511,6 +511,7 @@ class SpecializedAgentCoordinator:
             "eligibility_analyst": create_eligibility_analyst(),
             "compliance_checker": create_compliance_checker(),
             "letter_writer": create_immigration_letter_writer(),
+            "uscis_translator": create_uscis_form_translator(),
             "triage": create_urgency_triage()
         }
     
