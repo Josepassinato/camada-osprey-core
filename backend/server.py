@@ -2414,8 +2414,9 @@ async def immigration_expert_analyze_document(request: dict):
         document_type = request.get("documentType", "passport")
         document_content = request.get("documentContent", "")
         visa_type = request.get("visaType", "H-1B")
+        user_data = request.get("userData", {})  # Dados do usuário para validação
         
-        result = await expert.analyze_document(document_type, document_content, visa_type)
+        result = await expert.analyze_document(document_type, document_content, visa_type, user_data)
         
         return {
             "success": True,
