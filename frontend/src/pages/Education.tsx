@@ -479,7 +479,7 @@ const Education = () => {
                       </div>
                     )}
 
-                    {searchResult.next_steps && searchResult.next_steps.length > 0 && (
+                    {searchResult?.next_steps && searchResult.next_steps.length > 0 && (
                       <div>
                         <h5 className="font-medium text-foreground mb-2">Próximos passos:</h5>
                         <ul className="text-sm text-muted-foreground space-y-1">
