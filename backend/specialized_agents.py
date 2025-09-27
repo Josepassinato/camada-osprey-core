@@ -10,17 +10,20 @@ from emergentintegrations.llm.chat import LlmChat, UserMessage
 logger = logging.getLogger(__name__)
 
 class BaseSpecializedAgent:
-    """Base class for all specialized agents"""
+    """Base class for all specialized agents with Dra. Paula's knowledge base"""
     
     def __init__(self, 
                  agent_name: str,
                  specialization: str,
                  provider: str = "openai", 
-                 model: str = "gpt-4o"):
+                 model: str = "gpt-4o",
+                 use_dra_paula_knowledge: bool = True):
         self.agent_name = agent_name
         self.specialization = specialization
         self.provider = provider
         self.model = model
+        self.use_dra_paula_knowledge = use_dra_paula_knowledge
+        self.dra_paula_assistant_id = "asst_AV1O2IBTnDXpEZXiSSQGBT4"  # Banco de dados da Dra. Paula
         self.api_key = os.environ.get('EMERGENT_LLM_KEY')
         
         if not self.api_key:
