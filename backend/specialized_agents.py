@@ -30,20 +30,40 @@ class BaseSpecializedAgent:
             raise ValueError("EMERGENT_LLM_KEY not found in environment variables")
     
     async def _call_agent(self, prompt: str, session_id: str) -> str:
-        """Base method to call the specialized agent"""
+        """Base method to call the specialized agent with Dra. Paula's knowledge"""
         try:
+            # Enhanced prompt with Dra. Paula's knowledge base reference
+            enhanced_prompt = f"""
+            {self.get_system_prompt()}
+            
+            BANCO DE CONHECIMENTO DRA. PAULA B2C:
+            Assistant ID: {self.dra_paula_assistant_id}
+            
+            Use o conhecimento especializado da Dra. Paula B2C sobre:
+            - Leis de imigração americana atualizadas
+            - Processos USCIS específicos 
+            - Regulamentações e mudanças recentes
+            - Precedentes e casos práticos
+            - Documentação obrigatória por tipo de visto
+            
+            TAREFA ESPECIALIZADA:
+            {prompt}
+            
+            Combine sua especialização com o conhecimento da Dra. Paula para dar a resposta mais precisa possível.
+            """
+            
             chat = LlmChat(
                 api_key=self.api_key,
                 session_id=session_id,
-                system_message=self.get_system_prompt()
+                system_message=enhanced_prompt
             ).with_model(self.provider, self.model)
             
-            user_message = UserMessage(text=prompt)
+            user_message = UserMessage(text="Execute a análise conforme sua especialização usando o conhecimento da Dra. Paula B2C.")
             response = await chat.send_message(user_message)
             return response
             
         except Exception as e:
-            logger.error(f"Error calling {self.agent_name}: {e}")
+            logger.error(f"Error calling {self.agent_name} with Dra. Paula's knowledge: {e}")
             return f"Erro ao processar com {self.agent_name}. Tente novamente."
     
     def get_system_prompt(self) -> str:
