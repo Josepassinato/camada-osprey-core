@@ -271,7 +271,7 @@ const Education = () => {
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
                     <Clock className="h-8 w-8 text-gray-700" />
                   </div>
-                  <div className="text-2xl font-bold text-foreground">{formatStudyTime(progress.total_study_time_minutes)}</div>
+                  <div className="text-2xl font-bold text-foreground">{progress?.total_study_time_minutes ? formatStudyTime(progress.total_study_time_minutes) : '0m'}</div>
                   <div className="text-sm text-muted-foreground">Tempo de Estudo</div>
                 </div>
                 
