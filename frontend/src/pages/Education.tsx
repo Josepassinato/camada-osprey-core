@@ -414,7 +414,7 @@ const Education = () => {
                       </div>
                       
                       <Button 
-                        className="btn-gradient group"
+                        className="bg-black text-white hover:bg-gray-800 group"
                         onClick={() => navigate('/education/interview')}
                       >
                         <Play className="h-4 w-4" />
