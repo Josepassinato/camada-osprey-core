@@ -101,7 +101,7 @@ const Footer = () => {
                   <span>5.000+ Aprovações</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse delay-300"></div>
+                  <div className="w-2 h-2 bg-black rounded-full animate-pulse delay-300"></div>
                   <span>98% Taxa de Sucesso</span>
                 </div>
               </div>
