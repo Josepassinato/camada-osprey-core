@@ -124,7 +124,7 @@ const CTA = () => {
               <div className="text-left">
                 <div className="flex items-center gap-1 mb-1">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="w-4 h-4 text-amber-400">⭐</div>
+                    <div key={i} className="w-4 h-4 text-black">⭐</div>
                   ))}
                 </div>
                 <p className="text-sm text-muted-foreground">
