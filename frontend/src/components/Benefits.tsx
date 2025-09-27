@@ -45,7 +45,7 @@ const benefits = [
     title: "Suporte Premium 24/7",
     description: "Atendimento especializado disponível sempre que você precisar",
     color: "from-rose-500/10 to-pink-500/10",
-    iconColor: "text-rose-600"
+    iconColor: "text-black"
   },
   {
     icon: FileCheck,
