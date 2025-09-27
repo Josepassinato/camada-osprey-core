@@ -381,15 +381,15 @@ const BasicData = () => {
               </h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Endereço Atual <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-black mb-2">
+                    Endereço Atual <span className="text-black">*</span>
                   </label>
                   <input
                     type="text"
                     value={formData.currentAddress}
                     onChange={(e) => handleInputChange('currentAddress', e.target.value)}
                     placeholder="Rua, número, apartamento"
-                    className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                    className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-black"
                   />
                 </div>
 
