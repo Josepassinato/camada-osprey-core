@@ -176,8 +176,8 @@ const AutoApplicationStart = () => {
                   className="w-4 h-4"
                 />
                 <label htmlFor="disclaimer-accept" className="text-sm font-medium text-foreground">
-                  Li e aceito os termos acima. Entendo que esta plataforma oferece apenas orientação educacional 
-                  e não constitui consultoria jurídica.
+                  Li e aceito os termos acima. Entendo que esta é apenas uma ferramenta tecnológica de apoio 
+                  e que eu sou responsável por fazer minha própria auto-aplicação.
                 </label>
               </div>
 
