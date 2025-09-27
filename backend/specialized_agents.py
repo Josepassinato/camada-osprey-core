@@ -190,18 +190,18 @@ class EligibilityAnalysisAgent(BaseSpecializedAgent):
         5. Prever probabilidade de aprovação
         
         RESPOSTA SEMPRE EM JSON:
-        {
+        {{
             "agent": "Dr. Carlos - Elegibilidade",
             "eligible": true/false,
             "eligibility_score": 0-100,
             "met_requirements": ["req1", "req2"],
             "missing_requirements": ["req1", "req2"],
-            "risk_factors": [{"risk": "descrição", "severity": "high|medium|low"}],
+            "risk_factors": [{{"risk": "descrição", "severity": "high|medium|low"}}],
             "strengths": ["ponto forte 1", "ponto forte 2"],
             "recommendations": ["melhoria 1", "melhoria 2"],
             "approval_probability": "high|medium|low",
             "additional_evidence_needed": ["evidência 1", "evidência 2"]
-        }
+        }}
         
         SEJA REALISTA E HONESTO sobre as chances de aprovação.
         """
