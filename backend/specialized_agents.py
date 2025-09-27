@@ -277,7 +277,7 @@ class UrgencyTriageAgent(BaseSpecializedAgent):
         4. Dra. Patricia - Compliance USCIS
         
         RESPOSTA SEMPRE EM JSON:
-        {
+        {{
             "agent": "Dr. Roberto - Triagem",
             "urgency": "CRÍTICO|ALTO|MÉDIO|BAIXO",
             "issue_type": "documento|formulário|elegibilidade|compliance|geral",
@@ -286,7 +286,7 @@ class UrgencyTriageAgent(BaseSpecializedAgent):
             "priority_order": ["agent1", "agent2"],
             "estimated_complexity": "simples|moderado|complexo",
             "immediate_action_needed": true/false
-        }
+        }}
         """
 
 # Factory functions for each specialized agent
