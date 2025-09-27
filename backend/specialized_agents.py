@@ -32,8 +32,8 @@ class BaseSpecializedAgent:
     async def _call_agent(self, prompt: str, session_id: str) -> str:
         """Base method to call the specialized agent with Dra. Paula's knowledge"""
         try:
-            # Enhanced prompt with Dra. Paula's knowledge base reference
-            enhanced_prompt = f"""
+            # Use system prompt and enhanced user prompt
+            system_message = f"""
             {self.get_system_prompt()}
             
             BANCO DE CONHECIMENTO DRA. PAULA B2C:
@@ -46,19 +46,17 @@ class BaseSpecializedAgent:
             - Precedentes e casos práticos
             - Documentação obrigatória por tipo de visto
             
-            TAREFA ESPECIALIZADA:
-            {prompt}
-            
             Combine sua especialização com o conhecimento da Dra. Paula para dar a resposta mais precisa possível.
             """
             
             chat = LlmChat(
                 api_key=self.api_key,
                 session_id=session_id,
-                system_message=enhanced_prompt
+                system_message=system_message
             ).with_model(self.provider, self.model)
             
-            user_message = UserMessage(text="Execute a análise conforme sua especialização usando o conhecimento da Dra. Paula B2C.")
+            # Send the actual task as user message
+            user_message = UserMessage(text=prompt)
             response = await chat.send_message(user_message)
             return response
             
