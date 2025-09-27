@@ -132,11 +132,12 @@ const AutoApplicationStart = () => {
                 <div className="flex items-start gap-3">
                   <AlertTriangle className="h-5 w-5 text-black flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-semibold text-foreground mb-2">Esta plataforma NÃO é um escritório de advocacia</h4>
+                    <h4 className="font-semibold text-foreground mb-2">Somos uma ferramenta tecnológica de apoio</h4>
                     <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• Não oferecemos consultoria jurídica nem representação legal</li>
-                      <li>• Não assinamos formulários G-28 (Notice of Entry of Appearance)</li>
-                      <li>• Fornecemos apenas orientação educacional para auto-aplicação</li>
+                      <li>• NÃO somos um escritório de advocacia nem oferecemos consultoria jurídica</li>
+                      <li>• NÃO assinamos formulários G-28 (Notice of Entry of Appearance)</li>
+                      <li>• Oferecemos apenas uma ferramenta tecnológica para organizar sua auto-aplicação</li>
+                      <li>• VOCÊ é responsável por revisar e enviar sua própria aplicação</li>
                       <li>• Para questões legais complexas, consulte um advogado licenciado</li>
                     </ul>
                   </div>
