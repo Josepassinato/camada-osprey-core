@@ -238,9 +238,9 @@ const AutoApplicationStart = () => {
                   <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold">
                     3
                   </div>
-                  <h4 className="font-semibold text-foreground mb-2">Download e Envio</h4>
+                  <h4 className="font-semibold text-foreground mb-2">Sua Auto-Aplicação</h4>
                   <p className="text-sm text-muted-foreground">
-                    Receba o pacote completo com instruções para envio ao USCIS
+                    Você recebe o pacote organizado com instruções para fazer sua própria aplicação
                   </p>
                 </div>
               </div>
