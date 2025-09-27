@@ -117,7 +117,7 @@ const AutoApplicationStart = () => {
           </p>
           
           {/* CTA */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+          <div className="flex flex-col items-center justify-center gap-4 mb-16">
             <Button 
               onClick={(e) => {
                 e.preventDefault();
@@ -150,6 +150,22 @@ const AutoApplicationStart = () => {
                 </>
               )}
             </Button>
+            
+            {/* Terms acceptance - moved below button */}
+            <div className="flex items-start gap-3 max-w-md">
+              <input
+                type="checkbox"
+                id="terms-button"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                className="h-4 w-4 mt-1 accent-black"
+              />
+              <label htmlFor="terms-button" className="text-sm text-gray-600">
+                Entendo que esta é uma ferramenta de apoio e não constitui consultoria jurídica. 
+                Aceito os termos e condições de uso.
+              </label>
+            </div>
+            
             <div className="flex items-center text-sm text-gray-600">
               <Clock className="h-4 w-4 mr-2" />
               Leva apenas 15 minutos
