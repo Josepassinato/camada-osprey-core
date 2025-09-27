@@ -781,10 +781,14 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Osprey Owl Tutor Validation System Testing Complete"
+    - "General System Testing - Complete Backend Verification"
+    - "Case ID persistence validation"
+    - "Auto-Application Journey End-to-End Testing"
+    - "Authentication and Data Persistence"
+    - "Owl Tutor System Integration"
   stuck_tasks: []
-  test_all: false
-  test_priority: "high_first"
+  test_all: true
+  test_priority: "critical_first"
 
 agent_communication:
   - agent: "testing"
