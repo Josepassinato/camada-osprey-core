@@ -2060,13 +2060,18 @@ def run_all_tests():
         "dashboard_with_education": test_dashboard_with_education()
     }
     
+    # Voice Agent system tests (NEW - Semana 1 MVP)
+    voice_agent_results = {
+        "voice_agent_comprehensive": test_voice_agent_comprehensive()
+    }
+    
     # Auto-Application system tests (NEW)
     auto_app_results = {
         "complete_auto_application_journey": test_complete_auto_application_journey()
     }
     
     # Combine all results
-    all_results = {**auth_results, **document_results, **education_results, **auto_app_results}
+    all_results = {**auth_results, **document_results, **education_results, **voice_agent_results, **auto_app_results}
     
     print("\n" + "=" * 60)
     print("📊 TEST RESULTS SUMMARY")
