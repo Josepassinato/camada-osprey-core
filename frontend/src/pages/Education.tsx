@@ -358,7 +358,7 @@ const Education = () => {
                           </div>
                           
                           <Button 
-                            className="mt-4 btn-gradient group"
+                            className="mt-4 bg-black text-white hover:bg-gray-800 group"
                             onClick={(e) => {
                               e.stopPropagation();
                               navigate(`/education/guides/${guide.visa_type}`);
