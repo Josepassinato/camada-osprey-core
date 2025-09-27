@@ -358,12 +358,37 @@ const AutoApplicationStart = () => {
       {/* Legal Disclaimer */}
       <section className="py-12 border-t border-gray-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <h3 className="font-bold text-black mb-3">Importante - Ferramenta Tecnológica de Apoio</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Esta é uma ferramenta de apoio tecnológico, não consultoria jurídica. 
-              Organizamos e preenchemos formulários baseados nas suas informações e fornecemos orientações gerais sobre o processo.
-            </p>
+          <div className="bg-gray-50 border-2 border-black p-8 rounded-lg">
+            <h3 className="font-bold text-black mb-4 text-lg">🤖 Plataforma de Auxílio Digital para Auto-Aplicação</h3>
+            
+            <div className="space-y-4 text-sm text-gray-700">
+              <p>
+                <strong>O que somos:</strong> Uma plataforma tecnológica que auxilia <strong>self-petitioners</strong> 
+                (auto-aplicantes) a prepararem suas próprias aplicações de visto americano usando inteligência artificial.
+              </p>
+              
+              <p>
+                <strong>Como funciona:</strong> Nossa IA especializada organiza suas informações, preenche formulários 
+                oficiais do USCIS e fornece orientações técnicas para que você possa fazer sua própria submissão 
+                diretamente no site oficial do governo americano.
+              </p>
+              
+              <p>
+                <strong>Importante:</strong> Esta é uma ferramenta de apoio tecnológico, não consultoria jurídica. 
+                Você permanece como o responsável pela sua aplicação (self-petitioner) e pode consultar um 
+                advogado especializado sempre que necessário.
+              </p>
+              
+              <div className="bg-white border border-gray-300 p-4 rounded">
+                <p className="font-medium text-black mb-2">✅ Você mantém controle total:</p>
+                <ul className="space-y-1 text-xs text-gray-600">
+                  <li>• Suas informações são organizadas pela nossa IA</li>
+                  <li>• Formulários oficiais são preenchidos automaticamente</li>
+                  <li>• Você revisa e submete diretamente no USCIS</li>
+                  <li>• Pode consultar advogados quando desejar</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </section>
