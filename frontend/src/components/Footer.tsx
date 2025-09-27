@@ -69,7 +69,7 @@ const Footer = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
+              <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center shadow-glow">
                 <Sparkles className="h-7 w-7 text-white" />
               </div>
               <div>
@@ -161,7 +161,7 @@ const Footer = () => {
                 placeholder="Seu melhor email"
                 className="flex-1 px-4 py-3 bg-white/80 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent text-sm"
               />
-              <button className="px-6 py-3 bg-gradient-primary text-black-foreground rounded-lg font-medium hover:shadow-glow transition-all duration-300 text-sm">
+              <button className="px-6 py-3 bg-black text-black-foreground rounded-lg font-medium hover:shadow-glow transition-all duration-300 text-sm">
                 Inscrever
               </button>
             </div>

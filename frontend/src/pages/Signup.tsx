@@ -102,7 +102,7 @@ const Signup = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
+            <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center shadow-glow">
               <Sparkles className="h-7 w-7 text-white" />
             </div>
             <div>

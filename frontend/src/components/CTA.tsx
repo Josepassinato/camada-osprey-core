@@ -115,7 +115,7 @@ const CTA = () => {
             <div className="inline-flex items-center gap-4 p-6 glass rounded-2xl border border-black/10 max-w-2xl">
               <div className="flex -space-x-2">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="w-10 h-10 bg-gradient-primary rounded-full border-2 border-white flex items-center justify-center text-white text-sm font-medium">
+                  <div key={i} className="w-10 h-10 bg-black rounded-full border-2 border-white flex items-center justify-center text-white text-sm font-medium">
                     {i === 1 ? "M" : i === 2 ? "A" : i === 3 ? "J" : "S"}
                   </div>
                 ))}

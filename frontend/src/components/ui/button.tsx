@@ -19,7 +19,7 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground shadow-soft hover:bg-secondary/80 hover:shadow-elegant",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-black underline-offset-4 hover:underline",
-        hero: "bg-gradient-primary text-black-foreground shadow-elegant hover:shadow-glow hover:-translate-y-1 active:translate-y-0 font-semibold",
+        hero: "bg-black text-black-foreground shadow-elegant hover:shadow-glow hover:-translate-y-1 active:translate-y-0 font-semibold",
         professional: "bg-gradient-to-r from-primary to-accent text-black-foreground shadow-elegant hover:shadow-glow hover:scale-105 active:scale-100 font-semibold",
         glass: "glass backdrop-blur-md border border-white/20 hover:bg-white/90 hover:shadow-elegant hover:-translate-y-0.5 active:translate-y-0"
       },

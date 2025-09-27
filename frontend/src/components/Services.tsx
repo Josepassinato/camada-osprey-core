@@ -114,7 +114,7 @@ const Services = () => {
                 {/* Popular badge */}
                 {service.popular && (
                   <div className="absolute -top-2 -right-2 z-10">
-                    <Badge className="bg-gradient-primary text-black-foreground font-medium border-0 shadow-glow">
+                    <Badge className="bg-black text-black-foreground font-medium border-0 shadow-glow">
                       ⭐ Popular
                     </Badge>
                   </div>

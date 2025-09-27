@@ -115,7 +115,7 @@ const Hero = () => {
             <div className="relative z-10">
               {/* Main visual card */}
               <div className="relative glass border border-white/20 rounded-3xl p-8 card-hover">
-                <div className="aspect-[4/3] bg-gradient-primary rounded-2xl relative overflow-hidden">
+                <div className="aspect-[4/3] bg-black rounded-2xl relative overflow-hidden">
                   {/* Simulated dashboard/document interface */}
                   <div className="absolute inset-4 bg-white/95 rounded-xl p-6 space-y-4">
                     <div className="flex items-center gap-3">
@@ -155,7 +155,7 @@ const Hero = () => {
             </div>
 
             {/* Background decoration */}
-            <div className="absolute -top-6 -right-6 w-full h-full bg-gradient-primary/20 rounded-3xl -z-10 blur-sm"></div>
+            <div className="absolute -top-6 -right-6 w-full h-full bg-black/20 rounded-3xl -z-10 blur-sm"></div>
           </div>
         </div>
       </div>
