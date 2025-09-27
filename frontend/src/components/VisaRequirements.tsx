@@ -197,11 +197,11 @@ const VisaRequirements = ({ visaType, onClose }: VisaRequirementsProps) => {
           'Pode levar ao green card EB-1A'
         ]
       },
-      'B-2': {
-        title: 'B-2: Visto de Turista/Visitante',
-        description: 'Para turismo, visitas familiares, tratamento médico ou eventos sociais',
+      'B-1/B-2': {
+        title: 'B-1/B-2: Visto de Negócios e Turismo',
+        description: 'Para negócios, turismo, visitas familiares, tratamento médico ou eventos sociais',
         processingTime: '2-4 semanas (consulado) ou alguns dias (ESTA)',
-        uscisfee: '$185 (consulado) ou $21 (ESTA)',
+        uscisfee: '$120 (consulado) ou $21 (ESTA)',
         eligibility: [
           'Propósito temporário (turismo, visitas, tratamento)',
           'Intenção de retornar ao Brasil',
