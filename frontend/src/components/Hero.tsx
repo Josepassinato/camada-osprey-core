@@ -119,7 +119,7 @@ const Hero = () => {
                   {/* Simulated dashboard/document interface */}
                   <div className="absolute inset-4 bg-white/95 rounded-xl p-6 space-y-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-success rounded-full"></div>
+                      <div className="w-3 h-3 bg-black rounded-full"></div>
                       <div className="text-sm font-medium text-zinc-700">Status: Em Processamento</div>
                     </div>
                     
