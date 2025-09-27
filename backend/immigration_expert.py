@@ -193,7 +193,8 @@ class ImmigrationExpert:
     async def analyze_document(self, 
                               document_type: str, 
                               document_content: str,
-                              visa_type: str) -> Dict[str, Any]:
+                              visa_type: str,
+                              user_data: Dict[str, Any] = None) -> Dict[str, Any]:
         """
         Analyze uploaded documents for completeness and accuracy
         """
