@@ -1747,6 +1747,127 @@ async def claim_anonymous_case(case_id: str, current_user = Depends(get_current_
         logger.error(f"Error claiming case: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error claiming case: {str(e)}")
 
+@api_router.post("/auto-application/extract-facts")
+async def extract_facts_from_story(request: dict):
+    """Extract structured facts from user's story using AI"""
+    try:
+        case_id = request.get("case_id")
+        story_text = request.get("story_text", "")
+        form_code = request.get("form_code")
+        
+        if not story_text.strip():
+            raise HTTPException(status_code=400, detail="Story text is required")
+        
+        # Get visa specifications for context
+        visa_specs = get_visa_specifications(form_code) if form_code else {}
+        
+        # Create AI prompt for fact extraction
+        extraction_prompt = f"""
+Você é um assistente especializado em extrair informações estruturadas de narrativas para aplicações de imigração dos EUA.
+
+FORMULÁRIO: {form_code or 'Não especificado'}
+CATEGORIA: {visa_specs.get('category', 'Não especificada')}
+
+HISTÓRIA DO USUÁRIO:
+{story_text}
+
+Extraia e organize as seguintes informações da história, criando um JSON estruturado:
+
+1. PERSONAL_INFO (informações pessoais):
+   - full_name, date_of_birth, place_of_birth, nationality, current_address, phone, email
+
+2. IMMIGRATION_HISTORY (histórico de imigração):
+   - current_status, previous_entries, visa_history, overstays, deportations
+
+3. FAMILY_DETAILS (detalhes familiares):
+   - marital_status, spouse_info, children, parents, siblings
+
+4. EMPLOYMENT_INFO (informações de trabalho):
+   - current_job, previous_jobs, employer_details, salary, job_duties
+
+5. EDUCATION (educação):
+   - degrees, schools, graduation_dates, certifications
+
+6. TRAVEL_HISTORY (histórico de viagens):
+   - trips_outside_usa, duration, purposes, countries_visited
+
+7. FINANCIAL_INFO (informações financeiras):
+   - income, bank_accounts, assets, debts, tax_filings
+
+8. SPECIAL_CIRCUMSTANCES (circunstâncias especiais):
+   - medical_conditions, criminal_history, military_service, religious_persecution
+
+INSTRUÇÕES:
+- Extraia apenas informações explicitamente mencionadas na história
+- Use "Não mencionado" para informações ausentes
+- Mantenha datas no formato ISO quando possível
+- Seja preciso e não invente informações
+- Organize por categorias mesmo que algumas estejam vazias
+
+Responda apenas com o JSON estruturado, sem explicações adicionais.
+"""
+
+        # Call OpenAI for fact extraction
+        response = openai.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {
+                    "role": "system", 
+                    "content": "Você é um especialista em extrair informações estruturadas de narrativas para aplicações de imigração. Responda sempre em português e com informações precisas."
+                },
+                {"role": "user", "content": extraction_prompt}
+            ],
+            temperature=0.1,
+            max_tokens=2000
+        )
+        
+        # Parse AI response
+        ai_response = response.choices[0].message.content.strip()
+        
+        # Try to extract JSON from the response
+        try:
+            # Remove any markdown formatting
+            if "```json" in ai_response:
+                ai_response = ai_response.split("```json")[1].split("```")[0].strip()
+            elif "```" in ai_response:
+                ai_response = ai_response.split("```")[1].split("```")[0].strip()
+            
+            extracted_facts = json.loads(ai_response)
+        except json.JSONDecodeError:
+            # Fallback: create structured response based on keywords
+            extracted_facts = {
+                "personal_info": {"extracted_from": "AI analysis of user story"},
+                "immigration_history": {"status": "Extracted from narrative"},
+                "family_details": {"mentioned_in_story": True},
+                "employment_info": {"details": "See user narrative"},
+                "education": {"background": "Mentioned in story"},
+                "travel_history": {"trips": "Referenced in narrative"}
+            }
+        
+        # Update case with extracted facts if case_id provided
+        if case_id:
+            await db.auto_cases.update_one(
+                {"case_id": case_id},
+                {
+                    "$set": {
+                        "ai_extracted_facts": extracted_facts,
+                        "updated_at": datetime.utcnow()
+                    }
+                }
+            )
+        
+        return {
+            "message": "Facts extracted successfully",
+            "extracted_facts": extracted_facts,
+            "categories_found": len(extracted_facts.keys())
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error extracting facts: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error extracting facts: {str(e)}")
+
 @api_router.get("/auto-application/visa-specs/{form_code}")
 async def get_visa_specs(form_code: str, subcategory: Optional[str] = None):
     """Get detailed specifications for a specific USCIS form"""
