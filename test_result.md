@@ -529,8 +529,7 @@ metadata:
 test_plan:
   current_focus:
     - "Education Module Frontend Integration"
-  stuck_tasks:
-    - "Education Module Frontend Integration"
+  stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
