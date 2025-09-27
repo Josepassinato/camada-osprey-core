@@ -277,12 +277,15 @@ const VisaRequirements = ({ visaType, onClose }: VisaRequirementsProps) => {
           }
         ],
         tips: [
+          'B-1: Para negócios (reuniões, conferências) - NÃO permite trabalho remunerado',
+          'B-2: Para turismo, visitas familiares, tratamento médico',
           'Demonstre vínculos fortes com o Brasil (emprego, família, propriedades)',
           'Tenha recursos financeiros comprovados para toda a viagem',
           'Seja honesto sobre o propósito da viagem na entrevista',
-          'ESTA disponível para brasileiros (válido por 2 anos)',
-          'Visto B-2 pode ser válido por até 10 anos (múltiplas entradas)',
-          'Permanência máxima: 6 meses por entrada'
+          'ESTA disponível para brasileiros (válido por 2 anos) - mais rápido',
+          'Visto B-1/B-2 pode ser válido por até 10 anos (múltiplas entradas)',
+          'Permanência máxima: 6 meses por entrada (decisão do oficial na imigração)',
+          'Taxa de $120 aplicável para brasileiros (acordo de reciprocidade)'
         ]
       },
       'F-1': {
