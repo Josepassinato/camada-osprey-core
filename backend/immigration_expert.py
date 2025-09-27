@@ -196,35 +196,63 @@ class ImmigrationExpert:
                               visa_type: str,
                               user_data: Dict[str, Any] = None) -> Dict[str, Any]:
         """
-        Analyze uploaded documents for completeness and accuracy
+        Analyze uploaded documents for completeness, accuracy and authenticity - Dra. Paula B2C
         """
         try:
-            chat = LlmChat(
-                api_key=self.api_key,
-                session_id=f"doc_analysis_{visa_type}_{document_type}_{hash(document_content) % 10000}",
-                system_message=self.system_prompt
-            ).with_model(self.provider, self.model)
+            user_info = ""
+            if user_data:
+                user_info = f"""
+                DADOS DO USUÁRIO PARA VALIDAÇÃO:
+                Nome: {user_data.get('fullName', 'N/A')}
+                Data de Nascimento: {user_data.get('dateOfBirth', 'N/A')}
+                Nacionalidade: {user_data.get('nationality', 'N/A')}
+                """
             
             prompt = f"""
-            Analise o seguinte documento para visto {visa_type}:
+            DRA. PAULA B2C - ANÁLISE RIGOROSA DE DOCUMENTO
+
+            TIPO ESPERADO: {document_type}
+            VISTO: {visa_type}
+            CONTEÚDO DO DOCUMENTO: {document_content[:1500]}
             
-            TIPO DE DOCUMENTO: {document_type}
-            CONTEÚDO: {document_content[:2000]}  # Truncate for token limits
+            {user_info}
             
-            Forneça análise em JSON:
+            VALIDAÇÕES CRÍTICAS OBRIGATÓRIAS:
+            1. Verificar se o documento é realmente do tipo esperado ({document_type})
+            2. Verificar se os dados pessoais no documento batem com os dados do usuário
+            3. Verificar se é um documento válido e não uma imagem aleatória
+            4. Verificar autenticidade e formato oficial
+            5. Verificar se não é documento de outra pessoa
+            
+            Como Dra. Paula B2C, faça uma análise RIGOROSA e CRÍTICA:
+            
             {{
+                "document_type_correct": true/false,
+                "belongs_to_user": true/false,
+                "is_authentic_document": true/false,
                 "document_valid": true/false,
                 "completeness_score": 0-100,
-                "issues_found": ["problema1", "problema2"],
-                "missing_elements": ["elemento1", "elemento2"],
-                "recommendations": ["sugestão1", "sugestão2"],
-                "expiration_check": "ok|warning|expired",
-                "uscis_compliance": "compliant|needs_review|non_compliant"
+                "critical_issues": [
+                    {{
+                        "severity": "CRÍTICO|ALTO|MÉDIO|BAIXO",
+                        "issue": "Descrição detalhada do problema",
+                        "impact": "Impacto na aplicação do visto"
+                    }}
+                ],
+                "data_inconsistencies": ["inconsistência1", "inconsistência2"],
+                "missing_elements": ["elemento obrigatório 1"],
+                "recommendations": ["ação corretiva 1", "ação corretiva 2"],
+                "expiration_check": "ok|warning|expired|cannot_verify",
+                "uscis_compliance": "compliant|needs_review|non_compliant|rejected",
+                "dra_paula_verdict": "APROVADO|REJEITADO|REQUER_REVISÃO",
+                "expert_notes": "Observações técnicas da Dra. Paula"
             }}
+            
+            IMPORTANTE: Seja RIGOROSA. Se não for o documento correto ou for de outra pessoa, REJEITE.
             """
             
-            user_message = UserMessage(text=prompt)
-            response = await chat.send_message(user_message)
+            session_id = f"dra_paula_doc_{visa_type}_{document_type}_{hash(document_content) % 10000}"
+            response = await self._call_dra_paula(prompt, session_id)
             
             import json
             try:
