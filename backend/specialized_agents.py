@@ -494,6 +494,9 @@ def create_compliance_checker() -> ComplianceCheckAgent:
 def create_immigration_letter_writer() -> ImmigrationLetterWriterAgent:
     return ImmigrationLetterWriterAgent()
 
+def create_uscis_form_translator() -> USCISFormTranslatorAgent:
+    return USCISFormTranslatorAgent()
+
 def create_urgency_triage() -> UrgencyTriageAgent:
     return UrgencyTriageAgent()
 
