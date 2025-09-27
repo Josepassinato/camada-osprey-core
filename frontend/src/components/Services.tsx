@@ -182,7 +182,7 @@ const Services = () => {
 
         {/* Bottom CTA */}
         <div className="text-center mt-16">
-          <Button size="lg" className="btn-gradient text-lg font-medium">
+          <Button size="lg" className="bg-black text-white hover:bg-gray-800 text-lg font-medium">
             Ver Todos os Serviços
             <ArrowRight className="h-5 w-5" />
           </Button>
