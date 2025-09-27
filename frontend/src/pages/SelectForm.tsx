@@ -40,6 +40,89 @@ const SelectForm = () => {
 
   const uscisforms: USCISFormType[] = [
     {
+      code: 'B-2',
+      title: 'B-2: Visto de Turista/Visitante',
+      description: 'Para turismo, visitas familiares, tratamento médico ou eventos sociais nos EUA',
+      icon: <Plane className="h-6 w-6" />,
+      category: 'Turismo',
+      processingTime: '2-4 semanas',
+      uscisfee: '$185',
+      complexity: 'Básico',
+      eligibility: [
+        'Propósito temporário (turismo, visitas, tratamento)',
+        'Intenção de retornar ao Brasil',
+        'Vínculos fortes com país de origem',
+        'Recursos financeiros suficientes para a viagem'
+      ],
+      popular: true
+    },
+    {
+      code: 'H-1B',
+      title: 'H-1B: Trabalhador Especializado',
+      description: 'Para profissionais com ensino superior em ocupação especializada nos EUA',
+      icon: <Briefcase className="h-6 w-6" />,
+      category: 'Trabalho',
+      processingTime: '2-4 meses',
+      uscisfee: '$555 + taxas',
+      complexity: 'Avançado',
+      eligibility: [
+        'Diploma de ensino superior ou equivalente',
+        'Oferta de trabalho em ocupação especializada',
+        'Empregador americano patrocinador',
+        'Qualificações específicas para a função'
+      ],
+      popular: true
+    },
+    {
+      code: 'F-1',
+      title: 'F-1: Visto de Estudante',
+      description: 'Para estudos acadêmicos em instituições americanas aprovadas',
+      icon: <GraduationCap className="h-6 w-6" />,
+      category: 'Educação',
+      processingTime: '2-6 semanas',
+      uscisfee: '$185 + $350',
+      complexity: 'Intermediário',
+      eligibility: [
+        'Aceito em instituição aprovada pelo SEVP',
+        'Programa acadêmico ou de idiomas',
+        'Recursos financeiros para estudos',
+        'Intenção de retornar após estudos'
+      ],
+      popular: true
+    },
+    {
+      code: 'L-1',
+      title: 'L-1: Transferência Intracompanhia',
+      description: 'Para executivos, gerentes ou especialistas transferidos entre empresas relacionadas',
+      icon: <Building className="h-6 w-6" />,
+      category: 'Trabalho',
+      processingTime: '2-4 meses',
+      uscisfee: '$555 + taxas',
+      complexity: 'Avançado',
+      eligibility: [
+        '1 ano trabalhando na empresa no exterior',
+        'Função executiva, gerencial ou especializada',
+        'Empresa americana relacionada à estrangeira',
+        'Transferência para posição similar'
+      ]
+    },
+    {
+      code: 'O-1',
+      title: 'O-1: Habilidade Extraordinária',
+      description: 'Para indivíduos com habilidades extraordinárias em sua área',
+      icon: <Star className="h-6 w-6" />,
+      category: 'Trabalho',
+      processingTime: '2-4 meses',
+      uscisfee: '$555 + $1,440',
+      complexity: 'Avançado',
+      eligibility: [
+        'Habilidade extraordinária comprovada',
+        'Reconhecimento nacional/internacional',
+        'Evidências de conquistas substanciais',
+        'Continuação do trabalho na área'
+      ]
+    },
+    {
       code: 'N-400',
       title: 'N-400: Pedido de Naturalização',
       description: 'Para residentes permanentes elegíveis que desejam se tornar cidadãos americanos',
