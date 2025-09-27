@@ -484,7 +484,7 @@ const Dashboard = () => {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="w-full mt-3 border-orange-200 text-orange-600 hover:bg-orange-50"
+                    className="w-full mt-3 border-gray-300 text-black hover:bg-gray-200"
                     onClick={() => navigate('/documents')}
                   >
                     Ver Todos os Documentos
