@@ -31,9 +31,9 @@ interface Snapshot {
 
 interface UseFormSnapshotOptions {
   enabled?: boolean;
-  autoSend?: boolean;
+  autoGenerate?: boolean;
   debounceMs?: number;
-  onSnapshotSent?: (snapshot: Snapshot) => void;
+  onSnapshotUpdate?: (snapshot: Snapshot) => void;
   onError?: (error: string) => void;
 }
 
@@ -43,15 +43,15 @@ export const useFormSnapshot = (
 ) => {
   const {
     enabled = true,
-    autoSend = true,
-    debounceMs = 1000,
-    onSnapshotSent,
+    autoGenerate = true,
+    debounceMs = 500,
+    onSnapshotUpdate,
     onError
   } = options;
 
   const location = useLocation();
   const params = useParams();
-  const [lastSnapshot, setLastSnapshot] = useState<Snapshot | null>(null);
+  const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -68,14 +68,14 @@ export const useFormSnapshot = (
     try {
       // Determine current step/form based on URL and params
       const stepId = getStepIdFromUrl(location.pathname);
-      const formId = params.caseId || 'auto-application';
+      const formId = params.caseId || 'osprey-self-app-v1';
       const userId = getCurrentUserId();
 
       // Analyze form sections and fields
       const sections = analyzeSections(formData, stepId);
-      const fields = analyzeFields(formData);
+      const fields = analyzeFields(formData, stepId);
 
-      const snapshot: Snapshot = {
+      const newSnapshot: Snapshot = {
         userId,
         formId,
         stepId,
@@ -86,8 +86,9 @@ export const useFormSnapshot = (
         siteVersionHash: "v1.0.0"
       };
 
-      setLastSnapshot(snapshot);
-      return snapshot;
+      setSnapshot(newSnapshot);
+      onSnapshotUpdate?.(newSnapshot);
+      return newSnapshot;
 
     } catch (error) {
       console.error('Error generating snapshot:', error);
@@ -96,37 +97,11 @@ export const useFormSnapshot = (
     } finally {
       setIsGenerating(false);
     }
-  }, [enabled, formData, location.pathname, params.caseId, onError]);
+  }, [enabled, formData, location.pathname, params.caseId, onSnapshotUpdate, onError]);
 
-  // Send snapshot to voice agent or external service
-  const sendSnapshot = useCallback((snapshot?: Snapshot) => {
-    const snapshotToSend = snapshot || lastSnapshot;
-    
-    if (!snapshotToSend) {
-      console.warn('No snapshot to send');
-      return false;
-    }
-
-    try {
-      // Send via custom event for VoiceMic component to listen
-      window.dispatchEvent(new CustomEvent('formSnapshotUpdate', {
-        detail: { snapshot: snapshotToSend }
-      }));
-
-      onSnapshotSent?.(snapshotToSend);
-      console.log('Form snapshot sent:', snapshotToSend);
-      return true;
-
-    } catch (error) {
-      console.error('Error sending snapshot:', error);
-      onError?.('Erro ao enviar snapshot');
-      return false;
-    }
-  }, [lastSnapshot, onSnapshotSent, onError]);
-
-  // Auto-generate and send snapshot when form data changes
+  // Auto-generate snapshot when form data changes
   useEffect(() => {
-    if (!enabled || !autoSend) {
+    if (!enabled || !autoGenerate || !formData) {
       return;
     }
 
@@ -142,12 +117,9 @@ export const useFormSnapshot = (
       clearTimeout(debounceTimeoutRef.current);
     }
 
-    // Debounce snapshot generation and sending
+    // Debounce snapshot generation
     debounceTimeoutRef.current = setTimeout(() => {
-      const snapshot = generateSnapshot();
-      if (snapshot) {
-        sendSnapshot(snapshot);
-      }
+      generateSnapshot();
     }, debounceMs);
 
     return () => {
@@ -155,12 +127,11 @@ export const useFormSnapshot = (
         clearTimeout(debounceTimeoutRef.current);
       }
     };
-  }, [formData, enabled, autoSend, debounceMs, generateSnapshot, sendSnapshot]);
+  }, [formData, enabled, autoGenerate, debounceMs, generateSnapshot]);
 
   return {
-    snapshot: lastSnapshot,
+    snapshot,
     generateSnapshot,
-    sendSnapshot,
     isGenerating
   };
 };
@@ -168,7 +139,7 @@ export const useFormSnapshot = (
 // Helper functions
 
 function getStepIdFromUrl(pathname: string): string {
-  // Extract step ID from URL path
+  // Map URL paths to step IDs
   if (pathname.includes('/basic-data')) return 'personal';
   if (pathname.includes('/documents')) return 'documents';
   if (pathname.includes('/story')) return 'story';
@@ -176,7 +147,7 @@ function getStepIdFromUrl(pathname: string): string {
   if (pathname.includes('/review')) return 'review';
   if (pathname.includes('/payment')) return 'payment';
   
-  // Default mappings
+  // Default fallback
   const pathSegments = pathname.split('/').filter(Boolean);
   const lastSegment = pathSegments[pathSegments.length - 1];
   
@@ -194,42 +165,49 @@ function getStepIdFromUrl(pathname: string): string {
 }
 
 function getCurrentUserId(): string {
-  // Try to get user ID from session or localStorage
+  // Get user ID from session or generate anonymous ID
   const sessionToken = localStorage.getItem('osprey_session_token');
   
   if (sessionToken && sessionToken !== 'null') {
-    return `session_${sessionToken.slice(-8)}`;
+    return `user_${sessionToken.slice(-8)}`;
   }
   
-  return 'anonymous_user';
+  // Generate anonymous user ID
+  let anonymousId = localStorage.getItem('osprey_anonymous_id');
+  if (!anonymousId) {
+    anonymousId = `anon_${Date.now().toString(36)}_${Math.random().toString(36).substr(2, 5)}`;
+    localStorage.setItem('osprey_anonymous_id', anonymousId);
+  }
+  
+  return anonymousId;
 }
 
 function analyzeSections(formData: any, stepId: string): SectionState[] {
   const sections: SectionState[] = [];
 
-  // Define section structure based on step
+  // Define section structure based on current step
   const sectionDefinitions = getSectionDefinitions(stepId);
 
   sectionDefinitions.forEach(sectionDef => {
-    const sectionData = formData[sectionDef.key] || {};
+    const sectionData = getSectionData(formData, sectionDef.dataPath);
     const requiredFields = sectionDef.requiredFields || [];
     
     // Calculate missing required fields
     const missing = requiredFields.filter(field => {
-      const value = sectionData[field];
+      const value = getNestedValue(sectionData, field);
       return !value || (typeof value === 'string' && value.trim() === '');
     });
 
     // Calculate completion percentage
-    const totalFields = requiredFields.length;
+    const totalFields = requiredFields.length || 1;
     const completedFields = totalFields - missing.length;
-    const percent = totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 100;
+    const percent = Math.round((completedFields / totalFields) * 100);
 
     // Determine status
     let status: "todo" | "in_progress" | "complete" = "todo";
     if (percent === 100) {
       status = "complete";
-    } else if (percent > 0) {
+    } else if (percent > 0 || Object.keys(sectionData || {}).length > 0) {
       status = "in_progress";  
     }
 
@@ -237,7 +215,7 @@ function analyzeSections(formData: any, stepId: string): SectionState[] {
       id: sectionDef.id,
       label: sectionDef.label,
       status,
-      missing,
+      missing: missing.map(field => sectionDef.fieldLabels?.[field] || field),
       percent
     });
   });
@@ -245,51 +223,30 @@ function analyzeSections(formData: any, stepId: string): SectionState[] {
   return sections;
 }
 
-function analyzeFields(formData: any): FieldState[] {
+function analyzeFields(formData: any, stepId: string): FieldState[] {
   const fields: FieldState[] = [];
-
-  // Recursively analyze all form fields
-  const analyzeObject = (obj: any, prefix: string = '') => {
-    Object.entries(obj || {}).forEach(([key, value]) => {
-      const fieldName = prefix ? `${prefix}.${key}` : key;
-      
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        // Recursive analysis for nested objects
-        analyzeObject(value, fieldName);
-      } else {
-        // Analyze individual field
-        const field = analyzeField(fieldName, value);
-        if (field) {
-          fields.push(field);
-        }
-      }
-    });
-  };
-
-  analyzeObject(formData);
-  return fields;
-}
-
-function analyzeField(name: string, value: any): FieldState | null {
-  // Skip non-form fields
-  if (name.startsWith('_') || ['timestamp', 'id', 'case_id'].includes(name)) {
-    return null;
-  }
-
-  const stringValue = value?.toString() || '';
-  const isRequired = isFieldRequired(name);
   
-  // Validate field value
-  const validation = validateFieldValue(name, stringValue);
+  // Get field definitions for current step
+  const fieldDefinitions = getFieldDefinitions(stepId);
+  
+  fieldDefinitions.forEach(fieldDef => {
+    const value = getNestedValue(formData, fieldDef.path);
+    const stringValue = value?.toString() || '';
+    
+    // Validate field value
+    const validation = validateFieldValue(fieldDef, stringValue);
+    
+    fields.push({
+      name: fieldDef.path,
+      label: fieldDef.label,
+      value: stringValue,
+      valid: validation.isValid,
+      errors: validation.errors,
+      required: fieldDef.required || false
+    });
+  });
 
-  return {
-    name,
-    label: getFieldLabel(name),
-    value: stringValue,
-    valid: validation.isValid,
-    errors: validation.errors,
-    required: isRequired
-  };
+  return fields;
 }
 
 function getSectionDefinitions(stepId: string) {
@@ -297,43 +254,61 @@ function getSectionDefinitions(stepId: string) {
     personal: [
       {
         id: 'personal_info',
-        key: 'personal',
         label: 'Informações Pessoais',
-        requiredFields: ['firstName', 'lastName', 'dateOfBirth', 'nationality']
+        dataPath: '',
+        requiredFields: ['firstName', 'lastName', 'dateOfBirth', 'nationality'],
+        fieldLabels: {
+          firstName: 'Nome',
+          lastName: 'Sobrenome',
+          dateOfBirth: 'Data de Nascimento',
+          nationality: 'Nacionalidade'
+        }
       },
       {
         id: 'contact_info',
-        key: 'contact',
-        label: 'Informações de Contato', 
-        requiredFields: ['email', 'phone']
+        label: 'Contato',
+        dataPath: '',
+        requiredFields: ['email', 'phone'],
+        fieldLabels: {
+          email: 'E-mail',
+          phone: 'Telefone'
+        }
       }
     ],
     documents: [
       {
         id: 'required_docs',
-        key: 'documents',
         label: 'Documentos Obrigatórios',
-        requiredFields: ['passport', 'photos']
+        dataPath: 'documents',
+        requiredFields: ['passport', 'photos'],
+        fieldLabels: {
+          passport: 'Passaporte',
+          photos: 'Fotos'
+        }
       }
     ],
     form: [
       {
         id: 'personal',
-        key: 'personal',
         label: 'Dados Pessoais',
-        requiredFields: ['firstName', 'lastName', 'dateOfBirth']
+        dataPath: 'personal',
+        requiredFields: ['firstName', 'lastName', 'dateOfBirth'],
+        fieldLabels: {
+          firstName: 'Nome',
+          lastName: 'Sobrenome', 
+          dateOfBirth: 'Data de Nascimento'
+        }
       },
       {
         id: 'address',
-        key: 'address', 
         label: 'Endereço',
-        requiredFields: ['currentAddress', 'city', 'zipCode']
-      },
-      {
-        id: 'employment',
-        key: 'employment',
-        label: 'Emprego',
-        requiredFields: ['employerName', 'jobTitle']
+        dataPath: 'address',
+        requiredFields: ['currentAddress', 'city', 'zipCode'],
+        fieldLabels: {
+          currentAddress: 'Endereço Atual',
+          city: 'Cidade',
+          zipCode: 'CEP'
+        }
       }
     ]
   };
@@ -341,98 +316,117 @@ function getSectionDefinitions(stepId: string) {
   return definitions[stepId] || [
     {
       id: 'general',
-      key: 'general',
       label: 'Informações Gerais',
+      dataPath: '',
       requiredFields: []
     }
   ];
 }
 
-function isFieldRequired(fieldName: string): boolean {
-  const requiredFields = [
-    'firstName', 'lastName', 'dateOfBirth', 'nationality',
-    'email', 'phone', 'currentAddress', 'city', 'zipCode',
-    'passport', 'photos', 'employerName', 'jobTitle'
-  ];
-  
-  return requiredFields.some(required => 
-    fieldName.includes(required) || fieldName.endsWith(required)
-  );
-}
-
-function getFieldLabel(fieldName: string): string {
-  const labelMappings: { [key: string]: string } = {
-    firstName: 'Nome',
-    lastName: 'Sobrenome', 
-    dateOfBirth: 'Data de Nascimento',
-    nationality: 'Nacionalidade',
-    email: 'E-mail',
-    phone: 'Telefone',
-    currentAddress: 'Endereço Atual',
-    city: 'Cidade',
-    zipCode: 'CEP',
-    employerName: 'Nome do Empregador',
-    jobTitle: 'Cargo'
+function getFieldDefinitions(stepId: string) {
+  const definitions: { [key: string]: any[] } = {
+    personal: [
+      { path: 'firstName', label: 'Nome', required: true, type: 'name' },
+      { path: 'lastName', label: 'Sobrenome', required: true, type: 'name' },
+      { path: 'middleName', label: 'Nome do Meio', required: false, type: 'name' },
+      { path: 'dateOfBirth', label: 'Data de Nascimento', required: true, type: 'date' },
+      { path: 'nationality', label: 'Nacionalidade', required: true, type: 'text' },
+      { path: 'email', label: 'E-mail', required: true, type: 'email' },
+      { path: 'phone', label: 'Telefone', required: true, type: 'phone' }
+    ],
+    form: [
+      { path: 'personal.firstName', label: 'Nome', required: true, type: 'name' },
+      { path: 'personal.lastName', label: 'Sobrenome', required: true, type: 'name' },
+      { path: 'personal.dateOfBirth', label: 'Data de Nascimento', required: true, type: 'date' },
+      { path: 'address.currentAddress', label: 'Endereço Atual', required: true, type: 'address' },
+      { path: 'address.city', label: 'Cidade', required: true, type: 'text' },
+      { path: 'address.zipCode', label: 'CEP', required: true, type: 'zip' }
+    ]
   };
 
-  // Try exact match first
-  if (labelMappings[fieldName]) {
-    return labelMappings[fieldName];
-  }
-
-  // Try partial matches
-  for (const [key, label] of Object.entries(labelMappings)) {
-    if (fieldName.includes(key)) {
-      return label;
-    }
-  }
-
-  // Default: capitalize and clean field name
-  return fieldName
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/^./, str => str.toUpperCase())
-    .trim();
+  return definitions[stepId] || [];
 }
 
-function validateFieldValue(fieldName: string, value: string): { isValid: boolean; errors: string[] } {
+function getSectionData(formData: any, dataPath: string) {
+  if (!dataPath) return formData;
+  return getNestedValue(formData, dataPath);
+}
+
+function getNestedValue(obj: any, path: string): any {
+  if (!path || !obj) return obj;
+  
+  const keys = path.split('.');
+  let current = obj;
+  
+  for (const key of keys) {
+    if (current && typeof current === 'object' && key in current) {
+      current = current[key];
+    } else {
+      return undefined;
+    }
+  }
+  
+  return current;
+}
+
+function validateFieldValue(fieldDef: any, value: string): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
 
+  // Required field validation
+  if (fieldDef.required && (!value || value.trim() === '')) {
+    errors.push('Campo obrigatório');
+    return { isValid: false, errors };
+  }
+
+  // Skip other validations if empty and not required
   if (!value || value.trim() === '') {
-    if (isFieldRequired(fieldName)) {
-      errors.push('Campo obrigatório não preenchido');
-    }
-    return { isValid: errors.length === 0, errors };
+    return { isValid: true, errors: [] };
   }
 
-  // Email validation
-  if (fieldName.includes('email') || fieldName.includes('Email')) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(value)) {
-      errors.push('Formato de e-mail inválido');
-    }
-  }
+  // Type-specific validation
+  switch (fieldDef.type) {
+    case 'email':
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(value)) {
+        errors.push('Formato de e-mail inválido');
+      }
+      break;
 
-  // Phone validation
-  if (fieldName.includes('phone') || fieldName.includes('Phone')) {
-    const phoneRegex = /[\d\s\-\(\)\+]{10,}/;
-    if (!phoneRegex.test(value)) {
-      errors.push('Formato de telefone inválido');
-    }
-  }
+    case 'phone':
+      const phoneRegex = /[\d\s\-\(\)\+]{10,}/;
+      if (!phoneRegex.test(value)) {
+        errors.push('Formato de telefone inválido');
+      }
+      break;
 
-  // Date validation
-  if (fieldName.includes('date') || fieldName.includes('Date')) {
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(value)) {
-      errors.push('Data deve estar no formato YYYY-MM-DD');
-    }
-  }
+    case 'date':
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(value)) {
+        errors.push('Data deve estar no formato YYYY-MM-DD');
+      } else {
+        const date = new Date(value);
+        const today = new Date();
+        if (date > today) {
+          errors.push('Data não pode ser no futuro');
+        }
+      }
+      break;
 
-  // Name validation
-  if (fieldName.includes('name') || fieldName.includes('Name')) {
-    if (value.length < 2) {
-      errors.push('Nome deve ter pelo menos 2 caracteres');
-    }
+    case 'zip':
+      const cleanZip = value.replace(/\D/g, '');
+      if (cleanZip.length !== 5) {
+        errors.push('CEP deve ter 5 dígitos');
+      }
+      break;
+
+    case 'name':
+      if (value.length < 2) {
+        errors.push('Nome deve ter pelo menos 2 caracteres');
+      }
+      if (!/^[A-Za-zÀ-ÿ\s'-]+$/.test(value)) {
+        errors.push('Nome deve conter apenas letras');
+      }
+      break;
   }
 
   return { isValid: errors.length === 0, errors };
