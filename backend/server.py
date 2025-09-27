@@ -19,6 +19,7 @@ import mimetypes
 import re
 from visa_specifications import get_visa_specifications, get_required_documents, get_key_questions, get_common_issues
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+import openai
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
