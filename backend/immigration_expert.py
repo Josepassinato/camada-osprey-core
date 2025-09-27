@@ -108,7 +108,7 @@ class ImmigrationExpert:
                                 visa_type: str,
                                 step_id: str) -> Dict[str, Any]:
         """
-        Validate form data using immigration expertise
+        Validate form data using Dra. Paula B2C's immigration expertise
         
         Args:
             form_data: User's form data
@@ -119,63 +119,75 @@ class ImmigrationExpert:
             Dict with validation results, suggestions, and warnings
         """
         try:
-            chat = LlmChat(
-                api_key=self.api_key,
-                session_id=f"validation_{visa_type}_{step_id}_{hash(str(form_data)) % 10000}",
-                system_message=self.system_prompt
-            ).with_model(self.provider, self.model)
-            
             prompt = f"""
+            DRA. PAULA - VALIDAÇÃO DE FORMULÁRIO OSPREY
+
             Analise os seguintes dados do formulário para visto {visa_type}:
             
-            ETAPA: {step_id}
-            DADOS: {form_data}
+            ETAPA ATUAL: {step_id}
+            DADOS DO FORMULÁRIO: {form_data}
             
-            Por favor, forneça uma análise detalhada em formato JSON:
+            Como especialista em imigração, forneça uma análise detalhada em formato JSON:
             {{
                 "status": "ok|warning|error", 
+                "dra_paula_analysis": "Sua análise profissional resumida",
                 "issues": [
                     {{
                         "field": "nome_do_campo",
                         "severity": "high|medium|low",
-                        "message": "descrição do problema",
-                        "suggestion": "como corrigir"
+                        "message": "descrição do problema específico",
+                        "suggestion": "como corrigir (orientação prática da Dra. Paula)"
                     }}
                 ],
-                "missing_info": ["campo1", "campo2"],
-                "recommendations": ["sugestão1", "sugestão2"],
-                "next_steps": ["próximo passo 1", "próximo passo 2"],
-                "disclaimer": "Esta análise é baseada nas informações fornecidas e não constitui consultoria jurídica."
+                "missing_info": ["campo obrigatório 1", "campo obrigatório 2"],
+                "recommendations": ["recomendação específica 1", "recomendação específica 2"],
+                "next_steps": ["próximo passo sugerido 1", "próximo passo sugerido 2"],
+                "uscis_compliance": "compliant|needs_review|non_compliant",
+                "disclaimer": "Análise da Dra. Paula B2C - ferramenta de apoio, não consultoria jurídica."
             }}
+            
+            Use seu conhecimento especializado em imigração para brasileiros nos EUA.
             """
             
-            user_message = UserMessage(text=prompt)
-            response = await chat.send_message(user_message)
+            session_id = f"dra_paula_validation_{visa_type}_{step_id}_{hash(str(form_data)) % 10000}"
+            response = await self._call_dra_paula(prompt, session_id)
             
             # Try to parse JSON response
             import json
             try:
-                return json.loads(response)
+                result = json.loads(response)
+                # Ensure Dra. Paula signature
+                result["expert"] = "Dra. Paula B2C"
+                result["assistant_id"] = self.assistant_id
+                return result
             except json.JSONDecodeError:
                 # Fallback if response isn't valid JSON
                 return {
+                    "expert": "Dra. Paula B2C",
+                    "assistant_id": self.assistant_id,
                     "status": "ok",
+                    "dra_paula_analysis": response,
                     "issues": [],
                     "missing_info": [],
                     "recommendations": [response],
                     "next_steps": [],
-                    "disclaimer": "Esta análise é baseada nas informações fornecidas."
+                    "uscis_compliance": "needs_review",
+                    "disclaimer": "Análise da Dra. Paula B2C - ferramenta de apoio, não consultoria jurídica."
                 }
                 
         except Exception as e:
-            logger.error(f"Error in immigration validation: {e}")
+            logger.error(f"Error in Dra. Paula validation: {e}")
             return {
+                "expert": "Dra. Paula B2C",
+                "assistant_id": self.assistant_id,
                 "status": "error",
-                "issues": [{"field": "system", "severity": "high", "message": "Erro na análise. Tente novamente."}],
+                "dra_paula_analysis": "Erro na análise. Tente novamente.",
+                "issues": [{"field": "system", "severity": "high", "message": "Erro temporário na análise da Dra. Paula."}],
                 "missing_info": [],
-                "recommendations": [],
+                "recommendations": ["Tente novamente em alguns instantes"],
                 "next_steps": [],
-                "disclaimer": "Ocorreu um erro na análise."
+                "uscis_compliance": "needs_review",
+                "disclaimer": "Erro temporário - consulte um especialista se necessário."
             }
     
     async def analyze_document(self, 
