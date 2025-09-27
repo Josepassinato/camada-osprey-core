@@ -2670,7 +2670,7 @@ def run_all_tests():
     }
     
     # Combine all results
-    all_results = {**auth_results, **document_results, **education_results, **voice_agent_results, **auto_app_results}
+    all_results = {**auth_results, **document_results, **education_results, **owl_tutor_results, **voice_agent_results, **auto_app_results}
     
     print("\n" + "=" * 60)
     print("📊 TEST RESULTS SUMMARY")
