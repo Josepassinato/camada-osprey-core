@@ -179,7 +179,8 @@ class ApplicationUpdate(BaseModel):
 # Auto-Application System Models
 class AutoApplicationCase(BaseModel):
     case_id: str = Field(default_factory=lambda: f"OSP-{str(uuid.uuid4())[:8].upper()}")
-    user_id: str
+    user_id: Optional[str] = None  # Allow anonymous cases
+    session_token: Optional[str] = None  # For anonymous tracking
     form_code: Optional[USCISForm] = None
     status: CaseStatus = CaseStatus.created
     
@@ -208,9 +209,11 @@ class AutoApplicationCase(BaseModel):
     # Metadata
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+    expires_at: Optional[datetime] = None  # For anonymous cases
     
 class CaseCreate(BaseModel):
     form_code: Optional[USCISForm] = None
+    session_token: Optional[str] = None  # For anonymous users
     
 class CaseUpdate(BaseModel):
     form_code: Optional[USCISForm] = None
