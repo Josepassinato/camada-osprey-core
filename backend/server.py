@@ -27,6 +27,7 @@ from specialized_agents import (
     create_form_validator, 
     create_eligibility_analyst,
     create_compliance_checker,
+    create_immigration_letter_writer,
     create_urgency_triage
 )
 
