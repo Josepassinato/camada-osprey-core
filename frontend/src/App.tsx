@@ -12,6 +12,9 @@ import DocumentUpload from "./pages/DocumentUpload";
 import Education from "./pages/Education";
 import GuideDetail from "./pages/GuideDetail";
 import InterviewSimulator from "./pages/InterviewSimulator";
+import Chat from "./pages/Chat";
+import Applications from "./pages/Applications";
+import NewApplication from "./pages/NewApplication";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
