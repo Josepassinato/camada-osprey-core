@@ -2678,6 +2678,59 @@ async def specialized_immigration_letter_writing(request: dict):
             "error": str(e)
         }
 
+@api_router.post("/specialized-agents/uscis-form-translation")
+async def specialized_uscis_form_translation(request: dict):
+    """Ultra-specialized USCIS form validation and translation using Dr. Fernando"""
+    try:
+        translator = create_uscis_form_translator()
+        
+        friendly_form_responses = request.get("friendlyFormResponses", {})
+        visa_type = request.get("visaType", "H-1B")
+        target_uscis_form = request.get("targetUSCISForm", "I-129")  # I-129, I-130, I-485, etc.
+        
+        prompt = f"""
+        VALIDAÇÃO E TRADUÇÃO DE FORMULÁRIO USCIS
+        
+        TIPO DE VISTO: {visa_type}
+        FORMULÁRIO USCIS DE DESTINO: {target_uscis_form}
+        
+        RESPOSTAS DO FORMULÁRIO AMIGÁVEL (EM PORTUGUÊS):
+        {friendly_form_responses}
+        
+        INSTRUÇÕES CRÍTICAS:
+        1. PRIMEIRO: Valide se todas as respostas obrigatórias estão completas
+        2. Verifique consistência e formato correto das informações
+        3. Identifique ambiguidades ou informações insuficientes
+        4. SOMENTE APÓS VALIDAÇÃO: Traduza para o formulário oficial USCIS
+        5. Use terminologia técnica oficial do USCIS
+        6. NUNCA traduza informações não fornecidas
+        7. Mantenha rastreabilidade campo por campo
+        
+        Execute validação completa e tradução conforme seu protocolo especializado.
+        """
+        
+        session_id = f"uscis_translation_{visa_type}_{target_uscis_form}_{hash(str(friendly_form_responses)) % 10000}"
+        analysis = await translator._call_agent(prompt, session_id)
+        
+        return {
+            "success": True,
+            "agent": "Dr. Fernando - Tradutor e Validador USCIS",
+            "specialization": "USCIS Form Translation & Validation",
+            "visa_type": visa_type,
+            "target_form": target_uscis_form,
+            "analysis": analysis,
+            "timestamp": datetime.now().isoformat(),
+            "translation_guarantee": "Only provided information translated - no assumptions"
+        }
+        
+    except Exception as e:
+        logger.error(f"Dr. Fernando USCIS translation error: {e}")
+        return {
+            "success": False,
+            "agent": "Dr. Fernando - Tradutor e Validador USCIS",
+            "error": str(e)
+        }
+
 @api_router.post("/specialized-agents/comprehensive-analysis")
 async def comprehensive_multi_agent_analysis(request: dict):
     """Comprehensive analysis using multiple specialized agents"""
