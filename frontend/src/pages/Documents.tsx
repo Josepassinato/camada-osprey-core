@@ -88,7 +88,7 @@ const Documents = () => {
         return;
       }
 
-      const response = await fetch(`${import.meta.env.REACT_APP_BACKEND_URL}/api/documents`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/documents`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
