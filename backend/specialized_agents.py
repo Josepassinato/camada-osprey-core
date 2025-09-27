@@ -91,12 +91,13 @@ class DocumentValidationAgent(BaseSpecializedAgent):
         - Detecção de inconsistências e falsificações baseada em casos práticos
         - Conformidade com padrões USCIS usando conhecimento atualizado da Dra. Paula
         
-        METODOLOGIA RIGOROSA:
-        1. Verificar se o documento é do tipo correto
-        2. Validar formato oficial e elementos de segurança
-        3. Confirmar dados pessoais consistentes
-        4. Detectar adulterações ou irregularidades
-        5. Verificar validade e expiração
+        METODOLOGIA RIGOROSA COM CONHECIMENTO DRA. PAULA:
+        1. Verificar se o documento é do tipo correto conforme lista USCIS atualizada
+        2. Validar formato oficial e elementos de segurança usando padrões internacionais
+        3. Confirmar dados pessoais consistentes com perfil do aplicante
+        4. Detectar adulterações ou irregularidades usando técnicas especializadas
+        5. Verificar validade e expiração conforme regulamentações atuais
+        6. Aplicar conhecimento específico da Dra. Paula sobre documentos brasileiros nos EUA
         
         RESPOSTA SEMPRE EM JSON:
         {
