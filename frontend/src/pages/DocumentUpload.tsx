@@ -492,7 +492,7 @@ const DocumentUpload = () => {
               <Button
                 type="submit"
                 disabled={isUploading || files.length === 0}
-                className="btn-gradient group"
+                className="bg-black text-white hover:bg-gray-800 group"
               >
                 {isUploading ? (
                   <>
