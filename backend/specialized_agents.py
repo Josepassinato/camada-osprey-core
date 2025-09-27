@@ -393,6 +393,7 @@ class SpecializedAgentCoordinator:
             "form_validator": create_form_validator(), 
             "eligibility_analyst": create_eligibility_analyst(),
             "compliance_checker": create_compliance_checker(),
+            "letter_writer": create_immigration_letter_writer(),
             "triage": create_urgency_triage()
         }
     
