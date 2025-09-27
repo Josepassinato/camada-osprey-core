@@ -1582,7 +1582,114 @@ async def reanalyze_document(document_id: str, current_user = Depends(get_curren
         logger.error(f"Error reanalyzing document: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error reanalyzing document: {str(e)}")
 
-# Application routes (keeping existing ones)
+# Auto-Application System Endpoints
+@api_router.post("/auto-application/start")
+async def start_auto_application(case_data: CaseCreate, current_user = Depends(get_current_user)):
+    """Start a new auto-application case"""
+    try:
+        # Check if user has accepted legal disclaimer
+        user = await db.users.find_one({"id": current_user["id"]})
+        if not user.get("legal_disclaimer_accepted"):
+            raise HTTPException(status_code=400, detail="Legal disclaimer must be accepted first")
+        
+        case = AutoApplicationCase(
+            user_id=current_user["id"],
+            form_code=case_data.form_code
+        )
+        
+        await db.auto_cases.insert_one(case.dict())
+        
+        return {"message": "Auto-application case created successfully", "case": case}
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error starting auto-application: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error starting auto-application: {str(e)}")
+
+@api_router.get("/auto-application/cases")
+async def get_user_cases(current_user = Depends(get_current_user)):
+    """Get all user auto-application cases"""
+    try:
+        cases = await db.auto_cases.find({"user_id": current_user["id"]}, {"_id": 0}).to_list(100)
+        return {"cases": cases}
+    
+    except Exception as e:
+        logger.error(f"Error getting cases: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error getting cases: {str(e)}")
+
+@api_router.get("/auto-application/case/{case_id}")
+async def get_case(case_id: str, current_user = Depends(get_current_user)):
+    """Get a specific case by ID"""
+    try:
+        case = await db.auto_cases.find_one({
+            "case_id": case_id,
+            "user_id": current_user["id"]
+        })
+        
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        # Remove MongoDB ObjectId
+        if "_id" in case:
+            del case["_id"]
+            
+        return {"case": case}
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting case: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error getting case: {str(e)}")
+
+@api_router.put("/auto-application/case/{case_id}")
+async def update_case(case_id: str, case_update: CaseUpdate, current_user = Depends(get_current_user)):
+    """Update a specific case"""
+    try:
+        case = await db.auto_cases.find_one({
+            "case_id": case_id,
+            "user_id": current_user["id"]
+        })
+        
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        update_data = case_update.dict(exclude_none=True)
+        update_data["updated_at"] = datetime.utcnow()
+        
+        await db.auto_cases.update_one(
+            {"case_id": case_id},
+            {"$set": update_data}
+        )
+        
+        updated_case = await db.auto_cases.find_one({"case_id": case_id})
+        if "_id" in updated_case:
+            del updated_case["_id"]
+            
+        return {"message": "Case updated successfully", "case": updated_case}
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating case: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error updating case: {str(e)}")
+
+@api_router.post("/auth/accept-disclaimer")
+async def accept_legal_disclaimer(current_user = Depends(get_current_user)):
+    """Accept legal disclaimer for auto-application"""
+    try:
+        await db.users.update_one(
+            {"id": current_user["id"]},
+            {"$set": {"legal_disclaimer_accepted": True, "disclaimer_accepted_at": datetime.utcnow()}}
+        )
+        
+        return {"message": "Legal disclaimer accepted successfully"}
+    
+    except Exception as e:
+        logger.error(f"Error accepting disclaimer: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error accepting disclaimer: {str(e)}")
+
+# Existing Applications endpoints continue here...
 @api_router.post("/applications")
 async def create_application(app_data: ApplicationCreate, current_user = Depends(get_current_user)):
     """Create a new visa application"""
