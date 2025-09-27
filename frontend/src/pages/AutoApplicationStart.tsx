@@ -114,10 +114,43 @@ const AutoApplicationStart = () => {
           </h1>
           
           {/* Subtitle */}
-          <p className="text-xl md:text-2xl text-black mb-12 font-light max-w-3xl mx-auto leading-relaxed">
-            Osprey torna a aplicação de visto americano surpreendentemente rápida para brasileiros - 
-            em apenas <strong>3 passos</strong> - com uma experiência simples e completa.
+          <p className="text-xl md:text-2xl text-black mb-8 font-light max-w-4xl mx-auto leading-relaxed">
+            <strong>Plataforma de auxílio digital</strong> que permite a você, como <strong>self-petitioner</strong>, 
+            fazer sua própria aplicação de visto americano diretamente no site oficial do USCIS.
           </p>
+          
+          {/* Key Features */}
+          <div className="bg-gray-50 border-2 border-black rounded-lg p-6 mb-12 max-w-4xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-6 text-left">
+              <div className="flex items-start space-x-3">
+                <Target className="h-6 w-6 text-black mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="font-bold text-black mb-2">Auto-Aplicação Assistida</h3>
+                  <p className="text-sm text-gray-700">
+                    Tecnologia de IA especializada te guia para fazer sua própria petição no USCIS
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <Shield className="h-6 w-6 text-black mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="font-bold text-black mb-2">Self-Petitioner</h3>
+                  <p className="text-sm text-gray-700">
+                    Você mantém controle total - nossa IA apenas organiza e orienta o processo
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <Globe className="h-6 w-6 text-black mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="font-bold text-black mb-2">Direto no USCIS</h3>
+                  <p className="text-sm text-gray-700">
+                    Formulários oficiais preenchidos corretamente para submissão no site do governo
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
           
           {/* CTA */}
           <div className="flex flex-col items-center justify-center gap-4 mb-16">
