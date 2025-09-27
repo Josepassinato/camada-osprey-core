@@ -24,7 +24,7 @@ const benefits = [
     title: "Processo Inteligente",
     description: "IA avançada acelera análises e otimiza sua aplicação automaticamente",
     color: "from-purple-500/10 to-pink-500/10", 
-    iconColor: "text-purple-600"
+    iconColor: "text-black"
   },
   {
     icon: Users,
