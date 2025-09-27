@@ -210,11 +210,11 @@ const Login = () => {
         <div className="mt-8 text-center text-xs text-muted-foreground">
           <p>
             Ao fazer login, você concorda com nossos{" "}
-            <Link to="/terms" className="text-primary hover:underline">
+            <Link to="/terms" className="text-black hover:underline">
               Termos de Uso
             </Link>{" "}
             e{" "}
-            <Link to="/privacy" className="text-primary hover:underline">
+            <Link to="/privacy" className="text-black hover:underline">
               Política de Privacidade
             </Link>
           </p>
