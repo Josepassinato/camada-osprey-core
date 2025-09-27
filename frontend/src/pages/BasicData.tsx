@@ -86,18 +86,18 @@ const BasicData = () => {
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [voiceAdvice, setVoiceAdvice] = useState<string>("");
   const [case_, setCase] = useState<any>(null);
 
-  // Voice agent integration
-  const { snapshot, sendSnapshot } = useFormSnapshot(formData, {
+  // Osprey Owl Tutor integration
+  const { snapshot } = useFormSnapshot(formData, {
     enabled: true,
-    autoSend: true,
-    onSnapshotSent: (snapshot) => {
-      console.log('Form snapshot sent to voice agent:', snapshot);
+    autoGenerate: true,
+    onSnapshotUpdate: (snapshot) => {
+      console.log('Form snapshot updated:', snapshot);
     },
     onError: (error) => {
       console.error('Form snapshot error:', error);
+      setError(error);
     }
   });
 
