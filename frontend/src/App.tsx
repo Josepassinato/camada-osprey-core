@@ -15,6 +15,7 @@ import InterviewSimulator from "./pages/InterviewSimulator";
 import Chat from "./pages/Chat";
 import Applications from "./pages/Applications";
 import NewApplication from "./pages/NewApplication";
+import ApplicationDetail from "./pages/ApplicationDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
