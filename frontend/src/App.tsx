@@ -42,6 +42,8 @@ const App = () => (
           <Route path="/applications" element={<Applications />} />
           <Route path="/applications/new" element={<NewApplication />} />
           <Route path="/applications/:applicationId" element={<ApplicationDetail />} />
+          <Route path="/auto-application/start" element={<AutoApplicationStart />} />
+          <Route path="/auto-application/select-form" element={<SelectForm />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
