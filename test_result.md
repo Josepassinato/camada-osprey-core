@@ -541,6 +541,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "✅ Stage 2 WORKING PERFECTLY! SelectForm page loads correctly with title 'Escolha seu Formulário USCIS'. Multiple visa forms displayed including H-1B, I-130, N-400, I-765, I-485, I-90, I-751, I-589, O-1 with proper form specifications (processing times, USCIS fees, complexity levels, requirements). H-1B form selection works correctly - clicked 'Começar H-1B' button and successfully navigated to BasicData page with case ID OSP-E8D6A076 created. Form cards display properly with categories, popular badges, and detailed information."
+      - working: true
+        agent: "testing"
+        comment: "✅ MOBILE OPTIMIZED FORM SELECTION VERIFIED! SelectForm working excellently on mobile (375px): Page title 'Escolha seu Formulário' clear, 5+ form cards found and properly displayed. H-1B, I-130, N-400 forms all visible with complete information. Responsive grid layout adapts to single column (343px width) on mobile. Touch targets for form selection working but buttons slightly below 44px minimum (40px height). Scrolling and navigation functional. Black/white color scheme consistent - white card backgrounds, black borders, black text. Popular badges and complexity indicators properly styled. Tablet (768px) shows 2-column grid layout (348px x 348px with 24px gap). Card interaction and selection working perfectly."
 
   - task: "Auto-Application Complete Journey - Stage 3 (BasicData Frontend)"
     implemented: true
