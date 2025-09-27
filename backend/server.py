@@ -1975,6 +1975,277 @@ Responda apenas com o JSON estruturado, sem explicações adicionais.
         logger.error(f"Error generating forms: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error generating forms: {str(e)}")
 
+@api_router.post("/auto-application/validate-forms")
+async def validate_forms(request: dict):
+    """Validate official forms for consistency and completeness"""
+    try:
+        case_id = request.get("case_id")
+        form_code = request.get("form_code")
+        
+        if not case_id:
+            raise HTTPException(status_code=400, detail="Case ID is required")
+        
+        # Get case data
+        case = await db.auto_cases.find_one({"case_id": case_id})
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        # Simulate validation process
+        validation_issues = []
+        
+        # Check for required fields
+        official_form = case.get("official_form_data", {})
+        simplified_responses = case.get("simplified_form_responses", {})
+        
+        # Validate personal information
+        if not official_form.get("full_name") and not official_form.get("applicant_name"):
+            validation_issues.append({
+                "section": "Informações Pessoais",
+                "field": "Nome Completo",
+                "issue": "Nome completo não foi preenchido no formulário oficial",
+                "severity": "high"
+            })
+        
+        if not official_form.get("date_of_birth") and not official_form.get("birth_date"):
+            validation_issues.append({
+                "section": "Informações Pessoais", 
+                "field": "Data de Nascimento",
+                "issue": "Data de nascimento não foi preenchida",
+                "severity": "high"
+            })
+        
+        # Check for address information
+        if not official_form.get("current_address") and not official_form.get("mailing_address"):
+            validation_issues.append({
+                "section": "Informações de Endereço",
+                "field": "Endereço Atual", 
+                "issue": "Endereço atual não foi preenchido",
+                "severity": "high"
+            })
+        
+        # Form-specific validation
+        if form_code == "H-1B":
+            if not official_form.get("employer_name") and not official_form.get("company_name"):
+                validation_issues.append({
+                    "section": "Informações de Trabalho",
+                    "field": "Nome do Empregador",
+                    "issue": "Nome do empregador é obrigatório para H-1B",
+                    "severity": "high"
+                })
+        
+        elif form_code == "I-130":
+            if not official_form.get("spouse_name") and not official_form.get("beneficiary_name"):
+                validation_issues.append({
+                    "section": "Informações Familiares",
+                    "field": "Nome do Beneficiário",
+                    "issue": "Nome do beneficiário é obrigatório para I-130",
+                    "severity": "high"
+                })
+        
+        # Date format validation
+        date_fields = ["date_of_birth", "birth_date", "marriage_date"]
+        for field in date_fields:
+            if official_form.get(field):
+                date_value = official_form[field]
+                # Check if date is in MM/DD/YYYY format
+                if not re.match(r'^\d{2}/\d{2}/\d{4}$', str(date_value)):
+                    validation_issues.append({
+                        "section": "Validação de Formato",
+                        "field": field,
+                        "issue": "Data deve estar no formato MM/DD/YYYY",
+                        "severity": "medium"
+                    })
+        
+        return {
+            "message": "Form validation completed",
+            "validation_issues": validation_issues,
+            "total_issues": len(validation_issues),
+            "blocking_issues": len([i for i in validation_issues if i["severity"] == "high"])
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error validating forms: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error validating forms: {str(e)}")
+
+@api_router.post("/auto-application/process-payment")
+async def process_payment(request: dict):
+    """Process payment for auto-application package"""
+    try:
+        case_id = request.get("case_id")
+        package_id = request.get("package_id")
+        payment_method = request.get("payment_method")
+        amount = request.get("amount")
+        
+        if not all([case_id, package_id, payment_method, amount]):
+            raise HTTPException(status_code=400, detail="Missing required payment information")
+        
+        # Get case
+        case = await db.auto_cases.find_one({"case_id": case_id})
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        # Generate payment ID
+        payment_id = f"PAY-{str(uuid.uuid4())[:8].upper()}"
+        
+        # Simulate payment processing
+        # In real implementation, integrate with Stripe/PagSeguro/etc.
+        payment_data = {
+            "payment_id": payment_id,
+            "case_id": case_id,
+            "package_id": package_id,
+            "payment_method": payment_method,
+            "amount": amount,
+            "currency": "USD",
+            "status": "completed",
+            "processed_at": datetime.utcnow(),
+            "transaction_fee": amount * 0.029 if payment_method == "credit_card" else 0
+        }
+        
+        # Update case with payment information
+        await db.auto_cases.update_one(
+            {"case_id": case_id},
+            {
+                "$set": {
+                    "payment_status": "completed",
+                    "payment_id": payment_id,
+                    "package_selected": package_id,
+                    "payment_data": payment_data,
+                    "updated_at": datetime.utcnow()
+                }
+            }
+        )
+        
+        # Store payment record
+        await db.payments.insert_one(payment_data)
+        
+        return {
+            "message": "Payment processed successfully",
+            "payment_id": payment_id,
+            "status": "completed",
+            "amount_charged": amount
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error processing payment: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error processing payment: {str(e)}")
+
+@api_router.post("/auto-application/generate-package")
+async def generate_final_package(request: dict):
+    """Generate final document package for download"""
+    try:
+        case_id = request.get("case_id")
+        package_type = request.get("package_type", "complete")
+        
+        if not case_id:
+            raise HTTPException(status_code=400, detail="Case ID is required")
+        
+        # Get case data
+        case = await db.auto_cases.find_one({"case_id": case_id})
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        # Verify payment status
+        if case.get("payment_status") != "completed":
+            raise HTTPException(status_code=400, detail="Payment required before package generation")
+        
+        # Get form specifications
+        form_code = case.get("form_code")
+        visa_specs = get_visa_specifications(form_code) if form_code else {}
+        
+        # Generate package contents based on type
+        package_contents = {
+            "case_id": case_id,
+            "form_code": form_code,
+            "generated_at": datetime.utcnow().isoformat(),
+            "package_type": package_type,
+            "files": []
+        }
+        
+        # Official forms
+        if case.get("official_form_data"):
+            package_contents["files"].append({
+                "name": f"{form_code}_Official_Form.pdf",
+                "type": "official_form",
+                "description": f"Formulário oficial {form_code} preenchido em inglês"
+            })
+        
+        # Document checklist
+        package_contents["files"].append({
+            "name": "Document_Checklist.pdf",
+            "type": "checklist",
+            "description": "Lista completa de documentos necessários"
+        })
+        
+        # Submission instructions
+        package_contents["files"].append({
+            "name": "Submission_Instructions.pdf", 
+            "type": "instructions",
+            "description": "Instruções passo-a-passo para submissão"
+        })
+        
+        # User story and extracted facts
+        if case.get("user_story_text"):
+            package_contents["files"].append({
+                "name": "User_Story_Summary.pdf",
+                "type": "summary",
+                "description": "Resumo da sua história e fatos extraídos"
+            })
+        
+        # Support documents (for complete/premium packages)
+        if package_type in ["complete", "premium"]:
+            package_contents["files"].extend([
+                {
+                    "name": "Cover_Letter_Template.docx",
+                    "type": "template",
+                    "description": "Modelo de carta de apresentação"
+                },
+                {
+                    "name": "RFE_Response_Guide.pdf",
+                    "type": "guide",
+                    "description": "Guia para responder Request for Evidence"
+                },
+                {
+                    "name": "Interview_Preparation.pdf",
+                    "type": "guide", 
+                    "description": "Guia de preparação para entrevista"
+                }
+            ])
+        
+        # Generate download URL (in real implementation, create actual ZIP file)
+        download_url = f"/downloads/packages/OSPREY-{form_code}-{case_id}-{package_type}.zip"
+        
+        # Update case with package information
+        await db.auto_cases.update_one(
+            {"case_id": case_id},
+            {
+                "$set": {
+                    "final_package_generated": True,
+                    "final_package_url": download_url,
+                    "package_contents": package_contents,
+                    "status": "completed",
+                    "completed_at": datetime.utcnow(),
+                    "updated_at": datetime.utcnow()
+                }
+            }
+        )
+        
+        return {
+            "message": "Package generated successfully",
+            "download_url": download_url,
+            "package_contents": package_contents,
+            "total_files": len(package_contents["files"])
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error generating package: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating package: {str(e)}")
+
 @api_router.get("/auto-application/visa-specs/{form_code}")
 async def get_visa_specs(form_code: str, subcategory: Optional[str] = None):
     """Get detailed specifications for a specific USCIS form"""
