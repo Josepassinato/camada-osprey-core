@@ -613,9 +613,9 @@ const Education = () => {
                   </div>
 
                   <div className="text-xs text-muted-foreground space-y-1">
-                    <div>• {progress.guides_completed.length} guias concluídos</div>
-                    <div>• {progress.interviews_completed.length} entrevistas simuladas</div>
-                    <div>• {formatStudyTime(progress.total_study_time_minutes)} de estudo</div>
+                    <div>• {progress?.guides_completed?.length || 0} guias concluídos</div>
+                    <div>• {progress?.interviews_completed?.length || 0} entrevistas simuladas</div>
+                    <div>• {progress?.total_study_time_minutes ? formatStudyTime(progress.total_study_time_minutes) : '0m'} de estudo</div>
                   </div>
                 </CardContent>
               </Card>
