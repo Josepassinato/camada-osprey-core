@@ -17,6 +17,8 @@ const AutoApplicationStart = () => {
   const navigate = useNavigate();
   const [agreed, setAgreed] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  
+  console.log('🔄 AutoApplicationStart rendered - agreed:', agreed, 'isCreating:', isCreating);
 
   const startApplication = async () => {
     console.log('🔘 startApplication called');
