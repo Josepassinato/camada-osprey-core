@@ -253,7 +253,7 @@ const Documents = () => {
             </div>
             
             <Button 
-              className="btn-gradient"
+              className="bg-black text-white hover:bg-gray-800"
               onClick={() => setShowUpload(true)}
             >
               <Plus className="h-4 w-4" />
