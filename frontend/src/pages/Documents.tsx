@@ -205,7 +205,7 @@ const Documents = () => {
   const handleReanalyze = async (documentId: string) => {
     try {
       const token = localStorage.getItem('osprey_token');
-      const response = await fetch(`${import.meta.env.REACT_APP_BACKEND_URL}/api/documents/${documentId}/reanalyze`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/documents/${documentId}/reanalyze`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
