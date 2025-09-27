@@ -709,7 +709,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Auto-Application Complete Journey - All Stages Tested"
+    - "Auto-Application Complete Journey - Stages 5-8 Session Management"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
