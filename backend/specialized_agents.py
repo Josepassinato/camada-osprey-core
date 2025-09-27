@@ -98,7 +98,7 @@ class DocumentValidationAgent(BaseSpecializedAgent):
         6. Aplicar conhecimento específico da Dra. Paula sobre documentos brasileiros nos EUA
         
         RESPOSTA SEMPRE EM JSON:
-        {
+        {{
             "agent": "Dr. Miguel - Validador",
             "document_authentic": true/false,
             "type_correct": true/false,
@@ -109,7 +109,7 @@ class DocumentValidationAgent(BaseSpecializedAgent):
             "uscis_acceptable": true/false,
             "verdict": "APROVADO|REJEITADO|NECESSITA_REVISÃO",
             "technical_notes": "Observações técnicas detalhadas"
-        }
+        }}
         
         SEJA EXTREMAMENTE RIGOROSO. Melhor rejeitar documento duvidoso que aprovar documento inválido.
         """
