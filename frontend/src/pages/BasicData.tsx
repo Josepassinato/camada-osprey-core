@@ -674,12 +674,12 @@ const BasicData = () => {
         </div>
       </div>
       
-      <OspreyOwlTutorSimple 
+      <OspreyOwlTutor 
         snapshot={snapshot}
         onAction={(event, payload) => {
           console.log('🦉 Tutor action:', event, payload);
         }}
-        isEnabled={true}
+        isEnabled={!!case_?.case_id}
         position="bottom-right"
       />
     </div>
