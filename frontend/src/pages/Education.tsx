@@ -252,7 +252,7 @@ const Education = () => {
             <CardContent>
               <div className="grid md:grid-cols-4 gap-6">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <div className="w-16 h-16 bg-black/10 rounded-full flex items-center justify-center mx-auto mb-2">
                     <BookOpen className="h-8 w-8 text-black" />
                   </div>
                   <div className="text-2xl font-bold text-foreground">{progress?.guides_completed?.length || 0}</div>
@@ -302,7 +302,7 @@ const Education = () => {
               <CardContent className="space-y-4">
                 {guides.length === 0 ? (
                   <div className="text-center py-8">
-                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 bg-black/10 rounded-full flex items-center justify-center mx-auto mb-4">
                       <BookOpen className="h-8 w-8 text-black" />
                     </div>
                     <p className="text-muted-foreground">Carregando guias interativos...</p>

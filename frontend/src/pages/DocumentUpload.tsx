@@ -310,7 +310,7 @@ const DocumentUpload = () => {
                   />
                   
                   <div className="space-y-4">
-                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                    <div className="w-16 h-16 bg-black/10 rounded-full flex items-center justify-center mx-auto">
                       <Upload className="h-8 w-8 text-black" />
                     </div>
                     
@@ -457,7 +457,7 @@ const DocumentUpload = () => {
             <Card className="glass border-0 bg-gradient-to-r from-primary/5 to-accent/5">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 bg-black/10 rounded-lg flex items-center justify-center">
                     <Sparkles className="h-6 w-6 text-black" />
                   </div>
                   <div className="flex-1">

@@ -90,7 +90,7 @@ const Footer = () => {
                 <div className="px-3 py-1 bg-success/10 text-success text-xs font-medium rounded-full">
                   SOC 2 Certified
                 </div>
-                <div className="px-3 py-1 bg-primary/10 text-black text-xs font-medium rounded-full">
+                <div className="px-3 py-1 bg-black/10 text-black text-xs font-medium rounded-full">
                   USCIS Approved
                 </div>
               </div>

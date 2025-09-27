@@ -51,7 +51,7 @@ const Hero = () => {
               </div>
 
               <div className="flex items-center gap-3 p-4 rounded-xl glass-dark hover:bg-white/90 transition-colors">
-                <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                <div className="flex-shrink-0 w-12 h-12 bg-black/10 rounded-lg flex items-center justify-center">
                   <Shield className="h-6 w-6 text-black" />
                 </div>
                 <div>

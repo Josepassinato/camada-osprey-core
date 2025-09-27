@@ -278,7 +278,7 @@ const Documents = () => {
             <Card className="glass border-0 card-hover">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 bg-black/10 rounded-lg flex items-center justify-center">
                     <FileText className="h-6 w-6 text-black" />
                   </div>
                   <div>
@@ -385,7 +385,7 @@ const Documents = () => {
             {filteredDocuments.length === 0 ? (
               <Card className="glass border-0">
                 <CardContent className="p-12 text-center">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-black/10 rounded-full flex items-center justify-center mx-auto mb-4">
                     <FileText className="h-8 w-8 text-black" />
                   </div>
                   <h3 className="font-medium text-foreground mb-2">
@@ -412,7 +412,7 @@ const Documents = () => {
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                          <div className="w-12 h-12 bg-black/10 rounded-lg flex items-center justify-center">
                             <FileText className="h-6 w-6 text-black" />
                           </div>
                           <div>
@@ -457,7 +457,7 @@ const Documents = () => {
                         <div className="bg-white/30 rounded-lg p-4 space-y-3">
                           <div className="flex items-center justify-between">
                             <span className="text-sm font-medium text-foreground">Análise IA</span>
-                            <Badge className="bg-primary/10 text-black border-primary/20">
+                            <Badge className="bg-black/10 text-black border-primary/20">
                               {doc.ai_analysis.completeness_score}% completo
                             </Badge>
                           </div>
