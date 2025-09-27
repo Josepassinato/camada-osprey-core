@@ -160,19 +160,22 @@ const BasicData = () => {
     try {
       const sessionToken = localStorage.getItem('osprey_session_token');
       
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}?session_token=${sessionToken}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            basic_data: formData,
-            status: 'basic_data'
-          }),
-        }
-      );
+      // Build query string
+      let url = `${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}`;
+      if (sessionToken && sessionToken !== 'null') {
+        url += `?session_token=${sessionToken}`;
+      }
+      
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          basic_data: formData,
+          status: 'basic_data'
+        }),
+      });
 
       if (response.ok) {
         if (!autoSave) {
