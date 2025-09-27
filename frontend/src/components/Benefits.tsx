@@ -52,7 +52,7 @@ const benefits = [
     title: "Garantia de Resultados",
     description: "Aprovação garantida ou reembolso de 100% do investimento",
     color: "from-green-500/10 to-emerald-500/10",
-    iconColor: "text-green-600"
+    iconColor: "text-black"
   },
   {
     icon: Clock,
