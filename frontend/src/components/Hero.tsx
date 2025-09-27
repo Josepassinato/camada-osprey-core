@@ -125,7 +125,7 @@ const Hero = () => {
                     
                     <div className="space-y-3">
                       <div className="h-2 bg-zinc-200 rounded-full overflow-hidden">
-                        <div className="h-full bg-gradient-primary rounded-full w-3/4"></div>
+                        <div className="h-full bg-black rounded-full w-3/4"></div>
                       </div>
                       <div className="text-xs text-zinc-500">75% completo - Análise de documentos</div>
                     </div>
