@@ -2649,6 +2649,16 @@ def run_all_tests():
         "dashboard_with_education": test_dashboard_with_education()
     }
     
+    # Osprey Owl Tutor validation tests (NEW - Simplified Version)
+    owl_tutor_results = {
+        "owl_tutor_personal_validation": test_owl_tutor_personal_validation(),
+        "owl_tutor_address_validation": test_owl_tutor_address_validation(),
+        "owl_tutor_employment_validation": test_owl_tutor_employment_validation(),
+        "owl_tutor_family_validation": test_owl_tutor_family_validation(),
+        "owl_tutor_travel_validation": test_owl_tutor_travel_validation(),
+        "owl_tutor_validation_response_structure": test_owl_tutor_validation_response_structure()
+    }
+    
     # Voice Agent system tests (NEW - Semana 1 MVP)
     voice_agent_results = {
         "voice_agent_comprehensive": test_voice_agent_comprehensive()
