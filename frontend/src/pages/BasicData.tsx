@@ -576,11 +576,9 @@ const BasicData = () => {
             )}
 
             {/* Progress */}
-            <Card className="glass border-0">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold">Progresso da Aplicação</CardTitle>
-              </CardHeader>
-              <CardContent>
+            <div className="bg-white border border-black rounded-lg p-4 sm:p-6">
+              <h3 className="text-lg font-semibold text-black mb-4">Progresso da Aplicação</h3>
+              <div>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <div className="w-6 h-6 bg-black text-white rounded-full flex items-center justify-center text-xs font-bold">
