@@ -19,11 +19,14 @@ const AutoApplicationStart = () => {
   const [isCreating, setIsCreating] = useState(false);
 
   const startApplication = async () => {
+    console.log('🔘 startApplication called');
+    
     if (!agreed) {
       alert('Por favor, aceite os termos para continuar.');
       return;
     }
 
+    console.log('🔘 Terms agreed, starting application...');
     setIsCreating(true);
     
     try {
@@ -31,7 +34,14 @@ const AutoApplicationStart = () => {
       const sessionToken = `sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       localStorage.setItem('osprey_session_token', sessionToken);
       
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auto-application/start`, {
+      console.log('🔘 Session token generated:', sessionToken);
+      
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001';
+      const apiUrl = `${backendUrl}/api/auto-application/start`;
+      
+      console.log('🔘 Making request to:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,19 +51,27 @@ const AutoApplicationStart = () => {
         }),
       });
 
+      console.log('🔘 Response status:', response.status);
+
       if (response.ok) {
         const data = await response.json();
+        console.log('🔘 Response data:', data);
+        
         // Navigate to form selection with case ID
+        console.log('🔘 Navigating to form selection...');
         navigate('/auto-application/select-form', { 
           state: { caseId: data.case.case_id, sessionToken } 
         });
       } else {
-        throw new Error('Falha ao criar aplicação');
+        const errorText = await response.text();
+        console.error('🔘 Response error:', errorText);
+        throw new Error(`Falha ao criar aplicação: ${response.status} - ${errorText}`);
       }
     } catch (error) {
-      console.error('Error starting application:', error);
-      alert('Erro ao iniciar aplicação. Tente novamente.');
+      console.error('🔘 Error starting application:', error);
+      alert(`Erro ao iniciar aplicação: ${error.message}\n\nTente novamente ou recarregue a página.`);
     } finally {
+      console.log('🔘 Setting isCreating to false');
       setIsCreating(false);
     }
   };
