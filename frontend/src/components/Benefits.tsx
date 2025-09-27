@@ -31,7 +31,7 @@ const benefits = [
     title: "Especialistas Dedicados",
     description: "Equipe de advogados experientes acompanha cada etapa do seu caso",
     color: "from-emerald-500/10 to-teal-500/10",
-    iconColor: "text-emerald-600"
+    iconColor: "text-black"
   },
   {
     icon: Award,
