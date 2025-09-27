@@ -93,13 +93,20 @@ const BasicData = () => {
     enabled: true,
     autoGenerate: true,
     onSnapshotUpdate: (snapshot) => {
-      console.log('Form snapshot updated:', snapshot);
+      console.log('🦉 Form snapshot updated:', snapshot);
     },
     onError: (error) => {
-      console.error('Form snapshot error:', error);
+      console.error('🦉 Form snapshot error:', error);
       setError(error);
     }
   });
+
+  // Debug: Log snapshot state
+  useEffect(() => {
+    console.log('🦉 Current snapshot state:', snapshot);
+    console.log('🦉 Case ID:', case_?.case_id);
+    console.log('🦉 Form data:', formData);
+  }, [snapshot, case_, formData]);
 
   useEffect(() => {
     if (caseId) {
