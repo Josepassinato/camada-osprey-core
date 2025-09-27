@@ -2622,6 +2622,61 @@ async def specialized_compliance_check(request: dict):
             "error": str(e)
         }
 
+@api_router.post("/specialized-agents/immigration-letter")
+async def specialized_immigration_letter_writing(request: dict):
+    """Ultra-specialized immigration letter writing using Dr. Ricardo - NEVER invents facts"""
+    try:
+        letter_writer = create_immigration_letter_writer()
+        
+        client_story = request.get("clientStory", "")
+        client_data = request.get("clientData", {})
+        visa_type = request.get("visaType", "H-1B")
+        letter_type = request.get("letterType", "cover_letter")  # cover_letter, personal_statement, support_letter
+        
+        prompt = f"""
+        REDAÇÃO DE CARTA DE IMIGRAÇÃO - BASEADA APENAS EM FATOS DO CLIENTE
+        
+        TIPO DE VISTO: {visa_type}
+        TIPO DE CARTA: {letter_type}
+        
+        DADOS DO CLIENTE (USE APENAS ESTES FATOS):
+        {client_data}
+        
+        HISTÓRIA/CONTEXTO FORNECIDO PELO CLIENTE:
+        {client_story}
+        
+        INSTRUÇÕES CRÍTICAS:
+        - Use APENAS as informações fornecidas acima
+        - Se informação crítica estiver faltando, indique [INFORMAÇÃO NECESSÁRIA: descrição]
+        - NÃO invente datas, nomes, empresas, qualificações ou eventos
+        - Mantenha tom profissional e formal apropriado para USCIS
+        - Estruture conforme padrões de cartas de imigração
+        
+        Execute conforme seu protocolo especializado de redação.
+        """
+        
+        session_id = f"letter_{visa_type}_{letter_type}_{hash(client_story) % 10000}"
+        analysis = await letter_writer._call_agent(prompt, session_id)
+        
+        return {
+            "success": True,
+            "agent": "Dr. Ricardo - Redator de Cartas",
+            "specialization": "Immigration Letter Writing",
+            "visa_type": visa_type,
+            "letter_type": letter_type,
+            "analysis": analysis,
+            "timestamp": datetime.now().isoformat(),
+            "fact_check": "Only client-provided facts used - no invention"
+        }
+        
+    except Exception as e:
+        logger.error(f"Dr. Ricardo letter writing error: {e}")
+        return {
+            "success": False,
+            "agent": "Dr. Ricardo - Redator de Cartas",
+            "error": str(e)
+        }
+
 @api_router.post("/specialized-agents/comprehensive-analysis")
 async def comprehensive_multi_agent_analysis(request: dict):
     """Comprehensive analysis using multiple specialized agents"""
