@@ -89,6 +89,16 @@ const BasicData = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [case_, setCase] = useState<any>(null);
 
+  // Session management  
+  const { 
+    sessionData, 
+    setCaseId, 
+    setCurrentStep, 
+    getCaseId,
+    getSessionToken,
+    isSessionActive 
+  } = useSessionManager();
+
   // Osprey Owl Tutor integration
   const { snapshot } = useFormSnapshot(formData, {
     enabled: true,
@@ -101,13 +111,6 @@ const BasicData = () => {
       setError(error);
     }
   });
-
-  // Debug: Log snapshot state
-  useEffect(() => {
-    console.log('🦉 Current snapshot state:', snapshot);
-    console.log('🦉 Case ID:', case_?.case_id);
-    console.log('🦉 Form data:', formData);
-  }, [snapshot, case_, formData]);
 
   useEffect(() => {
     if (caseId) {
