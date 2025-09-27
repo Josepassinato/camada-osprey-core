@@ -11,24 +11,27 @@ logger = logging.getLogger(__name__)
 
 class ImmigrationExpert:
     """
-    Wrapper for specialized immigration agent
+    Wrapper for specialized immigration agent - Dra. Paula B2C
     Handles immigration-specific queries, validations, and advice
     """
     
     def __init__(self, 
                  provider: str = "openai", 
                  model: str = "gpt-4o",
+                 assistant_id: str = "asst_AV1O2IBTnDXpEZXiSSQGBT4",
                  custom_system_prompt: Optional[str] = None):
         """
-        Initialize the immigration expert agent
+        Initialize the immigration expert agent - Dra. Paula B2C
         
         Args:
             provider: LLM provider (openai, anthropic, gemini)
             model: Specific model name
+            assistant_id: OpenAI Assistant ID for Dra. Paula B2C
             custom_system_prompt: Your specialized immigration prompt
         """
         self.provider = provider
         self.model = model
+        self.assistant_id = assistant_id
         
         # Default immigration system prompt (can be overridden)
         self.system_prompt = custom_system_prompt or """
