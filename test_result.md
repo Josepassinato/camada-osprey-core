@@ -559,6 +559,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "✅ Stage 3 WORKING CORRECTLY! BasicData page loads successfully with title 'Visto de Trabalho Especializado' and case ID display. All three form sections present: Informações Pessoais, Informações de Contato, Informações de Imigração. Form fields work correctly - successfully filled realistic H-1B data (Carlos Silva, birth date 05/15/1990, Brasil, etc.). Form validation working properly - continue button disabled until required fields filled. Progress sidebar shows current step (1. Dados Básicos active). Auto-save functionality and form structure working as expected."
+      - working: true
+        agent: "testing"
+        comment: "✅ PARTIALLY OPTIMIZED MOBILE FORM VERIFIED! BasicData working well on mobile (375px): Page title 'Visto de Trabalho Especializado' clear, all form sections (Personal, Contact, Immigration) visible and functional. Form inputs working correctly - successfully filled Carlos Silva, birth date, address, city, ZIP code. Input field sizing adequate (309px x 38px) but below 44px touch target minimum. Mobile keyboard interactions working perfectly for email and phone inputs. Continue button functional but also below 44px minimum (40px height). Black/white color scheme properly implemented - white form sections with black borders, black text, white input backgrounds. Progress section and auto-save info visible. Responsive form layout adapts correctly to mobile. Tablet (768px) shows improved 2-column layout for form fields. Overall mobile usability good despite minor touch target issues."
 
   - task: "Auto-Application Complete Journey - Stage 4 (DocumentUploadAuto Frontend)"
     implemented: true
