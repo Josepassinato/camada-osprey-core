@@ -377,6 +377,9 @@ def create_eligibility_analyst() -> EligibilityAnalysisAgent:
 def create_compliance_checker() -> ComplianceCheckAgent:
     return ComplianceCheckAgent()
 
+def create_immigration_letter_writer() -> ImmigrationLetterWriterAgent:
+    return ImmigrationLetterWriterAgent()
+
 def create_urgency_triage() -> UrgencyTriageAgent:
     return UrgencyTriageAgent()
 
