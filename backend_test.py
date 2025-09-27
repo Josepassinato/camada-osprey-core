@@ -2974,4 +2974,26 @@ def run_all_tests():
     return all_results
 
 if __name__ == "__main__":
-    run_all_tests()
+    # Run comprehensive critical priorities test as requested
+    print("🎯 OSPREY IMMIGRATION B2C SYSTEM - COMPREHENSIVE CRITICAL PRIORITIES TEST")
+    print("=" * 80)
+    print("Testing based on user request: 'Realize um teste geral e abrangente do sistema OSPREY'")
+    print("Focus: Case ID persistence, Complete H1-B journey, Authentication, Owl Tutor, Brazilian scenarios")
+    print("=" * 80)
+    
+    # Run the comprehensive critical priorities test
+    success = test_comprehensive_system_critical_priorities()
+    
+    print("\n" + "=" * 80)
+    print("🏁 COMPREHENSIVE TEST COMPLETED")
+    print("=" * 80)
+    
+    if success:
+        print("🎉 OSPREY SYSTEM READY FOR PRODUCTION!")
+        print("All critical priorities have been validated successfully.")
+    else:
+        print("⚠️  OSPREY SYSTEM NEEDS ATTENTION")
+        print("Some critical priorities require fixes before production.")
+    
+    print(f"⏰ Test completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("=" * 80)
