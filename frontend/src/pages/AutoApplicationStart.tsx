@@ -364,7 +364,7 @@ const AutoApplicationStart = () => {
               
               <p>
                 <strong>Como funciona:</strong> Nossa IA especializada organiza suas informações, preenche formulários 
-                oficiais do USCIS e fornece orientações técnicas para que você possa fazer sua própria submissão 
+                oficiais do USCIS e fornece ajuda para que você possa fazer sua própria submissão 
                 diretamente no site oficial do governo americano.
               </p>
               
