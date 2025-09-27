@@ -278,8 +278,8 @@ const Dashboard = () => {
           <Card className="glass border-0 card-hover">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-green-500" />
+                <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <TrendingUp className="h-6 w-6 text-gray-700" />
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-foreground">
