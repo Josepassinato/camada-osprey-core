@@ -235,7 +235,7 @@ const BasicData = () => {
         <Card className="glass border-0 max-w-md">
           <CardContent className="text-center p-8">
             <AlertTriangle className="h-12 w-12 text-gray-700 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-foreground mb-2">
+            <h2 className="text-xl font-semibold text-black mb-2">
               {error || 'Caso não encontrado'}
             </h2>
             <Button onClick={() => navigate('/auto-application/start')}>
@@ -395,7 +395,7 @@ const BasicData = () => {
 
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-black mb-2">
                       Cidade <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -407,7 +407,7 @@ const BasicData = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-black mb-2">
                       Estado
                     </label>
                     <input
@@ -419,7 +419,7 @@ const BasicData = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-black mb-2">
                       CEP/ZIP <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -434,7 +434,7 @@ const BasicData = () => {
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-black mb-2">
                       Telefone
                     </label>
                     <input
@@ -446,7 +446,7 @@ const BasicData = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-black mb-2">
                       Email
                     </label>
                     <input
@@ -470,7 +470,7 @@ const BasicData = () => {
               <div className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-black mb-2">
                       A-Number (se aplicável)
                     </label>
                     <input
@@ -482,7 +482,7 @@ const BasicData = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-black mb-2">
                       SSN (se aplicável)
                     </label>
                     <input
@@ -497,7 +497,7 @@ const BasicData = () => {
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-black mb-2">
                       Status Atual nos EUA
                     </label>
                     <input
@@ -509,7 +509,7 @@ const BasicData = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-black mb-2">
                       Expiração do Status
                     </label>
                     <input
@@ -629,7 +629,7 @@ const BasicData = () => {
                 <div className="flex items-center gap-3">
                   <CheckCircle className="h-5 w-5 text-gray-700" />
                   <div>
-                    <p className="text-sm font-medium text-foreground">Salvamento Automático</p>
+                    <p className="text-sm font-medium text-black">Salvamento Automático</p>
                     <p className="text-xs text-muted-foreground">
                       Suas informações são salvas automaticamente a cada 30 segundos
                     </p>
