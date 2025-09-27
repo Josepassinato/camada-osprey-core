@@ -377,10 +377,10 @@ const Dashboard = () => {
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
-                  onClick={() => navigate('/chat')}
+                  onClick={() => navigate('/education')}
                 >
-                  <MessageSquare className="h-4 w-4" />
-                  Chat com IA
+                  <GraduationCap className="h-4 w-4" />
+                  Centro Educacional
                 </Button>
                 <Button 
                   variant="outline" 
