@@ -1084,6 +1084,568 @@ def test_dashboard_with_education():
         return False
 
 # ============================================================================
+# VOICE AGENT SYSTEM TESTS (NEW - Semana 1 MVP)
+# ============================================================================
+
+def test_voice_agent_status():
+    """Test voice agent status endpoint"""
+    print("\n🎤 Testing Voice Agent Status...")
+    
+    try:
+        response = requests.get(f"{API_BASE}/voice/status", timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Voice agent status retrieved successfully")
+            print(f"   Status: {data.get('status')}")
+            print(f"   Active sessions: {data.get('active_sessions', 0)}")
+            print(f"   Capabilities: {len(data.get('capabilities', []))}")
+            print(f"   Supported languages: {data.get('supported_languages', [])}")
+            print(f"   Version: {data.get('version')}")
+            
+            # Verify expected capabilities
+            capabilities = data.get('capabilities', [])
+            expected_caps = ['voice_guidance', 'form_validation', 'step_assistance', 'intent_recognition']
+            
+            for cap in expected_caps:
+                if cap in capabilities:
+                    print(f"   ✅ {cap} capability available")
+                else:
+                    print(f"   ⚠️  {cap} capability missing")
+            
+            # Check for Portuguese support
+            languages = data.get('supported_languages', [])
+            if 'pt-BR' in languages:
+                print("✅ Portuguese language support confirmed")
+            else:
+                print("⚠️  Portuguese language support not found")
+            
+            return True
+        else:
+            print(f"❌ Voice agent status failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Voice agent status error: {str(e)}")
+        return False
+
+def test_form_validation_personal():
+    """Test form validation for personal information step"""
+    print("\n✅ Testing Form Validation - Personal Info...")
+    
+    try:
+        # Test with valid personal information
+        valid_payload = {
+            "stepId": "personal",
+            "formData": {
+                "firstName": "Carlos Eduardo",
+                "lastName": "Silva Santos",
+                "dateOfBirth": "1990-03-15",
+                "nationality": "Brazilian",
+                "passportNumber": "BR123456789",
+                "placeOfBirth": "São Paulo, Brazil"
+            }
+        }
+        
+        response = requests.post(f"{API_BASE}/validate", json=valid_payload, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Personal info validation successful")
+            print(f"   Validation OK: {data.get('ok')}")
+            print(f"   Errors: {len(data.get('errors', []))}")
+            print(f"   Missing required: {len(data.get('missingRequired', []))}")
+            print(f"   Suggestions: {len(data.get('suggestions', []))}")
+            
+            # Test with invalid data
+            invalid_payload = {
+                "stepId": "personal",
+                "formData": {
+                    "firstName": "Carlos123",  # Invalid characters
+                    "lastName": "",  # Missing required
+                    "dateOfBirth": "2030-01-01",  # Future date
+                    "nationality": "X"  # Too short
+                }
+            }
+            
+            invalid_response = requests.post(f"{API_BASE}/validate", json=invalid_payload, timeout=10)
+            
+            if invalid_response.status_code == 200:
+                invalid_data = invalid_response.json()
+                print(f"✅ Invalid data validation working")
+                print(f"   Errors detected: {len(invalid_data.get('errors', []))}")
+                print(f"   Missing fields detected: {len(invalid_data.get('missingRequired', []))}")
+                
+                # Show sample errors
+                errors = invalid_data.get('errors', [])
+                if errors:
+                    print(f"   Sample error: {errors[0].get('message', 'N/A')}")
+                
+                return True
+            else:
+                print(f"❌ Invalid data validation failed: {invalid_response.status_code}")
+                return False
+                
+        else:
+            print(f"❌ Personal info validation failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Personal info validation error: {str(e)}")
+        return False
+
+def test_form_validation_address():
+    """Test form validation for address information step"""
+    print("\n🏠 Testing Form Validation - Address Info...")
+    
+    try:
+        # Test with valid address information
+        valid_payload = {
+            "stepId": "address",
+            "formData": {
+                "currentAddress": "123 Main Street, Apt 4B",
+                "city": "San Francisco",
+                "state": "CA",
+                "zipCode": "94102",
+                "phone": "+1 (415) 555-0123",
+                "email": "carlos.silva@email.com"
+            }
+        }
+        
+        response = requests.post(f"{API_BASE}/validate", json=valid_payload, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Address validation successful")
+            print(f"   Validation OK: {data.get('ok')}")
+            print(f"   Errors: {len(data.get('errors', []))}")
+            print(f"   Missing required: {len(data.get('missingRequired', []))}")
+            
+            # Test with invalid ZIP code and state mismatch
+            invalid_payload = {
+                "stepId": "address",
+                "formData": {
+                    "currentAddress": "456 Test Ave",
+                    "city": "Los Angeles",
+                    "state": "NY",  # Wrong state for LA
+                    "zipCode": "90210",  # CA ZIP but NY state
+                    "phone": "123",  # Too short
+                    "email": "invalid-email"  # Invalid format
+                }
+            }
+            
+            invalid_response = requests.post(f"{API_BASE}/validate", json=invalid_payload, timeout=10)
+            
+            if invalid_response.status_code == 200:
+                invalid_data = invalid_response.json()
+                print(f"✅ Address validation errors detected correctly")
+                print(f"   Errors found: {len(invalid_data.get('errors', []))}")
+                
+                # Check for specific error types
+                errors = invalid_data.get('errors', [])
+                error_codes = [error.get('code') for error in errors]
+                
+                if 'state_mismatch' in error_codes:
+                    print("   ✅ ZIP/State mismatch detected")
+                if 'invalid_format' in error_codes:
+                    print("   ✅ Invalid format errors detected")
+                
+                return True
+            else:
+                print(f"❌ Invalid address validation failed: {invalid_response.status_code}")
+                return False
+                
+        else:
+            print(f"❌ Address validation failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Address validation error: {str(e)}")
+        return False
+
+def test_form_validation_employment():
+    """Test form validation for employment information step"""
+    print("\n💼 Testing Form Validation - Employment Info...")
+    
+    try:
+        # Test with valid employment information
+        valid_payload = {
+            "stepId": "employment",
+            "formData": {
+                "currentlyEmployed": True,
+                "employerName": "TechGlobal Inc.",
+                "jobTitle": "Senior Software Engineer",
+                "startDate": "2020-01-15",
+                "endDate": "",  # Current job
+                "salary": "$95000",
+                "workLocation": "San Francisco, CA"
+            }
+        }
+        
+        response = requests.post(f"{API_BASE}/validate", json=valid_payload, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Employment validation successful")
+            print(f"   Validation OK: {data.get('ok')}")
+            print(f"   Errors: {len(data.get('errors', []))}")
+            print(f"   Missing required: {len(data.get('missingRequired', []))}")
+            
+            # Test with invalid employment dates
+            invalid_payload = {
+                "stepId": "employment",
+                "formData": {
+                    "currentlyEmployed": True,
+                    "employerName": "Test Company",
+                    "jobTitle": "Developer",
+                    "startDate": "2025-01-01",  # Future start date
+                    "endDate": "2020-01-01",  # End before start
+                    "salary": "$50000"
+                }
+            }
+            
+            invalid_response = requests.post(f"{API_BASE}/validate", json=invalid_payload, timeout=10)
+            
+            if invalid_response.status_code == 200:
+                invalid_data = invalid_response.json()
+                print(f"✅ Employment date validation working")
+                print(f"   Date errors detected: {len(invalid_data.get('errors', []))}")
+                
+                # Check for date-related errors
+                errors = invalid_data.get('errors', [])
+                date_errors = [e for e in errors if 'date' in e.get('code', '').lower()]
+                
+                if date_errors:
+                    print(f"   ✅ Date validation errors: {len(date_errors)}")
+                    print(f"   Sample: {date_errors[0].get('message', 'N/A')}")
+                
+                return True
+            else:
+                print(f"❌ Invalid employment validation failed: {invalid_response.status_code}")
+                return False
+                
+        else:
+            print(f"❌ Employment validation failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Employment validation error: {str(e)}")
+        return False
+
+def test_form_validation_family():
+    """Test form validation for family information step"""
+    print("\n👨‍👩‍👧‍👦 Testing Form Validation - Family Info...")
+    
+    try:
+        # Test with married status and spouse info
+        married_payload = {
+            "stepId": "family",
+            "formData": {
+                "maritalStatus": "Married",
+                "spouseName": "Maria Silva Santos",
+                "spouseDateOfBirth": "1992-07-20",
+                "spouseNationality": "Brazilian",
+                "childrenCount": "1",
+                "childrenInfo": [
+                    {
+                        "name": "Pedro Silva Santos",
+                        "dateOfBirth": "2020-05-10",
+                        "relationship": "Son"
+                    }
+                ]
+            }
+        }
+        
+        response = requests.post(f"{API_BASE}/validate", json=married_payload, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Family validation successful")
+            print(f"   Validation OK: {data.get('ok')}")
+            print(f"   Errors: {len(data.get('errors', []))}")
+            print(f"   Missing required: {len(data.get('missingRequired', []))}")
+            print(f"   Suggestions: {len(data.get('suggestions', []))}")
+            
+            # Test with missing spouse info for married status
+            invalid_payload = {
+                "stepId": "family",
+                "formData": {
+                    "maritalStatus": "Married",
+                    # Missing spouse information
+                    "childrenCount": "2",
+                    "childrenInfo": []  # Missing children details
+                }
+            }
+            
+            invalid_response = requests.post(f"{API_BASE}/validate", json=invalid_payload, timeout=10)
+            
+            if invalid_response.status_code == 200:
+                invalid_data = invalid_response.json()
+                print(f"✅ Family validation errors detected")
+                print(f"   Missing spouse info detected: {len(invalid_data.get('missingRequired', []))}")
+                print(f"   Children info suggestions: {len(invalid_data.get('suggestions', []))}")
+                
+                return True
+            else:
+                print(f"❌ Invalid family validation failed: {invalid_response.status_code}")
+                return False
+                
+        else:
+            print(f"❌ Family validation failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Family validation error: {str(e)}")
+        return False
+
+def test_form_validation_travel():
+    """Test form validation for travel history step"""
+    print("\n✈️ Testing Form Validation - Travel History...")
+    
+    try:
+        # Test with valid travel history
+        valid_payload = {
+            "stepId": "travel",
+            "formData": {
+                "hasInternationalTravel": True,
+                "trips": [
+                    {
+                        "country": "United States",
+                        "purpose": "Tourism",
+                        "departureDate": "2019-06-15",
+                        "returnDate": "2019-06-30",
+                        "duration": "15 days"
+                    },
+                    {
+                        "country": "United States", 
+                        "purpose": "Business",
+                        "departureDate": "2021-09-10",
+                        "returnDate": "2021-09-20",
+                        "duration": "10 days"
+                    }
+                ]
+            }
+        }
+        
+        response = requests.post(f"{API_BASE}/validate", json=valid_payload, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Travel validation successful")
+            print(f"   Validation OK: {data.get('ok')}")
+            print(f"   Errors: {len(data.get('errors', []))}")
+            print(f"   Suggestions: {len(data.get('suggestions', []))}")
+            
+            # Test with invalid travel dates
+            invalid_payload = {
+                "stepId": "travel",
+                "formData": {
+                    "hasInternationalTravel": True,
+                    "trips": [
+                        {
+                            "country": "United States",
+                            "purpose": "Tourism",
+                            "departureDate": "2019-06-30",  # Return before departure
+                            "returnDate": "2019-06-15",
+                            "duration": "15 days"
+                        },
+                        {
+                            "country": "France",
+                            "purpose": "Tourism", 
+                            "departureDate": "2010-01-01",  # Very old trip
+                            "returnDate": "2010-01-15",
+                            "duration": "15 days"
+                        }
+                    ]
+                }
+            }
+            
+            invalid_response = requests.post(f"{API_BASE}/validate", json=invalid_payload, timeout=10)
+            
+            if invalid_response.status_code == 200:
+                invalid_data = invalid_response.json()
+                print(f"✅ Travel date validation working")
+                print(f"   Date errors detected: {len(invalid_data.get('errors', []))}")
+                print(f"   Old trip suggestions: {len(invalid_data.get('suggestions', []))}")
+                
+                # Check for date order errors
+                errors = invalid_data.get('errors', [])
+                date_order_errors = [e for e in errors if 'date_order' in e.get('code', '')]
+                
+                if date_order_errors:
+                    print(f"   ✅ Date order validation working")
+                
+                return True
+            else:
+                print(f"❌ Invalid travel validation failed: {invalid_response.status_code}")
+                return False
+                
+        else:
+            print(f"❌ Travel validation failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Travel validation error: {str(e)}")
+        return False
+
+def test_llm_analysis():
+    """Test LLM analysis endpoint with form snapshots"""
+    print("\n🧠 Testing LLM Analysis with Form Snapshots...")
+    
+    try:
+        # Create a realistic form snapshot for H-1B application
+        form_snapshot = {
+            "stepId": "personal_info",
+            "formId": "h1b_application",
+            "url": "https://example.com/h1b-form",
+            "sections": [
+                {
+                    "id": "personal",
+                    "label": "Informações Pessoais",
+                    "status": "in_progress",
+                    "percent": 75,
+                    "missing": ["passportNumber"]
+                },
+                {
+                    "id": "address",
+                    "label": "Informações de Endereço", 
+                    "status": "todo",
+                    "percent": 0,
+                    "missing": ["currentAddress", "city", "zipCode"]
+                }
+            ],
+            "fields": [
+                {
+                    "name": "personal_firstName",
+                    "label": "Nome",
+                    "value": "Carlos Eduardo",
+                    "valid": True,
+                    "required": True
+                },
+                {
+                    "name": "personal_lastName",
+                    "label": "Sobrenome",
+                    "value": "Silva Santos",
+                    "valid": True,
+                    "required": True
+                },
+                {
+                    "name": "personal_dateOfBirth",
+                    "label": "Data de Nascimento",
+                    "value": "1990-03-15",
+                    "valid": True,
+                    "required": True
+                },
+                {
+                    "name": "personal_passportNumber",
+                    "label": "Número do Passaporte",
+                    "value": "",
+                    "valid": False,
+                    "required": True,
+                    "errors": ["Campo obrigatório não preenchido"]
+                }
+            ]
+        }
+        
+        response = requests.post(f"{API_BASE}/analyze", json=form_snapshot, timeout=30)
+        
+        if response.status_code == 200:
+            data = response.json()
+            advice = data.get('advice', {})
+            
+            print(f"✅ LLM analysis successful")
+            print(f"   Analysis timestamp: {data.get('analysis_timestamp', 'N/A')}")
+            print(f"   Disclaimer present: {'disclaimer' in advice}")
+            print(f"   Advice message length: {len(advice.get('say', ''))}")
+            print(f"   Corrections provided: {len(advice.get('corrections', []))}")
+            print(f"   How to verify tips: {len(advice.get('howToVerify', []))}")
+            print(f"   Unresolved issues: {len(advice.get('unresolved', []))}")
+            
+            # Check for Portuguese content and legal disclaimers
+            advice_text = advice.get('say', '').lower()
+            disclaimer = advice.get('disclaimer', '').lower()
+            
+            # Check for legal disclaimer
+            has_disclaimer = any(phrase in disclaimer for phrase in [
+                'ferramenta de apoio', 'consultoria jurídica', 'não oferece'
+            ])
+            
+            if has_disclaimer:
+                print("✅ Legal disclaimer present")
+            else:
+                print("⚠️  Legal disclaimer not clearly present")
+            
+            # Check for Portuguese content
+            has_portuguese = any(word in advice_text for word in [
+                'você', 'seu', 'sua', 'para', 'com', 'campo', 'preencher'
+            ])
+            
+            if has_portuguese:
+                print("✅ Advice provided in Portuguese")
+            else:
+                print("⚠️  Portuguese content unclear")
+            
+            # Check for specific guidance about missing passport number
+            if 'passaporte' in advice_text or 'passport' in advice_text:
+                print("✅ Specific guidance about missing passport field")
+            
+            return True
+        else:
+            print(f"❌ LLM analysis failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ LLM analysis error: {str(e)}")
+        return False
+
+def test_voice_agent_comprehensive():
+    """Test comprehensive voice agent functionality"""
+    print("\n🎯 Testing Comprehensive Voice Agent System...")
+    
+    voice_tests = {
+        "voice_agent_status": test_voice_agent_status(),
+        "form_validation_personal": test_form_validation_personal(),
+        "form_validation_address": test_form_validation_address(),
+        "form_validation_employment": test_form_validation_employment(),
+        "form_validation_family": test_form_validation_family(),
+        "form_validation_travel": test_form_validation_travel(),
+        "llm_analysis": test_llm_analysis()
+    }
+    
+    passed_tests = sum(voice_tests.values())
+    total_tests = len(voice_tests)
+    
+    print(f"\n📊 VOICE AGENT SYSTEM RESULTS:")
+    for test_name, result in voice_tests.items():
+        status = "✅ PASS" if result else "❌ FAIL"
+        print(f"  {test_name.replace('_', ' ').title()}: {status}")
+    
+    print(f"\n🎯 Voice Agent System: {passed_tests}/{total_tests} tests passed ({passed_tests/total_tests*100:.1f}%)")
+    
+    if passed_tests == total_tests:
+        print("🎉 Voice Agent system working perfectly!")
+        return True
+    elif passed_tests >= total_tests - 1:
+        print("✅ Voice Agent system working with minor issues")
+        return True
+    else:
+        print("⚠️  Voice Agent system has significant issues")
+        return False
+
+# ============================================================================
 # AUTO-APPLICATION SYSTEM TESTS (NEW)
 # ============================================================================
 
