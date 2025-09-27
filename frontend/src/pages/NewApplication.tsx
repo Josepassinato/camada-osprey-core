@@ -118,8 +118,7 @@ const NewApplication = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          visa_type: visaType,
-          status: 'draft'
+          visa_type: visaType
         }),
       });
 
