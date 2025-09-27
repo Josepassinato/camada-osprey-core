@@ -458,11 +458,11 @@ const BasicData = () => {
                     />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Immigration Information */}
-            <Card className="glass border-0">
+            <div className="bg-white border border-black rounded-lg p-4 sm:p-6">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5 text-black" />
