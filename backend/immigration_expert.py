@@ -285,15 +285,23 @@ class ImmigrationExpert:
             return "Desculpe, ocorreu um erro ao processar sua pergunta. Tente novamente ou contate o suporte."
 
 
-# Factory function to create expert with custom configuration
+# Factory function to create Dra. Paula B2C expert
 def create_immigration_expert(provider: str = "openai", 
                             model: str = "gpt-4o",
+                            assistant_id: str = "asst_AV1O2IBTnDXpEZXiSSQGBT4",
                             custom_prompt: str = None) -> ImmigrationExpert:
     """
-    Factory function to create immigration expert with custom settings
+    Factory function to create Dra. Paula B2C immigration expert
+    
+    Args:
+        provider: LLM provider (default: openai)
+        model: Model to use (default: gpt-4o) 
+        assistant_id: Dra. Paula's Assistant ID
+        custom_prompt: Override system prompt if needed
     """
     return ImmigrationExpert(
         provider=provider,
         model=model,
+        assistant_id=assistant_id,
         custom_system_prompt=custom_prompt
     )
