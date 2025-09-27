@@ -256,16 +256,29 @@ class ImmigrationExpert:
             
             import json
             try:
-                return json.loads(response)
+                result = json.loads(response)
+                # Add Dra. Paula signature
+                result["expert"] = "Dra. Paula B2C"
+                result["assistant_id"] = self.assistant_id
+                return result
             except json.JSONDecodeError:
+                # If can't parse JSON, assume there's an issue
                 return {
-                    "document_valid": True,
-                    "completeness_score": 85,
-                    "issues_found": [],
-                    "missing_elements": [],
+                    "expert": "Dra. Paula B2C",
+                    "assistant_id": self.assistant_id,
+                    "document_type_correct": False,
+                    "belongs_to_user": False, 
+                    "is_authentic_document": False,
+                    "document_valid": False,
+                    "completeness_score": 0,
+                    "critical_issues": [{"severity": "CRÍTICO", "issue": "Erro na análise do documento", "impact": "Não foi possível validar"}],
+                    "data_inconsistencies": ["Erro no processamento"],
+                    "missing_elements": ["Análise válida"],
                     "recommendations": [response],
-                    "expiration_check": "ok",
-                    "uscis_compliance": "compliant"
+                    "expiration_check": "cannot_verify",
+                    "uscis_compliance": "rejected",
+                    "dra_paula_verdict": "REJEITADO",
+                    "expert_notes": "Erro no processamento - documento deve ser reanalisado"
                 }
                 
         except Exception as e:
