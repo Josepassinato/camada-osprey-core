@@ -84,7 +84,7 @@ const Benefits = () => {
         
         {/* Header */}
         <div className="text-center space-y-6 mb-20">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-black/20">
             <Award className="h-4 w-4 text-black" />
             <span className="text-sm font-medium text-black">Por que OSPREY?</span>
           </div>
@@ -134,7 +134,7 @@ const Benefits = () => {
                 </CardContent>
 
                 {/* Hover border effect */}
-                <div className="absolute inset-0 rounded-lg border-2 border-transparent group-hover:border-primary/20 transition-colors duration-300 pointer-events-none"></div>
+                <div className="absolute inset-0 rounded-lg border-2 border-transparent group-hover:border-black/20 transition-colors duration-300 pointer-events-none"></div>
               </Card>
             );
           })}
@@ -142,7 +142,7 @@ const Benefits = () => {
 
         {/* Trust indicators */}
         <div className="mt-20 text-center">
-          <div className="inline-flex items-center gap-12 p-8 glass rounded-2xl border border-primary/10">
+          <div className="inline-flex items-center gap-12 p-8 glass rounded-2xl border border-black/10">
             <div className="text-center">
               <div className="text-3xl font-bold text-gradient mb-1">5.000+</div>
               <div className="text-sm text-muted-foreground">Clientes Aprovados</div>

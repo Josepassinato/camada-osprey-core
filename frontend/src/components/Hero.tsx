@@ -85,7 +85,7 @@ const Hero = () => {
               <Button 
                 variant="outline" 
                 size="xl" 
-                className="text-lg font-medium btn-glass hover:border-primary/30"
+                className="text-lg font-medium btn-glass hover:border-black/30"
               >
                 Ver Como Funciona
               </Button>
@@ -148,7 +148,7 @@ const Hero = () => {
                   <CheckCircle className="h-6 w-6 text-success" />
                 </div>
                 
-                <div className="absolute -bottom-4 -left-4 glass border border-primary/20 rounded-full p-3">
+                <div className="absolute -bottom-4 -left-4 glass border border-black/20 rounded-full p-3">
                   <Sparkles className="h-6 w-6 text-black animate-pulse" />
                 </div>
               </div>

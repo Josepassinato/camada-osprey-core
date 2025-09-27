@@ -292,8 +292,8 @@ const DocumentUpload = () => {
                 <div
                   className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                     dragActive 
-                      ? "border-primary bg-black/5" 
-                      : "border-border hover:border-primary/50"
+                      ? "border-black bg-black/5" 
+                      : "border-border hover:border-black/50"
                   }`}
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}

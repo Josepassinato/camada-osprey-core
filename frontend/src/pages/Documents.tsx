@@ -229,7 +229,7 @@ const Documents = () => {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
           <p className="text-muted-foreground">Carregando documentos...</p>
         </div>
       </div>
@@ -457,7 +457,7 @@ const Documents = () => {
                         <div className="bg-white/30 rounded-lg p-4 space-y-3">
                           <div className="flex items-center justify-between">
                             <span className="text-sm font-medium text-foreground">Análise IA</span>
-                            <Badge className="bg-black/10 text-black border-primary/20">
+                            <Badge className="bg-black/10 text-black border-black/20">
                               {doc.ai_analysis.completeness_score}% completo
                             </Badge>
                           </div>

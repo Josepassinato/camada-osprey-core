@@ -17,7 +17,7 @@ const CTA = () => {
         <div className="max-w-5xl mx-auto">
           
           {/* Main CTA Card */}
-          <div className="glass border border-primary/20 rounded-3xl p-8 md:p-12 lg:p-16 text-center space-y-8 card-hover relative overflow-hidden">
+          <div className="glass border border-black/20 rounded-3xl p-8 md:p-12 lg:p-16 text-center space-y-8 card-hover relative overflow-hidden">
             
             {/* Background pattern */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 rounded-3xl"></div>
@@ -26,7 +26,7 @@ const CTA = () => {
             <div className="relative space-y-6">
               
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/30">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-black/30">
                 <Sparkles className="h-4 w-4 text-black animate-pulse" />
                 <span className="text-sm font-medium text-black">Comece sua Jornada Agora</span>
               </div>
@@ -75,7 +75,7 @@ const CTA = () => {
                 <Button 
                   variant="outline" 
                   size="xl" 
-                  className="text-lg font-medium btn-glass hover:border-primary/30 flex-1"
+                  className="text-lg font-medium btn-glass hover:border-black/30 flex-1"
                   onClick={() => navigate('/chat')}
                 >
                   <MessageSquare className="h-5 w-5" />
@@ -105,14 +105,14 @@ const CTA = () => {
               <CheckCircle className="h-8 w-8 text-success" />
             </div>
             
-            <div className="absolute -bottom-6 -right-6 glass border border-primary/20 rounded-2xl p-4 -rotate-12">
+            <div className="absolute -bottom-6 -right-6 glass border border-black/20 rounded-2xl p-4 -rotate-12">
               <Sparkles className="h-8 w-8 text-black animate-pulse" />
             </div>
           </div>
 
           {/* Bottom testimonial */}
           <div className="mt-16 text-center">
-            <div className="inline-flex items-center gap-4 p-6 glass rounded-2xl border border-primary/10 max-w-2xl">
+            <div className="inline-flex items-center gap-4 p-6 glass rounded-2xl border border-black/10 max-w-2xl">
               <div className="flex -space-x-2">
                 {[1, 2, 3, 4].map((i) => (
                   <div key={i} className="w-10 h-10 bg-gradient-primary rounded-full border-2 border-white flex items-center justify-center text-white text-sm font-medium">
