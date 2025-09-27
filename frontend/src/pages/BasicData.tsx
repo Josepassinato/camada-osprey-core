@@ -302,17 +302,11 @@ const BasicData = () => {
               <span className="text-sm font-medium text-black">🎤 Assistente de Voz:</span>
               <VoiceMic
                 sessionId={case_?.case_id}
-                onAdvice={(advice) => setVoiceAdvice(advice.say || '')}
                 onError={(error) => setError(error)}
                 isEnabled={!!case_?.case_id}
                 className="flex-1"
               />
             </div>
-            {voiceAdvice && (
-              <div className="max-w-md ml-4 p-2 bg-white border border-black rounded text-xs text-black">
-                💡 {voiceAdvice}
-              </div>
-            )}
           </div>
         </div>
       </div>
