@@ -303,7 +303,7 @@ const BasicData = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-black mb-2">
                       Nome do Meio
                     </label>
                     <input
@@ -311,7 +311,7 @@ const BasicData = () => {
                       value={formData.middleName}
                       onChange={(e) => handleInputChange('middleName', e.target.value)}
                       placeholder="Nome do meio"
-                      className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-black"
                     />
                   </div>
                 </div>
