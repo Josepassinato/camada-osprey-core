@@ -375,13 +375,11 @@ const BasicData = () => {
 
             {/* Contact Information */}
             <div className="bg-white border border-black rounded-lg p-4 sm:p-6">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-black" />
-                  Informações de Contato
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+              <h2 className="text-lg font-semibold text-black mb-4 flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Informações de Contato
+              </h2>
+              <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
                     Endereço Atual <span className="text-red-500">*</span>
