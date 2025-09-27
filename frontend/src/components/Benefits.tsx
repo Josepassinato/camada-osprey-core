@@ -59,7 +59,7 @@ const benefits = [
     title: "Rapidez Comprovada",
     description: "Média de 30 dias para aprovação com nosso processo otimizado",
     color: "from-indigo-500/10 to-blue-500/10",
-    iconColor: "text-indigo-600"
+    iconColor: "text-black"
   },
   {
     icon: Globe,
