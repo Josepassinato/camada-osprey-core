@@ -497,18 +497,15 @@ CONTEXTO ATUAL: O usuário está preenchendo um formulário de auto-aplicação
 Responda de forma útil mas sempre dentro dos guardrails.
 """
 
-            # Call OpenAI with guardrails
-            response = openai.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "Você é um assistente de conformidade que ajuda com preenchimento de formulários, mas nunca dá aconselhamento jurídico."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.1,
-                max_tokens=200
-            )
+            # Call LLM with guardrails via emergentintegrations
+            chat = LlmChat(
+                api_key="sk-emergent-aE5F536B80dFf0bA6F",
+                session_id=f"general_q_{uuid.uuid4().hex[:8]}",
+                system_message="Você é um assistente de conformidade que ajuda com preenchimento de formulários, mas nunca dá aconselhamento jurídico."
+            ).with_model("openai", "gpt-4o-mini")
             
-            ai_response = response.choices[0].message.content.strip()
+            user_message = UserMessage(text=prompt)
+            ai_response = await chat.send_message(user_message)
             
             return AgentAdvice(
                 disclaimer="Esta é uma ferramenta de apoio, não aconselhamento jurídico.",
