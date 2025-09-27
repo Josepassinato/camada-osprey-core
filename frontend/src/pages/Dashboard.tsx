@@ -105,12 +105,12 @@ const Dashboard = () => {
   const getStatusColor = (status: string) => {
     const colors = {
       'not_started': 'bg-gray-100 text-gray-800',
-      'in_progress': 'bg-blue-100 text-blue-800',
-      'document_review': 'bg-orange-100 text-orange-800',
-      'ready_to_submit': 'bg-purple-100 text-purple-800',
-      'submitted': 'bg-green-100 text-green-800',
-      'approved': 'bg-emerald-100 text-emerald-800',
-      'denied': 'bg-red-100 text-red-800',
+      'in_progress': 'bg-gray-200 text-black',
+      'document_review': 'bg-gray-300 text-black',
+      'ready_to_submit': 'bg-gray-400 text-white',
+      'submitted': 'bg-gray-500 text-white',
+      'approved': 'bg-black text-white',
+      'denied': 'bg-gray-600 text-white',
     };
     return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
