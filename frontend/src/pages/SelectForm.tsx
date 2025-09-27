@@ -144,29 +144,24 @@ const SelectForm = () => {
     setError("");
 
     try {
-      const token = localStorage.getItem('osprey_token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
+      const sessionToken = localStorage.getItem('osprey_session_token');
+      
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auto-application/start`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          form_code: formCode
+          form_code: formCode,
+          session_token: sessionToken
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
+        // Store case ID for anonymous access
+        localStorage.setItem('osprey_current_case_id', data.case.case_id);
         navigate(`/auto-application/case/${data.case.case_id}/basic-data`);
-      } else if (response.status === 400) {
-        setError('Você precisa aceitar o aviso legal primeiro.');
-        navigate('/auto-application/start');
       } else {
         setError('Erro ao criar caso. Tente novamente.');
       }
