@@ -162,7 +162,7 @@ const DocumentUpload = () => {
       if (issueDate) formData.append('issue_date', issueDate + 'T00:00:00Z');
 
       try {
-        const response = await fetch(`${import.meta.env.REACT_APP_BACKEND_URL}/api/documents/upload`, {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/documents/upload`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
