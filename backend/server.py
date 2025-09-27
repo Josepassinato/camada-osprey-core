@@ -1808,22 +1808,15 @@ INSTRUÇÕES:
 Responda apenas com o JSON estruturado, sem explicações adicionais.
 """
 
-        # Call OpenAI for fact extraction
-        response = openai.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {
-                    "role": "system", 
-                    "content": "Você é um especialista em extrair informações estruturadas de narrativas para aplicações de imigração. Responda sempre em português e com informações precisas."
-                },
-                {"role": "user", "content": extraction_prompt}
-            ],
-            temperature=0.1,
-            max_tokens=2000
-        )
+        # Call LLM via emergentintegrations for fact extraction
+        chat = LlmChat(
+            api_key="sk-emergent-aE5F536B80dFf0bA6F",
+            session_id=f"fact_extraction_{uuid.uuid4().hex[:8]}",
+            system_message="Você é um especialista em extrair informações estruturadas de narrativas para aplicações de imigração. Responda sempre em português e com informações precisas."
+        ).with_model("openai", "gpt-4o")
         
-        # Parse AI response
-        ai_response = response.choices[0].message.content.strip()
+        user_message = UserMessage(text=extraction_prompt)
+        ai_response = await chat.send_message(user_message)
         
         # Try to extract JSON from the response
         try:
