@@ -398,7 +398,7 @@ const Documents = () => {
                     }
                   </p>
                   {documents.length === 0 && (
-                    <Button className="btn-gradient" onClick={() => setShowUpload(true)}>
+                    <Button className="bg-black text-white hover:bg-gray-800" onClick={() => setShowUpload(true)}>
                       <Upload className="h-4 w-4" />
                       Fazer Upload
                     </Button>
