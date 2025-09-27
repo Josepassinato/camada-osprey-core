@@ -199,7 +199,7 @@ const Header = () => {
                       Entrar
                     </Button>
                     <Button 
-                      className="w-full btn-gradient font-medium"
+                      className="w-full bg-black text-white hover:bg-gray-800 font-medium"
                       onClick={() => {
                         navigate('/signup');
                         setIsMobileMenuOpen(false);
