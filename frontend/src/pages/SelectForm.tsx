@@ -282,80 +282,70 @@ const SelectForm = () => {
 
         <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
           {uscisforms.map((form) => (
-            <Card 
+            <div 
               key={form.code}
-              className={`glass border-0 card-hover cursor-pointer relative ${
-                selectedForm === form.code ? 'ring-2 ring-black' : ''
+              className={`bg-white border-2 rounded-lg p-4 sm:p-6 cursor-pointer transition-all hover:shadow-lg ${
+                selectedForm === form.code ? 'border-black shadow-lg' : 'border-gray-200'
               }`}
               onClick={() => setSelectedForm(form.code)}
             >
               {form.popular && (
-                <div className="absolute -top-2 -right-2 bg-black text-white text-xs px-2 py-1 rounded-full">
+                <div className="inline-block bg-black text-white text-xs px-2 py-1 rounded-full mb-3">
                   Popular
                 </div>
               )}
               
-              <CardHeader>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-700">
-                      {form.icon}
-                    </div>
-                    <div className="text-2xl">
-                      {getCategoryIcon(form.category)}
-                    </div>
-                  </div>
-                  <div className={`px-2 py-1 rounded-full text-xs border ${getComplexityColor(form.complexity)}`}>
-                    {form.complexity}
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-black text-white rounded-lg flex items-center justify-center">
+                    {form.icon}
                   </div>
                 </div>
-                <CardTitle className="text-lg">{form.title}</CardTitle>
-              </CardHeader>
+                <div className="bg-white border border-black px-2 py-1 rounded-full text-xs text-black">
+                  {form.complexity}
+                </div>
+              </div>
               
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  {form.description}
-                </p>
+              <h3 className="text-base sm:text-lg font-bold text-black mb-2">{form.title}</h3>
+              
+              <p className="text-xs sm:text-sm text-black mb-4 leading-tight">
+                {form.description}
+              </p>
 
-                <div className="space-y-2">
-                  <Badge className="bg-gray-100 text-gray-700 border-gray-200">
-                    {form.category}
-                  </Badge>
-                </div>
+              <div className="mb-3">
+                <span className="inline-block bg-black text-white text-xs px-2 py-1 rounded">
+                  {form.category}
+                </span>
+              </div>
 
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      <span>Prazo</span>
-                    </div>
-                    <div className="font-medium">{form.processingTime}</div>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <DollarSign className="h-3 w-3" />
-                      <span>Taxa USCIS</span>
-                    </div>
-                    <div className="font-medium">{form.uscisfee}</div>
-                  </div>
-                </div>
-
+              <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm mb-4">
                 <div>
-                  <h4 className="font-medium text-sm mb-2">Principais requisitos:</h4>
-                  <ul className="space-y-1">
-                    {form.eligibility.slice(0, 2).map((req, index) => (
-                      <li key={index} className="text-xs text-muted-foreground flex items-start gap-1">
-                        <div className="w-1 h-1 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
-                        {req}
-                      </li>
-                    ))}
-                    {form.eligibility.length > 2 && (
-                      <li className="text-xs text-muted-foreground">
-                        ... e mais {form.eligibility.length - 2} requisitos
-                      </li>
-                    )}
-                  </ul>
+                  <div className="flex items-center gap-1 text-black mb-1">
+                    <Clock className="h-3 w-3" />
+                    <span>Prazo</span>
+                  </div>
+                  <div className="font-medium text-black">{form.processingTime}</div>
                 </div>
+                <div>
+                  <div className="flex items-center gap-1 text-black mb-1">
+                    <DollarSign className="h-3 w-3" />
+                    <span>Taxa USCIS</span>
+                  </div>
+                  <div className="font-medium text-black">{form.uscisfee}</div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-xs sm:text-sm text-black mb-2">Principais requisitos:</h4>
+                <ul className="space-y-1">
+                  {form.eligibility.slice(0, 2).map((req, index) => (
+                    <li key={index} className="text-xs text-black flex items-start gap-2">
+                      <CheckCircle className="h-3 w-3 text-black flex-shrink-0 mt-0.5" />
+                      <span className="leading-tight">{req}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
                 <Button 
                   className={`w-full ${
