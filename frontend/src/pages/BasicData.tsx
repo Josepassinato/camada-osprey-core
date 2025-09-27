@@ -520,8 +520,8 @@ const BasicData = () => {
                     />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Actions */}
             <div className="flex justify-between items-center">
