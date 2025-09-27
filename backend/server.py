@@ -2463,6 +2463,194 @@ async def immigration_expert_advice(request: dict):
             "error": str(e),
             "advice": "Desculpe, não foi possível processar sua pergunta no momento."
         }
+
+# Specialized Agents Endpoints
+@api_router.post("/specialized-agents/document-validation")
+async def specialized_document_validation(request: dict):
+    """Ultra-specialized document validation using Dr. Miguel"""
+    try:
+        validator = create_document_validator()
+        
+        document_type = request.get("documentType", "passport")
+        document_content = request.get("documentContent", "")
+        user_data = request.get("userData", {})
+        
+        prompt = f"""
+        VALIDAÇÃO RIGOROSA DE DOCUMENTO
+        
+        Tipo Esperado: {document_type}
+        Conteúdo: {document_content[:1500]}
+        Dados do Usuário: {user_data}
+        
+        Faça validação técnica completa conforme seu protocolo especializado.
+        """
+        
+        session_id = f"doc_validation_{hash(document_content) % 10000}"
+        analysis = await validator._call_agent(prompt, session_id)
+        
+        return {
+            "success": True,
+            "agent": "Dr. Miguel - Validador de Documentos",
+            "specialization": "Document Validation & Authenticity",
+            "analysis": analysis,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Dr. Miguel document validation error: {e}")
+        return {
+            "success": False,
+            "agent": "Dr. Miguel - Validador de Documentos", 
+            "error": str(e)
+        }
+
+@api_router.post("/specialized-agents/form-validation")
+async def specialized_form_validation(request: dict):
+    """Ultra-specialized form validation using Dra. Ana"""
+    try:
+        validator = create_form_validator()
+        
+        form_data = request.get("formData", {})
+        visa_type = request.get("visaType", "H-1B")
+        step_id = request.get("stepId", "personal")
+        
+        prompt = f"""
+        VALIDAÇÃO COMPLETA DE FORMULÁRIO
+        
+        Dados do Formulário: {form_data}
+        Tipo de Visto: {visa_type}
+        Etapa Atual: {step_id}
+        
+        Execute validação sistemática conforme seu protocolo especializado.
+        """
+        
+        session_id = f"form_validation_{visa_type}_{step_id}_{hash(str(form_data)) % 10000}"
+        analysis = await validator._call_agent(prompt, session_id)
+        
+        return {
+            "success": True,
+            "agent": "Dra. Ana - Validadora de Formulários",
+            "specialization": "Form Validation & Data Consistency", 
+            "analysis": analysis,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Dra. Ana form validation error: {e}")
+        return {
+            "success": False,
+            "agent": "Dra. Ana - Validadora de Formulários",
+            "error": str(e)
+        }
+
+@api_router.post("/specialized-agents/eligibility-analysis")
+async def specialized_eligibility_analysis(request: dict):
+    """Ultra-specialized eligibility analysis using Dr. Carlos"""
+    try:
+        analyst = create_eligibility_analyst()
+        
+        applicant_profile = request.get("applicantProfile", {})
+        visa_type = request.get("visaType", "H-1B")
+        qualifications = request.get("qualifications", {})
+        
+        prompt = f"""
+        ANÁLISE COMPLETA DE ELEGIBILIDADE
+        
+        Perfil do Candidato: {applicant_profile}
+        Visto Solicitado: {visa_type}
+        Qualificações: {qualifications}
+        
+        Execute análise sistemática conforme seu protocolo especializado.
+        """
+        
+        session_id = f"eligibility_{visa_type}_{hash(str(applicant_profile)) % 10000}"
+        analysis = await analyst._call_agent(prompt, session_id)
+        
+        return {
+            "success": True,
+            "agent": "Dr. Carlos - Analista de Elegibilidade",
+            "specialization": "Visa Eligibility Analysis",
+            "analysis": analysis,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Dr. Carlos eligibility analysis error: {e}")
+        return {
+            "success": False,
+            "agent": "Dr. Carlos - Analista de Elegibilidade",
+            "error": str(e)
+        }
+
+@api_router.post("/specialized-agents/compliance-check")
+async def specialized_compliance_check(request: dict):
+    """Ultra-specialized USCIS compliance check using Dra. Patricia"""
+    try:
+        checker = create_compliance_checker()
+        
+        complete_application = request.get("completeApplication", {})
+        documents = request.get("documents", [])
+        forms = request.get("forms", {})
+        
+        prompt = f"""
+        REVISÃO FINAL DE COMPLIANCE USCIS
+        
+        Aplicação Completa: {complete_application}
+        Documentos Submetidos: {documents}
+        Formulários: {forms}
+        
+        Execute revisão final conforme seu protocolo especializado.
+        """
+        
+        session_id = f"compliance_{hash(str(complete_application)) % 10000}"
+        analysis = await checker._call_agent(prompt, session_id)
+        
+        return {
+            "success": True,
+            "agent": "Dra. Patricia - Compliance USCIS",
+            "specialization": "USCIS Compliance & Final Review",
+            "analysis": analysis,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Dra. Patricia compliance check error: {e}")
+        return {
+            "success": False,
+            "agent": "Dra. Patricia - Compliance USCIS", 
+            "error": str(e)
+        }
+
+@api_router.post("/specialized-agents/comprehensive-analysis")
+async def comprehensive_multi_agent_analysis(request: dict):
+    """Comprehensive analysis using multiple specialized agents"""
+    try:
+        coordinator = SpecializedAgentCoordinator()
+        
+        task_type = request.get("taskType", "form_validation")
+        data = request.get("data", {})
+        user_context = request.get("userContext", {})
+        
+        comprehensive_result = await coordinator.analyze_comprehensive(
+            task_type=task_type,
+            data=data, 
+            user_context=user_context
+        )
+        
+        return {
+            "success": True,
+            "coordinator": "Multi-Agent Specialized System",
+            "result": comprehensive_result,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Comprehensive analysis error: {e}")
+        return {
+            "success": False,
+            "coordinator": "Multi-Agent Specialized System",
+            "error": str(e)
+        }
 # Helper function for optional authentication
 async def get_current_user_optional():
     """Get current user if authenticated, None if not"""
