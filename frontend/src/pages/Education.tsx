@@ -345,7 +345,7 @@ const Education = () => {
                             </div>
                             <div>
                               <div className="text-muted-foreground">Seções</div>
-                              <div className="font-medium">{guide.sections.length} capítulos</div>
+                              <div className="font-medium">{guide.sections?.length || 0} capítulos</div>
                             </div>
                             <div>
                               <div className="text-muted-foreground">Requisitos</div>
