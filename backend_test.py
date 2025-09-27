@@ -2110,6 +2110,17 @@ def run_all_tests():
     
     print(f"  Education System: {edu_passed}/{edu_total} tests passed ({edu_passed/edu_total*100:.1f}%)")
     
+    # Voice Agent System Results (NEW - Semana 1 MVP)
+    print("\n🎤 VOICE AGENT SYSTEM:")
+    voice_passed = sum(voice_agent_results.values())
+    voice_total = len(voice_agent_results)
+    
+    for test_name, result in voice_agent_results.items():
+        status = "✅ PASS" if result else "❌ FAIL"
+        print(f"  {test_name.replace('_', ' ').title()}: {status}")
+    
+    print(f"  Voice Agent System: {voice_passed}/{voice_total} tests passed ({voice_passed/voice_total*100:.1f}%)")
+    
     # Auto-Application System Results (NEW)
     print("\n🚀 AUTO-APPLICATION SYSTEM:")
     auto_passed = sum(auto_app_results.values())
