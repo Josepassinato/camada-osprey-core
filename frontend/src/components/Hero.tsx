@@ -76,9 +76,9 @@ const Hero = () => {
               <Button 
                 size="xl" 
                 className="bg-black text-white hover:bg-gray-800 text-lg font-medium group"
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate('/auto-application/start')}
               >
-                Iniciar Aplicação Agora
+                Começar Auto-Aplicação
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
               
