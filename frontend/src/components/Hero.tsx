@@ -144,8 +144,8 @@ const Hero = () => {
                 </div>
                 
                 {/* Floating indicators */}
-                <div className="absolute -top-4 -right-4 glass border border-success/20 rounded-full p-3">
-                  <CheckCircle className="h-6 w-6 text-success" />
+                <div className="absolute -top-4 -right-4 glass border border-black/20 rounded-full p-3">
+                  <CheckCircle className="h-6 w-6 text-black" />
                 </div>
                 
                 <div className="absolute -bottom-4 -left-4 glass border border-black/20 rounded-full p-3">
