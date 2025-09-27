@@ -2609,6 +2609,212 @@ def test_complete_auto_application_journey():
         print("⚠️  Auto-application journey has significant issues")
         return False
 
+def test_case_id_persistence():
+    """Test Case ID persistence between navigation steps - CRITICAL PRIORITY"""
+    print("\n🔄 Testing Case ID Persistence (CRITICAL PRIORITY)...")
+    
+    if not AUTO_APPLICATION_CASE_ID:
+        print("❌ No case ID available for persistence test")
+        return False
+    
+    try:
+        # Step 1: Update case with basic data
+        basic_data = {
+            "full_name": "Carlos Eduardo Silva Santos",
+            "date_of_birth": "1990-03-15",
+            "nationality": "Brazilian",
+            "passport_number": "BR123456789",
+            "email": "carlos.silva.teste@gmail.com",
+            "phone": "+55 11 99999-8888",
+            "current_address": "Rua das Flores, 123, São Paulo, SP, Brazil"
+        }
+        
+        update_payload = {
+            "status": "basic_data",
+            "basic_data": basic_data
+        }
+        
+        update_response = requests.put(
+            f"{API_BASE}/auto-application/case/{AUTO_APPLICATION_CASE_ID}", 
+            json=update_payload, 
+            timeout=10
+        )
+        
+        if update_response.status_code == 200:
+            print(f"✅ Step 1: Basic data updated successfully")
+            
+            # Step 2: Retrieve case and verify persistence
+            get_response = requests.get(
+                f"{API_BASE}/auto-application/case/{AUTO_APPLICATION_CASE_ID}", 
+                timeout=10
+            )
+            
+            if get_response.status_code == 200:
+                case_data = get_response.json().get('case', {})
+                
+                # Verify case ID is maintained
+                retrieved_case_id = case_data.get('case_id')
+                if retrieved_case_id == AUTO_APPLICATION_CASE_ID:
+                    print(f"✅ Case ID persistence verified: {retrieved_case_id}")
+                else:
+                    print(f"❌ Case ID mismatch: expected {AUTO_APPLICATION_CASE_ID}, got {retrieved_case_id}")
+                    return False
+                
+                # Verify basic data is persisted
+                persisted_basic_data = case_data.get('basic_data', {})
+                if persisted_basic_data.get('full_name') == basic_data['full_name']:
+                    print(f"✅ Basic data persistence verified")
+                else:
+                    print(f"❌ Basic data not persisted correctly")
+                    return False
+                
+                # Step 3: Update to next stage and verify persistence again
+                story_update = {
+                    "status": "story_completed",
+                    "user_story_text": "Sou engenheiro de software brasileiro com 8 anos de experiência. Trabalho atualmente em São Paulo para uma empresa multinacional de tecnologia. Recebi uma oferta de emprego de uma empresa americana em San Francisco para trabalhar como Senior Software Engineer. A empresa está disposta a patrocinar meu visto H1-B. Tenho graduação em Ciência da Computação pela USP e especialização em Inteligência Artificial. Sou casado com Maria Silva Santos e temos um filho de 3 anos. Nunca tive problemas com a lei e possuo todos os documentos necessários."
+                }
+                
+                story_response = requests.put(
+                    f"{API_BASE}/auto-application/case/{AUTO_APPLICATION_CASE_ID}", 
+                    json=story_update, 
+                    timeout=10
+                )
+                
+                if story_response.status_code == 200:
+                    print(f"✅ Step 3: Story data updated successfully")
+                    
+                    # Final verification
+                    final_get_response = requests.get(
+                        f"{API_BASE}/auto-application/case/{AUTO_APPLICATION_CASE_ID}", 
+                        timeout=10
+                    )
+                    
+                    if final_get_response.status_code == 200:
+                        final_case_data = final_get_response.json().get('case', {})
+                        
+                        # Verify case ID still maintained
+                        final_case_id = final_case_data.get('case_id')
+                        if final_case_id == AUTO_APPLICATION_CASE_ID:
+                            print(f"✅ CRITICAL: Case ID persistence maintained across all steps")
+                        else:
+                            print(f"❌ CRITICAL: Case ID lost during navigation")
+                            return False
+                        
+                        # Verify both basic data and story are maintained
+                        final_basic_data = final_case_data.get('basic_data', {})
+                        final_story = final_case_data.get('user_story_text', '')
+                        
+                        if (final_basic_data.get('full_name') == basic_data['full_name'] and 
+                            'engenheiro de software' in final_story.lower()):
+                            print(f"✅ CRITICAL: All data persistence verified across navigation steps")
+                            return True
+                        else:
+                            print(f"❌ CRITICAL: Data loss detected during navigation")
+                            return False
+                    else:
+                        print(f"❌ Final case retrieval failed: {final_get_response.status_code}")
+                        return False
+                else:
+                    print(f"❌ Story update failed: {story_response.status_code}")
+                    return False
+            else:
+                print(f"❌ Case retrieval failed: {get_response.status_code}")
+                return False
+        else:
+            print(f"❌ Basic data update failed: {update_response.status_code}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Case ID persistence test error: {str(e)}")
+        return False
+
+def test_comprehensive_system_critical_priorities():
+    """Test all critical priorities mentioned in the review request"""
+    print("\n🎯 COMPREHENSIVE SYSTEM TEST - CRITICAL PRIORITIES")
+    print("=" * 60)
+    
+    critical_tests = {}
+    
+    # 1. Authentication System (CRITICAL PRIORITY #3)
+    print("\n🔐 PRIORITY 1: Authentication System...")
+    auth_tests = [
+        test_user_signup(),
+        test_user_login(),
+        test_user_profile()
+    ]
+    critical_tests["authentication_system"] = all(auth_tests)
+    
+    # 2. Auto-Application Journey (CRITICAL PRIORITY #2)
+    print("\n🚀 PRIORITY 2: Auto-Application Journey...")
+    critical_tests["auto_application_journey"] = test_complete_auto_application_journey()
+    
+    # 3. Case ID Persistence (CRITICAL PRIORITY #1)
+    print("\n🔄 PRIORITY 3: Case ID Persistence Testing...")
+    critical_tests["case_id_persistence"] = test_case_id_persistence()
+    
+    # 4. Osprey Owl Tutor System (CRITICAL PRIORITY #4)
+    print("\n🦉 PRIORITY 4: Osprey Owl Tutor System...")
+    owl_tests = [
+        test_owl_tutor_personal_validation(),
+        test_owl_tutor_address_validation(),
+        test_owl_tutor_employment_validation()
+    ]
+    critical_tests["owl_tutor_system"] = all(owl_tests)
+    
+    # 5. Brazilian User Scenarios
+    print("\n🇧🇷 PRIORITY 5: Brazilian User Scenarios...")
+    brazilian_tests = [
+        test_authenticated_chat(),  # Portuguese chat
+        test_knowledge_base_search(),  # Portuguese knowledge base
+        test_personalized_tips()  # Portuguese tips
+    ]
+    critical_tests["brazilian_user_scenarios"] = all(brazilian_tests)
+    
+    # 6. Document Management with AI
+    print("\n📄 PRIORITY 6: Document Management with AI...")
+    doc_tests = [
+        test_document_upload(),
+        test_document_reanalyze(),
+        test_document_details()
+    ]
+    critical_tests["document_management_ai"] = all(doc_tests)
+    
+    # Summary of critical priorities
+    print("\n" + "=" * 60)
+    print("🎯 CRITICAL PRIORITIES TEST RESULTS")
+    print("=" * 60)
+    
+    priority_names = {
+        "authentication_system": "Authentication System",
+        "auto_application_journey": "Auto-Application Journey", 
+        "case_id_persistence": "Case ID Persistence",
+        "owl_tutor_system": "Osprey Owl Tutor System",
+        "brazilian_user_scenarios": "Brazilian User Scenarios",
+        "document_management_ai": "Document Management with AI"
+    }
+    
+    passed_priorities = 0
+    for test_key, result in critical_tests.items():
+        status = "✅ PASS" if result else "❌ FAIL"
+        priority_name = priority_names.get(test_key, test_key)
+        print(f"  {priority_name}: {status}")
+        if result:
+            passed_priorities += 1
+    
+    total_priorities = len(critical_tests)
+    success_rate = (passed_priorities / total_priorities) * 100
+    
+    print(f"\n🎯 CRITICAL PRIORITIES: {passed_priorities}/{total_priorities} passed ({success_rate:.1f}%)")
+    
+    if success_rate >= 80:
+        print("✅ SYSTEM READY FOR PRODUCTION - Critical priorities met!")
+    elif success_rate >= 60:
+        print("⚠️  SYSTEM PARTIALLY READY - Some critical issues need attention")
+    else:
+        print("❌ SYSTEM NOT READY - Major critical issues detected")
+    
+    return success_rate >= 80
+
 def run_all_tests():
     """Run all B2C backend tests including document management and education system"""
     print("🚀 Starting OSPREY B2C Backend Complete System Tests")
