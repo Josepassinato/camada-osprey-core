@@ -245,7 +245,7 @@ const Education = () => {
           <Card className="glass border-0 mb-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-primary" />
+                <Trophy className="h-5 w-5 text-black" />
                 Seu Progresso de Aprendizado
               </CardTitle>
             </CardHeader>
