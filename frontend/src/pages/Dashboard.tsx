@@ -401,6 +401,14 @@ const Dashboard = () => {
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
+                  onClick={() => navigate('/chat')}
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  Chat com IA
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
                   onClick={() => navigate('/documents')}
                 >
                   <FileText className="h-4 w-4" />
