@@ -49,6 +49,7 @@ const App = () => (
           <Route path="/auto-application/select-form" element={<SelectForm />} />
           <Route path="/auto-application/case/:caseId/basic-data" element={<BasicData />} />
           <Route path="/auto-application/case/:caseId/documents" element={<DocumentUploadAuto />} />
+          <Route path="/auto-application/case/:caseId/story" element={<StoryTelling />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
