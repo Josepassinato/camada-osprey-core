@@ -396,7 +396,7 @@ const BasicData = () => {
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-black mb-2">
-                      Cidade <span className="text-red-500">*</span>
+                      Cidade <span className="text-black">*</span>
                     </label>
                     <input
                       type="text"
@@ -420,7 +420,7 @@ const BasicData = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-black mb-2">
-                      CEP/ZIP <span className="text-red-500">*</span>
+                      CEP/ZIP <span className="text-black">*</span>
                     </label>
                     <input
                       type="text"
