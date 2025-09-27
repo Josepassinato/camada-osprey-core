@@ -220,9 +220,9 @@ const AutoApplicationStart = () => {
                   <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold">
                     1
                   </div>
-                  <h4 className="font-semibold text-foreground mb-2">Escolha o Formulário</h4>
+                  <h4 className="font-semibold text-foreground mb-2">Organizar Informações</h4>
                   <p className="text-sm text-muted-foreground">
-                    Selecione o tipo de formulário USCIS apropriado para sua situação
+                    Nossa ferramenta ajuda a organizar suas informações de forma estruturada
                   </p>
                 </div>
                 <div className="text-center">
