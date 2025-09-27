@@ -1744,6 +1744,33 @@ async def claim_anonymous_case(case_id: str, current_user = Depends(get_current_
         logger.error(f"Error claiming case: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error claiming case: {str(e)}")
 
+@api_router.get("/auto-application/visa-specs/{form_code}")
+async def get_visa_specs(form_code: str, subcategory: Optional[str] = None):
+    """Get detailed specifications for a specific USCIS form"""
+    try:
+        specs = get_visa_specifications(form_code)
+        if not specs:
+            raise HTTPException(status_code=404, detail="Form specifications not found")
+        
+        # Get additional details
+        required_documents = get_required_documents(form_code, subcategory)
+        key_questions = get_key_questions(form_code)
+        common_issues = get_common_issues(form_code)
+        
+        return {
+            "form_code": form_code,
+            "specifications": specs,
+            "required_documents": required_documents,
+            "key_questions": key_questions,
+            "common_issues": common_issues
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting visa specifications: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error getting visa specifications: {str(e)}")
+
 # Helper function for optional authentication
 async def get_current_user_optional():
     """Get current user if authenticated, None if not"""
