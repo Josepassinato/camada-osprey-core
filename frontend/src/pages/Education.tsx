@@ -349,7 +349,7 @@ const Education = () => {
                             </div>
                             <div>
                               <div className="text-muted-foreground">Requisitos</div>
-                              <div className="font-medium">{guide.requirements.length} itens</div>
+                              <div className="font-medium">{guide.requirements?.length || 0} itens</div>
                             </div>
                             <div>
                               <div className="text-muted-foreground">Dicas</div>
