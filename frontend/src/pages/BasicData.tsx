@@ -294,6 +294,29 @@ const BasicData = () => {
         </div>
       </div>
 
+      {/* Voice Assistant */}
+      <div className="bg-gray-50 border-t border-black">
+        <div className="px-4 py-3 sm:px-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-black">🎤 Assistente de Voz:</span>
+              <VoiceMic
+                sessionId={case_?.case_id}
+                onAdvice={(advice) => setVoiceAdvice(advice.say || '')}
+                onError={(error) => setError(error)}
+                isEnabled={!!case_?.case_id}
+                className="flex-1"
+              />
+            </div>
+            {voiceAdvice && (
+              <div className="max-w-md ml-4 p-2 bg-white border border-black rounded text-xs text-black">
+                💡 {voiceAdvice}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className="px-4 py-6 sm:px-6 sm:py-8">
         <div className="max-w-4xl mx-auto lg:grid lg:grid-cols-3 lg:gap-8">
           {/* Main Form */}
