@@ -332,6 +332,241 @@ VISA_SPECIFICATIONS = {
             "Aplicação fora do prazo (90 dias antes da expiração)",
             "Inconsistências em declarações anteriores"
         ]
+    },
+    
+    "I-589": {
+        "title": "Pedido de Asilo",
+        "category": "Asilo",
+        "description": "Para pessoas que buscam proteção nos EUA devido à perseguição",
+        "uscis_fee": "$0",
+        "processing_time": "2-5 anos",
+        
+        "required_documents": [
+            "Formulário I-589 preenchido",
+            "Evidência de identidade (passaporte, certidão de nascimento)",
+            "Declaração pessoal detalhada sobre perseguição",
+            "Evidências de perseguição ou ameaças",
+            "Documentos do país de origem",
+            "Relatórios sobre condições do país",
+            "Fotos tipo passaporte (2 fotos)"
+        ],
+        
+        "evidence_required": {
+            "persecution_evidence": [
+                "Relatórios médicos de ferimentos",
+                "Relatórios policiais",
+                "Ordens de prisão ou mandados",
+                "Ameaças escritas ou gravadas",
+                "Fotos de ferimentos ou danos à propriedade",
+                "Declarações de testemunhas",
+                "Artigos de jornal sobre perseguição"
+            ],
+            "country_conditions": [
+                "Relatórios do Departamento de Estado dos EUA",
+                "Relatórios de organizações de direitos humanos",
+                "Artigos acadêmicos sobre condições do país",
+                "Notícias sobre perseguição a grupos similares"
+            ],
+            "identity_documents": [
+                "Passaporte ou documento de identidade nacional",
+                "Certidão de nascimento",
+                "Documentos de casamento/família",
+                "Carteira de trabalho ou documentos profissionais"
+            ],
+            "expert_testimony": [
+                "Relatórios de especialistas em país de origem",
+                "Avaliação psicológica de trauma",
+                "Relatório médico sobre tortura",
+                "Tradução certificada de documentos"
+            ]
+        },
+        
+        "key_questions": [
+            "Quando você chegou aos Estados Unidos?",
+            "Você aplicou para asilo dentro de 1 ano da chegada?",
+            "Por que você não pode retornar ao seu país de origem?",
+            "Qual foi a natureza da perseguição que você sofreu?",
+            "A perseguição foi baseada em raça, religião, nacionalidade, política ou grupo social?",
+            "O governo do seu país estava envolvido na perseguição?",
+            "Você procurou proteção das autoridades locais?",
+            "Você já aplicou para asilo em outro país?",
+            "Você cometeu algum crime grave?",
+            "Você tem familiares que também precisam de proteção?"
+        ],
+        
+        "protected_grounds": [
+            "Raça ou etnia",
+            "Religião ou crenças religiosas", 
+            "Nacionalidade",
+            "Opinião política",
+            "Pertencimento a grupo social particular (LGBTI+, mulheres, etc.)"
+        ],
+        
+        "common_issues": [
+            "Aplicação após o prazo de 1 ano (sem circunstâncias excepcionais)",
+            "Falta de evidência credível de perseguição",
+            "Inconsistências no testemunho",
+            "Perseguição por motivos criminais (não elegível)",
+            "Proteção interna disponível no país de origem",
+            "Crimes graves cometidos pelo aplicante"
+        ]
+    },
+    
+    "O-1": {
+        "title": "Visto de Habilidade Extraordinária",
+        "category": "Trabalho Especializado",
+        "description": "Para indivíduos com habilidades extraordinárias em ciências, artes, educação, negócios ou atletismo",
+        "uscis_fee": "$460",
+        "processing_time": "2-4 meses",
+        
+        "required_documents": [
+            "Formulário I-129 (Petição de Trabalhador Não-Imigrante)",
+            "Suplemento O (Classificação O)",
+            "Contrato ou resumo dos termos do emprego",
+            "Itinerário detalhado das atividades nos EUA",
+            "Carta de consulta de organização apropriada",
+            "Evidência de habilidade extraordinária",
+            "Cópia do passaporte",
+            "Taxa de petição I-129"
+        ],
+        
+        "evidence_required": {
+            "extraordinary_ability_arts": [
+                "Liderança ou papel crítico em organizações distinguidas",
+                "Reconhecimento nacional ou internacional por conquistas",
+                "Registro de sucesso comercial ou crítico maior",
+                "Reconhecimento significativo de organizações, críticos, etc.",
+                "Salário alto ou remuneração comparado a outros na área",
+                "Participação em painéis como juiz do trabalho de outros",
+                "Contribuições artísticas originais de significância major"
+            ],
+            "extraordinary_ability_sciences": [
+                "Prêmios nacionais ou internacionais de excelência",
+                "Membro de associações que exigem conquistas excepcionais",
+                "Material publicado sobre o indivíduo em publicações profissionais",
+                "Participação como juiz do trabalho de outros na área",
+                "Contribuições científicas originais de significância major",
+                "Autoria de artigos acadêmicos em publicações profissionais",
+                "Emprego em posição crítica para organizações distinguidas",
+                "Salário alto comparado a outros na área"
+            ],
+            "business_achievements": [
+                "Prêmios de excelência nacional ou internacional",
+                "Membro de associações profissionais de elite",
+                "Publicações sobre conquistas em mídia profissional",
+                "Liderança em organizações distinguidas",
+                "Salário excepcionalmente alto",
+                "Participação como juiz/avaliador de outros profissionais"
+            ]
+        },
+        
+        "key_questions": [
+            "Em que área você tem habilidade extraordinária?",
+            "Quais prêmios ou reconhecimentos você recebeu?",
+            "Você é membro de organizações profissionais prestigiosas?",
+            "Suas conquistas foram publicadas na mídia?",
+            "Você já foi juiz do trabalho de outros profissionais?",
+            "Qual é sua contribuição original para sua área?",
+            "Seu salário está no topo da sua área?",
+            "Você teve papel crítico em organizações distinguidas?",
+            "Qual será sua atividade específica nos EUA?",
+            "Quem será seu empregador ou peticionário nos EUA?"
+        ],
+        
+        "consultation_organizations": {
+            "arts": "Organização sindical apropriada (SAG-AFTRA, etc.)",
+            "sciences": "Associação profissional na área específica", 
+            "business": "Associação empresarial relevante",
+            "athletics": "Organização atlética apropriada",
+            "education": "Associação educacional relevante"
+        },
+        
+        "common_issues": [
+            "Evidência insuficiente de habilidade extraordinária",
+            "Falta de carta de consulta de organização apropriada",
+            "Itinerário vago ou incompleto das atividades",
+            "Comparação inadequada com pares na área",
+            "Documentação de conquistas inadequadamente traduzida",
+            "Falta de evidência de reconhecimento nacional/internacional"
+        ]
+    },
+    
+    "H-1B": {
+        "title": "Visto de Trabalho Especializado",
+        "category": "Trabalho",
+        "description": "Para profissionais especializados em ocupações que requerem aplicação teórica e prática de conhecimentos especializados",
+        "uscis_fee": "$460 + taxas adicionais",
+        "processing_time": "3-8 meses",
+        
+        "required_documents": [
+            "Formulário I-129 (Petição de Trabalhador Não-Imigrante)",
+            "Suplemento H (Classificação H)",
+            "Labor Condition Application (LCA) certificada",
+            "Carta de oferta de emprego",
+            "Evidência de qualificações educacionais",
+            "Evidência de experiência profissional",
+            "Cópia do diploma universitário",
+            "Histórico acadêmico oficial",
+            "Avaliação de credenciais (se necessário)"
+        ],
+        
+        "evidence_required": {
+            "specialty_occupation": [
+                "Descrição detalhada das funções do cargo",
+                "Evidência de que a posição requer diploma de bacharel",
+                "Evidência de complexidade e singularidade das funções",
+                "Grau de supervisão e julgamento independente requerido"
+            ],
+            "employer_qualifications": [
+                "Prova de que o empregador é uma entidade válida",
+                "Evidência de capacidade financeira para pagar salário",
+                "Histórico de conformidade com leis trabalhistas",
+                "Organograma mostrando onde a posição se encaixa"
+            ],
+            "educational_requirements": [
+                "Diploma de bacharel ou superior em área relacionada",
+                "Histórico acadêmico oficial (transcript)",
+                "Avaliação de credenciais por organização credenciada",
+                "Tradução certificada de documentos estrangeiros"
+            ],
+            "experience_alternative": [
+                "3 anos de experiência = 1 ano de educação universitária",
+                "Cartas de empregadores anteriores detalhando experiência",
+                "Certificados profissionais relevantes",
+                "Evidência de treinamento especializado"
+            ]
+        },
+        
+        "key_questions": [
+            "Qual é sua área de especialização?",
+            "Você tem diploma de bacharel ou superior?",
+            "Em que área é seu diploma?",
+            "Sua área de estudo está relacionada ao trabalho oferecido?",
+            "Quantos anos de experiência profissional você tem?",
+            "Qual será seu salário nos EUA?",
+            "O salário atende ao salário prevalente da área?",
+            "A empresa tem capacidade de pagar o salário proposto?",
+            "As funções do cargo requerem conhecimento especializado?",
+            "Você já trabalhou nos EUA antes em visto H-1B?"
+        ],
+        
+        "specialty_occupation_criteria": [
+            "Diploma de bacharel ou superior é normalmente o requisito mínimo",
+            "Grau de complexidade da posição é tão especializado que está associado com diploma",
+            "Empregador normalmente requer diploma para a posição",
+            "Natureza das funções é tão especializada e complexa que requer conhecimento de bacharel"
+        ],
+        
+        "common_issues": [
+            "LCA não certificada ou com problemas",
+            "Diploma não relacionado à área da posição",
+            "Salário abaixo do salário prevalente",
+            "Posição não qualifica como specialty occupation",
+            "Avaliação de credenciais inadequada",
+            "Experiência insuficiente para compensar falta de educação",
+            "Capacidade financeira do empregador questionável",
+            "Descrição vaga das funções do trabalho"
+        ]
     }
 }
 
