@@ -121,7 +121,7 @@ const Header = () => {
                   Entrar
                 </Button>
                 <Button 
-                  className="btn-gradient font-medium"
+                  className="bg-black text-white hover:bg-gray-800 font-medium"
                   onClick={() => navigate('/signup')}
                 >
                   Começar Agora
