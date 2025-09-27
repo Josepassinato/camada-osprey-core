@@ -320,8 +320,8 @@ const Documents = () => {
             <Card className="glass border-0 card-hover">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-red-500/10 rounded-lg flex items-center justify-center">
-                    <AlertTriangle className="h-6 w-6 text-red-500" />
+                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <AlertTriangle className="h-6 w-6 text-gray-700" />
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-foreground">{stats.expired}</div>
