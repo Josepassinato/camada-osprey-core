@@ -77,7 +77,7 @@ const Dashboard = () => {
         return;
       }
 
-      const response = await fetch(`${import.meta.env.REACT_APP_BACKEND_URL}/api/dashboard`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/dashboard`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
