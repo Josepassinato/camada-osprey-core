@@ -351,10 +351,10 @@ const DocumentUploadAuto = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Carregando documentos necessários...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto"></div>
+          <p className="text-black text-sm">Carregando documentos...</p>
         </div>
       </div>
     );
@@ -362,331 +362,227 @@ const DocumentUploadAuto = () => {
 
   if (error || !case_) {
     return (
-      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
-        <Card className="glass border-0 max-w-md">
-          <CardContent className="text-center p-8">
-            <AlertTriangle className="h-12 w-12 text-gray-700 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-foreground mb-2">
-              {error || 'Caso não encontrado'}
-            </h2>
-            <Button onClick={() => navigate('/auto-application/start')}>
-              Voltar ao Início
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-white flex items-center justify-center px-4">
+        <div className="bg-white border border-black rounded-lg p-6 max-w-sm w-full text-center">
+          <AlertTriangle className="h-8 w-8 text-black mx-auto mb-4" />
+          <h2 className="text-lg font-semibold text-black mb-2">
+            {error || 'Caso não encontrado'}
+          </h2>
+          <Button 
+            onClick={() => navigate('/auto-application/start')}
+            className="bg-black text-white hover:bg-gray-800 w-full"
+          >
+            Voltar ao Início
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
-      {/* Header */}
-      <div className="glass border-b border-white/20">
-        <div className="container-responsive py-6">
+    <div className="min-h-screen bg-white">
+      {/* Header - Mobile Optimized */}
+      <div className="bg-white border-b border-black">
+        <div className="px-4 py-4 sm:py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <Button 
                 variant="ghost" 
                 onClick={() => navigate(`/auto-application/case/${caseId}/basic-data`)}
-                className="p-2"
+                className="p-2 hover:bg-gray-100"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Voltar
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
-                  <Upload className="h-8 w-8 text-black" />
-                  {visaSpecs?.specifications.title || case_.form_code}
+                <h1 className="text-lg sm:text-xl font-bold text-black">
+                  Upload de Documentos
                 </h1>
-                <p className="text-muted-foreground">
-                  Etapa 2 de 6: Upload de Documentos • Caso: {case_.case_id}
+                <p className="text-xs sm:text-sm text-black">
+                  {case_.case_id}
                 </p>
               </div>
             </div>
-            <Badge className="bg-gray-100 text-gray-800 border-gray-200">
-              {getUploadedRequiredCount()}/{getRequiredDocumentsCount()} Obrigatórios
-            </Badge>
+            <div className="bg-black text-white text-xs px-2 py-1 rounded">
+              {getUploadedRequiredCount()}/{getRequiredDocumentsCount()}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="container-responsive section-padding">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            
-            {/* Progress */}
-            <Card className="glass border-0">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm font-medium">Progresso dos Documentos</span>
-                  <span className="text-sm text-muted-foreground">
-                    {getUploadedRequiredCount()}/{getRequiredDocumentsCount()} obrigatórios
-                  </span>
-                </div>
-                <Progress 
-                  value={(getUploadedRequiredCount() / Math.max(getRequiredDocumentsCount(), 1)) * 100} 
-                  className="h-3" 
-                />
-              </CardContent>
-            </Card>
+      <div className="px-4 py-6 sm:px-6 sm:py-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          
+          {/* Progress */}
+          <div className="bg-white border border-black rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium text-black">Progresso dos Documentos</span>
+              <span className="text-sm text-black">
+                {getUploadedRequiredCount()}/{getRequiredDocumentsCount()} obrigatórios
+              </span>
+            </div>
+            <Progress 
+              value={(getUploadedRequiredCount() / Math.max(getRequiredDocumentsCount(), 1)) * 100} 
+              className="h-2" 
+            />
+          </div>
 
-            {/* Document Requirements */}
-            <div className="space-y-4">
-              {documentRequirements.map((doc) => (
-                <Card key={doc.id} className="glass border-0">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="font-semibold text-foreground">{doc.name}</h3>
-                          {doc.required && (
-                            <Badge variant="outline" className="text-xs">Obrigatório</Badge>
+          {/* Document Requirements */}
+          <div className="space-y-4">
+            {documentRequirements.map((doc) => (
+              <div key={doc.id} className="bg-white border border-black rounded-lg p-4 sm:p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="font-semibold text-black">{doc.name}</h3>
+                      {doc.required && (
+                        <span className="bg-black text-white text-xs px-2 py-1 rounded">Obrigatório</span>
+                      )}
+                    </div>
+                    <p className="text-sm text-black mb-2">{doc.description}</p>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-black">
+                      <span>Formatos: {doc.formats.join(', ')}</span>
+                      <span>•</span>
+                      <span>Máximo: {doc.maxSize}</span>
+                    </div>
+                  </div>
+                  
+                  {doc.uploaded ? (
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-black" />
+                      <span className="text-sm text-black">Enviado</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 border-2 border-black rounded-full"></div>
+                      <span className="text-sm text-black">Pendente</span>
+                    </div>
+                  )}
+                </div>
+
+                {doc.uploaded && doc.aiAnalysis ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-gray-100 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <File className="h-4 w-4 text-black" />
+                        <span className="text-sm font-medium text-black">{doc.fileName}</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeDocument(doc.id, doc.fileId!)}
+                        className="hover:bg-gray-200"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    {/* AI Analysis Results */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-black">Análise da IA:</span>
+                        <div className="flex items-center gap-2">
+                          {doc.aiAnalysis.valid ? (
+                            <CheckCircle className="h-4 w-4 text-black" />
+                          ) : (
+                            <AlertTriangle className="h-4 w-4 text-black" />
                           )}
-                          <Badge className="bg-gray-100 text-gray-700 border-gray-200 text-xs">
-                            {doc.category}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-2">{doc.description}</p>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span>Formatos: {doc.formats.join(', ')}</span>
-                          <span>Máximo: {doc.maxSize}</span>
+                          <span className="text-black">{doc.aiAnalysis.completeness}% completo</span>
                         </div>
                       </div>
                       
-                      {doc.uploaded ? (
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="h-5 w-5 text-gray-700" />
-                          <span className="text-sm text-gray-700">Enviado</span>
+                      {doc.aiAnalysis.issues.length > 0 && (
+                        <div className="p-3 bg-gray-100 rounded-lg">
+                          <p className="text-sm font-medium text-black mb-1">Observações:</p>
+                          {doc.aiAnalysis.issues.map((issue, index) => (
+                            <p key={index} className="text-sm text-black">• {issue}</p>
+                          ))}
                         </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <div className="w-5 h-5 border-2 border-gray-300 rounded-full"></div>
-                          <span className="text-sm text-muted-foreground">Pendente</span>
+                      )}
+
+                      {doc.aiAnalysis.extracted_data && Object.keys(doc.aiAnalysis.extracted_data).length > 0 && (
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <p className="text-sm font-medium text-black mb-1">Informações Extraídas:</p>
+                          {Object.entries(doc.aiAnalysis.extracted_data).map(([key, value]) => (
+                            <p key={key} className="text-sm text-black">
+                              <strong>{key}:</strong> {String(value)}
+                            </p>
+                          ))}
                         </div>
                       )}
                     </div>
-
-                    {doc.uploaded && doc.aiAnalysis ? (
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <File className="h-4 w-4 text-gray-700" />
-                            <span className="text-sm font-medium">{doc.fileName}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeDocument(doc.id, doc.fileId!)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* AI Analysis Results */}
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-sm">
-                            <span>Análise da IA:</span>
-                            <div className="flex items-center gap-2">
-                              {doc.aiAnalysis.valid ? (
-                                <CheckCircle className="h-4 w-4 text-gray-700" />
-                              ) : (
-                                <AlertTriangle className="h-4 w-4 text-gray-700" />
-                              )}
-                              <span>{doc.aiAnalysis.completeness}% completo</span>
-                            </div>
-                          </div>
-                          
-                          {doc.aiAnalysis.issues.length > 0 && (
-                            <div className="p-3 bg-gray-100 rounded-lg">
-                              <p className="text-sm font-medium text-gray-800 mb-1">Observações:</p>
-                              {doc.aiAnalysis.issues.map((issue, index) => (
-                                <p key={index} className="text-sm text-gray-700">• {issue}</p>
-                              ))}
-                            </div>
-                          )}
-
-                          {doc.aiAnalysis.extracted_data && Object.keys(doc.aiAnalysis.extracted_data).length > 0 && (
-                            <div className="p-3 bg-gray-50 rounded-lg">
-                              <p className="text-sm font-medium text-gray-800 mb-1">Informações Extraídas:</p>
-                              {Object.entries(doc.aiAnalysis.extracted_data).map(([key, value]) => (
-                                <p key={key} className="text-sm text-gray-700">
-                                  <strong>{key}:</strong> {String(value)}
-                                </p>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ) : (
-                      <div
-                        className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                          dragActive ? 'border-black bg-gray-50' : 'border-gray-300'
-                        }`}
-                        onDragEnter={handleDrag}
-                        onDragLeave={handleDrag}
-                        onDragOver={handleDrag}
-                        onDrop={(e) => handleDrop(e, doc.id)}
-                      >
-                        <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                        <p className="text-sm text-muted-foreground mb-2">
-                          Arraste o arquivo aqui ou clique para selecionar
-                        </p>
-                        <input
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          onChange={(e) => {
-                            if (e.target.files && e.target.files[0]) {
-                              handleFileUpload(e.target.files[0], doc.id);
-                            }
-                          }}
-                          className="hidden"
-                          id={`file-${doc.id}`}
-                        />
-                        <Button
-                          variant="outline"
-                          onClick={() => document.getElementById(`file-${doc.id}`)?.click()}
-                          disabled={isUploading}
-                        >
-                          {isUploading ? (
-                            <RefreshCw className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <>
-                              <Camera className="h-4 w-4" />
-                              Selecionar Arquivo
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Actions */}
-            <div className="flex justify-between items-center">
-              <div className="text-sm text-muted-foreground">
-                {canContinue() ? (
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <CheckCircle className="h-4 w-4" />
-                    <span>Todos os documentos obrigatórios foram enviados</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4 text-gray-700" />
-                    <span>
-                      Faltam {getRequiredDocumentsCount() - getUploadedRequiredCount()} documento(s) obrigatório(s)
-                    </span>
+                  <div
+                    className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                      dragActive ? 'border-black bg-gray-50' : 'border-gray-300'
+                    }`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={(e) => handleDrop(e, doc.id)}
+                  >
+                    <Upload className="h-8 w-8 text-black mx-auto mb-2" />
+                    <p className="text-sm text-black mb-2">
+                      Arraste o arquivo aqui ou clique para selecionar
+                    </p>
+                    <input
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          handleFileUpload(e.target.files[0], doc.id);
+                        }
+                      }}
+                      className="hidden"
+                      id={`file-${doc.id}`}
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={() => document.getElementById(`file-${doc.id}`)?.click()}
+                      disabled={isUploading}
+                      className="border-black text-black hover:bg-gray-50"
+                    >
+                      {isUploading ? (
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Camera className="h-4 w-4 mr-2" />
+                          Selecionar Arquivo
+                        </>
+                      )}
+                    </Button>
                   </div>
                 )}
               </div>
-
-              <Button 
-                onClick={continueToNextStep}
-                disabled={!canContinue()}
-                className="bg-black text-white hover:bg-gray-800 flex items-center gap-2"
-              >
-                Continuar para História
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
+            ))}
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Requirements Summary */}
-            {visaSpecs && (
-              <Card className="glass border-0">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                    <Info className="h-5 w-5 text-black" />
-                    Documentos para {case_.form_code}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    {visaSpecs.specifications.description}
-                  </p>
-                  
-                  <div className="text-sm">
-                    <p className="font-medium text-foreground mb-1">
-                      Total: {documentRequirements.length} documentos
-                    </p>
-                    <p className="text-muted-foreground">
-                      Obrigatórios: {getRequiredDocumentsCount()}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Progress Steps */}
-            <Card className="glass border-0">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold">Progresso da Aplicação</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-gray-700 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                      ✓
-                    </div>
-                    <span className="text-sm text-gray-700">Dados Básicos</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-black text-white rounded-full flex items-center justify-center text-xs font-bold">
-                      2
-                    </div>
-                    <span className="text-sm font-medium">Upload de Documentos</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-xs font-bold">
-                      3
-                    </div>
-                    <span className="text-sm text-muted-foreground">Conte sua História</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-xs font-bold">
-                      4
-                    </div>
-                    <span className="text-sm text-muted-foreground">Formulário Amigável</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-xs font-bold">
-                      5
-                    </div>
-                    <span className="text-sm text-muted-foreground">Revisão Final</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-xs font-bold">
-                      6
-                    </div>
-                    <span className="text-sm text-muted-foreground">Pagamento & Download</span>
-                  </div>
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="text-sm text-black">
+              {canContinue() ? (
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4" />
+                  <span>Todos os documentos obrigatórios foram enviados</span>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Tips */}
-            <Card className="glass border-0 bg-gray-50">
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <Info className="h-5 w-5 text-gray-700 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground mb-1">Dicas de Upload</p>
-                    <ul className="text-xs text-muted-foreground space-y-1">
-                      <li>• Use arquivos de alta qualidade (mínimo 300 DPI)</li>
-                      <li>• Certifique-se que o texto está legível</li>
-                      <li>• Inclua todas as páginas do documento</li>
-                      <li>• Nossa IA verifica automaticamente a qualidade</li>
-                    </ul>
-                  </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span>
+                    Faltam {getRequiredDocumentsCount() - getUploadedRequiredCount()} documento(s) obrigatório(s)
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
+              )}
+            </div>
+
+            <Button 
+              onClick={continueToNextStep}
+              disabled={!canContinue()}
+              className="bg-black text-white hover:bg-gray-800 flex items-center gap-2 w-full sm:w-auto"
+            >
+              Continuar para História
+              <ArrowRight className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
