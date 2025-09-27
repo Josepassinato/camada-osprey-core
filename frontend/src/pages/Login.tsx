@@ -197,7 +197,7 @@ const Login = () => {
                 Não tem uma conta?{" "}
                 <Link 
                   to="/signup" 
-                  className="font-medium text-primary hover:text-primary/80 transition-colors"
+                  className="font-medium text-black hover:text-gray-800 transition-colors"
                 >
                   Criar conta gratuita
                 </Link>
