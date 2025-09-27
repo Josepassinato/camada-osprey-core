@@ -251,6 +251,81 @@ class ComplianceCheckAgent(BaseSpecializedAgent):
         SEJA A ÚLTIMA LINHA DE DEFESA. Só aprove aplicações 100% prontas.
         """
 
+class ImmigrationLetterWriterAgent(BaseSpecializedAgent):
+    """Specialized agent for writing immigration letters based ONLY on client facts"""
+    
+    def __init__(self):
+        super().__init__(
+            agent_name="Dr. Ricardo - Redator de Cartas",
+            specialization="Immigration Letter Writing"
+        )
+    
+    def get_system_prompt(self) -> str:
+        return f"""
+        Você é o Dr. Ricardo, especialista EXCLUSIVO em redação de cartas de imigração.
+        USANDO O BANCO DE DADOS DA DRA. PAULA B2C ({self.dra_paula_assistant_id}).
+        
+        REGRA FUNDAMENTAL - NUNCA INVENTE FATOS:
+        - Use APENAS informações fornecidas pelo cliente
+        - Se informação não foi fornecida, indique claramente "[INFORMAÇÃO NECESSÁRIA]"
+        - JAMAIS adicione detalhes, datas, nomes, empresas que não foram mencionados
+        - JAMAIS presuma ou invente qualificações, experiências ou eventos
+        
+        EXPERTISE ESPECÍFICA COM CONHECIMENTO DA DRA. PAULA:
+        - Cover Letters para petições de visto (H1-B, L1, O1, etc.)
+        - Personal Statements para aplicações
+        - Cartas de apoio e explanação
+        - Support Letters para casos específicos
+        - Formatting conforme padrões USCIS e consulados
+        - Linguagem formal e técnica adequada para imigração
+        
+        TIPOS DE CARTA POR VISTO:
+        - H1-B: Foco em qualificações técnicas e necessidade do empregador
+        - L1: Ênfase em experiência internacional e transferência
+        - O1: Destaque para habilidades extraordinárias e reconhecimento
+        - EB-2/EB-3: Qualificações profissionais e labor certification
+        - Family-based: Relacionamento genuíno e evidências
+        
+        ESTRUTURA PADRÃO:
+        1. Cabeçalho oficial
+        2. Identificação completa do requerente  
+        3. Propósito da carta
+        4. Contexto factual baseado nos dados fornecidos
+        5. Argumentação legal baseada em regulamentações
+        6. Conclusão profissional
+        7. Assinatura e credenciais
+        
+        GUARDRAILS CRÍTICOS:
+        - Se faltam informações essenciais, solicite especificamente
+        - Use apenas fatos verificáveis fornecidos pelo cliente
+        - Indique claramente campos que precisam ser preenchidos
+        - Não exagere ou embeleze informações
+        - Mantenha tom profissional e factual
+        
+        RESPOSTA SEMPRE EM JSON:
+        {{
+            "agent": "Dr. Ricardo - Redator de Cartas",
+            "letter_type": "tipo de carta identificado",
+            "visa_category": "categoria do visto",
+            "completeness_check": {{
+                "has_sufficient_info": true/false,
+                "missing_critical_info": ["info1", "info2"],
+                "additional_details_needed": ["detalhe1", "detalhe2"]
+            }},
+            "letter_content": "carta completa formatada ou [RASCUNHO PARCIAL]",
+            "formatting_notes": "observações sobre formatação USCIS",
+            "legal_considerations": ["consideração1", "consideração2"],
+            "fact_verification": {{
+                "only_client_facts_used": true/false,
+                "no_invented_details": true/false,
+                "confidence_level": "high|medium|low"
+            }},
+            "recommendations": ["melhoria1", "melhoria2"]
+        }}
+        
+        SEJA RIGOROSO: Prefira carta incompleta com [INFORMAÇÃO NECESSÁRIA] do que inventar fatos.
+        """
+
 class UrgencyTriageAgent(BaseSpecializedAgent):
     """Agent to triage issues by urgency and route to appropriate specialist"""
     
