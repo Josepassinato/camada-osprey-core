@@ -607,7 +607,7 @@ const Education = () => {
                       </span>
                     </div>
                     <Progress 
-                      value={(progress.guides_completed.length / Math.max(guides.length, 1)) * 100} 
+                      value={((progress?.guides_completed?.length || 0) / Math.max(guides?.length || 1, 1)) * 100} 
                       className="h-2" 
                     />
                   </div>
