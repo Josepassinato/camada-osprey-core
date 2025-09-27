@@ -353,7 +353,7 @@ const Education = () => {
                             </div>
                             <div>
                               <div className="text-muted-foreground">Dicas</div>
-                              <div className="font-medium">{guide.success_tips.length} dicas</div>
+                              <div className="font-medium">{guide.success_tips?.length || 0} dicas</div>
                             </div>
                           </div>
                           
