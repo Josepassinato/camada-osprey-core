@@ -66,7 +66,7 @@ const benefits = [
     title: "Alcance Global",
     description: "Cobertura em mais de 50 países com parceiros locais especializados",
     color: "from-violet-500/10 to-purple-500/10",
-    iconColor: "text-violet-600"
+    iconColor: "text-black"
   },
   {
     icon: Lock,
