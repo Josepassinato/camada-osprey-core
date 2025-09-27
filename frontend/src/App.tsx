@@ -22,6 +22,8 @@ import BasicData from "./pages/BasicData";
 import DocumentUploadAuto from "./pages/DocumentUploadAuto";
 import StoryTelling from "./pages/StoryTelling";
 import FriendlyForm from "./pages/FriendlyForm";
+import VisualReview from "./pages/VisualReview";
+import PaymentAndDownload from "./pages/PaymentAndDownload";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
