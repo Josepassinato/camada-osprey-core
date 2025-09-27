@@ -603,7 +603,7 @@ const Education = () => {
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm font-medium">Progresso Geral</span>
                       <span className="text-sm text-muted-foreground">
-                        {Math.round((progress.guides_completed.length / Math.max(guides.length, 1)) * 100)}%
+                        {Math.round(((progress?.guides_completed?.length || 0) / Math.max(guides?.length || 1, 1)) * 100)}%
                       </span>
                     </div>
                     <Progress 
