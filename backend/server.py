@@ -2761,6 +2761,121 @@ async def comprehensive_multi_agent_analysis(request: dict):
             "coordinator": "Multi-Agent Specialized System",
             "error": str(e)
         }
+
+# Responsibility Confirmation Endpoints
+@api_router.post("/responsibility/confirm")
+async def record_responsibility_confirmation(request: dict):
+    """Record user responsibility confirmations at critical steps"""
+    try:
+        case_id = request.get("caseId")
+        confirmation_type = request.get("type")  # document_authenticity, form_data_review, letter_verification, final_declaration
+        confirmations = request.get("confirmations", {})
+        digital_signature = request.get("digitalSignature")
+        timestamp = request.get("timestamp")
+        user_agent = request.get("userAgent")
+        
+        if not case_id or not confirmation_type or not confirmations:
+            raise HTTPException(status_code=400, detail="Missing required fields")
+        
+        # Create confirmation record
+        confirmation_record = {
+            "case_id": case_id,
+            "type": confirmation_type,
+            "confirmations": confirmations,
+            "digital_signature": digital_signature,
+            "timestamp": timestamp,
+            "user_agent": user_agent,
+            "ip_timestamp": datetime.now().isoformat(),
+            "created_at": datetime.now(),
+            "all_confirmed": all(confirmations.values()),
+            "confirmation_count": len([v for v in confirmations.values() if v])
+        }
+        
+        # Store in database
+        result = await db.responsibility_confirmations.insert_one(confirmation_record)
+        
+        # Update case with confirmation status
+        update_data = {}
+        if confirmation_type == "document_authenticity":
+            update_data["document_authenticity_confirmed"] = True
+            update_data["document_authenticity_timestamp"] = timestamp
+        elif confirmation_type == "form_data_review":
+            update_data["form_data_reviewed"] = True
+            update_data["form_review_timestamp"] = timestamp
+        elif confirmation_type == "letter_verification":
+            update_data["letter_verified"] = True
+            update_data["letter_verification_timestamp"] = timestamp
+        elif confirmation_type == "final_declaration":
+            update_data["final_declaration_signed"] = True
+            update_data["final_declaration_timestamp"] = timestamp
+            update_data["final_signature"] = digital_signature
+            update_data["ready_for_download"] = True
+            
+        if update_data:
+            await db.auto_application_cases.update_one(
+                {"case_id": case_id},
+                {"$set": update_data}
+            )
+        
+        return {
+            "success": True,
+            "confirmation_id": str(result.inserted_id),
+            "type": confirmation_type,
+            "recorded_at": datetime.now().isoformat(),
+            "next_step_unlocked": True
+        }
+        
+    except Exception as e:
+        logger.error(f"Responsibility confirmation error: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+@api_router.get("/responsibility/status/{case_id}")
+async def get_responsibility_status(case_id: str):
+    """Get confirmation status for a case"""
+    try:
+        # Get case confirmations
+        case_data = await db.auto_application_cases.find_one(
+            {"case_id": case_id},
+            {
+                "document_authenticity_confirmed": 1,
+                "form_data_reviewed": 1, 
+                "letter_verified": 1,
+                "final_declaration_signed": 1,
+                "ready_for_download": 1
+            }
+        )
+        
+        if not case_data:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        # Get detailed confirmation records
+        confirmations = await db.responsibility_confirmations.find(
+            {"case_id": case_id}
+        ).sort("created_at", 1).to_list(100)
+        
+        return {
+            "success": True,
+            "case_id": case_id,
+            "status": {
+                "document_authenticity_confirmed": case_data.get("document_authenticity_confirmed", False),
+                "form_data_reviewed": case_data.get("form_data_reviewed", False),
+                "letter_verified": case_data.get("letter_verified", False),
+                "final_declaration_signed": case_data.get("final_declaration_signed", False),
+                "ready_for_download": case_data.get("ready_for_download", False)
+            },
+            "confirmations": confirmations,
+            "total_confirmations": len(confirmations)
+        }
+        
+    except Exception as e:
+        logger.error(f"Get responsibility status error: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
 # Helper function for optional authentication
 async def get_current_user_optional():
     """Get current user if authenticated, None if not"""
