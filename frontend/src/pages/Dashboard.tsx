@@ -319,7 +319,7 @@ const Dashboard = () => {
                       <p className="text-sm text-muted-foreground mb-4">
                         Comece sua jornada imigratória criando sua primeira aplicação
                       </p>
-                      <Button className="btn-gradient" onClick={() => navigate('/applications/new')}>
+                      <Button className="bg-black text-white hover:bg-gray-800" onClick={() => navigate('/applications/new')}>
                         <Plus className="h-4 w-4" />
                         Criar Aplicação
                       </Button>
