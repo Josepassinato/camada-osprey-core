@@ -347,29 +347,28 @@ const SelectForm = () => {
                 </ul>
               </div>
 
-                <Button 
-                  className={`w-full ${
-                    selectedForm === form.code 
-                      ? 'bg-black text-white hover:bg-gray-800' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    createCase(form.code);
-                  }}
-                  disabled={isLoading && selectedForm === form.code}
-                >
-                  {isLoading && selectedForm === form.code ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  ) : (
-                    <>
-                      Começar {form.code}
-                      <ArrowRight className="h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
+              <Button 
+                className={`w-full mt-4 ${
+                  selectedForm === form.code 
+                    ? 'bg-black text-white hover:bg-gray-800' 
+                    : 'bg-white border border-black text-black hover:bg-gray-50'
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  createCase(form.code);
+                }}
+                disabled={isLoading && selectedForm === form.code}
+              >
+                {isLoading && selectedForm === form.code ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                ) : (
+                  <>
+                    Começar {form.code}
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </div>
           ))}
         </div>
 
