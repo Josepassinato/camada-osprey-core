@@ -28,8 +28,8 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# OpenAI configuration
-openai.api_key = os.environ['OPENAI_API_KEY']
+# LLM configuration via emergentintegrations
+# API key handled directly in LlmChat calls
 
 # JWT configuration
 JWT_SECRET = os.environ.get('JWT_SECRET', 'osprey-secret-key-change-in-production')
