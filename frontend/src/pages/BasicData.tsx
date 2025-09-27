@@ -676,8 +676,36 @@ const BasicData = () => {
       
       <OspreyOwlTutor 
         snapshot={snapshot}
-        onAction={(event, payload) => {
+        onAction={async (event, payload) => {
           console.log('🦉 Tutor action:', event, payload);
+          
+          // Integration with Dra. Paula B2C for expert validation
+          if (event === 'validate_form') {
+            try {
+              const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/immigration-expert/validate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  formData: formData,
+                  visaType: 'H-1B',
+                  stepId: 'personal'
+                })
+              });
+              
+              if (response.ok) {
+                const expertAnalysis = await response.json();
+                console.log('🦉 Dra. Paula analysis:', expertAnalysis);
+                
+                // Display expert analysis in Owl Tutor
+                if (expertAnalysis.success && expertAnalysis.expert_analysis) {
+                  // You can handle the expert analysis here
+                  console.log('✅ Expert validation completed by Dra. Paula B2C');
+                }
+              }
+            } catch (error) {
+              console.error('❌ Error calling Dra. Paula:', error);
+            }
+          }
         }}
         isEnabled={!!case_?.case_id}
         position="bottom-right"
