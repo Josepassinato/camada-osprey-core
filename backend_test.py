@@ -2709,6 +2709,17 @@ def run_all_tests():
     
     print(f"  Education System: {edu_passed}/{edu_total} tests passed ({edu_passed/edu_total*100:.1f}%)")
     
+    # Osprey Owl Tutor System Results (NEW - Simplified Version)
+    print("\n🦉 OSPREY OWL TUTOR VALIDATION SYSTEM:")
+    owl_passed = sum(owl_tutor_results.values())
+    owl_total = len(owl_tutor_results)
+    
+    for test_name, result in owl_tutor_results.items():
+        status = "✅ PASS" if result else "❌ FAIL"
+        print(f"  {test_name.replace('_', ' ').title()}: {status}")
+    
+    print(f"  Owl Tutor System: {owl_passed}/{owl_total} tests passed ({owl_passed/owl_total*100:.1f}%)")
+    
     # Voice Agent System Results (NEW - Semana 1 MVP)
     print("\n🎤 VOICE AGENT SYSTEM:")
     voice_passed = sum(voice_agent_results.values())
