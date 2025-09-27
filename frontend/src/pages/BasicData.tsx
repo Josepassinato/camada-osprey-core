@@ -403,7 +403,7 @@ const BasicData = () => {
                       value={formData.city}
                       onChange={(e) => handleInputChange('city', e.target.value)}
                       placeholder="Cidade"
-                      className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-black"
                     />
                   </div>
                   <div>
@@ -415,7 +415,7 @@ const BasicData = () => {
                       value={formData.state}
                       onChange={(e) => handleInputChange('state', e.target.value)}
                       placeholder="Estado"
-                      className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-black"
                     />
                   </div>
                   <div>
@@ -427,7 +427,7 @@ const BasicData = () => {
                       value={formData.zipCode}
                       onChange={(e) => handleInputChange('zipCode', e.target.value)}
                       placeholder="00000-000"
-                      className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-black"
                     />
                   </div>
                 </div>
@@ -442,7 +442,7 @@ const BasicData = () => {
                       value={formData.phoneNumber}
                       onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
                       placeholder="+1 (555) 123-4567"
-                      className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-black"
                     />
                   </div>
                   <div>
@@ -454,7 +454,7 @@ const BasicData = () => {
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       placeholder="seu@email.com"
-                      className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-black"
                     />
                   </div>
                 </div>
@@ -478,7 +478,7 @@ const BasicData = () => {
                       value={formData.alienNumber}
                       onChange={(e) => handleInputChange('alienNumber', e.target.value)}
                       placeholder="A123456789"
-                      className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-black"
                     />
                   </div>
                   <div>
@@ -490,7 +490,7 @@ const BasicData = () => {
                       value={formData.socialSecurityNumber}
                       onChange={(e) => handleInputChange('socialSecurityNumber', e.target.value)}
                       placeholder="000-00-0000"
-                      className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-black"
                     />
                   </div>
                 </div>
@@ -505,7 +505,7 @@ const BasicData = () => {
                       value={formData.currentStatus}
                       onChange={(e) => handleInputChange('currentStatus', e.target.value)}
                       placeholder="Ex: F-1, H-1B, Residente Permanente"
-                      className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-black"
                     />
                   </div>
                   <div>
@@ -516,7 +516,7 @@ const BasicData = () => {
                       type="date"
                       value={formData.statusExpiration}
                       onChange={(e) => handleInputChange('statusExpiration', e.target.value)}
-                      className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-black"
                     />
                   </div>
                 </div>
