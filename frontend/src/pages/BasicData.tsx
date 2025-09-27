@@ -291,15 +291,15 @@ const BasicData = () => {
               <div className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Nome <span className="text-red-500">*</span>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Nome <span className="text-black">*</span>
                     </label>
                     <input
                       type="text"
                       value={formData.firstName}
                       onChange={(e) => handleInputChange('firstName', e.target.value)}
                       placeholder="Primeiro nome"
-                      className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-black"
                     />
                   </div>
                   <div>
