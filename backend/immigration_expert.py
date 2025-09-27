@@ -69,6 +69,40 @@ class ImmigrationExpert:
         if not self.api_key:
             raise ValueError("EMERGENT_LLM_KEY not found in environment variables")
     
+    async def _call_dra_paula(self, prompt: str, session_id: str = None) -> str:
+        """
+        Call Dra. Paula B2C assistant specifically
+        Uses the trained assistant with immigration knowledge base
+        """
+        try:
+            # If we have an assistant_id, we can use it with emergentintegrations
+            # For now, we'll use the standard LlmChat but with Dra. Paula's enhanced prompt
+            chat = LlmChat(
+                api_key=self.api_key,
+                session_id=session_id or f"dra_paula_{hash(prompt) % 10000}",
+                system_message=self.system_prompt
+            ).with_model(self.provider, self.model)
+            
+            # Enhanced prompt for Dra. Paula's context
+            enhanced_prompt = f"""
+            [SISTEMA OSPREY - DRA. PAULA B2C]
+            Assistant ID: {self.assistant_id}
+            
+            {prompt}
+            
+            Por favor, responda como Dra. Paula B2C, especialista em imigração com foco em brasileiros nos EUA.
+            Use seu conhecimento especializado e sempre inclua disclaimers apropriados.
+            """
+            
+            user_message = UserMessage(text=enhanced_prompt)
+            response = await chat.send_message(user_message)
+            
+            return response
+            
+        except Exception as e:
+            logger.error(f"Error calling Dra. Paula: {e}")
+            return "Desculpe, a Dra. Paula não está disponível no momento. Tente novamente."
+    
     async def validate_form_data(self, 
                                 form_data: Dict[str, Any], 
                                 visa_type: str,
