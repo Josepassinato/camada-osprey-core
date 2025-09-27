@@ -472,10 +472,10 @@ const Dashboard = () => {
                         <FileText className="h-4 w-4 text-gray-700" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-orange-800">
+                        <p className="text-sm font-medium text-black">
                           {exp.document_type.replace('_', ' ').toUpperCase()}
                         </p>
-                        <p className="text-xs text-orange-600">
+                        <p className="text-xs text-gray-700">
                           {exp.days_to_expire} dia{exp.days_to_expire !== 1 ? 's' : ''} restante{exp.days_to_expire !== 1 ? 's' : ''}
                         </p>
                       </div>
