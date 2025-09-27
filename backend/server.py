@@ -2369,6 +2369,91 @@ async def voice_agent_status():
         logger.error(f"Error getting voice status: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error getting voice status: {str(e)}")
 
+# Immigration Expert endpoints
+@api_router.post("/immigration-expert/validate")
+async def immigration_expert_validate(request: dict):
+    """Use specialized immigration expert for form validation"""
+    try:
+        # Initialize expert with custom configuration
+        expert = create_immigration_expert(
+            provider="openai",  # You can change this
+            model="gpt-4o",     # You can change this
+            custom_prompt=None  # You can add your custom prompt here
+        )
+        
+        form_data = request.get("formData", {})
+        visa_type = request.get("visaType", "H-1B")
+        step_id = request.get("stepId", "personal")
+        
+        result = await expert.validate_form_data(form_data, visa_type, step_id)
+        
+        return {
+            "success": True,
+            "expert_analysis": result,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Immigration expert validation error: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "expert_analysis": {
+                "status": "error",
+                "issues": [],
+                "recommendations": ["Erro ao processar análise especializada"]
+            }
+        }
+
+@api_router.post("/immigration-expert/analyze-document") 
+async def immigration_expert_analyze_document(request: dict):
+    """Use specialized immigration expert for document analysis"""
+    try:
+        expert = create_immigration_expert()
+        
+        document_type = request.get("documentType", "passport")
+        document_content = request.get("documentContent", "")
+        visa_type = request.get("visaType", "H-1B")
+        
+        result = await expert.analyze_document(document_type, document_content, visa_type)
+        
+        return {
+            "success": True,
+            "expert_analysis": result,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Immigration expert document analysis error: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+@api_router.post("/immigration-expert/advice")
+async def immigration_expert_advice(request: dict):
+    """Get specialized immigration advice"""
+    try:
+        expert = create_immigration_expert()
+        
+        question = request.get("question", "")
+        context = request.get("context", {})
+        
+        advice = await expert.generate_advice(question, context)
+        
+        return {
+            "success": True,
+            "advice": advice,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Immigration expert advice error: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "advice": "Desculpe, não foi possível processar sua pergunta no momento."
+        }
 # Helper function for optional authentication
 async def get_current_user_optional():
     """Get current user if authenticated, None if not"""
