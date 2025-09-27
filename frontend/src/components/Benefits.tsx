@@ -17,7 +17,7 @@ const benefits = [
     title: "Segurança Máxima",
     description: "Seus dados protegidos com criptografia bancária e compliance SOC 2",
     color: "from-blue-500/10 to-cyan-500/10",
-    iconColor: "text-blue-600"
+    iconColor: "text-black"
   },
   {
     icon: Zap,
