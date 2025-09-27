@@ -248,33 +248,31 @@ const BasicData = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
-      {/* Header */}
-      <div className="glass border-b border-white/20">
-        <div className="container-responsive py-6">
+    <div className="min-h-screen bg-white">
+      {/* Header - Mobile Optimized */}
+      <div className="bg-white border-b border-black">
+        <div className="px-4 py-4 sm:py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <Button 
                 variant="ghost" 
                 onClick={() => navigate('/auto-application/select-form')}
-                className="p-2"
+                className="p-2 hover:bg-gray-100"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Voltar
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
-                  <FileText className="h-8 w-8 text-black" />
+                <h1 className="text-lg sm:text-xl font-bold text-black">
                   {visaSpecs?.specifications.title || case_.form_code}
                 </h1>
-                <p className="text-muted-foreground">
-                  Etapa 1 de 6: Dados Básicos • Caso: {case_.case_id}
+                <p className="text-xs sm:text-sm text-black">
+                  Dados Básicos • {case_.case_id}
                 </p>
               </div>
             </div>
-            <Badge className="bg-gray-100 text-gray-800 border-gray-200">
-              {visaSpecs?.specifications.category}
-            </Badge>
+            <div className="bg-black text-white text-xs px-2 py-1 rounded">
+              100%
+            </div>
           </div>
         </div>
       </div>
