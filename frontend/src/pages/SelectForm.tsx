@@ -16,7 +16,8 @@ import {
   Briefcase,
   Home,
   CreditCard,
-  CheckCircle
+  CheckCircle,
+  Plane
 } from "lucide-react";
 
 interface USCISFormType {
