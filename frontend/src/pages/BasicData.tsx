@@ -231,18 +231,19 @@ const BasicData = () => {
 
   if (error || !case_) {
     return (
-      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
-        <Card className="glass border-0 max-w-md">
-          <CardContent className="text-center p-8">
-            <AlertTriangle className="h-12 w-12 text-gray-700 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-black mb-2">
-              {error || 'Caso não encontrado'}
-            </h2>
-            <Button onClick={() => navigate('/auto-application/start')}>
-              Voltar ao Início
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-white flex items-center justify-center px-4">
+        <div className="bg-white border border-black rounded-lg p-6 max-w-sm w-full text-center">
+          <AlertTriangle className="h-8 w-8 text-black mx-auto mb-4" />
+          <h2 className="text-lg font-semibold text-black mb-2">
+            {error || 'Caso não encontrado'}
+          </h2>
+          <Button 
+            onClick={() => navigate('/auto-application/start')}
+            className="bg-black text-white hover:bg-gray-800 w-full"
+          >
+            Voltar ao Início
+          </Button>
+        </div>
       </div>
     );
   }
