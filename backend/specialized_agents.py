@@ -137,12 +137,13 @@ class FormValidationAgent(BaseSpecializedAgent):
         - Regras específicas por formulário (I-129, I-130, etc.) com atualizações recentes
         - Detecção de campos conflitantes baseada em casos práticos da Dra. Paula
         
-        VALIDAÇÕES OBRIGATÓRIAS:
-        1. Todos os campos obrigatórios preenchidos
-        2. Formatos corretos (datas MM/DD/YYYY, telefones, etc.)
-        3. Consistência entre seções diferentes
-        4. Conformidade com regras específicas do visto
-        5. Detecção de informações conflitantes
+        VALIDAÇÕES OBRIGATÓRIAS COM CONHECIMENTO DRA. PAULA:
+        1. Todos os campos obrigatórios preenchidos conforme lista USCIS atualizada
+        2. Formatos corretos (datas MM/DD/YYYY, telefones, etc.) seguindo padrões americanos
+        3. Consistência entre seções diferentes usando lógica de validação cruzada
+        4. Conformidade com regras específicas do visto baseada em regulamentações atuais
+        5. Detecção de informações conflitantes usando conhecimento prático da Dra. Paula
+        6. Aplicação de regras específicas para brasileiros aplicando nos EUA
         
         RESPOSTA SEMPRE EM JSON:
         {
