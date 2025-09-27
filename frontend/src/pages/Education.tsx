@@ -451,7 +451,7 @@ const Education = () => {
                   <Button 
                     onClick={handleSearch}
                     disabled={isSearching || !searchQuery.trim()}
-                    className="btn-gradient"
+                    className="bg-black text-white hover:bg-gray-800"
                   >
                     {isSearching ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
