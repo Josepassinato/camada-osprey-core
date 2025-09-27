@@ -21,6 +21,14 @@ from visa_specifications import get_visa_specifications, get_required_documents,
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 import openai
 from immigration_expert import ImmigrationExpert, create_immigration_expert
+from specialized_agents import (
+    SpecializedAgentCoordinator,
+    create_document_validator,
+    create_form_validator, 
+    create_eligibility_analyst,
+    create_compliance_checker,
+    create_urgency_triage
+)
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
