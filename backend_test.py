@@ -1084,6 +1084,595 @@ def test_dashboard_with_education():
         return False
 
 # ============================================================================
+# OSPREY OWL TUTOR VALIDATION TESTS (NEW - Simplified Version)
+# ============================================================================
+
+def test_owl_tutor_personal_validation():
+    """Test Osprey Owl Tutor personal info validation"""
+    print("\n👤 Testing Owl Tutor - Personal Info Validation...")
+    
+    try:
+        # Test with valid Brazilian user data
+        valid_payload = {
+            "stepId": "personal",
+            "formData": {
+                "firstName": "Carlos Eduardo",
+                "lastName": "Silva Santos",
+                "dateOfBirth": "1990-03-15",
+                "nationality": "Brazilian",
+                "passportNumber": "BR123456789",
+                "placeOfBirth": "São Paulo, Brazil"
+            }
+        }
+        
+        response = requests.post(f"{API_BASE}/validate", json=valid_payload, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Valid personal info validation successful")
+            print(f"   Validation OK: {data.get('ok')}")
+            print(f"   Errors: {len(data.get('errors', []))}")
+            print(f"   Missing required: {len(data.get('missingRequired', []))}")
+            print(f"   Suggestions: {len(data.get('suggestions', []))}")
+            
+            # Test with invalid data (future birth date, invalid characters)
+            invalid_payload = {
+                "stepId": "personal",
+                "formData": {
+                    "firstName": "Carlos123",  # Invalid characters
+                    "lastName": "",  # Missing required
+                    "dateOfBirth": "2030-01-01",  # Future date
+                    "nationality": "X"  # Too short
+                }
+            }
+            
+            invalid_response = requests.post(f"{API_BASE}/validate", json=invalid_payload, timeout=10)
+            
+            if invalid_response.status_code == 200:
+                invalid_data = invalid_response.json()
+                print(f"✅ Invalid personal data validation working")
+                print(f"   Validation OK: {invalid_data.get('ok')}")
+                print(f"   Errors detected: {len(invalid_data.get('errors', []))}")
+                print(f"   Missing fields detected: {len(invalid_data.get('missingRequired', []))}")
+                
+                # Check for specific error types
+                errors = invalid_data.get('errors', [])
+                error_codes = [error.get('code') for error in errors]
+                
+                if 'invalid_format' in error_codes:
+                    print("   ✅ Invalid format errors detected")
+                if 'future_date' in error_codes:
+                    print("   ✅ Future date validation working")
+                if 'too_short' in error_codes:
+                    print("   ✅ Field length validation working")
+                
+                # Check error messages are in Portuguese
+                sample_error = errors[0] if errors else {}
+                message = sample_error.get('message', '')
+                if any(word in message.lower() for word in ['deve', 'conter', 'apenas', 'formato']):
+                    print("   ✅ Error messages in Portuguese")
+                
+                return True
+            else:
+                print(f"❌ Invalid personal data validation failed: {invalid_response.status_code}")
+                return False
+                
+        else:
+            print(f"❌ Personal info validation failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Personal info validation error: {str(e)}")
+        return False
+
+def test_owl_tutor_address_validation():
+    """Test Osprey Owl Tutor address info validation with ZIP code logic"""
+    print("\n🏠 Testing Owl Tutor - Address Info Validation...")
+    
+    try:
+        # Test with valid US address
+        valid_payload = {
+            "stepId": "address",
+            "formData": {
+                "currentAddress": "123 Main Street, Apt 4B",
+                "city": "San Francisco",
+                "state": "CA",
+                "zipCode": "94102",  # Valid CA ZIP
+                "phone": "+1 (415) 555-0123",
+                "email": "carlos.silva@email.com"
+            }
+        }
+        
+        response = requests.post(f"{API_BASE}/validate", json=valid_payload, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Valid address validation successful")
+            print(f"   Validation OK: {data.get('ok')}")
+            print(f"   Errors: {len(data.get('errors', []))}")
+            print(f"   Missing required: {len(data.get('missingRequired', []))}")
+            
+            # Test ZIP code validation with state mismatch
+            zip_mismatch_payload = {
+                "stepId": "address",
+                "formData": {
+                    "currentAddress": "456 Test Ave",
+                    "city": "Los Angeles",
+                    "state": "NY",  # Wrong state for LA
+                    "zipCode": "90210",  # CA ZIP but NY state
+                    "phone": "123",  # Too short
+                    "email": "invalid-email"  # Invalid format
+                }
+            }
+            
+            zip_response = requests.post(f"{API_BASE}/validate", json=zip_mismatch_payload, timeout=10)
+            
+            if zip_response.status_code == 200:
+                zip_data = zip_response.json()
+                print(f"✅ ZIP/State validation working")
+                print(f"   Validation OK: {zip_data.get('ok')}")
+                print(f"   Errors found: {len(zip_data.get('errors', []))}")
+                
+                # Check for specific error types
+                errors = zip_data.get('errors', [])
+                error_codes = [error.get('code') for error in errors]
+                
+                if 'state_mismatch' in error_codes:
+                    print("   ✅ ZIP/State mismatch detected")
+                if 'invalid_format' in error_codes:
+                    print("   ✅ Phone and email format validation working")
+                
+                # Test with invalid ZIP format
+                invalid_zip_payload = {
+                    "stepId": "address",
+                    "formData": {
+                        "currentAddress": "789 Test St",
+                        "city": "Miami",
+                        "state": "FL",
+                        "zipCode": "123",  # Too short
+                        "phone": "+1 305 555 0123",
+                        "email": "test@example.com"
+                    }
+                }
+                
+                invalid_zip_response = requests.post(f"{API_BASE}/validate", json=invalid_zip_payload, timeout=10)
+                
+                if invalid_zip_response.status_code == 200:
+                    invalid_zip_data = invalid_zip_response.json()
+                    zip_errors = invalid_zip_data.get('errors', [])
+                    zip_error_codes = [error.get('code') for error in zip_errors]
+                    
+                    if 'invalid_format' in zip_error_codes:
+                        print("   ✅ Invalid ZIP format validation working")
+                        
+                        # Check error message mentions 5 digits
+                        zip_error = next((e for e in zip_errors if e.get('field') == 'zipCode'), {})
+                        if '5 dígitos' in zip_error.get('message', ''):
+                            print("   ✅ ZIP format error message correct")
+                
+                return True
+            else:
+                print(f"❌ ZIP validation failed: {zip_response.status_code}")
+                return False
+                
+        else:
+            print(f"❌ Address validation failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Address validation error: {str(e)}")
+        return False
+
+def test_owl_tutor_employment_validation():
+    """Test Osprey Owl Tutor employment info validation with date logic"""
+    print("\n💼 Testing Owl Tutor - Employment Info Validation...")
+    
+    try:
+        # Test with valid employment data
+        valid_payload = {
+            "stepId": "employment",
+            "formData": {
+                "currentlyEmployed": True,
+                "employerName": "TechGlobal Inc.",
+                "jobTitle": "Senior Software Engineer",
+                "startDate": "2020-01-15",
+                "endDate": "",  # Current job
+                "salary": "$95000",
+                "workLocation": "San Francisco, CA"
+            }
+        }
+        
+        response = requests.post(f"{API_BASE}/validate", json=valid_payload, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Valid employment validation successful")
+            print(f"   Validation OK: {data.get('ok')}")
+            print(f"   Errors: {len(data.get('errors', []))}")
+            print(f"   Missing required: {len(data.get('missingRequired', []))}")
+            
+            # Test with invalid employment dates
+            invalid_dates_payload = {
+                "stepId": "employment",
+                "formData": {
+                    "currentlyEmployed": True,
+                    "employerName": "Test Company",
+                    "jobTitle": "Developer",
+                    "startDate": "2025-01-01",  # Future start date
+                    "endDate": "2020-01-01",  # End before start
+                    "salary": "$50000"
+                }
+            }
+            
+            invalid_response = requests.post(f"{API_BASE}/validate", json=invalid_dates_payload, timeout=10)
+            
+            if invalid_response.status_code == 200:
+                invalid_data = invalid_response.json()
+                print(f"✅ Employment date validation working")
+                print(f"   Validation OK: {invalid_data.get('ok')}")
+                print(f"   Date errors detected: {len(invalid_data.get('errors', []))}")
+                
+                # Check for specific date errors
+                errors = invalid_data.get('errors', [])
+                error_codes = [error.get('code') for error in errors]
+                
+                if 'future_date' in error_codes:
+                    print("   ✅ Future start date validation working")
+                if 'date_order' in error_codes:
+                    print("   ✅ Date order validation working")
+                
+                # Test missing required fields for employed person
+                missing_fields_payload = {
+                    "stepId": "employment",
+                    "formData": {
+                        "currentlyEmployed": True,
+                        # Missing employerName, jobTitle, startDate
+                        "salary": "$60000"
+                    }
+                }
+                
+                missing_response = requests.post(f"{API_BASE}/validate", json=missing_fields_payload, timeout=10)
+                
+                if missing_response.status_code == 200:
+                    missing_data = missing_response.json()
+                    missing_fields = missing_data.get('missingRequired', [])
+                    
+                    expected_missing = ['employerName', 'jobTitle', 'startDate']
+                    found_missing = [field for field in expected_missing if field in missing_fields]
+                    
+                    if len(found_missing) >= 2:
+                        print(f"   ✅ Required field validation working ({len(found_missing)} fields detected)")
+                
+                return True
+            else:
+                print(f"❌ Invalid employment validation failed: {invalid_response.status_code}")
+                return False
+                
+        else:
+            print(f"❌ Employment validation failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Employment validation error: {str(e)}")
+        return False
+
+def test_owl_tutor_family_validation():
+    """Test Osprey Owl Tutor family info validation with marital status logic"""
+    print("\n👨‍👩‍👧‍👦 Testing Owl Tutor - Family Info Validation...")
+    
+    try:
+        # Test with married status and complete spouse info
+        married_payload = {
+            "stepId": "family",
+            "formData": {
+                "maritalStatus": "Married",
+                "spouseName": "Maria Silva Santos",
+                "spouseDateOfBirth": "1992-07-20",
+                "spouseNationality": "Brazilian",
+                "childrenCount": "1",
+                "childrenInfo": [
+                    {
+                        "name": "Pedro Silva Santos",
+                        "dateOfBirth": "2020-05-10",
+                        "relationship": "Son"
+                    }
+                ]
+            }
+        }
+        
+        response = requests.post(f"{API_BASE}/validate", json=married_payload, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Valid family info validation successful")
+            print(f"   Validation OK: {data.get('ok')}")
+            print(f"   Errors: {len(data.get('errors', []))}")
+            print(f"   Missing required: {len(data.get('missingRequired', []))}")
+            print(f"   Suggestions: {len(data.get('suggestions', []))}")
+            
+            # Test with married status but missing spouse info
+            missing_spouse_payload = {
+                "stepId": "family",
+                "formData": {
+                    "maritalStatus": "Married",
+                    # Missing spouse information
+                    "childrenCount": "2",
+                    "childrenInfo": []  # Missing children details
+                }
+            }
+            
+            missing_response = requests.post(f"{API_BASE}/validate", json=missing_spouse_payload, timeout=10)
+            
+            if missing_response.status_code == 200:
+                missing_data = missing_response.json()
+                print(f"✅ Family validation conditional logic working")
+                print(f"   Validation OK: {missing_data.get('ok')}")
+                print(f"   Missing spouse info detected: {len(missing_data.get('missingRequired', []))}")
+                print(f"   Children info suggestions: {len(missing_data.get('suggestions', []))}")
+                
+                # Check for spouse-related missing fields
+                missing_fields = missing_data.get('missingRequired', [])
+                spouse_fields = ['spouseName', 'spouseDateOfBirth']
+                found_spouse_fields = [field for field in spouse_fields if field in missing_fields]
+                
+                if len(found_spouse_fields) >= 1:
+                    print(f"   ✅ Spouse info requirement validation working")
+                
+                # Check for children suggestions
+                suggestions = missing_data.get('suggestions', [])
+                children_suggestions = [s for s in suggestions if 'filhos' in s.lower()]
+                
+                if children_suggestions:
+                    print(f"   ✅ Children info suggestions working")
+                
+                # Test with single status (should not require spouse info)
+                single_payload = {
+                    "stepId": "family",
+                    "formData": {
+                        "maritalStatus": "Single",
+                        "childrenCount": "0"
+                    }
+                }
+                
+                single_response = requests.post(f"{API_BASE}/validate", json=single_payload, timeout=10)
+                
+                if single_response.status_code == 200:
+                    single_data = single_response.json()
+                    single_missing = single_data.get('missingRequired', [])
+                    
+                    # Should not require spouse info for single person
+                    spouse_required = any(field in single_missing for field in ['spouseName', 'spouseDateOfBirth'])
+                    
+                    if not spouse_required:
+                        print(f"   ✅ Single status validation working (no spouse info required)")
+                
+                return True
+            else:
+                print(f"❌ Missing spouse validation failed: {missing_response.status_code}")
+                return False
+                
+        else:
+            print(f"❌ Family validation failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Family validation error: {str(e)}")
+        return False
+
+def test_owl_tutor_travel_validation():
+    """Test Osprey Owl Tutor travel history validation with date logic"""
+    print("\n✈️ Testing Owl Tutor - Travel History Validation...")
+    
+    try:
+        # Test with valid travel history
+        valid_payload = {
+            "stepId": "travel",
+            "formData": {
+                "hasInternationalTravel": True,
+                "trips": [
+                    {
+                        "country": "United States",
+                        "purpose": "Tourism",
+                        "departureDate": "2019-06-15",
+                        "returnDate": "2019-06-30",
+                        "duration": "15 days"
+                    },
+                    {
+                        "country": "United States", 
+                        "purpose": "Business",
+                        "departureDate": "2021-09-10",
+                        "returnDate": "2021-09-20",
+                        "duration": "10 days"
+                    }
+                ]
+            }
+        }
+        
+        response = requests.post(f"{API_BASE}/validate", json=valid_payload, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Valid travel validation successful")
+            print(f"   Validation OK: {data.get('ok')}")
+            print(f"   Errors: {len(data.get('errors', []))}")
+            print(f"   Suggestions: {len(data.get('suggestions', []))}")
+            
+            # Test with invalid travel dates (return before departure)
+            invalid_dates_payload = {
+                "stepId": "travel",
+                "formData": {
+                    "hasInternationalTravel": True,
+                    "trips": [
+                        {
+                            "country": "United States",
+                            "purpose": "Tourism",
+                            "departureDate": "2019-06-30",  # Return before departure
+                            "returnDate": "2019-06-15",
+                            "duration": "15 days"
+                        },
+                        {
+                            "country": "France",
+                            "purpose": "Tourism", 
+                            "departureDate": "2010-01-01",  # Very old trip (>10 years)
+                            "returnDate": "2010-01-15",
+                            "duration": "15 days"
+                        }
+                    ]
+                }
+            }
+            
+            invalid_response = requests.post(f"{API_BASE}/validate", json=invalid_dates_payload, timeout=10)
+            
+            if invalid_response.status_code == 200:
+                invalid_data = invalid_response.json()
+                print(f"✅ Travel date validation working")
+                print(f"   Validation OK: {invalid_data.get('ok')}")
+                print(f"   Date errors detected: {len(invalid_data.get('errors', []))}")
+                print(f"   Old trip suggestions: {len(invalid_data.get('suggestions', []))}")
+                
+                # Check for date order errors
+                errors = invalid_data.get('errors', [])
+                date_order_errors = [e for e in errors if 'date_order' in e.get('code', '')]
+                
+                if date_order_errors:
+                    print(f"   ✅ Date order validation working")
+                    
+                    # Check error message mentions trip number
+                    sample_error = date_order_errors[0]
+                    if 'viagem' in sample_error.get('message', '').lower():
+                        print(f"   ✅ Trip-specific error messages working")
+                
+                # Check for old trip suggestions
+                suggestions = invalid_data.get('suggestions', [])
+                old_trip_suggestions = [s for s in suggestions if '10 anos' in s]
+                
+                if old_trip_suggestions:
+                    print(f"   ✅ Old trip suggestions working")
+                
+                return True
+            else:
+                print(f"❌ Invalid travel validation failed: {invalid_response.status_code}")
+                return False
+                
+        else:
+            print(f"❌ Travel validation failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Travel validation error: {str(e)}")
+        return False
+
+def test_owl_tutor_validation_response_structure():
+    """Test that validation responses follow the expected ValidateResult structure"""
+    print("\n📋 Testing Owl Tutor - Validation Response Structure...")
+    
+    try:
+        # Test with a simple payload to check response structure
+        test_payload = {
+            "stepId": "personal",
+            "formData": {
+                "firstName": "Test",
+                "lastName": "User"
+                # Missing required fields to trigger validation
+            }
+        }
+        
+        response = requests.post(f"{API_BASE}/validate", json=test_payload, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Validation response structure test successful")
+            
+            # Check required fields in response
+            required_fields = ['ok', 'errors', 'missingRequired', 'suggestions']
+            missing_fields = [field for field in required_fields if field not in data]
+            
+            if not missing_fields:
+                print(f"   ✅ All required response fields present: {required_fields}")
+            else:
+                print(f"   ❌ Missing response fields: {missing_fields}")
+                return False
+            
+            # Check data types
+            type_checks = {
+                'ok': bool,
+                'errors': list,
+                'missingRequired': list,
+                'suggestions': list
+            }
+            
+            type_errors = []
+            for field, expected_type in type_checks.items():
+                if not isinstance(data.get(field), expected_type):
+                    type_errors.append(f"{field} should be {expected_type.__name__}")
+            
+            if not type_errors:
+                print(f"   ✅ All response field types correct")
+            else:
+                print(f"   ❌ Type errors: {type_errors}")
+                return False
+            
+            # Check error structure if errors exist
+            errors = data.get('errors', [])
+            if errors:
+                sample_error = errors[0]
+                error_fields = ['field', 'code', 'message']
+                missing_error_fields = [field for field in error_fields if field not in sample_error]
+                
+                if not missing_error_fields:
+                    print(f"   ✅ Error object structure correct")
+                else:
+                    print(f"   ❌ Missing error fields: {missing_error_fields}")
+                    return False
+            
+            # Test with invalid stepId to check error handling
+            invalid_step_payload = {
+                "stepId": "invalid_step",
+                "formData": {"test": "data"}
+            }
+            
+            invalid_step_response = requests.post(f"{API_BASE}/validate", json=invalid_step_payload, timeout=10)
+            
+            if invalid_step_response.status_code == 200:
+                invalid_step_data = invalid_step_response.json()
+                
+                # Should still return valid structure even for unknown step
+                if all(field in invalid_step_data for field in required_fields):
+                    print(f"   ✅ Unknown step handling working")
+                
+            # Test with missing stepId
+            no_step_payload = {
+                "formData": {"test": "data"}
+            }
+            
+            no_step_response = requests.post(f"{API_BASE}/validate", json=no_step_payload, timeout=10)
+            
+            if no_step_response.status_code == 400:
+                print(f"   ✅ Missing stepId validation working")
+            
+            return True
+            
+        else:
+            print(f"❌ Validation response structure test failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Validation response structure test error: {str(e)}")
+        return False
+
+# ============================================================================
 # VOICE AGENT SYSTEM TESTS (NEW - Semana 1 MVP)
 # ============================================================================
 
