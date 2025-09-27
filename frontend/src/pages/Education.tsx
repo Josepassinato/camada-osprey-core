@@ -255,7 +255,7 @@ const Education = () => {
                   <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-2">
                     <BookOpen className="h-8 w-8 text-primary" />
                   </div>
-                  <div className="text-2xl font-bold text-foreground">{progress.guides_completed.length}</div>
+                  <div className="text-2xl font-bold text-foreground">{progress?.guides_completed?.length || 0}</div>
                   <div className="text-sm text-muted-foreground">Guias Concluídos</div>
                 </div>
                 
