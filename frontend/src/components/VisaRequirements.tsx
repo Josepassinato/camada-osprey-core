@@ -244,6 +244,14 @@ const VisaRequirements = ({ visaType, onClose }: VisaRequirementsProps) => {
             examples: ['Reservas de hotel', 'Passagens aéreas', 'Roteiro turístico detalhado']
           },
           {
+            id: 'business_documents',
+            name: 'Documentos de Negócios (B-1)',
+            description: 'Para viagens de negócios - se aplicável',
+            required: false,
+            needsTranslation: true,
+            examples: ['Carta da empresa americana convidando', 'Agenda de reuniões/conferências', 'Contrato ou acordo comercial']
+          },
+          {
             id: 'invitation_letter',
             name: 'Carta Convite (se aplicável)',
             description: 'Se visitando familiares ou amigos nos EUA',
