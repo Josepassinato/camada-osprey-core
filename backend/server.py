@@ -1587,48 +1587,54 @@ async def reanalyze_document(document_id: str, current_user = Depends(get_curren
 
 # Auto-Application System Endpoints
 @api_router.post("/auto-application/start")
-async def start_auto_application(case_data: CaseCreate, current_user = Depends(get_current_user)):
-    """Start a new auto-application case"""
+async def start_auto_application(case_data: CaseCreate):
+    """Start a new auto-application case (anonymous or authenticated)"""
     try:
-        # Check if user has accepted legal disclaimer
-        user = await db.users.find_one({"id": current_user["id"]})
-        if not user.get("legal_disclaimer_accepted"):
-            raise HTTPException(status_code=400, detail="Legal disclaimer must be accepted first")
-        
+        # For anonymous users, create temporary case with 7 days expiration
         case = AutoApplicationCase(
-            user_id=current_user["id"],
-            form_code=case_data.form_code
+            form_code=case_data.form_code,
+            session_token=case_data.session_token,
+            expires_at=datetime.utcnow() + timedelta(days=7)
         )
         
         await db.auto_cases.insert_one(case.dict())
         
         return {"message": "Auto-application case created successfully", "case": case}
     
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"Error starting auto-application: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error starting auto-application: {str(e)}")
 
-@api_router.get("/auto-application/cases")
-async def get_user_cases(current_user = Depends(get_current_user)):
-    """Get all user auto-application cases"""
-    try:
-        cases = await db.auto_cases.find({"user_id": current_user["id"]}, {"_id": 0}).to_list(100)
-        return {"cases": cases}
-    
-    except Exception as e:
-        logger.error(f"Error getting cases: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error getting cases: {str(e)}")
-
 @api_router.get("/auto-application/case/{case_id}")
-async def get_case(case_id: str, current_user = Depends(get_current_user)):
-    """Get a specific case by ID"""
+async def get_case_anonymous(case_id: str, session_token: Optional[str] = None):
+    """Get a specific case by ID (anonymous or authenticated)"""
     try:
-        case = await db.auto_cases.find_one({
-            "case_id": case_id,
-            "user_id": current_user["id"]
-        })
+        # Try to get from current user first if authenticated
+        try:
+            current_user = await get_current_user_optional()
+            if current_user:
+                case = await db.auto_cases.find_one({
+                    "case_id": case_id,
+                    "user_id": current_user["id"]
+                })
+                if case:
+                    if "_id" in case:
+                        del case["_id"]
+                    return {"case": case}
+        except:
+            pass
+        
+        # If not found or not authenticated, try anonymous lookup
+        if session_token:
+            case = await db.auto_cases.find_one({
+                "case_id": case_id,
+                "session_token": session_token
+            })
+        else:
+            case = await db.auto_cases.find_one({
+                "case_id": case_id,
+                "user_id": None
+            })
         
         if not case:
             raise HTTPException(status_code=404, detail="Case not found")
@@ -1646,14 +1652,42 @@ async def get_case(case_id: str, current_user = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail=f"Error getting case: {str(e)}")
 
 @api_router.put("/auto-application/case/{case_id}")
-async def update_case(case_id: str, case_update: CaseUpdate, current_user = Depends(get_current_user)):
-    """Update a specific case"""
+async def update_case_anonymous(case_id: str, case_update: CaseUpdate, session_token: Optional[str] = None):
+    """Update a specific case (anonymous or authenticated)"""
     try:
-        case = await db.auto_cases.find_one({
-            "case_id": case_id,
-            "user_id": current_user["id"]
-        })
+        # Try authenticated user first
+        try:
+            current_user = await get_current_user_optional()
+            if current_user:
+                case = await db.auto_cases.find_one({
+                    "case_id": case_id,
+                    "user_id": current_user["id"]
+                })
+                if case:
+                    update_data = case_update.dict(exclude_none=True)
+                    update_data["updated_at"] = datetime.utcnow()
+                    
+                    await db.auto_cases.update_one(
+                        {"case_id": case_id},
+                        {"$set": update_data}
+                    )
+                    
+                    updated_case = await db.auto_cases.find_one({"case_id": case_id})
+                    if "_id" in updated_case:
+                        del updated_case["_id"]
+                        
+                    return {"message": "Case updated successfully", "case": updated_case}
+        except:
+            pass
         
+        # Anonymous update
+        query = {"case_id": case_id}
+        if session_token:
+            query["session_token"] = session_token
+        else:
+            query["user_id"] = None
+        
+        case = await db.auto_cases.find_one(query)
         if not case:
             raise HTTPException(status_code=404, detail="Case not found")
         
@@ -1677,20 +1711,45 @@ async def update_case(case_id: str, case_update: CaseUpdate, current_user = Depe
         logger.error(f"Error updating case: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error updating case: {str(e)}")
 
-@api_router.post("/auth/accept-disclaimer")
-async def accept_legal_disclaimer(current_user = Depends(get_current_user)):
-    """Accept legal disclaimer for auto-application"""
+@api_router.post("/auto-application/case/{case_id}/claim")
+async def claim_anonymous_case(case_id: str, current_user = Depends(get_current_user)):
+    """Claim an anonymous case when user registers/logs in"""
     try:
-        await db.users.update_one(
-            {"id": current_user["id"]},
-            {"$set": {"legal_disclaimer_accepted": True, "disclaimer_accepted_at": datetime.utcnow()}}
+        # Find anonymous case
+        case = await db.auto_cases.find_one({
+            "case_id": case_id,
+            "user_id": None
+        })
+        
+        if not case:
+            raise HTTPException(status_code=404, detail="Anonymous case not found")
+        
+        # Assign to current user
+        await db.auto_cases.update_one(
+            {"case_id": case_id},
+            {"$set": {
+                "user_id": current_user["id"],
+                "session_token": None,
+                "expires_at": None,
+                "updated_at": datetime.utcnow()
+            }}
         )
         
-        return {"message": "Legal disclaimer accepted successfully"}
+        return {"message": "Case claimed successfully"}
     
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Error accepting disclaimer: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error accepting disclaimer: {str(e)}")
+        logger.error(f"Error claiming case: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error claiming case: {str(e)}")
+
+# Helper function for optional authentication
+async def get_current_user_optional():
+    """Get current user if authenticated, None if not"""
+    try:
+        return await get_current_user()
+    except:
+        return None
 
 # Existing Applications endpoints continue here...
 @api_router.post("/applications")
