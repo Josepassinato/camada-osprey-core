@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import OspreyOwlTutor from "@/components/OspreyOwlTutor";
+import OspreyOwlTutorSimple from "@/components/OspreyOwlTutorSimple";
 import { useFormSnapshot } from "@/hooks/useFormSnapshot";
 import { 
   ArrowLeft,
