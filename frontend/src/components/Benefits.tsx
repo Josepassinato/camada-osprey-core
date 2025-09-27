@@ -38,7 +38,7 @@ const benefits = [
     title: "Taxa de Sucesso 98%",
     description: "Histórico comprovado com mais de 5.000 processos aprovados",
     color: "from-amber-500/10 to-orange-500/10",
-    iconColor: "text-amber-600"
+    iconColor: "text-black"
   },
   {
     icon: Headphones,
