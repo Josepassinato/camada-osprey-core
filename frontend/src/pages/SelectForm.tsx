@@ -40,16 +40,17 @@ const SelectForm = () => {
 
   const uscisforms: USCISFormType[] = [
     {
-      code: 'B-2',
-      title: 'B-2: Visto de Turista/Visitante',
-      description: 'Para turismo, visitas familiares, tratamento médico ou eventos sociais nos EUA',
+      code: 'B-1/B-2',
+      title: 'B-1/B-2: Visto de Negócios e Turismo',
+      description: 'Para negócios, turismo, visitas familiares, tratamento médico ou eventos sociais nos EUA',
       icon: <Plane className="h-6 w-6" />,
-      category: 'Turismo',
+      category: 'Turismo/Negócios',
       processingTime: '2-4 semanas',
-      uscisfee: '$185',
+      uscisfee: '$120',
       complexity: 'Básico',
       eligibility: [
-        'Propósito temporário (turismo, visitas, tratamento)',
+        'B-1: Reuniões de negócios, conferências, treinamentos',
+        'B-2: Turismo, visitas familiares, tratamento médico',
         'Intenção de retornar ao Brasil',
         'Vínculos fortes com país de origem',
         'Recursos financeiros suficientes para a viagem'
