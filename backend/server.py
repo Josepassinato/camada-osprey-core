@@ -1868,6 +1868,113 @@ Responda apenas com o JSON estruturado, sem explicações adicionais.
         logger.error(f"Error extracting facts: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error extracting facts: {str(e)}")
 
+@api_router.post("/auto-application/generate-forms")
+async def generate_official_forms(request: dict):
+    """Generate official USCIS forms from simplified responses using AI"""
+    try:
+        case_id = request.get("case_id")
+        form_responses = request.get("form_responses", {})
+        form_code = request.get("form_code")
+        
+        if not case_id or not form_responses:
+            raise HTTPException(status_code=400, detail="Case ID and form responses are required")
+        
+        # Get visa specifications for context
+        visa_specs = get_visa_specifications(form_code) if form_code else {}
+        
+        # Create AI prompt for form conversion
+        conversion_prompt = f"""
+Você é um especialista em formulários do USCIS. Converta as respostas simplificadas em português para o formato oficial do formulário {form_code}.
+
+FORMULÁRIO: {form_code}
+CATEGORIA: {visa_specs.get('category', 'Não especificada')}
+TÍTULO: {visa_specs.get('title', 'Não especificado')}
+
+RESPOSTAS DO USUÁRIO (em português):
+{json.dumps(form_responses, indent=2, ensure_ascii=False)}
+
+INSTRUÇÕES:
+1. Converta todas as respostas para inglês profissional
+2. Formate conforme os padrões do USCIS para {form_code}
+3. Complete campos obrigatórios baseados nas informações fornecidas
+4. Mantenha consistência de datas (MM/DD/YYYY)
+5. Use formatação oficial de nomes e endereços
+6. Adicione códigos de país padrão (BR para Brasil, US para EUA)
+7. Converta valores monetários para USD se necessário
+
+FORMATO DE SAÍDA:
+Retorne um JSON estruturado com os campos do formulário oficial {form_code}, usando os nomes de campos exatos do USCIS.
+
+Para campos não preenchidos pelo usuário, use:
+- "N/A" para não aplicável
+- "None" para informações não fornecidas
+- Mantenha campos obrigatórios em branco se não houver informação
+
+Responda apenas com o JSON estruturado, sem explicações adicionais.
+"""
+
+        # Call OpenAI for form conversion
+        response = openai.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {
+                    "role": "system", 
+                    "content": "Você é um especialista em formulários do USCIS. Converta respostas em português para formato oficial em inglês com precisão total."
+                },
+                {"role": "user", "content": conversion_prompt}
+            ],
+            temperature=0.1,
+            max_tokens=3000
+        )
+        
+        # Parse AI response
+        ai_response = response.choices[0].message.content.strip()
+        
+        # Try to extract JSON from the response
+        try:
+            # Remove any markdown formatting
+            if "```json" in ai_response:
+                ai_response = ai_response.split("```json")[1].split("```")[0].strip()
+            elif "```" in ai_response:
+                ai_response = ai_response.split("```")[1].split("```")[0].strip()
+            
+            official_form_data = json.loads(ai_response)
+        except json.JSONDecodeError:
+            # Fallback: create basic structure
+            official_form_data = {
+                "form_number": form_code,
+                "generated_date": datetime.utcnow().isoformat(),
+                "user_responses": form_responses,
+                "conversion_status": "partial",
+                "notes": "Manual review recommended"
+            }
+        
+        # Update case with official form data
+        if case_id:
+            await db.auto_cases.update_one(
+                {"case_id": case_id},
+                {
+                    "$set": {
+                        "official_form_data": official_form_data,
+                        "status": "form_filled",
+                        "updated_at": datetime.utcnow()
+                    }
+                }
+            )
+        
+        return {
+            "message": "Official forms generated successfully",
+            "form_code": form_code,
+            "official_form_data": official_form_data,
+            "fields_converted": len(official_form_data.keys())
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error generating forms: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating forms: {str(e)}")
+
 @api_router.get("/auto-application/visa-specs/{form_code}")
 async def get_visa_specs(form_code: str, subcategory: Optional[str] = None):
     """Get detailed specifications for a specific USCIS form"""
