@@ -19,6 +19,7 @@ import ApplicationDetail from "./pages/ApplicationDetail";
 import AutoApplicationStart from "./pages/AutoApplicationStart";
 import SelectForm from "./pages/SelectForm";
 import BasicData from "./pages/BasicData";
+import DocumentUploadAuto from "./pages/DocumentUploadAuto";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
