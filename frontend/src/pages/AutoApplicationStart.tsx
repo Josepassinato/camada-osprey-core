@@ -22,37 +22,14 @@ const AutoApplicationStart = () => {
   const [error, setError] = useState("");
 
   const acceptDisclaimer = async () => {
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const token = localStorage.getItem('osprey_token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/accept-disclaimer`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        setDisclaimerAccepted(true);
-        // Proceed to form selection
-        navigate('/auto-application/select-form');
-      } else {
-        setError('Erro ao aceitar aviso legal. Tente novamente.');
-      }
-    } catch (error) {
-      console.error('Disclaimer error:', error);
-      setError('Erro de conexão. Tente novamente.');
-    } finally {
-      setIsLoading(false);
-    }
+    if (!disclaimerAccepted) return;
+    
+    // Generate session token for anonymous user
+    const sessionToken = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem('osprey_session_token', sessionToken);
+    
+    // Proceed to form selection without requiring login
+    navigate('/auto-application/select-form');
   };
 
   const benefits = [
