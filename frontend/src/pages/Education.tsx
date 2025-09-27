@@ -153,7 +153,7 @@ const Education = () => {
   };
 
   const isGuideCompleted = (guideType: string) => {
-    return progress?.guides_completed.includes(guideType) || false;
+    return progress?.guides_completed?.includes(guideType) || false;
   };
 
   const handleSearch = async () => {
