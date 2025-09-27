@@ -83,9 +83,23 @@ const BasicData = () => {
   });
   
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [voiceAdvice, setVoiceAdvice] = useState<string>("");
   const [case_, setCase] = useState<any>(null);
+
+  // Voice agent integration
+  const { snapshot, sendSnapshot } = useFormSnapshot(formData, {
+    enabled: true,
+    autoSend: true,
+    onSnapshotSent: (snapshot) => {
+      console.log('Form snapshot sent to voice agent:', snapshot);
+    },
+    onError: (error) => {
+      console.error('Form snapshot error:', error);
+    }
+  });
 
   useEffect(() => {
     if (caseId) {
