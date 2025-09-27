@@ -10,7 +10,8 @@ import {
   Zap,
   User,
   CreditCard,
-  Download
+  Download,
+  Target
 } from "lucide-react";
 
 const AutoApplicationStart = () => {
