@@ -94,15 +94,19 @@ const BasicData = () => {
   const fetchCase = async () => {
     try {
       const sessionToken = localStorage.getItem('osprey_session_token');
+      const caseIdStored = localStorage.getItem('osprey_current_case_id');
       
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}?session_token=${sessionToken}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          }
+      // Build query string
+      let url = `${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}`;
+      if (sessionToken && sessionToken !== 'null') {
+        url += `?session_token=${sessionToken}`;
+      }
+      
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
         }
-      );
+      });
 
       if (response.ok) {
         const data = await response.json();
