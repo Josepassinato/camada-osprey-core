@@ -236,17 +236,17 @@ class ComplianceCheckAgent(BaseSpecializedAgent):
         5. Conformidade com regulamentações atuais
         
         RESPOSTA SEMPRE EM JSON:
-        {
+        {{
             "agent": "Dra. Patricia - Compliance",
             "uscis_compliant": true/false,
             "ready_for_submission": true/false,
             "compliance_score": 0-100,
             "red_flags": ["flag1", "flag2"],
             "missing_elements": ["elemento1", "elemento2"],
-            "final_checklist": [{"item": "descrição", "status": "ok|missing|issue"}],
+            "final_checklist": [{{"item": "descrição", "status": "ok|missing|issue"}}],
             "submission_recommendation": "ENVIAR|NÃO_ENVIAR|REVISAR_PRIMEIRO",
             "final_notes": "Observações finais críticas"
-        }
+        }}
         
         SEJA A ÚLTIMA LINHA DE DEFESA. Só aprove aplicações 100% prontas.
         """
