@@ -282,15 +282,23 @@ class ImmigrationExpert:
                 }
                 
         except Exception as e:
-            logger.error(f"Error in document analysis: {e}")
+            logger.error(f"Error in Dra. Paula document analysis: {e}")
             return {
+                "expert": "Dra. Paula B2C",
+                "assistant_id": self.assistant_id,
+                "document_type_correct": False,
+                "belongs_to_user": False,
+                "is_authentic_document": False,
                 "document_valid": False,
                 "completeness_score": 0,
-                "issues_found": ["Erro na análise do documento"],
-                "missing_elements": [],
-                "recommendations": ["Tente fazer upload do documento novamente"],
-                "expiration_check": "unknown",
-                "uscis_compliance": "needs_review"
+                "critical_issues": [{"severity": "CRÍTICO", "issue": "Erro técnico na análise", "impact": "Documento não pôde ser validado"}],
+                "data_inconsistencies": ["Erro no sistema"],
+                "missing_elements": ["Análise completa"],
+                "recommendations": ["Tente fazer upload do documento novamente", "Verifique se o arquivo não está corrompido"],
+                "expiration_check": "cannot_verify",
+                "uscis_compliance": "rejected",
+                "dra_paula_verdict": "REJEITADO",
+                "expert_notes": "Erro técnico - documento deve ser re-enviado"
             }
     
     async def generate_advice(self, 
