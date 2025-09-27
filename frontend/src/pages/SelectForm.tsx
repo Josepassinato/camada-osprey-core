@@ -209,10 +209,10 @@ const SelectForm = () => {
             <div>
               <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
                 <FileText className="h-8 w-8 text-black" />
-                Escolha o Formulário USCIS
+                Escolha seu Formulário USCIS
               </h1>
               <p className="text-muted-foreground">
-                Selecione o tipo de formulário apropriado para sua situação
+                Selecione o tipo de formulário para organizar sua auto-aplicação
               </p>
             </div>
           </div>
