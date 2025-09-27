@@ -203,10 +203,12 @@ const VisaRequirements = ({ visaType, onClose }: VisaRequirementsProps) => {
         processingTime: '2-4 semanas (consulado) ou alguns dias (ESTA)',
         uscisfee: '$120 (consulado) ou $21 (ESTA)',
         eligibility: [
-          'Propósito temporário (turismo, visitas, tratamento)',
-          'Intenção de retornar ao Brasil',
-          'Vínculos fortes com país de origem',
-          'Recursos financeiros suficientes para a viagem'
+          'B-1: Reuniões de negócios, conferências, consultas, treinamentos',
+          'B-2: Turismo, visitas familiares, tratamento médico, eventos sociais',
+          'Propósito temporário (máximo 6 meses por entrada)',
+          'Intenção clara de retornar ao Brasil',
+          'Vínculos fortes com país de origem (emprego, família, propriedades)',
+          'Recursos financeiros suficientes para custear toda a viagem'
         ],
         documents: [
           {
