@@ -245,45 +245,41 @@ const SelectForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
-      {/* Header */}
-      <div className="glass border-b border-white/20">
-        <div className="container-responsive py-6">
-          <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-white">
+      {/* Header - Mobile Optimized */}
+      <div className="bg-white border-b border-black">
+        <div className="px-4 py-4 sm:py-6">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Button 
               variant="ghost" 
               onClick={() => navigate('/auto-application/start')}
-              className="p-2"
+              className="p-2 hover:bg-gray-100"
             >
               <ArrowLeft className="h-4 w-4" />
-              Voltar
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
-                <FileText className="h-8 w-8 text-black" />
-                Escolha seu Formulário USCIS
+              <h1 className="text-lg sm:text-2xl font-bold text-black">
+                Escolha seu Formulário
               </h1>
-              <p className="text-muted-foreground">
-                Selecione o tipo de formulário para organizar sua auto-aplicação
+              <p className="text-sm text-black hidden sm:block">
+                Selecione o tipo de formulário USCIS
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container-responsive section-padding">
+      <div className="px-4 py-6 sm:px-6 sm:py-8">
         {error && (
-          <Card className="glass border-0 mb-6 border-l-4 border-l-gray-600">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <AlertTriangle className="h-6 w-6 text-gray-700" />
-                <p className="text-foreground">{error}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="bg-white border border-black rounded-lg mb-6 p-4">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-5 w-5 text-black" />
+              <p className="text-black text-sm">{error}</p>
+            </div>
+          </div>
         )}
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
           {uscisforms.map((form) => (
             <Card 
               key={form.code}
