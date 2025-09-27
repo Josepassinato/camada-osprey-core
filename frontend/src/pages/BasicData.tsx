@@ -344,7 +344,7 @@ const BasicData = () => {
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-black mb-2">
                       País de Nascimento
                     </label>
                     <input
@@ -352,7 +352,7 @@ const BasicData = () => {
                       value={formData.countryOfBirth}
                       onChange={(e) => handleInputChange('countryOfBirth', e.target.value)}
                       placeholder="Ex: Brasil"
-                      className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-black"
                     />
                   </div>
                   <div>
