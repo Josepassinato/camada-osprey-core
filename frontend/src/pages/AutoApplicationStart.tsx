@@ -98,16 +98,18 @@ const AutoApplicationStart = () => {
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24">
         <div className="text-center max-w-4xl mx-auto">
           {/* Badge */}
-          <div className="inline-flex items-center px-4 py-2 bg-gray-100 rounded-full text-sm text-black mb-8">
-            <Zap className="h-4 w-4 mr-2" />
-            IA Avançada para Imigração
+          <div className="inline-flex items-center px-4 py-2 bg-black text-white rounded-full text-sm mb-8 font-medium">
+            <Users className="h-4 w-4 mr-2" />
+            Plataforma de Auto-Aplicação para Vistos Americanos
           </div>
           
           {/* Main Headline */}
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-black mb-6 tracking-tight leading-tight">
-            Clique. Clique. Clique.
+            Faça sua própria
             <br />
-            <span className="text-gray-600">E seu visto está pronto.</span>
+            <span className="text-gray-600">aplicação de visto</span>
+            <br />
+            <span className="text-black">no USCIS</span>
           </h1>
           
           {/* Subtitle */}
