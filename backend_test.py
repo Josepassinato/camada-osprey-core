@@ -33,6 +33,7 @@ AUTH_TOKEN = None
 USER_ID = None
 DOCUMENT_ID = None  # For document tests
 INTERVIEW_SESSION_ID = None  # For education tests
+AUTO_APPLICATION_CASE_ID = None  # For auto-application tests
 
 def test_basic_connectivity():
     """Test basic API connectivity"""
