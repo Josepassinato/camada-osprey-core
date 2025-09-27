@@ -1546,6 +1546,30 @@ async def create_application(app_data: ApplicationCreate, current_user = Depends
         logger.error(f"Error creating application: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error creating application: {str(e)}")
 
+@api_router.get("/applications/{application_id}")
+async def get_application(application_id: str, current_user = Depends(get_current_user)):
+    """Get a specific application by ID"""
+    try:
+        application = await db.applications.find_one({
+            "id": application_id,
+            "user_id": current_user["id"]
+        })
+        
+        if not application:
+            raise HTTPException(status_code=404, detail="Application not found")
+        
+        # Remove MongoDB ObjectId
+        if "_id" in application:
+            del application["_id"]
+            
+        return {"application": application}
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting application: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error getting application: {str(e)}")
+
 @api_router.get("/applications")
 async def get_user_applications(current_user = Depends(get_current_user)):
     """Get all user applications"""
