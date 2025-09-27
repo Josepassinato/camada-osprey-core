@@ -159,8 +159,9 @@ const AutoApplicationStart = () => {
 
                 <div className="border-t border-gray-200 pt-4">
                   <p className="text-xs text-muted-foreground">
-                    <strong>Responsabilidade:</strong> É sua responsabilidade revisar todos os formulários preenchidos, 
-                    verificar a precisão das informações e consultar um advogado quando necessário. 
+                    <strong>Responsabilidade:</strong> Somos apenas uma ferramenta de apoio tecnológico. 
+                    É SUA responsabilidade revisar todas as informações organizadas, verificar a precisão dos dados 
+                    e fazer sua própria auto-aplicação. Consulte um advogado quando necessário. 
                     A OSPREY não se responsabiliza por resultados de aplicações ou decisões do USCIS.
                   </p>
                 </div>
