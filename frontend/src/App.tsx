@@ -18,6 +18,7 @@ import NewApplication from "./pages/NewApplication";
 import ApplicationDetail from "./pages/ApplicationDetail";
 import AutoApplicationStart from "./pages/AutoApplicationStart";
 import SelectForm from "./pages/SelectForm";
+import BasicData from "./pages/BasicData";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
