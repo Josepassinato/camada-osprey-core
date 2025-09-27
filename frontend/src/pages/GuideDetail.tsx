@@ -49,7 +49,7 @@ const GuideDetail = () => {
       }
 
       const response = await fetch(
-        `${import.meta.env.REACT_APP_BACKEND_URL}/api/education/guides/${visaType}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/education/guides/${visaType}`,
         {
           headers: { 'Authorization': `Bearer ${token}` }
         }
@@ -242,21 +242,23 @@ const GuideDetail = () => {
             {/* Sections Navigation */}
             <Card className="glass border-0">
               <CardHeader>
-                <CardTitle className="text-lg font-semibold">Seções</CardTitle>
+                <CardTitle className="text-lg font-semibold">Navegação por Seções</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 {guide.sections.map((section, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentSection(index)}
-                    className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                    className={`w-full text-left p-3 rounded-lg transition-colors ${
                       currentSection === index
-                        ? 'bg-gray-100 border-gray-300 text-gray-900'
-                        : 'hover:bg-gray-50 border-gray-200'
+                        ? 'bg-gray-100 text-gray-900 border border-gray-300'
+                        : 'hover:bg-gray-50 text-muted-foreground'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{section.title}</span>
+                      <span className="text-sm font-medium">
+                        {index + 1}. {section.title}
+                      </span>
                       {completedSections.includes(index) && (
                         <CheckCircle className="h-4 w-4 text-gray-700" />
                       )}
@@ -274,8 +276,8 @@ const GuideDetail = () => {
               <CardContent>
                 <ul className="space-y-2">
                   {guide.requirements.map((req, index) => (
-                    <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <li key={index} className="text-sm text-foreground flex items-start gap-2">
+                      <div className="w-1.5 h-1.5 bg-gray-700 rounded-full mt-2 flex-shrink-0"></div>
                       {req}
                     </li>
                   ))}
@@ -291,8 +293,8 @@ const GuideDetail = () => {
               <CardContent>
                 <ul className="space-y-2">
                   {guide.success_tips.map((tip, index) => (
-                    <li key={index} className="text-sm text-foreground flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-gray-700 rounded-full mt-2 flex-shrink-0"></div>
+                    <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
                       {tip}
                     </li>
                   ))}

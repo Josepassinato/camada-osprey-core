@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   MessageSquare, 
+  Clock, 
+  CheckCircle, 
   ArrowLeft,
   ArrowRight,
-  Play,
-  CheckCircle,
+  Target,
   AlertTriangle,
-  Clock,
-  Star,
-  Target
+  Play,
+  Star
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface InterviewQuestion {
   question_en: string;
@@ -29,11 +29,10 @@ interface InterviewSession {
   difficulty: string;
   questions: InterviewQuestion[];
   current_question: number;
-  status: string;
   created_at: string;
 }
 
-interface AnswerFeedback {
+interface InterviewFeedback {
   score: number;
   confidence_level: string;
   strengths: string[];
@@ -44,15 +43,15 @@ interface AnswerFeedback {
 
 const InterviewSimulator = () => {
   const navigate = useNavigate();
+  const [showSetup, setShowSetup] = useState(true);
   const [session, setSession] = useState<InterviewSession | null>(null);
-  const [currentAnswer, setCurrentAnswer] = useState("");
-  const [feedback, setFeedback] = useState<AnswerFeedback | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showSetup, setShowSetup] = useState(true);
+  const [currentAnswer, setCurrentAnswer] = useState("");
+  const [feedback, setFeedback] = useState<InterviewFeedback | null>(null);
   const [sessionCompleted, setSessionCompleted] = useState(false);
-
-  // Setup form
+  
+  // Setup form state
   const [interviewType, setInterviewType] = useState("consular");
   const [visaType, setVisaType] = useState("h1b");
   const [difficulty, setDifficulty] = useState("beginner");
@@ -69,7 +68,7 @@ const InterviewSimulator = () => {
       }
 
       const response = await fetch(
-        `${import.meta.env.REACT_APP_BACKEND_URL}/api/education/interview/start`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/education/interview/start`,
         {
           method: 'POST',
           headers: {
@@ -79,21 +78,22 @@ const InterviewSimulator = () => {
           body: JSON.stringify({
             interview_type: interviewType,
             visa_type: visaType,
-            difficulty: difficulty
+            difficulty: difficulty,
           }),
         }
       );
 
       if (response.ok) {
         const data = await response.json();
-        setSession(data);
+        setSession(data.session);
         setShowSetup(false);
       } else {
-        setError('Erro ao iniciar simulação');
+        const errorData = await response.json();
+        setError(errorData.detail || 'Erro ao iniciar simulação');
       }
     } catch (error) {
       console.error('Start session error:', error);
-      setError('Erro de conexão');
+      setError('Erro de conexão. Tente novamente.');
     } finally {
       setIsLoading(false);
     }
@@ -103,12 +103,10 @@ const InterviewSimulator = () => {
     if (!session || !currentAnswer.trim()) return;
 
     setIsLoading(true);
-    setError("");
-
     try {
       const token = localStorage.getItem('osprey_token');
       const response = await fetch(
-        `${import.meta.env.REACT_APP_BACKEND_URL}/api/education/interview/${session.session_id}/answer`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/education/interview/${session.session_id}/answer`,
         {
           method: 'POST',
           headers: {
@@ -116,8 +114,7 @@ const InterviewSimulator = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            question_index: session.current_question,
-            answer: currentAnswer
+            answer: currentAnswer,
           }),
         }
       );
@@ -136,10 +133,11 @@ const InterviewSimulator = () => {
     }
   };
 
-  const nextQuestion = () => {
+  const nextQuestion = async () => {
     if (!session) return;
 
     if (session.current_question < session.questions.length - 1) {
+      // Move to next question
       setSession({
         ...session,
         current_question: session.current_question + 1
@@ -147,38 +145,25 @@ const InterviewSimulator = () => {
       setCurrentAnswer("");
       setFeedback(null);
     } else {
-      completeInterview();
-    }
-  };
+      // Complete interview
+      try {
+        const token = localStorage.getItem('osprey_token');
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/api/education/interview/${session.session_id}/complete`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          }
+        );
 
-  const completeInterview = async () => {
-    if (!session) return;
-
-    setIsLoading(true);
-
-    try {
-      const token = localStorage.getItem('osprey_token');
-      const response = await fetch(
-        `${import.meta.env.REACT_APP_BACKEND_URL}/api/education/interview/${session.session_id}/complete`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+        if (response.ok) {
+          setSessionCompleted(true);
         }
-      );
-
-      if (response.ok) {
-        setSessionCompleted(true);
-      } else {
-        setError('Erro ao finalizar entrevista');
+      } catch (error) {
+        console.error('Complete interview error:', error);
       }
-    } catch (error) {
-      console.error('Complete interview error:', error);
-      setError('Erro de conexão');
-    } finally {
-      setIsLoading(false);
     }
   };
 

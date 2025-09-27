@@ -77,13 +77,13 @@ const Education = () => {
 
       // Fetch guides, progress, and tips in parallel
       const [guidesRes, progressRes, tipsRes] = await Promise.all([
-        fetch(`${import.meta.env.REACT_APP_BACKEND_URL}/api/education/guides`, {
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/education/guides`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
-        fetch(`${import.meta.env.REACT_APP_BACKEND_URL}/api/education/progress`, {
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/education/progress`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
-        fetch(`${import.meta.env.REACT_APP_BACKEND_URL}/api/education/tips`, {
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/education/tips`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
       ]);
@@ -162,7 +162,7 @@ const Education = () => {
     setIsSearching(true);
     try {
       const token = localStorage.getItem('osprey_token');
-      const response = await fetch(`${import.meta.env.REACT_APP_BACKEND_URL}/api/education/knowledge-base/search`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/education/knowledge-base/search`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -188,7 +188,7 @@ const Education = () => {
   const markTipAsRead = async (tipId: string) => {
     try {
       const token = localStorage.getItem('osprey_token');
-      await fetch(`${import.meta.env.REACT_APP_BACKEND_URL}/api/education/tips/${tipId}/read`, {
+      await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/education/tips/${tipId}/read`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
       });
