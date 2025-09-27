@@ -300,11 +300,6 @@ const AutoApplicationStart = () => {
                 description: "Osprey oferece a assistência que você não consegue sozinho para aplicar nos EUA."
               },
               {
-                icon: <User className="h-8 w-8" />,
-                title: "Time especialista",
-                description: "Nós te guiamos através das questões legais e burocráticas. Não precisa virar especialista da noite pro dia."
-              },
-              {
                 icon: <FileText className="h-8 w-8" />,
                 title: "Mantenha-se informado",
                 description: "Com um processo simplificado, será tão fácil quanto rastrear um pacote. Sem surpresas."
