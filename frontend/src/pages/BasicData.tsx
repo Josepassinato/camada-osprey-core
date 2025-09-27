@@ -277,8 +277,8 @@ const BasicData = () => {
         </div>
       </div>
 
-      <div className="container-responsive section-padding">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
+      <div className="px-4 py-6 sm:px-6 sm:py-8">
+        <div className="max-w-4xl mx-auto lg:grid lg:grid-cols-3 lg:gap-8">
           {/* Main Form */}
           <div className="lg:col-span-2 space-y-6">
             
