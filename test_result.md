@@ -637,7 +637,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Education Module Frontend Integration"
+    - "Auto-Application Complete Journey - All Stages Tested"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
