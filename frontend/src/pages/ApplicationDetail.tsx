@@ -203,7 +203,7 @@ const ApplicationDetail = () => {
                     {application.progress_percentage}%
                   </span>
                 </div>
-                <Progress value={application.progress_percentage} className="h-3" />
+                <Progress value={application.progress_percentage} className="h-3 bg-gray-200" />
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                   <div className="p-4 bg-gray-50 rounded-lg">
