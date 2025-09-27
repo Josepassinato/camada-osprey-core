@@ -151,140 +151,74 @@ Sistema de cores minimalista para aplicação de imigração
   }
 }
 
-/* Custom utility classes for OSPREY - Preto e Branco */
+/* Utilities - Mobile First Design */
 @layer utilities {
-  /* Glass morphism effect - Preto e Branco */
-  .glass {
-    @apply bg-white/80 backdrop-blur-md border border-black/20;
-  }
-
-  .glass-dark {
-    @apply dark:bg-black/80 dark:backdrop-blur-md dark:border-white/20;
-  }
-
-  /* Enhanced button variants - Preto e Branco */
-  .btn-gradient {
-    @apply bg-black text-white shadow-elegant hover:shadow-glow hover:bg-gray-800 transition-all duration-300;
-  }
-
-  .btn-glass {
-    @apply glass hover:bg-white/90 transition-all duration-200;
-  }
-
-  /* Card enhancements - Preto e Branco */
-  .card-hover {
-    @apply hover:shadow-elegant hover:-translate-y-1 transition-all duration-300;
-  }
-
-  .card-glass {
-    @apply glass shadow-card;
-  }
-
-  /* Text gradients - Escala de cinza */
-  .text-gradient {
-    @apply bg-gradient-to-r from-black to-gray-600 bg-clip-text text-transparent;
-  }
-
-  /* Professional spacing */
-  .section-padding {
-    @apply py-16 px-4 sm:px-6 lg:px-8;
-  }
-
   .container-responsive {
-    @apply container mx-auto max-w-7xl;
+    @apply w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
   }
-
-  /* Overrides para garantir preto e branco */
-  .bg-primary {
-    @apply !bg-black;
+  
+  .section-padding {
+    @apply py-8 sm:py-12 lg:py-16;
   }
-
-  .text-primary {
-    @apply !text-black;
+  
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-lg;
   }
-
-  .border-primary {
-    @apply !border-black;
+  
+  .glass {
+    @apply bg-white border border-gray-200;
   }
-
-  .bg-accent {
-    @apply !bg-gray-600;
+  
+  .bg-gradient-subtle {
+    @apply bg-white;
   }
-
-  .text-accent {
-    @apply !text-gray-600;
+  
+  .text-gradient {
+    @apply text-black;
   }
-
-  .bg-success {
-    @apply !bg-black;
+  
+  /* Mobile optimizations */
+  .mobile-padding {
+    @apply px-4 py-3 sm:px-6 sm:py-4;
   }
-
-  .text-success {
-    @apply !text-black;
+  
+  .mobile-text {
+    @apply text-sm sm:text-base;
   }
-
-  .bg-destructive {
-    @apply !bg-black;
+  
+  .mobile-title {
+    @apply text-lg sm:text-xl md:text-2xl;
   }
-
-  .text-destructive {
-    @apply !text-black;
+  
+  .mobile-button {
+    @apply px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base;
   }
-
-  /* Cores específicas para botões */
-  .btn-primary {
-    @apply !bg-black !text-white hover:!bg-gray-800;
+  
+  /* Touch targets for mobile */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
   }
+}
 
-  .btn-secondary {
-    @apply !bg-gray-200 !text-black hover:!bg-gray-300;
+/* Mobile-first responsive design */
+@media (max-width: 640px) {
+  .container-responsive {
+    @apply px-3;
   }
-
-  /* Remover qualquer cor que não seja preto/branco/cinza */
-  .text-blue-500,
-  .text-blue-600,
-  .text-blue-700,
-  .text-green-500,
-  .text-green-600,
-  .text-green-700,
-  .text-red-500,
-  .text-red-600,
-  .text-red-700,
-  .text-orange-500,
-  .text-orange-600,
-  .text-yellow-500,
-  .text-yellow-600,
-  .text-purple-500,
-  .text-indigo-500,
-  .text-pink-500,
-  .text-cyan-500,
-  .text-teal-500 {
-    @apply !text-black;
+  
+  body {
+    @apply text-sm;
   }
-
-  .bg-blue-50,
-  .bg-blue-100,
-  .bg-blue-500,
-  .bg-green-50,
-  .bg-green-100,
-  .bg-green-500,
-  .bg-red-50,
-  .bg-red-100,
-  .bg-red-500,
-  .bg-orange-50,
-  .bg-orange-100,
-  .bg-orange-500,
-  .bg-yellow-50,
-  .bg-yellow-100,
-  .bg-yellow-500 {
-    @apply !bg-gray-100;
+  
+  h1 {
+    @apply text-xl;
   }
-
-  .border-blue-200,
-  .border-green-200,
-  .border-red-200,
-  .border-orange-200,
-  .border-yellow-200 {
-    @apply !border-gray-300;
+  
+  h2 {
+    @apply text-lg;
+  }
+  
+  h3 {
+    @apply text-base;
   }
 }
