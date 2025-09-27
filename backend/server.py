@@ -18,6 +18,7 @@ from enum import Enum
 import base64
 import mimetypes
 import re
+from visa_specifications import get_visa_specifications, get_required_documents, get_key_questions, get_common_issues
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
