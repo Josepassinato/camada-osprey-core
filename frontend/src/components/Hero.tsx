@@ -41,8 +41,8 @@ const Hero = () => {
             {/* Trust indicators */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="flex items-center gap-3 p-4 rounded-xl glass-dark hover:bg-white/90 transition-colors">
-                <div className="flex-shrink-0 w-12 h-12 bg-success/10 rounded-lg flex items-center justify-center">
-                  <CheckCircle className="h-6 w-6 text-success" />
+                <div className="flex-shrink-0 w-12 h-12 bg-black/10 rounded-lg flex items-center justify-center">
+                  <CheckCircle className="h-6 w-6 text-black" />
                 </div>
                 <div>
                   <div className="text-sm font-medium text-foreground">100% Digital</div>
