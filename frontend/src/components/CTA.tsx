@@ -65,7 +65,7 @@ const CTA = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
                 <Button 
                   size="xl" 
-                  className="btn-gradient text-lg font-medium group flex-1"
+                  className="bg-black text-white hover:bg-gray-800 text-lg font-medium group flex-1"
                   onClick={() => navigate('/signup')}
                 >
                   Iniciar Processo Gratuito
