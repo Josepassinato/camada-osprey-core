@@ -781,7 +781,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Voice Agent System Testing Complete"
+    - "Osprey Owl Tutor Validation System Testing Complete"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
