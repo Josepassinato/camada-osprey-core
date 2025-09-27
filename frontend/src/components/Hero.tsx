@@ -75,7 +75,7 @@ const Hero = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <Button 
                 size="xl" 
-                className="btn-gradient text-lg font-medium group"
+                className="bg-black text-white hover:bg-gray-800 text-lg font-medium group"
                 onClick={() => navigate('/signup')}
               >
                 Iniciar Aplicação Agora
