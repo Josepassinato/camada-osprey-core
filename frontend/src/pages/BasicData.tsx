@@ -653,6 +653,38 @@ const BasicData = () => {
           </div>
         </div>
       </div>
+
+      {/* Osprey Owl Tutor */}
+      <OspreyOwlTutor 
+        snapshot={snapshot}
+        onAction={(event, payload) => {
+          console.log('Tutor action:', event, payload);
+          
+          // Handle tutor actions
+          switch (event) {
+            case 'go:next':
+              continueToNextStep();
+              break;
+            case 'help:field':
+              // Focus on specific field
+              if (payload?.field) {
+                const fieldElement = document.querySelector(`[name="${payload.field}"]`);
+                if (fieldElement) {
+                  (fieldElement as HTMLElement).focus();
+                }
+              }
+              break;
+            case 'validate:current_step':
+              // Trigger validation
+              console.log('Validating current step...');
+              break;
+            default:
+              console.log('Unhandled tutor action:', event);
+          }
+        }}
+        isEnabled={!!case_?.case_id}
+        position="bottom-right"
+      />
     </div>
   );
 };
