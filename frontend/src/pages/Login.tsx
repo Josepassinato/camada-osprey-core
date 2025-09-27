@@ -165,7 +165,7 @@ const Login = () => {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full btn-gradient text-lg font-medium group"
+                className="w-full bg-black text-white hover:bg-gray-800 text-lg font-medium group"
               >
                 {isLoading ? (
                   <>
