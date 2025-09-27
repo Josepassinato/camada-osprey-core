@@ -10,7 +10,6 @@ from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional, Dict, Any
 import uuid
 from datetime import datetime, timedelta
-import openai
 import json
 import jwt
 import bcrypt
