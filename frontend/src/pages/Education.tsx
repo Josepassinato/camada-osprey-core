@@ -263,7 +263,7 @@ const Education = () => {
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
                     <MessageSquare className="h-8 w-8 text-gray-700" />
                   </div>
-                  <div className="text-2xl font-bold text-foreground">{progress.interviews_completed.length}</div>
+                  <div className="text-2xl font-bold text-foreground">{progress?.interviews_completed?.length || 0}</div>
                   <div className="text-sm text-muted-foreground">Entrevistas Simuladas</div>
                 </div>
                 
