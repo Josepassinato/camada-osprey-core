@@ -34,11 +34,11 @@ Sistema de cores minimalista para aplicação de imigração
     --accent: 64 64 64;               /* Cinza escuro */
     --accent-foreground: 255 255 255; /* Branco puro */
 
-    /* Success - Cinza escuro (sem verde) */
+    /* Success - Preto (sem cores) */
     --success: 0 0 0;                 /* Preto puro */
     --success-foreground: 255 255 255; /* Branco puro */
 
-    /* Destructive - Cinza escuro (sem vermelho) */
+    /* Destructive - Preto (sem cores) */
     --destructive: 0 0 0;             /* Preto puro */
     --destructive-foreground: 255 255 255; /* Branco puro */
 
