@@ -541,8 +541,8 @@ const Documents = () => {
                 <CardContent className="space-y-3">
                   {upcomingExpirations.slice(0, 5).map((exp, index) => (
                     <div key={index} className="flex items-start gap-3">
-                      <div className="w-8 h-8 bg-orange-500/10 rounded-full flex items-center justify-center flex-shrink-0">
-                        <AlertTriangle className="h-4 w-4 text-orange-500" />
+                      <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <AlertTriangle className="h-4 w-4 text-gray-700" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground line-clamp-1">
