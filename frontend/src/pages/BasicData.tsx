@@ -661,35 +661,21 @@ const BasicData = () => {
         </div>
       </div>
 
-      {/* Osprey Owl Tutor */}
+      {/* Osprey Owl Tutor - Debug Version */}
+      <div className="fixed bottom-4 right-4 z-50">
+        <div className="bg-red-100 border border-red-300 rounded p-2 text-xs">
+          <p>🦉 Debug: Case ID: {case_?.case_id}</p>
+          <p>🦉 Debug: Snapshot: {snapshot ? 'exists' : 'null'}</p>
+          <p>🦉 Debug: Enabled: {!!case_?.case_id ? 'yes' : 'no'}</p>
+        </div>
+      </div>
+      
       <OspreyOwlTutor 
         snapshot={snapshot}
         onAction={(event, payload) => {
-          console.log('Tutor action:', event, payload);
-          
-          // Handle tutor actions
-          switch (event) {
-            case 'go:next':
-              continueToNextStep();
-              break;
-            case 'help:field':
-              // Focus on specific field
-              if (payload?.field) {
-                const fieldElement = document.querySelector(`[name="${payload.field}"]`);
-                if (fieldElement) {
-                  (fieldElement as HTMLElement).focus();
-                }
-              }
-              break;
-            case 'validate:current_step':
-              // Trigger validation
-              console.log('Validating current step...');
-              break;
-            default:
-              console.log('Unhandled tutor action:', event);
-          }
+          console.log('🦉 Tutor action:', event, payload);
         }}
-        isEnabled={!!case_?.case_id}
+        isEnabled={true}
         position="bottom-right"
       />
     </div>
