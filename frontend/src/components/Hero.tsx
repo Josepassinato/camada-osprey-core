@@ -19,9 +19,9 @@ const Hero = () => {
           {/* Content */}
           <div className="space-y-8">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-primary">Plataforma Líder em Imigração</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-black/20">
+              <Sparkles className="h-4 w-4 text-black" />
+              <span className="text-sm font-medium text-black">Plataforma Líder em Imigração</span>
             </div>
 
             {/* Main heading */}
