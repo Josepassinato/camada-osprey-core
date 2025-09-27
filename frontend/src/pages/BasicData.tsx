@@ -670,7 +670,7 @@ const BasicData = () => {
         </div>
       </div>
       
-      <OspreyOwlTutor 
+      <OspreyOwlTutorSimple 
         snapshot={snapshot}
         onAction={(event, payload) => {
           console.log('🦉 Tutor action:', event, payload);
