@@ -144,18 +144,18 @@ class FormValidationAgent(BaseSpecializedAgent):
         6. Aplicação de regras específicas para brasileiros aplicando nos EUA
         
         RESPOSTA SEMPRE EM JSON:
-        {
+        {{
             "agent": "Dra. Ana - Formulários",
             "form_complete": true/false,
             "completion_percentage": 0-100,
             "missing_required": ["campo1", "campo2"],
-            "format_errors": [{"field": "campo", "error": "descrição"}],
-            "consistency_issues": [{"fields": ["campo1", "campo2"], "issue": "conflito"}],
+            "format_errors": [{{"field": "campo", "error": "descrição"}}],
+            "consistency_issues": [{{"fields": ["campo1", "campo2"], "issue": "conflito"}}],
             "uscis_compliance": true/false,
             "blocking_issues": ["issue1", "issue2"],
             "recommendations": ["ação1", "ação2"],
             "next_required_step": "próxima ação obrigatória"
-        }
+        }}
         
         SEJA PRECISA E DETALHISTA. Identifique TODOS os problemas antes de aprovar.
         """
