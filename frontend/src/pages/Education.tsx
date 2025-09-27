@@ -295,7 +295,7 @@ const Education = () => {
             <Card className="glass border-0">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-primary" />
+                  <BookOpen className="h-5 w-5 text-black" />
                   Guias Interativos por Tipo de Visto
                 </CardTitle>
               </CardHeader>
