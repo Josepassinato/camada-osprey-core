@@ -175,6 +175,49 @@ class ApplicationCreate(BaseModel):
 
 class ApplicationUpdate(BaseModel):
     status: Optional[ApplicationStatus] = None
+
+# Auto-Application System Models
+class AutoApplicationCase(BaseModel):
+    case_id: str = Field(default_factory=lambda: f"OSP-{str(uuid.uuid4())[:8].upper()}")
+    user_id: str
+    form_code: Optional[USCISForm] = None
+    status: CaseStatus = CaseStatus.created
+    
+    # Basic Data
+    basic_data: Optional[Dict[str, Any]] = None
+    
+    # Documents
+    uploaded_documents: List[str] = []
+    document_analysis: Optional[Dict[str, Any]] = None
+    
+    # User Story
+    user_story_text: Optional[str] = None
+    user_story_audio_url: Optional[str] = None
+    ai_extracted_facts: Optional[Dict[str, Any]] = None
+    
+    # Form Data
+    simplified_form_responses: Optional[Dict[str, Any]] = None
+    official_form_data: Optional[Dict[str, Any]] = None
+    
+    # Payment & Final
+    payment_status: Optional[str] = None
+    payment_id: Optional[str] = None
+    final_package_generated: bool = False
+    final_package_url: Optional[str] = None
+    
+    # Metadata
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    
+class CaseCreate(BaseModel):
+    form_code: Optional[USCISForm] = None
+    
+class CaseUpdate(BaseModel):
+    form_code: Optional[USCISForm] = None
+    status: Optional[CaseStatus] = None
+    basic_data: Optional[Dict[str, Any]] = None
+    user_story_text: Optional[str] = None
+    simplified_form_responses: Optional[Dict[str, Any]] = None
     progress_percentage: Optional[int] = None
     current_step: Optional[str] = None
 
