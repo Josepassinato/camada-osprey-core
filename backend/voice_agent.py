@@ -7,10 +7,7 @@ from datetime import datetime
 from typing import Dict, List, Optional, Callable, Any
 from fastapi import WebSocket, WebSocketDisconnect
 from dataclasses import dataclass, asdict
-import openai
-
-# Configure OpenAI with Emergent LLM key
-openai.api_key = "sk-emergent-aE5F536B80dFf0bA6F"
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 @dataclass
 class FieldState:
