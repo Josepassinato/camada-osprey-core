@@ -35,23 +35,23 @@ const AutoApplicationStart = () => {
   const benefits = [
     {
       icon: <Clock className="h-6 w-6" />,
-      title: "Economize Tempo",
-      description: "Sistema inteligente que preenche automaticamente os formulários oficiais com base nas suas informações."
+      title: "Organize suas Informações",
+      description: "Ferramenta inteligente que ajuda a organizar e estruturar suas informações para preenchimento preciso."
     },
     {
       icon: <Shield className="h-6 w-6" />,
-      title: "Reduz Erros",
-      description: "IA verifica consistência e valida dados antes da submissão final."
+      title: "Validação Automática",
+      description: "Sistema verifica consistência e formatos antes da finalização, reduzindo erros comuns."
     },
     {
       icon: <FileText className="h-6 w-6" />,
-      title: "Documentos Organizados",
-      description: "Checklist personalizada e análise automática de documentos."
+      title: "Checklist Personalizada",
+      description: "Gera lista de documentos e instruções específicas para seu tipo de aplicação."
     },
     {
       icon: <Users className="h-6 w-6" />,
-      title: "Suporte Especializado",
-      description: "Orientação educacional durante todo o processo de aplicação."
+      title: "Você Mantém o Controle",
+      description: "Ferramenta de apoio - você revisa tudo e faz sua própria auto-aplicação."
     }
   ];
 
