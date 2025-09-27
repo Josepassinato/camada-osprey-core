@@ -356,13 +356,14 @@ const SelectForm = () => {
               <div>
                 <h4 className="font-medium mb-2 flex items-center gap-2">
                   <FileText className="h-4 w-4 text-gray-700" />
-                  O Que Você Receberá
+                  O Que Você Receberá para Sua Auto-Aplicação
                 </h4>
                 <ul className="space-y-1 text-sm text-muted-foreground">
-                  <li>• Formulário oficial preenchido em inglês</li>
+                  <li>• Formulário oficial organizado com suas informações</li>
                   <li>• Checklist de documentos personalizada</li>
-                  <li>• Instruções detalhadas para envio</li>
-                  <li>• Carta com informações de pagamento ao USCIS</li>
+                  <li>• Instruções detalhadas para sua auto-aplicação</li>
+                  <li>• Carta com informações sobre taxas do USCIS</li>
+                  <li>• Você revisa tudo e faz sua própria aplicação</li>
                 </ul>
               </div>
             </div>
