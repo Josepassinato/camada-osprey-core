@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import OspreyOwlTutorSimple from "@/components/OspreyOwlTutorSimple";
 import { useFormSnapshot } from "@/hooks/useFormSnapshot";
+import { useSessionManager } from "@/hooks/useSessionManager";
 import { 
   ArrowLeft,
   ArrowRight,
