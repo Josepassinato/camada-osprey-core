@@ -551,30 +551,28 @@ const BasicData = () => {
           <div className="space-y-6">
             {/* Form Requirements */}
             {visaSpecs && (
-              <Card className="glass border-0">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                    <Info className="h-5 w-5 text-black" />
-                    Sobre {visaSpecs.specifications.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
+              <div className="bg-white border border-black rounded-lg p-4 sm:p-6">
+                <h3 className="text-lg font-semibold text-black mb-4 flex items-center gap-2">
+                  <Info className="h-5 w-5" />
+                  Sobre {visaSpecs.specifications.title}
+                </h3>
+                <div className="space-y-4">
+                  <p className="text-sm text-black">
                     {visaSpecs.specifications.description}
                   </p>
                   
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="text-muted-foreground">Taxa USCIS:</span>
-                      <div className="font-medium">{visaSpecs.specifications.uscis_fee}</div>
+                      <span className="text-black">Taxa USCIS:</span>
+                      <div className="font-medium text-black">{visaSpecs.specifications.uscis_fee}</div>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Prazo:</span>
-                      <div className="font-medium">{visaSpecs.specifications.processing_time}</div>
+                      <span className="text-black">Prazo:</span>
+                      <div className="font-medium text-black">{visaSpecs.specifications.processing_time}</div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
 
             {/* Progress */}
