@@ -2273,6 +2273,104 @@ async def get_visa_specs(form_code: str, subcategory: Optional[str] = None):
         logger.error(f"Error getting visa specifications: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error getting visa specifications: {str(e)}")
 
+# Voice Agent WebSocket and REST endpoints
+from voice_websocket import voice_manager
+from validate_endpoint import form_validator
+
+@app.websocket("/ws/voice/{session_id}")
+async def voice_websocket_endpoint(websocket: WebSocket, session_id: str):
+    """WebSocket endpoint for voice agent interactions"""
+    await voice_manager.connect(websocket, session_id)
+    
+    try:
+        while True:
+            # Receive message from client
+            data = await websocket.receive_text()
+            message = json.loads(data)
+            
+            # Process message through voice agent
+            response = await voice_manager.handle_message(session_id, message)
+            
+            # Send response back to client
+            await voice_manager.send_personal_message(session_id, response)
+            
+    except WebSocketDisconnect:
+        voice_manager.disconnect(session_id)
+    except Exception as e:
+        logger.error(f"Voice WebSocket error for {session_id}: {e}")
+        voice_manager.disconnect(session_id)
+
+@api_router.post("/validate")
+async def validate_form_step(request: dict):
+    """Validate form data for a specific step"""
+    try:
+        step_id = request.get("stepId", "")
+        form_data = request.get("formData", {})
+        
+        if not step_id:
+            raise HTTPException(status_code=400, detail="stepId is required")
+        
+        # Validate using form validator
+        result = form_validator.validate_step(step_id, form_data)
+        
+        return result.to_dict()
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error validating form step: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error validating form step: {str(e)}")
+
+@api_router.post("/analyze")
+async def analyze_with_llm(request: dict):
+    """Analyze form state using LLM with guardrails"""
+    try:
+        from voice_agent import voice_agent
+        
+        # Create a mock snapshot from request
+        snapshot = {
+            "sections": request.get("sections", []),
+            "fields": request.get("fields", []),
+            "stepId": request.get("stepId", ""),
+            "formId": request.get("formId", ""),
+            "userId": "temp_user",
+            "url": request.get("url", ""),
+            "timestamp": datetime.utcnow().isoformat(),
+            "siteVersionHash": "v1.0.0"
+        }
+        
+        # Analyze using voice agent
+        advice = await voice_agent._analyze_current_state(snapshot)
+        
+        return {
+            "advice": advice.__dict__,
+            "analysis_timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in LLM analysis: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error in LLM analysis: {str(e)}")
+
+@api_router.get("/voice/status")
+async def voice_agent_status():
+    """Get voice agent status and metrics"""
+    try:
+        return {
+            "status": "active",
+            "active_sessions": voice_manager.get_session_count(),
+            "capabilities": [
+                "voice_guidance",
+                "form_validation", 
+                "step_assistance",
+                "intent_recognition"
+            ],
+            "supported_languages": ["pt-BR", "en-US"],
+            "version": "1.0.0"
+        }
+    except Exception as e:
+        logger.error(f"Error getting voice status: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error getting voice status: {str(e)}")
+
 # Helper function for optional authentication
 async def get_current_user_optional():
     """Get current user if authenticated, None if not"""
