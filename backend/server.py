@@ -3025,8 +3025,14 @@ async def update_application(application_id: str, update_data: ApplicationUpdate
 async def get_dashboard(current_user = Depends(get_current_user)):
     """Get user dashboard data"""
     try:
-        # Get applications
+        # Get applications (traditional applications)
         applications = await db.applications.find({"user_id": current_user["id"]}, {"_id": 0}).to_list(100)
+        
+        # Get auto-applications (saved applications from "Save and Continue Later")
+        auto_applications = await db.auto_cases.find({
+            "user_id": current_user["id"],
+            "is_anonymous": False
+        }, {"_id": 0}).to_list(100)
         
         # Get recent chat sessions
         recent_chats = await db.chat_sessions.find(
