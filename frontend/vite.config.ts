@@ -13,7 +13,12 @@ export default defineConfig(({ mode }) => ({
   server: {
     port: 3000,
     host: '0.0.0.0', // Explicitly bind to all interfaces
-    allowedHosts: true
+    allowedHosts: true,
+    watch: {
+      usePolling: false,
+      interval: 1000,
+      ignored: ['**/node_modules/**', '**/build/**']
+    }
   },
   
   plugins: [
