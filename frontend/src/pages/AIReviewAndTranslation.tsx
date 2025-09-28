@@ -410,7 +410,7 @@ const AIReviewAndTranslation = () => {
                 onClick={continueToUSCISForm}
                 className="bg-black text-white hover:bg-gray-800 flex items-center gap-2"
               >
-                Ver Formulário USCIS Gerado
+                Revisar e Autorizar Formulário
                 <ArrowRight className="h-4 w-4" />
               </Button>
             )}
