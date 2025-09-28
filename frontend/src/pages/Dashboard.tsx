@@ -115,6 +115,25 @@ const Dashboard = () => {
     return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
 
+  const continueApplication = (app: any) => {
+    // Navigate to the correct step based on current progress
+    const stepRoutes = {
+      'basic-data': `/auto-application/case/${app.id}/basic-data`,
+      'friendly-form': `/auto-application/case/${app.id}/friendly-form`,
+      'ai-review': `/auto-application/case/${app.id}/ai-review`,
+      'uscis-form': `/auto-application/case/${app.id}/uscis-form`,
+      'documents': `/auto-application/case/${app.id}/documents`,
+      'story': `/auto-application/case/${app.id}/story`,
+      'review': `/auto-application/case/${app.id}/review`,
+      'payment': `/auto-application/case/${app.id}/payment`
+    };
+    
+    const route = stepRoutes[app.current_step as keyof typeof stepRoutes] || 
+                  `/auto-application/case/${app.id}/basic-data`;
+    
+    navigate(route);
+  };
+
   const getStatusIcon = (status: string) => {
     const icons = {
       'not_started': Clock,
