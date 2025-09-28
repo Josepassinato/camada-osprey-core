@@ -4348,35 +4348,52 @@ async def validate_form_data_ai(case, friendly_form_data, basic_data):
     """AI validation of form data completeness and accuracy"""
     try:
         from emergentintegrations import EmergentLLM
+        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
         
         llm = EmergentLLM(api_key=os.environ.get('EMERGENT_LLM_KEY'))
         
-        # Prepare data for validation
+        # Get Dra. Paula's enhanced knowledge for validation
+        visa_type = case.get('form_code', 'N/A')
+        enhanced_prompt = get_dra_paula_enhanced_prompt("document_validation", f"Tipo de Visto: {visa_type}")
+        visa_knowledge = get_visa_knowledge(visa_type)
+        
+        # Prepare data for validation with Dra. Paula's expertise
         validation_prompt = f"""
-        Analise os dados do formulário de imigração americana e identifique problemas ou campos em falta:
+        {enhanced_prompt}
+        
+        [ANÁLISE DE FORMULÁRIO COM EXPERTISE DRA. PAULA B2C]
+        
+        Analise os dados do formulário de imigração americana usando seu conhecimento especializado:
         
         Dados Básicos: {json.dumps(basic_data, indent=2)}
         Respostas do Formulário: {json.dumps(friendly_form_data, indent=2)}
-        Tipo de Visto: {case.get('form_code', 'N/A')}
+        Tipo de Visto: {visa_type}
         
-        Identifique:
-        1. Campos obrigatórios em falta
-        2. Formatos incorretos (datas, telefones, emails)
-        3. Inconsistências nos dados
-        4. Sugestões de melhoria
+        CONHECIMENTO ESPECÍFICO DO VISTO:
+        {json.dumps(visa_knowledge, indent=2) if visa_knowledge else "Consulte conhecimento geral de imigração"}
         
-        Responda em formato JSON:
+        ANÁLISE REQUIRED (usando expertise Dra. Paula):
+        1. Campos obrigatórios em falta ESPECÍFICOS para {visa_type}
+        2. Formatos incorretos (datas MM/DD/YYYY, telefones, emails)
+        3. Inconsistências nos dados baseado em requisitos USCIS
+        4. Sugestões práticas da Dra. Paula para melhoria
+        5. Problemas potenciais de inadmissibilidade
+        6. Documentos adicionais que podem ser necessários
+        
+        Responda em formato JSON seguindo expertise da Dra. Paula:
         {{
             "validation_issues": [
                 {{
                     "field": "nome_do_campo",
-                    "issue": "descrição do problema",
+                    "issue": "descrição do problema (com conhecimento Dra. Paula)",
                     "severity": "error|warning|info",
-                    "suggestion": "sugestão de correção"
+                    "suggestion": "sugestão específica da Dra. Paula para correção"
                 }}
             ],
             "overall_status": "approved|needs_review|rejected",
-            "completion_percentage": 85
+            "completion_percentage": 85,
+            "dra_paula_insights": "Análise especializada e tips específicos",
+            "visa_specific_tips": "Dicas específicas para este tipo de visto"
         }}
         """
         
