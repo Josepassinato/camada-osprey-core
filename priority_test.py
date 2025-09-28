@@ -177,7 +177,7 @@ def test_ai_review_and_translation_workflow():
             return False
         
         case_data = case_response.json()
-        case_id = case_data.get('case_id')
+        case_id = case_data.get('case', {}).get('case_id')
         print(f"   Created test case: {case_id}")
         
         # Test all 5 AI processing steps
@@ -272,7 +272,7 @@ def test_save_and_continue_later():
             return False
         
         case_data = case_response.json()
-        case_id = case_data.get('case_id')
+        case_id = case_data.get('case', {}).get('case_id')
         print(f"   Created case for save test: {case_id}")
         
         # Add some basic data to the case
