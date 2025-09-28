@@ -420,7 +420,7 @@ def test_complete_user_journey():
         }
         
         story_response = requests.put(
-            f"{API_BASE}/auto-application/cases/{case_id}",
+            f"{API_BASE}/auto-application/case/{case_id}",
             json=story_payload,
             headers=headers,
             timeout=10
