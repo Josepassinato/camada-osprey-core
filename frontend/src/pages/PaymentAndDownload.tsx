@@ -28,6 +28,7 @@ import {
   Send
 } from "lucide-react";
 import USCISSubmissionGuide from "@/components/USCISSubmissionGuide";
+import PostPaymentSignupModal from "@/components/PostPaymentSignupModal";
 
 interface PricingPackage {
   id: string;
