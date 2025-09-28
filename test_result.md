@@ -833,7 +833,6 @@ metadata:
 test_plan:
   current_focus:
     - "Save and Continue Later Flow - End-to-End Testing"
-    - "AI Review and Translation Backend Logic"
     - "User Login/Signup Integration with Auto Applications"
     - "Dashboard Saved Applications Management"
     - "Case Association with User Accounts"
