@@ -3240,6 +3240,7 @@ def test_comprehensive_system_critical_priorities():
         "case_id_persistence": "Case ID Persistence",
         "owl_tutor_system": "Osprey Owl Tutor System",
         "brazilian_user_scenarios": "Brazilian User Scenarios",
+        "ai_review_translation_system": "AI Review and Translation System",
         "document_management_ai": "Document Management with AI"
     }
     
