@@ -3674,6 +3674,120 @@ def get_important_submission_notes(form_code: str) -> list:
     
     return notes.get(form_code, [])
 
+# User Association Endpoints
+@api_router.post("/auto-application/case/{case_id}/associate-user")
+async def associate_case_with_user(case_id: str, request: Request):
+    """Associate an anonymous case with a logged-in user"""
+    try:
+        # Get user from JWT token
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Authentication required")
+        
+        token = auth_header.split(" ")[1]
+        user_data = verify_jwt_token(token)  # You'll need to implement this
+        
+        if not user_data:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        
+        # Get case details
+        case = await db.auto_cases.find_one({"case_id": case_id})
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        # Get request body for additional info
+        body = await request.json()
+        
+        # Update case with user information
+        update_data = {
+            "user_id": user_data["user_id"],
+            "user_email": user_data["email"],
+            "associated_at": datetime.utcnow(),
+            "is_anonymous": False
+        }
+        
+        # Add purchase information if provided
+        if body.get("purchase_completed"):
+            update_data.update({
+                "purchase_completed": True,
+                "package_type": body.get("package_type"),
+                "amount_paid": body.get("amount_paid"),
+                "purchase_date": datetime.utcnow()
+            })
+        
+        result = await db.auto_cases.update_one(
+            {"case_id": case_id},
+            {"$set": update_data}
+        )
+        
+        if result.modified_count == 0:
+            raise HTTPException(status_code=500, detail="Failed to associate case with user")
+        
+        return {
+            "message": "Case successfully associated with user",
+            "case_id": case_id,
+            "user_id": user_data["user_id"]
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error associating case with user: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error associating case: {str(e)}")
+
+@api_router.get("/user/cases")
+async def get_user_cases(request: Request):
+    """Get all cases associated with the logged-in user"""
+    try:
+        # Get user from JWT token
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Authentication required")
+        
+        token = auth_header.split(" ")[1]
+        user_data = verify_jwt_token(token)
+        
+        if not user_data:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        
+        # Find all cases for this user
+        cursor = db.auto_cases.find(
+            {"user_id": user_data["user_id"]},
+            {"_id": 0}  # Exclude MongoDB _id field
+        ).sort("created_at", -1)  # Most recent first
+        
+        cases = await cursor.to_list(length=100)  # Limit to 100 cases
+        
+        return {
+            "cases": cases,
+            "total": len(cases)
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting user cases: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error retrieving cases: {str(e)}")
+
+def verify_jwt_token(token: str):
+    """Verify JWT token and return user data - implement based on your JWT setup"""
+    try:
+        # This is a simplified version - implement proper JWT verification
+        # You might want to use libraries like python-jose or PyJWT
+        import jwt
+        
+        # Replace 'your-secret-key' with your actual secret key
+        SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'osprey-secret-key-2025')
+        
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        return payload
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.InvalidTokenError:
+        return None
+    except Exception:
+        return None
+
 app.include_router(api_router)
 
 app.add_middleware(
