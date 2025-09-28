@@ -3854,8 +3854,8 @@ def verify_jwt_token(token: str):
         # You might want to use libraries like python-jose or PyJWT
         import jwt
         
-        # Replace 'your-secret-key' with your actual secret key
-        SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'osprey-secret-key-2025')
+        # Use the same JWT secret as the main authentication
+        SECRET_KEY = os.environ.get('JWT_SECRET', 'osprey-secret-key-change-in-production')
         
         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
         return payload
