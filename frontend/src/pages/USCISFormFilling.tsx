@@ -506,18 +506,18 @@ const USCISFormFilling = () => {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-            <span>Etapa 3 de 8</span>
+            <span>Etapa 5 de 8</span>
             <span>•</span>
-            <span>Preenchimento do Formulário USCIS</span>
+            <span>Revisão e Autorização do Formulário USCIS</span>
           </div>
           
           <h1 className="text-3xl font-bold text-black mb-2">
-            Formulário USCIS {case_?.form_code} - Gerado pela IA
+            Revisar Formulário USCIS {case_?.form_code}
           </h1>
           
           <p className="text-gray-600">
-            ✅ Formulário oficial gerado automaticamente pela IA com base nas suas respostas. 
-            Todas as informações foram traduzidas para inglês jurídico e mapeadas corretamente.
+            ✅ Formulário oficial gerado pela IA com base nas suas respostas. 
+            Revise cuidadosamente e autorize para salvar automaticamente na sua pasta.
           </p>
         </div>
 
