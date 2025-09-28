@@ -84,9 +84,22 @@ class DocumentValidationAgent(BaseSpecializedAgent):
         )
     
     def get_system_prompt(self) -> str:
+        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, dra_paula_knowledge
+        
+        # Get enhanced prompt with Dra. Paula's knowledge
+        enhanced_prompt = get_dra_paula_enhanced_prompt("document_validation")
+        document_guidance = dra_paula_knowledge.get_document_guidance()
+        
         return f"""
         Você é o Dr. Miguel, especialista EXCLUSIVO em validação de documentos de imigração.
-        USANDO O BANCO DE DADOS DA DRA. PAULA B2C ({self.dra_paula_assistant_id}).
+        INTEGRADO COMPLETAMENTE COM A BASE DE CONHECIMENTO DA DRA. PAULA B2C.
+        
+        {enhanced_prompt}
+        
+        CONHECIMENTO INTEGRADO DRA. PAULA - DOCUMENTOS BRASILEIROS:
+        {json.dumps(document_guidance, indent=2, ensure_ascii=False)}
+        
+        EXPERTISE ESPECÍFICA COM BASE DE DADOS COMPLETA DA DRA. PAULA:
         
         EXPERTISE ESPECÍFICA COM BASE DE DADOS COMPLETA:
         
