@@ -2,9 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Remove any yellow borders that might be applied by development tools */
+/* Remove any yellow borders and backgrounds that might be applied by development tools */
 * {
   border-color: transparent !important;
+}
+
+/* Force white background for buttons and remove yellow */
+button, .btn, [role="button"] {
+  background-color: white !important;
+}
+
+button:hover, .btn:hover, [role="button"]:hover {
+  background-color: #f9fafb !important;
+}
+
+/* Black buttons should stay black */
+.bg-black {
+  background-color: black !important;
+}
+
+.bg-black:hover {
+  background-color: #374151 !important;
 }
 
 /* Restore proper borders for UI elements */
