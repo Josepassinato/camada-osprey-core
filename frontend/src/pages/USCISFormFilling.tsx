@@ -628,9 +628,11 @@ const USCISFormFilling = () => {
                     <Checkbox 
                       id="form-review"
                       className="mt-1"
+                      checked={formReviewed}
+                      onCheckedChange={(checked) => setFormReviewed(checked as boolean)}
                     />
                     <div className="flex-1">
-                      <Label htmlFor="form-review" className="text-sm font-medium">
+                      <Label htmlFor="form-review" className="text-sm font-medium cursor-pointer">
                         Revisão Completa
                       </Label>
                       <p className="text-sm text-gray-600 mt-1">
@@ -646,9 +648,11 @@ const USCISFormFilling = () => {
                     <Checkbox 
                       id="form-authorize"
                       className="mt-1"
+                      checked={formAuthorized}
+                      onCheckedChange={(checked) => setFormAuthorized(checked as boolean)}
                     />
                     <div className="flex-1">
-                      <Label htmlFor="form-authorize" className="text-sm font-medium">
+                      <Label htmlFor="form-authorize" className="text-sm font-medium cursor-pointer">
                         Autorização de Salvamento Automático
                       </Label>
                       <p className="text-sm text-gray-600 mt-1">
