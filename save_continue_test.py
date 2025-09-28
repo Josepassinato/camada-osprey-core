@@ -320,7 +320,8 @@ def test_authentication_with_case_association():
             
             if case_response.status_code == 200:
                 test_case_data = case_response.json()
-                test_case_id = test_case_data.get('case_id')
+                case_info = test_case_data.get('case', {})
+                test_case_id = case_info.get('case_id')
                 
                 print(f"   ✅ Test case created: {test_case_id}")
                 
