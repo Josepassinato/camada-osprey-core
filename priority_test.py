@@ -289,7 +289,7 @@ def test_save_and_continue_later():
         }
         
         update_response = requests.put(
-            f"{API_BASE}/auto-application/cases/{case_id}",
+            f"{API_BASE}/auto-application/case/{case_id}",
             json=basic_data_payload,
             headers=headers,
             timeout=10
