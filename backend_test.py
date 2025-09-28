@@ -3239,7 +3239,8 @@ def test_data_persistence_mongodb():
         response = requests.get(f"{API_BASE}/auto-application/case/{AUTO_APPLICATION_CASE_ID}", timeout=10)
         
         if response.status_code == 200:
-            case_data = response.json()
+            response_data = response.json()
+            case_data = response_data.get('case', {})
             
             # Check if data persisted correctly
             simplified_responses = case_data.get('simplified_form_responses')
