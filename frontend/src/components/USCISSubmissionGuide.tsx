@@ -367,7 +367,7 @@ const USCISSubmissionGuide = ({ caseId, onDownloadPackage }: USCISSubmissionGuid
                 <h4 className="font-medium mb-3">Taxas Adicionais</h4>
                 <div className="space-y-2">
                   {instructions.payment_info.additional_fees.map((fee, index) => (
-                    <div key={index} className="bg-yellow-50 p-3 rounded text-sm">
+                    <div key={index} className="bg-orange-50 p-3 rounded text-sm">
                       {fee}
                     </div>
                   ))}
