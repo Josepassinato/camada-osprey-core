@@ -6,6 +6,12 @@ import os
 import logging
 from typing import Optional, Dict, Any, List
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+from document_validation_database import (
+    DOCUMENT_VALIDATION_DATABASE, 
+    VISA_DOCUMENT_REQUIREMENTS,
+    get_document_validation_info,
+    get_required_documents_for_visa
+)
 
 logger = logging.getLogger(__name__)
 
