@@ -4417,22 +4417,35 @@ async def check_data_consistency_ai(case, friendly_form_data, basic_data):
     """AI check for data consistency across different form sections"""
     try:
         from emergentintegrations import EmergentLLM
+        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt
         
         llm = EmergentLLM(api_key=os.environ.get('EMERGENT_LLM_KEY'))
         
+        # Get Dra. Paula's enhanced knowledge for consistency checking
+        visa_type = case.get('form_code', 'N/A')
+        enhanced_prompt = get_dra_paula_enhanced_prompt("consistency_check", f"Tipo de Visto: {visa_type}")
+        
         consistency_prompt = f"""
-        Verifique a consistência dos dados de imigração americana entre diferentes seções:
+        {enhanced_prompt}
+        
+        [VERIFICAÇÃO DE CONSISTÊNCIA COM EXPERTISE DRA. PAULA B2C]
+        
+        Verifique a consistência dos dados usando conhecimento especializado da Dra. Paula:
         
         Dados Básicos: {json.dumps(basic_data, indent=2)}
         Formulário: {json.dumps(friendly_form_data, indent=2)}
+        Tipo de Visto: {visa_type}
         
-        Verifique:
-        1. Nomes consistentes em todas as seções
-        2. Datas que fazem sentido cronologicamente
-        3. Endereços e informações de contato consistentes
-        4. Histórico de trabalho/educação coerente
+        VERIFICAÇÕES ESPECIALIZADAS (Dra. Paula):
+        1. Nomes consistentes em todas as seções (exatamente como no passaporte)
+        2. Datas cronologicamente corretas e no formato americano
+        3. Endereços e informações de contato atuais e consistentes
+        4. Histórico de trabalho/educação coerente e sem gaps problemáticos
+        5. Informações familiares consistentes entre seções
+        6. Dados financeiros realistas e compatíveis
+        7. Consistência específica para requisitos do visto {visa_type}
         
-        Responda "DADOS_CONSISTENTES" se tudo estiver correto, ou liste inconsistências encontradas.
+        Responda "DADOS_CONSISTENTES_DRA_PAULA" se tudo estiver correto, ou liste inconsistências encontradas com orientações específicas da Dra. Paula para correção.
         """
         
         response = llm.chat([{"role": "user", "content": consistency_prompt}])
