@@ -1,0 +1,695 @@
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import OspreyOwlTutor from "@/components/OspreyOwlTutor";
+import SaveAndContinueModal from "@/components/SaveAndContinueModal";
+import { useFormSnapshot } from "@/hooks/useFormSnapshot";
+import { useSessionManager } from "@/hooks/useSessionManager";
+import { useToast } from "@/components/ui/use-toast";
+import { 
+  ArrowLeft,
+  ArrowRight,
+  FileText,
+  AlertTriangle,
+  CheckCircle,
+  Save,
+  Info,
+  Download,
+  ClipboardList,
+  User,
+  Calendar,
+  MapPin,
+  Building
+} from "lucide-react";
+
+interface USCISFormData {
+  // Personal Information (from BasicData)
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  dateOfBirth: string;
+  countryOfBirth: string;
+  currentAddress: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  phone: string;
+  email: string;
+  
+  // USCIS Form Specific Fields
+  alienNumber: string;
+  socialSecurityNumber: string;
+  passportNumber: string;
+  passportCountry: string;
+  passportExpirationDate: string;
+  
+  // Employment Information (for H-1B, L-1, O-1)
+  employerName: string;
+  employerAddress: string;
+  jobTitle: string;
+  jobDescription: string;
+  salaryAmount: string;
+  startDate: string;
+  
+  // Education Information (for F-1, H-1B)
+  schoolName: string;
+  degreeLevel: string;
+  fieldOfStudy: string;
+  graduationDate: string;
+  
+  // Family Information (for I-130, I-485)
+  maritalStatus: string;
+  spouseName: string;
+  spouseDateOfBirth: string;
+  numberOfChildren: string;
+  
+  // Additional Questions
+  previousUSVisits: boolean;
+  previousVisaApplications: boolean;
+  criminalHistory: boolean;
+  additionalInfo: string;
+}
+
+const USCISFormFilling = () => {
+  const { caseId } = useParams<{ caseId: string }>();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const [formData, setFormData] = useState<USCISFormData>({
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    dateOfBirth: '',
+    countryOfBirth: '',
+    currentAddress: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    phone: '',
+    email: '',
+    alienNumber: '',
+    socialSecurityNumber: '',
+    passportNumber: '',
+    passportCountry: '',
+    passportExpirationDate: '',
+    employerName: '',
+    employerAddress: '',
+    jobTitle: '',
+    jobDescription: '',
+    salaryAmount: '',
+    startDate: '',
+    schoolName: '',
+    degreeLevel: '',
+    fieldOfStudy: '',
+    graduationDate: '',
+    maritalStatus: '',
+    spouseName: '',
+    spouseDateOfBirth: '',
+    numberOfChildren: '',
+    previousUSVisits: false,
+    previousVisaApplications: false,
+    criminalHistory: false,
+    additionalInfo: ''
+  });
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [case_, setCase] = useState<any>(null);
+  const [visaSpecs, setVisaSpecs] = useState<any>(null);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [activeSection, setActiveSection] = useState("personal");
+
+  // Session management
+  const { 
+    sessionData, 
+    setCaseId, 
+    setCurrentStep, 
+    getCaseId,
+    getSessionToken,
+    isSessionActive 
+  } = useSessionManager();
+
+  // Form snapshot for AI analysis
+  const { snapshot } = useFormSnapshot(formData, {
+    enabled: true,
+    autoGenerate: true,
+    onSnapshotUpdate: (snapshot) => {
+      console.log('🦉 USCIS Form snapshot updated:', snapshot);
+    },
+    onError: (error) => {
+      console.error('🦉 USCIS Form snapshot error:', error);
+    }
+  });
+
+  useEffect(() => {
+    if (caseId) {
+      fetchCase();
+      fetchVisaSpecs();
+    }
+  }, [caseId]);
+
+  const fetchCase = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setCase(data.case);
+        
+        // Pre-fill form with existing basic data
+        if (data.case.basic_data) {
+          const basicData = data.case.basic_data;
+          setFormData(prev => ({
+            ...prev,
+            firstName: basicData.firstName || '',
+            middleName: basicData.middleName || '',
+            lastName: basicData.lastName || '',
+            dateOfBirth: basicData.dateOfBirth || '',
+            countryOfBirth: basicData.countryOfBirth || '',
+            currentAddress: basicData.currentAddress || '',
+            city: basicData.city || '',
+            state: basicData.state || '',
+            zipCode: basicData.zipCode || '',
+            phone: basicData.phone || '',
+            email: basicData.email || ''
+          }));
+        }
+        
+        // Load existing USCIS form data if available
+        if (data.case.uscis_form_data) {
+          setFormData(prev => ({
+            ...prev,
+            ...data.case.uscis_form_data
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching case:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar dados do caso",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchVisaSpecs = async () => {
+    try {
+      if (!case_?.form_code) return;
+      
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auto-application/visa-specs/${case_.form_code}`);
+      if (response.ok) {
+        const data = await response.json();
+        setVisaSpecs(data.specifications);
+      }
+    } catch (error) {
+      console.error('Error fetching visa specs:', error);
+    }
+  };
+
+  const handleInputChange = (field: keyof USCISFormData, value: string | boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const saveUSCISFormData = async () => {
+    if (!caseId) return;
+    
+    setIsSaving(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}/uscis-form`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uscis_form_data: formData,
+          completed_sections: getCompletedSections()
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Sucesso",
+          description: "Formulário USCIS salvo com sucesso",
+        });
+        setCurrentStep("uscis-form");
+        return true;
+      } else {
+        throw new Error('Failed to save USCIS form data');
+      }
+    } catch (error) {
+      console.error('Error saving USCIS form:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar formulário USCIS",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const getCompletedSections = () => {
+    const sections = [];
+    if (formData.firstName && formData.lastName && formData.dateOfBirth) {
+      sections.push("personal");
+    }
+    if (formData.passportNumber && formData.passportCountry) {
+      sections.push("passport");
+    }
+    if (formData.employerName && formData.jobTitle) {
+      sections.push("employment");
+    }
+    if (formData.schoolName && formData.degreeLevel) {
+      sections.push("education");
+    }
+    return sections;
+  };
+
+  const isFormValid = () => {
+    // Basic validation
+    const requiredFields = ['firstName', 'lastName', 'dateOfBirth', 'currentAddress', 'passportNumber'];
+    return requiredFields.every(field => formData[field as keyof USCISFormData]);
+  };
+
+  const continueToDocuments = async () => {
+    const saved = await saveUSCISFormData();
+    if (saved) {
+      navigate(`/auto-application/case/${caseId}/documents`);
+    }
+  };
+
+  const renderPersonalSection = () => (
+    <div className="space-y-6">
+      <div className="grid md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="firstName">Nome *</Label>
+          <Input
+            id="firstName"
+            value={formData.firstName}
+            onChange={(e) => handleInputChange('firstName', e.target.value)}
+            placeholder="Primeiro nome"
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="lastName">Sobrenome *</Label>
+          <Input
+            id="lastName"
+            value={formData.lastName}
+            onChange={(e) => handleInputChange('lastName', e.target.value)}
+            placeholder="Último nome"
+            required
+          />
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="dateOfBirth">Data de Nascimento *</Label>
+          <Input
+            id="dateOfBirth"
+            type="date"
+            value={formData.dateOfBirth}
+            onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="countryOfBirth">País de Nascimento *</Label>
+          <Input
+            id="countryOfBirth"
+            value={formData.countryOfBirth}
+            onChange={(e) => handleInputChange('countryOfBirth', e.target.value)}
+            placeholder="Brasil"
+            required
+          />
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="currentAddress">Endereço Atual *</Label>
+        <Textarea
+          id="currentAddress"
+          value={formData.currentAddress}
+          onChange={(e) => handleInputChange('currentAddress', e.target.value)}
+          placeholder="Endereço completo"
+          required
+        />
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-4">
+        <div>
+          <Label htmlFor="city">Cidade *</Label>
+          <Input
+            id="city"
+            value={formData.city}
+            onChange={(e) => handleInputChange('city', e.target.value)}
+            placeholder="Cidade"
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="state">Estado/Província *</Label>
+          <Input
+            id="state"
+            value={formData.state}
+            onChange={(e) => handleInputChange('state', e.target.value)}
+            placeholder="Estado"
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="zipCode">CEP *</Label>
+          <Input
+            id="zipCode"
+            value={formData.zipCode}
+            onChange={(e) => handleInputChange('zipCode', e.target.value)}
+            placeholder="00000-000"
+            required
+          />
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderPassportSection = () => (
+    <div className="space-y-6">
+      <div className="grid md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="passportNumber">Número do Passaporte *</Label>
+          <Input
+            id="passportNumber"
+            value={formData.passportNumber}
+            onChange={(e) => handleInputChange('passportNumber', e.target.value)}
+            placeholder="BR1234567"
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="passportCountry">País Emissor *</Label>
+          <Input
+            id="passportCountry"
+            value={formData.passportCountry}
+            onChange={(e) => handleInputChange('passportCountry', e.target.value)}
+            placeholder="Brasil"
+            required
+          />
+        </div>
+      </div>
+      
+      <div className="grid md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="passportExpirationDate">Data de Expiração *</Label>
+          <Input
+            id="passportExpirationDate"
+            type="date"
+            value={formData.passportExpirationDate}
+            onChange={(e) => handleInputChange('passportExpirationDate', e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="alienNumber">Alien Number (se aplicável)</Label>
+          <Input
+            id="alienNumber"
+            value={formData.alienNumber}
+            onChange={(e) => handleInputChange('alienNumber', e.target.value)}
+            placeholder="123456789"
+          />
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderEmploymentSection = () => (
+    <div className="space-y-6">
+      <div className="grid md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="employerName">Nome do Empregador</Label>
+          <Input
+            id="employerName"
+            value={formData.employerName}
+            onChange={(e) => handleInputChange('employerName', e.target.value)}
+            placeholder="Nome da empresa"
+          />
+        </div>
+        <div>
+          <Label htmlFor="jobTitle">Título do Cargo</Label>
+          <Input
+            id="jobTitle"
+            value={formData.jobTitle}
+            onChange={(e) => handleInputChange('jobTitle', e.target.value)}
+            placeholder="Software Engineer"
+          />
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="jobDescription">Descrição do Trabalho</Label>
+        <Textarea
+          id="jobDescription"
+          value={formData.jobDescription}
+          onChange={(e) => handleInputChange('jobDescription', e.target.value)}
+          placeholder="Descreva as principais responsabilidades..."
+          rows={4}
+        />
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="salaryAmount">Salário Anual (USD)</Label>
+          <Input
+            id="salaryAmount"
+            value={formData.salaryAmount}
+            onChange={(e) => handleInputChange('salaryAmount', e.target.value)}
+            placeholder="85000"
+          />
+        </div>
+        <div>
+          <Label htmlFor="startDate">Data de Início</Label>
+          <Input
+            id="startDate"
+            type="date"
+            value={formData.startDate}
+            onChange={(e) => handleInputChange('startDate', e.target.value)}
+          />
+        </div>
+      </div>
+    </div>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
+            <span>Etapa 3 de 8</span>
+            <span>•</span>
+            <span>Preenchimento do Formulário USCIS</span>
+          </div>
+          
+          <h1 className="text-3xl font-bold text-black mb-2">
+            Formulário USCIS {case_?.form_code}
+          </h1>
+          
+          <p className="text-gray-600">
+            Preencha as informações que serão utilizadas no formulário oficial do USCIS. 
+            Estas informações serão formatadas automaticamente no documento final.
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Progress */}
+            <Card className="border-black">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold">Progresso do Formulário</h3>
+                  <Badge variant="outline">{getCompletedSections().length}/4 seções</Badge>
+                </div>
+                
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    { id: 'personal', label: 'Pessoal', icon: User },
+                    { id: 'passport', label: 'Passaporte', icon: FileText },
+                    { id: 'employment', label: 'Emprego', icon: Building },
+                    { id: 'education', label: 'Educação', icon: ClipboardList }
+                  ].map(({ id, label, icon: Icon }) => (
+                    <button
+                      key={id}
+                      onClick={() => setActiveSection(id)}
+                      className={`p-3 rounded-lg border text-sm font-medium transition-colors ${
+                        activeSection === id
+                          ? 'bg-black text-white border-black'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4 mx-auto mb-1" />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Form Sections */}
+            <Card className="border-black">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  {activeSection === 'personal' && 'Informações Pessoais'}
+                  {activeSection === 'passport' && 'Informações do Passaporte'}
+                  {activeSection === 'employment' && 'Informações de Emprego'}
+                  {activeSection === 'education' && 'Informações Educacionais'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                {activeSection === 'personal' && renderPersonalSection()}
+                {activeSection === 'passport' && renderPassportSection()}
+                {activeSection === 'employment' && renderEmploymentSection()}
+                {activeSection === 'education' && (
+                  <div className="text-center py-8 text-gray-500">
+                    <ClipboardList className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Seção educacional em desenvolvimento</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Actions */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-between">
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/auto-application/case/${caseId}/basic-data`)}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Voltar para Dados Básicos
+              </Button>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => saveUSCISFormData()}
+                  disabled={isSaving}
+                  className="flex items-center gap-2"
+                >
+                  <Save className="h-4 w-4" />
+                  {isSaving ? 'Salvando...' : 'Salvar Progresso'}
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={() => setShowSaveModal(true)}
+                  className="flex items-center gap-2 border-blue-500 text-blue-600 hover:bg-blue-50"
+                >
+                  <Save className="h-4 w-4" />
+                  Salvar e Continuar Depois
+                </Button>
+
+                <Button 
+                  onClick={continueToDocuments}
+                  disabled={!isFormValid() || isSaving}
+                  className="bg-black text-white hover:bg-gray-800 flex items-center gap-2"
+                >
+                  Continuar para Documentos
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Form Info */}
+            {visaSpecs && (
+              <Card className="border-black">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Info className="h-5 w-5" />
+                    Sobre o Formulário {case_?.form_code}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <p className="text-sm text-gray-600">{visaSpecs.description}</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="font-medium text-gray-700">Taxa USCIS</p>
+                      <p className="text-black">{visaSpecs.uscis_fee}</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-700">Processamento</p>
+                      <p className="text-black">{visaSpecs.processing_time}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Important Note */}
+            <Alert className="border-yellow-400 bg-yellow-50">
+              <AlertTriangle className="h-4 w-4 text-yellow-600" />
+              <AlertDescription className="text-yellow-800">
+                <strong>Importante:</strong> As informações preenchidas aqui serão utilizadas 
+                para gerar automaticamente o formulário USCIS oficial. Certifique-se de que 
+                todos os dados estão corretos.
+              </AlertDescription>
+            </Alert>
+          </div>
+        </div>
+      </div>
+
+      {/* Osprey Owl Tutor */}
+      <OspreyOwlTutor
+        currentStage="uscis-form"
+        formData={formData}
+        onValidationRequest={async (validationData) => {
+          console.log('🦉 USCIS Form validation requested:', validationData);
+        }}
+        isEnabled={!!case_?.case_id}
+        position="bottom-right"
+      />
+
+      {/* Save and Continue Later Modal */}
+      <SaveAndContinueModal
+        isOpen={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        caseId={caseId || ''}
+        currentStage="Formulário USCIS"
+        onSuccess={(userData) => {
+          console.log('User authenticated:', userData);
+          navigate('/dashboard');
+        }}
+      />
+    </div>
+  );
+};
+
+export default USCISFormFilling;
