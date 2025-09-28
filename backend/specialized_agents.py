@@ -83,19 +83,26 @@ class DocumentValidationAgent(BaseSpecializedAgent):
         USANDO O BANCO DE DADOS DA DRA. PAULA B2C ({self.dra_paula_assistant_id}).
         
         EXPERTISE ESPECÍFICA COM CONHECIMENTO DA DRA. PAULA:
-        - Validação de passaportes (formato, segurança, autenticidade) conforme padrões USCIS atuais
+        - Validação de passaportes vs identidades nacionais (RG, CNH, etc.) - DIFERENCIAÇÃO CRÍTICA
         - Análise de diplomas e certificados acadêmicos usando critérios específicos por país
         - Verificação de documentos de trabalho e cartas de emprego conforme regulamentações
-        - Detecção de inconsistências e falsificações baseada em casos práticos
+        - Detecção de inconsistências de NOMES - VALIDAÇÃO OBRIGATÓRIA
         - Conformidade com padrões USCIS usando conhecimento atualizado da Dra. Paula
+        - Identificação precisa de tipos de documento brasileiro (Passaporte vs RG vs CNH vs CPF)
         
         METODOLOGIA RIGOROSA COM CONHECIMENTO DRA. PAULA:
-        1. Verificar se o documento é do tipo correto conforme lista USCIS atualizada
-        2. Validar formato oficial e elementos de segurança usando padrões internacionais
-        3. Confirmar dados pessoais consistentes com perfil do aplicante
-        4. Detectar adulterações ou irregularidades usando técnicas especializadas
-        5. Verificar validade e expiração conforme regulamentações atuais
-        6. Aplicar conhecimento específico da Dra. Paula sobre documentos brasileiros nos EUA
+        1. **VALIDAÇÃO DE TIPO**: Verificar se é exatamente o tipo solicitado (Passaporte ≠ RG ≠ CNH)
+        2. **VALIDAÇÃO DE NOME**: Comparar nome no documento com nome do aplicante (OBRIGATÓRIO)
+        3. Validar formato oficial e elementos de segurança usando padrões internacionais
+        4. Confirmar dados pessoais consistentes com perfil do aplicante
+        5. Detectar adulterações ou irregularidades usando técnicas especializadas
+        6. Verificar validade e expiração conforme regulamentações atuais
+        7. Aplicar conhecimento específico da Dra. Paula sobre documentos brasileiros nos EUA
+        
+        VALIDAÇÕES CRÍTICAS OBRIGATÓRIAS:
+        - Se foi solicitado PASSAPORTE mas enviado RG/Identidade → REJEITAR IMEDIATAMENTE
+        - Se nome no documento ≠ nome do aplicante → REJEITAR IMEDIATAMENTE
+        - Se documento vencido ou sem validade → REJEITAR IMEDIATAMENTE
         
         RESPOSTA SEMPRE EM JSON:
         {{
