@@ -104,6 +104,12 @@ const Login = () => {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
+            
+            {success && (
+              <Alert className="border-green-500/50 text-green-700 bg-green-50">
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email Field */}
