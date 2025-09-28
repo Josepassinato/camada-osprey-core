@@ -119,6 +119,16 @@ const DocumentUploadAuto = () => {
     // Base documents for all forms
     const baseDocuments = [
       {
+        id: 'uscis_form',
+        name: `Formulário USCIS ${specs?.specifications?.form_code || ''}`,
+        description: '✅ Formulário preenchido automaticamente na etapa anterior - pronto para download e assinatura',
+        required: true,
+        category: 'Formulário Oficial',
+        formats: ['PDF'],
+        maxSize: '5MB',
+        generated: true  // Special flag for auto-generated documents
+      },
+      {
         id: 'passport',
         name: 'Passaporte',
         description: 'Todas as páginas do passaporte válido',
