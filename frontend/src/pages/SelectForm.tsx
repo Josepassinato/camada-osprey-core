@@ -46,6 +46,18 @@ const SelectForm = () => {
   const [showRequirements, setShowRequirements] = useState(false);
   const [selectedVisaType, setSelectedVisaType] = useState("");
 
+  // Listen for start application event from VisaRequirements component
+  React.useEffect(() => {
+    const handleStartApplication = (event: CustomEvent) => {
+      const { visaType } = event.detail;
+      setShowRequirements(false);
+      createCase(visaType);
+    };
+
+    window.addEventListener('startApplication', handleStartApplication as EventListener);
+    return () => window.removeEventListener('startApplication', handleStartApplication as EventListener);
+  }, []);
+
   const uscisforms: USCISFormType[] = [
     {
       code: 'B-1/B-2',
