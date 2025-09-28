@@ -556,25 +556,45 @@ const BasicData = () => {
             </div>
 
             {/* Actions */}
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-between">
               <Button
                 variant="outline"
-                onClick={() => saveData()}
-                disabled={isSaving}
+                onClick={() => navigate(-1)}
                 className="flex items-center gap-2"
               >
-                <Save className="h-4 w-4" />
-                {isSaving ? 'Salvando...' : 'Salvar Progresso'}
+                <ArrowLeft className="h-4 w-4" />
+                Voltar
               </Button>
 
-              <Button 
-                onClick={continueToNextStep}
-                disabled={!isFormValid() || isSaving}
-                className="bg-black text-white hover:bg-gray-800 flex items-center gap-2"
-              >
-                Continuar para Documentos
-                <ArrowRight className="h-4 w-4" />
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => saveData()}
+                  disabled={isSaving}
+                  className="flex items-center gap-2"
+                >
+                  <Save className="h-4 w-4" />
+                  {isSaving ? 'Salvando...' : 'Salvar Progresso'}
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={() => setShowSaveModal(true)}
+                  className="flex items-center gap-2 border-blue-500 text-blue-600 hover:bg-blue-50"
+                >
+                  <Save className="h-4 w-4" />
+                  Salvar e Continuar Depois
+                </Button>
+
+                <Button 
+                  onClick={continueToNextStep}
+                  disabled={!isFormValid() || isSaving}
+                  className="bg-black text-white hover:bg-gray-800 flex items-center gap-2"
+                >
+                  Continuar para Documentos
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
 
