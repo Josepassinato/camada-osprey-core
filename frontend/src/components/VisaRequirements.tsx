@@ -14,7 +14,7 @@ import {
   Calendar,
   Building,
   GraduationCap,
-  Passport
+  Globe
 } from "lucide-react";
 
 interface VisaRequirement {
