@@ -3163,7 +3163,8 @@ def test_case_data_retrieval():
         response = requests.get(f"{API_BASE}/auto-application/case/{AUTO_APPLICATION_CASE_ID}", timeout=10)
         
         if response.status_code == 200:
-            case_data = response.json()
+            response_data = response.json()
+            case_data = response_data.get('case', {})
             print(f"✅ Case data retrieved successfully")
             print(f"   Case ID: {case_data.get('case_id')}")
             print(f"   Status: {case_data.get('status')}")
