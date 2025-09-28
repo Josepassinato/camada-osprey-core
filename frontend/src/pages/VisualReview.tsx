@@ -120,7 +120,7 @@ const VisualReview = () => {
           {
             label: 'Nome Completo',
             portuguese: portugueseResponses.personal?.full_name || 'Não informado',
-            english: englishForm.full_name || englishForm.applicant_name || 'Not provided',
+            english: hasOfficialForm ? (englishForm.full_name || englishForm.applicant_name || 'Not provided') : 'Aguardando processamento IA',
             status: 'correct'
           },
           {
