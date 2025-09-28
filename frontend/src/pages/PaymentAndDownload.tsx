@@ -681,6 +681,19 @@ const PaymentAndDownload = () => {
           </div>
         </div>
       )}
+
+      {/* Post-Payment Mandatory Signup Modal */}
+      <PostPaymentSignupModal
+        isOpen={showPostPaymentSignup}
+        caseId={caseId!}
+        packageInfo={packageInfo}
+        onSuccess={(userData) => {
+          console.log('User registered/logged in after payment:', userData);
+          setShowPostPaymentSignup(false);
+          // Now proceed with package generation
+          generateFinalPackage();
+        }}
+      />
     </div>
   );
 };
