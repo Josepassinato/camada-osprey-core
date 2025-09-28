@@ -157,7 +157,7 @@ const VisualReview = () => {
           {
             label: 'Telefone',
             portuguese: portugueseResponses.address?.phone || 'Não informado',
-            english: englishForm.phone_number || englishForm.telephone || 'Not provided',
+            english: hasOfficialForm ? (englishForm.phone_number || englishForm.telephone || 'Not provided') : 'Aguardando processamento IA',
             status: 'correct'
           },
           {
