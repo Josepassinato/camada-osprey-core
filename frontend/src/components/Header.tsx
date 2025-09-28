@@ -115,7 +115,7 @@ const Header = () => {
               <>
                 <Button 
                   variant="ghost" 
-                  className="font-medium"
+                  className="font-medium hover:bg-orange-50 hover:text-orange-600"
                   onClick={() => navigate('/login')}
                 >
                   Entrar
