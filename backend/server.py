@@ -4463,22 +4463,40 @@ async def translate_data_ai(case, friendly_form_data):
     """AI translation from Portuguese to English for USCIS forms"""
     try:
         from emergentintegrations import EmergentLLM
+        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt
         
         llm = EmergentLLM(api_key=os.environ.get('EMERGENT_LLM_KEY'))
         
+        # Get Dra. Paula's enhanced knowledge for translation
+        visa_type = case.get('form_code', 'N/A')
+        enhanced_prompt = get_dra_paula_enhanced_prompt("form_generation", f"Tipo de Visto: {visa_type}")
+        
         translation_prompt = f"""
-        Traduza as respostas do português para inglês jurídico apropriado para formulários USCIS:
+        {enhanced_prompt}
+        
+        [TRADUÇÃO ESPECIALIZADA COM EXPERTISE DRA. PAULA B2C]
+        
+        Traduza as respostas usando conhecimento especializado da Dra. Paula sobre formulários USCIS:
         
         Dados em Português: {json.dumps(friendly_form_data, indent=2)}
+        Tipo de Visto: {visa_type}
         
-        Regras de tradução:
-        1. Use terminologia jurídica oficial do USCIS
-        2. Mantenha nomes próprios e endereços no formato original
-        3. Traduza profissões para termos americanos equivalentes
-        4. Converta datas para formato MM/DD/YYYY
-        5. Use inglês formal e preciso
+        REGRAS DE TRADUÇÃO ESPECIALIZADAS (Dra. Paula):
+        1. Use terminologia jurídica oficial específica do USCIS
+        2. Mantenha nomes próprios EXATAMENTE como no passaporte
+        3. Traduza profissões usando códigos SOC quando aplicável
+        4. Converta datas para formato MM/DD/YYYY (obrigatório USCIS)
+        5. Use inglês formal e preciso para contexto jurídico
+        6. Endereços americanos: Street, City, State, ZIP Code
+        7. Traduza títulos acadêmicos para equivalentes americanos
+        8. Mantenha consistência com terminologia USCIS oficial
         
-        Responda apenas "TRADUÇÃO_COMPLETA" quando terminar.
+        CONHECIMENTO ESPECÍFICO DO VISTO {visa_type}:
+        - Aplique requisitos específicos de tradução para este tipo de visto
+        - Use terminologia apropriada para o contexto (trabalho, família, temporário)
+        - Considere nuances importantes para aprovação do visto
+        
+        Responda apenas "TRADUÇÃO_COMPLETA_DRA_PAULA" quando terminar a tradução com expertise especializada.
         """
         
         response = llm.chat([{"role": "user", "content": translation_prompt}])
