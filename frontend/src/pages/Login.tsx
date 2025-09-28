@@ -85,10 +85,10 @@ const Login = () => {
           </div>
           
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Bem-vindo de volta!
+            Continuar Aplicação
           </h1>
           <p className="text-muted-foreground">
-            Faça login para continuar sua jornada imigratória
+            Acesse sua conta para continuar de onde parou
           </p>
         </div>
 
