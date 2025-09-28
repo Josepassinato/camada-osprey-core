@@ -443,15 +443,26 @@ const PaymentAndDownload = () => {
                     </Card>
                   </div>
                   
-                  <div className="mt-8 p-4 bg-white rounded-lg border border-green-200">
-                    <h4 className="font-medium text-gray-800 mb-2">Próximos Passos:</h4>
-                    <ol className="text-sm text-gray-600 space-y-1 text-left max-w-2xl mx-auto">
-                      <li>1. Faça o download do pacote completo acima</li>
-                      <li>2. Revise todos os documentos e formulários</li>
-                      <li>3. Reúna os documentos originais conforme checklist</li>
-                      <li>4. Agende sua submissão seguindo as instruções</li>
-                      <li>5. Entre em contato conosco se tiver dúvidas</li>
-                    </ol>
+                  <div className="mt-8 space-y-4">
+                    <Button 
+                      onClick={() => setShowSubmissionGuide(true)}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
+                      size="lg"
+                    >
+                      <Send className="h-5 w-5 mr-2" />
+                      Ver Instruções Completas para Submissão ao USCIS
+                    </Button>
+                    
+                    <div className="p-4 bg-white rounded-lg border border-green-200">
+                      <h4 className="font-medium text-gray-800 mb-2">Próximos Passos:</h4>
+                      <ol className="text-sm text-gray-600 space-y-1 text-left max-w-2xl mx-auto">
+                        <li>1. Faça o download do pacote completo acima</li>
+                        <li>2. <strong>Clique no botão azul</strong> para ver instruções detalhadas</li>
+                        <li>3. Revise todos os documentos e assinatura</li>
+                        <li>4. Prepare o pagamento conforme orientações</li>
+                        <li>5. Submeta ao USCIS seguindo o passo a passo</li>
+                      </ol>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
