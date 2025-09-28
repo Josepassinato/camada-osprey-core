@@ -3,6 +3,7 @@ Specialized Immigration Agents System
 Multiple expert agents for specific tasks in the immigration process
 """
 import os
+import json
 import logging
 from typing import Optional, Dict, Any, List
 from emergentintegrations.llm.chat import LlmChat, UserMessage
