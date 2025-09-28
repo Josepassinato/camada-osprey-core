@@ -797,6 +797,8 @@ test_plan:
   test_priority: "critical_first"
 
 agent_communication:
+  - agent: "main"
+    message: "🎉 CRITICAL SELECTFORM YELLOW PAGE ERROR SUCCESSFULLY RESOLVED! User reported yellow page error on /auto-application/select-form after recent modifications. Root cause: Duplicate entries in uscisforms array (H-1B and O-1 duplicated) causing React key conflicts. Fixed by cleaning up the array to have unique entries only: B-1/B-2, H-1B, F-1, O-1, N-400, I-130, I-765, I-485, I-90, I-751, I-589. Verified complete user journey: Start page → checkbox → 'Começar' → SelectForm displays correctly with all 11 forms, proper black/white theme, Popular badges, complexity levels. Navigation flow working perfectly. SelectForm critical functionality restored."
   - agent: "testing"
     message: "Completed comprehensive testing of OSPREY OpenAI integration. All 7 backend tasks tested successfully. Fixed one minor datetime serialization issue in chat session persistence. All endpoints working correctly with realistic immigration scenarios. MongoDB persistence confirmed across all collections. Backend ready for production use."
   - agent: "testing"
