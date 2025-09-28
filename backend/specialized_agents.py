@@ -149,7 +149,96 @@ class DocumentValidationAgent(BaseSpecializedAgent):
         }}
         
         SEJA EXTREMAMENTE RIGOROSO. Melhor rejeitar documento duvidoso que aprovar documento inválido.
+        
+        BASE DE DADOS DE VALIDAÇÃO DISPONÍVEL:
+        Use as informações da base de dados DOCUMENT_VALIDATION_DATABASE para validações específicas.
+        Cada tipo de documento tem critérios únicos e elementos de segurança específicos.
         """
+    
+    async def validate_document_with_database(self, document_type: str, document_content: str, 
+                                            applicant_name: str, visa_type: str = None) -> str:
+        """Enhanced validation using the comprehensive document database"""
+        
+        # Get validation info from database
+        validation_info = get_document_validation_info(document_type)
+        
+        # Build enhanced prompt with specific validation criteria
+        enhanced_prompt = f"""
+        VALIDAÇÃO ULTRA-RIGOROSA COM BASE DE DADOS ESPECIALIZADA
+        
+        DOCUMENTO SOLICITADO: {document_type}
+        NOME DO APLICANTE: {applicant_name}
+        TIPO DE VISTO: {visa_type}
+        CONTEÚDO: {document_content[:1500]}
+        
+        CRITÉRIOS ESPECÍFICOS PARA {document_type.upper()}:
+        """
+        
+        if validation_info:
+            enhanced_prompt += f"""
+            VALIDAÇÕES CRÍTICAS OBRIGATÓRIAS:
+            {validation_info.get('critical_validations', {})}
+            
+            CAMPOS OBRIGATÓRIOS QUE DEVEM ESTAR PRESENTES:
+            {validation_info.get('required_fields', [])}
+            
+            ELEMENTOS DE SEGURANÇA ESPERADOS:
+            {validation_info.get('security_elements', [])}
+            
+            PROBLEMAS COMUNS PARA DETECTAR:
+            {validation_info.get('common_issues', [])}
+            """
+        
+        # Add visa-specific validation
+        if visa_type:
+            required_docs = get_required_documents_for_visa(visa_type)
+            if document_type not in required_docs:
+                enhanced_prompt += f"""
+                ⚠️ ALERTA CRÍTICO: Documento "{document_type}" NÃO é obrigatório para visto {visa_type}.
+                Documentos obrigatórios para {visa_type}: {required_docs}
+                """
+        
+        enhanced_prompt += f"""
+        
+        PROTOCOLO DE VALIDAÇÃO DR. MIGUEL AVANÇADO:
+        1. IDENTIFICAR tipo exato do documento (não aceitar substitutos)
+        2. COMPARAR nome no documento com "{applicant_name}" (deve ser idêntico)
+        3. VERIFICAR todos os campos obrigatórios estão presentes
+        4. VALIDAR elementos de segurança esperados
+        5. DETECTAR problemas comuns conhecidos
+        6. AVALIAR se documento é adequado para visto {visa_type}
+        
+        RESPOSTA OBRIGATÓRIA EM JSON:
+        {{
+            "agent": "Dr. Miguel - Validador",
+            "document_type_identified": "string - tipo identificado",
+            "document_type_expected": "{document_type}",
+            "type_correct": true/false,
+            "document_authentic": true/false,
+            "name_on_document": "string - nome extraído",
+            "applicant_name": "{applicant_name}",
+            "belongs_to_applicant": true/false,
+            "name_match_explanation": "Detalhes da comparação",
+            "required_fields_present": true/false,
+            "missing_required_fields": ["array"],
+            "security_elements_valid": true/false,
+            "missing_security_elements": ["array"],
+            "detected_issues": ["array"],
+            "visa_appropriate": true/false,
+            "critical_issues": ["array"],
+            "confidence_score": 0-100,
+            "uscis_acceptable": true/false,
+            "verdict": "APROVADO|REJEITADO|NECESSITA_REVISÃO",
+            "rejection_reason": "Razão específica se rejeitado",
+            "recommendations": ["array de recomendações"],
+            "technical_notes": "Observações técnicas detalhadas"
+        }}
+        
+        VALIDAÇÃO RIGOROSA: Use todos os critérios específicos do tipo de documento.
+        """
+        
+        session_id = f"enhanced_validation_{hash(document_content) % 10000}"
+        return await self._call_agent(enhanced_prompt, session_id)
 
 class FormValidationAgent(BaseSpecializedAgent):
     """Specialized agent for form completion and data consistency"""
