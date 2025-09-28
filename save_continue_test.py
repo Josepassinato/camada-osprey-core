@@ -122,6 +122,7 @@ def test_save_and_continue_later_flow():
             data = response.json()
             AUTO_APPLICATION_CASE_ID = data.get('case_id')
             print(f"   ✅ Anonymous case created: {AUTO_APPLICATION_CASE_ID}")
+            print(f"   Response data: {data}")  # Debug: see full response
             
             # Step 2: Add some basic data to the case
             print("   Step 2: Adding basic data to case...")
