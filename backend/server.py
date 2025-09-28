@@ -1663,15 +1663,39 @@ async def reanalyze_document(document_id: str, current_user = Depends(get_curren
 
 # Auto-Application System Endpoints
 @api_router.post("/auto-application/start")
-async def start_auto_application(case_data: CaseCreate):
+async def start_auto_application(case_data: CaseCreate, request: Request):
     """Start a new auto-application case (anonymous or authenticated)"""
     try:
-        # For anonymous users, create temporary case with 7 days expiration
-        case = AutoApplicationCase(
-            form_code=case_data.form_code,
-            session_token=case_data.session_token,
-            expires_at=datetime.utcnow() + timedelta(days=7)
-        )
+        # Check if user is authenticated
+        current_user = None
+        try:
+            auth_header = request.headers.get("Authorization")
+            if auth_header and auth_header.startswith("Bearer "):
+                token = auth_header.split(" ")[1]
+                payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+                user_id = payload.get("user_id")
+                if user_id:
+                    current_user = await db.users.find_one({"id": user_id})
+        except:
+            pass
+        
+        # Create case with or without user association
+        if current_user:
+            # Authenticated user - associate case with user
+            case = AutoApplicationCase(
+                form_code=case_data.form_code,
+                session_token=case_data.session_token,
+                user_id=current_user["id"],
+                is_anonymous=False,
+                expires_at=datetime.utcnow() + timedelta(days=30)  # Longer expiration for authenticated users
+            )
+        else:
+            # Anonymous user - create temporary case
+            case = AutoApplicationCase(
+                form_code=case_data.form_code,
+                session_token=case_data.session_token,
+                expires_at=datetime.utcnow() + timedelta(days=7)
+            )
         
         await db.auto_cases.insert_one(case.dict())
         
