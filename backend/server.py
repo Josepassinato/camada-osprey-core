@@ -427,50 +427,64 @@ def validate_file_type(mime_type: str) -> bool:
     return mime_type in supported_types
 
 async def analyze_document_with_ai(document: UserDocument) -> Dict[str, Any]:
-    """Analyze document content with OpenAI"""
+    """Analyze document with Dr. Miguel's improved validation"""
     try:
+        # Use Dr. Miguel for rigorous document validation
+        validator = create_document_validator()
+        
         # For text-based documents, extract text
         if document.mime_type.startswith('image/'):
             content = extract_text_from_base64_image(document.content_base64)
         else:
             content = f"Document type: {document.document_type}, Filename: {document.original_filename}"
 
-        prompt = f"""
-        Analise este documento de imigração e forneça:
-
-        Tipo de documento: {document.document_type}
-        Conteúdo: {content[:1000]}...
-
-        Retorne APENAS um JSON com:
+        # Get user information for name validation (if available)
+        # This would need to be passed from the upload context
+        user_data = getattr(document, 'user_data', {})
+        
+        validation_prompt = f"""
+        VALIDAÇÃO RIGOROSA DE DOCUMENTO - DR. MIGUEL MELHORADO
+        
+        DADOS CRÍTICOS PARA VALIDAÇÃO:
+        - Tipo de Documento Esperado: {document.document_type}
+        - Conteúdo do Documento: {content[:1500]}
+        - Dados do Usuário: {user_data}
+        - Nome do Arquivo: {document.original_filename}
+        
+        VALIDAÇÕES OBRIGATÓRIAS:
+        1. TIPO CORRETO: Verificar se é exatamente do tipo "{document.document_type}"
+        2. NOME CORRETO: Verificar se nome no documento corresponde ao aplicante
+        3. AUTENTICIDADE: Verificar se é documento genuíno
+        4. VALIDADE: Verificar se não está vencido
+        5. ACEITABILIDADE USCIS: Confirmar se atende padrões USCIS
+        
+        INSTRUÇÕES CRÍTICAS:
+        - Se tipo de documento não for o esperado → REJEITAR
+        - Se nome não corresponder ao aplicante → REJEITAR  
+        - Se documento vencido → REJEITAR
+        - Explicar claramente qualquer problema encontrado
+        
+        RESPOSTA OBRIGATÓRIA EM JSON:
         {{
-            "completeness_score": [0-100],
+            "document_type_identified": "string",
+            "type_correct": true/false,
+            "name_validation": "approved|rejected|cannot_verify",
+            "belongs_to_applicant": true/false,
             "validity_status": "valid|invalid|expired|unclear",
-            "key_information": ["info1", "info2"],
-            "missing_information": ["missing1", "missing2"],
-            "suggestions": ["suggestion1", "suggestion2"],
-            "expiration_warnings": ["warning1"],
-            "quality_issues": ["issue1"],
-            "next_steps": ["step1", "step2"]
+            "uscis_acceptable": true/false,
+            "critical_issues": ["array of issues"],
+            "verdict": "APROVADO|REJEITADO|NECESSITA_REVISÃO",
+            "completeness_score": 0-100,
+            "key_information": ["extracted info"],
+            "suggestions": ["improvement suggestions"],
+            "rejection_reason": "specific reason if rejected"
         }}
-
-        IMPORTANTE: Esta é uma ferramenta de orientação para auto-aplicação, não consultoria jurídica.
+        
+        Faça validação técnica rigorosa conforme protocolo Dr. Miguel.
         """
-
-        response = openai.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "Você é um assistente especializado em análise de documentos para imigração. Responda APENAS em formato JSON válido."
-                },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            max_tokens=1000,
-            temperature=0.3
-        )
+        
+        session_id = f"doc_analysis_{document.id}"
+        dr_miguel_analysis = await validator._call_agent(validation_prompt, session_id)
 
         # Parse JSON response
         analysis_text = response.choices[0].message.content.strip()
