@@ -3575,7 +3575,8 @@ def test_comprehensive_system_critical_priorities():
         "owl_tutor_system": "Osprey Owl Tutor System",
         "brazilian_user_scenarios": "Brazilian User Scenarios",
         "ai_review_translation_system": "AI Review and Translation System",
-        "document_management_ai": "Document Management with AI"
+        "document_management_ai": "Document Management with AI",
+        "data_persistence_investigation": "🚨 CRITICAL: Data Persistence Investigation"
     }
     
     passed_priorities = 0
