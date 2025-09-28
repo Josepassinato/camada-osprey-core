@@ -3902,6 +3902,103 @@ async def test_document_validation_with_image(request: dict):
             "timestamp": datetime.now().isoformat()
         }
 
+# Comprehensive Document Validation Test Endpoint
+@api_router.post("/test-comprehensive-document-validation")
+async def test_comprehensive_document_validation(request: dict):
+    """Test the enhanced Dr. Miguel with comprehensive document database"""
+    try:
+        validator = create_document_validator()
+        
+        document_type = request.get("document_type", "passport")
+        document_content = request.get("document_content", "")
+        applicant_name = request.get("applicant_name", "")
+        visa_type = request.get("visa_type", "")
+        
+        # Use the enhanced validation method
+        analysis = await validator.validate_document_with_database(
+            document_type=document_type,
+            document_content=document_content,
+            applicant_name=applicant_name,
+            visa_type=visa_type
+        )
+        
+        return {
+            "success": True,
+            "agent": "Dr. Miguel - Validador Avançado com Base de Dados",
+            "test_scenario": {
+                "document_type": document_type,
+                "applicant_name": applicant_name,
+                "visa_type": visa_type
+            },
+            "validation_database_used": True,
+            "analysis": analysis,
+            "timestamp": datetime.now().isoformat()
+        }
+    
+    except Exception as e:
+        logger.error(f"Error in comprehensive document validation: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+
+# Document Database Info Endpoint
+@api_router.get("/document-validation-database/{document_type}")
+async def get_document_validation_info_endpoint(document_type: str):
+    """Get validation information for a specific document type"""
+    try:
+        from document_validation_database import get_document_validation_info
+        
+        validation_info = get_document_validation_info(document_type)
+        
+        if not validation_info:
+            raise HTTPException(status_code=404, detail=f"Document type '{document_type}' not found in database")
+        
+        return {
+            "success": True,
+            "document_type": document_type,
+            "validation_info": validation_info,
+            "timestamp": datetime.now().isoformat()
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting document validation info: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Visa Requirements Endpoint
+@api_router.get("/visa-document-requirements/{visa_type}")
+async def get_visa_document_requirements_endpoint(visa_type: str):
+    """Get required documents for a specific visa type"""
+    try:
+        from document_validation_database import get_required_documents_for_visa, get_document_validation_info
+        
+        required_docs = get_required_documents_for_visa(visa_type)
+        
+        if not required_docs:
+            raise HTTPException(status_code=404, detail=f"Visa type '{visa_type}' not found in database")
+        
+        # Get detailed info for each required document
+        detailed_requirements = {}
+        for doc_type in required_docs:
+            detailed_requirements[doc_type] = get_document_validation_info(doc_type)
+        
+        return {
+            "success": True,
+            "visa_type": visa_type,
+            "required_documents": required_docs,
+            "detailed_requirements": detailed_requirements,
+            "timestamp": datetime.now().isoformat()
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting visa requirements: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 app.include_router(api_router)
 
 app.add_middleware(
