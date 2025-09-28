@@ -361,7 +361,7 @@ const VisualReview = () => {
     const getStatusIcon = (status: string) => {
       switch (status) {
         case 'correct': return <CheckCircle className="h-4 w-4 text-green-600" />;
-        case 'warning': return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
+        case 'warning': return <AlertTriangle className="h-4 w-4 text-orange-600" />;
         case 'error': return <Flag className="h-4 w-4 text-red-600" />;
         default: return null;
       }
