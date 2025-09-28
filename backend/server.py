@@ -4576,24 +4576,50 @@ async def final_review_ai(case):
     """Final AI review of the complete USCIS form"""
     try:
         from emergentintegrations import EmergentLLM
+        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
         
         llm = EmergentLLM(api_key=os.environ.get('EMERGENT_LLM_KEY'))
         
+        # Get Dra. Paula's enhanced knowledge for final review
+        form_code = case.get('form_code', '')
+        enhanced_prompt = get_dra_paula_enhanced_prompt("final_review", f"Revisão Final: {form_code}")
+        visa_knowledge = get_visa_knowledge(form_code)
+        
         review_prompt = f"""
-        Faça uma revisão final do formulário USCIS gerado:
+        {enhanced_prompt}
+        
+        [REVISÃO FINAL COM EXPERTISE DRA. PAULA B2C]
+        
+        Faça uma revisão especializada final usando conhecimento da Dra. Paula:
         
         Caso: {case.get('case_id')}
-        Tipo: {case.get('form_code')}
+        Tipo de Visto: {form_code}
+        Status: {case.get('status', 'N/A')}
         
-        Verifique:
-        1. Todos os campos obrigatórios preenchidos
-        2. Formatação correta de datas e números
-        3. Consistência de informações
-        4. Requisitos específicos do tipo de visto
-        5. Adequação aos padrões USCIS
+        CONHECIMENTO ESPECÍFICO DO VISTO (Dra. Paula):
+        {json.dumps(visa_knowledge, indent=2) if visa_knowledge else "Aplicar conhecimento geral USCIS"}
         
-        Confirme se está pronto para submissão oficial.
-        Responda apenas "REVISÃO_APROVADA" se tudo estiver correto.
+        CHECKLIST DE REVISÃO ESPECIALIZADA:
+        1. ✓ Todos os campos obrigatórios preenchidos (específicos para {form_code})
+        2. ✓ Formatação correta: datas MM/DD/YYYY, números, telefones internacionais
+        3. ✓ Consistência de informações entre seções
+        4. ✓ Requisitos específicos do visto {form_code} atendidos
+        5. ✓ Adequação aos padrões USCIS oficiais
+        6. ✓ Documentos de apoio necessários identificados
+        7. ✓ Problemas potenciais de inadmissibilidade verificados
+        8. ✓ Tips da Dra. Paula para sucesso da aplicação
+        
+        ANÁLISE DE RISCOS (Dra. Paula):
+        - Identifique possíveis red flags para o tipo de visto
+        - Verifique se há gaps ou inconsistências problemáticas
+        - Confirme adequação aos critérios específicos do {form_code}
+        - Avalie probabilidade de aprovação baseada na experiência
+        
+        RESULTADO DA REVISÃO:
+        Se tudo estiver correto segundo expertise da Dra. Paula, responda:
+        "REVISÃO_APROVADA_DRA_PAULA - Formulário pronto para submissão oficial com alta probabilidade de sucesso"
+        
+        Se houver problemas, liste-os com orientações específicas para correção.
         """
         
         response = llm.chat([{"role": "user", "content": review_prompt}])
