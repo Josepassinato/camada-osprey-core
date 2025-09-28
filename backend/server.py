@@ -1823,7 +1823,7 @@ Responda apenas com o JSON estruturado, sem explicações adicionais.
 
         # Call LLM via emergentintegrations for fact extraction
         chat = LlmChat(
-            api_key="sk-emergent-aE5F536B80dFf0bA6F",
+            api_key=os.environ.get('EMERGENT_LLM_KEY'),
             session_id=f"fact_extraction_{uuid.uuid4().hex[:8]}",
             system_message="Você é um especialista em extrair informações estruturadas de narrativas para aplicações de imigração. Responda sempre em português e com informações precisas."
         ).with_model("openai", "gpt-4o")
