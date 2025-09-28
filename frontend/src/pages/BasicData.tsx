@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import OspreyOwlTutor from "@/components/OspreyOwlTutor";
+import SaveAndContinueModal from "@/components/SaveAndContinueModal";
 import { useFormSnapshot } from "@/hooks/useFormSnapshot";
 import { useSessionManager } from "@/hooks/useSessionManager";
 import { 
