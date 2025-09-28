@@ -512,12 +512,12 @@ const USCISFormFilling = () => {
           </div>
           
           <h1 className="text-3xl font-bold text-black mb-2">
-            Formulário USCIS {case_?.form_code}
+            Formulário USCIS {case_?.form_code} - Gerado pela IA
           </h1>
           
           <p className="text-gray-600">
-            Preencha as informações que serão utilizadas no formulário oficial do USCIS. 
-            Estas informações serão formatadas automaticamente no documento final.
+            ✅ Formulário oficial gerado automaticamente pela IA com base nas suas respostas. 
+            Todas as informações foram traduzidas para inglês jurídico e mapeadas corretamente.
           </p>
         </div>
 
