@@ -245,8 +245,22 @@ const PaymentAndDownload = () => {
         
         setPaymentComplete(true);
         
-        // Start generating final package
-        generateFinalPackage();
+        // Set package info for the modal
+        const selectedPkg = packages.find(p => p.id === selectedPackage);
+        setPackageInfo({
+          type: selectedPkg?.name || 'Pacote Selecionado',
+          amount: selectedPkg?.price || 'N/A'
+        });
+        
+        // Check if user is already logged in
+        const userToken = localStorage.getItem('osprey_token');
+        if (!userToken) {
+          // Show mandatory signup modal for anonymous users
+          setShowPostPaymentSignup(true);
+        } else {
+          // User is already logged in, proceed normally
+          generateFinalPackage();
+        }
         
       } else {
         setError('Erro ao processar pagamento');
