@@ -463,6 +463,21 @@ const SelectForm = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Visa Requirements Dialog */}
+      <Dialog open={showRequirements} onOpenChange={setShowRequirements}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Requisitos Detalhados do Visto</DialogTitle>
+          </DialogHeader>
+          {selectedVisaType && (
+            <VisaRequirements 
+              visaType={selectedVisaType} 
+              onClose={() => setShowRequirements(false)} 
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
