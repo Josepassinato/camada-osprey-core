@@ -1,52 +1,66 @@
 <analysis>
-The AI engineer's work primarily focused on iteratively building and refining a B2C immigration self-application tool. Key efforts included implementing the 9-step auto-application journey, redesigning the landing page for minimalism and mobile responsiveness, and pivoting from a voice agent to a Proactive Owl Tutor. A significant recurring challenge was debugging frontend/backend URL mismatches ( vs. preview environment) and ensuring  persistence. Recent work saw the integration of a multi-agent AI system, leveraging an existing Dra. Paula B2C expert for enhanced document validation, form validation, letter generation, and USCIS form translation. The work then shifted to UI/UX refinements on the landing page and adding new visa types and responsibility confirmations. The immediate last task involved resolving a critical frontend error (yellow page on SelectForm) caused by recent modifications, leading to a rollback.
+The AI engineer's work focused on building and refining an AI-powered B2C immigration self-application tool. Key achievements include implementing the 9-step application journey, a minimalist UI, and a multi-agent AI system (Proactive Owl Tutor with Dra. Paula B2C and specialized agents like Dr. Miguel for document validation). Recurring challenges involved URL mismatches and file watcher limits, both resolved. Significant features implemented during this trajectory include fixing a yellow page error on , resolving a 422 error for B-1/B-2 visa case creation, introducing a comprehensive USCIS submission guide, and enhancing the AI document validation agent (Dr. Miguel) to detect critical errors. A major architectural change involved refactoring the application flow to correctly sequence form filling, AI review, and document upload. The most recent work focused on implementing a Save and Continue Later feature, including user login/signup and a dashboard to manage saved applications, with UI and backend infrastructure now in place.
 </analysis>
 
 <product_requirements>
-The application is an AI-powered self-application tool for immigration, assisting self-petitioners with US visa applications without providing legal advice. Its core is a 9-step AI-driven auto-application journey, from initial agreement (Comece Agora) through visa selection, basic data entry, document upload, storytelling, a friendly form (online completion only), visual review, payment, and final download/tutorial. Key features include AI assistance (via a proactive Osprey Owl Tutor providing guidance and deterministic validations), user authentication, document management (with AI verification and certified translation partner suggestions), and education. Recent refinements emphasize a minimalist, mobile-responsive, black-and-white UI. New requirements include clearly communicating the platform's self-application purpose, providing visa-specific document and eligibility requirements upfront, and implementing comprehensive responsibility confirmations (with digital signatures) at each critical stage of the application process. Tourist visa (B-1/B-2) support was added.
+The application is an AI-powered self-application tool for US immigration, guiding users through a 9-step auto-application journey. This includes initial agreement, visa selection, basic data entry, a user-friendly Friendly Form (in Portuguese), AI review and translation to generate official USCIS forms, user authorization, document upload, storytelling, visual review, payment, and final package download with a tutorial. The system utilizes a Proactive Owl Tutor (multi-agent AI) for guidance and deterministic validations. The UI is minimalist, black-and-white, and mobile-responsive. Recent requirements focused on clearly stating the self-application nature, providing visa-specific details, and implementing comprehensive responsibility confirmations. Support for B-1/B-2, H-1B, and F-1 visas was added. Critical updates include providing detailed USCIS submission instructions (signatures, fees, office addresses), significantly enhancing AI document validation for accuracy (e.g., name and type matching, expiry), reordering the application flow to place form filling before document upload (with auto-saving of generated USCIS forms), and enabling users to save application progress via login/signup.
 </product_requirements>
 
 <key_technical_concepts>
-- **Full-stack:** React (frontend), FastAPI (backend), MongoDB (database).
-- **AI Integration:**  library, multi-agent AI architecture (specialized LLM agents like Dra. Paula B2C, Dr. Miguel, Dra. Ana, Dr. Ricardo, Dr. Fernando).
-- **Styling:** Tailwind CSS (customized B&W theme), Radix UI.
-- **UI/UX:** Framer Motion.
-- **Data Flow:**  hook,  for  persistence.
-- **Responsibility Confirmations:** Backend endpoints and frontend components for legal disclaimers and digital signatures.
+-   **Full-stack:** React (frontend), FastAPI (backend), MongoDB.
+-   **AI Integration:**  library, multi-agent AI architecture (Dra. Paula B2C, Dr. Miguel - Document Validator, etc.).
+-   **Styling & UI:** Tailwind CSS (B&W), Radix UI, Framer Motion.
+-   **Data Management:**  hook,  for  persistence.
+-   **Authentication:** JWT for token management, bcrypt for password hashing.
 </key_technical_concepts>
 
 <code_architecture>
 
--   : **Extensively modified.** Core API endpoints, user authentication, application case management. Includes , , and new endpoints for the multi-agent system (, ) and responsibility confirmations.
--   : Defines visa requirements. **Modified** to include B-1/B-2 visa details.
--   : **New file.** Contains logic for Dra. Paula B2C, an OpenAI Assistant, integrated via  for expert immigration analysis.
--   : **New file.** Implements a multi-agent system (Dr. Miguel - Document Validator, Dra. Ana - Form Validator, Dr. Carlos - Eligibility Analyst, Dra. Patricia - Compliance USCIS, Dr. Ricardo - Letter Writer, Dr. Fernando - USCIS Translator/Validator, Dr. Roberto - Triage), all sharing Dra. Paula's knowledge base.
--   : **Frequently modified.**  and  were repeatedly switched between  and  due to environment mismatches during testing.  was added here.
--   : **Modified.** Centralized routing. The root route  was changed to  from .
--   : **Modified extensively.** Landing page redesigned multiple times for minimalist, B&W, mobile-responsive UI. Updated to clarify self-application purpose, text changes (orientações técnicas to ajuda), removed Time especialista section, and moved the terms acceptance checkbox.
--   : **Modified and source of current issue.** Displays visa selection. Updated to include B-1/B-2, Student, and Work visas. Temporarily simplified/broken by attempts to fix the yellow page error, currently being reverted.
--   : **Modified.** Integrates  (replacing ) and .
--   : **New file.** Proactive tutor component, now integrated with Dra. Paula B2C for real-time validations.
--   : **New file.** Simplified debug version, now deprecated in favor of .
--   : **New file.** Component to display visa-specific document and eligibility requirements. Created but temporarily removed due to causing a frontend error.
--   : **New file.** Component for various user responsibility checkboxes/declarations.
--   : **New file.** Component to suggest certified translation partners.
--   : **New file.** Manages session data and  persistence.
--   : **New file.** Hook to manage user confirmations throughout the application flow.
--   : **Modified.** Added  options to reduce file watcher usage to prevent  errors.
+-   : **Core API and logic.**
+    -   Added  and  to  enum (lines 77-100).
+    -   New endpoint  for generating instructions (lines 2200-2248).
+    -   Endpoint  fixed for B-1/B-2 visa.
+    -   Integrated enhanced  into  (lines 429-510).
+    -   New endpoint  to save USCIS form data (lines 3020-3023).
+    -   Modified  to fetch user's  (lines 3024-3060).
+    -   New endpoint  for associating cases with users (lines 3061-3091).
+    -   Cleaned up To use the fastapi command, please install "fastapi[standard]":
+
+	pip install "fastapi[standard]" imports including  (lines 1-12).
+    -   Hardcoded API keys replaced with .
+-   : **Multi-agent definitions.**
+    -    (Dr. Miguel) significantly enhanced to perform detailed document validation, checking type correctness, applicant name matching, USCIS acceptability, critical elements, and security features (lines 71-120, plus internal ).
+-   : **New file.** Created to store comprehensive, visa-specific document requirements and critical validation aspects.
+-   : Contains  and  (e.g., ).  added.
+-   : **Centralized routing.** Updated routes to reflect the new flow:  ->  ->  ->  (now review/authorize) ->  (lines 20-60).
+-   : **Visa selection.** Reverted previous breaking changes to resolve a yellow page error.
+-   : **User basic data.** Modified  to navigate to . Integrated  with a Salvar e Continuar Depois button (lines 560-580).
+-   : **User-friendly form.** Now serves as the main input for user data in a structured, multi-section format. Navigates to  (lines 400-450, and button changes).
+-   : **New file.** Page for AI processing of friendly form data to generate official USCIS forms.
+-   : **Refactored page.** Now serves as Review and Authorize Official USCIS Form instead of initial filling. Includes authorization checkboxes (lines 100-300).
+-   : **Document upload.** Updated to indicate that the USCIS form is now auto-saved and not a manual upload requirement (lines 116-130, and  update).
+-   : **Payment and download.** Integrated  component. Modified  to show  (lines 218-260).
+-   : **User dashboard.** Displays saved applications and allows continuation (lines 325-365).
+-   : **Login page.** Enhanced for continuing saved applications (lines 60-220).
+-   : **Landing page.** Added a Já tem uma aplicação salva? section with a link to login (lines 391-428).
+-   : **Navigation bar.** Added Entrar button linking to  (lines 120-130).
+-   : **New file.** Component to display detailed, visa-specific submission instructions (lines 1-100+).
+-   : **New file.** Modal for users to log in or sign up to save their application progress.
+-   : **New file.** Modal for mandatory signup after payment, to link application to a user account.
 </code_architecture>
 
 <pending_tasks>
-- Fully implement robust session management for  persistence (though initial fix was reported).
-- Finalize the Proactive Owl Tutor implementation, ensuring full integration across wizard pages with all specialized agents for comprehensive validation rules and message prioritization.
-- Complete the implementation and integration of the  component to display visa-specific details early in the flow.
-- Integrate the newly created responsibility confirmation components and hooks into the respective application stages (Document Upload, Friendly Form, Letter Review, Final Declaration).
+-   Finalize the Proactive Owl Tutor implementation, ensuring full integration with specialized agents for comprehensive validation.
+-   Complete the implementation and integration of the  component to display visa-specific details early.
+-   Integrate responsibility confirmation components into application stages.
+-   Implement the actual AI logic in  to process the friendly form, review for consistency, translate, and generate the official USCIS form.
+-   Test the complete Save and Continue Later flow, ensuring data from all application steps is correctly saved, retrieved, and linked to user accounts.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was addressing a critical frontend issue: a yellow page error appearing on the  route after the initial Começar Aplicação button click. This problem resurfaced repeatedly, often linked to  and  discrepancies between the  development environment and the public  preview environment. After re-correcting these environment variables to the public URL, the yellow page error persisted. Debugging revealed a System limit for number of file watchers reached error in the frontend logs. Attempts to fix this involved modifying  and simplifying . However, these simplifications proved to be the cause of the yellow page, prompting the user to request a rollback. The AI engineer is currently in the process of reverting the changes made to  to restore its previous working state.
+Immediately before this summary request, the AI engineer was implementing the Save and Continue Later feature. This involved creating the frontend components  and , and adding backend endpoints like  to associate cases with user accounts. The frontend  page was modified to include a Salvar e Continuar Depois button and integrate the . The  page was updated to present the  after payment. The  and  pages were enhanced to list and provide access to a user's saved applications, respectively. Additionally, a section on  (the landing page) was added to guide users with saved applications. The latest action involved ensuring all necessary imports (like  from ) were present and restarting services to facilitate testing of this new flow.
 </current_work>
 
 <optional_next_step>
-Revert the recent changes in  to restore its previous working state.
+Test the complete Save and Continue Later flow by simulating saving an application and then resuming it via login.
 </optional_next_step>
