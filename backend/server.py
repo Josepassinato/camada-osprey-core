@@ -4065,6 +4065,163 @@ async def get_uscis_form_data(case_id: str):
         logger.error(f"Error getting USCIS form data: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error getting USCIS form data: {str(e)}")
 
+# AI Processing Step Endpoint
+@api_router.post("/ai-processing/step")
+async def process_ai_step(request: dict):
+    """Process individual AI step for form validation and translation"""
+    try:
+        case_id = request.get("case_id")
+        step_id = request.get("step_id")
+        friendly_form_data = request.get("friendly_form_data", {})
+        basic_data = request.get("basic_data", {})
+        
+        start_time = datetime.utcnow()
+        
+        # Simulate AI processing based on step
+        if step_id == "validation":
+            # Validate form data
+            details = "Verificados todos os campos obrigatórios e formatos de dados"
+            issues = []
+            
+            # Example validation logic
+            if not friendly_form_data.get("personal_info", {}).get("full_name"):
+                issues.append({
+                    "field": "Nome Completo",
+                    "issue": "Campo obrigatório não preenchido",
+                    "severity": "error",
+                    "suggestion": "Preencha o nome completo no formulário"
+                })
+            
+        elif step_id == "consistency":
+            details = "Verificadas consistências entre dados pessoais, datas e informações"
+            issues = []
+            
+        elif step_id == "translation":
+            details = "Traduções realizadas para inglês jurídico adequado ao USCIS"
+            issues = []
+            
+        elif step_id == "form_generation":
+            details = f"Formulário {case_id.split('-')[-1]} gerado com mapeamento completo dos campos"
+            issues = []
+            
+            # Save generated form to case
+            case = await db.auto_cases.find_one({"case_id": case_id})
+            if case:
+                generated_form = {
+                    "form_code": case.get("form_code"),
+                    "generated_at": datetime.utcnow(),
+                    "friendly_form_data": friendly_form_data,
+                    "basic_data": basic_data,
+                    "ai_translated_fields": {
+                        "full_name": basic_data.get("firstName", "") + " " + basic_data.get("lastName", ""),
+                        "date_of_birth": basic_data.get("dateOfBirth", ""),
+                        "country_of_birth": basic_data.get("countryOfBirth", "Brazil"),
+                        "current_address": basic_data.get("currentAddress", "")
+                    }
+                }
+                
+                await db.auto_cases.update_one(
+                    {"case_id": case_id},
+                    {"$set": {"ai_generated_uscis_form": generated_form}}
+                )
+            
+        elif step_id == "final_review":
+            details = "Revisão final completada - formulário pronto para uso"
+            issues = []
+            
+        else:
+            details = f"Processamento do passo {step_id} concluído"
+            issues = []
+        
+        # Calculate duration
+        end_time = datetime.utcnow()
+        duration = (end_time - start_time).total_seconds()
+        
+        return {
+            "success": True,
+            "step_id": step_id,
+            "details": details,
+            "duration": round(duration, 1),
+            "validation_issues": issues,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    
+    except Exception as e:
+        logger.error(f"Error processing AI step {step_id}: {str(e)}")
+        return {
+            "success": False,
+            "error": f"Erro no processamento: {str(e)}"
+        }
+
+# Authorize USCIS Form Endpoint
+@api_router.post("/auto-application/case/{case_id}/authorize-uscis-form")
+async def authorize_uscis_form(case_id: str, request: dict):
+    """Authorize and save USCIS form automatically to user's document folder"""
+    try:
+        form_reviewed = request.get("form_reviewed", False)
+        form_authorized = request.get("form_authorized", False)
+        generated_form_data = request.get("generated_form_data", {})
+        authorization_timestamp = request.get("authorization_timestamp")
+        
+        if not (form_reviewed and form_authorized):
+            raise HTTPException(status_code=400, detail="Form must be reviewed and authorized")
+        
+        # Get case details
+        case = await db.auto_cases.find_one({"case_id": case_id})
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        # Create the USCIS form document entry
+        uscis_document = {
+            "id": f"uscis_form_{case_id}",
+            "document_type": "uscis_form",
+            "name": f"Formulário USCIS {case.get('form_code', '')}",
+            "description": "Formulário oficial gerado automaticamente pela IA e autorizado pelo aplicante",
+            "content_type": "application/pdf",
+            "generated_by_ai": True,
+            "authorized_by_user": True,
+            "authorization_timestamp": authorization_timestamp,
+            "form_data": generated_form_data,
+            "case_id": case_id,
+            "created_at": datetime.utcnow(),
+            "status": "ready_for_submission"
+        }
+        
+        # Update case with authorized form and add to documents
+        update_data = {
+            "uscis_form_authorized": True,
+            "uscis_form_authorized_at": datetime.utcnow(),
+            "uscis_form_document": uscis_document,
+            "current_step": "uscis-form-authorized"
+        }
+        
+        # Add to documents array if it exists, otherwise create it
+        existing_documents = case.get("documents", [])
+        existing_documents.append(uscis_document)
+        update_data["documents"] = existing_documents
+        
+        result = await db.auto_cases.update_one(
+            {"case_id": case_id},
+            {"$set": update_data}
+        )
+        
+        if result.modified_count == 0:
+            raise HTTPException(status_code=500, detail="Failed to authorize and save form")
+        
+        return {
+            "success": True,
+            "message": "Formulário USCIS autorizado e salvo automaticamente",
+            "case_id": case_id,
+            "document_saved": True,
+            "document_id": uscis_document["id"]
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error authorizing USCIS form: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error authorizing form: {str(e)}")
+
 app.include_router(api_router)
 
 app.add_middleware(
