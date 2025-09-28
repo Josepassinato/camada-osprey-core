@@ -107,14 +107,20 @@ class DocumentValidationAgent(BaseSpecializedAgent):
         RESPOSTA SEMPRE EM JSON:
         {{
             "agent": "Dr. Miguel - Validador",
-            "document_authentic": true/false,
+            "document_type_identified": "Passaporte|RG|CNH|CPF|Certidão|Other",
+            "document_type_expected": "string - tipo que deveria ser",
             "type_correct": true/false,
+            "document_authentic": true/false,
+            "name_on_document": "string - nome extraído",
+            "applicant_name": "string - nome que deveria estar",
             "belongs_to_applicant": true/false,
+            "name_match_explanation": "Detalhes da comparação de nomes",
             "security_elements": "valid|missing|suspicious",
             "critical_issues": ["issue1", "issue2"],
             "confidence_score": 0-100,
             "uscis_acceptable": true/false,
             "verdict": "APROVADO|REJEITADO|NECESSITA_REVISÃO",
+            "rejection_reason": "Razão específica se rejeitado",
             "technical_notes": "Observações técnicas detalhadas"
         }}
         
