@@ -591,7 +591,7 @@ const BasicData = () => {
                   disabled={!isFormValid() || isSaving}
                   className="bg-black text-white hover:bg-gray-800 flex items-center gap-2"
                 >
-                  Continuar para Formulário USCIS
+                  Continuar para Formulário Amigável
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
