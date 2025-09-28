@@ -484,7 +484,7 @@ const FriendlyForm = () => {
   };
 
   const continueToNextStep = () => {
-    navigate(`/auto-application/case/${caseId}/review`);
+    navigate(`/auto-application/case/${caseId}/ai-review`);
   };
 
   const renderField = (field: FormField, sectionId: string) => {
