@@ -61,7 +61,7 @@ def fix_openai_calls(file_path):
         
         return f'''# Call LLM via emergentintegrations
         chat = LlmChat(
-            api_key="sk-emergent-aE5F536B80dFf0bA6F",
+            api_key=os.environ.get('EMERGENT_LLM_KEY'),
             session_id=f"chat_{{uuid.uuid4().hex[:8]}}",
             system_message="{system_msg}"
         ).with_model("openai", "{mapped_model}")
@@ -86,7 +86,7 @@ def fix_openai_calls(file_path):
         ai_response = response\.choices\[0\]\.message\.content''', 
          '''# Call LLM via emergentintegrations
         chat = LlmChat(
-            api_key="sk-emergent-aE5F536B80dFf0bA6F",
+            api_key=os.environ.get('EMERGENT_LLM_KEY'),
             session_id=f"chat_{uuid.uuid4().hex[:8]}",
             system_message="You are a helpful assistant for immigration applications."
         ).with_model("openai", "gpt-4o")
@@ -120,7 +120,7 @@ def fix_openai_calls(file_path):
         ai_response = response\.choices\[0\]\.message\.content\.strip\(\)''',
          '''# Call LLM via emergentintegrations for document analysis
         chat = LlmChat(
-            api_key="sk-emergent-aE5F536B80dFf0bA6F",
+            api_key=os.environ.get('EMERGENT_LLM_KEY'),
             session_id=f"doc_analysis_{uuid.uuid4().hex[:8]}",
             system_message="\\1"
         ).with_model("openai", "gpt-4o")
