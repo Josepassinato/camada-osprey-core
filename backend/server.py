@@ -3102,6 +3102,21 @@ async def get_dashboard(current_user = Depends(get_current_user)):
         in_progress_apps = len([app for app in applications if app["status"] in ["in_progress", "document_review"]])
         completed_apps = len([app for app in applications if app["status"] in ["submitted", "approved"]])
         
+        # Transform auto-applications to match dashboard format
+        auto_apps_formatted = []
+        for auto_app in auto_applications:
+            auto_apps_formatted.append({
+                "id": auto_app["case_id"],
+                "title": f"Aplicação {auto_app['form_code']}",
+                "status": "in_progress",
+                "type": "auto_application",
+                "created_at": auto_app.get("created_at", ""),
+                "current_step": auto_app.get("current_step", "basic-data"),
+                "form_code": auto_app.get("form_code", ""),
+                "progress_percentage": get_progress_percentage(auto_app.get("current_step", "basic-data")),
+                "description": f"Auto-aplicação para visto {auto_app['form_code']} - Continue de onde parou"
+            })
+
         return {
             "user": {
                 "name": f"{current_user['first_name']} {current_user['last_name']}",
@@ -3121,7 +3136,8 @@ async def get_dashboard(current_user = Depends(get_current_user)):
                 "total_study_time": progress.get("total_study_time_minutes", 0) if progress else 0,
                 "unread_tips": unread_tips
             },
-            "applications": applications,
+            "applications": applications + auto_apps_formatted,  # Combine both types
+            "auto_applications": auto_apps_formatted,  # Separate list for auto-applications
             "recent_activity": {
                 "chats": recent_chats,
                 "translations": recent_translations
