@@ -737,13 +737,12 @@ const BasicData = () => {
       <SaveAndContinueModal
         isOpen={showSaveModal}
         onClose={() => setShowSaveModal(false)}
-        onSave={async () => {
-          await saveData();
-          setShowSaveModal(false);
-          navigate('/auto-application/dashboard');
+        caseId={caseId || ''}
+        currentStage="Dados Básicos"
+        onSuccess={(userData) => {
+          console.log('User authenticated:', userData);
+          navigate('/dashboard');
         }}
-        formData={formData}
-        caseId={caseId}
       />
     </div>
   );
