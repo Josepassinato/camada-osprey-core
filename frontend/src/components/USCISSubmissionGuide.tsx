@@ -507,7 +507,7 @@ const USCISSubmissionGuide = ({ caseId, onDownloadPackage }: USCISSubmissionGuid
         <CardContent>
           <div className="space-y-3">
             {instructions.important_notes.map((note, index) => (
-              <div key={index} className="text-sm text-yellow-800 p-3 bg-yellow-100 rounded">
+              <div key={index} className="text-sm text-orange-800 p-3 bg-orange-100 rounded">
                 {note}
               </div>
             ))}
