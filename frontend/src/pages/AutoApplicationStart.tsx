@@ -408,6 +408,43 @@ const AutoApplicationStart = () => {
         </div>
       </section>
 
+      {/* Continue Application Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="bg-white rounded-2xl shadow-lg p-8 border">
+            <div className="flex items-center justify-center mb-6">
+              <div className="bg-blue-100 p-3 rounded-full">
+                <Save className="h-8 w-8 text-blue-600" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-black mb-4">
+              Já começou sua aplicação?
+            </h2>
+            <p className="text-gray-600 mb-8">
+              Se você já salvou sua aplicação usando "Salvar e Continuar Depois", 
+              acesse sua conta para continuar de onde parou.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                onClick={() => navigate('/login')}
+                variant="outline"
+                className="border-blue-500 text-blue-600 hover:bg-blue-50 px-6 py-3"
+              >
+                <User className="h-4 w-4 mr-2" />
+                Continuar Aplicação Salva
+              </Button>
+              <Button 
+                onClick={() => navigate('/signup')}
+                variant="outline"
+                className="px-6 py-3"
+              >
+                Não tenho conta ainda
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="border-t border-gray-200 py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
