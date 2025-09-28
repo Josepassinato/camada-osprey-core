@@ -1682,23 +1682,31 @@ async def start_auto_application(case_data: CaseCreate):
         raise HTTPException(status_code=500, detail=f"Error starting auto-application: {str(e)}")
 
 @api_router.get("/auto-application/case/{case_id}")
-async def get_case_anonymous(case_id: str, session_token: Optional[str] = None):
+async def get_case_anonymous(case_id: str, session_token: Optional[str] = None, request: Request = None):
     """Get a specific case by ID (anonymous or authenticated)"""
     try:
         # Try to get from current user first if authenticated
+        current_user = None
         try:
-            current_user = await get_current_user_optional()
-            if current_user:
-                case = await db.auto_cases.find_one({
-                    "case_id": case_id,
-                    "user_id": current_user["id"]
-                })
-                if case:
-                    if "_id" in case:
-                        del case["_id"]
-                    return {"case": case}
+            auth_header = request.headers.get("Authorization") if request else None
+            if auth_header and auth_header.startswith("Bearer "):
+                token = auth_header.split(" ")[1]
+                payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+                user_id = payload.get("user_id")
+                if user_id:
+                    current_user = await db.users.find_one({"id": user_id})
         except:
             pass
+        
+        if current_user:
+            case = await db.auto_cases.find_one({
+                "case_id": case_id,
+                "user_id": current_user["id"]
+            })
+            if case:
+                if "_id" in case:
+                    del case["_id"]
+                return {"case": case}
         
         # If not found or not authenticated, try anonymous lookup
         if session_token:
