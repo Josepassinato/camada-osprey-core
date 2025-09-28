@@ -449,7 +449,7 @@ const VisaRequirements = ({ visaType, onClose }: VisaRequirementsProps) => {
                       {doc.required && <Badge variant="destructive" className="text-xs">Obrigatório</Badge>}
                       {doc.needsTranslation && (
                         <Badge variant="outline" className="text-xs border-orange-400 text-orange-700">
-                          <Passport className="h-3 w-3 mr-1" />
+                          <Globe className="h-3 w-3 mr-1" />
                           Tradução Juramentada
                         </Badge>
                       )}
