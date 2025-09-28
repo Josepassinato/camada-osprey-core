@@ -132,7 +132,7 @@ const VisualReview = () => {
           {
             label: 'Local de Nascimento',
             portuguese: portugueseResponses.personal?.place_of_birth || 'Não informado',
-            english: englishForm.place_of_birth || englishForm.birth_place || 'Not provided',
+            english: hasOfficialForm ? (englishForm.place_of_birth || englishForm.birth_place || 'Not provided') : 'Aguardando processamento IA',
             status: 'correct'
           },
           {
