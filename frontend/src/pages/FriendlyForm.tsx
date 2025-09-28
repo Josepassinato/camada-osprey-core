@@ -600,7 +600,7 @@ const FriendlyForm = () => {
             <div className="flex items-center gap-4">
               <Button 
                 variant="ghost" 
-                onClick={() => navigate(`/auto-application/case/${caseId}/story`)}
+                onClick={() => navigate(`/auto-application/case/${caseId}/ai-review`)}
                 className="p-2"
               >
                 <ArrowLeft className="h-4 w-4" />
