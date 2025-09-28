@@ -401,7 +401,7 @@ def test_complete_user_journey():
         }
         
         basic_response = requests.put(
-            f"{API_BASE}/auto-application/cases/{case_id}",
+            f"{API_BASE}/auto-application/case/{case_id}",
             json=basic_data_payload,
             headers=headers,
             timeout=10
