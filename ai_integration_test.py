@@ -113,7 +113,7 @@ def test_ai_fact_extraction():
         # Now test AI fact extraction
         ai_payload = {
             "case_id": CASE_ID,
-            "user_story": "Meu nome é Carlos Silva, sou engenheiro de software brasileiro. Trabalho há 5 anos na área de tecnologia e recebi uma oferta de emprego de uma empresa americana chamada TechGlobal Inc. para trabalhar como Senior Software Engineer em San Francisco. A empresa vai patrocinar meu visto H1-B. Sou formado em Ciência da Computação pela USP e tenho experiência em Python, Java e desenvolvimento web. Minha esposa Maria também é brasileira e pretendemos nos mudar juntos para os Estados Unidos."
+            "story_text": "Meu nome é Carlos Silva, sou engenheiro de software brasileiro. Trabalho há 5 anos na área de tecnologia e recebi uma oferta de emprego de uma empresa americana chamada TechGlobal Inc. para trabalhar como Senior Software Engineer em San Francisco. A empresa vai patrocinar meu visto H1-B. Sou formado em Ciência da Computação pela USP e tenho experiência em Python, Java e desenvolvimento web. Minha esposa Maria também é brasileira e pretendemos nos mudar juntos para os Estados Unidos."
         }
         
         headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
