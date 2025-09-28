@@ -583,6 +583,18 @@ backend:
         agent: "testing"
         comment: "❌ CRITICAL ISSUE IDENTIFIED: Save and Continue Later partially working but has authentication integration bug. Case data saves successfully via PUT /api/auto-application/case/{case_id}, but cases are created with user_id=null even when authenticated. Root cause: /api/auto-application/start endpoint doesn't check for authenticated users and always creates anonymous cases. Dashboard query looks for cases with user_id and is_anonymous=false, but cases lack proper user association. Fix needed: Update start endpoint to detect authentication and set user_id when user is logged in. Case creation (✅), data saving (✅), dashboard integration (❌)."
 
+  - task: "FriendlyForm to VisualReview Data Persistence Investigation"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ CRITICAL DATA PERSISTENCE INVESTIGATION COMPLETED - 100% SUCCESS RATE! Comprehensive testing revealed that FriendlyForm → VisualReview data persistence is working perfectly. All 4 critical tests passed: 1) FORM DATA SAVING - PUT /api/auto-application/case/{case_id} successfully saves simplified_form_responses with all 6 sections (personal_information, current_address, contact_information, employment_information, education, family_information), 2) CASE DATA RETRIEVAL - GET /api/auto-application/case/{case_id} correctly returns all saved form data, 3) MONGODB PERSISTENCE - Data persists correctly in MongoDB with exact values matching what was saved, 4) VISUAL REVIEW COMPATIBILITY - Data structure perfectly matches VisualReview expectations. Tested with realistic H-1B data including Carlos Eduardo Silva Santos profile. Root cause of user's 'Não informado' issue is likely frontend-related or case-specific, not a backend data persistence problem. Backend API endpoints working flawlessly for form data flow."
+
   - task: "AI Review and Translation Logic"
     implemented: true
     working: true
