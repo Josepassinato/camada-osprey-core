@@ -46,8 +46,12 @@ const Login = () => {
         localStorage.setItem('osprey_token', data.token);
         localStorage.setItem('osprey_user', JSON.stringify(data.user));
         
-        // Redirect to dashboard
-        navigate('/dashboard');
+        setSuccess(`Bem-vindo de volta, ${data.user.name}! Redirecionando...`);
+        
+        // Small delay to show success message, then redirect to dashboard
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1500);
       } else {
         setError(data.detail || 'Erro ao fazer login. Verifique suas credenciais.');
       }
