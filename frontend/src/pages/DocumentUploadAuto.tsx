@@ -121,12 +121,13 @@ const DocumentUploadAuto = () => {
       {
         id: 'uscis_form',
         name: `Formulário USCIS ${specs?.specifications?.form_code || ''}`,
-        description: '✅ Formulário preenchido automaticamente na etapa anterior - pronto para download e assinatura',
+        description: '✅ Salvo automaticamente após sua autorização - sem necessidade de upload',
         required: true,
         category: 'Formulário Oficial',
         formats: ['PDF'],
         maxSize: '5MB',
-        generated: true  // Special flag for auto-generated documents
+        generated: true,  // Special flag for auto-generated documents
+        auto_saved: true  // Special flag for automatically saved documents
       },
       {
         id: 'passport',
