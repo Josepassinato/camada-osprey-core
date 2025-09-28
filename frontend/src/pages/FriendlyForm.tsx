@@ -794,7 +794,7 @@ const FriendlyForm = () => {
                     disabled={!canContinue()}
                     className="bg-black text-white hover:bg-gray-800 flex items-center gap-2"
                   >
-                    Continuar para Revisão
+                    Continuar para Processamento IA
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </div>
