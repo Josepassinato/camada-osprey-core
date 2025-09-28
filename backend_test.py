@@ -3045,6 +3045,335 @@ def test_complete_auto_application_journey():
         print("⚠️  Auto-application journey has significant issues")
         return False
 
+# ============================================================================
+# CRITICAL DATA PERSISTENCE INVESTIGATION TESTS
+# ============================================================================
+
+def test_friendly_form_data_saving():
+    """CRITICAL TEST: Test FriendlyForm data saving to MongoDB"""
+    print("\n🔍 CRITICAL: Testing FriendlyForm Data Saving...")
+    
+    if not AUTO_APPLICATION_CASE_ID:
+        print("❌ No case ID available for form data test")
+        return False
+    
+    try:
+        # Realistic H-1B form data as would be filled in FriendlyForm
+        realistic_form_data = {
+            "simplified_form_responses": {
+                "personal_information": {
+                    "full_name": "Carlos Eduardo Silva Santos",
+                    "date_of_birth": "15/03/1990",
+                    "place_of_birth": "São Paulo, Brasil",
+                    "nationality": "Brasileira",
+                    "passport_number": "BR123456789",
+                    "gender": "Masculino"
+                },
+                "current_address": {
+                    "street_address": "123 Tech Avenue, Apt 4B",
+                    "city": "San Francisco",
+                    "state": "CA",
+                    "zip_code": "94102",
+                    "country": "Estados Unidos"
+                },
+                "contact_information": {
+                    "phone": "+1 (415) 555-0123",
+                    "email": "carlos.silva@techcompany.com",
+                    "emergency_contact": "Maria Silva Santos - +55 11 99999-8888"
+                },
+                "employment_information": {
+                    "employer_name": "TechGlobal Inc.",
+                    "job_title": "Senior Software Engineer",
+                    "work_address": "456 Innovation Drive, San Francisco, CA 94105",
+                    "start_date": "01/02/2024",
+                    "salary": "$120,000 per year",
+                    "job_description": "Desenvolvimento de software e arquitetura de sistemas"
+                },
+                "education": {
+                    "highest_degree": "Mestrado em Ciência da Computação",
+                    "university": "Universidade de São Paulo",
+                    "graduation_date": "12/2015",
+                    "field_of_study": "Engenharia de Software"
+                },
+                "family_information": {
+                    "marital_status": "Casado",
+                    "spouse_name": "Maria Silva Santos",
+                    "spouse_nationality": "Brasileira",
+                    "children_count": "1",
+                    "children_details": "Pedro Silva Santos, nascido em 10/05/2020"
+                }
+            },
+            "status": "form_filled"
+        }
+        
+        # Save form data using PUT endpoint
+        response = requests.put(
+            f"{API_BASE}/auto-application/case/{AUTO_APPLICATION_CASE_ID}", 
+            json=realistic_form_data, 
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            print(f"✅ FriendlyForm data saved successfully")
+            print(f"   Case ID: {data.get('case_id')}")
+            print(f"   Status updated to: {data.get('status')}")
+            print(f"   Form responses saved: {'Yes' if 'simplified_form_responses' in str(data) else 'No'}")
+            
+            # Verify data structure matches what VisualReview expects
+            saved_responses = data.get('simplified_form_responses', {})
+            expected_sections = ['personal_information', 'current_address', 'contact_information', 
+                               'employment_information', 'education', 'family_information']
+            
+            found_sections = []
+            for section in expected_sections:
+                if section in saved_responses:
+                    found_sections.append(section)
+                    print(f"   ✅ {section} section saved")
+                else:
+                    print(f"   ❌ {section} section MISSING")
+            
+            if len(found_sections) >= 5:
+                print(f"✅ Data structure compatible with VisualReview ({len(found_sections)}/6 sections)")
+                return True
+            else:
+                print(f"❌ CRITICAL: Data structure incomplete ({len(found_sections)}/6 sections)")
+                return False
+                
+        else:
+            print(f"❌ CRITICAL: Form data saving failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ CRITICAL: Form data saving error: {str(e)}")
+        return False
+
+def test_case_data_retrieval():
+    """CRITICAL TEST: Test case data retrieval as VisualReview would do"""
+    print("\n🔍 CRITICAL: Testing Case Data Retrieval (VisualReview Perspective)...")
+    
+    if not AUTO_APPLICATION_CASE_ID:
+        print("❌ No case ID available for retrieval test")
+        return False
+    
+    try:
+        # Retrieve case data as VisualReview page would
+        response = requests.get(f"{API_BASE}/auto-application/case/{AUTO_APPLICATION_CASE_ID}", timeout=10)
+        
+        if response.status_code == 200:
+            case_data = response.json()
+            print(f"✅ Case data retrieved successfully")
+            print(f"   Case ID: {case_data.get('case_id')}")
+            print(f"   Status: {case_data.get('status')}")
+            
+            # Check if simplified_form_responses exists and has data
+            simplified_responses = case_data.get('simplified_form_responses')
+            
+            if simplified_responses:
+                print(f"✅ simplified_form_responses found in case data")
+                
+                # Check each section that VisualReview expects
+                sections_check = {
+                    'personal_information': simplified_responses.get('personal_information', {}),
+                    'current_address': simplified_responses.get('current_address', {}),
+                    'contact_information': simplified_responses.get('contact_information', {}),
+                    'employment_information': simplified_responses.get('employment_information', {}),
+                    'education': simplified_responses.get('education', {}),
+                    'family_information': simplified_responses.get('family_information', {})
+                }
+                
+                print(f"\n   📋 DETAILED SECTION ANALYSIS:")
+                all_sections_have_data = True
+                
+                for section_name, section_data in sections_check.items():
+                    if section_data and len(section_data) > 0:
+                        print(f"   ✅ {section_name}: {len(section_data)} fields")
+                        # Show sample data
+                        sample_field = list(section_data.keys())[0] if section_data else None
+                        if sample_field:
+                            sample_value = section_data[sample_field]
+                            print(f"      Sample: {sample_field} = '{sample_value}'")
+                    else:
+                        print(f"   ❌ {section_name}: EMPTY or MISSING")
+                        all_sections_have_data = False
+                
+                if all_sections_have_data:
+                    print(f"\n✅ SUCCESS: All form sections have data - VisualReview should display correctly")
+                    return True
+                else:
+                    print(f"\n❌ CRITICAL ISSUE: Some sections are empty - VisualReview will show 'Não informado'")
+                    return False
+                    
+            else:
+                print(f"❌ CRITICAL ISSUE: simplified_form_responses is NULL or missing")
+                print(f"   This explains why VisualReview shows 'Não informado' for all fields")
+                print(f"   Case data keys: {list(case_data.keys())}")
+                return False
+                
+        else:
+            print(f"❌ Case retrieval failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Case retrieval error: {str(e)}")
+        return False
+
+def test_data_persistence_mongodb():
+    """CRITICAL TEST: Verify data actually persists in MongoDB"""
+    print("\n💾 CRITICAL: Testing MongoDB Data Persistence...")
+    
+    if not AUTO_APPLICATION_CASE_ID:
+        print("❌ No case ID available for persistence test")
+        return False
+    
+    try:
+        # Wait a moment for database write
+        import time
+        time.sleep(2)
+        
+        # Retrieve case again to verify persistence
+        response = requests.get(f"{API_BASE}/auto-application/case/{AUTO_APPLICATION_CASE_ID}", timeout=10)
+        
+        if response.status_code == 200:
+            case_data = response.json()
+            
+            # Check if data persisted correctly
+            simplified_responses = case_data.get('simplified_form_responses')
+            
+            if simplified_responses:
+                # Verify specific data points that were saved
+                personal_info = simplified_responses.get('personal_information', {})
+                full_name = personal_info.get('full_name')
+                date_of_birth = personal_info.get('date_of_birth')
+                
+                employment_info = simplified_responses.get('employment_information', {})
+                employer_name = employment_info.get('employer_name')
+                
+                print(f"✅ Data persistence verified")
+                print(f"   Full Name: {full_name}")
+                print(f"   Date of Birth: {date_of_birth}")
+                print(f"   Employer: {employer_name}")
+                
+                # Check if all expected data is there
+                if full_name == "Carlos Eduardo Silva Santos" and date_of_birth == "15/03/1990":
+                    print(f"✅ PERSISTENCE SUCCESS: Exact data matches what was saved")
+                    return True
+                else:
+                    print(f"❌ PERSISTENCE ISSUE: Data doesn't match what was saved")
+                    return False
+                    
+            else:
+                print(f"❌ PERSISTENCE FAILURE: simplified_form_responses lost after save")
+                return False
+                
+        else:
+            print(f"❌ Persistence check failed: {response.status_code}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Persistence check error: {str(e)}")
+        return False
+
+def test_visual_review_data_structure():
+    """CRITICAL TEST: Test if data structure matches VisualReview expectations"""
+    print("\n👁️ CRITICAL: Testing VisualReview Data Structure Compatibility...")
+    
+    if not AUTO_APPLICATION_CASE_ID:
+        print("❌ No case ID available for structure test")
+        return False
+    
+    try:
+        # Get case data
+        response = requests.get(f"{API_BASE}/auto-application/case/{AUTO_APPLICATION_CASE_ID}", timeout=10)
+        
+        if response.status_code == 200:
+            case_data = response.json()
+            simplified_responses = case_data.get('simplified_form_responses', {})
+            
+            # Define what VisualReview expects based on the issue description
+            visual_review_expectations = {
+                'personal_information': ['full_name', 'date_of_birth', 'place_of_birth', 'nationality'],
+                'current_address': ['street_address', 'city', 'state', 'zip_code'],
+                'contact_information': ['phone', 'email'],
+                'employment_information': ['employer_name', 'job_title', 'salary'],
+                'family_information': ['marital_status', 'spouse_name']
+            }
+            
+            print(f"   📋 VISUAL REVIEW COMPATIBILITY CHECK:")
+            compatibility_issues = []
+            
+            for section, expected_fields in visual_review_expectations.items():
+                section_data = simplified_responses.get(section, {})
+                
+                if not section_data:
+                    compatibility_issues.append(f"Section '{section}' is missing")
+                    print(f"   ❌ {section}: MISSING SECTION")
+                    continue
+                
+                missing_fields = []
+                for field in expected_fields:
+                    if field not in section_data or not section_data[field]:
+                        missing_fields.append(field)
+                
+                if missing_fields:
+                    compatibility_issues.append(f"Section '{section}' missing fields: {missing_fields}")
+                    print(f"   ⚠️  {section}: Missing {len(missing_fields)} fields")
+                else:
+                    print(f"   ✅ {section}: All expected fields present")
+            
+            if not compatibility_issues:
+                print(f"\n✅ PERFECT COMPATIBILITY: VisualReview should display all data correctly")
+                return True
+            else:
+                print(f"\n❌ COMPATIBILITY ISSUES FOUND:")
+                for issue in compatibility_issues:
+                    print(f"   - {issue}")
+                print(f"\n   This explains why VisualReview shows 'Não informado'")
+                return False
+                
+        else:
+            print(f"❌ Structure check failed: {response.status_code}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Structure check error: {str(e)}")
+        return False
+
+def test_complete_data_persistence_investigation():
+    """Run complete data persistence investigation"""
+    print("\n🎯 COMPLETE DATA PERSISTENCE INVESTIGATION...")
+    
+    investigation_results = {
+        "friendly_form_data_saving": test_friendly_form_data_saving(),
+        "case_data_retrieval": test_case_data_retrieval(),
+        "data_persistence_mongodb": test_data_persistence_mongodb(),
+        "visual_review_data_structure": test_visual_review_data_structure()
+    }
+    
+    passed_tests = sum(investigation_results.values())
+    total_tests = len(investigation_results)
+    
+    print(f"\n📊 DATA PERSISTENCE INVESTIGATION RESULTS:")
+    for test_name, result in investigation_results.items():
+        status = "✅ PASS" if result else "❌ FAIL"
+        print(f"  {test_name.replace('_', ' ').title()}: {status}")
+    
+    print(f"\n🎯 Investigation Completion: {passed_tests}/{total_tests} tests passed ({passed_tests/total_tests*100:.1f}%)")
+    
+    if passed_tests == total_tests:
+        print("🎉 DATA PERSISTENCE WORKING PERFECTLY!")
+        print("   VisualReview should display all form data correctly")
+        return True
+    elif passed_tests >= 2:
+        print("⚠️  PARTIAL DATA PERSISTENCE ISSUES IDENTIFIED")
+        print("   Some data may not display correctly in VisualReview")
+        return False
+    else:
+        print("❌ CRITICAL DATA PERSISTENCE FAILURE")
+        print("   This explains why VisualReview shows 'Não informado' for all fields")
+        return False
 def test_case_id_persistence():
     """Test Case ID persistence between navigation steps - CRITICAL PRIORITY"""
     print("\n🔄 Testing Case ID Persistence (CRITICAL PRIORITY)...")
