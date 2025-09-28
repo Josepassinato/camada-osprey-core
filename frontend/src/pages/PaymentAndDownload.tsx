@@ -634,6 +634,36 @@ const PaymentAndDownload = () => {
           )}
         </div>
       </div>
+
+      {/* USCIS Submission Guide Modal/Overlay */}
+      {showSubmissionGuide && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-auto">
+          <div className="min-h-screen py-8">
+            <div className="bg-white max-w-6xl mx-auto rounded-lg shadow-xl">
+              <div className="sticky top-0 bg-white border-b p-4 flex items-center justify-between">
+                <h2 className="text-xl font-bold">Instruções para Submissão ao USCIS</h2>
+                <Button
+                  variant="ghost"
+                  onClick={() => setShowSubmissionGuide(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </Button>
+              </div>
+              
+              <div className="p-6">
+                <USCISSubmissionGuide 
+                  caseId={caseId!}
+                  onDownloadPackage={() => {
+                    downloadPackage();
+                    setShowSubmissionGuide(false);
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
