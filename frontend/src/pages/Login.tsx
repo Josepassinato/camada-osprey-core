@@ -217,6 +217,20 @@ const Login = () => {
           </CardContent>
         </Card>
 
+        {/* Info Section */}
+        <Card className="mt-6 bg-blue-50 border-blue-200">
+          <CardContent className="p-4">
+            <h3 className="font-semibold text-blue-900 mb-2">
+              💾 Como funciona "Salvar e Continuar Depois"?
+            </h3>
+            <div className="text-sm text-blue-800 space-y-2">
+              <p>• <strong>Durante o preenchimento:</strong> Clique em "Salvar e Continuar Depois" para criar sua conta</p>
+              <p>• <strong>Para voltar:</strong> Use este login para acessar suas aplicações salvas</p>
+              <p>• <strong>Continue de onde parou:</strong> Seu progresso é mantido automaticamente</p>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Footer */}
         <div className="mt-8 text-center text-xs text-muted-foreground">
           <p>
