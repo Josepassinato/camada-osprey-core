@@ -109,6 +109,7 @@ const VisualReview = () => {
     const portugueseResponses = caseData.simplified_form_responses || {};
     const englishForm = caseData.official_form_data || {};
     const foundIssues: any[] = [];
+    const hasOfficialForm = englishForm && Object.keys(englishForm).length > 0;
 
     const sections: FormSection[] = [
       {
