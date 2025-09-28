@@ -3,22 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  ArrowLeft,
-  ArrowRight,
-  FileText,
-  Clock,
-  DollarSign,
-  AlertTriangle,
-  Users,
-  GraduationCap,
-  Heart,
-  Briefcase,
-  Home,
-  CreditCard,
-  CheckCircle,
-  Plane
-} from "lucide-react";
+import { Briefcase, Heart, Users, FileText, Plane } from 'lucide-react';
 
 interface USCISFormType {
   code: string;
