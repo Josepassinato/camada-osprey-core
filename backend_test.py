@@ -3292,7 +3292,8 @@ def test_visual_review_data_structure():
         response = requests.get(f"{API_BASE}/auto-application/case/{AUTO_APPLICATION_CASE_ID}", timeout=10)
         
         if response.status_code == 200:
-            case_data = response.json()
+            response_data = response.json()
+            case_data = response_data.get('case', {})
             simplified_responses = case_data.get('simplified_form_responses', {})
             
             # Define what VisualReview expects based on the issue description
