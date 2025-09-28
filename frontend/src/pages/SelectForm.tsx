@@ -49,7 +49,7 @@ const SelectForm = () => {
       icon: <Plane className="h-6 w-6" />,
       category: 'Turismo/Negócios',
       processingTime: '2-4 semanas',
-      uscisfee: '$120',
+      uscisfee: '$185',
       complexity: 'Básico',
       eligibility: [
         'B-1: Reuniões de negócios, conferências, treinamentos',
@@ -93,22 +93,6 @@ const SelectForm = () => {
         'Intenção de retornar após estudos'
       ],
       popular: true
-    },
-    {
-      code: 'L-1',
-      title: 'L-1: Transferência Intracompanhia',
-      description: 'Para executivos, gerentes ou especialistas transferidos entre empresas relacionadas',
-      icon: <Building className="h-6 w-6" />,
-      category: 'Trabalho',
-      processingTime: '2-4 meses',
-      uscisfee: '$555 + taxas',
-      complexity: 'Avançado',
-      eligibility: [
-        '1 ano trabalhando na empresa no exterior',
-        'Função executiva, gerencial ou especializada',
-        'Empresa americana relacionada à estrangeira',
-        'Transferência para posição similar'
-      ]
     },
     {
       code: 'O-1',
@@ -240,42 +224,7 @@ const SelectForm = () => {
         'Demonstrar perseguição ou medo bem fundamentado',
         'Perseguição baseada em motivos protegidos',
         'Não ter cometido crimes graves'
-      ],
-      popular: false
-    },
-    {
-      code: 'O-1',
-      title: 'O-1: Habilidade Extraordinária',
-      description: 'Para indivíduos com habilidades extraordinárias em sua área',
-      icon: <GraduationCap className="h-6 w-6" />,
-      category: 'Trabalho Especializado',
-      processingTime: '2-4 meses',
-      uscisfee: '$460',
-      complexity: 'Avançado',
-      eligibility: [
-        'Habilidade extraordinária comprovada',
-        'Reconhecimento nacional ou internacional',
-        'Oferta de emprego ou contrato nos EUA',
-        'Carta de consulta de organização apropriada'
-      ],
-      popular: false
-    },
-    {
-      code: 'H-1B',
-      title: 'H-1B: Trabalho Especializado',
-      description: 'Para profissionais especializados com oferta de emprego',
-      icon: <Briefcase className="h-6 w-6" />,
-      category: 'Trabalho',
-      processingTime: '3-8 meses',
-      uscisfee: '$460+',
-      complexity: 'Intermediário',
-      eligibility: [
-        'Diploma de bacharel ou equivalente',
-        'Oferta de emprego em specialty occupation',
-        'LCA (Labor Condition Application) aprovada',
-        'Salário no nível prevalente da área'
-      ],
-      popular: true
+      ]
     }
   ];
 
