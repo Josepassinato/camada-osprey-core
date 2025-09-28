@@ -39,7 +39,7 @@ export const VoiceMic: React.FC<VoiceMicProps> = ({
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://immibot.preview.emergentagent.com';
   const wsUrl = `${backendUrl.replace('http', 'ws')}/ws/voice/${sessionId || 'default'}`;
 
   // Initialize WebSocket connection
