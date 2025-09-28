@@ -74,7 +74,7 @@ const colorSchemes = {
   purple: "from-purple-500/20 to-pink-500/20 border-purple-200/30",
   pink: "from-pink-500/20 to-rose-500/20 border-pink-200/30",
   green: "from-green-500/20 to-emerald-500/20 border-green-200/30",
-  orange: "from-orange-500/20 to-yellow-500/20 border-orange-200/30",
+  orange: "from-orange-500/20 to-orange-400/20 border-orange-200/30",
   emerald: "from-emerald-500/20 to-teal-500/20 border-emerald-200/30",
 };
 
