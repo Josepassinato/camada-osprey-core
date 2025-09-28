@@ -1,5 +1,6 @@
 # Script to replace all OpenAI calls with EmergentIntegrations in server.py
 
+import os
 import re
 
 def fix_openai_calls(file_path):
