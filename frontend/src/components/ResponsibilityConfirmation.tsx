@@ -234,13 +234,13 @@ const ResponsibilityConfirmation = ({
           )}
 
           {/* Legal Text */}
-          <Alert className="border-yellow-400 bg-yellow-50 mb-6">
-            <Lock className="h-4 w-4 text-yellow-600" />
+          <Alert className="border-orange-400 bg-orange-50 mb-6">
+            <Lock className="h-4 w-4 text-orange-600" />
             <AlertDescription>
-              <div className="text-sm text-yellow-800">
+              <div className="text-sm text-orange-800">
                 <p className="font-medium mb-2">📋 Registro Legal:</p>
                 <p>{config.legalText}</p>
-                <div className="mt-2 flex items-center space-x-4 text-xs text-yellow-700">
+                <div className="mt-2 flex items-center space-x-4 text-xs text-orange-700">
                   <span>📅 Data/Hora: {new Date().toLocaleString('pt-BR')}</span>
                   <span>🔒 Registro Permanente</span>
                 </div>
