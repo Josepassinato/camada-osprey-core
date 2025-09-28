@@ -832,11 +832,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Save and Continue Later Flow - End-to-End Testing"
-    - "User Login/Signup Integration with Auto Applications"
-    - "Dashboard Saved Applications Management"
-    - "Case Association with User Accounts"
-    - "Session Management and Data Persistence"
+    - "VisaRequirements Component Integration"
+    - "Responsibility Confirmation System"
+    - "Proactive Owl Tutor Finalization"
+    - "Complete System Integration Testing"
   stuck_tasks: []
   test_all: false
   test_priority: "save_continue_first"
