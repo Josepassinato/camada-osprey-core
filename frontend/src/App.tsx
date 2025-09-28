@@ -52,6 +52,7 @@ const App = () => (
           <Route path="/auto-application/start" element={<AutoApplicationStart />} />
           <Route path="/auto-application/select-form" element={<SelectForm />} />
           <Route path="/auto-application/case/:caseId/basic-data" element={<BasicData />} />
+          <Route path="/auto-application/case/:caseId/uscis-form" element={<USCISFormFilling />} />
           <Route path="/auto-application/case/:caseId/documents" element={<DocumentUploadAuto />} />
           <Route path="/auto-application/case/:caseId/story" element={<StoryTelling />} />
           <Route path="/auto-application/case/:caseId/friendly-form" element={<FriendlyForm />} />
