@@ -3206,8 +3206,22 @@ def test_comprehensive_system_critical_priorities():
     ]
     critical_tests["brazilian_user_scenarios"] = all(brazilian_tests)
     
-    # 6. Document Management with AI
-    print("\n📄 PRIORITY 6: Document Management with AI...")
+    # 6. AI Review and Translation System (NEW - CRITICAL PRIORITY)
+    print("\n🤖 PRIORITY 6: AI Review and Translation System...")
+    ai_processing_tests = [
+        test_ai_processing_validation_step(),
+        test_ai_processing_consistency_step(),
+        test_ai_processing_translation_step(),
+        test_ai_processing_form_generation_step(),
+        test_ai_processing_final_review_step(),
+        test_ai_processing_error_handling(),
+        test_ai_processing_authentication(),
+        test_emergent_llm_integration()
+    ]
+    critical_tests["ai_review_translation_system"] = all(ai_processing_tests)
+    
+    # 7. Document Management with AI
+    print("\n📄 PRIORITY 7: Document Management with AI...")
     doc_tests = [
         test_document_upload(),
         test_document_reanalyze(),
