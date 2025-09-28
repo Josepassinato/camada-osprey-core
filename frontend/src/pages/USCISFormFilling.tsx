@@ -580,28 +580,65 @@ const USCISFormFilling = () => {
               </CardContent>
             </Card>
 
+            {/* Authorization Section */}
+            <Card className="border-green-500 bg-green-50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-green-800">
+                  <CheckCircle className="h-5 w-5" />
+                  Autorização do Formulário
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-white p-4 rounded-lg border">
+                  <div className="flex items-start gap-3">
+                    <Checkbox 
+                      id="form-review"
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <Label htmlFor="form-review" className="text-sm font-medium">
+                        Revisão Completa
+                      </Label>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Confirmo que revisei cuidadosamente todas as informações no formulário USCIS 
+                        e elas estão corretas e completas.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white p-4 rounded-lg border">
+                  <div className="flex items-start gap-3">
+                    <Checkbox 
+                      id="form-authorize"
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <Label htmlFor="form-authorize" className="text-sm font-medium">
+                        Autorização de Salvamento Automático
+                      </Label>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Autorizo o sistema a salvar automaticamente este formulário na minha pasta 
+                        de documentos, eliminando a necessidade de download e upload manual.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-4 justify-between">
               <Button
                 variant="outline"
-                onClick={() => navigate(`/auto-application/case/${caseId}/basic-data`)}
+                onClick={() => navigate(`/auto-application/case/${caseId}/ai-review`)}
                 className="flex items-center gap-2"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Voltar para Dados Básicos
+                Voltar para Processamento IA
               </Button>
 
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => saveUSCISFormData()}
-                  disabled={isSaving}
-                  className="flex items-center gap-2"
-                >
-                  <Save className="h-4 w-4" />
-                  {isSaving ? 'Salvando...' : 'Salvar Progresso'}
-                </Button>
-
                 <Button
                   variant="outline"
                   onClick={() => setShowSaveModal(true)}
@@ -612,12 +649,12 @@ const USCISFormFilling = () => {
                 </Button>
 
                 <Button 
-                  onClick={continueToDocuments}
-                  disabled={!isFormValid() || isSaving}
-                  className="bg-black text-white hover:bg-gray-800 flex items-center gap-2"
+                  onClick={authorizeAndSaveForm}
+                  disabled={!isFormAuthorized() || isSaving}
+                  className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
                 >
-                  Continuar para Documentos
-                  <ArrowRight className="h-4 w-4" />
+                  <CheckCircle className="h-4 w-4" />
+                  {isSaving ? 'Salvando...' : 'Autorizar e Salvar Automaticamente'}
                 </Button>
               </div>
             </div>
