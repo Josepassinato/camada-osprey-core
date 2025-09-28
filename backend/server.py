@@ -570,12 +570,14 @@ def get_progress_percentage(current_step: str) -> int:
     step_percentages = {
         "created": 10,
         "form_selected": 20,
-        "basic_data": 40,
-        "documents_uploaded": 60,
-        "story_completed": 80,
-        "form_filled": 90,
-        "reviewed": 95,
-        "paid": 100,
+        "basic-data": 30,
+        "friendly-form": 40,
+        "ai-review": 50,
+        "uscis-form": 60,
+        "documents": 70,
+        "story": 80,
+        "review": 90,
+        "payment": 95,
         "completed": 100
     }
     return step_percentages.get(current_step, 10)
