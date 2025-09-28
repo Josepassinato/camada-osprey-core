@@ -2479,12 +2479,29 @@ async def specialized_document_validation(request: dict):
         document_content = request.get("documentContent", "")
         user_data = request.get("userData", {})
         
-        prompt = f"""
-        VALIDAÇÃO RIGOROSA DE DOCUMENTO
+        # Extract user's name for comparison
+        user_name = user_data.get("name", user_data.get("full_name", user_data.get("firstName", "") + " " + user_data.get("lastName", "")))
         
-        Tipo Esperado: {document_type}
-        Conteúdo: {document_content[:1500]}
-        Dados do Usuário: {user_data}
+        prompt = f"""
+        VALIDAÇÃO RIGOROSA DE DOCUMENTO - PROTOCOLO DE SEGURANÇA MÁXIMA
+        
+        DADOS CRÍTICOS PARA VALIDAÇÃO:
+        - Tipo de Documento Esperado: {document_type}
+        - Nome do Aplicante: {user_name}
+        - Conteúdo do Documento: {document_content[:1500]}
+        - Dados Completos do Usuário: {user_data}
+        
+        VALIDAÇÕES OBRIGATÓRIAS (TODAS DEVEM PASSAR):
+        1. TIPO CORRETO: Verificar se o documento enviado é exatamente do tipo "{document_type}"
+        2. NOME CORRETO: O nome no documento DEVE ser "{user_name}" ou muito similar
+        3. AUTENTICIDADE: Verificar se é documento genuíno
+        4. VALIDADE: Verificar se não está vencido
+        
+        INSTRUÇÕES ESPECÍFICAS:
+        - Se for solicitado "passport" mas enviado RG/CNH/Identidade → REJEITAR
+        - Se nome no documento for diferente de "{user_name}" → REJEITAR
+        - Ser EXTREMAMENTE rigoroso na comparação de nomes
+        - Explicar claramente qualquer discrepância encontrada
         
         Faça validação técnica completa conforme seu protocolo especializado.
         """
