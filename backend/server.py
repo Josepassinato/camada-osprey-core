@@ -4511,25 +4511,48 @@ async def generate_uscis_form_ai(case, friendly_form_data, basic_data):
     """AI generation of official USCIS form from friendly data"""
     try:
         from emergentintegrations import EmergentLLM
+        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
         
         llm = EmergentLLM(api_key=os.environ.get('EMERGENT_LLM_KEY'))
         
         form_code = case.get("form_code", "")
         
+        # Get Dra. Paula's enhanced knowledge for form generation
+        enhanced_prompt = get_dra_paula_enhanced_prompt("form_generation", f"Formulário: {form_code}")
+        visa_knowledge = get_visa_knowledge(form_code)
+        
         generation_prompt = f"""
-        Gere o formulário oficial USCIS {form_code} baseado nos dados fornecidos:
+        {enhanced_prompt}
+        
+        [GERAÇÃO DE FORMULÁRIO USCIS COM EXPERTISE DRA. PAULA B2C]
+        
+        Gere o formulário oficial USCIS {form_code} usando conhecimento especializado da Dra. Paula:
         
         Dados Básicos: {json.dumps(basic_data, indent=2)}
-        Respostas Traduzidas: {json.dumps(friendly_form_data, indent=2)}
+        Respostas do Formulário: {json.dumps(friendly_form_data, indent=2)}
+        Tipo de Visto: {form_code}
         
-        Mapeie os dados para os campos oficiais do formulário {form_code}:
-        1. Informações pessoais (nome, data nascimento, nacionalidade)
-        2. Informações de contato (endereço, telefone, email)
-        3. Informações específicas do visto
-        4. Histórico (educação, trabalho, viagens)
+        CONHECIMENTO ESPECÍFICO DO VISTO (Dra. Paula):
+        {json.dumps(visa_knowledge, indent=2) if visa_knowledge else "Aplicar conhecimento geral USCIS"}
         
-        Gere JSON com estrutura do formulário oficial.
-        Responda apenas "FORMULÁRIO_GERADO" quando concluir.
+        MAPEAMENTO ESPECIALIZADO DOS CAMPOS:
+        1. Informações pessoais (nome EXATO do passaporte, data MM/DD/YYYY, nacionalidade)
+        2. Informações de contato (endereço formato americano, telefone internacional)
+        3. Informações específicas do visto {form_code} (baseado em requisitos Dra. Paula)
+        4. Histórico (educação com equivalências americanas, trabalho cronológico)
+        5. Seções específicas do formulário {form_code}
+        6. Campos obrigatórios vs opcionais (conhecimento USCIS)
+        7. Validações de consistência interna do formulário
+        
+        DIRETRIZES DRA. PAULA PARA {form_code}:
+        - Aplique requisitos específicos para este tipo de visto
+        - Use formatação USCIS oficial
+        - Inclua todos os campos obrigatórios
+        - Mantenha consistência com documentação de apoio
+        - Prepare dados para revisão final
+        
+        Gere JSON completo com estrutura oficial do formulário.
+        Responda apenas "FORMULÁRIO_GERADO_DRA_PAULA" quando concluir.
         """
         
         response = llm.chat([{"role": "user", "content": generation_prompt}])
