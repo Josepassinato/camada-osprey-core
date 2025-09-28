@@ -799,14 +799,15 @@ metadata:
 
 test_plan:
   current_focus:
-    - "General System Testing - Complete Backend Verification"
-    - "Case ID persistence validation"
-    - "Auto-Application Journey End-to-End Testing"
-    - "Authentication and Data Persistence"
-    - "Owl Tutor System Integration"
+    - "Save and Continue Later Flow - End-to-End Testing"
+    - "AI Review and Translation Backend Logic"
+    - "User Login/Signup Integration with Auto Applications"
+    - "Dashboard Saved Applications Management"
+    - "Case Association with User Accounts"
+    - "Session Management and Data Persistence"
   stuck_tasks: []
-  test_all: true
-  test_priority: "critical_first"
+  test_all: false
+  test_priority: "save_continue_first"
 
 agent_communication:
   - agent: "main"
