@@ -151,7 +151,7 @@ const VisualReview = () => {
           {
             label: 'Endereço Atual',
             portuguese: portugueseResponses.address?.current_address || 'Não informado',
-            english: englishForm.current_address || englishForm.mailing_address || 'Not provided',
+            english: hasOfficialForm ? (englishForm.current_address || englishForm.mailing_address || 'Not provided') : 'Aguardando processamento IA',
             status: 'correct'
           },
           {
