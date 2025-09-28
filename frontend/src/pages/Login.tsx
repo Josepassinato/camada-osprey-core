@@ -95,7 +95,7 @@ const Login = () => {
         {/* Login Card */}
         <Card className="glass border-0 shadow-elegant card-hover">
           <CardHeader className="text-center pb-4">
-            <CardTitle className="text-xl font-semibold">Entrar na sua conta</CardTitle>
+            <CardTitle className="text-xl font-semibold">Acesso à Aplicação Salva</CardTitle>
           </CardHeader>
           
           <CardContent className="space-y-6">
