@@ -568,6 +568,30 @@ backend:
         agent: "testing"
         comment: "✅ Osprey Owl Tutor validation system working perfectly! Comprehensive testing of POST /api/validate endpoint completed with 100% success rate (6/6 tests passed). All step types tested successfully: Personal Info (name format, date validation, nationality checks), Address Info (ZIP code validation with state mapping, phone/email format), Employment Info (date ranges, required fields), Family Info (marital status conditionals, spouse/children requirements), Travel History (date order validation, old trip suggestions). Validation logic deterministic with proper error messages in Portuguese. ZIP code validation uses simplified mapping (NY, CA, IL, TX, FL areas) as specified. ValidateResult structure correct with ok, errors, missingRequired, suggestions fields. Error handling working for invalid stepId and missing parameters. Tested with realistic Brazilian immigration form data. Foundation for complete Osprey Owl Tutor system ready for production use."
 
+  - task: "Save and Continue Later - Backend Implementation"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Save and Continue Later feature implemented: Added /api/auto-application/save-progress endpoint to associate cases with user accounts, modified /api/dashboard to include user's auto_applications, created user association functionality. SaveAndContinueModal and PostPaymentSignupModal components created. Need to test complete flow: save application → login → resume from dashboard."
+
+  - task: "AI Review and Translation Logic"
+    implemented: false
+    working: false
+    file: "/app/frontend/src/pages/AIReviewAndTranslation.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "AIReviewAndTranslation.tsx page exists but lacks actual AI processing logic. Need to implement: 1) Process friendly form data, 2) AI review for consistency, 3) Translation Portuguese to English, 4) Generate official USCIS form. Currently shows loading state without backend integration."
+
   - task: "Security Health Check - Post Security Fixes"
     implemented: true
     working: true
