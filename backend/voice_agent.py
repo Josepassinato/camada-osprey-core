@@ -499,7 +499,7 @@ Responda de forma útil mas sempre dentro dos guardrails.
 
             # Call LLM with guardrails via emergentintegrations
             chat = LlmChat(
-                api_key="sk-emergent-aE5F536B80dFf0bA6F",
+                api_key=os.environ.get('EMERGENT_LLM_KEY'),
                 session_id=f"general_q_{uuid.uuid4().hex[:8]}",
                 system_message="Você é um assistente de conformidade que ajuda com preenchimento de formulários, mas nunca dá aconselhamento jurídico."
             ).with_model("openai", "gpt-4o-mini")
