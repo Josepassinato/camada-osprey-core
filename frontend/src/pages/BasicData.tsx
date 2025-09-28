@@ -89,6 +89,7 @@ const BasicData = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [case_, setCase] = useState<any>(null);
+  const [showSaveModal, setShowSaveModal] = useState(false);
 
   // Session management  
   const { 
