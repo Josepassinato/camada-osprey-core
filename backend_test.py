@@ -3558,6 +3558,11 @@ def test_comprehensive_system_critical_priorities():
     ]
     critical_tests["document_management_ai"] = all(doc_tests)
     
+    # 8. CRITICAL DATA PERSISTENCE INVESTIGATION (URGENT PRIORITY)
+    print("\n🔍 URGENT PRIORITY: Data Persistence Investigation...")
+    print("   Investigating FriendlyForm → VisualReview data persistence issue")
+    critical_tests["data_persistence_investigation"] = test_complete_data_persistence_investigation()
+    
     # Summary of critical priorities
     print("\n" + "=" * 60)
     print("🎯 CRITICAL PRIORITIES TEST RESULTS")
