@@ -126,6 +126,8 @@ const USCISFormFilling = () => {
   const [visaSpecs, setVisaSpecs] = useState<any>(null);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [activeSection, setActiveSection] = useState("personal");
+  const [formReviewed, setFormReviewed] = useState(false);
+  const [formAuthorized, setFormAuthorized] = useState(false);
 
   // Session management
   const { 
