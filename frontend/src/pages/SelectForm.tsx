@@ -4,20 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  ArrowLeft,
-  ArrowRight,
   Briefcase, 
-  Heart, 
-  Users, 
   FileText, 
   Plane,
-  Clock,
-  DollarSign,
-  AlertTriangle,
-  GraduationCap,
-  Home,
-  CreditCard,
-  CheckCircle
+  Users,
+  Heart
 } from 'lucide-react';
 
 interface USCISFormType {
