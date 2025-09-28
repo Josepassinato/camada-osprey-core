@@ -4351,6 +4351,17 @@ def run_all_tests():
     
     print(f"  Auto-Application System: {auto_passed}/{auto_total} tests passed ({auto_passed/auto_total*100:.1f}%)")
     
+    # Priority Tests Results (NEW)
+    print("\n🎯 PRIORITY TESTS FOR FINAL REVIEW:")
+    priority_passed = sum(priority_results.values())
+    priority_total = len(priority_results)
+    
+    for test_name, result in priority_results.items():
+        status = "✅ PASS" if result else "❌ FAIL"
+        print(f"  {test_name.replace('_', ' ').title()}: {status}")
+    
+    print(f"  Priority Tests: {priority_passed}/{priority_total} tests passed ({priority_passed/priority_total*100:.1f}%)")
+    
     # Overall Results
     total_passed = sum(all_results.values())
     total_tests = len(all_results)
