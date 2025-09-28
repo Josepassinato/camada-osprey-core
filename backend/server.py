@@ -4509,6 +4509,65 @@ async def final_review_ai(case):
         logger.error(f"Error in final review: {str(e)}")
         return {"details": "Revisão final concluída"}
 
+# Responsibility Confirmation Endpoint
+@api_router.post("/responsibility/confirm")
+async def record_responsibility_confirmation(request: dict):
+    """Record user responsibility confirmation for compliance"""
+    try:
+        case_id = request.get("caseId")
+        confirmation_type = request.get("type")
+        confirmations = request.get("confirmations", {})
+        digital_signature = request.get("digitalSignature", "")
+        timestamp = request.get("timestamp", datetime.utcnow().isoformat())
+        user_agent = request.get("userAgent", "")
+        
+        if not case_id or not confirmation_type:
+            raise HTTPException(status_code=400, detail="caseId and type are required")
+        
+        # Create confirmation record
+        confirmation_record = {
+            "id": f"conf_{case_id}_{confirmation_type}_{int(datetime.utcnow().timestamp())}",
+            "case_id": case_id,
+            "type": confirmation_type,
+            "confirmations": confirmations,
+            "digital_signature": digital_signature,
+            "timestamp": timestamp,
+            "user_agent": user_agent,
+            "ip_address": "system_recorded",  # In production, get from request
+            "created_at": datetime.utcnow()
+        }
+        
+        # Store in database
+        await db.responsibility_confirmations.insert_one(confirmation_record)
+        
+        # Update case with confirmation status
+        case_update = {
+            f"responsibility_confirmations.{confirmation_type}": {
+                "confirmed": True,
+                "timestamp": timestamp,
+                "signature": digital_signature
+            },
+            "updated_at": datetime.utcnow()
+        }
+        
+        await db.auto_cases.update_one(
+            {"case_id": case_id},
+            {"$set": case_update}
+        )
+        
+        return {
+            "success": True,
+            "confirmation_id": confirmation_record["id"],
+            "type": confirmation_type,
+            "recorded_at": confirmation_record["created_at"].isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error recording responsibility confirmation: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error recording confirmation: {str(e)}")
+
 app.include_router(api_router)
 
 app.add_middleware(
