@@ -201,7 +201,7 @@ const TranslationPartners = ({
                       key={star}
                       className={`h-4 w-4 ${
                         star <= partner.rating 
-                          ? 'text-yellow-400 fill-current' 
+                          ? 'text-orange-400 fill-current' 
                           : 'text-gray-300'
                       }`}
                     />
