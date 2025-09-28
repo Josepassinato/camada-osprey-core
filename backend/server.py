@@ -3805,6 +3805,81 @@ def verify_jwt_token(token: str):
     except Exception:
         return None
 
+# Test Document Validation with Image Analysis
+@api_router.post("/test-document-validation")
+async def test_document_validation_with_image(request: dict):
+    """Test the improved document validation with image analysis"""
+    try:
+        validator = create_document_validator()
+        
+        image_url = request.get("image_url", "")
+        expected_document_type = request.get("expected_type", "passport")
+        applicant_name = request.get("applicant_name", "")
+        
+        # First, analyze the image to extract information
+        vision_prompt = f"""
+        Analyze this document image and extract:
+        1. Document type (passport, national ID/RG, driver's license, etc.)
+        2. Full name on the document
+        3. Country/nationality
+        4. Document number
+        5. Expiration date
+        6. Any other identifying information
+        
+        Be very specific about the document type. A Brazilian RG/Identidade Nacional is NOT a passport.
+        """
+        
+        # For now, we'll simulate this - in production you'd use vision API
+        # This is where you'd integrate with OpenAI Vision or similar
+        
+        # Use the improved validation prompt
+        validation_prompt = f"""
+        VALIDAÇÃO RIGOROSA DE DOCUMENTO - PROTOCOLO DE SEGURANÇA MÁXIMA
+        
+        DADOS CRÍTICOS PARA VALIDAÇÃO:
+        - Tipo de Documento Esperado: {expected_document_type}
+        - Nome do Aplicante: {applicant_name}
+        - URL da Imagem: {image_url}
+        
+        CENÁRIO DE TESTE:
+        Usuário "{applicant_name}" deveria enviar {expected_document_type} mas pode ter enviado documento errado ou de outra pessoa.
+        
+        VALIDAÇÕES OBRIGATÓRIAS (TODAS DEVEM PASSAR):
+        1. TIPO CORRETO: Verificar se é exatamente "{expected_document_type}"
+        2. NOME CORRETO: Nome no documento DEVE ser "{applicant_name}"
+        3. PROPRIEDADE: Documento deve pertencer ao aplicante
+        
+        INSTRUÇÕES ESPECÍFICAS:
+        - Se for solicitado "passport" mas for RG/CNH/Identidade → REJEITAR com explicação clara
+        - Se nome no documento for diferente de "{applicant_name}" → REJEITAR com explicação clara
+        - Explicar detalhadamente cada problema encontrado
+        
+        Analise a imagem e faça validação técnica rigorosa.
+        """
+        
+        session_id = f"test_validation_{hash(image_url) % 10000}"
+        analysis = await validator._call_agent(validation_prompt, session_id)
+        
+        return {
+            "success": True,
+            "agent": "Dr. Miguel - Validador de Documentos (MELHORADO)",
+            "test_scenario": {
+                "expected_type": expected_document_type,
+                "applicant_name": applicant_name,
+                "image_url": image_url
+            },
+            "analysis": analysis,
+            "timestamp": datetime.now().isoformat()
+        }
+    
+    except Exception as e:
+        logger.error(f"Error in test document validation: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+
 app.include_router(api_router)
 
 app.add_middleware(
