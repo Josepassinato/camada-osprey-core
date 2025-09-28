@@ -281,16 +281,48 @@ const USCISFormFilling = () => {
     return sections;
   };
 
-  const isFormValid = () => {
-    // Basic validation
-    const requiredFields = ['firstName', 'lastName', 'dateOfBirth', 'currentAddress', 'passportNumber'];
-    return requiredFields.every(field => formData[field as keyof USCISFormData]);
+  const isFormAuthorized = () => {
+    return formReviewed && formAuthorized;
   };
 
-  const continueToDocuments = async () => {
-    const saved = await saveUSCISFormData();
-    if (saved) {
-      navigate(`/auto-application/case/${caseId}/documents`);
+  const authorizeAndSaveForm = async () => {
+    if (!isFormAuthorized()) return;
+    
+    setIsSaving(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}/authorize-uscis-form`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          form_reviewed: formReviewed,
+          form_authorized: formAuthorized,
+          generated_form_data: case_?.ai_generated_uscis_form || {},
+          authorization_timestamp: new Date().toISOString()
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Sucesso!",
+          description: "Formulário USCIS autorizado e salvo automaticamente na sua pasta",
+        });
+        
+        // Navigate to documents page
+        navigate(`/auto-application/case/${caseId}/documents`);
+      } else {
+        throw new Error('Failed to authorize and save form');
+      }
+    } catch (error) {
+      console.error('Error authorizing form:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao autorizar formulário. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
