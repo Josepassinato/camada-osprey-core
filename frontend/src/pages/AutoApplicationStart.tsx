@@ -41,7 +41,7 @@ const AutoApplicationStart = () => {
       
       console.log('🔘 Session token generated:', sessionToken);
       
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001';
+      const backendUrl = import.meta.env.VITE_BACKEND_URL;
       const apiUrl = `${backendUrl}/api/auto-application/start`;
       
       console.log('🔘 Making request to:', apiUrl);
