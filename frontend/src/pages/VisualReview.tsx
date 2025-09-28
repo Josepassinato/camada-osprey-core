@@ -126,7 +126,7 @@ const VisualReview = () => {
           {
             label: 'Data de Nascimento',
             portuguese: portugueseResponses.personal?.date_of_birth || 'Não informado',
-            english: englishForm.date_of_birth || englishForm.birth_date || 'Not provided',
+            english: hasOfficialForm ? (englishForm.date_of_birth || englishForm.birth_date || 'Not provided') : 'Aguardando processamento IA',
             status: 'correct'
           },
           {
