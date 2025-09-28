@@ -64,6 +64,7 @@ const PaymentAndDownload = () => {
   const [error, setError] = useState("");
   const [paymentComplete, setPaymentComplete] = useState(false);
   const [downloadReady, setDownloadReady] = useState(false);
+  const [showSubmissionGuide, setShowSubmissionGuide] = useState(false);
 
   const paymentMethods: PaymentMethod[] = [
     {
