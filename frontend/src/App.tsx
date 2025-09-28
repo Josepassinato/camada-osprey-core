@@ -21,6 +21,7 @@ import SelectForm from "./pages/SelectForm";
 import BasicData from "./pages/BasicData";
 import DocumentUploadAuto from "./pages/DocumentUploadAuto";
 import USCISFormFilling from "./pages/USCISFormFilling";
+import AIReviewAndTranslation from "./pages/AIReviewAndTranslation";
 import StoryTelling from "./pages/StoryTelling";
 import FriendlyForm from "./pages/FriendlyForm";
 import VisualReview from "./pages/VisualReview";
