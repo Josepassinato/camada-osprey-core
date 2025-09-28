@@ -3115,13 +3115,14 @@ def test_friendly_form_data_saving():
         
         if response.status_code == 200:
             data = response.json()
+            case_data = data.get('case', {})
             print(f"✅ FriendlyForm data saved successfully")
-            print(f"   Case ID: {data.get('case_id')}")
-            print(f"   Status updated to: {data.get('status')}")
-            print(f"   Form responses saved: {'Yes' if 'simplified_form_responses' in str(data) else 'No'}")
+            print(f"   Case ID: {case_data.get('case_id')}")
+            print(f"   Status updated to: {case_data.get('status')}")
+            print(f"   Form responses saved: {'Yes' if 'simplified_form_responses' in str(case_data) else 'No'}")
             
             # Verify data structure matches what VisualReview expects
-            saved_responses = data.get('simplified_form_responses', {})
+            saved_responses = case_data.get('simplified_form_responses', {})
             expected_sections = ['personal_information', 'current_address', 'contact_information', 
                                'employment_information', 'education', 'family_information']
             
