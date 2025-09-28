@@ -194,12 +194,12 @@ const PostPaymentSignupModal = ({
             </div>
           </div>
 
-          <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="mb-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
-              <Shield className="h-4 w-4 text-yellow-600" />
-              <p className="font-medium text-yellow-800">Importante!</p>
+              <Shield className="h-4 w-4 text-orange-600" />
+              <p className="font-medium text-orange-800">Importante!</p>
             </div>
-            <p className="text-sm text-yellow-700">
+            <p className="text-sm text-orange-700">
               Para acessar seu pacote e continuar utilizando nossos serviços, 
               você precisa criar uma conta ou fazer login.
             </p>
