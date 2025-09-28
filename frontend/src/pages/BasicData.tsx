@@ -732,6 +732,19 @@ const BasicData = () => {
         isEnabled={!!case_?.case_id}
         position="bottom-right"
       />
+
+      {/* Save and Continue Later Modal */}
+      <SaveAndContinueModal
+        isOpen={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        onSave={async () => {
+          await saveData();
+          setShowSaveModal(false);
+          navigate('/auto-application/dashboard');
+        }}
+        formData={formData}
+        caseId={caseId}
+      />
     </div>
   );
 };
