@@ -216,7 +216,7 @@ const USCISSubmissionGuide = ({ caseId, onDownloadPackage }: USCISSubmissionGuid
                 </h4>
                 <div className="space-y-2">
                   {instructions.important_notes.slice(0, 3).map((note, index) => (
-                    <div key={index} className="text-sm p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+                    <div key={index} className="text-sm p-3 bg-orange-50 border-l-4 border-orange-400 rounded">
                       {note}
                     </div>
                   ))}
