@@ -330,7 +330,7 @@ const Dashboard = () => {
                     <div 
                       key={app.id}
                       className="p-4 rounded-lg border border-white/20 hover:bg-white/50 transition-colors cursor-pointer"
-                      onClick={() => navigate(`/applications/${app.id}`)}
+                      onClick={() => continueApplication(app)}
                     >
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
