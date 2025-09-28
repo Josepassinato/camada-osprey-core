@@ -163,7 +163,7 @@ const VisualReview = () => {
           {
             label: 'E-mail',
             portuguese: portugueseResponses.address?.email || 'Não informado',
-            english: englishForm.email_address || englishForm.email || 'Not provided',
+            english: hasOfficialForm ? (englishForm.email_address || englishForm.email || 'Not provided') : 'Aguardando processamento IA',
             status: 'correct'
           }
         ]
