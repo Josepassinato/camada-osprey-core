@@ -486,24 +486,51 @@ async def analyze_document_with_ai(document: UserDocument) -> Dict[str, Any]:
         session_id = f"doc_analysis_{document.id}"
         dr_miguel_analysis = await validator._call_agent(validation_prompt, session_id)
 
-        # Parse JSON response
-        analysis_text = response.choices[0].message.content.strip()
+        # Parse Dr. Miguel's JSON response
+        analysis_text = dr_miguel_analysis.strip()
         # Remove markdown formatting if present
         analysis_text = analysis_text.replace('```json', '').replace('```', '').strip()
         
         try:
-            analysis = json.loads(analysis_text)
+            miguel_result = json.loads(analysis_text)
+            
+            # Convert Dr. Miguel's format to expected format
+            analysis = {
+                "completeness_score": miguel_result.get("completeness_score", 50),
+                "validity_status": miguel_result.get("validity_status", "unclear"),
+                "key_information": miguel_result.get("key_information", []),
+                "missing_information": [],
+                "suggestions": miguel_result.get("suggestions", []),
+                "expiration_warnings": [],
+                "quality_issues": miguel_result.get("critical_issues", []),
+                "next_steps": [],
+                # Additional Dr. Miguel specific fields
+                "dr_miguel_validation": {
+                    "document_type_identified": miguel_result.get("document_type_identified"),
+                    "type_correct": miguel_result.get("type_correct"),
+                    "belongs_to_applicant": miguel_result.get("belongs_to_applicant"),
+                    "verdict": miguel_result.get("verdict"),
+                    "rejection_reason": miguel_result.get("rejection_reason"),
+                    "uscis_acceptable": miguel_result.get("uscis_acceptable")
+                }
+            }
+            
         except json.JSONDecodeError:
             # Fallback analysis if JSON parsing fails
+            logger.warning(f"Failed to parse Dr. Miguel analysis: {analysis_text}")
             analysis = {
-                "completeness_score": 75,
-                "validity_status": "valid",
-                "key_information": ["Document uploaded successfully"],
-                "missing_information": [],
-                "suggestions": ["Documento analisado com sucesso"],
+                "completeness_score": 25,  # Low score for parsing failure
+                "validity_status": "unclear",
+                "key_information": ["Análise pendente - erro na validação"],
+                "missing_information": ["Validação completa necessária"],
+                "suggestions": ["Documento precisa ser revalidado pelo Dr. Miguel"],
                 "expiration_warnings": [],
-                "quality_issues": [],
-                "next_steps": ["Aguardar revisão adicional se necessário"]
+                "quality_issues": ["Erro na análise automática"],
+                "next_steps": ["Reenviar documento ou contactar suporte"],
+                "dr_miguel_validation": {
+                    "verdict": "NECESSITA_REVISÃO",
+                    "rejection_reason": "Erro na análise automática"
+                }
             }
 
         return analysis
