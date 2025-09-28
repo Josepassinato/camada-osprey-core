@@ -86,6 +86,8 @@ class USCISForm(str, Enum):
     I589 = "I-589"  # Application for Asylum
     O1 = "O-1"      # Extraordinary Ability (part of I-129)
     H1B = "H-1B"    # Specialty Occupation (part of I-129)
+    B1B2 = "B-1/B-2"  # Business/Tourism Visitor Visa
+    F1 = "F-1"      # Student Visa
     AR11 = "AR-11"  # Change of Address
 
 class CaseStatus(str, Enum):
