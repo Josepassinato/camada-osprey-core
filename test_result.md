@@ -595,6 +595,19 @@ backend:
         agent: "testing"
         comment: "✅ CRITICAL DATA PERSISTENCE INVESTIGATION COMPLETED - 100% SUCCESS RATE! Comprehensive testing revealed that FriendlyForm → VisualReview data persistence is working perfectly. All 4 critical tests passed: 1) FORM DATA SAVING - PUT /api/auto-application/case/{case_id} successfully saves simplified_form_responses with all 6 sections (personal_information, current_address, contact_information, employment_information, education, family_information), 2) CASE DATA RETRIEVAL - GET /api/auto-application/case/{case_id} correctly returns all saved form data, 3) MONGODB PERSISTENCE - Data persists correctly in MongoDB with exact values matching what was saved, 4) VISUAL REVIEW COMPATIBILITY - Data structure perfectly matches VisualReview expectations. Tested with realistic H-1B data including Carlos Eduardo Silva Santos profile. Root cause of user's 'Não informado' issue is likely frontend-related or case-specific, not a backend data persistence problem. Backend API endpoints working flawlessly for form data flow."
 
+frontend:
+  - task: "VisualReview English Translation Display Bug"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/pages/VisualReview.tsx"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL BUG IDENTIFIED: VisualReview component shows 'Not provided' for all English fields when users navigate directly from FriendlyForm. ROOT CAUSE: Lines 109-111 in VisualReview.tsx - Portuguese data correctly loads from simplified_form_responses, but English data expects official_form_data which is null until AI processing step is completed. IMPACT: Users see filled Portuguese data but empty English translations, creating confusion. TESTED: Case OSP-A56A5926 with complete form data - Portuguese fields display correctly ('Carlos Eduardo Silva Santos', etc.) but English fields show 'Not provided'. SOLUTION NEEDED: VisualReview should auto-generate English translations from Portuguese data, show appropriate messaging, or trigger automatic official form generation when official_form_data is missing."
+
   - task: "AI Review and Translation Logic"
     implemented: true
     working: true
