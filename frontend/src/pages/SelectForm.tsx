@@ -41,11 +41,9 @@ const SelectForm = () => {
       uscisfee: '$120',
       complexity: 'Básico',
       eligibility: [
-        'B-1: Reuniões de negócios, conferências, treinamentos',
-        'B-2: Turismo, visitas familiares, tratamento médico',
+        'Reuniões de negócios, turismo, visitas familiares',
         'Intenção de retornar ao Brasil',
-        'Vínculos fortes com país de origem',
-        'Recursos financeiros suficientes para a viagem'
+        'Recursos financeiros para a viagem'
       ],
       popular: true
     },
