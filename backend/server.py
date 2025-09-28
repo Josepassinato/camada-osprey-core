@@ -565,6 +565,21 @@ def determine_document_priority(document_type: DocumentType, expiration_date: Op
     
     return DocumentPriority.low
 
+def get_progress_percentage(current_step: str) -> int:
+    """Calculate progress percentage based on current step"""
+    step_percentages = {
+        "created": 10,
+        "form_selected": 20,
+        "basic_data": 40,
+        "documents_uploaded": 60,
+        "story_completed": 80,
+        "form_filled": 90,
+        "reviewed": 95,
+        "paid": 100,
+        "completed": 100
+    }
+    return step_percentages.get(current_step, 10)
+
 # Education helper functions (NEW)
 async def generate_interview_questions(interview_type: InterviewType, visa_type: VisaType, difficulty_level: DifficultyLevel) -> List[Dict[str, Any]]:
     """Generate interview questions using AI"""
