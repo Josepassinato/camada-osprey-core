@@ -572,13 +572,16 @@ backend:
     implemented: true
     working: false
     file: "/app/backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: false
         agent: "main"
         comment: "Save and Continue Later feature implemented: Added /api/auto-application/save-progress endpoint to associate cases with user accounts, modified /api/dashboard to include user's auto_applications, created user association functionality. SaveAndContinueModal and PostPaymentSignupModal components created. Need to test complete flow: save application → login → resume from dashboard."
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL ISSUE IDENTIFIED: Save and Continue Later partially working but has authentication integration bug. Case data saves successfully via PUT /api/auto-application/case/{case_id}, but cases are created with user_id=null even when authenticated. Root cause: /api/auto-application/start endpoint doesn't check for authenticated users and always creates anonymous cases. Dashboard query looks for cases with user_id and is_anonymous=false, but cases lack proper user association. Fix needed: Update start endpoint to detect authentication and set user_id when user is logged in. Case creation (✅), data saving (✅), dashboard integration (❌)."
 
   - task: "AI Review and Translation Logic"
     implemented: true
