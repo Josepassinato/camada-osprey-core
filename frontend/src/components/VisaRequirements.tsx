@@ -511,10 +511,18 @@ const VisaRequirements = ({ visaType, onClose }: VisaRequirementsProps) => {
       {/* Action Button */}
       <div className="flex justify-end space-x-4 pt-4">
         <Button variant="outline" onClick={onClose} className="border-black text-black">
-          Escolher Outro Visto
+          Voltar à Seleção
         </Button>
-        <Button className="bg-black text-white hover:bg-gray-800">
-          Começar H1-B
+        <Button 
+          className="bg-black text-white hover:bg-gray-800"
+          onClick={() => {
+            onClose();
+            // Trigger form creation through parent component
+            const event = new CustomEvent('startApplication', { detail: { visaType } });
+            window.dispatchEvent(event);
+          }}
+        >
+          Começar {visaType}
         </Button>
       </div>
     </div>
