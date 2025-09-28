@@ -2,6 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Remove any yellow borders that might be applied by development tools */
+* {
+  border-color: transparent !important;
+}
+
+/* Restore proper borders for UI elements */
+.border {
+  border-color: hsl(var(--border)) !important;
+}
+
+.border-black {
+  border-color: black !important;
+}
+
+.border-white {
+  border-color: white !important;
+}
+
+.border-gray-200 {
+  border-color: rgb(229, 231, 235) !important;
+}
+
+.border-gray-300 {
+  border-color: rgb(209, 213, 219) !important;
+}
+
+.border-orange-200 {
+  border-color: rgb(254, 215, 170) !important;
+}
+
+.border-orange-400 {
+  border-color: rgb(251, 146, 60) !important;
+}
+
+.border-red-200 {
+  border-color: rgb(254, 202, 202) !important;
+}
+
+.border-green-200 {
+  border-color: rgb(187, 247, 208) !important;
+}
+
+.border-blue-200 {
+  border-color: rgb(191, 219, 254) !important;
+}
+
+.border-blue-500 {
+  border-color: rgb(59, 130, 246) !important;
+}
+
 /* OSPREY Design System - Preto e Branco Apenas
 Sistema de cores minimalista para aplicação de imigração
 */
