@@ -24,8 +24,10 @@ import {
   Zap,
   Mail,
   Phone,
-  ExternalLink
+  ExternalLink,
+  Send
 } from "lucide-react";
+import USCISSubmissionGuide from "@/components/USCISSubmissionGuide";
 
 interface PricingPackage {
   id: string;
