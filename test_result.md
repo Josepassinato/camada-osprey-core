@@ -591,7 +591,7 @@ frontend:
     implemented: true
     working: true
     file: "/app/frontend/src/pages/SelectForm.tsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
@@ -604,6 +604,12 @@ frontend:
       - working: true
         agent: "testing"
         comment: "✅ MOBILE OPTIMIZED FORM SELECTION VERIFIED! SelectForm working excellently on mobile (375px): Page title 'Escolha seu Formulário' clear, 5+ form cards found and properly displayed. H-1B, I-130, N-400 forms all visible with complete information. Responsive grid layout adapts to single column (343px width) on mobile. Touch targets for form selection working but buttons slightly below 44px minimum (40px height). Scrolling and navigation functional. Black/white color scheme consistent - white card backgrounds, black borders, black text. Popular badges and complexity indicators properly styled. Tablet (768px) shows 2-column grid layout (348px x 348px with 24px gap). Card interaction and selection working perfectly."
+      - working: false
+        agent: "user"
+        comment: "User reported yellow page error on SelectForm after recent modifications to fix file watcher issues. Problem caused by duplicate form entries and React key conflicts in uscisforms array."
+      - working: true
+        agent: "main"
+        comment: "✅ YELLOW PAGE ERROR FIXED! Successfully reverted SelectForm.tsx to working state by removing duplicate H-1B and O-1 entries that were causing React key conflicts. Cleaned up uscisforms array to have unique entries only. Verified complete user flow: AutoApplicationStart → checkbox → 'Começar' button → SelectForm page. All visa forms (B-1/B-2, H-1B, F-1, O-1, N-400, I-130, I-765, I-485, I-90, I-751, I-589) displaying correctly with proper black/white theme, Popular badges, complexity levels, and requirements. Navigation working perfectly. SelectForm page now loads without errors and displays all 11 form cards correctly."
 
   - task: "Auto-Application Complete Journey - Stage 3 (BasicData Frontend)"
     implemented: true
