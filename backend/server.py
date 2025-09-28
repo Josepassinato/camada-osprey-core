@@ -3999,6 +3999,72 @@ async def get_visa_document_requirements_endpoint(visa_type: str):
         logger.error(f"Error getting visa requirements: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# USCIS Form Data Endpoint
+@api_router.post("/auto-application/case/{case_id}/uscis-form")
+async def save_uscis_form_data(case_id: str, request: dict):
+    """Save USCIS form data for a case"""
+    try:
+        # Get case details
+        case = await db.auto_cases.find_one({"case_id": case_id})
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        uscis_form_data = request.get("uscis_form_data", {})
+        completed_sections = request.get("completed_sections", [])
+        
+        # Update case with USCIS form data
+        update_data = {
+            "uscis_form_data": uscis_form_data,
+            "uscis_form_completed_sections": completed_sections,
+            "uscis_form_updated_at": datetime.utcnow(),
+            "current_step": "uscis-form"
+        }
+        
+        result = await db.auto_cases.update_one(
+            {"case_id": case_id},
+            {"$set": update_data}
+        )
+        
+        if result.modified_count == 0:
+            raise HTTPException(status_code=500, detail="Failed to save USCIS form data")
+        
+        return {
+            "success": True,
+            "message": "USCIS form data saved successfully",
+            "case_id": case_id,
+            "completed_sections": completed_sections
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error saving USCIS form data: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error saving USCIS form data: {str(e)}")
+
+@api_router.get("/auto-application/case/{case_id}/uscis-form")
+async def get_uscis_form_data(case_id: str):
+    """Get USCIS form data for a case"""
+    try:
+        # Get case details
+        case = await db.auto_cases.find_one({"case_id": case_id})
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        return {
+            "success": True,
+            "case_id": case_id,
+            "form_code": case.get("form_code"),
+            "uscis_form_data": case.get("uscis_form_data", {}),
+            "completed_sections": case.get("uscis_form_completed_sections", []),
+            "basic_data": case.get("basic_data", {})  # Include basic data for pre-filling
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting USCIS form data: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error getting USCIS form data: {str(e)}")
+
 app.include_router(api_router)
 
 app.add_middleware(
