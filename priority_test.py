@@ -317,7 +317,7 @@ def test_save_and_continue_later():
                     
                     # Test resuming the case
                     resume_response = requests.get(
-                        f"{API_BASE}/auto-application/cases/{case_id}",
+                        f"{API_BASE}/auto-application/case/{case_id}",
                         headers=headers,
                         timeout=10
                     )
