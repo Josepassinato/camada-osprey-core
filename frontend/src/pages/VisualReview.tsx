@@ -138,7 +138,7 @@ const VisualReview = () => {
           {
             label: 'Nacionalidade',
             portuguese: portugueseResponses.personal?.nationality || 'Não informado',
-            english: englishForm.nationality || englishForm.country_of_citizenship || 'Not provided',
+            english: hasOfficialForm ? (englishForm.nationality || englishForm.country_of_citizenship || 'Not provided') : 'Aguardando processamento IA',
             status: 'correct'
           }
         ]
