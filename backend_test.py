@@ -4268,8 +4268,18 @@ def run_all_tests():
         "complete_auto_application_journey": test_complete_auto_application_journey()
     }
     
+    # PRIORITY TESTS FOR FINAL REVIEW
+    print("\n" + "🎯" * 20 + " PRIORITY TESTS " + "🎯" * 20)
+    priority_results = {
+        "visa_requirements_integration": test_visa_requirements_integration(),
+        "responsibility_confirmation_system": test_responsibility_confirmation_system(),
+        "ai_review_and_translation_workflow": test_ai_review_and_translation_workflow(),
+        "save_and_continue_later": test_save_and_continue_later(),
+        "complete_user_journey": test_complete_user_journey()
+    }
+    
     # Combine all results
-    all_results = {**auth_results, **document_results, **education_results, **owl_tutor_results, **voice_agent_results, **auto_app_results}
+    all_results = {**auth_results, **document_results, **education_results, **owl_tutor_results, **voice_agent_results, **auto_app_results, **priority_results}
     
     print("\n" + "=" * 60)
     print("📊 TEST RESULTS SUMMARY")
