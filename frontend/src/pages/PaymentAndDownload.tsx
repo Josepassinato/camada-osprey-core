@@ -66,6 +66,8 @@ const PaymentAndDownload = () => {
   const [paymentComplete, setPaymentComplete] = useState(false);
   const [downloadReady, setDownloadReady] = useState(false);
   const [showSubmissionGuide, setShowSubmissionGuide] = useState(false);
+  const [showPostPaymentSignup, setShowPostPaymentSignup] = useState(false);
+  const [packageInfo, setPackageInfo] = useState<{type: string; amount: string}>({type: '', amount: ''});
 
   const paymentMethods: PaymentMethod[] = [
     {
