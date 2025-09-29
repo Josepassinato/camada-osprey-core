@@ -334,6 +334,18 @@ export const OspreyOwlTutor: React.FC<OspreyOwlTutorProps> = ({
   const messageHistoryRef = useRef<TutorMsg[]>([]);
   const validationCacheRef = useRef<Map<string, ValidateResult>>(new Map());
 
+  // Expose document analysis handler
+  useEffect(() => {
+    if (onAction) {
+      // Add document analysis listener
+      (window as any).draPaulaDocumentAnalysis = handleDocumentAnalysis;
+    }
+    
+    return () => {
+      delete (window as any).draPaulaDocumentAnalysis;
+    };
+  }, [onAction, currentVisaType, currentStep, achievements]);
+
   // Owl blinking animation
   useEffect(() => {
     const blinkInterval = setInterval(() => {
