@@ -25,12 +25,15 @@ interface DocumentRequirement {
   name: string;
   description: string;
   required: boolean;
-  category: string;
-  formats: string[];
-  maxSize: string;
+  category?: string;
+  formats?: string[];
+  maxSize?: string;
   uploaded: boolean;
   fileId?: string;
   fileName?: string;
+  dra_paula_tip?: string;
+  file?: File | null;
+  analyzing?: boolean;
   aiAnalysis?: {
     valid: boolean;
     legible: boolean;
