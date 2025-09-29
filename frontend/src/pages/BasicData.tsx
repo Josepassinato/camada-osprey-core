@@ -239,7 +239,7 @@ const BasicData = () => {
 
   const continueToNextStep = () => {
     saveData();
-    navigate(`/auto-application/case/${caseId}/friendly-form`);
+    navigate(`/auto-application/case/${caseId}/documents`);
   };
 
   const isFormValid = () => {
