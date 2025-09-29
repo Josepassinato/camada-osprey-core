@@ -215,6 +215,56 @@ export const OspreyOwlTutor: React.FC<OspreyOwlTutorProps> = ({
     }, 4000);
   };
 
+  const handleDocumentAnalysis = (documentId: string, analysis: any) => {
+    if (!currentVisaType || !currentStep) return;
+
+    // Get document-specific messages from Dra. Paula
+    const docMessages = draPaulaIntelligentTutor.getMessagesForContext(
+      currentVisaType,
+      'documents',
+      'onDocument',
+      { documentType: documentId, analysis }
+    );
+
+    const newMessages = docMessages.map(msg => {
+      const tutorMsg = draPaulaIntelligentTutor.convertToTutorMessage(msg);
+      return {
+        ...tutorMsg,
+        text: `📄 **${documentId.toUpperCase()}**: ${tutorMsg.text}`,
+        meta: { ...tutorMsg.meta, documentAnalysis: true }
+      };
+    });
+
+    if (newMessages.length > 0) {
+      setMessages(prev => [...prev, ...newMessages]);
+    }
+
+    // Check if this completes all documents for achievement
+    if (analysis.valid && snapshot?.documents) {
+      const allValid = snapshot.documents.every((doc: any) => 
+        doc.uploaded && doc.aiAnalysis?.valid
+      );
+
+      if (allValid) {
+        const achievementMsg = draPaulaIntelligentTutor.getAchievementMessage(
+          currentVisaType,
+          'documents',
+          { allDocumentsUploaded: true, allDocumentsValid: true }
+        );
+
+        if (achievementMsg) {
+          const achievementTutorMsg = draPaulaIntelligentTutor.convertToTutorMessage(achievementMsg);
+          setMessages(prev => [...prev, achievementTutorMsg]);
+          
+          if (!achievements.includes(achievementMsg.id)) {
+            setAchievements(prev => [...prev, achievementMsg.id]);
+            showAchievementNotification(achievementMsg.id);
+          }
+        }
+      }
+    }
+  };
+
   const handleValidationSuccess = (result: ValidateResult) => {
     const newMessages: TutorMsg[] = [];
     
