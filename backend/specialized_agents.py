@@ -256,6 +256,76 @@ class DocumentValidationAgent(BaseSpecializedAgent):
         
         session_id = f"enhanced_validation_{hash(document_content) % 10000}"
         return await self._call_agent(enhanced_prompt, session_id)
+    
+    async def validate_document(self, document_data: str, document_type: str, case_context: dict = None) -> str:
+        """Enhanced document validation using comprehensive database and Dra. Paula's knowledge"""
+        
+        applicant_name = case_context.get('applicant_name', 'Nome não informado') if case_context else 'Nome não informado'
+        visa_type = case_context.get('visa_type') or case_context.get('form_code') if case_context else None
+        
+        # Use enhanced database validation
+        return await self.validate_document_with_database(
+            document_type=document_type,
+            document_content=document_data,
+            applicant_name=applicant_name,
+            visa_type=visa_type
+        )
+    
+    async def validate_document_enhanced(self, 
+                                       file_content: bytes,
+                                       file_name: str,
+                                       expected_document_type: str,
+                                       visa_type: str,
+                                       applicant_name: str) -> Dict[str, Any]:
+        """
+        NOVA VALIDAÇÃO APRIMORADA - Sistema completo de reconhecimento
+        """
+        
+        try:
+            # Use o novo sistema aprimorado
+            enhanced_validator = EnhancedDocumentRecognitionAgent()
+            
+            result = await enhanced_validator.analyze_document_comprehensive(
+                file_content=file_content,
+                file_name=file_name,
+                expected_document_type=expected_document_type,
+                visa_type=visa_type,
+                applicant_name=applicant_name
+            )
+            
+            # Converter para formato esperado pelo sistema atual
+            if result.get('success'):
+                return {
+                    "valid": result['verdict'] == "APROVADO",
+                    "verdict": result['verdict'],
+                    "confidence_score": result['overall_confidence'],
+                    "document_type_identified": result['document_analysis'].get('identified_type', expected_document_type),
+                    "type_matches_expected": result['type_matches_expected'],
+                    "quality_acceptable": result['quality_acceptable'],
+                    "relevant_for_visa": result['relevant_for_visa'],
+                    "belongs_to_applicant": result['belongs_to_applicant'],
+                    "issues": result['issues'],
+                    "recommendations": result['recommendations'],
+                    "detailed_analysis": result,
+                    "agent": "Dr. Miguel - Sistema Aprimorado",
+                    "uscis_approval_likelihood": result['uscis_approval_likelihood']
+                }
+            else:
+                return {
+                    "valid": False,
+                    "verdict": "ERRO",
+                    "confidence_score": 0,
+                    "issues": [result.get('error', 'Erro desconhecido')],
+                    "agent": "Dr. Miguel - Sistema Aprimorado"
+                }
+                
+        except Exception as e:
+            logger.error(f"Erro na validação aprimorada: {str(e)}")
+            # Fallback para sistema original
+            return await self.validate_document(str(file_content), expected_document_type, {
+                'applicant_name': applicant_name,
+                'visa_type': visa_type
+            })
     def validate_document(self, document_data: Dict[str, Any], document_type: str, case_context: Dict[str, Any] = None) -> Dict[str, Any]:
         """Valida documento usando expertise da Dra. Paula B2C e mapeamento inteligente por visto"""
         try:
