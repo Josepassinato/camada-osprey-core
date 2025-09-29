@@ -261,19 +261,8 @@ export const OspreyOwlTutor: React.FC<OspreyOwlTutorProps> = ({
         
         setLastValidation(validateResult);
         
-        // Generate tutor messages
-        const newMessages = toTutorMessages(validateResult, snapshot);
-        
-        // Update messages with deduplication
-        setMessages(prev => {
-          const combined = [...prev, ...newMessages];
-          const unique = combined.filter((msg, index, arr) => 
-            arr.findIndex(m => m.id === msg.id) === index
-          );
-          return unique.slice(-4); // Keep last 4 messages
-        });
-        
-        messageHistoryRef.current = [...messageHistoryRef.current, ...newMessages].slice(-10);
+        // Use the new handleValidationSuccess function
+        handleValidationSuccess(validateResult);
         
       } catch (error) {
         console.error('Tutor validation error:', error);
