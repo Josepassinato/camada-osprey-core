@@ -643,30 +643,6 @@ class USCISFormTranslatorAgent(BaseSpecializedAgent):
         SEJA RIGOROSO: Prefira solicitar esclarecimentos do que fazer traduções imprecisas.
         O USCIS rejeita formulários com erros - precisão é fundamental.
         """
-        
-        RESPOSTA SEMPRE EM JSON:
-        {{
-            "agent": "Dr. Ricardo - Redator de Cartas",
-            "letter_type": "tipo de carta identificado",
-            "visa_category": "categoria do visto",
-            "completeness_check": {{
-                "has_sufficient_info": true/false,
-                "missing_critical_info": ["info1", "info2"],
-                "additional_details_needed": ["detalhe1", "detalhe2"]
-            }},
-            "letter_content": "carta completa formatada ou [RASCUNHO PARCIAL]",
-            "formatting_notes": "observações sobre formatação USCIS",
-            "legal_considerations": ["consideração1", "consideração2"],
-            "fact_verification": {{
-                "only_client_facts_used": true/false,
-                "no_invented_details": true/false,
-                "confidence_level": "high|medium|low"
-            }},
-            "recommendations": ["melhoria1", "melhoria2"]
-        }}
-        
-        SEJA RIGOROSO: Prefira carta incompleta com [INFORMAÇÃO NECESSÁRIA] do que inventar fatos.
-        """
 
 class UrgencyTriageAgent(BaseSpecializedAgent):
     """Agent to triage issues by urgency and route to appropriate specialist"""
