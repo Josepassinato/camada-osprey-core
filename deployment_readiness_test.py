@@ -248,7 +248,7 @@ def test_3_ai_integration_endpoints():
                 log_test_result(
                     "AI processing step endpoint",
                     True,
-                    f"Processing result: {data.get('status', 'N/A')}"
+                    f"Processing success: {data.get('success', False)}, Step: {data.get('step_id', 'N/A')}"
                 )
                 success_count += 1
             else:
