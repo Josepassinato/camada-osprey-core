@@ -164,8 +164,8 @@ const FriendlyForm = () => {
           value: extractedFacts.personal_info?.place_of_birth || caseData.basic_data?.countryOfBirth || '',
           placeholder: 'Cidade, Estado/Província, País',
           aiSuggestion: extractedFacts.personal_info?.place_of_birth ? 
-            `IA sugeriu: ${extractedFacts.personal_info.place_of_birth}` : 
-            (caseData.basic_data?.countryOfBirth ? `Dados básicos: ${caseData.basic_data.countryOfBirth}` : undefined)
+            `🤖 IA extraiu dos documentos: ${extractedFacts.personal_info.place_of_birth}` : 
+            (caseData.basic_data?.countryOfBirth ? `📋 Dados básicos: ${caseData.basic_data.countryOfBirth}` : undefined)
         },
         {
           id: 'nationality',
