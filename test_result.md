@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "TESTES COMPLEMENTARES ABRANGENTES - VALIDAÇÃO FINAL PRÉ-DEPLOYMENT: Executar bateria completa de testes complementares para validar todos os aspectos críticos do sistema OSPREY antes do deployment em produção. Incluindo responsividade cross-device, jornada completa multi-visa (H-1B, B-1/B-2, F-1), validação de correções implementadas, integração AI completa, error handling, performance, browser compatibility, e security validation."
+user_problem_statement: "TESTE VALIDAÇÃO DOS NOVOS VALIDADORES DE ALTA PRECISÃO: Testar os novos validadores baseados no plano de alta precisão que foram integrados ao sistema. Incluindo normalizador de datas, validador USCIS receipt (I-797), validador SSN, parser MRZ com checksums, integração com sistema atual, e testes de KPI."
 
 backend:
   - task: "Case Management Complete (H-1B, B-1/B-2, F-1)"
