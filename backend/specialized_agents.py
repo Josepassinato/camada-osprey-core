@@ -326,7 +326,7 @@ class DocumentValidationAgent(BaseSpecializedAgent):
                 'applicant_name': applicant_name,
                 'visa_type': visa_type
             })
-    def validate_document(self, document_data: Dict[str, Any], document_type: str, case_context: Dict[str, Any] = None) -> Dict[str, Any]:
+    def validate_document_legacy(self, document_data: Dict[str, Any], document_type: str, case_context: Dict[str, Any] = None) -> Dict[str, Any]:
         """Valida documento usando expertise da Dra. Paula B2C e mapeamento inteligente por visto"""
         try:
             from emergentintegrations import EmergentLLM
