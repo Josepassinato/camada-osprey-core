@@ -16,6 +16,15 @@ from document_validation_database import (
     get_required_documents_for_visa
 )
 from enhanced_document_recognition import EnhancedDocumentRecognitionAgent
+from document_analysis_metrics import (
+    DocumentAnalysisKPIs, 
+    DocumentMetrics, 
+    AdvancedFieldValidators,
+    QualityAssessment,
+    ConsistencyChecker,
+    DecisionType
+)
+from specialized_document_validators import create_specialized_validators
 
 logger = logging.getLogger(__name__)
 
