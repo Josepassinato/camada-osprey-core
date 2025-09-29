@@ -4908,6 +4908,57 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+@app.on_event("startup")
+async def startup_db_client():
+    """Startup event to connect to MongoDB with optimized indexes"""
+    global client, db
+    
+    try:
+        # MongoDB connection string - usually set via environment variable
+        mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/')
+        
+        client = AsyncIOMotorClient(mongo_url)
+        db = client.osprey_immigration_db  # Database name
+        
+        # Test the connection
+        await client.admin.command('ping')
+        
+        logger.info("Successfully connected to MongoDB!")
+        
+        # Create optimized indexes for better performance
+        try:
+            # Auto-application cases indexes
+            await db.auto_cases.create_index("case_id", unique=True)
+            await db.auto_cases.create_index("user_id")
+            await db.auto_cases.create_index("session_token")
+            await db.auto_cases.create_index("status")
+            await db.auto_cases.create_index("created_at")
+            await db.auto_cases.create_index([("user_id", 1), ("status", 1)])
+            
+            # Users indexes
+            await db.users.create_index("email", unique=True)
+            await db.users.create_index("id", unique=True)
+            
+            # Documents indexes
+            await db.documents.create_index("user_id")
+            await db.documents.create_index("document_type")
+            await db.documents.create_index("case_id")
+            await db.documents.create_index([("user_id", 1), ("document_type", 1)])
+            
+            # Chat history indexes for AI interactions
+            await db.chat_history.create_index("user_id")
+            await db.chat_history.create_index("session_id")
+            await db.chat_history.create_index("created_at")
+            
+            logger.info("Database indexes created successfully for optimized performance!")
+            
+        except Exception as index_error:
+            logger.warning(f"Some indexes may already exist: {str(index_error)}")
+        
+    except Exception as e:
+        logger.error(f"Error connecting to MongoDB: {str(e)}")
+        raise e
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
