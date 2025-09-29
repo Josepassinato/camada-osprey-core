@@ -356,8 +356,10 @@ const DocumentUploadAuto = () => {
     return requiredUploaded === totalRequired;
   };
 
-  const continueToNextStep = () => {
-    navigate(`/auto-application/case/${caseId}/story`);
+  const continueToNextStep = async () => {
+    // Save extracted data to case before navigation
+    await saveExtractedDataToCase();
+    navigate(`/auto-application/case/${caseId}/friendly-form`);
   };
 
   if (isLoading) {
