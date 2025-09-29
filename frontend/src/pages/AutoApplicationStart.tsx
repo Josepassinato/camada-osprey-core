@@ -42,7 +42,12 @@ const AutoApplicationStart = () => {
       
       console.log('🔘 Session token generated:', sessionToken);
       
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://visa-genius-2.preview.emergentagent.com';
+      // Robust backend URL detection for preview environment
+      const isPreview = window.location.hostname.includes('preview.emergentagent.com');
+      const backendUrl = isPreview 
+        ? 'https://visa-genius-2.preview.emergentagent.com'
+        : (import.meta.env.VITE_BACKEND_URL || 'https://visa-genius-2.preview.emergentagent.com');
+      
       const apiUrl = `${backendUrl}/api/auto-application/start`;
       
       console.log('🔘 Making request to:', apiUrl);
