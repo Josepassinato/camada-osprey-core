@@ -4764,6 +4764,50 @@ async def record_responsibility_confirmation(request: dict):
         logger.error(f"Error recording responsibility confirmation: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error recording confirmation: {str(e)}")
 
+# Document Analysis KPIs and Metrics Endpoints
+@api_router.get("/documents/analysis/kpis")
+async def get_document_analysis_kpis(timeframe_days: int = 30):
+    """
+    Obtém KPIs de análise de documentos para o período especificado
+    """
+    try:
+        from document_analysis_metrics import DocumentAnalysisKPIs
+        
+        kpi_system = DocumentAnalysisKPIs()
+        report = kpi_system.generate_kpi_report(timeframe_days)
+        
+        return {
+            "success": True,
+            "kpi_report": report,
+            "message": f"KPI report generated for last {timeframe_days} days"
+        }
+        
+    except Exception as e:
+        logger.error(f"Error generating KPI report: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating KPI report: {str(e)}")
+
+@api_router.get("/documents/analysis/performance")
+async def get_document_analysis_performance():
+    """
+    Obtém métricas de performance do sistema de análise
+    """
+    try:
+        from document_analysis_metrics import DocumentAnalysisKPIs
+        
+        kpi_system = DocumentAnalysisKPIs()
+        performance = kpi_system.calculate_processing_performance()
+        
+        return {
+            "success": True,
+            "performance_metrics": performance,
+            "targets": kpi_system.targets,
+            "message": "Performance metrics retrieved successfully"
+        }
+        
+    except Exception as e:
+        logger.error(f"Error retrieving performance metrics: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error retrieving performance metrics: {str(e)}")
+
 # CRITICAL: Real Document Analysis Endpoint
 @api_router.post("/documents/analyze-with-ai")
 async def analyze_document_with_real_ai(
