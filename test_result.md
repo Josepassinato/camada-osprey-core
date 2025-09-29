@@ -288,14 +288,16 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Cross-Device Responsiveness Testing"
-    - "Multi-Visa Journey Testing (H-1B, B-1/B-2, F-1)"
-    - "AI Integration and Chat Functionality"
-    - "Error Handling and Edge Cases"
-    - "Performance and Loading Testing"
+    - "High-Precision Date Normalizer (normalize_date)"
+    - "USCIS Receipt Validator (is_valid_uscis_receipt)"
+    - "SSN Validator (is_plausible_ssn)"
+    - "MRZ Parser with Checksums (parse_mrz_td3)"
+    - "Enhanced Field Validation Integration (enhance_field_validation)"
+    - "Document Analysis KPIs and Performance Endpoints"
+    - "Validation Performance and Targets"
   stuck_tasks: []
   test_all: true
-  test_priority: "comprehensive_validation"
+  test_priority: "high_precision_validators"
 
 agent_communication:
   - agent: "testing"
