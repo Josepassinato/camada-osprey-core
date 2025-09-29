@@ -15,6 +15,7 @@ from document_validation_database import (
     get_document_validation_info,
     get_required_documents_for_visa
 )
+from enhanced_document_recognition import EnhancedDocumentRecognitionAgent
 
 logger = logging.getLogger(__name__)
 
