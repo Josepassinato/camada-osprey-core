@@ -55,7 +55,157 @@ const DocumentUploadAuto = () => {
   
   const [case_, setCase] = useState<any>(null);
   const [visaSpecs, setVisaSpecs] = useState<any>(null);
-  const [documentRequirements, setDocumentRequirements] = useState<DocumentRequirement[]>([]);
+  const getDocumentRequirementsForVisa = (visaType: string) => {
+    const visaMap: any = {
+      'H-1B': [
+        {
+          id: 'passport',
+          name: 'Passaporte',
+          description: 'Passaporte válido por pelo menos 6 meses',
+          required: true,
+          dra_paula_tip: 'Essencial para H-1B. Validade mínima 6 meses.'
+        },
+        {
+          id: 'diploma',
+          name: 'Diploma Universitário',
+          description: 'Diploma de bacharel ou superior na área relacionada',
+          required: true,
+          dra_paula_tip: 'Deve ser Bachelor degree ou superior. Área deve qualificar como specialty occupation.'
+        },
+        {
+          id: 'transcript',
+          name: 'Histórico Escolar',
+          description: 'Transcripts oficiais da universidade',
+          required: true,
+          dra_paula_tip: 'Oficial da instituição. Pode precisar de evaluation credencial.'
+        },
+        {
+          id: 'employment_letter',
+          name: 'Carta de Emprego',
+          description: 'Job offer do empregador americano',
+          required: true,
+          dra_paula_tip: 'Deve especificar: posição, salário, duties, duração.'
+        },
+        {
+          id: 'resume',
+          name: 'Currículo Atualizado',
+          description: 'CV detalhado com experiência relevante',
+          required: true,
+          dra_paula_tip: 'Destaque experiência na área do H-1B.'
+        },
+        {
+          id: 'photos',
+          name: 'Fotos 2x2',
+          description: '2 fotos padrão USCIS',
+          required: true,
+          dra_paula_tip: 'Fundo branco, 2x2 polegadas, recentes.'
+        }
+      ],
+      'L-1': [
+        {
+          id: 'passport',
+          name: 'Passaporte',
+          description: 'Passaporte válido',
+          required: true,
+          dra_paula_tip: 'Verificar validade para toda duração do L-1.'
+        },
+        {
+          id: 'employment_letter_us',
+          name: 'Carta Empresa Americana',
+          description: 'Carta da empresa americana detalhando posição',
+          required: true,
+          dra_paula_tip: 'Deve explicar relacionamento com empresa estrangeira.'
+        },
+        {
+          id: 'employment_letter_foreign',
+          name: 'Carta Empresa Estrangeira',
+          description: 'Comprovante de 1 ano de trabalho no exterior',
+          required: true,
+          dra_paula_tip: 'Comprovar 1 ano nos últimos 3 anos na empresa relacionada.'
+        },
+        {
+          id: 'company_documents',
+          name: 'Documentos da Empresa',
+          description: 'Organograma, contratos, documentos corporativos',
+          required: true,
+          dra_paula_tip: 'Comprovar relacionamento parent/subsidiary/affiliate.'
+        }
+      ],
+      'B-1/B-2': [
+        {
+          id: 'passport',
+          name: 'Passaporte',
+          description: 'Passaporte válido por 6+ meses',
+          required: true,
+          dra_paula_tip: 'Essencial. Verifique validade e páginas em branco.'
+        },
+        {
+          id: 'photos',
+          name: 'Foto Digital',
+          description: 'Foto digital para DS-160',
+          required: true,
+          dra_paula_tip: 'Upload no DS-160. Padrão consulado americano.'
+        },
+        {
+          id: 'financial_documents',
+          name: 'Comprovantes Financeiros',
+          description: 'Extratos bancários, declaração de renda',
+          required: true,
+          dra_paula_tip: '3 meses de extratos + declaração IR + carta emprego.'
+        },
+        {
+          id: 'ties_documents',
+          name: 'Vínculos com Brasil',
+          description: 'Emprego, propriedades, família',
+          required: true,
+          dra_paula_tip: 'Essencial para demonstrar intenção de retorno.'
+        }
+      ],
+      'F-1': [
+        {
+          id: 'passport',
+          name: 'Passaporte',
+          description: 'Passaporte válido',
+          required: true,
+          dra_paula_tip: 'Válido por toda duração dos estudos.'
+        },
+        {
+          id: 'i20_form',
+          name: 'Formulário I-20',
+          description: 'I-20 original da escola',
+          required: true,
+          dra_paula_tip: 'Assinado pela escola. Verificar SEVIS fee pago.'
+        },
+        {
+          id: 'financial_documents',
+          name: 'Comprovação Financeira',
+          description: 'Recursos para estudos e manutenção',
+          required: true,
+          dra_paula_tip: 'Deve cobrir tuition + living expenses por todo curso.'
+        },
+        {
+          id: 'academic_transcripts',
+          name: 'Histórico Escolar',
+          description: 'Transcripts da educação anterior',
+          required: true,
+          dra_paula_tip: 'Com traduções. Mostrar progressão acadêmica.'
+        }
+      ]
+    };
+
+    return (visaMap[visaType] || visaMap['H-1B']).map((doc: any) => ({
+      ...doc,
+      uploaded: false,
+      file: null as File | null,
+      analyzing: false,
+      aiAnalysis: null as any
+    }));
+  };
+
+  const [documentRequirements, setDocumentRequirements] = useState(() => {
+    const visaType = case_?.form_code || 'H-1B';
+    return getDocumentRequirementsForVisa(visaType);
+  });
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
