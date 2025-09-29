@@ -5179,6 +5179,17 @@ def run_all_tests():
     
     print(f"  Auto-Application System: {auto_passed}/{auto_total} tests passed ({auto_passed/auto_total*100:.1f}%)")
     
+    # AI Document Validation Results (CRITICAL PRIORITY)
+    print("\n🔍 AI DOCUMENT VALIDATION SYSTEM:")
+    ai_validation_passed = sum(ai_validation_results.values())
+    ai_validation_total = len(ai_validation_results)
+    
+    for test_name, result in ai_validation_results.items():
+        status = "✅ PASS" if result else "❌ FAIL"
+        print(f"  {test_name.replace('_', ' ').title()}: {status}")
+    
+    print(f"  AI Document Validation: {ai_validation_passed}/{ai_validation_total} tests passed ({ai_validation_passed/ai_validation_total*100:.1f}%)")
+    
     # Priority Tests Results (NEW)
     print("\n🎯 PRIORITY TESTS FOR FINAL REVIEW:")
     priority_passed = sum(priority_results.values())
