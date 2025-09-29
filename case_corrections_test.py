@@ -112,8 +112,9 @@ def test_case_creation():
                 created_cases.append(case_id)
                 
                 print(f"✅ {test_case['description']} case created: {case_id}")
+                print(f"   Response data: {data}")
                 
-                if not CASE_ID:  # Use first case for subsequent tests
+                if not CASE_ID and case_id:  # Use first case for subsequent tests
                     CASE_ID = case_id
                     
             else:
