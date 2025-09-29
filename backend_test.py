@@ -2920,7 +2920,7 @@ def test_mongodb_optimizations_performance():
         
         # Test case listing performance
         start_time = time.time()
-        cases_response = requests.get(f"{API_BASE}/auto-application/cases", headers=headers, timeout=10)
+        cases_response = requests.get(f"{API_BASE}/user/cases", headers=headers, timeout=10)
         cases_time = (time.time() - start_time) * 1000
         
         if cases_response.status_code == 200:
