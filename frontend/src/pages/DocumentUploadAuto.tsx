@@ -579,9 +579,6 @@ const DocumentUploadAuto = () => {
       };
     }
 
-    return analysis;
-  };
-    
     // Visa-specific intelligent extraction using Dr. Miguel's knowledge
     if (documentType === 'passport') {
       analysis.extracted_data = {
