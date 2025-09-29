@@ -1820,6 +1820,14 @@ async def update_case_anonymous(case_id: str, case_update: CaseUpdate, session_t
         logger.error(f"Error updating case: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error updating case: {str(e)}")
 
+# Helper function for optional authentication
+async def get_current_user_optional():
+    """Get current user if authenticated, None if not"""
+    try:
+        return await get_current_user()
+    except:
+        return None
+
 @api_router.patch("/auto-application/case/{case_id}")
 async def patch_case_data(case_id: str, update_data: dict, current_user = Depends(get_current_user_optional)):
     """Efficiently update specific case fields with optimized data persistence"""
