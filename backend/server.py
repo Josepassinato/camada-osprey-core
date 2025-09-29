@@ -24,6 +24,7 @@ import openai
 from immigration_expert import ImmigrationExpert, create_immigration_expert
 from specialized_agents import (
     SpecializedAgentCoordinator,
+    DocumentValidationAgent,
     create_document_validator,
     create_form_validator, 
     create_eligibility_analyst,
