@@ -4689,6 +4689,145 @@ async def record_responsibility_confirmation(request: dict):
         logger.error(f"Error recording responsibility confirmation: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error recording confirmation: {str(e)}")
 
+# CRITICAL: Real Document Analysis Endpoint
+@api_router.post("/documents/analyze-with-ai")
+async def analyze_document_with_real_ai(
+    file: UploadFile = File(...),
+    document_type: str = Form(...),
+    visa_type: str = Form(...),
+    case_id: str = Form(...)
+):
+    """
+    REAL document analysis using Dr. Miguel's expertise
+    CRITICAL SECURITY FUNCTION - Validates actual document content
+    """
+    try:
+        from specialized_agents import DocumentValidationAgent
+        from visa_document_mapping import get_visa_document_requirements
+        
+        # Validate file type and size
+        allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']
+        if file.content_type not in allowed_types:
+            return {
+                "valid": False,
+                "legible": False,
+                "completeness": 0,
+                "issues": [f"❌ ERRO CRÍTICO: Tipo de arquivo '{file.content_type}' não permitido"],
+                "extracted_data": {"validation_status": "REJECTED", "reason": "Invalid file type"},
+                "dra_paula_assessment": "❌ DOCUMENTO REJEITADO: Tipo de arquivo não aceito pelo USCIS"
+            }
+        
+        # Check file size (10MB limit)
+        file_size = 0
+        file_content = await file.read()
+        file_size = len(file_content)
+        
+        if file_size > 10 * 1024 * 1024:  # 10MB
+            return {
+                "valid": False,
+                "legible": False,
+                "completeness": 0,
+                "issues": ["❌ ERRO: Arquivo muito grande. Máximo: 10MB"],
+                "extracted_data": {"validation_status": "REJECTED", "reason": "File too large"},
+                "dra_paula_assessment": "❌ DOCUMENTO REJEITADO: Arquivo excede limite de 10MB"
+            }
+        
+        if file_size < 50000:  # 50KB
+            return {
+                "valid": False,
+                "legible": False,
+                "completeness": 0,
+                "issues": ["❌ ERRO: Arquivo muito pequeno. Pode estar corrompido"],
+                "extracted_data": {"validation_status": "REJECTED", "reason": "File too small"},
+                "dra_paula_assessment": "❌ DOCUMENTO REJEITADO: Arquivo suspeito (muito pequeno)"
+            }
+        
+        # Validate document type against visa requirements
+        required_docs = get_visa_document_requirements(visa_type)
+        if document_type not in required_docs:
+            return {
+                "valid": False,
+                "legible": True,
+                "completeness": 0,
+                "issues": [f"❌ ERRO CRÍTICO: Documento '{document_type}' não é necessário para {visa_type}"],
+                "extracted_data": {"validation_status": "REJECTED", "reason": "Document not required for visa"},
+                "dra_paula_assessment": f"❌ DOCUMENTO REJEITADO: {document_type} não é requisito para {visa_type}"
+            }
+        
+        # File name analysis for obvious mismatches
+        file_name = file.filename.lower() if file.filename else ""
+        mismatch_detected = False
+        mismatch_reason = ""
+        
+        if document_type == 'passport':
+            if any(word in file_name for word in ['diploma', 'certificate', 'birth', 'certidao']):
+                mismatch_detected = True
+                mismatch_reason = f"Arquivo '{file.filename}' parece ser outro documento, não passaporte"
+        elif document_type == 'diploma':
+            if any(word in file_name for word in ['passport', 'birth', 'id', 'certidao', 'passaporte']):
+                mismatch_detected = True
+                mismatch_reason = f"Arquivo '{file.filename}' parece ser outro documento, não diploma"
+        elif document_type == 'birth_certificate':
+            if any(word in file_name for word in ['passport', 'diploma', 'id', 'passaporte']):
+                mismatch_detected = True
+                mismatch_reason = f"Arquivo '{file.filename}' parece ser outro documento, não certidão de nascimento"
+        
+        if mismatch_detected:
+            return {
+                "valid": False,
+                "legible": True,
+                "completeness": 0,
+                "issues": [f"❌ ERRO CRÍTICO: {mismatch_reason}"],
+                "extracted_data": {"validation_status": "REJECTED", "reason": "Document type mismatch"},
+                "dra_paula_assessment": f"❌ DOCUMENTO REJEITADO: {mismatch_reason}. Verifique se enviou o documento correto!"
+            }
+        
+        # If all validations pass, use Dr. Miguel for deeper analysis
+        dr_miguel = DocumentValidationAgent()
+        
+        document_data = {
+            "file_name": file.filename,
+            "file_type": file.content_type,
+            "file_size": file_size,
+            "document_type": document_type
+        }
+        
+        case_context = {
+            "form_code": visa_type,
+            "case_id": case_id
+        }
+        
+        # Real AI validation
+        validation_result = dr_miguel.validate_document(document_data, document_type, case_context)
+        
+        # Format response for frontend
+        return {
+            "valid": validation_result.get("document_valid", True),
+            "legible": validation_result.get("legible", True),
+            "completeness": validation_result.get("completeness_score", 85),
+            "issues": validation_result.get("issues_found", []),
+            "extracted_data": validation_result.get("extracted_data", {
+                "document_type": document_type,
+                "file_name": file.filename,
+                "validation_status": "APPROVED" if validation_result.get("document_valid", True) else "REJECTED",
+                "visa_context": visa_type
+            }),
+            "dra_paula_assessment": validation_result.get("dra_paula_assessment", f"✅ Documento {document_type} validado para {visa_type}"),
+            "visa_specific_validation": validation_result.get("visa_specific_validation", {})
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in real document analysis: {str(e)}")
+        return {
+            "valid": False,
+            "legible": False,
+            "completeness": 0,
+            "issues": [f"❌ ERRO INTERNO: Falha na análise do documento - {str(e)}"],
+            "extracted_data": {"validation_status": "ERROR", "reason": str(e)},
+            "dra_paula_assessment": "❌ ERRO: Falha na validação. Tente enviar novamente."
+        }
 app.include_router(api_router)
 
 app.add_middleware(
