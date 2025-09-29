@@ -644,22 +644,6 @@ class USCISFormTranslatorAgent(BaseSpecializedAgent):
         O USCIS rejeita formulários com erros - precisão é fundamental.
         """
         
-        ESTRUTURA PADRÃO:
-        1. Cabeçalho oficial
-        2. Identificação completa do requerente  
-        3. Propósito da carta
-        4. Contexto factual baseado nos dados fornecidos
-        5. Argumentação legal baseada em regulamentações
-        6. Conclusão profissional
-        7. Assinatura e credenciais
-        
-        GUARDRAILS CRÍTICOS:
-        - Se faltam informações essenciais, solicite especificamente
-        - Use apenas fatos verificáveis fornecidos pelo cliente
-        - Indique claramente campos que precisam ser preenchidos
-        - Não exagere ou embeleze informações
-        - Mantenha tom profissional e factual
-        
         RESPOSTA SEMPRE EM JSON:
         {{
             "agent": "Dr. Ricardo - Redator de Cartas",
