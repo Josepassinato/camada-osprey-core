@@ -138,7 +138,8 @@ def test_2_auto_application_journey():
             
             if response.status_code == 200:
                 data = response.json()
-                case_id = data.get('case_id')
+                case_data = data.get('case', {})
+                case_id = case_data.get('case_id')
                 
                 if case_id and case_id.startswith('OSP-'):
                     log_test_result(
