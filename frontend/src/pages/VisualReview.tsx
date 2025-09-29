@@ -208,19 +208,19 @@ const VisualReview = () => {
           {
             label: 'Endereço Atual',
             portuguese: portugueseResponses.address?.current_address || 'Não informado',
-            english: hasOfficialForm ? (englishForm.current_address || englishForm.mailing_address || 'Not provided') : 'Aguardando processamento IA',
+            english: hasOfficialForm ? (englishForm.current_address || englishForm.mailing_address || 'Not provided') : autoTranslateField(portugueseResponses.address?.current_address || 'Não informado'),
             status: 'correct'
           },
           {
             label: 'Telefone',
             portuguese: portugueseResponses.address?.phone || 'Não informado',
-            english: hasOfficialForm ? (englishForm.phone_number || englishForm.telephone || 'Not provided') : 'Aguardando processamento IA',
+            english: hasOfficialForm ? (englishForm.phone_number || englishForm.telephone || 'Not provided') : autoTranslateField(portugueseResponses.address?.phone || 'Não informado'),
             status: 'correct'
           },
           {
             label: 'E-mail',
             portuguese: portugueseResponses.address?.email || 'Não informado',
-            english: hasOfficialForm ? (englishForm.email_address || englishForm.email || 'Not provided') : 'Aguardando processamento IA',
+            english: hasOfficialForm ? (englishForm.email_address || englishForm.email || 'Not provided') : autoTranslateField(portugueseResponses.address?.email || 'Não informado'),
             status: 'correct'
           }
         ]
