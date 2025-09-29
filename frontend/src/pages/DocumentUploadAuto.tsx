@@ -217,6 +217,23 @@ const DocumentUploadAuto = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
+
+  // Form snapshot for OspreyOwlTutor integration
+  const { snapshot } = useFormSnapshot({
+    documents: documentRequirements.map(doc => ({
+      id: doc.id,
+      name: doc.name,
+      uploaded: doc.uploaded,
+      analyzed: !!doc.aiAnalysis,
+      valid: doc.aiAnalysis?.valid || false
+    })),
+    visa_type: case_?.form_code,
+    step: 'documents'
+  }, {
+    enabled: true,
+    autoGenerate: true,
+    debounceMs: 500
+  });
   const [dragActive, setDragActive] = useState(false);
 
   useEffect(() => {
