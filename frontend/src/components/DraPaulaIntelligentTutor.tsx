@@ -1,7 +1,7 @@
-"""
-Dra. Paula Intelligent Tutor - Sistema de mensagens inteligentes
-Integra o conhecimento especializado da Dra. Paula B2C no OspreyOwlTutor
-"""
+/**
+ * Dra. Paula Intelligent Tutor - Sistema de mensagens inteligentes
+ * Integra o conhecimento especializado da Dra. Paula B2C no OspreyOwlTutor
+ */
 
 interface VisaSpecificMessage {
   id: string;
