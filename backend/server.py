@@ -4704,8 +4704,6 @@ async def analyze_document_with_real_ai(
     CRITICAL SECURITY FUNCTION - Validates actual document content
     """
     try:
-        from specialized_agents import DocumentValidationAgent
-        from visa_document_mapping import get_visa_document_requirements
         
         # Validate file type and size
         allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']
