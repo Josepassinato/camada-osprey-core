@@ -235,7 +235,9 @@ const DocumentUploadAuto = () => {
         const data = await response.json();
         setCase(data.case);
         
+        // Update document requirements based on visa type
         if (data.case.form_code) {
+          setDocumentRequirements(getDocumentRequirementsForVisa(data.case.form_code));
           await fetchVisaSpecs(data.case.form_code);
         }
       } else {
