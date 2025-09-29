@@ -940,6 +940,24 @@ const DocumentUploadAuto = () => {
           </div>
         </div>
       </div>
+      
+      {/* Osprey Owl Tutor Integration */}
+      <OspreyOwlTutor 
+        snapshot={snapshot}
+        onAction={(event, payload) => {
+          console.log('DocumentUpload Tutor Action:', event, payload);
+          // Handle tutor actions specific to document upload
+          if (event === 'upload:document') {
+            const docElement = document.getElementById(`upload-${payload.docId}`);
+            docElement?.scrollIntoView({ behavior: 'smooth' });
+          } else if (event === 'help:document') {
+            const docSection = document.querySelector(`[data-doc-id="${payload.docId}"]`);
+            docSection?.scrollIntoView({ behavior: 'smooth' });
+          }
+        }}
+        isEnabled={true}
+        position="bottom-right"
+      />
     </div>
   );
 };
