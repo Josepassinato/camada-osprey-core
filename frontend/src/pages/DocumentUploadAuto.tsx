@@ -758,11 +758,24 @@ const DocumentUploadAuto = () => {
                       )}
                     </div>
                     <p className="text-sm text-black mb-2">{doc.description}</p>
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-black">
-                      <span>Formatos: {doc.formats.join(', ')}</span>
-                      <span>•</span>
-                      <span>Máximo: {doc.maxSize}</span>
-                    </div>
+                    {doc.dra_paula_tip && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-2">
+                        <div className="flex items-start gap-2">
+                          <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <p className="text-xs font-medium text-blue-800 mb-1">Dica da Dra. Paula:</p>
+                            <p className="text-xs text-blue-700">{doc.dra_paula_tip}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {doc.formats && doc.maxSize && (
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-black">
+                        <span>Formatos: {doc.formats.join(', ')}</span>
+                        <span>•</span>
+                        <span>Máximo: {doc.maxSize}</span>
+                      </div>
+                    )}
                   </div>
                   
                   {doc.uploaded ? (
