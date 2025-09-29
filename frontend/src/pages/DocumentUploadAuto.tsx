@@ -206,8 +206,7 @@ const DocumentUploadAuto = () => {
   };
 
   const [documentRequirements, setDocumentRequirements] = useState(() => {
-    const visaType = case_?.form_code || 'H-1B';
-    return getDocumentRequirementsForVisa(visaType);
+    return getDocumentRequirementsForVisa('H-1B');
   });
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
