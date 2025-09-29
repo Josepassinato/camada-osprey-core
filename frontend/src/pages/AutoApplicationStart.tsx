@@ -43,21 +43,9 @@ const AutoApplicationStart = () => {
       
       console.log('🔘 Session token generated:', sessionToken);
       
-      // Robust backend URL detection for preview environment
-      const isPreview = window.location.hostname.includes('preview.emergentagent.com');
-      const backendUrl = isPreview 
-        ? 'https://visa-genius-2.preview.emergentagent.com'
-        : (import.meta.env.VITE_BACKEND_URL || 'https://visa-genius-2.preview.emergentagent.com');
-      
-      const apiUrl = `${backendUrl}/api/auto-application/start`;
-      
-      console.log('🔘 Making request to:', apiUrl);
-      
-      const response = await fetch(apiUrl, {
+      // Use utility function for robust API call
+      const response = await makeApiCall('/auto-application/start', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           session_token: sessionToken
         }),
