@@ -110,6 +110,121 @@ export const OspreyOwlTutor: React.FC<OspreyOwlTutorProps> = ({
       setMessages(prev => [...prev, ...newMessages]);
     }
   };
+
+  const checkForAchievements = (result: ValidateResult) => {
+    const newAchievements: string[] = [];
+    
+    // Check for completion-based achievements
+    if (result.ok && result.errors.length === 0 && result.missingRequired.length === 0) {
+      const achievementMsg = draPaulaIntelligentTutor.getAchievementMessage(
+        currentVisaType,
+        currentStep,
+        { 
+          allSectionsComplete: true,
+          allDocumentsUploaded: snapshot?.documents?.every((doc: any) => doc.uploaded),
+          errorFree: true
+        }
+      );
+
+      if (achievementMsg) {
+        const achievementTutorMsg = draPaulaIntelligentTutor.convertToTutorMessage(achievementMsg);
+        setMessages(prev => [...prev, achievementTutorMsg]);
+        
+        if (!achievements.includes(achievementMsg.id)) {
+          newAchievements.push(achievementMsg.id);
+        }
+      }
+    }
+
+    // Update achievements
+    if (newAchievements.length > 0) {
+      setAchievements(prev => [...prev, ...newAchievements]);
+      showAchievementNotification(newAchievements[0]);
+    }
+  };
+
+  const showAchievementNotification = (achievementId: string) => {
+    // Show floating achievement notification
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce';
+    notification.innerHTML = `
+      <div class="flex items-center gap-2">
+        <span class="text-xl">🏆</span>
+        <span class="font-bold">Conquista Desbloqueada!</span>
+      </div>
+    `;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.remove();
+    }, 4000);
+  };
+
+  const handleValidationSuccess = (result: ValidateResult) => {
+    const newMessages: TutorMsg[] = [];
+    
+    if (result.ok && result.errors.length === 0) {
+      newMessages.push({
+        id: `success-${Date.now()}`,
+        severity: 'success',
+        text: '✅ Excelente! Todos os campos estão preenchidos corretamente.',
+        actions: [],
+        meta: { draPaulaAdvice: false, disclaimer: false }
+      });
+
+      // Check for achievements after successful validation
+      checkForAchievements(result);
+    }
+    
+    // Add contextual Dra. Paula messages for errors
+    if (result.errors.length > 0 || result.missingRequired.length > 0) {
+      const contextualMessages = draPaulaIntelligentTutor.getMessagesForContext(
+        currentVisaType,
+        currentStep,
+        'onError'
+      );
+
+      contextualMessages.forEach(msg => {
+        newMessages.push(draPaulaIntelligentTutor.convertToTutorMessage(msg));
+      });
+    }
+    
+    // Add error messages
+    result.errors.forEach((error, index) => {
+      newMessages.push({
+        id: `error-${Date.now()}-${index}`,
+        severity: 'error',
+        text: `❌ ${error}`,
+        actions: [],
+        meta: { draPaulaAdvice: false, disclaimer: false }
+      });
+    });
+    
+    // Add missing field messages  
+    result.missingRequired.forEach((missing, index) => {
+      newMessages.push({
+        id: `missing-${Date.now()}-${index}`,
+        severity: 'warning',
+        text: `⚠️ Campo obrigatório: ${missing}`,
+        actions: [],
+        meta: { draPaulaAdvice: false, disclaimer: false }
+      });
+    });
+    
+    // Add suggestions with Dra. Paula insights
+    result.suggestions.forEach((suggestion, index) => {
+      newMessages.push({
+        id: `suggestion-${Date.now()}-${index}`,
+        severity: 'info', 
+        text: `💡 ${suggestion}`,
+        actions: [],
+        meta: { draPaulaAdvice: true, disclaimer: false }
+      });
+    });
+
+    setMessages(prev => [...prev, ...newMessages]);
+    setLastValidation(result);
+  };
   
   const messageHistoryRef = useRef<TutorMsg[]>([]);
   const validationCacheRef = useRef<Map<string, ValidateResult>>(new Map());
