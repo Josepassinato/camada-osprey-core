@@ -172,8 +172,13 @@ const FriendlyForm = () => {
           label: 'Nacionalidade',
           type: 'text',
           required: true,
-          value: extractedFacts.personal_info?.nationality || caseData.basic_data?.nationality || '',
-          aiSuggestion: extractedFacts.personal_info?.nationality ? `IA sugeriu: ${extractedFacts.personal_info.nationality}` : undefined
+          value: extractedFacts.personal_info?.nationality || 
+                 extractedFacts.document_info?.passport_nationality ||
+                 caseData.basic_data?.nationality || 
+                 'Brasileira',
+          aiSuggestion: extractedFacts.personal_info?.nationality ? 
+            `IA extraiu do documento: ${extractedFacts.personal_info.nationality}` : 
+            (caseData.basic_data?.countryOfBirth ? `Dados básicos: ${caseData.basic_data.countryOfBirth}` : undefined)
         }
       ]
     });
