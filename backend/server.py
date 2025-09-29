@@ -1909,6 +1909,9 @@ async def batch_update_case_data(case_id: str, request: dict, current_user = Dep
         if not case:
             raise HTTPException(status_code=404, detail="Case not found")
         
+        # Extract updates from request
+        updates = request.get("updates", [])
+        
         # Process batch updates atomically
         combined_update = {"updated_at": datetime.utcnow()}
         
