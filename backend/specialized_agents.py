@@ -255,6 +255,68 @@ class DocumentValidationAgent(BaseSpecializedAgent):
         
         session_id = f"enhanced_validation_{hash(document_content) % 10000}"
         return await self._call_agent(enhanced_prompt, session_id)
+    def validate_document(self, document_data: Dict[str, Any], document_type: str, case_context: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Valida documento usando expertise da Dra. Paula B2C e mapeamento inteligente por visto"""
+        try:
+            from emergentintegrations import EmergentLLM
+            from visa_document_mapping import get_smart_extraction_prompt, get_visa_document_requirements
+            
+            llm = EmergentLLM(api_key=os.environ.get('EMERGENT_LLM_KEY'))
+            
+            # Obter tipo de visto do contexto do caso
+            visa_type = case_context.get('form_code', 'H-1B') if case_context else 'H-1B'
+            
+            # Usar prompt inteligente específico para o tipo de visto e documento
+            smart_prompt = get_smart_extraction_prompt(visa_type, document_type)
+            system_prompt = self.get_system_prompt() + f"\n\n{smart_prompt}"
+            
+            validation_prompt = self._get_enhanced_validation_prompt(document_data, document_type, visa_type, case_context)
+            
+            # Continue with the rest of the method implementation
+            response = llm.generate_response(system_prompt, validation_prompt)
+            
+            return {
+                "agent": "Dr. Miguel - Validador",
+                "document_type": document_type,
+                "visa_type": visa_type,
+                "validation_result": response,
+                "smart_mapping_used": True
+            }
+            
+        except Exception as e:
+            logger.error(f"Error in validate_document: {e}")
+            return {
+                "agent": "Dr. Miguel - Validador",
+                "document_type": document_type,
+                "validation_result": "Erro na validação",
+                "error": str(e)
+            }
+    
+    def _get_enhanced_validation_prompt(self, document_data: Dict[str, Any], document_type: str, visa_type: str, case_context: Dict[str, Any] = None) -> str:
+        """Gera prompt de validação aprimorado com mapeamento inteligente"""
+        from visa_document_mapping import get_visa_document_requirements
+        
+        # Obter requisitos específicos do documento para o tipo de visto
+        visa_requirements = get_visa_document_requirements(visa_type)
+        document_requirements = visa_requirements.get(document_type, {})
+        
+        prompt = f"""
+        VALIDAÇÃO INTELIGENTE COM MAPEAMENTO POR VISTO
+        
+        Tipo de Visto: {visa_type}
+        Documento: {document_type}
+        Dados: {document_data}
+        
+        REQUISITOS ESPECÍFICOS PARA {visa_type}:
+        {json.dumps(document_requirements, indent=2)}
+        
+        CONTEXTO DO CASO:
+        {case_context if case_context else 'Não fornecido'}
+        
+        Valide o documento considerando os requisitos específicos do visto {visa_type}.
+        """
+        
+        return prompt
 
 class FormValidationAgent(BaseSpecializedAgent):
     """Specialized agent for form completion and data consistency"""
