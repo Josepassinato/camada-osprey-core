@@ -177,8 +177,8 @@ const FriendlyForm = () => {
                  caseData.basic_data?.nationality || 
                  'Brasileira',
           aiSuggestion: extractedFacts.personal_info?.nationality ? 
-            `IA extraiu do documento: ${extractedFacts.personal_info.nationality}` : 
-            (caseData.basic_data?.countryOfBirth ? `Dados básicos: ${caseData.basic_data.countryOfBirth}` : undefined)
+            `🤖 IA extraiu dos documentos: ${extractedFacts.personal_info.nationality}` : 
+            (caseData.basic_data?.countryOfBirth ? `📋 Dados básicos: ${caseData.basic_data.countryOfBirth}` : undefined)
         }
       ]
     });
