@@ -25,6 +25,15 @@ from document_analysis_metrics import (
     DecisionType
 )
 from specialized_document_validators import create_specialized_validators
+from validators import (
+    normalize_date, 
+    parse_mrz_td3, 
+    is_valid_uscis_receipt, 
+    is_plausible_ssn,
+    enhance_field_validation,
+    extract_and_validate_mrz
+)
+import hashlib
 
 logger = logging.getLogger(__name__)
 
