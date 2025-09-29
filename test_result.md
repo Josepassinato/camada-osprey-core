@@ -884,13 +884,14 @@ metadata:
 
 test_plan:
   current_focus:
-    - "VisaRequirements Component Integration"
-    - "Responsibility Confirmation System"
-    - "Proactive Owl Tutor Finalization"
-    - "Complete System Integration Testing"
+    - "EMERGENT_LLM_KEY Integration Validation"
+    - "AI Chat Endpoints Testing"
+    - "AI Document Validation (Dr. Miguel)"
+    - "AI Processing Steps Verification"
+    - "AI Fact Extraction Testing"
   stuck_tasks: []
   test_all: false
-  test_priority: "save_continue_first"
+  test_priority: "ai_integration_first"
 
   - task: "AI Document Validation Real Integration Fix"
     implemented: true
