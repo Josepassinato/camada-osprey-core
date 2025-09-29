@@ -44,7 +44,7 @@ type TutorMsg = {
   severity: "success" | "info" | "warning" | "error";
   text: string;
   actions?: Array<{ label: string; event: string; payload?: any }>;
-  meta?: { notVerified?: boolean; disclaimer?: boolean };
+  meta?: { notVerified?: boolean; disclaimer?: boolean; draPaulaAdvice?: boolean };
 };
 
 interface OspreyOwlTutorProps {
