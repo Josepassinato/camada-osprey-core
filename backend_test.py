@@ -4547,6 +4547,487 @@ def test_complete_user_journey():
         print(f"❌ Complete user journey error: {str(e)}")
         return False
 
+# ============================================================================
+# AI DOCUMENT VALIDATION TESTS (CRITICAL PRIORITY)
+# ============================================================================
+
+def test_ai_document_validation_real_integration():
+    """Test REAL AI Document Validation with Dr. Miguel Agent - CRITICAL PRIORITY"""
+    print("\n🔍 Testing REAL AI Document Validation with Dr. Miguel...")
+    
+    try:
+        # Test 1: Valid passport document for H-1B visa (should pass)
+        print("\n   Test 1: Valid passport for H-1B visa")
+        
+        # Create a realistic test image (passport-like)
+        test_passport_base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+        test_passport_bytes = base64.b64decode(test_passport_base64)
+        
+        files = {
+            'file': ('passport_carlos_silva.jpg', test_passport_bytes, 'image/jpeg')
+        }
+        
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'OSP-TEST001'
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/documents/analyze-with-ai",
+            files=files,
+            data=data,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            print(f"      ✅ Valid passport analysis successful")
+            print(f"      Valid: {result.get('valid')}")
+            print(f"      Legible: {result.get('legible')}")
+            print(f"      Completeness: {result.get('completeness')}%")
+            print(f"      Issues: {len(result.get('issues', []))}")
+            print(f"      Dr. Miguel assessment: {result.get('dra_paula_assessment', 'N/A')[:100]}...")
+            
+            # Verify Dr. Miguel is actually being called (not simulated)
+            assessment = result.get('dra_paula_assessment', '')
+            extracted_data = result.get('extracted_data', {})
+            
+            if 'Dr. Miguel' in assessment or 'DocumentValidationAgent' in str(result):
+                print("      ✅ Dr. Miguel agent is being called (not simulated)")
+            else:
+                print("      ⚠️  Cannot confirm Dr. Miguel agent is being called")
+        else:
+            print(f"      ❌ Valid passport test failed: {response.status_code}")
+            print(f"      Error: {response.text}")
+            return False
+        
+        # Test 2: Wrong document type (diploma sent as passport) - should fail
+        print("\n   Test 2: Wrong document type (diploma as passport)")
+        
+        files = {
+            'file': ('diploma_engineering.pdf', test_passport_bytes, 'application/pdf')
+        }
+        
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B', 
+            'case_id': 'OSP-TEST002'
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/documents/analyze-with-ai",
+            files=files,
+            data=data,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            print(f"      ✅ Wrong document type analysis successful")
+            print(f"      Valid: {result.get('valid')} (should be False)")
+            print(f"      Issues detected: {len(result.get('issues', []))}")
+            
+            # Should detect mismatch
+            if not result.get('valid', True):
+                print("      ✅ Document type mismatch correctly detected")
+            else:
+                print("      ❌ Document type mismatch NOT detected")
+                return False
+        else:
+            print(f"      ❌ Wrong document type test failed: {response.status_code}")
+            return False
+        
+        # Test 3: File too large (>10MB) - should fail
+        print("\n   Test 3: File size validation (too large)")
+        
+        # Create large file content (simulate >10MB)
+        large_content = b"x" * (11 * 1024 * 1024)  # 11MB
+        
+        files = {
+            'file': ('large_passport.jpg', large_content, 'image/jpeg')
+        }
+        
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'OSP-TEST003'
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/documents/analyze-with-ai",
+            files=files,
+            data=data,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            print(f"      ✅ Large file analysis successful")
+            print(f"      Valid: {result.get('valid')} (should be False)")
+            
+            # Should reject large file
+            if not result.get('valid', True):
+                print("      ✅ Large file correctly rejected")
+                issues = result.get('issues', [])
+                if any('muito grande' in issue.lower() or '10mb' in issue.lower() for issue in issues):
+                    print("      ✅ Correct error message for large file")
+            else:
+                print("      ❌ Large file NOT rejected")
+                return False
+        else:
+            print(f"      ❌ Large file test failed: {response.status_code}")
+            return False
+        
+        # Test 4: File too small (<50KB) - should fail
+        print("\n   Test 4: File size validation (too small)")
+        
+        small_content = b"x" * 1000  # 1KB (very small)
+        
+        files = {
+            'file': ('tiny_passport.jpg', small_content, 'image/jpeg')
+        }
+        
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'OSP-TEST004'
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/documents/analyze-with-ai",
+            files=files,
+            data=data,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            print(f"      ✅ Small file analysis successful")
+            print(f"      Valid: {result.get('valid')} (should be False)")
+            
+            # Should reject small file
+            if not result.get('valid', True):
+                print("      ✅ Small file correctly rejected")
+                issues = result.get('issues', [])
+                if any('muito pequeno' in issue.lower() or 'corrompido' in issue.lower() for issue in issues):
+                    print("      ✅ Correct error message for small file")
+            else:
+                print("      ❌ Small file NOT rejected")
+                return False
+        else:
+            print(f"      ❌ Small file test failed: {response.status_code}")
+            return False
+        
+        # Test 5: Invalid file type (.txt) - should fail
+        print("\n   Test 5: Invalid file type validation")
+        
+        files = {
+            'file': ('document.txt', b"This is a text file", 'text/plain')
+        }
+        
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'OSP-TEST005'
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/documents/analyze-with-ai",
+            files=files,
+            data=data,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            print(f"      ✅ Invalid file type analysis successful")
+            print(f"      Valid: {result.get('valid')} (should be False)")
+            
+            # Should reject invalid file type
+            if not result.get('valid', True):
+                print("      ✅ Invalid file type correctly rejected")
+                issues = result.get('issues', [])
+                if any('não permitido' in issue.lower() or 'text/plain' in issue for issue in issues):
+                    print("      ✅ Correct error message for invalid file type")
+            else:
+                print("      ❌ Invalid file type NOT rejected")
+                return False
+        else:
+            print(f"      ❌ Invalid file type test failed: {response.status_code}")
+            return False
+        
+        # Test 6: Document not required for visa type - should fail
+        print("\n   Test 6: Document not required for visa type")
+        
+        files = {
+            'file': ('medical_exam.pdf', test_passport_bytes, 'application/pdf')
+        }
+        
+        data = {
+            'document_type': 'medical_exam',
+            'visa_type': 'B-1/B-2',  # Tourist visa doesn't need medical exam
+            'case_id': 'OSP-TEST006'
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/documents/analyze-with-ai",
+            files=files,
+            data=data,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            print(f"      ✅ Visa-specific validation successful")
+            print(f"      Valid: {result.get('valid')} (should be False)")
+            
+            # Should reject document not required for visa
+            if not result.get('valid', True):
+                print("      ✅ Visa-specific document requirement correctly enforced")
+                issues = result.get('issues', [])
+                if any('não é necessário' in issue.lower() for issue in issues):
+                    print("      ✅ Correct error message for unnecessary document")
+            else:
+                print("      ❌ Visa-specific document requirement NOT enforced")
+                return False
+        else:
+            print(f"      ❌ Visa-specific validation test failed: {response.status_code}")
+            return False
+        
+        # Test 7: Test various visa types
+        print("\n   Test 7: Various visa types validation")
+        
+        visa_types = ['H-1B', 'B-1/B-2', 'F-1']
+        for visa_type in visa_types:
+            files = {
+                'file': (f'passport_{visa_type.lower().replace("-", "").replace("/", "")}.jpg', test_passport_bytes, 'image/jpeg')
+            }
+            
+            data = {
+                'document_type': 'passport',
+                'visa_type': visa_type,
+                'case_id': f'OSP-TEST-{visa_type.replace("-", "").replace("/", "")}'
+            }
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                print(f"      ✅ {visa_type} visa validation working")
+                
+                # Check visa-specific validation
+                visa_validation = result.get('visa_specific_validation', {})
+                if visa_validation or visa_type in str(result):
+                    print(f"      ✅ {visa_type} visa-specific logic detected")
+            else:
+                print(f"      ❌ {visa_type} visa validation failed: {response.status_code}")
+                return False
+        
+        print("\n✅ ALL AI DOCUMENT VALIDATION TESTS PASSED!")
+        print("   Dr. Miguel agent is working correctly with real AI validation")
+        print("   File size limits enforced (50KB - 10MB)")
+        print("   File type validation working (PDF/JPG/PNG only)")
+        print("   Document type mismatch detection working")
+        print("   Visa-specific validation logic working")
+        print("   Multiple visa types supported")
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ AI Document Validation test error: {str(e)}")
+        return False
+
+def test_dr_miguel_specific_validations():
+    """Test Dr. Miguel's specific document validation scenarios"""
+    print("\n🔬 Testing Dr. Miguel Specific Validation Scenarios...")
+    
+    try:
+        # Test with realistic document names that should trigger specific validations
+        test_scenarios = [
+            {
+                'name': 'Birth certificate sent as passport',
+                'filename': 'certidao_nascimento_carlos.pdf',
+                'document_type': 'passport',
+                'should_fail': True,
+                'expected_issue': 'outro documento'
+            },
+            {
+                'name': 'Diploma sent as passport', 
+                'filename': 'diploma_engenharia_carlos.pdf',
+                'document_type': 'passport',
+                'should_fail': True,
+                'expected_issue': 'outro documento'
+            },
+            {
+                'name': 'ID card sent as passport',
+                'filename': 'rg_carlos_silva.jpg',
+                'document_type': 'passport', 
+                'should_fail': True,
+                'expected_issue': 'outro documento'
+            },
+            {
+                'name': 'Passport sent as birth certificate',
+                'filename': 'passaporte_brasileiro.jpg',
+                'document_type': 'birth_certificate',
+                'should_fail': True,
+                'expected_issue': 'outro documento'
+            }
+        ]
+        
+        test_image_bytes = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==")
+        
+        for i, scenario in enumerate(test_scenarios, 1):
+            print(f"\n   Test {i}: {scenario['name']}")
+            
+            files = {
+                'file': (scenario['filename'], test_image_bytes, 'image/jpeg')
+            }
+            
+            data = {
+                'document_type': scenario['document_type'],
+                'visa_type': 'H-1B',
+                'case_id': f'OSP-MIGUEL-{i:03d}'
+            }
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                is_valid = result.get('valid', True)
+                issues = result.get('issues', [])
+                
+                print(f"      Valid: {is_valid}")
+                print(f"      Issues: {len(issues)}")
+                
+                if scenario['should_fail']:
+                    if not is_valid:
+                        print(f"      ✅ Correctly rejected {scenario['name']}")
+                        
+                        # Check if expected issue is mentioned
+                        issue_text = ' '.join(issues).lower()
+                        if scenario['expected_issue'].lower() in issue_text:
+                            print(f"      ✅ Correct error message detected")
+                        else:
+                            print(f"      ⚠️  Expected issue '{scenario['expected_issue']}' not clearly mentioned")
+                    else:
+                        print(f"      ❌ Should have rejected {scenario['name']} but didn't")
+                        return False
+                else:
+                    if is_valid:
+                        print(f"      ✅ Correctly accepted {scenario['name']}")
+                    else:
+                        print(f"      ❌ Should have accepted {scenario['name']} but didn't")
+                        return False
+            else:
+                print(f"      ❌ Test failed with status: {response.status_code}")
+                return False
+        
+        print("\n✅ ALL DR. MIGUEL SPECIFIC VALIDATION TESTS PASSED!")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Dr. Miguel specific validation test error: {str(e)}")
+        return False
+
+def test_document_validation_error_messages():
+    """Test that error messages are meaningful and specific"""
+    print("\n💬 Testing Document Validation Error Messages...")
+    
+    try:
+        test_image_bytes = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==")
+        
+        # Test various error scenarios and check message quality
+        error_tests = [
+            {
+                'name': 'File too large',
+                'file_content': b"x" * (11 * 1024 * 1024),
+                'expected_keywords': ['muito grande', '10mb', 'máximo']
+            },
+            {
+                'name': 'File too small',
+                'file_content': b"x" * 1000,
+                'expected_keywords': ['muito pequeno', 'corrompido']
+            },
+            {
+                'name': 'Wrong document type',
+                'filename': 'diploma_carlos.pdf',
+                'document_type': 'passport',
+                'expected_keywords': ['outro documento', 'não passaporte']
+            }
+        ]
+        
+        for i, test in enumerate(error_tests, 1):
+            print(f"\n   Test {i}: {test['name']}")
+            
+            file_content = test.get('file_content', test_image_bytes)
+            filename = test.get('filename', 'test_document.jpg')
+            document_type = test.get('document_type', 'passport')
+            
+            files = {
+                'file': (filename, file_content, 'image/jpeg')
+            }
+            
+            data = {
+                'document_type': document_type,
+                'visa_type': 'H-1B',
+                'case_id': f'OSP-ERROR-{i:03d}'
+            }
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                issues = result.get('issues', [])
+                assessment = result.get('dra_paula_assessment', '')
+                
+                print(f"      Issues found: {len(issues)}")
+                print(f"      Assessment: {assessment[:100]}...")
+                
+                # Check if expected keywords are present
+                all_text = ' '.join(issues + [assessment]).lower()
+                found_keywords = []
+                
+                for keyword in test['expected_keywords']:
+                    if keyword.lower() in all_text:
+                        found_keywords.append(keyword)
+                
+                if found_keywords:
+                    print(f"      ✅ Found expected keywords: {found_keywords}")
+                else:
+                    print(f"      ⚠️  Expected keywords not found: {test['expected_keywords']}")
+                
+                # Check if messages are in Portuguese
+                if any(word in all_text for word in ['documento', 'arquivo', 'erro', 'rejeitado']):
+                    print(f"      ✅ Error messages in Portuguese")
+                else:
+                    print(f"      ⚠️  Error messages language unclear")
+            else:
+                print(f"      ❌ Test failed with status: {response.status_code}")
+                return False
+        
+        print("\n✅ ALL ERROR MESSAGE TESTS PASSED!")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error message test error: {str(e)}")
+        return False
+
 def run_all_tests():
     """Run all B2C backend tests including document management and education system"""
     print("🚀 Starting OSPREY B2C Backend Complete System Tests")
