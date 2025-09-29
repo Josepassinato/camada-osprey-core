@@ -3084,14 +3084,6 @@ async def get_responsibility_status(case_id: str):
             "success": False,
             "error": str(e)
         }
-# Helper function for optional authentication
-async def get_current_user_optional():
-    """Get current user if authenticated, None if not"""
-    try:
-        return await get_current_user()
-    except:
-        return None
-
 # Existing Applications endpoints continue here...
 @api_router.post("/applications")
 async def create_application(app_data: ApplicationCreate, current_user = Depends(get_current_user)):
