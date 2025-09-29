@@ -1821,10 +1821,18 @@ async def update_case_anonymous(case_id: str, case_update: CaseUpdate, session_t
         raise HTTPException(status_code=500, detail=f"Error updating case: {str(e)}")
 
 # Helper function for optional authentication
-async def get_current_user_optional():
+async def get_current_user_optional(credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False))):
     """Get current user if authenticated, None if not"""
+    if not credentials:
+        return None
     try:
-        return await get_current_user()
+        payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        user_id = payload.get("user_id")
+        if not user_id:
+            return None
+        
+        user = await db.users.find_one({"id": user_id})
+        return user
     except:
         return None
 
