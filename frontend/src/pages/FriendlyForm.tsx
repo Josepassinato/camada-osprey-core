@@ -187,17 +187,61 @@ const FriendlyForm = () => {
       completed: false,
       fields: [
         {
-          id: 'current_address',
-          label: 'Endereço Atual',
-          type: 'textarea',
+          id: 'cep',
+          label: 'CEP (se no Brasil)',
+          type: 'text',
+          required: false,
+          value: caseData.basic_data?.zipCode?.replace(/[^0-9]/g, '') || '',
+          placeholder: '00000000',
+          validation: 'cep'
+        },
+        {
+          id: 'street_address',
+          label: 'Endereço (Rua, Número)',
+          type: 'text',
           required: true,
-          value: extractedFacts.personal_info?.current_address || 
-                 `${caseData.basic_data?.currentAddress || ''} ${caseData.basic_data?.city || ''} ${caseData.basic_data?.state || ''} ${caseData.basic_data?.zipCode || ''}`.trim() || 
-                 '',
-          placeholder: 'Endereço completo incluindo CEP/ZIP Code',
-          aiSuggestion: extractedFacts.personal_info?.current_address ? 
-            `IA sugeriu: ${extractedFacts.personal_info.current_address}` : 
-            (caseData.basic_data?.currentAddress ? `Dados básicos: ${caseData.basic_data.currentAddress}` : undefined)
+          value: caseData.basic_data?.currentAddress || '',
+          placeholder: 'Ex: Rua das Flores, 123, Apt 45'
+        },
+        {
+          id: 'neighborhood',
+          label: 'Bairro',
+          type: 'text',
+          required: false,
+          value: '',
+          placeholder: 'Ex: Centro, Vila Nova'
+        },
+        {
+          id: 'city',
+          label: 'Cidade',
+          type: 'text',
+          required: true,
+          value: caseData.basic_data?.city || '',
+          placeholder: 'Ex: São Paulo'
+        },
+        {
+          id: 'state',
+          label: 'Estado/Província',
+          type: 'text',
+          required: true,
+          value: caseData.basic_data?.state || '',
+          placeholder: 'Ex: SP, CA, NY'
+        },
+        {
+          id: 'postal_code',
+          label: 'CEP/ZIP Code',
+          type: 'text',
+          required: true,
+          value: caseData.basic_data?.zipCode || '',
+          placeholder: '00000-000 ou 12345'
+        },
+        {
+          id: 'country',
+          label: 'País',
+          type: 'text',
+          required: true,
+          value: 'Brasil',
+          placeholder: 'Brasil, Estados Unidos, etc.'
         },
         {
           id: 'phone',
