@@ -309,6 +309,63 @@ const DocumentUploadAuto = () => {
     }
   };
 
+  const saveExtractedDataToCase = async () => {
+    try {
+      const sessionToken = localStorage.getItem('osprey_session_token');
+      
+      let url = `${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}`;
+      if (sessionToken && sessionToken !== 'null') {
+        url += `?session_token=${sessionToken}`;
+      }
+
+      // Consolidate all extracted data from documents
+      const extractedFacts: any = {
+        personal_info: {},
+        address_info: {},
+        document_info: {}
+      };
+
+      // Process each uploaded document's analysis
+      documentRequirements.forEach(doc => {
+        if (doc.uploaded && doc.aiAnalysis?.extracted_data) {
+          const data = doc.aiAnalysis.extracted_data;
+          
+          // Map passport data
+          if (doc.id === 'passport' && data) {
+            if (data.full_name) extractedFacts.personal_info.full_name = data.full_name;
+            if (data.document_number) extractedFacts.document_info.passport_number = data.document_number;
+            if (data.expiration_date) extractedFacts.document_info.passport_expiry = data.expiration_date;
+            if (data.country_of_issue) extractedFacts.personal_info.nationality = data.country_of_issue;
+          }
+
+          // Map other document types
+          if (data.date_of_birth) extractedFacts.personal_info.date_of_birth = data.date_of_birth;
+          if (data.place_of_birth) extractedFacts.personal_info.place_of_birth = data.place_of_birth;
+          if (data.address) extractedFacts.address_info.current_address = data.address;
+          if (data.phone) extractedFacts.address_info.phone = data.phone;
+          if (data.email) extractedFacts.address_info.email = data.email;
+        }
+      });
+
+      // Save extracted facts to case
+      await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ai_extracted_facts: extractedFacts,
+          status: 'documents_analyzed'
+        }),
+      });
+
+      console.log('✅ Dados extraídos dos documentos salvos:', extractedFacts);
+
+    } catch (error) {
+      console.error('Save extracted data error:', error);
+    }
+  };
+
   const removeDocument = async (documentId: string, fileId: string) => {
     setUploadedFiles(prev => prev.filter(f => f.id !== fileId));
     setDocumentRequirements(prev => prev.map(req => 
