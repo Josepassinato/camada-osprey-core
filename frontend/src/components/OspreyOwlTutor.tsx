@@ -63,10 +63,53 @@ export const OspreyOwlTutor: React.FC<OspreyOwlTutorProps> = ({
   className = ''
 }) => {
   const [messages, setMessages] = useState<TutorMsg[]>([]);
+  const [achievements, setAchievements] = useState<string[]>([]);
+  const [currentVisaType, setCurrentVisaType] = useState<string>('');
+  const [currentStep, setCurrentStep] = useState<string>('');
   const [isOpen, setIsOpen] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [owlEyes, setOwlEyes] = useState({ leftEye: true, rightEye: true });
   const [lastValidation, setLastValidation] = useState<ValidateResult | null>(null);
+
+  // Initialize with Dra. Paula welcome message
+  useEffect(() => {
+    if (snapshot?.visa_type && snapshot?.step) {
+      setCurrentVisaType(snapshot.visa_type);
+      setCurrentStep(snapshot.step);
+      
+      // Welcome message with visa-specific context
+      const welcomeMessage = {
+        id: 'welcome',
+        severity: 'info' as const,
+        text: `🦉 Olá! Sou a Coruja do Osprey, integrada com o conhecimento da **Dra. Paula B2C**!\n\nVou te guiar no seu processo ${snapshot.visa_type} com dicas especializadas. Juntas, vamos garantir o sucesso da sua aplicação! ✨`,
+        actions: [],
+        meta: { draPaulaAdvice: true, disclaimer: false }
+      };
+
+      setMessages([welcomeMessage]);
+      
+      // Load initial proactive messages from Dra. Paula
+      loadProactiveMessages();
+    }
+  }, [snapshot?.visa_type, snapshot?.step]);
+
+  const loadProactiveMessages = () => {
+    if (!currentVisaType || !currentStep) return;
+
+    const proactiveMessages = draPaulaIntelligentTutor.getProactiveMessages(
+      currentVisaType,
+      currentStep,
+      snapshot
+    );
+
+    const newMessages = proactiveMessages.map(msg => 
+      draPaulaIntelligentTutor.convertToTutorMessage(msg)
+    );
+
+    if (newMessages.length > 0) {
+      setMessages(prev => [...prev, ...newMessages]);
+    }
+  };
   
   const messageHistoryRef = useRef<TutorMsg[]>([]);
   const validationCacheRef = useRef<Map<string, ValidateResult>>(new Map());
