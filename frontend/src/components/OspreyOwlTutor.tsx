@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, HelpCircle, CheckCircle, AlertTriangle, Info, ArrowRight } from 'lucide-react';
+import { X, HelpCircle, CheckCircle, AlertTriangle, Info, ArrowRight, Award, Star } from 'lucide-react';
+import { draPaulaIntelligentTutor } from './DraPaulaIntelligentTutor';
 
 // Types from specification
 type FieldState = {
