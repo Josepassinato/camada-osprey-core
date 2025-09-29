@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Teste o novo sistema de educação e preparo B2C implementado no backend OSPREY. Sistema educacional completo implementado com 4 módulos principais: Guias Interativos, Simulador de Entrevista, Dicas Personalizadas, Base de Conhecimento, 9 novos endpoints educacionais, integração com IA (OpenAI GPT-4), sistema de progresso do usuário."
+user_problem_statement: "TESTE ESPECÍFICO - VALIDAÇÃO DA CHAVE API OPENAI/EMERGENT_LLM_KEY: Verificar se a chave EMERGENT_LLM_KEY está funcionando corretamente com integração OpenAI para todas as funcionalidades AI da aplicação OSPREY. Testes críticos: 1) EMERGENT_LLM_KEY status, 2) AI Chat endpoints, 3) AI Document validation (Dr. Miguel), 4) AI Processing steps (5 steps), 5) AI Fact extraction, 6) Error handling."
 
 backend:
   - task: "Auto-Application Complete Journey - Stage 5 (Story Telling)"
