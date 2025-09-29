@@ -60,6 +60,7 @@ const FriendlyForm = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
+  const [cepLoading, setCepLoading] = useState(false);
 
   useEffect(() => {
     if (caseId) {
