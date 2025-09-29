@@ -4815,17 +4815,26 @@ async def analyze_document_with_real_ai(
                 "dra_paula_assessment": "❌ DOCUMENTO REJEITADO: Arquivo suspeito (muito pequeno)"
             }
         
-        # Validate document type against visa requirements
-        required_docs = get_visa_document_requirements(visa_type)
+        # Validate document type against visa requirements (CORRECTED)
+        from document_validation_database import get_required_documents_for_visa
+        required_docs = get_required_documents_for_visa(visa_type)
+        
+        # Log para debug
+        logger.info(f"🔍 Verificando documento '{document_type}' para visto '{visa_type}'")
+        logger.info(f"📋 Documentos obrigatórios para {visa_type}: {required_docs}")
+        
         if document_type not in required_docs:
+            logger.warning(f"⚠️ Documento '{document_type}' NÃO está na lista obrigatória para {visa_type}")
             return {
                 "valid": False,
                 "legible": True,
                 "completeness": 0,
-                "issues": [f"❌ ERRO CRÍTICO: Documento '{document_type}' não é necessário para {visa_type}"],
+                "issues": [f"❌ ERRO CRÍTICO: Documento '{document_type}' não é necessário para {visa_type}. Documentos obrigatórios: {', '.join(required_docs)}"],
                 "extracted_data": {"validation_status": "REJECTED", "reason": "Document not required for visa"},
-                "dra_paula_assessment": f"❌ DOCUMENTO REJEITADO: {document_type} não é requisito para {visa_type}"
+                "dra_paula_assessment": f"❌ DOCUMENTO REJEITADO: {document_type} não é requisito para {visa_type}. Documentos necessários: {', '.join(required_docs)}"
             }
+        else:
+            logger.info(f"✅ Documento '{document_type}' é obrigatório para {visa_type} - prosseguindo com validação")
         
         # File name analysis for obvious mismatches
         file_name = file.filename.lower() if file.filename else ""
