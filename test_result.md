@@ -868,6 +868,18 @@ test_plan:
   test_all: false
   test_priority: "save_continue_first"
 
+  - task: "AI Document Validation Real Integration Fix"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py, /app/frontend/src/pages/DocumentUploadAuto.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "CRITICAL INVESTIGATION: Previous report mentioned DocumentUploadAuto.tsx was using simulateAIAnalysis with fake data. Investigation reveals: 1) Backend endpoint /api/documents/analyze-with-ai EXISTS and DOES use real Dr. Miguel AI analysis (DocumentValidationAgent), 2) Frontend realDocumentAnalysis function correctly calls this endpoint, 3) Backend restarted to ensure endpoint is active. Need to test if Dr. Miguel agent actually detects document errors or if there's a deeper issue with the AI validation logic."
+
 agent_communication:
   - agent: "main"
     message: "🎉 CASE CREATION ERROR COMPLETELY RESOLVED! After fixing SelectForm yellow page, user reported case creation errors. Root cause: Backend USCISForm enum missing B-1/B-2 and F-1 visa types, causing 422 validation errors. Frontend was sending valid visa codes but backend rejected them. Fixed by adding B1B2 = 'B-1/B-2' and F1 = 'F-1' to USCISForm enum in server.py. Verified all visa types now working: ✅ H-1B (Case: OSP-4CADE5BA), ✅ B-1/B-2 (Case: OSP-D38E1EDA), ✅ F-1 (Case: OSP-9B3367D9). Complete user journey functional: SelectForm → visa selection → case creation → BasicData page navigation. Case creation system fully operational."
