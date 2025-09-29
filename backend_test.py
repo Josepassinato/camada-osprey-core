@@ -2745,30 +2745,28 @@ def test_case_update_endpoints_corrections():
             # TEST 3: NEW BATCH UPDATE ENDPOINT
             print("\n   Testing POST /api/auto-application/case/{case_id}/batch-update (New - Batch Updates)")
             
-            batch_payload = {
-                "updates": [
-                    {
-                        "field": "user_story_text",
-                        "value": "Sou engenheiro de software brasileiro com 5 anos de experiência..."
-                    },
-                    {
-                        "field": "simplified_form_responses",
-                        "value": {
-                            "education_level": "Bachelor's Degree",
-                            "field_of_study": "Computer Science",
-                            "years_experience": "5"
-                        }
-                    },
-                    {
-                        "field": "status",
-                        "value": "form_filled"
-                    },
-                    {
-                        "field": "progress_percentage", 
-                        "value": 80
+            batch_payload = [
+                {
+                    "field": "user_story_text",
+                    "value": "Sou engenheiro de software brasileiro com 5 anos de experiência..."
+                },
+                {
+                    "field": "simplified_form_responses",
+                    "value": {
+                        "education_level": "Bachelor's Degree",
+                        "field_of_study": "Computer Science",
+                        "years_experience": "5"
                     }
-                ]
-            }
+                },
+                {
+                    "field": "status",
+                    "value": "form_filled"
+                },
+                {
+                    "field": "progress_percentage", 
+                    "value": 80
+                }
+            ]
             
             batch_response = requests.post(f"{API_BASE}/auto-application/case/{case_id}/batch-update", json=batch_payload, timeout=10)
             
