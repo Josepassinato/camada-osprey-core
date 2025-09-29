@@ -69,6 +69,14 @@ export const OspreyOwlTutor: React.FC<OspreyOwlTutorProps> = ({
   const [achievements, setAchievements] = useState<string[]>([]);
   const [currentVisaType, setCurrentVisaType] = useState<string>('');
   const [currentStep, setCurrentStep] = useState<string>('');
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [showPersonalization, setShowPersonalization] = useState(false);
+
+  // User guidance history integration
+  const { addGuidanceRecord, getPersonalizedTips } = useUserGuidanceHistory({
+    visaType: currentVisaType,
+    enablePersonalization: true
+  });
   const [isOpen, setIsOpen] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [owlEyes, setOwlEyes] = useState({ leftEye: true, rightEye: true });
