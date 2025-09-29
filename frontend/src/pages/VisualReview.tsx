@@ -176,26 +176,26 @@ const VisualReview = () => {
         fields: [
           {
             label: 'Nome Completo',
-            portuguese: portugueseResponses.personal?.full_name || 'Não informado',
-            english: hasOfficialForm ? (englishForm.full_name || englishForm.applicant_name || 'Not provided') : autoTranslateField(portugueseResponses.personal?.full_name || 'Não informado', 'name'),
+            portuguese: portugueseResponses.personal_information?.full_name || 'Não informado',
+            english: hasOfficialForm ? (englishForm.full_name || englishForm.applicant_name || 'Not provided') : autoTranslateField(portugueseResponses.personal_information?.full_name || 'Não informado', 'name'),
             status: 'correct'
           },
           {
             label: 'Data de Nascimento',
-            portuguese: portugueseResponses.personal?.date_of_birth || 'Não informado',
-            english: hasOfficialForm ? (englishForm.date_of_birth || englishForm.birth_date || 'Not provided') : autoTranslateField(portugueseResponses.personal?.date_of_birth || 'Não informado', 'date'),
+            portuguese: portugueseResponses.personal_information?.date_of_birth || 'Não informado',
+            english: hasOfficialForm ? (englishForm.date_of_birth || englishForm.birth_date || 'Not provided') : autoTranslateField(portugueseResponses.personal_information?.date_of_birth || 'Não informado', 'date'),
             status: 'correct'
           },
           {
             label: 'Local de Nascimento',
-            portuguese: portugueseResponses.personal?.place_of_birth || 'Não informado',
-            english: hasOfficialForm ? (englishForm.place_of_birth || englishForm.birth_place || 'Not provided') : autoTranslateField(portugueseResponses.personal?.place_of_birth || 'Não informado'),
+            portuguese: portugueseResponses.personal_information?.place_of_birth || 'Não informado',
+            english: hasOfficialForm ? (englishForm.place_of_birth || englishForm.birth_place || 'Not provided') : autoTranslateField(portugueseResponses.personal_information?.place_of_birth || 'Não informado'),
             status: 'correct'
           },
           {
             label: 'Nacionalidade',
-            portuguese: portugueseResponses.personal?.nationality || 'Não informado',
-            english: hasOfficialForm ? (englishForm.nationality || englishForm.country_of_citizenship || 'Not provided') : autoTranslateField(portugueseResponses.personal?.nationality || 'Não informado'),
+            portuguese: portugueseResponses.personal_information?.nationality || 'Não informado',
+            english: hasOfficialForm ? (englishForm.nationality || englishForm.country_of_citizenship || 'Not provided') : autoTranslateField(portugueseResponses.personal_information?.nationality || 'Não informado'),
             status: 'correct'
           }
         ]
