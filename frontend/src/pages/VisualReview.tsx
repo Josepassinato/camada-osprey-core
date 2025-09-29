@@ -105,6 +105,63 @@ const VisualReview = () => {
     }
   };
 
+  // Auto-translation function for when official form data is not yet generated
+  const autoTranslateField = (portugueseValue: string, fieldType: string = 'text'): string => {
+    if (!portugueseValue || portugueseValue === 'Não informado') {
+      return 'Not provided';
+    }
+
+    // Basic translations for common values
+    const translations: { [key: string]: string } = {
+      // Countries
+      'Brasil': 'Brazil',
+      'Estados Unidos': 'United States',
+      'São Paulo': 'São Paulo',
+      'Rio de Janeiro': 'Rio de Janeiro',
+      
+      // Marital status
+      'Solteiro': 'Single',
+      'Solteira': 'Single', 
+      'Casado': 'Married',
+      'Casada': 'Married',
+      'Divorciado': 'Divorced',
+      'Divorciada': 'Divorced',
+      'Viúvo': 'Widowed',
+      'Viúva': 'Widowed',
+      
+      // Education
+      'Ensino Fundamental': 'Elementary School',
+      'Ensino Médio': 'High School',
+      'Graduação': 'Bachelor\'s Degree',
+      'Pós-graduação': 'Graduate Degree',
+      'Mestrado': 'Master\'s Degree',
+      'Doutorado': 'Doctorate',
+      
+      // Yes/No
+      'Sim': 'Yes',
+      'Não': 'No'
+    };
+
+    // Check for direct translation
+    if (translations[portugueseValue]) {
+      return translations[portugueseValue];
+    }
+
+    // For names, keep as-is (they don't need translation)
+    if (fieldType === 'name') {
+      return portugueseValue;
+    }
+
+    // For dates, convert format if needed
+    if (fieldType === 'date' && portugueseValue.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+      const [day, month, year] = portugueseValue.split('/');
+      return `${month}/${day}/${year}`; // Convert DD/MM/YYYY to MM/DD/YYYY
+    }
+
+    // For other fields, return as-is with note
+    return portugueseValue;
+  };
+
   const generateFormComparison = (caseData: any) => {
     const portugueseResponses = caseData.simplified_form_responses || {};
     const englishForm = caseData.official_form_data || {};
