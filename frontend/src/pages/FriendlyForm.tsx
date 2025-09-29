@@ -465,6 +465,40 @@ const FriendlyForm = () => {
     }));
   };
 
+  const fetchAddressByCEP = async (cep: string) => {
+    if (!cep || cep.length !== 8) return;
+    
+    setCepLoading(true);
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      if (response.ok) {
+        const data = await response.json();
+        
+        if (!data.erro) {
+          // Auto-preencher campos de endereço
+          handleFieldChange('address', 'neighborhood', data.bairro || '');
+          handleFieldChange('address', 'city', data.localidade || '');
+          handleFieldChange('address', 'state', data.uf || '');
+          handleFieldChange('address', 'postal_code', `${cep.slice(0,5)}-${cep.slice(5)}` || '');
+          
+          // Se tiver logradouro, sugerir para o campo street_address
+          if (data.logradouro) {
+            const currentStreet = responses.address?.street_address || '';
+            if (!currentStreet) {
+              handleFieldChange('address', 'street_address', data.logradouro);
+            }
+          }
+          
+          console.log('✅ Endereço encontrado via CEP:', data);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao buscar CEP:', error);
+    } finally {
+      setCepLoading(false);
+    }
+  };
+
   const generateOfficialForms = async () => {
     setIsGenerating(true);
     
