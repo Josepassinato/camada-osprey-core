@@ -191,9 +191,13 @@ const FriendlyForm = () => {
           label: 'Endereço Atual',
           type: 'textarea',
           required: true,
-          value: extractedFacts.personal_info?.current_address || caseData.basic_data?.address || '',
+          value: extractedFacts.personal_info?.current_address || 
+                 `${caseData.basic_data?.currentAddress || ''} ${caseData.basic_data?.city || ''} ${caseData.basic_data?.state || ''} ${caseData.basic_data?.zipCode || ''}`.trim() || 
+                 '',
           placeholder: 'Endereço completo incluindo CEP/ZIP Code',
-          aiSuggestion: extractedFacts.personal_info?.current_address ? `IA sugeriu: ${extractedFacts.personal_info.current_address}` : undefined
+          aiSuggestion: extractedFacts.personal_info?.current_address ? 
+            `IA sugeriu: ${extractedFacts.personal_info.current_address}` : 
+            (caseData.basic_data?.currentAddress ? `Dados básicos: ${caseData.basic_data.currentAddress}` : undefined)
         },
         {
           id: 'phone',
