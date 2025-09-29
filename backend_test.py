@@ -2904,6 +2904,7 @@ def test_ai_processing_parameters_flexibility():
 def test_mongodb_optimizations_performance():
     """Test MongoDB optimizations and performance improvements"""
     print("\n💾 Testing MongoDB Optimizations & Performance...")
+    global AUTH_TOKEN
     
     if not AUTH_TOKEN:
         print("❌ No auth token available for MongoDB optimization test")
