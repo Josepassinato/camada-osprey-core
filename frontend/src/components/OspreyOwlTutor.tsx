@@ -772,6 +772,56 @@ export const OspreyOwlTutor: React.FC<OspreyOwlTutorProps> = ({
           </motion.div>
         )}
       </motion.div>
+
+      {/* Dra. Paula Chat Integration */}
+      <DraPaulaChat
+        visaType={currentVisaType}
+        currentStep={currentStep}
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        onSuggestion={(suggestion) => {
+          addGuidanceRecord('tip', suggestion, 'dra_paula', currentStep);
+          setMessages(prev => [...prev, {
+            id: Date.now().toString(),
+            severity: 'info' as const,
+            text: `💬 **Chat Dra. Paula**: ${suggestion}`,
+            actions: [],
+            meta: { draPaulaAdvice: true, disclaimer: false }
+          }]);
+        }}
+      />
+
+      {/* Smart Personalization Panel */}
+      {showPersonalization && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          className="fixed bottom-20 right-4 w-80 max-h-[60vh] overflow-y-auto bg-white rounded-lg shadow-2xl border border-gray-200 z-40"
+        >
+          <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Brain className="h-4 w-4 text-blue-600" />
+                <span className="font-bold text-sm text-blue-900">IA Personalizada</span>
+              </div>
+              <button
+                onClick={() => setShowPersonalization(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+          <div className="p-4">
+            <SmartPersonalization
+              visaType={currentVisaType}
+              currentStep={currentStep}
+              formData={snapshot}
+            />
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 };
