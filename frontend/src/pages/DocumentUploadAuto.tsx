@@ -201,7 +201,10 @@ const DocumentUploadAuto = () => {
       uploaded: false,
       file: null as File | null,
       analyzing: false,
-      aiAnalysis: null as any
+      aiAnalysis: null as any,
+      category: 'Documentos Necessários',
+      formats: ['PDF', 'JPG', 'PNG'],
+      maxSize: '10MB'
     }));
   };
 
