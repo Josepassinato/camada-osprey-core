@@ -5617,6 +5617,17 @@ def run_all_tests():
     
     print(f"  Auto-Application System: {auto_passed}/{auto_total} tests passed ({auto_passed/auto_total*100:.1f}%)")
     
+    # Review Request Focused Tests Results (FINAL VALIDATION)
+    print("\n🎯 REVIEW REQUEST FOCUSED TESTS (FINAL VALIDATION):")
+    review_passed = sum(review_focused_results.values())
+    review_total = len(review_focused_results)
+    
+    for test_name, result in review_focused_results.items():
+        status = "✅ PASS" if result else "❌ FAIL"
+        print(f"  {test_name.replace('_', ' ').title()}: {status}")
+    
+    print(f"  Review Focused Tests: {review_passed}/{review_total} tests passed ({review_passed/review_total*100:.1f}%)")
+    
     # AI Document Validation Results (CRITICAL PRIORITY)
     print("\n🔍 AI DOCUMENT VALIDATION SYSTEM:")
     ai_validation_passed = sum(ai_validation_results.values())
