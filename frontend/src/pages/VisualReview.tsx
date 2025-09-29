@@ -177,19 +177,19 @@ const VisualReview = () => {
           {
             label: 'Nome Completo',
             portuguese: portugueseResponses.personal?.full_name || 'Não informado',
-            english: hasOfficialForm ? (englishForm.full_name || englishForm.applicant_name || 'Not provided') : 'Aguardando processamento IA',
+            english: hasOfficialForm ? (englishForm.full_name || englishForm.applicant_name || 'Not provided') : autoTranslateField(portugueseResponses.personal?.full_name || 'Não informado', 'name'),
             status: 'correct'
           },
           {
             label: 'Data de Nascimento',
             portuguese: portugueseResponses.personal?.date_of_birth || 'Não informado',
-            english: hasOfficialForm ? (englishForm.date_of_birth || englishForm.birth_date || 'Not provided') : 'Aguardando processamento IA',
+            english: hasOfficialForm ? (englishForm.date_of_birth || englishForm.birth_date || 'Not provided') : autoTranslateField(portugueseResponses.personal?.date_of_birth || 'Não informado', 'date'),
             status: 'correct'
           },
           {
             label: 'Local de Nascimento',
             portuguese: portugueseResponses.personal?.place_of_birth || 'Não informado',
-            english: hasOfficialForm ? (englishForm.place_of_birth || englishForm.birth_place || 'Not provided') : 'Aguardando processamento IA',
+            english: hasOfficialForm ? (englishForm.place_of_birth || englishForm.birth_place || 'Not provided') : autoTranslateField(portugueseResponses.personal?.place_of_birth || 'Não informado'),
             status: 'correct'
           },
           {
