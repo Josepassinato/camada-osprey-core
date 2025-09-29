@@ -24,6 +24,9 @@ import {
   Heart,
   Plane
 } from "lucide-react";
+import SaveAndContinueModal from "@/components/SaveAndContinueModal";
+import OspreyOwlTutor from "@/components/OspreyOwlTutor";
+import { useFormSnapshot } from "@/hooks/useFormSnapshot";
 
 interface FormSection {
   id: string;
