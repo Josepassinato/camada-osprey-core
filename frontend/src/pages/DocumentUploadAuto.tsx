@@ -545,6 +545,12 @@ const DocumentUploadAuto = () => {
     }
 
     console.log(`🤖 Dr. Miguel analisou ${documentType} para ${visaType}:`, analysis);
+    
+    // Notify Dra. Paula Tutor about document analysis
+    if ((window as any).draPaulaDocumentAnalysis) {
+      (window as any).draPaulaDocumentAnalysis(documentType, analysis);
+    }
+    
     return analysis;
   };
 
