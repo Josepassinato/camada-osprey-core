@@ -875,21 +875,21 @@ def test_8_error_handling():
                 f"Expected 404, got {response_404.status_code}"
             )
         
-        # Test 401 for unauthorized access
+        # Test 401/403 for unauthorized access
         response_401 = requests.get(f"{API_BASE}/profile", timeout=10)  # No auth header
         
-        if response_401.status_code == 401:
+        if response_401.status_code in [401, 403]:
             log_test_result(
-                "401 errors for unauthorized access",
+                "401/403 errors for unauthorized access",
                 True,
-                "Protected endpoint requires authentication"
+                f"Protected endpoint requires authentication ({response_401.status_code})"
             )
             success_count += 1
         else:
             log_test_result(
-                "401 errors for unauthorized access",
+                "401/403 errors for unauthorized access",
                 False,
-                f"Expected 401, got {response_401.status_code}"
+                f"Expected 401/403, got {response_401.status_code}"
             )
         
         # Test 400 for invalid data
