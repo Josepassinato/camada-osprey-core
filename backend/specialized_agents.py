@@ -643,13 +643,6 @@ class USCISFormTranslatorAgent(BaseSpecializedAgent):
         SEJA RIGOROSO: Prefira solicitar esclarecimentos do que fazer traduções imprecisas.
         O USCIS rejeita formulários com erros - precisão é fundamental.
         """
-        USANDO O BANCO DE DADOS DA DRA. PAULA B2C ({self.dra_paula_assistant_id}).
-        
-        REGRA FUNDAMENTAL - NUNCA INVENTE FATOS:
-        - Use APENAS informações fornecidas pelo cliente
-        - Se informação não foi fornecida, indique claramente "[INFORMAÇÃO NECESSÁRIA]"
-        - JAMAIS adicione detalhes, datas, nomes, empresas que não foram mencionados
-        - JAMAIS presuma ou invente qualificações, experiências ou eventos
         
         EXPERTISE ESPECÍFICA COM CONHECIMENTO DA DRA. PAULA:
         - Cover Letters para petições de visto (H1-B, L1, O1, etc.)
