@@ -4917,7 +4917,7 @@ async def startup_db_client():
         mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/')
         
         client = AsyncIOMotorClient(mongo_url)
-        db = client.osprey_immigration_db  # Database name
+        db = client[os.environ.get('DB_NAME', 'osprey_immigration_db')]  # Database name
         
         # Test the connection
         await client.admin.command('ping')
