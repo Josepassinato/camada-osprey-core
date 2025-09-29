@@ -18,6 +18,7 @@ import base64
 import mimetypes
 import re
 from visa_specifications import get_visa_specifications, get_required_documents, get_key_questions, get_common_issues
+from visa_document_mapping import get_visa_document_requirements
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 import openai
 from immigration_expert import ImmigrationExpert, create_immigration_expert
