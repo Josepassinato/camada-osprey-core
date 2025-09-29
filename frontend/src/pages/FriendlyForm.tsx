@@ -65,6 +65,27 @@ const FriendlyForm = () => {
   const [error, setError] = useState("");
   const [cepLoading, setCepLoading] = useState(false);
 
+  // Form snapshot for OspreyOwlTutor integration
+  const { snapshot } = useFormSnapshot({
+    sections: formSections.map(section => ({
+      id: section.id,
+      completed: section.completed,
+      fields: section.fields.map(field => ({
+        id: field.id,
+        value: responses[section.id]?.[field.id] || field.value || '',
+        required: field.required,
+        filled: !!(responses[section.id]?.[field.id] || field.value)
+      }))
+    })),
+    visa_type: caseData?.form_code,
+    step: 'friendly_form',
+    completion_percentage: Math.round((formSections.filter(s => s.completed).length / formSections.length) * 100)
+  }, {
+    enabled: true,
+    autoGenerate: true,
+    debounceMs: 800
+  });
+
   useEffect(() => {
     if (caseId) {
       fetchCase();
