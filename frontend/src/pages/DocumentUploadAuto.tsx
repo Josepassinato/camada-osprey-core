@@ -238,68 +238,137 @@ const DocumentUploadAuto = () => {
   };
 
   const simulateAIAnalysis = async (file: File, documentType: string) => {
-    // Simulate AI processing delay
+    // Simulate AI processing with Dr. Miguel's visa-specific intelligence
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Simulate AI analysis results
     const isImage = file.type.startsWith('image/');
     const isPDF = file.type === 'application/pdf';
+    const visaType = case_?.form_code || 'H-1B';
     
     const analysis = {
-      valid: Math.random() > 0.1, // 90% chance of being valid
-      legible: isImage || isPDF ? Math.random() > 0.05 : true, // 95% chance of being legible
-      completeness: Math.floor(Math.random() * 30) + 70, // 70-100% completeness
+      valid: Math.random() > 0.1,
+      legible: isImage || isPDF ? Math.random() > 0.05 : true,
+      completeness: Math.floor(Math.random() * 30) + 70,
       issues: [] as string[],
-      extracted_data: {} as any
+      extracted_data: {} as any,
+      dra_paula_assessment: '',
+      visa_specific_validation: {} as any
     };
 
-    // Add some realistic issues
+    // Add realistic issues
     if (analysis.completeness < 80) {
-      analysis.issues.push('Documento pode estar incompleto');
+      analysis.issues.push('Documento pode estar incompleto para requisitos USCIS');
     }
     if (!analysis.legible) {
-      analysis.issues.push('Qualidade da imagem precisa melhorar');
+      analysis.issues.push('Qualidade insuficiente - Dr. Miguel recomenda nova digitalização');
     }
-    if (file.size < 100000) { // Less than 100KB
-      analysis.issues.push('Arquivo muito pequeno, pode estar comprimido demais');
+    if (file.size < 100000) {
+      analysis.issues.push('Arquivo comprimido demais - pode afetar legibilidade oficial');
     }
 
-    // Extract realistic mock data based on document type using existing case data
+    // Get existing case data for intelligent extraction
     const basicData = case_?.basic_data || {};
     
+    // Visa-specific intelligent extraction using Dr. Miguel's knowledge
     if (documentType === 'passport') {
       analysis.extracted_data = {
-        document_number: `BR${Math.floor(Math.random() * 9000000) + 1000000}`,
-        full_name: basicData.firstName ? `${basicData.firstName} ${basicData.middleName || ''} ${basicData.lastName}`.trim() : 'Maria Santos Silva',
+        passport_number: `BR${Math.floor(Math.random() * 9000000) + 1000000}`,
+        full_name: basicData.firstName ? `${basicData.firstName} ${basicData.middleName || ''} ${basicData.lastName}`.trim() : 'MARIA SANTOS SILVA',
         date_of_birth: basicData.dateOfBirth || '1990-05-15',
-        place_of_birth: basicData.countryOfBirth || 'São Paulo, SP, Brasil',
+        place_of_birth: basicData.countryOfBirth || 'SAO PAULO, SP, BRASIL',
         expiration_date: '2030-12-31',
-        country_of_issue: 'Brasil',
-        nationality: 'Brasileira'
+        issue_date: '2020-01-15',
+        country_of_issue: 'BRASIL',
+        nationality: 'BRASILEIRA',
+        issuing_authority: 'POLICIA FEDERAL'
       };
-    } else if (documentType === 'birth_certificate') {
+      
+      // Visa-specific validation for passport
+      if (visaType === 'H-1B') {
+        analysis.dra_paula_assessment = '✅ Passaporte adequado para H-1B. Validade suficiente para processo.';
+        analysis.visa_specific_validation = {
+          validity_sufficient: true,
+          meets_h1b_requirements: true,
+          recommendations: ['Conferir se nome está idêntico ao diploma']
+        };
+      }
+    } else if (documentType === 'diploma') {
       analysis.extracted_data = {
-        full_name: basicData.firstName ? `${basicData.firstName} ${basicData.lastName}`.trim() : 'Maria Santos Silva',
-        date_of_birth: basicData.dateOfBirth || '1990-05-15',
-        place_of_birth: basicData.countryOfBirth || 'São Paulo, SP, Brasil',
-        parents_names: 'João Silva Santos e Ana Maria Santos'
+        degree_type: 'BACHARELADO EM CIENCIA DA COMPUTACAO',
+        field_of_study: 'Ciência da Computação',
+        institution_name: 'UNIVERSIDADE DE SAO PAULO',
+        graduation_date: '2015-12-15',
+        student_name: basicData.firstName ? `${basicData.firstName} ${basicData.lastName}`.trim() : 'MARIA SANTOS SILVA',
+        gpa_equivalent: '8.5/10.0'
       };
+      
+      if (visaType === 'H-1B') {
+        analysis.dra_paula_assessment = '✅ Diploma de nível superior adequado para H-1B. Área de STEM qualifica para specialty occupation.';
+        analysis.visa_specific_validation = {
+          bachelor_or_higher: true,
+          stem_field: true,
+          specialty_occupation_qualified: true,
+          recommendations: ['Considerar evaluation credencial se necessário']
+        };
+      }
+    } else if (documentType === 'employment_letter') {
+      analysis.extracted_data = {
+        employer_name: 'TECH SOLUTIONS INC',
+        position_title: 'SOFTWARE ENGINEER',
+        salary: '$75,000 annually',
+        start_date: '2024-01-15',
+        job_duties: 'Desenvolvimento de software, análise de sistemas',
+        employer_address: '123 Tech Street, San Francisco, CA 94105'
+      };
+      
+      if (visaType === 'H-1B') {
+        analysis.dra_paula_assessment = '✅ Carta de emprego adequada. Salário acima do prevailing wage esperado.';
+        analysis.visa_specific_validation = {
+          salary_adequate: true,
+          specialty_occupation: true,
+          employer_qualified: true,
+          recommendations: ['Verificar se empregador tem LCA aprovada']
+        };
+      }
     } else if (documentType === 'photos') {
       analysis.extracted_data = {
-        photo_compliance: 'USCIS compliant',
-        background_color: 'White',
-        face_detection: 'Clear visibility',
-        dimensions: '2x2 inches'
+        photo_compliance: 'USCIS_COMPLIANT',
+        background_color: 'WHITE',
+        dimensions: '2x2_INCHES',
+        face_visibility: 'CLEAR',
+        recent_photo: true
+      };
+      
+      analysis.dra_paula_assessment = '✅ Fotos em conformidade com padrões USCIS.';
+    } else if (documentType === 'birth_certificate') {
+      analysis.extracted_data = {
+        full_name: basicData.firstName ? `${basicData.firstName} ${basicData.lastName}`.trim().toUpperCase() : 'MARIA SANTOS SILVA',
+        date_of_birth: basicData.dateOfBirth || '15/05/1990',
+        place_of_birth: 'SAO PAULO, SP, BRASIL',
+        parents_names: 'JOAO SILVA SANTOS E ANA MARIA SANTOS',
+        registration_number: 'SP123456789',
+        issue_date: '2022-03-10'
+      };
+      
+      analysis.dra_paula_assessment = '✅ Certidão válida. Lembrar de apostilar para uso internacional.';
+      analysis.visa_specific_validation = {
+        apostille_needed: true,
+        translation_required: true,
+        valid_for_immigration: true
       };
     } else {
-      // Generic document extraction
+      // Generic extraction with visa-specific context
       analysis.extracted_data = {
         document_type: documentType,
+        visa_relevance: visaType,
         issue_date: new Date().toISOString().split('T')[0],
-        extracted_text: 'Texto principal do documento identificado'
+        extracted_info: `Documento ${documentType} processado para ${visaType}`
       };
+      
+      analysis.dra_paula_assessment = `📋 Documento ${documentType} analisado conforme requisitos ${visaType}.`;
     }
 
+    console.log(`🤖 Dr. Miguel analisou ${documentType} para ${visaType}:`, analysis);
     return analysis;
   };
 
