@@ -374,8 +374,8 @@ const DocumentUploadAuto = () => {
       reader.onload = async (e) => {
         const base64 = e.target?.result as string;
         
-        // Simulate AI analysis
-        const aiAnalysis = await simulateAIAnalysis(file, documentType);
+        // Analyze document with REAL AI (Dr. Miguel)
+        const aiAnalysis = await realDocumentAnalysis(file, documentType);
         
         const uploadedFile: UploadedFile = {
           id: `file_${Date.now()}`,
