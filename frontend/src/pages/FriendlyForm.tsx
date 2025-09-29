@@ -153,8 +153,8 @@ const FriendlyForm = () => {
           required: true,
           value: extractedFacts.personal_info?.date_of_birth || caseData.basic_data?.dateOfBirth || '',
           aiSuggestion: extractedFacts.personal_info?.date_of_birth ? 
-            `IA sugeriu: ${extractedFacts.personal_info.date_of_birth}` : 
-            (caseData.basic_data?.dateOfBirth ? `Dados básicos: ${caseData.basic_data.dateOfBirth}` : undefined)
+            `🤖 IA extraiu dos documentos: ${extractedFacts.personal_info.date_of_birth}` : 
+            (caseData.basic_data?.dateOfBirth ? `📋 Dados básicos: ${caseData.basic_data.dateOfBirth}` : undefined)
         },
         {
           id: 'place_of_birth',
