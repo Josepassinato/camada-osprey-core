@@ -689,7 +689,7 @@ const DocumentUploadAuto = () => {
     }
     
     return analysis;
-  };
+  }
 
   const saveDocumentToCase = async (file: UploadedFile, analysis: any) => {
     try {
