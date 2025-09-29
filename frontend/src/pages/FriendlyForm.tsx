@@ -150,8 +150,10 @@ const FriendlyForm = () => {
           label: 'Data de Nascimento',
           type: 'date',
           required: true,
-          value: extractedFacts.personal_info?.date_of_birth || caseData.basic_data?.date_of_birth || '',
-          aiSuggestion: extractedFacts.personal_info?.date_of_birth ? `IA sugeriu: ${extractedFacts.personal_info.date_of_birth}` : undefined
+          value: extractedFacts.personal_info?.date_of_birth || caseData.basic_data?.dateOfBirth || '',
+          aiSuggestion: extractedFacts.personal_info?.date_of_birth ? 
+            `IA sugeriu: ${extractedFacts.personal_info.date_of_birth}` : 
+            (caseData.basic_data?.dateOfBirth ? `Dados básicos: ${caseData.basic_data.dateOfBirth}` : undefined)
         },
         {
           id: 'place_of_birth',
