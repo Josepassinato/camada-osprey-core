@@ -1897,7 +1897,7 @@ async def patch_case_data(case_id: str, update_data: dict, current_user = Depend
         raise HTTPException(status_code=500, detail=f"Error patching case: {str(e)}")
 
 @api_router.post("/auto-application/case/{case_id}/batch-update")
-async def batch_update_case_data(case_id: str, updates: list, current_user = Depends(get_current_user_optional)):
+async def batch_update_case_data(case_id: str, request: dict, current_user = Depends(get_current_user_optional)):
     """Process multiple case updates in a single transaction for better performance"""
     try:
         # Validate case access
