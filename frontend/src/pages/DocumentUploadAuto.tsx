@@ -1103,5 +1103,6 @@ const DocumentUploadAuto = () => {
       />
     </div>
   );
+};
 
 export default DocumentUploadAuto;
