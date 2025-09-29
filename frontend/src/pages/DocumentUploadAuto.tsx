@@ -250,7 +250,7 @@ const DocumentUploadAuto = () => {
       legible: isImage || isPDF ? Math.random() > 0.05 : true, // 95% chance of being legible
       completeness: Math.floor(Math.random() * 30) + 70, // 70-100% completeness
       issues: [] as string[],
-      extracted_data: {}
+      extracted_data: {} as any
     };
 
     // Add some realistic issues
@@ -264,13 +264,39 @@ const DocumentUploadAuto = () => {
       analysis.issues.push('Arquivo muito pequeno, pode estar comprimido demais');
     }
 
-    // Extract mock data based on document type
+    // Extract realistic mock data based on document type using existing case data
+    const basicData = case_?.basic_data || {};
+    
     if (documentType === 'passport') {
       analysis.extracted_data = {
-        document_number: 'BR1234567',
-        full_name: 'Nome extraído do passaporte',
+        document_number: `BR${Math.floor(Math.random() * 9000000) + 1000000}`,
+        full_name: basicData.firstName ? `${basicData.firstName} ${basicData.middleName || ''} ${basicData.lastName}`.trim() : 'Maria Santos Silva',
+        date_of_birth: basicData.dateOfBirth || '1990-05-15',
+        place_of_birth: basicData.countryOfBirth || 'São Paulo, SP, Brasil',
         expiration_date: '2030-12-31',
-        country_of_issue: 'Brasil'
+        country_of_issue: 'Brasil',
+        nationality: 'Brasileira'
+      };
+    } else if (documentType === 'birth_certificate') {
+      analysis.extracted_data = {
+        full_name: basicData.firstName ? `${basicData.firstName} ${basicData.lastName}`.trim() : 'Maria Santos Silva',
+        date_of_birth: basicData.dateOfBirth || '1990-05-15',
+        place_of_birth: basicData.countryOfBirth || 'São Paulo, SP, Brasil',
+        parents_names: 'João Silva Santos e Ana Maria Santos'
+      };
+    } else if (documentType === 'photos') {
+      analysis.extracted_data = {
+        photo_compliance: 'USCIS compliant',
+        background_color: 'White',
+        face_detection: 'Clear visibility',
+        dimensions: '2x2 inches'
+      };
+    } else {
+      // Generic document extraction
+      analysis.extracted_data = {
+        document_type: documentType,
+        issue_date: new Date().toISOString().split('T')[0],
+        extracted_text: 'Texto principal do documento identificado'
       };
     }
 
