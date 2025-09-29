@@ -137,9 +137,13 @@ const FriendlyForm = () => {
           label: 'Nome Completo',
           type: 'text',
           required: true,
-          value: extractedFacts.personal_info?.full_name || caseData.basic_data?.full_name || '',
+          value: extractedFacts.personal_info?.full_name || 
+                 `${caseData.basic_data?.firstName || ''} ${caseData.basic_data?.middleName || ''} ${caseData.basic_data?.lastName || ''}`.trim() || 
+                 '',
           placeholder: 'Seu nome completo como no passaporte',
-          aiSuggestion: extractedFacts.personal_info?.full_name ? `IA sugeriu: ${extractedFacts.personal_info.full_name}` : undefined
+          aiSuggestion: extractedFacts.personal_info?.full_name ? 
+            `IA sugeriu: ${extractedFacts.personal_info.full_name}` : 
+            (caseData.basic_data?.firstName ? `Dados básicos: ${caseData.basic_data.firstName} ${caseData.basic_data.lastName}` : undefined)
         },
         {
           id: 'date_of_birth',
