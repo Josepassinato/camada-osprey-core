@@ -2671,8 +2671,437 @@ def test_emergent_llm_integration():
         return False
 
 # ============================================================================
-# AUTO-APPLICATION SYSTEM TESTS (NEW)
+# AUTO-APPLICATION SYSTEM TESTS (NEW) - FOCUSED ON REVIEW REQUEST CORRECTIONS
 # ============================================================================
+
+def test_case_update_endpoints_corrections():
+    """Test the corrected case update endpoints as per review request"""
+    print("\n🔧 Testing CORRECTED Case Update Endpoints...")
+    global AUTO_APPLICATION_CASE_ID
+    
+    try:
+        # First create a case to test updates on
+        case_payload = {
+            "form_code": "H-1B",
+            "session_token": str(uuid.uuid4())
+        }
+        
+        create_response = requests.post(f"{API_BASE}/auto-application/start", json=case_payload, timeout=10)
+        
+        if create_response.status_code == 200:
+            case_data = create_response.json()
+            case_id = case_data.get('case', {}).get('case_id')
+            AUTO_APPLICATION_CASE_ID = case_id
+            print(f"✅ Test case created: {case_id}")
+            
+            # TEST 1: ORIGINAL PUT ENDPOINT (Should no longer return 404)
+            print("\n   Testing PUT /api/auto-application/case/{case_id} (Original - Fixed)")
+            
+            put_payload = {
+                "status": "basic_data",
+                "basic_data": {
+                    "first_name": "Carlos",
+                    "last_name": "Silva",
+                    "email": "carlos.silva@test.com",
+                    "phone": "+55 11 99999-9999",
+                    "date_of_birth": "1990-03-15",
+                    "nationality": "Brazilian"
+                },
+                "progress_percentage": 30
+            }
+            
+            put_response = requests.put(f"{API_BASE}/auto-application/case/{case_id}", json=put_payload, timeout=10)
+            
+            if put_response.status_code == 200:
+                print("   ✅ PUT endpoint working (no longer returns 404)")
+                put_data = put_response.json()
+                print(f"      Updated case status: {put_data.get('case', {}).get('status')}")
+                print(f"      Progress: {put_data.get('case', {}).get('progress_percentage', 0)}%")
+            else:
+                print(f"   ❌ PUT endpoint still failing: {put_response.status_code}")
+                print(f"      Error: {put_response.text}")
+                return False
+            
+            # TEST 2: NEW PATCH ENDPOINT (Partial updates)
+            print("\n   Testing PATCH /api/auto-application/case/{case_id} (New - Partial Updates)")
+            
+            patch_payload = {
+                "status": "documents_uploaded",
+                "progress_percentage": 50
+            }
+            
+            patch_response = requests.patch(f"{API_BASE}/auto-application/case/{case_id}", json=patch_payload, timeout=10)
+            
+            if patch_response.status_code == 200:
+                print("   ✅ PATCH endpoint working (partial updates)")
+                patch_data = patch_response.json()
+                print(f"      Updated status: {patch_data.get('case', {}).get('status')}")
+                print(f"      Progress: {patch_data.get('case', {}).get('progress_percentage', 0)}%")
+            else:
+                print(f"   ❌ PATCH endpoint failed: {patch_response.status_code}")
+                print(f"      Error: {patch_response.text}")
+                return False
+            
+            # TEST 3: NEW BATCH UPDATE ENDPOINT
+            print("\n   Testing POST /api/auto-application/case/{case_id}/batch-update (New - Batch Updates)")
+            
+            batch_payload = {
+                "updates": [
+                    {
+                        "field": "user_story_text",
+                        "value": "Sou engenheiro de software brasileiro com 5 anos de experiência..."
+                    },
+                    {
+                        "field": "simplified_form_responses",
+                        "value": {
+                            "education_level": "Bachelor's Degree",
+                            "field_of_study": "Computer Science",
+                            "years_experience": "5"
+                        }
+                    },
+                    {
+                        "field": "status",
+                        "value": "form_filled"
+                    },
+                    {
+                        "field": "progress_percentage", 
+                        "value": 80
+                    }
+                ]
+            }
+            
+            batch_response = requests.post(f"{API_BASE}/auto-application/case/{case_id}/batch-update", json=batch_payload, timeout=10)
+            
+            if batch_response.status_code == 200:
+                print("   ✅ Batch update endpoint working")
+                batch_data = batch_response.json()
+                print(f"      Batch updates applied: {batch_data.get('updates_applied', 0)}")
+                print(f"      Final status: {batch_data.get('case', {}).get('status')}")
+                print(f"      Final progress: {batch_data.get('case', {}).get('progress_percentage', 0)}%")
+            else:
+                print(f"   ❌ Batch update endpoint failed: {batch_response.status_code}")
+                print(f"      Error: {batch_response.text}")
+                return False
+            
+            # TEST 4: Verify data persistence after updates
+            print("\n   Testing data persistence after updates")
+            
+            get_response = requests.get(f"{API_BASE}/auto-application/case/{case_id}", timeout=10)
+            
+            if get_response.status_code == 200:
+                final_case = get_response.json().get('case', {})
+                print("   ✅ Case retrieval working after updates")
+                print(f"      Final case status: {final_case.get('status')}")
+                print(f"      Basic data present: {'Yes' if final_case.get('basic_data') else 'No'}")
+                print(f"      User story present: {'Yes' if final_case.get('user_story_text') else 'No'}")
+                print(f"      Form responses present: {'Yes' if final_case.get('simplified_form_responses') else 'No'}")
+                
+                return True
+            else:
+                print(f"   ❌ Case retrieval failed: {get_response.status_code}")
+                return False
+                
+        else:
+            print(f"❌ Failed to create test case: {create_response.status_code}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Case update endpoints test error: {str(e)}")
+        return False
+
+def test_ai_processing_parameters_flexibility():
+    """Test AI processing with both original and new flexible parameter structures"""
+    print("\n🤖 Testing AI Processing Parameters Flexibility...")
+    
+    if not AUTO_APPLICATION_CASE_ID:
+        print("❌ No case ID available for AI processing test")
+        return False
+    
+    try:
+        # TEST 1: Original structure (should still work)
+        print("\n   Testing original AI processing structure")
+        
+        original_payload = {
+            "case_id": AUTO_APPLICATION_CASE_ID,
+            "step_id": "validation",
+            "friendly_form_data": {
+                "education_level": "Bachelor's Degree",
+                "field_of_study": "Computer Science",
+                "years_experience": "5",
+                "current_salary": "$75000"
+            },
+            "basic_data": {
+                "first_name": "Carlos",
+                "last_name": "Silva",
+                "nationality": "Brazilian",
+                "date_of_birth": "1990-03-15"
+            }
+        }
+        
+        original_response = requests.post(f"{API_BASE}/ai-processing/step", json=original_payload, timeout=30)
+        
+        if original_response.status_code == 200:
+            print("   ✅ Original AI processing structure working")
+            original_data = original_response.json()
+            print(f"      Processing result: {original_data.get('result', 'N/A')}")
+            print(f"      AI recommendations: {'Yes' if original_data.get('ai_recommendations') else 'No'}")
+            print(f"      Response time: {original_data.get('processing_time_ms', 'N/A')}ms")
+        else:
+            print(f"   ❌ Original structure failed: {original_response.status_code}")
+            print(f"      Error: {original_response.text}")
+            return False
+        
+        # TEST 2: New flexible structure (should also work)
+        print("\n   Testing new flexible AI processing structure")
+        
+        flexible_payload = {
+            "case_id": AUTO_APPLICATION_CASE_ID,
+            "step_id": "validation",
+            "case_data": {
+                "simplified_form_responses": {
+                    "education_level": "Master's Degree",
+                    "field_of_study": "Computer Engineering", 
+                    "years_experience": "7",
+                    "current_salary": "$95000",
+                    "specialty_area": "Machine Learning"
+                },
+                "basic_data": {
+                    "first_name": "Carlos",
+                    "last_name": "Silva",
+                    "nationality": "Brazilian",
+                    "date_of_birth": "1990-03-15",
+                    "email": "carlos.silva@test.com"
+                }
+            }
+        }
+        
+        flexible_response = requests.post(f"{API_BASE}/ai-processing/step", json=flexible_payload, timeout=30)
+        
+        if flexible_response.status_code == 200:
+            print("   ✅ New flexible AI processing structure working")
+            flexible_data = flexible_response.json()
+            print(f"      Processing result: {flexible_data.get('result', 'N/A')}")
+            print(f"      AI recommendations: {'Yes' if flexible_data.get('ai_recommendations') else 'No'}")
+            print(f"      Response time: {flexible_data.get('processing_time_ms', 'N/A')}ms")
+            
+            # TEST 3: Performance comparison
+            original_time = original_data.get('processing_time_ms', 0)
+            flexible_time = flexible_data.get('processing_time_ms', 0)
+            
+            if original_time > 0 and flexible_time > 0:
+                if flexible_time <= original_time * 1.2:  # Within 20% of original
+                    print("   ✅ Performance maintained with flexible structure")
+                else:
+                    print(f"   ⚠️  Performance difference: {flexible_time - original_time}ms slower")
+            
+            return True
+        else:
+            print(f"   ❌ Flexible structure failed: {flexible_response.status_code}")
+            print(f"      Error: {flexible_response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ AI processing parameters test error: {str(e)}")
+        return False
+
+def test_mongodb_optimizations_performance():
+    """Test MongoDB optimizations and performance improvements"""
+    print("\n💾 Testing MongoDB Optimizations & Performance...")
+    
+    if not AUTH_TOKEN:
+        print("❌ No auth token available for MongoDB optimization test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        # TEST 1: Query performance measurement
+        print("\n   Testing query performance improvements")
+        
+        import time
+        
+        # Test case listing performance
+        start_time = time.time()
+        cases_response = requests.get(f"{API_BASE}/auto-application/cases", headers=headers, timeout=10)
+        cases_time = (time.time() - start_time) * 1000
+        
+        if cases_response.status_code == 200:
+            cases_data = cases_response.json()
+            cases_count = len(cases_data.get('cases', []))
+            print(f"   ✅ Case listing performance: {cases_time:.0f}ms for {cases_count} cases")
+            
+            if cases_time < 2000:  # Under 2 seconds as per success criteria
+                print("   ✅ Performance meets <2s criteria")
+            else:
+                print(f"   ⚠️  Performance slower than 2s: {cases_time:.0f}ms")
+        else:
+            print(f"   ❌ Case listing failed: {cases_response.status_code}")
+            return False
+        
+        # TEST 2: Document query performance
+        start_time = time.time()
+        docs_response = requests.get(f"{API_BASE}/documents", headers=headers, timeout=10)
+        docs_time = (time.time() - start_time) * 1000
+        
+        if docs_response.status_code == 200:
+            docs_data = docs_response.json()
+            docs_count = len(docs_data.get('documents', []))
+            print(f"   ✅ Document listing performance: {docs_time:.0f}ms for {docs_count} documents")
+            
+            if docs_time < 2000:
+                print("   ✅ Document performance meets <2s criteria")
+            else:
+                print(f"   ⚠️  Document performance slower than 2s: {docs_time:.0f}ms")
+        else:
+            print(f"   ❌ Document listing failed: {docs_response.status_code}")
+            return False
+        
+        # TEST 3: Concurrent operations test
+        print("\n   Testing concurrent operations handling")
+        
+        import threading
+        import queue
+        
+        results_queue = queue.Queue()
+        
+        def concurrent_case_create(thread_id):
+            try:
+                payload = {
+                    "form_code": "H-1B",
+                    "session_token": f"concurrent_test_{thread_id}_{uuid.uuid4()}"
+                }
+                
+                start = time.time()
+                response = requests.post(f"{API_BASE}/auto-application/start", json=payload, timeout=15)
+                duration = (time.time() - start) * 1000
+                
+                results_queue.put({
+                    'thread_id': thread_id,
+                    'success': response.status_code == 200,
+                    'duration': duration,
+                    'case_id': response.json().get('case', {}).get('case_id') if response.status_code == 200 else None
+                })
+            except Exception as e:
+                results_queue.put({
+                    'thread_id': thread_id,
+                    'success': False,
+                    'duration': 0,
+                    'error': str(e)
+                })
+        
+        # Launch 5 concurrent case creations
+        threads = []
+        for i in range(5):
+            thread = threading.Thread(target=concurrent_case_create, args=(i,))
+            threads.append(thread)
+            thread.start()
+        
+        # Wait for all threads to complete
+        for thread in threads:
+            thread.join()
+        
+        # Collect results
+        concurrent_results = []
+        while not results_queue.empty():
+            concurrent_results.append(results_queue.get())
+        
+        successful_ops = len([r for r in concurrent_results if r['success']])
+        total_ops = len(concurrent_results)
+        avg_duration = sum(r['duration'] for r in concurrent_results if r['success']) / max(successful_ops, 1)
+        
+        print(f"   ✅ Concurrent operations: {successful_ops}/{total_ops} successful")
+        print(f"   ✅ Average concurrent response time: {avg_duration:.0f}ms")
+        
+        if successful_ops >= 4:  # At least 80% success rate
+            print("   ✅ MongoDB handles concurrent operations well")
+            return True
+        else:
+            print("   ⚠️  Some concurrent operations failed")
+            return False
+            
+    except Exception as e:
+        print(f"❌ MongoDB optimization test error: {str(e)}")
+        return False
+
+def test_error_handling_improvements():
+    """Test improved error handling and fallbacks"""
+    print("\n🛡️ Testing Improved Error Handling...")
+    
+    try:
+        # TEST 1: Invalid case ID handling
+        print("\n   Testing invalid case ID error handling")
+        
+        invalid_case_id = "OSP-INVALID123"
+        response = requests.get(f"{API_BASE}/auto-application/case/{invalid_case_id}", timeout=10)
+        
+        if response.status_code == 404:
+            error_data = response.json()
+            print("   ✅ Invalid case ID properly handled with 404")
+            print(f"      Error message: {error_data.get('detail', 'N/A')}")
+            
+            # Check if error message is clear and helpful
+            error_msg = error_data.get('detail', '').lower()
+            if 'not found' in error_msg or 'não encontrado' in error_msg:
+                print("   ✅ Clear error message provided")
+        else:
+            print(f"   ❌ Invalid case ID handling failed: {response.status_code}")
+            return False
+        
+        # TEST 2: AI processing fallback when service fails
+        print("\n   Testing AI processing fallback handling")
+        
+        # Test with malformed AI request
+        malformed_payload = {
+            "case_id": "OSP-INVALID123",
+            "step_id": "invalid_step",
+            "malformed_data": "this should cause an error"
+        }
+        
+        ai_response = requests.post(f"{API_BASE}/ai-processing/step", json=malformed_payload, timeout=10)
+        
+        if ai_response.status_code in [400, 404, 422]:
+            ai_error = ai_response.json()
+            print(f"   ✅ AI processing error properly handled: {ai_response.status_code}")
+            print(f"      Error detail: {ai_error.get('detail', 'N/A')}")
+            
+            # Check for graceful degradation message
+            error_detail = ai_error.get('detail', '').lower()
+            if any(word in error_detail for word in ['invalid', 'not found', 'malformed']):
+                print("   ✅ Graceful error degradation working")
+        else:
+            print(f"   ❌ AI processing error handling failed: {ai_response.status_code}")
+            return False
+        
+        # TEST 3: Case update with invalid data
+        print("\n   Testing case update error handling")
+        
+        if AUTO_APPLICATION_CASE_ID:
+            invalid_update = {
+                "status": "invalid_status_value",
+                "progress_percentage": 150,  # Invalid percentage > 100
+                "invalid_field": "should be rejected"
+            }
+            
+            update_response = requests.put(f"{API_BASE}/auto-application/case/{AUTO_APPLICATION_CASE_ID}", json=invalid_update, timeout=10)
+            
+            if update_response.status_code in [400, 422]:
+                update_error = update_response.json()
+                print(f"   ✅ Invalid case update properly handled: {update_response.status_code}")
+                print(f"      Error detail: {update_error.get('detail', 'N/A')}")
+                
+                # Check for validation error details
+                if 'validation' in str(update_error).lower() or 'invalid' in str(update_error).lower():
+                    print("   ✅ Validation error details provided")
+            else:
+                print(f"   ❌ Invalid case update handling failed: {update_response.status_code}")
+                return False
+        
+        print("   ✅ Error handling improvements working correctly")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error handling test error: {str(e)}")
+        return False
 
 def test_auto_application_start():
     """Test starting a new auto-application case"""
