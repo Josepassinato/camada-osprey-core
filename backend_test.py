@@ -2773,9 +2773,8 @@ def test_case_update_endpoints_corrections():
             if batch_response.status_code == 200:
                 print("   ✅ Batch update endpoint working")
                 batch_data = batch_response.json()
-                print(f"      Batch updates applied: {batch_data.get('updates_applied', 0)}")
-                print(f"      Final status: {batch_data.get('case', {}).get('status')}")
-                print(f"      Final progress: {batch_data.get('case', {}).get('progress_percentage', 0)}%")
+                print(f"      Batch updates processed: {batch_data.get('updates_processed', 0)}")
+                print(f"      Fields modified: {batch_data.get('fields_modified', [])}")
             else:
                 print(f"   ❌ Batch update endpoint failed: {batch_response.status_code}")
                 print(f"      Error: {batch_response.text}")
