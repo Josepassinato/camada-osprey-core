@@ -160,9 +160,11 @@ const FriendlyForm = () => {
           label: 'Local de Nascimento',
           type: 'text',
           required: true,
-          value: extractedFacts.personal_info?.place_of_birth || '',
+          value: extractedFacts.personal_info?.place_of_birth || caseData.basic_data?.countryOfBirth || '',
           placeholder: 'Cidade, Estado/Província, País',
-          aiSuggestion: extractedFacts.personal_info?.place_of_birth ? `IA sugeriu: ${extractedFacts.personal_info.place_of_birth}` : undefined
+          aiSuggestion: extractedFacts.personal_info?.place_of_birth ? 
+            `IA sugeriu: ${extractedFacts.personal_info.place_of_birth}` : 
+            (caseData.basic_data?.countryOfBirth ? `Dados básicos: ${caseData.basic_data.countryOfBirth}` : undefined)
         },
         {
           id: 'nationality',
