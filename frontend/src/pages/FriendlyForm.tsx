@@ -927,6 +927,26 @@ const FriendlyForm = () => {
           </div>
         </div>
       </div>
+
+      {/* Osprey Owl Tutor Integration */}
+      <OspreyOwlTutor 
+        snapshot={snapshot}
+        onAction={(event, payload) => {
+          console.log('FriendlyForm Tutor Action:', event, payload);
+          // Handle tutor actions specific to friendly form
+          if (event === 'focus:field') {
+            const fieldElement = document.getElementById(payload.fieldId);
+            fieldElement?.focus();
+            fieldElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          } else if (event === 'expand:section') {
+            setActiveSection(payload.sectionId);
+          } else if (event === 'save:progress') {
+            setShowSaveModal(true);
+          }
+        }}
+        isEnabled={true}
+        position="bottom-right"
+      />
     </div>
   );
 };
