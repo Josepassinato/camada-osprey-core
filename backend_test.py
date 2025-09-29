@@ -5545,7 +5545,7 @@ def run_all_tests():
     }
     
     # Combine all results
-    all_results = {**auth_results, **document_results, **education_results, **owl_tutor_results, **voice_agent_results, **auto_app_results, **ai_validation_results, **priority_results}
+    all_results = {**auth_results, **document_results, **education_results, **owl_tutor_results, **voice_agent_results, **auto_app_results, **review_focused_results, **ai_validation_results, **priority_results}
     
     print("\n" + "=" * 60)
     print("📊 TEST RESULTS SUMMARY")
