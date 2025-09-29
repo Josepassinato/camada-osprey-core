@@ -217,7 +217,9 @@ const FriendlyForm = () => {
           required: true,
           value: extractedFacts.personal_info?.email || caseData.basic_data?.email || '',
           placeholder: 'seu@email.com',
-          aiSuggestion: extractedFacts.personal_info?.email ? `IA sugeriu: ${extractedFacts.personal_info.email}` : undefined
+          aiSuggestion: extractedFacts.personal_info?.email ? 
+            `IA sugeriu: ${extractedFacts.personal_info.email}` : 
+            (caseData.basic_data?.email ? `Dados básicos: ${caseData.basic_data.email}` : undefined)
         }
       ]
     });
