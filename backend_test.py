@@ -5088,6 +5088,14 @@ def run_all_tests():
         "complete_auto_application_journey": test_complete_auto_application_journey()
     }
     
+    # CRITICAL PRIORITY: AI Document Validation Tests
+    print("\n" + "🔍" * 20 + " AI DOCUMENT VALIDATION TESTS " + "🔍" * 20)
+    ai_validation_results = {
+        "ai_document_validation_real_integration": test_ai_document_validation_real_integration(),
+        "dr_miguel_specific_validations": test_dr_miguel_specific_validations(),
+        "document_validation_error_messages": test_document_validation_error_messages()
+    }
+    
     # PRIORITY TESTS FOR FINAL REVIEW
     print("\n" + "🎯" * 20 + " PRIORITY TESTS " + "🎯" * 20)
     priority_results = {
