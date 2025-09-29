@@ -4864,39 +4864,84 @@ async def analyze_document_with_real_ai(
                 "dra_paula_assessment": f"❌ DOCUMENTO REJEITADO: {mismatch_reason}. Verifique se enviou o documento correto!"
             }
         
-        # If all validations pass, use Dr. Miguel for deeper analysis
+        # Use Dr. Miguel ENHANCED SYSTEM for comprehensive analysis
         dr_miguel = DocumentValidationAgent()
         
-        document_data = {
-            "file_name": file.filename,
-            "file_type": file.content_type,
-            "file_size": file_size,
-            "document_type": document_type
-        }
-        
-        case_context = {
-            "form_code": visa_type,
-            "case_id": case_id
-        }
-        
-        # Real AI validation
-        validation_result = dr_miguel.validate_document(document_data, document_type, case_context)
-        
-        # Format response for frontend
-        return {
-            "valid": validation_result.get("document_valid", True),
-            "legible": validation_result.get("legible", True),
-            "completeness": validation_result.get("completeness_score", 85),
-            "issues": validation_result.get("issues_found", []),
-            "extracted_data": validation_result.get("extracted_data", {
-                "document_type": document_type,
+        try:
+            logger.info(f"🔬 Iniciando análise aprimorada Dr. Miguel para {document_type}")
+            
+            # Try the new enhanced validation system
+            enhanced_result = await dr_miguel.validate_document_enhanced(
+                file_content=file_content,
+                file_name=file.filename or f"document_{document_type}.{file.content_type.split('/')[-1]}",
+                expected_document_type=document_type,
+                visa_type=visa_type,
+                applicant_name='Usuário'  # Will be replaced with actual name when available
+            )
+            
+            logger.info(f"✅ Análise aprimorada concluída: {enhanced_result.get('verdict', 'PROCESSADO')}")
+            
+            # Convert enhanced result to expected format
+            return {
+                "valid": enhanced_result.get("valid", False),
+                "legible": enhanced_result.get("quality_acceptable", True),
+                "completeness": enhanced_result.get("confidence_score", 0),
+                "issues": enhanced_result.get("issues", []),
+                "extracted_data": {
+                    "document_type": enhanced_result.get("document_type_identified", document_type),
+                    "file_name": file.filename,
+                    "validation_status": enhanced_result.get("verdict", "PROCESSADO"),
+                    "visa_context": visa_type,
+                    "type_matches_expected": enhanced_result.get("type_matches_expected", False),
+                    "relevant_for_visa": enhanced_result.get("relevant_for_visa", False),
+                    "uscis_approval_likelihood": enhanced_result.get("uscis_approval_likelihood", 0),
+                    "detailed_analysis": enhanced_result.get("detailed_analysis", {})
+                },
+                "dra_paula_assessment": f"🤖 {enhanced_result.get('agent', 'Dr. Miguel Aprimorado')}: {enhanced_result.get('verdict', 'PROCESSADO')}",
+                "enhanced_analysis": enhanced_result,
+                "recommendations": enhanced_result.get("recommendations", []),
+                "visa_specific_validation": {
+                    "document_required": enhanced_result.get("relevant_for_visa", False),
+                    "meets_criteria": enhanced_result.get("type_matches_expected", False),
+                    "quality_score": enhanced_result.get("confidence_score", 0)
+                }
+            }
+            
+        except Exception as enhanced_error:
+            logger.error(f"❌ Erro no sistema aprimorado Dr. Miguel: {str(enhanced_error)}")
+            
+            # Fallback to original system
+            document_data = {
                 "file_name": file.filename,
-                "validation_status": "APPROVED" if validation_result.get("document_valid", True) else "REJECTED",
-                "visa_context": visa_type
-            }),
-            "dra_paula_assessment": validation_result.get("dra_paula_assessment", f"✅ Documento {document_type} validado para {visa_type}"),
-            "visa_specific_validation": validation_result.get("visa_specific_validation", {})
-        }
+                "file_type": file.content_type,
+                "file_size": file_size,
+                "document_type": document_type
+            }
+            
+            case_context = {
+                "form_code": visa_type,
+                "case_id": case_id
+            }
+            
+            # Use legacy validation as fallback
+            validation_result = dr_miguel.validate_document_legacy(document_data, document_type, case_context)
+            
+            # Format response for frontend (fallback)
+            return {
+                "valid": validation_result.get("document_valid", True),
+                "legible": validation_result.get("legible", True),
+                "completeness": validation_result.get("completeness_score", 85),
+                "issues": validation_result.get("issues_found", []),
+                "extracted_data": validation_result.get("extracted_data", {
+                    "document_type": document_type,
+                    "file_name": file.filename,
+                    "validation_status": "APPROVED" if validation_result.get("document_valid", True) else "REJECTED",
+                    "visa_context": visa_type
+                }),
+                "dra_paula_assessment": validation_result.get("dra_paula_assessment", f"✅ Documento {document_type} validado para {visa_type} (sistema legado)"),
+                "visa_specific_validation": validation_result.get("visa_specific_validation", {}),
+                "fallback_used": True
+            }
         
     except HTTPException:
         raise
