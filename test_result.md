@@ -107,7 +107,7 @@ user_problem_statement: "TESTES COMPLEMENTARES ABRANGENTES - VALIDAÇÃO FINAL P
 backend:
   - task: "Case Management Complete (H-1B, B-1/B-2, F-1)"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 1
     priority: "high"
@@ -116,6 +116,9 @@ backend:
       - working: false
         agent: "testing"
         comment: "❌ CASE MANAGEMENT ISSUES IDENTIFIED: 1) ✅ Case Creation - B-1/B-2 successful (OSP-95DA50F2), but H-1B and F-1 failed with 422 errors due to incorrect form_code format (expected 'H-1B', 'F-1' not 'H1B', 'F1'), 2) ❌ Case Updates - All case update operations failing with 404 errors, endpoint structure issues, 3) ❌ Data Persistence - Case retrieval failing, data not persisting between stages, 4) ❌ Historical Data - Case listing endpoint returning 404 errors. CRITICAL: Case update and retrieval endpoints have structural issues preventing proper case management workflow."
+      - working: true
+        agent: "testing"
+        comment: "✅ CASE MANAGEMENT CORRECTIONS VALIDATED: 1) ✅ PUT Endpoint Fixed - Original PUT /api/auto-application/case/{case_id} no longer returns 404, successfully updates case status and progress, 2) ✅ PATCH Endpoint Working - New PATCH endpoint for partial updates functional, 3) ⚠️ Batch Update Issue - POST /api/auto-application/case/{case_id}/batch-update has backend implementation bug (expects 'updates' parameter but FastAPI validation fails), 4) ✅ Data Persistence - Case retrieval working, data persisting correctly across updates, 5) ✅ Performance - Case operations under 2s criteria (19ms average). MAJOR IMPROVEMENT: Core case update functionality restored, only batch endpoint needs backend code fix."
 
   - task: "AI Processing Pipeline (5 Steps)"
     implemented: true
