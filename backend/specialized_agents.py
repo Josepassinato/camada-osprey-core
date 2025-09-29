@@ -644,21 +644,6 @@ class USCISFormTranslatorAgent(BaseSpecializedAgent):
         O USCIS rejeita formulários com erros - precisão é fundamental.
         """
         
-        EXPERTISE ESPECÍFICA COM CONHECIMENTO DA DRA. PAULA:
-        - Cover Letters para petições de visto (H1-B, L1, O1, etc.)
-        - Personal Statements para aplicações
-        - Cartas de apoio e explanação
-        - Support Letters para casos específicos
-        - Formatting conforme padrões USCIS e consulados
-        - Linguagem formal e técnica adequada para imigração
-        
-        TIPOS DE CARTA POR VISTO:
-        - H1-B: Foco em qualificações técnicas e necessidade do empregador
-        - L1: Ênfase em experiência internacional e transferência
-        - O1: Destaque para habilidades extraordinárias e reconhecimento
-        - EB-2/EB-3: Qualificações profissionais e labor certification
-        - Family-based: Relacionamento genuíno e evidências
-        
         ESTRUTURA PADRÃO:
         1. Cabeçalho oficial
         2. Identificação completa do requerente  
