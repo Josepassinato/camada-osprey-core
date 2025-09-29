@@ -204,9 +204,11 @@ const FriendlyForm = () => {
           label: 'Telefone',
           type: 'text',
           required: true,
-          value: extractedFacts.personal_info?.phone || caseData.basic_data?.phone || '',
+          value: extractedFacts.personal_info?.phone || caseData.basic_data?.phoneNumber || '',
           placeholder: '+55 11 99999-9999',
-          aiSuggestion: extractedFacts.personal_info?.phone ? `IA sugeriu: ${extractedFacts.personal_info.phone}` : undefined
+          aiSuggestion: extractedFacts.personal_info?.phone ? 
+            `IA sugeriu: ${extractedFacts.personal_info.phone}` : 
+            (caseData.basic_data?.phoneNumber ? `Dados básicos: ${caseData.basic_data.phoneNumber}` : undefined)
         },
         {
           id: 'email',
