@@ -1821,6 +1821,123 @@ async def update_case_anonymous(case_id: str, case_update: CaseUpdate, session_t
         logger.error(f"Error updating case: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error updating case: {str(e)}")
 
+@api_router.patch("/auto-application/case/{case_id}")
+async def patch_case_data(case_id: str, update_data: dict, current_user = Depends(get_current_user_optional)):
+    """Efficiently update specific case fields with optimized data persistence"""
+    try:
+        # Validate case access
+        query = {"case_id": case_id}
+        if current_user:
+            query["user_id"] = current_user["id"]
+        else:
+            session_token = update_data.get("session_token")
+            if session_token:
+                query["session_token"] = session_token
+            else:
+                query["user_id"] = None
+        
+        case = await db.auto_cases.find_one(query)
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        # Prepare optimized update with only changed fields
+        sanitized_update = {}
+        allowed_fields = [
+            "status", "basic_data", "user_story_text", "simplified_form_responses", 
+            "progress_percentage", "current_step", "documents", "extracted_facts",
+            "official_form_data", "ai_generated_uscis_form"
+        ]
+        
+        for field in allowed_fields:
+            if field in update_data and update_data[field] is not None:
+                sanitized_update[field] = update_data[field]
+        
+        # Always update timestamp
+        sanitized_update["updated_at"] = datetime.utcnow()
+        
+        # Use atomic update
+        result = await db.auto_cases.update_one(
+            {"case_id": case_id},
+            {"$set": sanitized_update}
+        )
+        
+        if result.modified_count == 0:
+            return {"message": "No changes made to case"}
+        
+        # Return updated case
+        updated_case = await db.auto_cases.find_one({"case_id": case_id})
+        if "_id" in updated_case:
+            del updated_case["_id"]
+            
+        return {
+            "message": "Case updated efficiently", 
+            "case": updated_case,
+            "fields_updated": list(sanitized_update.keys())
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error patching case: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error patching case: {str(e)}")
+
+@api_router.post("/auto-application/case/{case_id}/batch-update")
+async def batch_update_case_data(case_id: str, updates: list, current_user = Depends(get_current_user_optional)):
+    """Process multiple case updates in a single transaction for better performance"""
+    try:
+        # Validate case access
+        query = {"case_id": case_id}
+        if current_user:
+            query["user_id"] = current_user["id"]
+        
+        case = await db.auto_cases.find_one(query)
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        # Process batch updates atomically
+        combined_update = {"updated_at": datetime.utcnow()}
+        
+        for update in updates:
+            operation = update.get("operation", "set")
+            field = update.get("field")
+            value = update.get("value")
+            
+            if not field:
+                continue
+                
+            if operation == "set":
+                combined_update[field] = value
+            elif operation == "append" and field in case and isinstance(case[field], list):
+                if field not in combined_update:
+                    combined_update[field] = case[field].copy()
+                if isinstance(combined_update[field], list):
+                    combined_update[field].append(value)
+            elif operation == "merge" and isinstance(value, dict):
+                if field not in combined_update:
+                    combined_update[field] = case.get(field, {}).copy() if isinstance(case.get(field), dict) else {}
+                combined_update[field].update(value)
+        
+        # Execute atomic batch update
+        result = await db.auto_cases.update_one(
+            {"case_id": case_id},
+            {"$set": combined_update}
+        )
+        
+        if result.modified_count == 0:
+            return {"message": "No changes made in batch update"}
+        
+        return {
+            "message": f"Batch update completed successfully",
+            "updates_processed": len(updates),
+            "fields_modified": list(combined_update.keys())
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in batch update: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error in batch update: {str(e)}")
+
 @api_router.post("/auto-application/case/{case_id}/claim")
 async def claim_anonymous_case(case_id: str, current_user = Depends(get_current_user)):
     """Claim an anonymous case when user registers/logs in"""
