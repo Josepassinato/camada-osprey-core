@@ -593,7 +593,7 @@ const DocumentUploadAuto = () => {
               disabled={!canContinue()}
               className="bg-black text-white hover:bg-gray-800 flex items-center gap-2 w-full sm:w-auto"
             >
-              Continuar para História
+              Continuar para Formulário IA
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
