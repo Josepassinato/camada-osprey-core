@@ -544,8 +544,43 @@ const DocumentUploadAuto = () => {
       analysis.issues.push('Arquivo comprimido demais - pode afetar legibilidade oficial');
     }
 
-    // Get existing case data for intelligent extraction
-    const basicData = case_?.basic_data || {};
+    // Dra. Paula Assessment based on validation results
+    if (analysis.valid) {
+      analysis.dra_paula_assessment = `✅ Documento ${documentType.toUpperCase()} validado para ${visaType}. Formato e tipo corretos.`;
+      
+      // Add specific advice by document type
+      if (documentType === 'passport') {
+        analysis.dra_paula_assessment += ' Lembre-se: nome deve ser idêntico em todos os documentos.';
+      } else if (documentType === 'diploma') {
+        analysis.dra_paula_assessment += ' Verifique se é Bachelor ou superior para H-1B.';
+      } else if (documentType === 'birth_certificate') {
+        analysis.dra_paula_assessment += ' Não esqueça de apostilar para uso nos EUA.';
+      }
+    } else {
+      analysis.dra_paula_assessment = `❌ DOCUMENTO REJEITADO: ${analysis.issues.join('. ')}`;
+    }
+
+    // Set extracted data only if valid (no fake data!)
+    if (analysis.valid) {
+      analysis.extracted_data = {
+        document_type: documentType,
+        file_name: file.name,
+        file_size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+        upload_timestamp: new Date().toISOString(),
+        validation_status: 'APPROVED',
+        visa_context: visaType
+      };
+    } else {
+      analysis.extracted_data = {
+        document_type: documentType,
+        file_name: file.name,
+        validation_status: 'REJECTED',
+        rejection_reasons: analysis.issues
+      };
+    }
+
+    return analysis;
+  };
     
     // Visa-specific intelligent extraction using Dr. Miguel's knowledge
     if (documentType === 'passport') {
