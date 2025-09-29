@@ -93,6 +93,61 @@ export const OspreyOwlTutor: React.FC<OspreyOwlTutorProps> = ({
     }
   }, [snapshot?.visa_type, snapshot?.step]);
 
+  // Monitor for proactive opportunities
+  useEffect(() => {
+    if (!snapshot || !currentVisaType || !currentStep) return;
+
+    const checkProactiveOpportunities = () => {
+      const proactiveMessages: Message[] = [];
+
+      // Document-specific proactive messages
+      if (currentStep === 'documents' && snapshot.documents) {
+        snapshot.documents.forEach((doc: any) => {
+          if (doc.uploaded && doc.analyzed && doc.aiAnalysis) {
+            const contextMessages = draPaulaIntelligentTutor.getMessagesForContext(
+              currentVisaType,
+              currentStep,
+              'onDocument',
+              { documentType: doc.id, analysis: doc.aiAnalysis }
+            );
+            
+            contextMessages.forEach(msg => {
+              proactiveMessages.push(draPaulaIntelligentTutor.convertToTutorMessage(msg));
+            });
+          }
+        });
+      }
+
+      // Form progress proactive messages
+      if (currentStep === 'friendly_form' && snapshot.completion_percentage) {
+        if (snapshot.completion_percentage > 50 && snapshot.completion_percentage < 80) {
+          const progressMessages = draPaulaIntelligentTutor.getMessagesForContext(
+            currentVisaType,
+            currentStep,
+            'onProgress'
+          );
+          
+          progressMessages.forEach(msg => {
+            proactiveMessages.push(draPaulaIntelligentTutor.convertToTutorMessage(msg));
+          });
+        }
+      }
+
+      // Add new proactive messages (avoid duplicates)
+      if (proactiveMessages.length > 0) {
+        setMessages(prev => {
+          const existingIds = new Set(prev.map(m => m.id));
+          const newMessages = proactiveMessages.filter(m => !existingIds.has(m.id));
+          return [...prev, ...newMessages].slice(-6); // Keep last 6 messages
+        });
+      }
+    };
+
+    // Debounce proactive checks
+    const timeoutId = setTimeout(checkProactiveOpportunities, 2000);
+    return () => clearTimeout(timeoutId);
+  }, [snapshot, currentVisaType, currentStep]);
+
   const loadProactiveMessages = () => {
     if (!currentVisaType || !currentStep) return;
 
