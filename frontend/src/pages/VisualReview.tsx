@@ -207,20 +207,20 @@ const VisualReview = () => {
         fields: [
           {
             label: 'Endereço Atual',
-            portuguese: portugueseResponses.address?.current_address || 'Não informado',
-            english: hasOfficialForm ? (englishForm.current_address || englishForm.mailing_address || 'Not provided') : autoTranslateField(portugueseResponses.address?.current_address || 'Não informado'),
+            portuguese: portugueseResponses.personal_information?.current_address || 'Não informado',
+            english: hasOfficialForm ? (englishForm.current_address || englishForm.mailing_address || 'Not provided') : autoTranslateField(portugueseResponses.personal_information?.current_address || 'Não informado'),
             status: 'correct'
           },
           {
             label: 'Telefone',
-            portuguese: portugueseResponses.address?.phone || 'Não informado',
-            english: hasOfficialForm ? (englishForm.phone_number || englishForm.telephone || 'Not provided') : autoTranslateField(portugueseResponses.address?.phone || 'Não informado'),
+            portuguese: portugueseResponses.personal_information?.phone || 'Não informado',
+            english: hasOfficialForm ? (englishForm.phone_number || englishForm.telephone || 'Not provided') : autoTranslateField(portugueseResponses.personal_information?.phone || 'Não informado'),
             status: 'correct'
           },
           {
             label: 'E-mail',
-            portuguese: portugueseResponses.address?.email || 'Não informado',
-            english: hasOfficialForm ? (englishForm.email_address || englishForm.email || 'Not provided') : autoTranslateField(portugueseResponses.address?.email || 'Não informado'),
+            portuguese: portugueseResponses.personal_information?.email || 'Não informado',
+            english: hasOfficialForm ? (englishForm.email_address || englishForm.email || 'Not provided') : autoTranslateField(portugueseResponses.personal_information?.email || 'Não informado'),
             status: 'correct'
           }
         ]
