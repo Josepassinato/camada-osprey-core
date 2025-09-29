@@ -589,9 +589,16 @@ export const OspreyOwlTutor: React.FC<OspreyOwlTutorProps> = ({
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className={`p-3 rounded-lg border text-sm ${getSeverityColor(message.severity)}`}
+                      className={`p-3 rounded-lg border text-sm ${getSeverityColor(message.severity)} ${
+                        message.meta?.draPaulaAdvice 
+                          ? 'border-l-4 border-orange-400 bg-gradient-to-r from-orange-50 to-transparent' 
+                          : ''
+                      }`}
                     >
                       <div className="flex items-start gap-2">
+                        {message.meta?.draPaulaAdvice && (
+                          <div className="text-orange-600 font-bold text-xs">👩‍⚕️ Dra. Paula:</div>
+                        )}
                         <div className="flex-shrink-0 mt-0.5">
                           {message.severity === 'success' && <CheckCircle className="h-4 w-4" />}
                           {message.severity === 'error' && <AlertTriangle className="h-4 w-4" />}
@@ -613,10 +620,9 @@ export const OspreyOwlTutor: React.FC<OspreyOwlTutorProps> = ({
                                 <button
                                   key={actionIndex}
                                   onClick={() => handleAction(action)}
-                                  className="inline-flex items-center gap-1 px-2 py-1 bg-black text-white text-xs rounded hover:bg-gray-800 transition-colors"
+                                  className="text-xs px-2 py-1 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors"
                                 >
                                   {action.label}
-                                  <ArrowRight className="h-3 w-3" />
                                 </button>
                               ))}
                             </div>
@@ -625,13 +631,39 @@ export const OspreyOwlTutor: React.FC<OspreyOwlTutorProps> = ({
                           {/* Disclaimer */}
                           {message.meta?.disclaimer && (
                             <p className="mt-2 text-xs opacity-75">
-                              Isto não é aconselhamento jurídico.
+                              ℹ️ Esta é uma orientação geral. Consulte um advogado para casos específicos.
                             </p>
+                          )}
+
+                          {message.meta?.draPaulaAdvice && (
+                            <div className="text-xs mt-2 text-orange-700 bg-orange-100 p-2 rounded">
+                              💡 **Dica da Dra. Paula B2C** - Especialista em Imigração Americana
+                            </div>
                           )}
                         </div>
                       </div>
                     </motion.div>
                   ))}
+
+                  {achievements.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-3 rounded-lg"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <Award className="h-4 w-4" />
+                        <span className="font-bold text-sm">Suas Conquistas</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {achievements.map((achievement, index) => (
+                          <span key={achievement} className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded">
+                            🏆 {index + 1}
+                          </span>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
               </div>
             </div>
