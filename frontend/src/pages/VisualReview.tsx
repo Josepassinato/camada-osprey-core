@@ -753,11 +753,11 @@ const VisualReview = () => {
               </div>
 
               <Button 
-                onClick={continueToNextStep}
+                onClick={() => navigate(`/auto-application/case/${caseId}/finalize`)}
                 disabled={!canContinue()}
                 className="bg-black text-white hover:bg-gray-800 flex items-center gap-2"
               >
-                Aprovar e Continuar
+                Prosseguir para Finalização & Envio
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
