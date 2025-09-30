@@ -1,0 +1,54 @@
+doc_type: EMPLOYMENT_VERIFICATION_LETTER
+version: "1.0"
+quality:
+  min_dpi: 200
+  max_skew_deg: 5
+  min_blur_var: 120
+  min_file_size_kb: 30
+  max_file_size_mb: 5
+  supported_formats: ["pdf", "jpg", "jpeg", "png"]
+language: en
+translation_rule: null
+required_fields:
+  - name: employer_legal_name
+    regex: ".+"
+    description: "Nome legal da empresa empregadora"
+  - name: employee_full_name
+    regex: ".+"
+    description: "Nome completo do funcionário"
+  - name: job_title
+    regex: ".+"
+    description: "Título do cargo"
+  - name: employment_dates
+    regex: ".+"
+    description: "Período de emprego"
+  - name: duties_summary
+    regex: ".+"
+    description: "Resumo das funções"
+  - name: signature
+    regex: ".+"
+    description: "Assinatura do empregador"
+optional_fields:
+  - name: salary
+    regex: "[0-9\\.,]+"
+    description: "Salário"
+  - name: hr_contact
+    regex: ".+"
+    description: "Contato do RH"
+required_text_snippets: []
+presence_checks:
+  official_seal_or_stamp: false
+  signature: true
+  mrz_required: false
+attachments:
+  required: []
+  recommended: ["PAY_STUB"]
+consistency_checks:
+  - match_beneficiary_name_across_docs: true
+  - match_with_case_petitioner: true
+scoring:
+  critical_fields_weight: 0.4
+  quality_weight: 0.2
+  presence_checks_weight: 0.3
+  consistency_weight: 0.1
+notes: "Carta deve estar em papel timbrado da empresa e conter assinatura."
