@@ -2922,7 +2922,6 @@ async def generate_visa_directives(request: dict):
         context = request.get("context", "")
         
         # Load directives from YAML file
-        import yaml
         yaml_path = ROOT_DIR / "visa_directive_guides_informative.yaml"
         
         with open(yaml_path, 'r', encoding='utf-8') as f:
