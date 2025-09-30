@@ -673,7 +673,7 @@ const VisualReview = () => {
                     <div className="w-6 h-6 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-xs font-bold">
                       7
                     </div>
-                    <span className="text-sm text-muted-foreground">Pagamento & Download</span>
+                    <span className="text-sm text-muted-foreground">Finalização & Envio</span>
                   </div>
                 </div>
               </CardContent>
