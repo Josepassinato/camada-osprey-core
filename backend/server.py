@@ -5314,31 +5314,8 @@ async def analyze_document_with_real_ai(
                 if dr_miguel_assessment and "Policy Engine" not in analysis_result["dra_paula_assessment"]:
                     analysis_result["dra_paula_assessment"] += f" | Dr. Miguel: {dr_miguel_assessment}"
             
-            # Convert enhanced result to expected format
-            return {
-                "valid": enhanced_result.get("valid", False),
-                "legible": enhanced_result.get("quality_acceptable", True),
-                "completeness": enhanced_result.get("confidence_score", 0),
-                "issues": enhanced_result.get("issues", []),
-                "extracted_data": {
-                    "document_type": enhanced_result.get("document_type_identified", document_type),
-                    "file_name": file.filename,
-                    "validation_status": enhanced_result.get("verdict", "PROCESSADO"),
-                    "visa_context": visa_type,
-                    "type_matches_expected": enhanced_result.get("type_matches_expected", False),
-                    "relevant_for_visa": enhanced_result.get("relevant_for_visa", False),
-                    "uscis_approval_likelihood": enhanced_result.get("uscis_approval_likelihood", 0),
-                    "detailed_analysis": enhanced_result.get("detailed_analysis", {})
-                },
-                "dra_paula_assessment": f"🤖 {enhanced_result.get('agent', 'Dr. Miguel Aprimorado')}: {enhanced_result.get('verdict', 'PROCESSADO')}",
-                "enhanced_analysis": enhanced_result,
-                "recommendations": enhanced_result.get("recommendations", []),
-                "visa_specific_validation": {
-                    "document_required": enhanced_result.get("relevant_for_visa", False),
-                    "meets_criteria": enhanced_result.get("type_matches_expected", False),
-                    "quality_score": enhanced_result.get("confidence_score", 0)
-                }
-            }
+            # Return combined analysis result (Policy Engine + Dr. Miguel)
+            return analysis_result
             
         except Exception as enhanced_error:
             logger.error(f"❌ Erro no sistema aprimorado Dr. Miguel: {str(enhanced_error)}")
