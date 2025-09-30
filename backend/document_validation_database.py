@@ -397,6 +397,11 @@ VISA_DOCUMENT_REQUIREMENTS = {
         "birth_certificate", "marriage_certificate", "passport",
         "petitioner_citizenship_proof", "relationship_evidence"
     ],
+    "I-589": [
+        "passport", "birth_certificate", "marriage_certificate", 
+        "identity_documents", "persecution_evidence", "country_condition_evidence",
+        "psychological_evaluation", "medical_records", "supporting_documents"
+    ],
     "N-400": [
         "green_card", "tax_returns", "travel_records", 
         "marriage_certificate", "divorce_decree"
