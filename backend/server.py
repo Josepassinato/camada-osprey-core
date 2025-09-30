@@ -5236,12 +5236,12 @@ async def analyze_document_with_real_ai(
             enhanced_agent = EnhancedDocumentRecognitionAgent()
             
             # Primeira análise: Sistema existente (Dr. Miguel + alta precisão)
-            analysis_result = await enhanced_agent.analyze_document_with_ai(
+            analysis_result = await enhanced_agent.analyze_document_comprehensive(
                 file_content=file_content,
-                filename=file.filename,
-                document_type=document_type,
+                file_name=file.filename,
+                expected_document_type=document_type,
                 visa_type=visa_type,
-                case_id=case_id
+                applicant_name='Usuário'
             )
             
             # Segunda análise: Policy Engine (FASE 1 - Quality + Policies + Catalog)
