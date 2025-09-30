@@ -1,0 +1,48 @@
+doc_type: MARRIAGE_CERT
+version: "1.0"
+quality:
+  min_dpi: 200
+  max_skew_deg: 5
+  min_blur_var: 120
+  min_file_size_kb: 50
+  max_file_size_mb: 10
+  supported_formats: ["pdf", "jpg", "jpeg", "png"]
+language: en_or_translation_required
+translation_rule: CFR_103_2_b_3
+required_fields:
+  - name: spouse1_full_name
+    regex: ".+"
+    description: "Nome completo do primeiro cônjuge"
+  - name: spouse2_full_name
+    regex: ".+"
+    description: "Nome completo do segundo cônjuge"
+  - name: marriage_date
+    regex: "\\b\\d{1,2}[\\/\\.-]\\d{1,2}[\\/\\.-]\\d{4}\\b"
+    description: "Data do casamento"
+  - name: marriage_place
+    regex: ".+"
+    description: "Local do casamento"
+  - name: issuing_authority
+    regex: ".+"
+    description: "Autoridade emissora"
+optional_fields:
+  - name: certificate_number
+    regex: "\\b\\d+\\b"
+    description: "Número da certidão"
+required_text_snippets: []
+presence_checks:
+  official_seal_or_stamp: true
+  signature: false
+  mrz_required: false
+attachments:
+  required: []
+  recommended: []
+  if_applicable: ["DIVORCE_DECREE", "DEATH_CERTIFICATE"]
+consistency_checks:
+  - match_beneficiary_name_across_docs: true
+scoring:
+  critical_fields_weight: 0.4
+  quality_weight: 0.2
+  presence_checks_weight: 0.3
+  consistency_weight: 0.1
+notes: "Certidão de casamento deve conter carimbo oficial."
