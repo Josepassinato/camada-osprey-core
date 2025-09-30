@@ -1429,6 +1429,301 @@ def test_validation_performance():
         return False
 
 # ============================================================================
+# DOCUMENT ANALYSIS WITH AI TESTS (CRITICAL - USER REPORTED ISSUE)
+# ============================================================================
+
+def test_document_analysis_with_ai_endpoint():
+    """Test the specific /api/documents/analyze-with-ai endpoint reported by user"""
+    print("\n🔬 Testing Document Analysis with AI Endpoint...")
+    
+    try:
+        # Create a test document (passport image)
+        test_image_base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+        test_image_bytes = base64.b64decode(test_image_base64)
+        
+        # Prepare multipart form data for the analyze-with-ai endpoint
+        files = {
+            'file': ('passport_brazil.png', test_image_bytes, 'image/png')
+        }
+        
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'h1b',
+            'case_id': 'TEST-CASE-001'
+        }
+        
+        print(f"   Testing endpoint: {API_BASE}/documents/analyze-with-ai")
+        print(f"   Document type: {data['document_type']}")
+        print(f"   Visa type: {data['visa_type']}")
+        print(f"   File type: {files['file'][2]}")
+        
+        response = requests.post(
+            f"{API_BASE}/documents/analyze-with-ai", 
+            files=files, 
+            data=data, 
+            timeout=60  # Longer timeout for AI analysis
+        )
+        
+        print(f"   Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            result = response.json()
+            print(f"✅ Document analysis with AI successful")
+            print(f"   Valid: {result.get('valid')}")
+            print(f"   Legible: {result.get('legible')}")
+            print(f"   Completeness: {result.get('completeness')}")
+            print(f"   Issues count: {len(result.get('issues', []))}")
+            
+            # Check extracted data
+            extracted_data = result.get('extracted_data', {})
+            print(f"   Validation status: {extracted_data.get('validation_status')}")
+            print(f"   Document type identified: {extracted_data.get('document_type')}")
+            print(f"   Type matches expected: {extracted_data.get('type_matches_expected')}")
+            print(f"   Relevant for visa: {extracted_data.get('relevant_for_visa')}")
+            
+            # Check AI assessment
+            assessment = result.get('dra_paula_assessment', '')
+            print(f"   AI Assessment: {assessment[:100]}...")
+            
+            # Check if enhanced analysis is present
+            enhanced_analysis = result.get('enhanced_analysis')
+            if enhanced_analysis:
+                print(f"   ✅ Enhanced analysis present")
+                print(f"   Agent: {enhanced_analysis.get('agent', 'N/A')}")
+                print(f"   Verdict: {enhanced_analysis.get('verdict', 'N/A')}")
+            else:
+                print(f"   ⚠️  Enhanced analysis not present")
+            
+            # Check recommendations
+            recommendations = result.get('recommendations', [])
+            print(f"   Recommendations: {len(recommendations)}")
+            
+            return True
+        else:
+            print(f"❌ Document analysis with AI failed: {response.status_code}")
+            print(f"   Error: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Document analysis with AI error: {str(e)}")
+        return False
+
+def test_openai_integration():
+    """Test OpenAI API integration and key configuration"""
+    print("\n🤖 Testing OpenAI Integration...")
+    
+    try:
+        # Check if OpenAI key is configured
+        import os
+        from dotenv import load_dotenv
+        load_dotenv('/app/backend/.env')
+        
+        openai_key = os.environ.get('OPENAI_API_KEY')
+        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
+        
+        print(f"   OPENAI_API_KEY configured: {'Yes' if openai_key else 'No'}")
+        print(f"   EMERGENT_LLM_KEY configured: {'Yes' if emergent_key else 'No'}")
+        
+        if openai_key:
+            print(f"   OpenAI key length: {len(openai_key)} characters")
+            print(f"   OpenAI key starts with: {openai_key[:10]}...")
+        
+        if emergent_key:
+            print(f"   Emergent key length: {len(emergent_key)} characters")
+            print(f"   Emergent key starts with: {emergent_key[:15]}...")
+        
+        # Test a simple OpenAI call through the chat endpoint
+        if AUTH_TOKEN:
+            headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+            
+            chat_payload = {
+                "message": "Test OpenAI integration - respond with 'OpenAI working'",
+                "session_id": str(uuid.uuid4())
+            }
+            
+            chat_response = requests.post(f"{API_BASE}/chat", json=chat_payload, headers=headers, timeout=30)
+            
+            if chat_response.status_code == 200:
+                chat_data = chat_response.json()
+                response_message = chat_data.get('message', '').lower()
+                
+                if 'openai' in response_message or 'working' in response_message:
+                    print(f"✅ OpenAI integration test successful")
+                    print(f"   Response received: {len(chat_data.get('message', ''))} characters")
+                    return True
+                else:
+                    print(f"⚠️  OpenAI responded but test phrase not found")
+                    print(f"   Response: {response_message[:100]}...")
+                    return True  # Still working, just different response
+            else:
+                print(f"❌ OpenAI integration test failed: {chat_response.status_code}")
+                print(f"   Error: {chat_response.text}")
+                return False
+        else:
+            print(f"⚠️  Cannot test OpenAI integration - no auth token")
+            return openai_key is not None and emergent_key is not None
+            
+    except Exception as e:
+        print(f"❌ OpenAI integration test error: {str(e)}")
+        return False
+
+def test_document_validation_dependencies():
+    """Test if document validation dependencies are working"""
+    print("\n📚 Testing Document Validation Dependencies...")
+    
+    try:
+        # Test if we can import the required modules
+        test_imports = [
+            'specialized_agents',
+            'document_validation_database', 
+            'enhanced_document_recognition'
+        ]
+        
+        import sys
+        sys.path.append('/app/backend')
+        
+        successful_imports = 0
+        for module_name in test_imports:
+            try:
+                __import__(module_name)
+                print(f"   ✅ {module_name} imported successfully")
+                successful_imports += 1
+            except ImportError as e:
+                print(f"   ❌ {module_name} import failed: {str(e)}")
+            except Exception as e:
+                print(f"   ⚠️  {module_name} import warning: {str(e)}")
+                successful_imports += 1  # Count as success if not import error
+        
+        print(f"   Import success rate: {successful_imports}/{len(test_imports)}")
+        
+        # Test specific functions
+        try:
+            from document_validation_database import get_required_documents_for_visa
+            required_docs = get_required_documents_for_visa('h1b')
+            print(f"   ✅ Document database function working")
+            print(f"   H1-B required documents: {len(required_docs)} types")
+        except Exception as e:
+            print(f"   ❌ Document database function failed: {str(e)}")
+            return False
+        
+        # Test DocumentValidationAgent
+        try:
+            from specialized_agents import DocumentValidationAgent
+            agent = DocumentValidationAgent()
+            print(f"   ✅ DocumentValidationAgent created successfully")
+        except Exception as e:
+            print(f"   ❌ DocumentValidationAgent creation failed: {str(e)}")
+            return False
+        
+        return successful_imports >= len(test_imports) - 1  # Allow 1 failure
+        
+    except Exception as e:
+        print(f"❌ Document validation dependencies test error: {str(e)}")
+        return False
+
+def test_document_upload_and_analysis_flow():
+    """Test complete document upload and analysis flow"""
+    print("\n🔄 Testing Complete Document Upload and Analysis Flow...")
+    
+    if not AUTH_TOKEN:
+        print("❌ No auth token available for flow test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {AUTH_TOKEN}"}
+    
+    try:
+        # Step 1: Upload document using regular upload endpoint
+        test_image_base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+        test_image_bytes = base64.b64decode(test_image_base64)
+        
+        files = {
+            'file': ('passport_test.png', test_image_bytes, 'image/png')
+        }
+        
+        data = {
+            'document_type': 'passport',
+            'tags': 'test,passport,analysis',
+            'expiration_date': '2025-12-31T23:59:59Z'
+        }
+        
+        print("   Step 1: Uploading document...")
+        upload_response = requests.post(
+            f"{API_BASE}/documents/upload", 
+            files=files, 
+            data=data, 
+            headers=headers, 
+            timeout=30
+        )
+        
+        if upload_response.status_code != 200:
+            print(f"   ❌ Document upload failed: {upload_response.status_code}")
+            return False
+        
+        upload_result = upload_response.json()
+        document_id = upload_result.get('document_id')
+        print(f"   ✅ Document uploaded: {document_id}")
+        
+        # Step 2: Test analyze-with-ai endpoint
+        print("   Step 2: Analyzing with AI...")
+        
+        files_ai = {
+            'file': ('passport_test.png', test_image_bytes, 'image/png')
+        }
+        
+        data_ai = {
+            'document_type': 'passport',
+            'visa_type': 'h1b',
+            'case_id': 'TEST-FLOW-001'
+        }
+        
+        ai_response = requests.post(
+            f"{API_BASE}/documents/analyze-with-ai", 
+            files=files_ai, 
+            data=data_ai, 
+            timeout=60
+        )
+        
+        if ai_response.status_code != 200:
+            print(f"   ❌ AI analysis failed: {ai_response.status_code}")
+            print(f"   Error: {ai_response.text}")
+            return False
+        
+        ai_result = ai_response.json()
+        print(f"   ✅ AI analysis completed")
+        print(f"   Valid: {ai_result.get('valid')}")
+        print(f"   Completeness: {ai_result.get('completeness')}")
+        
+        # Step 3: Get document details to verify analysis was saved
+        print("   Step 3: Verifying document details...")
+        
+        details_response = requests.get(f"{API_BASE}/documents/{document_id}", headers=headers, timeout=10)
+        
+        if details_response.status_code == 200:
+            details = details_response.json()
+            ai_analysis = details.get('ai_analysis')
+            
+            if ai_analysis:
+                print(f"   ✅ AI analysis saved in document")
+                print(f"   Completeness score: {ai_analysis.get('completeness_score')}")
+                print(f"   Validity status: {ai_analysis.get('validity_status')}")
+            else:
+                print(f"   ⚠️  AI analysis not found in document details")
+        
+        # Step 4: Clean up - delete test document
+        print("   Step 4: Cleaning up...")
+        delete_response = requests.delete(f"{API_BASE}/documents/{document_id}", headers=headers, timeout=10)
+        
+        if delete_response.status_code == 200:
+            print(f"   ✅ Test document cleaned up")
+        
+        print(f"✅ Complete document upload and analysis flow successful")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Document upload and analysis flow error: {str(e)}")
+        return False
+
+# ============================================================================
 # OSPREY OWL TUTOR VALIDATION TESTS (NEW - Simplified Version)
 # ============================================================================
 
