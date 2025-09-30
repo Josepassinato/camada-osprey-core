@@ -516,22 +516,14 @@ metadata:
 
 test_plan:
   current_focus:
-    - "BaseSpecializedAgent with EMERGENT_LLM_KEY"
-    - "DocumentValidationAgent (Dr. Miguel)"
-    - "ImmigrationExpert (Dra. Paula B2C)"
-    - "FormValidationAgent (Dra. Ana)"
-    - "EligibilityAnalysisAgent (Dr. Carlos)"
-    - "ComplianceCheckAgent (Dra. Patricia)"
-    - "ImmigrationLetterWriterAgent (Dr. Ricardo)"
-    - "USCISFormTranslatorAgent (Dr. Fernando)"
-    - "UrgencyTriageAgent (Dr. Roberto)"
-    - "EnhancedDocumentRecognitionAgent"
-    - "SpecializedAgentCoordinator"
-    - "/api/documents/analyze-with-ai Endpoint (Dr. Miguel Integration)"
-    - "/api/chat Endpoint (Dra. Paula Integration)"
+    - "Dr. Paula Cover Letter Module - Generate Directives"
+    - "Dr. Paula Cover Letter Module - Review Letter"
+    - "Dr. Paula Cover Letter Module - Request Complement"
+    - "Dr. Paula Cover Letter Module - Process Add Letter"
+    - "Dr. Paula Cover Letter Module - YAML System"
   stuck_tasks: []
   test_all: true
-  test_priority: "ai_agents_system"
+  test_priority: "dr_paula_cover_letter_module"
 
 agent_communication:
   - agent: "testing"
