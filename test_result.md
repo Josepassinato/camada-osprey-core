@@ -442,11 +442,14 @@ frontend:
     file: "/app/frontend/src/pages/DocumentUploadAuto.tsx"
     stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: false
         agent: "testing"
         comment: "❌ DOCUMENT ANALYSIS ISSUE CONFIRMED - ROOT CAUSE IDENTIFIED: User-reported problem 'depois que faz o upload do documento dentro da aplicação de visto na segunda página o sistema não analisa corretamente' has been thoroughly investigated. FINDINGS: 1) ✅ Document Upload System Working - Successfully navigated to documents page, upload interface functional, files uploaded correctly, API calls made to /api/documents/analyze-with-ai with 200 OK responses, 2) ✅ Backend Analysis Functional - Dr. Miguel validation system working, file validation (size/format/type) operational, analysis results returned correctly (85% complete, APPROVED status), 3) ❌ ROOT CAUSE: Form Code Mismatch - User selects H-1B visa but case gets created with form_code 'B-1/B-2', causing document validation against wrong visa requirements. When passport document is validated against B-1/B-2 requirements instead of H-1B, it appears to fail analysis, 4) ✅ Direct API Test Confirms - When called with correct visa type (H-1B), analysis works perfectly. CONCLUSION: Document analysis system is fully functional. Issue is in form selection logic where case gets assigned wrong form_code, making user experience appear broken because documents are validated against incorrect visa type requirements."
+      - working: false
+        agent: "testing"
+        comment: "❌ FORM CODE MISMATCH CONFIRMED THROUGH END-TO-END TESTING: Comprehensive H-1B journey testing confirms the critical issue - when user selects H-1B visa type, the system creates a case with form_code 'B-1/B-2' instead of 'H-1B'. EVIDENCE: 1) ✅ Console logs show 'Updating existing case with form_code: B-1/B-2' when H-1B is selected, 2) ✅ Page header displays 'B-1/B-2' instead of 'H-1B' after selection, 3) ✅ Cover Letter module generates 'Roteiro Informativo - B-1/B-2' instead of H-1B directives, 4) ✅ Document requirements show B-1/B-2 documents (Comprovantes Financeiros) instead of H-1B documents (Employment Letter, Diploma), 5) ❌ This causes Policy Engine to validate documents against wrong visa requirements, making analysis appear broken. IMPACT: User experience severely affected as documents are validated against incorrect visa type, causing confusion and apparent system failure. RECOMMENDATION: Fix form selection logic in SelectForm.tsx to correctly assign H-1B form_code when H-1B is selected."
 
   - task: "Dr. Paula Cover Letter Module - Generate Directives"
     implemented: true
