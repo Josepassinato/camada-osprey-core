@@ -10,17 +10,17 @@ export const getBackendUrl = (): string => {
     
     // Preview environment detection
     if (hostname.includes('preview.emergentagent.com')) {
-      return 'https://visa-genius-2.preview.emergentagent.com';
+      return 'https://docsage-9.preview.emergentagent.com';
     }
     
     // Production environment detection  
     if (hostname.includes('emergentagent.com') && !hostname.includes('preview')) {
-      return 'https://visa-genius-2.preview.emergentagent.com'; // Will be updated for production
+      return 'https://docsage-9.preview.emergentagent.com'; // Will be updated for production
     }
   }
   
   // Fallback to environment variable or preview URL
-  return import.meta.env.VITE_BACKEND_URL || 'https://visa-genius-2.preview.emergentagent.com';
+  return import.meta.env.VITE_BACKEND_URL || 'https://docsage-9.preview.emergentagent.com';
 };
 
 export const getApiUrl = (endpoint: string): string => {
