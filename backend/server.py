@@ -5320,38 +5320,11 @@ async def analyze_document_with_real_ai(
         except Exception as enhanced_error:
             logger.error(f"❌ Erro no sistema aprimorado Dr. Miguel: {str(enhanced_error)}")
             
-            # Fallback to original system
-            document_data = {
-                "file_name": file.filename,
-                "file_type": file.content_type,
-                "file_size": file_size,
-                "document_type": document_type
-            }
+            # Even if Dr. Miguel fails, return Policy Engine results
+            analysis_result["dr_miguel_error"] = str(enhanced_error)
+            analysis_result["dra_paula_assessment"] += " | Dr. Miguel: Erro na análise avançada"
             
-            case_context = {
-                "form_code": visa_type,
-                "case_id": case_id
-            }
-            
-            # Use legacy validation as fallback
-            validation_result = dr_miguel.validate_document_legacy(document_data, document_type, case_context)
-            
-            # Format response for frontend (fallback)
-            return {
-                "valid": validation_result.get("document_valid", True),
-                "legible": validation_result.get("legible", True),
-                "completeness": validation_result.get("completeness_score", 85),
-                "issues": validation_result.get("issues_found", []),
-                "extracted_data": validation_result.get("extracted_data", {
-                    "document_type": document_type,
-                    "file_name": file.filename,
-                    "validation_status": "APPROVED" if validation_result.get("document_valid", True) else "REJECTED",
-                    "visa_context": visa_type
-                }),
-                "dra_paula_assessment": validation_result.get("dra_paula_assessment", f"✅ Documento {document_type} validado para {visa_type} (sistema legado)"),
-                "visa_specific_validation": validation_result.get("visa_specific_validation", {}),
-                "fallback_used": True
-            }
+            return analysis_result
         
     except HTTPException:
         raise
