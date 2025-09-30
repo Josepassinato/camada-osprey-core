@@ -33,7 +33,7 @@ const AutoApplicationStart = () => {
       return;
     }
 
-    console.log('🔘 Terms agreed, starting application...');
+    console.log('🔘 Terms agreed, navigating to form selection...');
     setIsCreating(true);
     
     try {
@@ -43,30 +43,12 @@ const AutoApplicationStart = () => {
       
       console.log('🔘 Session token generated:', sessionToken);
       
-      // Use utility function for robust API call
-      const response = await makeApiCall('/auto-application/start', {
-        method: 'POST',
-        body: JSON.stringify({
-          session_token: sessionToken
-        }),
+      // Navigate directly to form selection - don't create case yet
+      // Case will be created in SelectForm.tsx with the correct form_code
+      console.log('🔘 Navigating to form selection...');
+      navigate('/auto-application/select-form', { 
+        state: { sessionToken } 
       });
-
-      console.log('🔘 Response status:', response.status);
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('🔘 Response data:', data);
-        
-        // Navigate to form selection with case ID
-        console.log('🔘 Navigating to form selection...');
-        navigate('/auto-application/select-form', { 
-          state: { caseId: data.case.case_id, sessionToken } 
-        });
-      } else {
-        const errorText = await response.text();
-        console.error('🔘 Response error:', errorText);
-        throw new Error(`Falha ao criar aplicação: ${response.status} - ${errorText}`);
-      }
     } catch (error) {
       console.error('🔘 Error starting application:', error);
       alert(`Erro ao iniciar aplicação: ${error.message}\n\nTente novamente ou recarregue a página.`);
