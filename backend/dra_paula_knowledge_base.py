@@ -289,7 +289,7 @@ class DraPaulaKnowledgeBase:
         - Foque em auto-aplicação sem advogado quando apropriado
         - Inclua tips específicos para brasileiros (documentos, apostille, traduções)
         
-        IMPORTANTE: {disclaimers['primary']} {disclaimders['recommendation']}
+        IMPORTANTE: {disclaimers['primary']} {disclaimers['recommendation']}
         
         Use este conhecimento para fornecer respostas mais precisas e específicas sobre imigração americana.
         """
