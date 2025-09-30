@@ -1,0 +1,44 @@
+doc_type: TAX_RETURN_1040
+version: "1.0"
+quality:
+  min_dpi: 150
+  max_skew_deg: 5
+  min_blur_var: 100
+  min_file_size_kb: 50
+  max_file_size_mb: 15
+  supported_formats: ["pdf", "jpg", "jpeg", "png"]
+language: en
+translation_rule: null
+required_fields:
+  - name: tax_year
+    regex: "\\b20\\d{2}\\b"
+    description: "Ano fiscal"
+  - name: filer_name
+    regex: ".+"
+    description: "Nome do declarante"
+  - name: agi
+    regex: "[0-9\\.,]+"
+    description: "Renda bruta ajustada"
+optional_fields:
+  - name: filing_status
+    regex: ".+"
+    description: "Status de declaração"
+  - name: ssn
+    regex: "\\b\\d{3}-\\d{2}-\\d{4}\\b"
+    description: "SSN do declarante"
+required_text_snippets: []
+presence_checks:
+  official_seal_or_stamp: false
+  signature: true
+  mrz_required: false
+attachments:
+  required: []
+  recommended: ["IRS_TAX_TRANSCRIPT"]
+consistency_checks:
+  - match_beneficiary_name_across_docs: true
+scoring:
+  critical_fields_weight: 0.4
+  quality_weight: 0.2
+  presence_checks_weight: 0.2
+  consistency_weight: 0.2
+notes: "Declaração de imposto de renda deve estar assinada."
