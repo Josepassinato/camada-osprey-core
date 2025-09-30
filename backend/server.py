@@ -21,6 +21,7 @@ from visa_specifications import get_visa_specifications, get_required_documents,
 from visa_document_mapping import get_visa_document_requirements
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 import openai
+import yaml
 from immigration_expert import ImmigrationExpert, create_immigration_expert
 
 # Configure OpenAI
