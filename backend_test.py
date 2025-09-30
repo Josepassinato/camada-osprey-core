@@ -6125,6 +6125,15 @@ def run_all_tests():
         "document_delete": test_document_delete()
     }
     
+    # CRITICAL: Document Analysis with AI Tests (USER REPORTED ISSUE)
+    print("\n" + "🔬" * 20 + " DOCUMENT ANALYSIS WITH AI TESTS " + "🔬" * 20)
+    document_analysis_results = {
+        "document_analysis_with_ai_endpoint": test_document_analysis_with_ai_endpoint(),
+        "openai_integration": test_openai_integration(),
+        "document_validation_dependencies": test_document_validation_dependencies(),
+        "document_upload_and_analysis_flow": test_document_upload_and_analysis_flow()
+    }
+    
     # Education system tests (NEW)
     education_results = {
         "education_guides": test_education_guides(),
