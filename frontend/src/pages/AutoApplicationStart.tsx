@@ -46,9 +46,7 @@ const AutoApplicationStart = () => {
       // Navigate directly to form selection - don't create case yet
       // Case will be created in SelectForm.tsx with the correct form_code
       console.log('🔘 Navigating to form selection...');
-      navigate('/auto-application/select-form', { 
-        state: { sessionToken } 
-      });
+      navigate('/auto-application/select-form');
     } catch (error) {
       console.error('🔘 Error starting application:', error);
       alert(`Erro ao iniciar aplicação: ${error.message}\n\nTente novamente ou recarregue a página.`);
