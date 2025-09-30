@@ -22,6 +22,9 @@ from visa_document_mapping import get_visa_document_requirements
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 import openai
 from immigration_expert import ImmigrationExpert, create_immigration_expert
+
+# Configure OpenAI
+openai.api_key = os.environ.get('OPENAI_API_KEY')
 from specialized_agents import (
     SpecializedAgentCoordinator,
     DocumentValidationAgent,
