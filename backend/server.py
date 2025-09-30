@@ -2910,6 +2910,123 @@ async def specialized_immigration_letter_writing(request: dict):
         }
 
 # =====================================
+# CASE FINALIZER MVP - SISTEMA DE FINALIZAÇÃO
+# =====================================
+
+@api_router.post("/cases/{case_id}/finalize/start")
+async def start_case_finalization(case_id: str, request: dict):
+    """Inicia processo de finalização do caso"""
+    try:
+        from case_finalizer import case_finalizer
+        
+        scenario_key = request.get("scenario_key", "H-1B_basic")
+        postage = request.get("postage", "USPS")
+        language = request.get("language", "pt")
+        
+        result = case_finalizer.start_finalization(
+            case_id=case_id,
+            scenario_key=scenario_key,
+            postage=postage,
+            language=language
+        )
+        
+        if result["success"]:
+            return {
+                "job_id": result["job_id"],
+                "status": result["status"],
+                "message": "Finalização iniciada com sucesso"
+            }
+        else:
+            return {
+                "error": result["error"],
+                "supported_scenarios": result.get("supported_scenarios", [])
+            }
+            
+    except Exception as e:
+        logger.error(f"Error starting finalization: {e}")
+        return {
+            "error": "Erro interno do servidor",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.get("/cases/finalize/{job_id}/status")
+async def get_finalization_status(job_id: str):
+    """Obtém status da finalização"""
+    try:
+        from case_finalizer import case_finalizer
+        
+        result = case_finalizer.get_status(job_id)
+        
+        if result["success"]:
+            return {
+                "status": result["status"],
+                "issues": result.get("issues", []),
+                "links": result.get("links", {}),
+                "created_at": result.get("created_at"),
+                "completed_at": result.get("completed_at")
+            }
+        else:
+            return {"error": result["error"]}
+            
+    except Exception as e:
+        logger.error(f"Error getting finalization status: {e}")
+        return {"error": "Erro interno do servidor"}
+
+@api_router.post("/cases/{case_id}/finalize/accept")
+async def accept_finalization_consent(case_id: str, request: dict):
+    """Aceita consentimento para liberação dos downloads"""
+    try:
+        from case_finalizer import case_finalizer
+        
+        consent_hash = request.get("consent_hash", "")
+        
+        result = case_finalizer.accept_consent(
+            case_id=case_id,
+            consent_hash=consent_hash
+        )
+        
+        if result["success"]:
+            return {
+                "accepted": result["accepted"],
+                "message": result.get("message", "Consentimento registrado")
+            }
+        else:
+            return {"error": result["error"]}
+            
+    except Exception as e:
+        logger.error(f"Error accepting consent: {e}")
+        return {"error": "Erro interno do servidor"}
+
+@api_router.get("/instructions/{instruction_id}")
+async def get_instructions(instruction_id: str):
+    """Retorna instruções de envio (placeholder)"""
+    return {
+        "instruction_id": instruction_id,
+        "content": "# Instruções de envio\nPlaceholder para instruções detalhadas...",
+        "language": "pt",
+        "note": "MVP - Em produção retornaria conteúdo real do storage"
+    }
+
+@api_router.get("/checklists/{checklist_id}")
+async def get_checklist(checklist_id: str):
+    """Retorna checklist de verificação (placeholder)"""
+    return {
+        "checklist_id": checklist_id,
+        "content": "# Checklist Final\nPlaceholder para checklist...",
+        "language": "pt",
+        "note": "MVP - Em produção retornaria conteúdo real do storage"
+    }
+
+@api_router.get("/master-packets/{packet_id}")
+async def get_master_packet(packet_id: str):
+    """Retorna master packet (placeholder)"""
+    return {
+        "packet_id": packet_id,
+        "note": "MVP - Em produção retornaria PDF merged real",
+        "download_url": f"/download/master-packet/{packet_id}"
+    }
+
+# =====================================
 # MÓDULO DE CARTAS DE CAPA - DR. PAULA
 # =====================================
 
