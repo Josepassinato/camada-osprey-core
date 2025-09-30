@@ -252,6 +252,33 @@ const SelectForm = () => {
     try {
       const sessionToken = localStorage.getItem('osprey_session_token');
       
+      // Check if we have an existing case ID from the start flow
+      const existingCaseId = localStorage.getItem('osprey_current_case_id');
+      
+      if (existingCaseId) {
+        // Update existing case with form_code
+        console.log('🔄 Updating existing case with form_code:', formCode);
+        const updateResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${existingCaseId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            form_code: formCode,
+            session_token: sessionToken
+          }),
+        });
+        
+        if (updateResponse.ok) {
+          navigate(`/auto-application/case/${existingCaseId}/basic-data`);
+          return;
+        } else {
+          console.log('❌ Failed to update case, creating new one');
+        }
+      }
+      
+      // Create new case with form_code
+      console.log('🆕 Creating new case with form_code:', formCode);
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auto-application/start`, {
         method: 'POST',
         headers: {
