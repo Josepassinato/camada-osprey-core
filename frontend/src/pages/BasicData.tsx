@@ -239,7 +239,7 @@ const BasicData = () => {
 
   const continueToNextStep = () => {
     saveData();
-    navigate(`/auto-application/case/${caseId}/documents`);
+    navigate(`/auto-application/case/${caseId}/cover-letter`);
   };
 
   const isFormValid = () => {
