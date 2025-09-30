@@ -665,13 +665,13 @@ const VisualReview = () => {
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-6 h-6 bg-black text-white rounded-full flex items-center justify-center text-xs font-bold">
-                      5
+                      6
                     </div>
                     <span className="text-sm font-medium">Revisão Visual</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-6 h-6 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-xs font-bold">
-                      6
+                      7
                     </div>
                     <span className="text-sm text-muted-foreground">Pagamento & Download</span>
                   </div>
