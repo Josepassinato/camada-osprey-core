@@ -44,21 +44,55 @@ class CaseFinalizerTester:
             print(f"    Response: {response_data}")
         print()
 
-def test_basic_connectivity():
-    """Test basic API connectivity"""
-    print("\n🔍 Testing Basic Connectivity...")
-    try:
-        response = requests.get(f"{API_BASE}/", timeout=10)
-        if response.status_code == 200:
-            data = response.json()
-            print(f"✅ Basic connectivity: {data.get('message', 'OK')}")
-            return True
-        else:
-            print(f"❌ Basic connectivity failed: {response.status_code}")
-            return False
-    except Exception as e:
-        print(f"❌ Basic connectivity error: {str(e)}")
-        return False
+    def test_start_finalization_h1b_basic(self):
+        """Test H-1B basic finalization start"""
+        test_case_id = "TEST-CASE-H1B"
+        
+        payload = {
+            "scenario_key": "H-1B_basic",
+            "postage": "USPS",
+            "language": "pt"
+        }
+        
+        try:
+            response = self.session.post(
+                f"{API_BASE}/cases/{test_case_id}/finalize/start",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "job_id" in data and "status" in data:
+                    self.job_id_h1b = data["job_id"]  # Store for status polling
+                    self.log_test(
+                        "Start H-1B Finalization",
+                        True,
+                        f"Job ID: {data['job_id']}, Status: {data['status']}",
+                        data
+                    )
+                    return data
+                else:
+                    self.log_test(
+                        "Start H-1B Finalization",
+                        False,
+                        "Missing job_id or status in response",
+                        data
+                    )
+            else:
+                self.log_test(
+                    "Start H-1B Finalization",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Start H-1B Finalization",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        return None
 
 def test_user_signup():
     """Test user registration"""
