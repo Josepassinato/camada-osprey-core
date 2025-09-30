@@ -1,0 +1,44 @@
+doc_type: DEGREE_CERTIFICATE
+version: "1.0"
+quality:
+  min_dpi: 200
+  max_skew_deg: 5
+  min_blur_var: 120
+  min_file_size_kb: 50
+  max_file_size_mb: 10
+  supported_formats: ["pdf", "jpg", "jpeg", "png"]
+language: en_or_translation_required
+translation_rule: CFR_103_2_b_3
+required_fields:
+  - name: graduate_full_name
+    regex: ".+"
+    description: "Nome completo do formado"
+  - name: degree_title
+    regex: ".+"
+    description: "Título do diploma"
+  - name: institution
+    regex: ".+"
+    description: "Nome da instituição"
+  - name: completion_date
+    regex: "\\b\\d{1,2}[\\/\\.-]\\d{1,2}[\\/\\.-]\\d{4}\\b"
+    description: "Data de conclusão"
+optional_fields:
+  - name: gpa
+    regex: "\\b\\d\\.\\d{1,2}\\b"
+    description: "GPA ou nota média"
+required_text_snippets: []
+presence_checks:
+  official_seal_or_stamp: true
+  signature: false
+  mrz_required: false
+attachments:
+  required: []
+  recommended: ["TRANSCRIPT", "CREDENTIAL_EVALUATION"]
+consistency_checks:
+  - match_beneficiary_name_across_docs: true
+scoring:
+  critical_fields_weight: 0.4
+  quality_weight: 0.2
+  presence_checks_weight: 0.3
+  consistency_weight: 0.1
+notes: "Diploma deve conter carimbo oficial da instituição."
