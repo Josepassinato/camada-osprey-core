@@ -643,6 +643,12 @@ const VisualReview = () => {
                     <div className="w-6 h-6 bg-gray-700 text-white rounded-full flex items-center justify-center text-xs font-bold">
                       ✓
                     </div>
+                    <span className="text-sm text-gray-700">Carta de Apresentação</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 bg-gray-700 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                      ✓
+                    </div>
                     <span className="text-sm text-gray-700">Upload de Documentos</span>
                   </div>
                   <div className="flex items-center gap-3">
