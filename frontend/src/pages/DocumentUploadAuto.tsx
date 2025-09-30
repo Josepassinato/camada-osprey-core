@@ -415,7 +415,11 @@ const DocumentUploadAuto = () => {
 
   const realDocumentAnalysis = async (file: File, documentType: string) => {
     // REAL Dr. Miguel AI Analysis - Critical Security Function
-    const visaType = case_?.form_code || 'H-1B';
+    const visaType = case_?.form_code;
+    
+    if (!visaType) {
+      throw new Error('Tipo de visto não definido. Por favor, selecione o tipo de visto primeiro.');
+    }
     
     try {
       // Call backend for REAL analysis
