@@ -2908,6 +2908,284 @@ async def specialized_immigration_letter_writing(request: dict):
             "error": str(e)
         }
 
+# =====================================
+# MÓDULO DE CARTAS DE CAPA - DR. PAULA
+# =====================================
+
+@api_router.post("/llm/dr-paula/generate-directives")
+async def generate_visa_directives(request: dict):
+    """Gerar roteiro informativo com base nas exigências USCIS"""
+    try:
+        visa_type = request.get("visa_type", "H1B")
+        language = request.get("language", "pt")
+        context = request.get("context", "")
+        
+        # Load directives from YAML file
+        import yaml
+        yaml_path = ROOT_DIR / "visa_directive_guides_informative.yaml"
+        
+        with open(yaml_path, 'r', encoding='utf-8') as f:
+            directives_data = yaml.safe_load(f)
+        
+        visa_directives = directives_data.get(visa_type, {})
+        
+        if not visa_directives:
+            return {
+                "success": False,
+                "error": f"Tipo de visto {visa_type} não encontrado nas diretivas"
+            }
+        
+        # Create Dra. Paula expert
+        expert = create_immigration_expert()
+        
+        system_prompt = f"""
+        Você é a Dra. Paula, especialista em imigração. Produza um ROTEIRO INFORMATIVO com base nas exigências publicadas pelo USCIS para o visto {visa_type}.
+        
+        DIRETRIZES:
+        - Use linguagem impessoal: "o candidato deve demonstrar..."
+        - Base-se nas informações públicas do USCIS
+        - Finalize com o disclaimer padrão
+        - Idioma: {language}
+        - Use as diretivas fornecidas como base
+        
+        DIRETIVAS PARA {visa_type}:
+        {yaml.dump(visa_directives, default_flow_style=False, allow_unicode=True)}
+        
+        CONTEXTO ADICIONAL: {context}
+        
+        Formate como um roteiro informativo claro e objetivo.
+        """
+        
+        # Generate directives using Dra. Paula
+        session_id = f"directives_{visa_type}_{language}_{hash(context) % 10000}"
+        response = await expert._call_dra_paula(system_prompt, session_id)
+        
+        return {
+            "success": True,
+            "agent": "Dra. Paula B2C",
+            "visa_type": visa_type,
+            "language": language,
+            "directives_text": response,
+            "directives_data": visa_directives,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Dra. Paula generate directives error: {e}")
+        return {
+            "success": False,
+            "error": "Erro ao gerar roteiro informativo. Tente novamente.",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.post("/llm/dr-paula/review-letter")
+async def review_applicant_letter(request: dict):
+    """Revisar carta do aplicante contra exigências do visto"""
+    try:
+        visa_type = request.get("visa_type", "H1B")
+        applicant_letter = request.get("applicant_letter", "")
+        visa_profile = request.get("visa_profile", {})
+        
+        if not applicant_letter:
+            return {
+                "success": False,
+                "error": "Carta do aplicante não fornecida"
+            }
+        
+        # Create Dra. Paula expert
+        expert = create_immigration_expert()
+        
+        system_prompt = f"""
+        Você é a Dra. Paula, especialista em processos imigratórios.
+        Revise a carta escrita pelo aplicante para o visto {visa_type}.
+        
+        INSTRUÇÕES:
+        1. Verifique se cobre todas as exigências do visto {visa_type} baseado nas diretivas
+        2. Se faltar algo, liste em "issues"
+        3. Se completo, apenas ajuste redação e formalidade, SEM ALTERAR FATOS
+        4. Retorne em JSON com status, carta revisada (se completa) e lista de faltas (se houver)
+        5. NUNCA adicione dados não fornecidos pelo aplicante
+        6. Sempre finalize com o disclaimer
+        
+        DIRETIVAS PARA {visa_type}:
+        {yaml.dump(visa_profile, default_flow_style=False, allow_unicode=True)}
+        
+        CARTA DO APLICANTE:
+        {applicant_letter}
+        
+        Responda em JSON seguindo este formato:
+        {{
+            "review": {{
+                "visa_type": "{visa_type}",
+                "coverage_score": 0.0,
+                "status": "complete" ou "incomplete",
+                "issues": [],
+                "revised_letter": "carta revisada ou null",
+                "next_action": "present_to_applicant ou request_complement"
+            }}
+        }}
+        """
+        
+        session_id = f"review_{visa_type}_{hash(applicant_letter) % 10000}"
+        response = await expert._call_dra_paula(system_prompt, session_id)
+        
+        # Try to parse JSON response
+        try:
+            import json
+            # Extract JSON from response if it's wrapped in text
+            start_idx = response.find('{')
+            end_idx = response.rfind('}') + 1
+            if start_idx != -1 and end_idx > start_idx:
+                json_str = response[start_idx:end_idx]
+                review_data = json.loads(json_str)
+            else:
+                # Fallback: create structured response
+                review_data = {
+                    "review": {
+                        "visa_type": visa_type,
+                        "coverage_score": 0.8,
+                        "status": "needs_review",
+                        "issues": ["Resposta da IA não estava em formato JSON"],
+                        "revised_letter": None,
+                        "next_action": "request_complement",
+                        "raw_response": response
+                    }
+                }
+        except Exception as json_e:
+            logger.warning(f"Could not parse JSON from Dra. Paula: {json_e}")
+            review_data = {
+                "review": {
+                    "visa_type": visa_type,
+                    "coverage_score": 0.8,
+                    "status": "needs_review",
+                    "issues": ["Erro ao processar resposta da análise"],
+                    "revised_letter": None,
+                    "next_action": "request_complement",
+                    "raw_response": response
+                }
+            }
+        
+        return {
+            "success": True,
+            "agent": "Dra. Paula B2C",
+            "timestamp": datetime.utcnow().isoformat(),
+            **review_data
+        }
+        
+    except Exception as e:
+        logger.error(f"Dra. Paula review letter error: {e}")
+        return {
+            "success": False,
+            "error": "Erro ao revisar carta. Tente novamente.",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.post("/llm/dr-paula/request-complement")
+async def request_letter_complement(request: dict):
+    """Solicitar complementação quando carta está incompleta"""
+    try:
+        visa_type = request.get("visa_type", "H1B")
+        issues = request.get("issues", [])
+        
+        if not issues:
+            return {
+                "success": False,
+                "error": "Lista de pendências não fornecida"
+            }
+        
+        # Create Dra. Paula expert
+        expert = create_immigration_expert()
+        
+        system_prompt = f"""
+        Você é a Dra. Paula, especialista em imigração.
+        Com base nas faltas detectadas, produza um aviso informativo ao aplicante para o visto {visa_type}.
+        
+        DIRETRIZES:
+        - Liste claramente os pontos a complementar
+        - Use linguagem impessoal ("é necessário demonstrar...")
+        - Inclua sugestão de documentos/evidências
+        - Finalize com o disclaimer
+        - Mantenha tom profissional mas acessível
+        
+        PONTOS FALTANTES IDENTIFICADOS:
+        {chr(10).join(f"- {issue}" for issue in issues)}
+        
+        Produza um texto claro orientando o aplicante sobre como complementar a carta.
+        """
+        
+        session_id = f"complement_{visa_type}_{hash(str(issues)) % 10000}"
+        response = await expert._call_dra_paula(system_prompt, session_id)
+        
+        return {
+            "success": True,
+            "agent": "Dra. Paula B2C",
+            "visa_type": visa_type,
+            "complement_request": response,
+            "issues": issues,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Dra. Paula request complement error: {e}")
+        return {
+            "success": False,
+            "error": "Erro ao gerar solicitação de complemento. Tente novamente.",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.post("/process/{process_id}/add-letter")
+async def add_letter_to_process(process_id: str, request: dict):
+    """Adicionar carta finalizada ao processo do usuário"""
+    try:
+        letter_text = request.get("letter_text", "")
+        visa_type = request.get("visa_type", "")
+        confirmed_by_applicant = request.get("confirmed_by_applicant", False)
+        
+        if not letter_text or not confirmed_by_applicant:
+            return {
+                "success": False,
+                "error": "Carta ou confirmação do aplicante não fornecida"
+            }
+        
+        # Update case with letter
+        result = await db.auto_cases.update_one(
+            {"case_id": process_id},
+            {
+                "$set": {
+                    "cover_letter": {
+                        "text": letter_text,
+                        "visa_type": visa_type,
+                        "confirmed_by_applicant": confirmed_by_applicant,
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "status": "confirmed"
+                    },
+                    "updated_at": datetime.utcnow()
+                }
+            }
+        )
+        
+        if result.matched_count == 0:
+            return {
+                "success": False,
+                "error": "Processo não encontrado"
+            }
+        
+        return {
+            "success": True,
+            "message": "Carta adicionada ao processo com sucesso",
+            "process_id": process_id,
+            "letter_status": "confirmed",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Add letter to process error: {e}")
+        return {
+            "success": False,
+            "error": "Erro ao adicionar carta ao processo. Tente novamente.",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
 @api_router.post("/specialized-agents/uscis-form-translation")
 async def specialized_uscis_form_translation(request: dict):
     """Ultra-specialized USCIS form validation and translation using Dr. Fernando"""
