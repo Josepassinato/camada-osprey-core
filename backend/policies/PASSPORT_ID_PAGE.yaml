@@ -1,0 +1,47 @@
+doc_type: PASSPORT_ID_PAGE
+version: "1.0"
+quality:
+  min_dpi: 200
+  max_skew_deg: 5
+  min_blur_var: 120
+  min_file_size_kb: 50
+  max_file_size_mb: 10
+  supported_formats: ["pdf", "jpg", "jpeg", "png"]
+language: en_or_translation_required
+translation_rule: CFR_103_2_b_3
+required_fields:
+  - name: full_name
+    regex: ".+"
+    description: "Nome completo do portador do passaporte"
+  - name: passport_number
+    regex: "\\b[A-Z0-9]{6,12}\\b"
+    description: "Número do passaporte"
+  - name: date_of_birth
+    regex: "\\b\\d{1,2}[\\/\\.-]\\d{1,2}[\\/\\.-]\\d{4}\\b"
+    description: "Data de nascimento"
+  - name: expiry_date
+    regex: "\\b\\d{1,2}[\\/\\.-]\\d{1,2}[\\/\\.-]\\d{4}\\b"
+    description: "Data de expiração"
+  - name: nationality
+    regex: ".+"
+    description: "Nacionalidade"
+optional_fields:
+  - name: place_of_birth
+    regex: ".+"
+    description: "Local de nascimento"
+required_text_snippets: []
+presence_checks:
+  official_seal_or_stamp: false
+  signature: false
+  mrz_required: true
+attachments:
+  required: []
+  recommended: []
+consistency_checks:
+  - match_beneficiary_name_across_docs: true
+scoring:
+  critical_fields_weight: 0.4
+  quality_weight: 0.3
+  presence_checks_weight: 0.2
+  consistency_weight: 0.1
+notes: "Se não houver inglês na página, exigir tradução certificada."
