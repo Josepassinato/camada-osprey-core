@@ -1,0 +1,282 @@
+[
+  {
+    "test": "H-1B Case Creation - Form Code MISMATCH",
+    "success": false,
+    "details": "\u274c CRITICAL BUG: Expected 'H-1B', got 'None' for case None",
+    "timestamp": "2025-09-30T23:54:49.239085",
+    "response_data": {
+      "message": "Auto-application case created successfully",
+      "case": {
+        "case_id": "OSP-C0D0E9DE",
+        "user_id": null,
+        "session_token": "test_h1b_session",
+        "form_code": "H-1B",
+        "status": "created",
+        "basic_data": null,
+        "uploaded_documents": [],
+        "document_analysis": null,
+        "user_story_text": null,
+        "user_story_audio_url": null,
+        "ai_extracted_facts": null,
+        "simplified_form_responses": null,
+        "official_form_data": null,
+        "payment_status": null,
+        "payment_id": null,
+        "final_package_generated": false,
+        "final_package_url": null,
+        "created_at": "2025-09-30T23:54:49.233881",
+        "updated_at": "2025-09-30T23:54:49.233882",
+        "expires_at": "2025-10-07T23:54:49.233797"
+      }
+    }
+  },
+  {
+    "test": "B-1/B-2 Case Creation - Form Code Issue",
+    "success": false,
+    "details": "\u274c Expected 'B-1/B-2', got 'None' for case None",
+    "timestamp": "2025-09-30T23:54:49.290752",
+    "response_data": {
+      "message": "Auto-application case created successfully",
+      "case": {
+        "case_id": "OSP-64D5A11D",
+        "user_id": null,
+        "session_token": "test_b1b2_session",
+        "form_code": "B-1/B-2",
+        "status": "created",
+        "basic_data": null,
+        "uploaded_documents": [],
+        "document_analysis": null,
+        "user_story_text": null,
+        "user_story_audio_url": null,
+        "ai_extracted_facts": null,
+        "simplified_form_responses": null,
+        "official_form_data": null,
+        "payment_status": null,
+        "payment_id": null,
+        "final_package_generated": false,
+        "final_package_url": null,
+        "created_at": "2025-09-30T23:54:49.245496",
+        "updated_at": "2025-09-30T23:54:49.245497",
+        "expires_at": "2025-10-07T23:54:49.245387"
+      }
+    }
+  },
+  {
+    "test": "Enum Validation - H-1B Transformation",
+    "success": false,
+    "details": "\u274c H-1B transformed to None",
+    "timestamp": "2025-09-30T23:54:49.341588",
+    "response_data": {
+      "message": "Auto-application case created successfully",
+      "case": {
+        "case_id": "OSP-CC373A87",
+        "user_id": null,
+        "session_token": "enum_test_0",
+        "form_code": "H-1B",
+        "status": "created",
+        "basic_data": null,
+        "uploaded_documents": [],
+        "document_analysis": null,
+        "user_story_text": null,
+        "user_story_audio_url": null,
+        "ai_extracted_facts": null,
+        "simplified_form_responses": null,
+        "official_form_data": null,
+        "payment_status": null,
+        "payment_id": null,
+        "final_package_generated": false,
+        "final_package_url": null,
+        "created_at": "2025-09-30T23:54:49.296163",
+        "updated_at": "2025-09-30T23:54:49.296164",
+        "expires_at": "2025-10-07T23:54:49.296111"
+      }
+    }
+  },
+  {
+    "test": "Enum Validation - B-1/B-2 Transformation",
+    "success": false,
+    "details": "\u274c B-1/B-2 transformed to None",
+    "timestamp": "2025-09-30T23:54:49.356614",
+    "response_data": {
+      "message": "Auto-application case created successfully",
+      "case": {
+        "case_id": "OSP-935CCA49",
+        "user_id": null,
+        "session_token": "enum_test_1",
+        "form_code": "B-1/B-2",
+        "status": "created",
+        "basic_data": null,
+        "uploaded_documents": [],
+        "document_analysis": null,
+        "user_story_text": null,
+        "user_story_audio_url": null,
+        "ai_extracted_facts": null,
+        "simplified_form_responses": null,
+        "official_form_data": null,
+        "payment_status": null,
+        "payment_id": null,
+        "final_package_generated": false,
+        "final_package_url": null,
+        "created_at": "2025-09-30T23:54:49.351739",
+        "updated_at": "2025-09-30T23:54:49.351740",
+        "expires_at": "2025-10-07T23:54:49.351682"
+      }
+    }
+  },
+  {
+    "test": "Enum Validation - F-1 Transformation",
+    "success": false,
+    "details": "\u274c F-1 transformed to None",
+    "timestamp": "2025-09-30T23:54:49.408619",
+    "response_data": {
+      "message": "Auto-application case created successfully",
+      "case": {
+        "case_id": "OSP-1CEC0398",
+        "user_id": null,
+        "session_token": "enum_test_2",
+        "form_code": "F-1",
+        "status": "created",
+        "basic_data": null,
+        "uploaded_documents": [],
+        "document_analysis": null,
+        "user_story_text": null,
+        "user_story_audio_url": null,
+        "ai_extracted_facts": null,
+        "simplified_form_responses": null,
+        "official_form_data": null,
+        "payment_status": null,
+        "payment_id": null,
+        "final_package_generated": false,
+        "final_package_url": null,
+        "created_at": "2025-09-30T23:54:49.362348",
+        "updated_at": "2025-09-30T23:54:49.362349",
+        "expires_at": "2025-10-07T23:54:49.362307"
+      }
+    }
+  },
+  {
+    "test": "Enum Validation - O-1 Transformation",
+    "success": false,
+    "details": "\u274c O-1 transformed to None",
+    "timestamp": "2025-09-30T23:54:49.423400",
+    "response_data": {
+      "message": "Auto-application case created successfully",
+      "case": {
+        "case_id": "OSP-6C5BC5D0",
+        "user_id": null,
+        "session_token": "enum_test_3",
+        "form_code": "O-1",
+        "status": "created",
+        "basic_data": null,
+        "uploaded_documents": [],
+        "document_analysis": null,
+        "user_story_text": null,
+        "user_story_audio_url": null,
+        "ai_extracted_facts": null,
+        "simplified_form_responses": null,
+        "official_form_data": null,
+        "payment_status": null,
+        "payment_id": null,
+        "final_package_generated": false,
+        "final_package_url": null,
+        "created_at": "2025-09-30T23:54:49.418874",
+        "updated_at": "2025-09-30T23:54:49.418875",
+        "expires_at": "2025-10-07T23:54:49.418808"
+      }
+    }
+  },
+  {
+    "test": "Enum Validation - INVALID Correctly Rejected",
+    "success": true,
+    "details": "\u2705 INVALID correctly rejected with 422",
+    "timestamp": "2025-09-30T23:54:49.473354",
+    "response_data": null
+  },
+  {
+    "test": "Enum Validation - h1b Correctly Rejected",
+    "success": true,
+    "details": "\u2705 h1b correctly rejected with 422",
+    "timestamp": "2025-09-30T23:54:49.482903",
+    "response_data": null
+  },
+  {
+    "test": "Enum Validation - H1B Correctly Rejected",
+    "success": true,
+    "details": "\u2705 H1B correctly rejected with 422",
+    "timestamp": "2025-09-30T23:54:49.533453",
+    "response_data": null
+  },
+  {
+    "test": "Default Behavior - No Form Code",
+    "success": true,
+    "details": "\u2705 No form_code set when none provided",
+    "timestamp": "2025-09-30T23:54:49.589276",
+    "response_data": {
+      "message": "Auto-application case created successfully",
+      "case": {
+        "case_id": "OSP-76C91B6B",
+        "user_id": null,
+        "session_token": "default_test",
+        "form_code": null,
+        "status": "created",
+        "basic_data": null,
+        "uploaded_documents": [],
+        "document_analysis": null,
+        "user_story_text": null,
+        "user_story_audio_url": null,
+        "ai_extracted_facts": null,
+        "simplified_form_responses": null,
+        "official_form_data": null,
+        "payment_status": null,
+        "payment_id": null,
+        "final_package_generated": false,
+        "final_package_url": null,
+        "created_at": "2025-09-30T23:54:49.539120",
+        "updated_at": "2025-09-30T23:54:49.539120",
+        "expires_at": "2025-10-07T23:54:49.539066"
+      }
+    }
+  },
+  {
+    "test": "Edge Case - Null",
+    "success": true,
+    "details": "\u2705 Null form_code handled correctly: None",
+    "timestamp": "2025-09-30T23:54:49.648659",
+    "response_data": {
+      "message": "Auto-application case created successfully",
+      "case": {
+        "case_id": "OSP-4E179953",
+        "user_id": null,
+        "session_token": "edge_test_2",
+        "form_code": null,
+        "status": "created",
+        "basic_data": null,
+        "uploaded_documents": [],
+        "document_analysis": null,
+        "user_story_text": null,
+        "user_story_audio_url": null,
+        "ai_extracted_facts": null,
+        "simplified_form_responses": null,
+        "official_form_data": null,
+        "payment_status": null,
+        "payment_id": null,
+        "final_package_generated": false,
+        "final_package_url": null,
+        "created_at": "2025-09-30T23:54:49.603415",
+        "updated_at": "2025-09-30T23:54:49.603416",
+        "expires_at": "2025-10-07T23:54:49.603365"
+      }
+    }
+  },
+  {
+    "test": "Sequential Operations - Cross-Contamination Detected",
+    "success": false,
+    "details": "\u274c CROSS-CONTAMINATION BUG: H-1B case got form_code: None",
+    "timestamp": "2025-09-30T23:54:49.667942",
+    "response_data": {
+      "b1b2_case": null,
+      "h1b_case": null,
+      "h1b_form_code": null
+    }
+  }
+]
