@@ -5228,6 +5228,75 @@ async def analyze_document_with_real_ai(
             
             logger.info(f"✅ Análise aprimorada concluída: {enhanced_result.get('verdict', 'PROCESSADO')}")
             
+            # Enhanced Document Recognition with High-Precision Validators + Policy Engine
+            from enhanced_document_recognition import EnhancedDocumentValidationAgent
+            from policy_engine import policy_engine
+            from document_catalog import document_catalog
+            
+            # Primeira análise com o sistema existente
+            enhanced_agent = EnhancedDocumentValidationAgent()
+            analysis_result = await enhanced_agent.analyze_document_with_ai(
+                file_content=file_content,
+                filename=file.filename,
+                document_type=document_type,
+                visa_type=visa_type,
+                case_id=case_id
+            )
+            
+            # Segunda análise com o Policy Engine (FASE 1)
+            try:
+                # Mapear document_type para catálogo padronizado
+                standardized_doc_type = None
+                suggestions = document_catalog.suggest_document_type(file.filename)
+                
+                # Tentar mapear tipos conhecidos
+                type_mapping = {
+                    "passport": "PASSPORT_ID_PAGE",
+                    "birth_certificate": "BIRTH_CERTIFICATE", 
+                    "marriage_certificate": "MARRIAGE_CERT",
+                    "diploma": "DEGREE_CERTIFICATE",
+                    "transcript": "TRANSCRIPT",
+                    "employment_letter": "EMPLOYMENT_OFFER_LETTER",
+                    "pay_stub": "PAY_STUB",
+                    "tax_return": "TAX_RETURN_1040",
+                    "i94": "I94_RECORD",
+                    "i797": "I797_NOTICE",
+                    "medical": "I693_MEDICAL"
+                }
+                
+                standardized_doc_type = type_mapping.get(document_type, suggestions[0] if suggestions else "PASSPORT_ID_PAGE")
+                
+                # Extrair texto da análise existente para usar no PolicyEngine
+                extracted_text = analysis_result.get("extracted_data", {}).get("raw_text", "")
+                
+                # Executar validação com PolicyEngine
+                policy_validation = policy_engine.validate_document(
+                    file_content=file_content,
+                    filename=file.filename,
+                    doc_type=standardized_doc_type,
+                    extracted_text=extracted_text,
+                    case_context={"case_id": case_id, "visa_type": visa_type}
+                )
+                
+                # Combinar resultados
+                analysis_result["policy_engine"] = policy_validation
+                analysis_result["standardized_doc_type"] = standardized_doc_type
+                analysis_result["quality_analysis"] = policy_validation.get("quality", {})
+                analysis_result["policy_score"] = policy_validation.get("overall_score", 0.0)
+                analysis_result["policy_decision"] = policy_validation.get("decision", "UNKNOWN")
+                
+                # Atualizar assessment principal com insights do PolicyEngine
+                if policy_validation.get("decision") == "FAIL":
+                    analysis_result["dra_paula_assessment"] = f"❌ DOCUMENTO REJEITADO: {'; '.join(policy_validation.get('messages', []))}"
+                elif policy_validation.get("decision") == "ALERT":
+                    analysis_result["dra_paula_assessment"] = f"⚠️ DOCUMENTO COM RESSALVAS: {'; '.join(policy_validation.get('messages', []))}"
+                else:
+                    analysis_result["dra_paula_assessment"] = f"✅ DOCUMENTO APROVADO: Score {policy_validation.get('overall_score', 0.0):.2f}"
+                    
+            except Exception as e:
+                logger.error(f"Policy Engine error: {e}")
+                analysis_result["policy_engine_error"] = str(e)
+            
             # Convert enhanced result to expected format
             return {
                 "valid": enhanced_result.get("valid", False),
