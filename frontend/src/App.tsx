@@ -63,6 +63,7 @@ const App = () => (
           <Route path="/auto-application/case/:caseId/friendly-form" element={<FriendlyForm />} />
           <Route path="/auto-application/case/:caseId/review" element={<VisualReview />} />
           <Route path="/auto-application/case/:caseId/payment" element={<PaymentAndDownload />} />
+          <Route path="/auto-application/case/:caseId/finalize" element={<CaseFinalizer />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
