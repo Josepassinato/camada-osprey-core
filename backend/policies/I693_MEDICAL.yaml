@@ -1,0 +1,42 @@
+doc_type: I693_MEDICAL
+version: "1.1"
+quality:
+  min_dpi: 200
+  max_skew_deg: 5
+  min_blur_var: 120
+  min_file_size_kb: 50
+  max_file_size_mb: 15
+  supported_formats: ["pdf", "jpg", "jpeg", "png"]
+language: en
+translation_rule: null
+required_fields:
+  - name: civil_surgeon_signature_date
+    regex: "\\b\\d{1,2}[\\/\\.-]\\d{1,2}[\\/\\.-]\\d{4}\\b"
+    description: "Data da assinatura do cirurgião civil"
+  - name: applicant_name
+    regex: ".+"
+    description: "Nome do requerente"
+optional_fields:
+  - name: civil_surgeon_name
+    regex: ".+"
+    description: "Nome do cirurgião civil"
+  - name: medical_facility
+    regex: ".+"
+    description: "Facilidade médica"
+required_text_snippets: []
+presence_checks:
+  official_seal_or_stamp: true
+  signature: true
+  sealed_envelope_if_required: true
+  mrz_required: false
+attachments:
+  required: []
+  recommended: []
+consistency_checks:
+  - match_beneficiary_name_across_docs: true
+scoring:
+  critical_fields_weight: 0.4
+  quality_weight: 0.2
+  presence_checks_weight: 0.3
+  consistency_weight: 0.1
+notes: "Formulários assinados a partir de 2023-11-01: validade vinculada ao caso pendente. [Inferência]"
