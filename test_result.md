@@ -540,14 +540,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Dr. Paula Cover Letter Module - Generate Directives"
-    - "Dr. Paula Cover Letter Module - Review Letter"
-    - "Dr. Paula Cover Letter Module - Request Complement"
-    - "Dr. Paula Cover Letter Module - Process Add Letter"
-    - "Dr. Paula Cover Letter Module - YAML System"
+    - "Case Finalizer MVP System"
   stuck_tasks: []
   test_all: true
-  test_priority: "dr_paula_cover_letter_module"
+  test_priority: "case_finalizer_mvp_complete"
 
 agent_communication:
   - agent: "testing"
