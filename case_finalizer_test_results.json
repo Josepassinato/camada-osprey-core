@@ -1,0 +1,211 @@
+[
+  {
+    "test": "Start H-1B Finalization",
+    "success": true,
+    "details": "Job ID: 0ec24418-f8e2-4ba2-9c43-0a5103ea99e0, Status: needs_correction",
+    "timestamp": "2025-09-30T23:34:43.341753",
+    "response_data": {
+      "job_id": "0ec24418-f8e2-4ba2-9c43-0a5103ea99e0",
+      "status": "needs_correction",
+      "message": "Finaliza\u00e7\u00e3o iniciada com sucesso"
+    }
+  },
+  {
+    "test": "Start F-1 Finalization",
+    "success": true,
+    "details": "Job ID: 9de1647d-d26c-467f-a511-95d4b9d03ad6, Status: needs_correction",
+    "timestamp": "2025-09-30T23:34:43.354660",
+    "response_data": {
+      "job_id": "9de1647d-d26c-467f-a511-95d4b9d03ad6",
+      "status": "needs_correction",
+      "message": "Finaliza\u00e7\u00e3o iniciada com sucesso"
+    }
+  },
+  {
+    "test": "Invalid Scenario Handling",
+    "success": true,
+    "details": "Correctly rejected invalid scenario, returned supported: ['H-1B_basic', 'F-1_basic', 'I-485_basic']",
+    "timestamp": "2025-09-30T23:34:43.367724",
+    "response_data": {
+      "error": "Cen\u00e1rio n\u00e3o suportado: INVALID_SCENARIO",
+      "supported_scenarios": [
+        "H-1B_basic",
+        "F-1_basic",
+        "I-485_basic"
+      ]
+    }
+  },
+  {
+    "test": "Status Polling - H-1B",
+    "success": true,
+    "details": "Status: needs_correction, Issues: 1, Links: []",
+    "timestamp": "2025-09-30T23:34:43.416178",
+    "response_data": {
+      "status": "needs_correction",
+      "issues": [
+        "i797"
+      ],
+      "links": {},
+      "created_at": "2025-09-30T23:34:43.337606+00:00",
+      "completed_at": null
+    }
+  },
+  {
+    "test": "Status Polling - F-1",
+    "success": true,
+    "details": "Status: needs_correction, Issues: 2, Links: []",
+    "timestamp": "2025-09-30T23:34:43.424171",
+    "response_data": {
+      "status": "needs_correction",
+      "issues": [
+        "i20",
+        "financial_documents"
+      ],
+      "links": {},
+      "created_at": "2025-09-30T23:34:43.351334+00:00",
+      "completed_at": null
+    }
+  },
+  {
+    "test": "Status Polling - Invalid Job ID",
+    "success": true,
+    "details": "Correctly returned error: Job n\u00e3o encontrado",
+    "timestamp": "2025-09-30T23:34:43.432124",
+    "response_data": {
+      "error": "Job n\u00e3o encontrado"
+    }
+  },
+  {
+    "test": "Consent Acceptance - Valid Hash",
+    "success": true,
+    "details": "Consent accepted: Downloads liberados ap\u00f3s aceite de consentimento",
+    "timestamp": "2025-09-30T23:34:43.481749",
+    "response_data": {
+      "accepted": true,
+      "message": "Downloads liberados ap\u00f3s aceite de consentimento"
+    }
+  },
+  {
+    "test": "Consent Acceptance - Invalid Hash",
+    "success": true,
+    "details": "Correctly rejected invalid hash: Hash de consentimento inv\u00e1lido",
+    "timestamp": "2025-09-30T23:34:43.530726",
+    "response_data": {
+      "error": "Hash de consentimento inv\u00e1lido"
+    }
+  },
+  {
+    "test": "Instructions Endpoint",
+    "success": true,
+    "details": "ID: test_instruction_123, Language: pt, Content length: 63",
+    "timestamp": "2025-09-30T23:34:43.539260",
+    "response_data": {
+      "instruction_id": "test_instruction_123",
+      "language": "pt"
+    }
+  },
+  {
+    "test": "Checklist Endpoint",
+    "success": true,
+    "details": "ID: test_checklist_456, Language: pt, Content length: 47",
+    "timestamp": "2025-09-30T23:34:43.587417",
+    "response_data": {
+      "checklist_id": "test_checklist_456",
+      "language": "pt"
+    }
+  },
+  {
+    "test": "Master Packet Endpoint",
+    "success": true,
+    "details": "ID: test_packet_789, Note: MVP - Em produ\u00e7\u00e3o retornaria PDF merged real",
+    "timestamp": "2025-09-30T23:34:43.595596",
+    "response_data": {
+      "packet_id": "test_packet_789"
+    }
+  },
+  {
+    "test": "Start H-1B Finalization",
+    "success": true,
+    "details": "Job ID: 851c5c96-a10a-4c38-bb0f-999ac2f18417, Status: needs_correction",
+    "timestamp": "2025-09-30T23:34:43.645486",
+    "response_data": {
+      "job_id": "851c5c96-a10a-4c38-bb0f-999ac2f18417",
+      "status": "needs_correction",
+      "message": "Finaliza\u00e7\u00e3o iniciada com sucesso"
+    }
+  },
+  {
+    "test": "Status Polling - H-1B Knowledge Base",
+    "success": true,
+    "details": "Status: needs_correction, Issues: 1, Links: []",
+    "timestamp": "2025-09-30T23:34:43.694497",
+    "response_data": {
+      "status": "needs_correction",
+      "issues": [
+        "i797"
+      ],
+      "links": {},
+      "created_at": "2025-09-30T23:34:43.601097+00:00",
+      "completed_at": null
+    }
+  },
+  {
+    "test": "Start F-1 Finalization",
+    "success": true,
+    "details": "Job ID: 1340bb38-eacd-45e1-97c2-f89b28a4a559, Status: needs_correction",
+    "timestamp": "2025-09-30T23:34:43.743608",
+    "response_data": {
+      "job_id": "1340bb38-eacd-45e1-97c2-f89b28a4a559",
+      "status": "needs_correction",
+      "message": "Finaliza\u00e7\u00e3o iniciada com sucesso"
+    }
+  },
+  {
+    "test": "Status Polling - F-1 Knowledge Base",
+    "success": true,
+    "details": "Status: needs_correction, Issues: 2, Links: []",
+    "timestamp": "2025-09-30T23:34:43.751335",
+    "response_data": {
+      "status": "needs_correction",
+      "issues": [
+        "i20",
+        "financial_documents"
+      ],
+      "links": {},
+      "created_at": "2025-09-30T23:34:43.699698+00:00",
+      "completed_at": null
+    }
+  },
+  {
+    "test": "Complete H-1B Flow",
+    "success": false,
+    "details": "Checks: {'status_ready': False, 'has_links': False, 'has_instructions': False, 'has_checklist': False, 'has_master_packet': False}",
+    "timestamp": "2025-09-30T23:34:43.808617",
+    "response_data": {
+      "job_id": "2b69750a-f31e-4cec-8352-7ed8f667bca0",
+      "status": "needs_correction",
+      "links": [],
+      "expected_fees": [
+        "I-129: $460",
+        "H1B_CAP: $1500",
+        "PREMIUM: $2500"
+      ],
+      "expected_address": "USCIS Texas Service Center"
+    }
+  },
+  {
+    "test": "Complete F-1 Flow",
+    "success": false,
+    "details": "Checks: {'status_ready': False, 'has_links': False, 'language_en': True}",
+    "timestamp": "2025-09-30T23:34:43.865662",
+    "response_data": {
+      "job_id": "64eadf7a-f311-41b1-ba03-5d08f6619fbf",
+      "status": "needs_correction",
+      "links": [],
+      "expected_fees": [
+        "SEVIS: $350"
+      ],
+      "expected_address": "Student and Exchange Visitor Program"
+    }
+  }
+]
