@@ -5229,11 +5229,11 @@ async def analyze_document_with_real_ai(
             logger.info(f"✅ Análise aprimorada concluída: {enhanced_result.get('verdict', 'PROCESSADO')}")
             
             # Enhanced Document Recognition with High-Precision Validators + Policy Engine (FASE 1)
-            from enhanced_document_recognition import EnhancedDocumentValidationAgent
+            from enhanced_document_recognition import EnhancedDocumentRecognitionAgent
             from policy_engine import policy_engine
             from document_catalog import document_catalog
             
-            enhanced_agent = EnhancedDocumentValidationAgent()
+            enhanced_agent = EnhancedDocumentRecognitionAgent()
             
             # Primeira análise: Sistema existente (Dr. Miguel + alta precisão)
             analysis_result = await enhanced_agent.analyze_document_with_ai(
