@@ -280,6 +280,18 @@ frontend:
         agent: "testing"
         comment: "✅ FINAL VALIDATION CONFIRMED - PREVIEW URL CORRECTION 100% SUCCESSFUL: Comprehensive final test executed as requested to validate URL correction from localhost:8001 to preview URL. DETAILED RESULTS: 1) ✅ Environment Setup - VITE_BACKEND_URL correctly configured to https://docsage-9.preview.emergentagent.com, getBackendUrl() utility function working perfectly, 2) ✅ API Call Monitoring - Network monitoring captured POST https://docsage-9.preview.emergentagent.com/api/auto-application/start with 200 OK response, zero localhost:8001 calls detected, 3) ✅ Console Logs Validation - All expected debug logs present: '🔘 API Call: https://docsage-9.preview.emergentagent.com/api/auto-application/start', '🔘 API Response: 200', successful case creation with session token, 4) ✅ Complete User Flow - Checkbox functionality perfect, button state management working, loading state displayed ('Iniciando...'), navigation to SelectForm successful, 5) ✅ makeApiCall() Utility - New API utility function with detailed logging working flawlessly. FINAL CONFIRMATION: The URL correction is definitively working - no connectivity issues, all API calls use correct preview URL, button functionality 100% operational."
 
+  - task: "Document Analysis in Second Page (User Reported Issue)"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/pages/DocumentUploadAuto.tsx"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ DOCUMENT ANALYSIS ISSUE CONFIRMED - ROOT CAUSE IDENTIFIED: User-reported problem 'depois que faz o upload do documento dentro da aplicação de visto na segunda página o sistema não analisa corretamente' has been thoroughly investigated. FINDINGS: 1) ✅ Document Upload System Working - Successfully navigated to documents page, upload interface functional, files uploaded correctly, API calls made to /api/documents/analyze-with-ai with 200 OK responses, 2) ✅ Backend Analysis Functional - Dr. Miguel validation system working, file validation (size/format/type) operational, analysis results returned correctly (85% complete, APPROVED status), 3) ❌ ROOT CAUSE: Form Code Mismatch - User selects H-1B visa but case gets created with form_code 'B-1/B-2', causing document validation against wrong visa requirements. When passport document is validated against B-1/B-2 requirements instead of H-1B, it appears to fail analysis, 4) ✅ Direct API Test Confirms - When called with correct visa type (H-1B), analysis works perfectly. CONCLUSION: Document analysis system is fully functional. Issue is in form selection logic where case gets assigned wrong form_code, making user experience appear broken because documents are validated against incorrect visa type requirements."
+
 metadata:
   created_by: "testing_agent"
   version: "2.0"
