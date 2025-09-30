@@ -1,0 +1,44 @@
+doc_type: I94_RECORD
+version: "1.0"
+quality:
+  min_dpi: 150
+  max_skew_deg: 5
+  min_blur_var: 100
+  min_file_size_kb: 20
+  max_file_size_mb: 3
+  supported_formats: ["pdf", "jpg", "jpeg", "png"]
+language: en
+translation_rule: null
+required_fields:
+  - name: name
+    regex: ".+"
+    description: "Nome do viajante"
+  - name: class_of_admission
+    regex: ".+"
+    description: "Classe de admissão"
+  - name: admit_until_date
+    regex: "\\b\\w{3}\\s\\d{1,2},\\s\\d{4}\\b|\\b\\d{1,2}[\\/\\.-]\\d{1,2}[\\/\\.-]\\d{4}\\b"
+    description: "Data de admissão até"
+optional_fields:
+  - name: port_of_entry
+    regex: ".+"
+    description: "Porto de entrada"
+  - name: arrival_date
+    regex: "\\b\\w{3}\\s\\d{1,2},\\s\\d{4}\\b|\\b\\d{1,2}[\\/\\.-]\\d{1,2}[\\/\\.-]\\d{4}\\b"
+    description: "Data de chegada"
+required_text_snippets: []
+presence_checks:
+  official_seal_or_stamp: false
+  signature: false
+  mrz_required: false
+attachments:
+  required: []
+  recommended: []
+consistency_checks:
+  - match_beneficiary_name_across_docs: true
+scoring:
+  critical_fields_weight: 0.5
+  quality_weight: 0.2
+  presence_checks_weight: 0.1
+  consistency_weight: 0.2
+notes: "Print eletrônico é aceito."
