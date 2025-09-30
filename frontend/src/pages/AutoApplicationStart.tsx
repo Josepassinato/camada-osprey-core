@@ -57,6 +57,9 @@ const AutoApplicationStart = () => {
         const data = await response.json();
         console.log('🔘 Response data:', data);
         
+        // Store case ID for anonymous access and form selection
+        localStorage.setItem('osprey_current_case_id', data.case.case_id);
+        
         // Navigate to form selection with case ID
         console.log('🔘 Navigating to form selection...');
         navigate('/auto-application/select-form', { 
