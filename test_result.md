@@ -456,16 +456,22 @@ metadata:
 
 test_plan:
   current_focus:
-    - "High-Precision Date Normalizer (normalize_date)"
-    - "USCIS Receipt Validator (is_valid_uscis_receipt)"
-    - "SSN Validator (is_plausible_ssn)"
-    - "MRZ Parser with Checksums (parse_mrz_td3)"
-    - "Enhanced Field Validation Integration (enhance_field_validation)"
-    - "Document Analysis KPIs and Performance Endpoints"
-    - "Validation Performance and Targets"
+    - "BaseSpecializedAgent with EMERGENT_LLM_KEY"
+    - "DocumentValidationAgent (Dr. Miguel)"
+    - "ImmigrationExpert (Dra. Paula B2C)"
+    - "FormValidationAgent (Dra. Ana)"
+    - "EligibilityAnalysisAgent (Dr. Carlos)"
+    - "ComplianceCheckAgent (Dra. Patricia)"
+    - "ImmigrationLetterWriterAgent (Dr. Ricardo)"
+    - "USCISFormTranslatorAgent (Dr. Fernando)"
+    - "UrgencyTriageAgent (Dr. Roberto)"
+    - "EnhancedDocumentRecognitionAgent"
+    - "SpecializedAgentCoordinator"
+    - "/api/documents/analyze-with-ai Endpoint (Dr. Miguel Integration)"
+    - "/api/chat Endpoint (Dra. Paula Integration)"
   stuck_tasks: []
   test_all: true
-  test_priority: "high_precision_validators"
+  test_priority: "ai_agents_system"
 
 agent_communication:
   - agent: "testing"
