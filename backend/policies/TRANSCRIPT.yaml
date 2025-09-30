@@ -1,0 +1,44 @@
+doc_type: TRANSCRIPT
+version: "1.0"
+quality:
+  min_dpi: 200
+  max_skew_deg: 5
+  min_blur_var: 120
+  min_file_size_kb: 50
+  max_file_size_mb: 10
+  supported_formats: ["pdf", "jpg", "jpeg", "png"]
+language: en_or_translation_required
+translation_rule: CFR_103_2_b_3
+required_fields:
+  - name: student_full_name
+    regex: ".+"
+    description: "Nome completo do estudante"
+  - name: institution
+    regex: ".+"
+    description: "Nome da instituição"
+  - name: issue_date
+    regex: "\\b\\d{1,2}[\\/\\.-]\\d{1,2}[\\/\\.-]\\d{4}\\b"
+    description: "Data de emissão"
+optional_fields:
+  - name: degree_program
+    regex: ".+"
+    description: "Programa de graduação"
+  - name: graduation_date
+    regex: "\\b\\d{1,2}[\\/\\.-]\\d{1,2}[\\/\\.-]\\d{4}\\b"
+    description: "Data de formatura"
+required_text_snippets: []
+presence_checks:
+  official_seal_or_stamp: true
+  signature: false
+  mrz_required: false
+attachments:
+  required: []
+  recommended: ["DEGREE_CERTIFICATE"]
+consistency_checks:
+  - match_beneficiary_name_across_docs: true
+scoring:
+  critical_fields_weight: 0.4
+  quality_weight: 0.2
+  presence_checks_weight: 0.3
+  consistency_weight: 0.1
+notes: "Histórico escolar deve conter carimbo oficial da instituição."
