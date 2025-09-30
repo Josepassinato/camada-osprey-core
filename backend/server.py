@@ -4863,9 +4863,31 @@ async def analyze_document_with_real_ai(
         from document_validation_database import get_required_documents_for_visa
         required_docs = get_required_documents_for_visa(visa_type)
         
-        # Log para debug
-        logger.info(f"🔍 Verificando documento '{document_type}' para visto '{visa_type}'")
+        # Log para debug detalhado
+        logger.info(f"🔍 ANÁLISE DEBUG - Parâmetros recebidos:")
+        logger.info(f"  📄 document_type: '{document_type}'")
+        logger.info(f"  🎯 visa_type: '{visa_type}'")
+        logger.info(f"  📋 case_id: '{case_id}'")
+        logger.info(f"  📎 filename: '{file.filename}'")
         logger.info(f"📋 Documentos obrigatórios para {visa_type}: {required_docs}")
+        
+        # Se não encontrou documentos, pode estar usando visa_type incorreto
+        if not required_docs:
+            logger.warning(f"⚠️ ATENÇÃO: Nenhum documento obrigatório encontrado para visa_type '{visa_type}'. Verificar mapeamento!")
+            # Verificar se caso existe e tem form_code diferente
+            try:
+                case_doc = await db.auto_cases.find_one({"case_id": case_id})
+                if case_doc and case_doc.get('form_code'):
+                    actual_form_code = case_doc['form_code']
+                    logger.warning(f"⚠️ Case {case_id} tem form_code '{actual_form_code}' mas visa_type recebido foi '{visa_type}'")
+                    if actual_form_code != visa_type:
+                        logger.error(f"❌ INCONSISTÊNCIA: visa_type '{visa_type}' ≠ case.form_code '{actual_form_code}'")
+                        # Usar o form_code correto do caso
+                        visa_type = actual_form_code
+                        required_docs = get_required_documents_for_visa(visa_type)
+                        logger.info(f"🔄 Corrigido para usar form_code '{visa_type}'. Novos documentos obrigatórios: {required_docs}")
+            except Exception as e:
+                logger.error(f"❌ Erro ao verificar caso {case_id}: {e}")
         
         if document_type not in required_docs:
             logger.warning(f"⚠️ Documento '{document_type}' NÃO está na lista obrigatória para {visa_type}")
