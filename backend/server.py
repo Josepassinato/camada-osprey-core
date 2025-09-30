@@ -5211,7 +5211,82 @@ async def analyze_document_with_real_ai(
                 "dra_paula_assessment": f"❌ DOCUMENTO REJEITADO: {mismatch_reason}. Verifique se enviou o documento correto!"
             }
         
-        # Use Dr. Miguel ENHANCED SYSTEM for comprehensive analysis
+        # FASE 1: Policy Engine Integration (ALWAYS RUNS)
+        from policy_engine import policy_engine
+        from document_catalog import document_catalog
+        
+        # Initialize base analysis result
+        analysis_result = {
+            "valid": True,
+            "legible": True,
+            "completeness": 85,
+            "issues": [],
+            "extracted_data": {
+                "document_type": document_type,
+                "file_name": file.filename,
+                "validation_status": "PROCESSED",
+                "visa_context": visa_type
+            },
+            "dra_paula_assessment": f"Documento {document_type} processado para {visa_type}"
+        }
+        
+        # FASE 1: Policy Engine Analysis (Quality + Policies + Catalog)
+        try:
+            logger.info(f"🏛️ Iniciando análise Policy Engine FASE 1 para {document_type}")
+            
+            # Mapear para catálogo padronizado
+            suggestions = document_catalog.suggest_document_type(file.filename)
+            type_mapping = {
+                "passport": "PASSPORT_ID_PAGE",
+                "birth_certificate": "BIRTH_CERTIFICATE", 
+                "marriage_certificate": "MARRIAGE_CERT",
+                "diploma": "DEGREE_CERTIFICATE",
+                "transcript": "TRANSCRIPT",
+                "employment_letter": "EMPLOYMENT_OFFER_LETTER",
+                "pay_stub": "PAY_STUB",
+                "tax_return": "TAX_RETURN_1040",
+                "i94": "I94_RECORD",
+                "i797": "I797_NOTICE",
+                "medical": "I693_MEDICAL"
+            }
+            standardized_doc_type = type_mapping.get(document_type, suggestions[0] if suggestions else "PASSPORT_ID_PAGE")
+            
+            # Executar Policy Engine
+            extracted_text = f"Document type: {document_type}, Filename: {file.filename}"  # Basic text for now
+            policy_validation = policy_engine.validate_document(
+                file_content=file_content,
+                filename=file.filename,
+                doc_type=standardized_doc_type,
+                extracted_text=extracted_text,
+                case_context={"case_id": case_id, "visa_type": visa_type}
+            )
+            
+            # Enriquecer resultado com análise de políticas
+            analysis_result.update({
+                "policy_engine": policy_validation,
+                "standardized_doc_type": standardized_doc_type,
+                "quality_analysis": policy_validation.get("quality", {}),
+                "policy_score": policy_validation.get("overall_score", 0.0),
+                "policy_decision": policy_validation.get("decision", "UNKNOWN")
+            })
+            
+            # Atualizar assessment com insights combinados
+            policy_decision = policy_validation.get("decision", "UNKNOWN")
+            if policy_decision == "FAIL":
+                analysis_result["dra_paula_assessment"] = f"❌ REJEITADO (Policy Engine): {'; '.join(policy_validation.get('messages', []))}"
+                analysis_result["valid"] = False
+            elif policy_decision == "ALERT":
+                analysis_result["dra_paula_assessment"] = f"⚠️ COM RESSALVAS (Score: {policy_validation.get('overall_score', 0.0):.2f}): {'; '.join(policy_validation.get('messages', []))}"
+            elif policy_decision == "PASS":
+                analysis_result["dra_paula_assessment"] = f"✅ APROVADO (Score: {policy_validation.get('overall_score', 0.0):.2f}) - Análise Policy Engine FASE 1"
+            
+            logger.info(f"✅ Policy Engine FASE 1 concluído: {policy_decision}")
+                
+        except Exception as e:
+            logger.error(f"❌ Policy Engine FASE 1 error: {e}")
+            analysis_result["policy_engine_error"] = str(e)
+        
+        # Use Dr. Miguel ENHANCED SYSTEM for additional analysis (optional)
         dr_miguel = DocumentValidationAgent()
         
         try:
@@ -5226,74 +5301,18 @@ async def analyze_document_with_real_ai(
                 applicant_name='Usuário'  # Will be replaced with actual name when available
             )
             
-            logger.info(f"✅ Análise aprimorada concluída: {enhanced_result.get('verdict', 'PROCESSADO')}")
+            logger.info(f"✅ Análise aprimorada Dr. Miguel concluída: {enhanced_result.get('verdict', 'PROCESSADO')}")
             
-            # Enhanced Document Recognition with High-Precision Validators + Policy Engine (FASE 1)
-            from enhanced_document_recognition import EnhancedDocumentRecognitionAgent
-            from policy_engine import policy_engine
-            from document_catalog import document_catalog
-            
-            enhanced_agent = EnhancedDocumentRecognitionAgent()
-            
-            # Primeira análise: Sistema existente (Dr. Miguel + alta precisão)
-            analysis_result = await enhanced_agent.analyze_document_comprehensive(
-                file_content=file_content,
-                file_name=file.filename,
-                expected_document_type=document_type,
-                visa_type=visa_type,
-                applicant_name='Usuário'
-            )
-            
-            # Segunda análise: Policy Engine (FASE 1 - Quality + Policies + Catalog)
-            try:
-                # Mapear para catálogo padronizado
-                suggestions = document_catalog.suggest_document_type(file.filename)
-                type_mapping = {
-                    "passport": "PASSPORT_ID_PAGE",
-                    "birth_certificate": "BIRTH_CERTIFICATE", 
-                    "marriage_certificate": "MARRIAGE_CERT",
-                    "diploma": "DEGREE_CERTIFICATE",
-                    "transcript": "TRANSCRIPT",
-                    "employment_letter": "EMPLOYMENT_OFFER_LETTER",
-                    "pay_stub": "PAY_STUB",
-                    "tax_return": "TAX_RETURN_1040",
-                    "i94": "I94_RECORD",
-                    "i797": "I797_NOTICE",
-                    "medical": "I693_MEDICAL"
-                }
-                standardized_doc_type = type_mapping.get(document_type, suggestions[0] if suggestions else "PASSPORT_ID_PAGE")
+            # Merge enhanced results with Policy Engine results
+            if enhanced_result and isinstance(enhanced_result, dict):
+                # Update analysis result with enhanced data while preserving Policy Engine data
+                analysis_result["enhanced_analysis"] = enhanced_result
+                analysis_result["completeness"] = enhanced_result.get("confidence_score", analysis_result["completeness"])
                 
-                # Executar Policy Engine
-                extracted_text = analysis_result.get("extracted_data", {}).get("raw_text", "")
-                policy_validation = policy_engine.validate_document(
-                    file_content=file_content,
-                    filename=file.filename,
-                    doc_type=standardized_doc_type,
-                    extracted_text=extracted_text,
-                    case_context={"case_id": case_id, "visa_type": visa_type}
-                )
-                
-                # Enriquecer resultado com análise de políticas
-                analysis_result.update({
-                    "policy_engine": policy_validation,
-                    "standardized_doc_type": standardized_doc_type,
-                    "quality_analysis": policy_validation.get("quality", {}),
-                    "policy_score": policy_validation.get("overall_score", 0.0),
-                    "policy_decision": policy_validation.get("decision", "UNKNOWN")
-                })
-                
-                # Atualizar assessment com insights combinados
-                policy_decision = policy_validation.get("decision", "UNKNOWN")
-                if policy_decision == "FAIL":
-                    analysis_result["dra_paula_assessment"] = f"❌ REJEITADO (Policy Engine): {'; '.join(policy_validation.get('messages', []))}"
-                elif policy_decision == "ALERT":
-                    analysis_result["dra_paula_assessment"] = f"⚠️ COM RESSALVAS (Score: {policy_validation.get('overall_score', 0.0):.2f}): {'; '.join(policy_validation.get('messages', []))}"
-                elif policy_decision == "PASS":
-                    analysis_result["dra_paula_assessment"] = f"✅ APROVADO (Score: {policy_validation.get('overall_score', 0.0):.2f}) - {analysis_result.get('dra_paula_assessment', '')}"
-                    
-            except Exception as e:
-                logger.error(f"Policy Engine error: {e}")
-                analysis_result["policy_engine_error"] = str(e)
+                # Combine assessments
+                dr_miguel_assessment = enhanced_result.get("verdict", "")
+                if dr_miguel_assessment and "Policy Engine" not in analysis_result["dra_paula_assessment"]:
+                    analysis_result["dra_paula_assessment"] += f" | Dr. Miguel: {dr_miguel_assessment}"
             
             # Convert enhanced result to expected format
             return {
