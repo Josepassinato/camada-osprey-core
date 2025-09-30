@@ -1,0 +1,265 @@
+# visa_directive_guides_informative.yaml
+# Diretivas informativas baseadas nas exigências públicas do USCIS
+# Para auxiliar aplicantes na construção de cartas de capa
+
+H1B:
+  title: "Roteiro informativo — H-1B (Specialty Occupation)"
+  directives:
+    - id: job_title
+      pt: "De acordo com as informações publicadas pelo USCIS, o candidato deve demonstrar o título exato do cargo a ser ocupado."
+      en: "According to USCIS published information, the candidate must demonstrate the exact job title to be held."
+      required: true
+    - id: duties_breakdown
+      pt: "O candidato deve descrever de forma detalhada as 5–7 principais responsabilidades do cargo, indicando a proporção aproximada de tempo dedicada a cada uma."
+      en: "The candidate must describe in detail the 5-7 main job responsibilities, indicating the approximate proportion of time dedicated to each."
+      required: true
+    - id: degree_requirement
+      pt: "O candidato deve evidenciar que o cargo exige uma formação mínima específica e que sua qualificação acadêmica ou experiência atende a esse requisito."
+      en: "The candidate must demonstrate that the position requires specific minimum education and that their academic qualifications or experience meet this requirement."
+      required: true
+    - id: schedule
+      pt: "O candidato deve indicar a carga horária semanal prevista (ex.: 40 horas por semana) e o regime de trabalho (presencial, remoto ou híbrido)."
+      en: "The candidate must indicate the expected weekly hours (e.g., 40 hours per week) and work arrangement (in-person, remote, or hybrid)."
+      required: true
+    - id: worksites
+      pt: "O candidato deve listar os locais de trabalho (worksites) onde exercerá a função, incluindo cliente final se aplicável."
+      en: "The candidate must list the work locations (worksites) where they will perform duties, including end client if applicable."
+      required: true
+    - id: wage
+      pt: "O candidato deve detalhar a remuneração (valor anual ou por hora) e os benefícios principais oferecidos (como bônus e seguro-saúde)."
+      en: "The candidate must detail compensation (annual or hourly amount) and main benefits offered (such as bonuses and health insurance)."
+      required: true
+    - id: supervision
+      pt: "O candidato deve demonstrar quem supervisionará suas atividades e como ocorrerá a avaliação de desempenho."
+      en: "The candidate must demonstrate who will supervise their activities and how performance evaluation will occur."
+      required: true
+    - id: start_date
+      pt: "O candidato deve indicar a data de início prevista para o emprego."
+      en: "The candidate must indicate the expected employment start date."
+      required: true
+    - id: end_client
+      pt: "Se houver alocação em cliente final, o candidato deve descrever o projeto, o local e apresentar evidências documentais."
+      en: "If there is end client allocation, the candidate must describe the project, location, and provide documentary evidence."
+      required: false
+  attachments_suggested:
+    - EMPLOYMENT_OFFER_LETTER
+    - LCA_CERTIFIED
+    - DEGREE_CERTIFICATE
+    - CREDENTIAL_EVALUATION
+
+L1A:
+  title: "Roteiro informativo — L-1A (Intracompany Transfer - Executive/Managerial)"
+  directives:
+    - id: executive_role
+      pt: "O candidato deve demonstrar que exercerá função executiva ou gerencial na empresa americana, com autoridade para tomar decisões importantes."
+      en: "The candidate must demonstrate they will perform executive or managerial functions at the US company, with authority to make important decisions."
+      required: true
+    - id: foreign_employment
+      pt: "O candidato deve comprovar que trabalhou na empresa estrangeira por pelo menos 1 ano dos últimos 3 anos em função executiva ou gerencial."
+      en: "The candidate must prove they worked at the foreign company for at least 1 year of the last 3 years in an executive or managerial capacity."
+      required: true
+    - id: company_relationship
+      pt: "O candidato deve evidenciar a relação qualificante entre as empresas (subsidiária, filial, matriz ou afiliada)."
+      en: "The candidate must demonstrate the qualifying relationship between companies (subsidiary, branch, parent, or affiliate)."
+      required: true
+    - id: us_operations
+      pt: "O candidato deve descrever as operações atuais ou planejadas da empresa americana e sua viabilidade financeira."
+      en: "The candidate must describe current or planned operations of the US company and its financial viability."
+      required: true
+    - id: managerial_duties
+      pt: "O candidato deve detalhar as responsabilidades gerenciais específicas, incluindo número de subordinados e orçamento sob sua responsabilidade."
+      en: "The candidate must detail specific managerial responsibilities, including number of subordinates and budget under their responsibility."
+      required: true
+  attachments_suggested:
+    - EMPLOYMENT_OFFER_LETTER
+    - CORPORATE_DOCUMENTS
+    - ORGANIZATIONAL_CHART
+    - FINANCIAL_STATEMENTS
+
+O1:
+  title: "Roteiro informativo — O-1 (Extraordinary Ability)"
+  directives:
+    - id: extraordinary_achievement
+      pt: "O candidato deve demonstrar habilidade extraordinária através de reconhecimento nacional ou internacional sustentado."
+      en: "The candidate must demonstrate extraordinary ability through sustained national or international recognition."
+      required: true
+    - id: major_awards
+      pt: "O candidato deve apresentar prêmios ou distinções de reconhecimento nacional ou internacional em sua área de especialização."
+      en: "The candidate must present awards or distinctions of national or international recognition in their field of expertise."
+      required: false
+    - id: membership_exclusive
+      pt: "O candidato deve evidenciar participação em associações que exigem conquistas excepcionais de seus membros."
+      en: "The candidate must demonstrate membership in associations requiring exceptional achievements from their members."
+      required: false
+    - id: media_coverage
+      pt: "O candidato deve apresentar cobertura de mídia sobre suas conquistas profissionais em publicações comerciais ou de grande circulação."
+      en: "The candidate must present media coverage of their professional achievements in trade or major circulation publications."
+      required: false
+    - id: judging_others
+      pt: "O candidato deve comprovar que atuou como juiz do trabalho de outros em sua área, individualmente ou em painel."
+      en: "The candidate must prove they have judged the work of others in their field, either individually or on a panel."
+      required: false
+    - id: original_contributions
+      pt: "O candidato deve demonstrar contribuições originais de grande importância para sua área de especialização."
+      en: "The candidate must demonstrate original contributions of major significance to their field of expertise."
+      required: false
+    - id: scholarly_articles
+      pt: "O candidato deve apresentar artigos acadêmicos ou profissionais publicados em periódicos especializados ou outras mídias relevantes."
+      en: "The candidate must present scholarly or professional articles published in professional journals or other major media."
+      required: false
+    - id: high_salary
+      pt: "O candidato deve evidenciar que recebe ou receberá salário alto ou outra remuneração significativamente superior à média na área."
+      en: "The candidate must demonstrate they receive or will receive high salary or other compensation significantly above average in the field."
+      required: false
+    - id: consultation_letter
+      pt: "O candidato deve apresentar cartas de consulta de especialistas reconhecidos atestando suas habilidades extraordinárias."
+      en: "The candidate must present consultation letters from recognized experts attesting to their extraordinary abilities."
+      required: true
+  attachments_suggested:
+    - CONSULTATION_LETTERS
+    - AWARDS_CERTIFICATES
+    - MEDIA_COVERAGE
+    - SCHOLARLY_PUBLICATIONS
+    - MEMBERSHIP_CERTIFICATES
+
+F1:
+  title: "Roteiro informativo — F-1 (Academic Student)"
+  directives:
+    - id: academic_program
+      pt: "O candidato deve demonstrar que foi aceito em programa acadêmico qualificado em instituição aprovada pelo SEVP."
+      en: "The candidate must demonstrate acceptance into a qualified academic program at a SEVP-approved institution."
+      required: true
+    - id: financial_support
+      pt: "O candidato deve comprovar recursos financeiros suficientes para custear estudos e manutenção durante todo o período do programa."
+      en: "The candidate must prove sufficient financial resources to cover studies and maintenance throughout the entire program period."
+      required: true
+    - id: ties_home_country
+      pt: "O candidato deve evidenciar laços significativos com o país de origem que demonstrem intenção de retorno após os estudos."
+      en: "The candidate must demonstrate significant ties to home country showing intent to return after studies."
+      required: true
+    - id: english_proficiency
+      pt: "O candidato deve comprovar proficiência em inglês adequada para acompanhar o programa acadêmico escolhido."
+      en: "The candidate must prove adequate English proficiency to follow the chosen academic program."
+      required: true
+    - id: academic_intent
+      pt: "O candidato deve demonstrar que o objetivo principal nos EUA é estudar e não trabalhar ou imigrar permanentemente."
+      en: "The candidate must demonstrate that their primary purpose in the US is to study, not work or immigrate permanently."
+      required: true
+  attachments_suggested:
+    - I20_FORM
+    - FINANCIAL_DOCUMENTS
+    - BANK_STATEMENTS
+    - SCHOLARSHIP_LETTERS
+    - ENGLISH_PROFICIENCY_TEST
+
+B1_B2:
+  title: "Roteiro informativo — B-1/B-2 (Business/Tourism)"
+  directives:
+    - id: purpose_visit
+      pt: "O candidato deve especificar claramente o propósito da viagem (negócios, turismo, tratamento médico, etc.) e sua duração planejada."
+      en: "The candidate must clearly specify the purpose of travel (business, tourism, medical treatment, etc.) and planned duration."
+      required: true
+    - id: temporary_visit
+      pt: "O candidato deve demonstrar que a visita é temporária com intenção específica de partir dos EUA."
+      en: "The candidate must demonstrate the visit is temporary with specific intent to depart the US."
+      required: true
+    - id: financial_capacity
+      pt: "O candidato deve comprovar recursos financeiros adequados para custear a viagem e estadia sem trabalhar nos EUA."
+      en: "The candidate must prove adequate financial resources to cover travel and stay without working in the US."
+      required: true
+    - id: strong_ties
+      pt: "O candidato deve evidenciar laços econômicos, sociais e familiares fortes no país de origem que garantam o retorno."
+      en: "The candidate must demonstrate strong economic, social, and family ties in home country ensuring return."
+      required: true
+    - id: itinerary
+      pt: "O candidato deve apresentar itinerário detalhado incluindo locais a visitar, hospedagem e atividades planejadas."
+      en: "The candidate must present detailed itinerary including places to visit, accommodation, and planned activities."
+      required: true
+  attachments_suggested:
+    - INVITATION_LETTER
+    - BANK_STATEMENTS
+    - EMPLOYMENT_LETTER
+    - PROPERTY_DOCUMENTS
+    - TRAVEL_ITINERARY
+
+I130_MARRIAGE:
+  title: "Roteiro informativo — I-130 (Family-Based Petition - Marriage)"
+  directives:
+    - id: valid_marriage
+      pt: "O peticionário deve comprovar casamento válido e legal com o beneficiário através de certidão oficial."
+      en: "The petitioner must prove valid and legal marriage with beneficiary through official marriage certificate."
+      required: true
+    - id: bona_fide_marriage
+      pt: "O peticionário deve evidenciar que o casamento é de boa-fé, não apenas para fins imigratórios, através de evidências da vida conjugal."
+      en: "The petitioner must demonstrate the marriage is bona fide, not solely for immigration purposes, through evidence of marital life."
+      required: true
+    - id: us_status
+      pt: "O peticionário deve comprovar seu status como cidadão americano ou residente permanente legal através de documentação oficial."
+      en: "The petitioner must prove their status as US citizen or lawful permanent resident through official documentation."
+      required: true
+    - id: relationship_evidence
+      pt: "O peticionário deve apresentar evidências da relação contínua, incluindo documentos financeiros conjuntos, fotos, correspondências."
+      en: "The petitioner must present evidence of continuing relationship, including joint financial documents, photos, correspondence."
+      required: true
+    - id: previous_marriages
+      pt: "O peticionário deve documentar o término legal de casamentos anteriores através de certidões de divórcio ou óbito."
+      en: "The petitioner must document legal termination of previous marriages through divorce or death certificates."
+      required: false
+  attachments_suggested:
+    - MARRIAGE_CERTIFICATE
+    - JOINT_FINANCIAL_DOCUMENTS
+    - PHOTOS_TOGETHER
+    - CORRESPONDENCE
+    - DIVORCE_CERTIFICATES
+
+I485:
+  title: "Roteiro informativo — I-485 (Adjustment of Status to Permanent Resident)"
+  directives:
+    - id: eligible_category
+      pt: "O aplicante deve demonstrar elegibilidade para ajuste de status através de categoria específica (família, emprego, asilo, etc.)."
+      en: "The applicant must demonstrate eligibility for adjustment of status through specific category (family, employment, asylum, etc.)."
+      required: true
+    - id: lawful_status
+      pt: "O aplicante deve comprovar entrada legal nos EUA e manutenção de status legal ou elegibilidade apesar de violação."
+      en: "The applicant must prove lawful entry to US and maintenance of legal status or eligibility despite violation."
+      required: true
+    - id: priority_date
+      pt: "O aplicante deve evidenciar que sua priority date está atual conforme o Visa Bulletin do Departamento de Estado."
+      en: "The applicant must demonstrate their priority date is current according to State Department's Visa Bulletin."
+      required: true
+    - id: medical_examination
+      pt: "O aplicante deve completar exame médico por cirurgião civil designado e apresentar Formulário I-693 selado."
+      en: "The applicant must complete medical examination by designated civil surgeon and present sealed Form I-693."
+      required: true
+    - id: inadmissibility_waivers
+      pt: "O aplicante deve abordar qualquer base de inadmissibilidade e solicitar waivers apropriados se necessário."
+      en: "The applicant must address any grounds of inadmissibility and request appropriate waivers if necessary."
+      required: false
+  attachments_suggested:
+    - I693_MEDICAL_EXAM
+    - PRIORITY_DATE_EVIDENCE
+    - SUPPORTING_PETITION
+    - FINANCIAL_DOCUMENTS
+    - POLICE_CERTIFICATES
+
+# Avisos e disclaimers padrão
+disclaimer:
+  pt: "Esta lista é informativa, baseada nas exigências públicas do USCIS, e não substitui consulta jurídica profissional."
+  en: "This list is informational, based on public USCIS requirements, and does not replace professional legal consultation."
+
+guardrails:
+  forbidden_phrases:
+    - "garantia de aprovação"
+    - "nunca será negado"
+    - "100% de sucesso"
+    - "aprovação garantida"
+    - "guarantee approval"
+    - "never denied"
+    - "100% success"
+    - "guaranteed approval"
+  
+  required_disclaimers:
+    - "Esta revisão é informativa, baseada em exigências públicas do USCIS"
+    - "Não substitui consulta jurídica profissional"
+    - "This review is informational, based on public USCIS requirements"
+    - "Does not replace professional legal consultation"
