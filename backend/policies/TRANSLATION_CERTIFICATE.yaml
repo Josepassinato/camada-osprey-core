@@ -1,0 +1,45 @@
+doc_type: TRANSLATION_CERTIFICATE
+version: "1.0"
+quality:
+  min_dpi: 150
+  max_skew_deg: 5
+  min_blur_var: 100
+  min_file_size_kb: 20
+  max_file_size_mb: 5
+  supported_formats: ["pdf", "jpg", "jpeg", "png"]
+language: en
+translation_rule: null
+required_fields:
+  - name: translator_full_name
+    regex: ".+"
+    description: "Nome completo do tradutor"
+  - name: signature
+    regex: ".+"
+    description: "Assinatura do tradutor"
+  - name: date
+    regex: "\\b\\d{1,2}[\\/\\.-]\\d{1,2}[\\/\\.-]\\d{4}\\b"
+    description: "Data da tradução"
+optional_fields:
+  - name: translator_credentials
+    regex: ".+"
+    description: "Credenciais do tradutor"
+  - name: document_translated
+    regex: ".+"
+    description: "Documento traduzido"
+required_text_snippets:
+  - "complete and accurate"
+  - "competent to translate"
+presence_checks:
+  official_seal_or_stamp: false
+  signature: true
+  mrz_required: false
+attachments:
+  required: []
+  recommended: []
+consistency_checks: []
+scoring:
+  critical_fields_weight: 0.4
+  quality_weight: 0.2
+  presence_checks_weight: 0.3
+  consistency_weight: 0.1
+notes: "Certificação de tradução deve declarar competência e precisão."
