@@ -61,8 +61,9 @@ class FormCodeInvestigator:
             
             if response.status_code == 200:
                 data = response.json()
-                case_id = data.get("case_id")
-                form_code = data.get("form_code")
+                case_data = data.get("case", {})
+                case_id = case_data.get("case_id")
+                form_code = case_data.get("form_code")
                 
                 # Critical check: form_code should be H-1B, not B-1/B-2
                 if form_code == "H-1B":
@@ -70,7 +71,7 @@ class FormCodeInvestigator:
                         "H-1B Case Creation - Form Code Correct",
                         True,
                         f"✅ Case {case_id} created with correct form_code: {form_code}",
-                        data
+                        {"case_id": case_id, "form_code": form_code}
                     )
                     return case_id, data
                 else:
@@ -78,7 +79,7 @@ class FormCodeInvestigator:
                         "H-1B Case Creation - Form Code MISMATCH",
                         False,
                         f"❌ CRITICAL BUG: Expected 'H-1B', got '{form_code}' for case {case_id}",
-                        data
+                        {"case_id": case_id, "form_code": form_code, "expected": "H-1B"}
                     )
                     return case_id, data
             else:
