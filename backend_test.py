@@ -6222,6 +6222,17 @@ def run_all_tests():
     
     print(f"  Document System: {doc_passed}/{doc_total} tests passed ({doc_passed/doc_total*100:.1f}%)")
     
+    # Document Analysis with AI Results (CRITICAL - USER REPORTED ISSUE)
+    print("\n🔬 DOCUMENT ANALYSIS WITH AI SYSTEM:")
+    doc_analysis_passed = sum(document_analysis_results.values())
+    doc_analysis_total = len(document_analysis_results)
+    
+    for test_name, result in document_analysis_results.items():
+        status = "✅ PASS" if result else "❌ FAIL"
+        print(f"  {test_name.replace('_', ' ').title()}: {status}")
+    
+    print(f"  Document Analysis AI: {doc_analysis_passed}/{doc_analysis_total} tests passed ({doc_analysis_passed/doc_analysis_total*100:.1f}%)")
+    
     # Education System Results (NEW)
     print("\n🎓 EDUCATION SYSTEM:")
     edu_passed = sum(education_results.values())
