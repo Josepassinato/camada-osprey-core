@@ -26,6 +26,7 @@ import StoryTelling from "./pages/StoryTelling";
 import FriendlyForm from "./pages/FriendlyForm";
 import VisualReview from "./pages/VisualReview";
 import PaymentAndDownload from "./pages/PaymentAndDownload";
+import CoverLetterModule from "./pages/CoverLetterModule";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
