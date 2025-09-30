@@ -1,39 +1,48 @@
 #!/usr/bin/env python3
 """
-OSPREY Backend B2C System Tests
-Tests complete user authentication, profiles, applications, document management, and AI integration
+Case Finalizer MVP - Comprehensive Testing Suite
+Tests all Case Finalizer endpoints and functionality as requested
 """
 
 import requests
 import json
+import time
 import uuid
 from datetime import datetime
 import os
-import base64
-from dotenv import load_dotenv
+from typing import Dict, Any
 
-# Load environment variables
-load_dotenv('/app/frontend/.env')
-
-# Get backend URL from frontend environment
+# Get backend URL from environment
 BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://docsage-9.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
-print(f"Testing OSPREY B2C Backend at: {API_BASE}")
-print("=" * 60)
-
-# Global variables for test data
-TEST_USER = {
-    "email": "test@osprey.com",
-    "password": "TestUser123",
-    "first_name": "João",
-    "last_name": "Silva"
-}
-AUTH_TOKEN = None
-USER_ID = None
-DOCUMENT_ID = None  # For document tests
-INTERVIEW_SESSION_ID = None  # For education tests
-AUTO_APPLICATION_CASE_ID = None  # For auto-application tests
+class CaseFinalizerTester:
+    def __init__(self):
+        self.test_results = []
+        self.session = requests.Session()
+        self.session.headers.update({
+            'Content-Type': 'application/json',
+            'User-Agent': 'CaseFinalizerTester/1.0'
+        })
+        
+    def log_test(self, test_name: str, success: bool, details: str = "", response_data: Any = None):
+        """Log test result"""
+        result = {
+            "test": test_name,
+            "success": success,
+            "details": details,
+            "timestamp": datetime.now().isoformat(),
+            "response_data": response_data
+        }
+        self.test_results.append(result)
+        
+        status = "✅ PASS" if success else "❌ FAIL"
+        print(f"{status} {test_name}")
+        if details:
+            print(f"    {details}")
+        if not success and response_data:
+            print(f"    Response: {response_data}")
+        print()
 
 def test_basic_connectivity():
     """Test basic API connectivity"""
