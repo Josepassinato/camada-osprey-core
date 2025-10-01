@@ -204,8 +204,9 @@ class CarlosH1BSimulator:
             
             if response.status_code == 200:
                 data = response.json()
-                form_code = data.get('form_code')
-                status = data.get('status')
+                case_data = data.get('case', {})
+                form_code = case_data.get('form_code')
+                status = case_data.get('status')
                 
                 success = form_code == "H-1B" and status == "form_selected"
                 
@@ -220,7 +221,7 @@ class CarlosH1BSimulator:
                 self.log_test(
                     "Carlos Step 2 - Select H-1B Visa",
                     False,
-                    f"HTTP {response.status_code}",
+                    f"HTTP {response.status_code}: {response.text}",
                     response.text
                 )
         except Exception as e:
