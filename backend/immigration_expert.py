@@ -128,13 +128,13 @@ class ImmigrationExpert:
                 {prompt}
                 
                 Por favor, responda como Dra. Paula B2C, especialista em imigração com foco em brasileiros nos EUA.
-            Use seu conhecimento especializado e sempre inclua disclaimers apropriados.
-            """
-            
-            user_message = UserMessage(text=enhanced_prompt)
-            response = await chat.send_message(user_message)
-            
-            return response
+                Use seu conhecimento especializado e sempre inclua disclaimers apropriados.
+                """
+                
+                user_message = UserMessage(text=enhanced_prompt)
+                response = await chat.send_message(user_message)
+                
+                return response
             
         except Exception as e:
             logger.error(f"Error calling Dra. Paula: {e}")
