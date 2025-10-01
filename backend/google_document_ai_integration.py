@@ -123,12 +123,27 @@ class GoogleVisionAPIProcessor:
                 ]
             }
             
-            # Make API request
-            response = requests.post(
-                self.vision_endpoint,
-                json=request_data,
-                timeout=30
-            )
+            # Make API request with appropriate auth
+            headers = {'Content-Type': 'application/json'}
+            
+            if self.auth_method == "api_key":
+                # API key already in URL
+                response = requests.post(
+                    self.vision_endpoint,
+                    json=request_data,
+                    headers=headers,
+                    timeout=30
+                )
+            elif self.auth_method == "oauth2":
+                # For OAuth2, we would need to get access token first
+                # For now, let's try without auth and see what happens
+                logger.warning("⚠️ OAuth2 not fully implemented, using API key fallback")
+                response = requests.post(
+                    f"https://vision.googleapis.com/v1/images:annotate?key={self.api_key}" if self.api_key else self.vision_endpoint,
+                    json=request_data,
+                    headers=headers,
+                    timeout=30
+                )
             
             if response.status_code != 200:
                 logger.error(f"❌ Google Vision API error: {response.status_code} - {response.text}")
