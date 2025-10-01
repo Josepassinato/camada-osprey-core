@@ -6540,11 +6540,15 @@ async def resume_saved_session(request: dict):
         responses_cursor = db.owl_responses.find({"session_id": session_id})
         responses = await responses_cursor.to_list(length=None)
         
+        # Serialize session and responses
+        serialized_session = serialize_doc(session)
+        serialized_responses = serialize_doc(responses)
+        
         return {
             "success": True,
             "message": "Session resumed successfully",
-            "session": session,
-            "responses": responses,
+            "session": serialized_session,
+            "responses": serialized_responses,
             "timestamp": datetime.utcnow().isoformat()
         }
         
