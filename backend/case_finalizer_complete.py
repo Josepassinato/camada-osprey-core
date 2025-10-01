@@ -734,14 +734,14 @@ class CaseFinalizerComplete:
         content.append(Paragraph("TABLE OF CONTENTS", styles['Heading1']))
         content.append(Spacer(1, 20))
         
-        for i, doc in enumerate(documents, 1):
-            content.append(Paragraph(f"{i}. {doc['name']}", styles['Normal']))
+        for i, document in enumerate(documents, 1):
+            content.append(Paragraph(f"{i}. {document['name']}", styles['Normal']))
         
         content.append(PageBreak())
         
         # Páginas simulando documentos
-        for doc in documents:
-            content.append(Paragraph(f"DOCUMENT: {doc['name']}", styles['Heading1']))
+        for document in documents:
+            content.append(Paragraph(f"DOCUMENT: {document['name']}", styles['Heading1']))
             content.append(Spacer(1, 20))
             content.append(Paragraph("[This would be the actual document content]", styles['Normal']))
             content.append(Spacer(1, 20))
