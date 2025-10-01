@@ -1,112 +1,73 @@
 <analysis>
-The trajectory outlines a significant development cycle for an AI-powered immigration application tool. The work began by implementing Phases 2 and 3 of the Intelligent Document Validator, which involved creating new backend modules for field extraction, translation checks, cross-document consistency, and auto-classification. This required extensive modifications to the  and  files. Initial testing revealed critical bugs, such as unregistered API endpoints and duplicate Pydantic models, which were systematically debugged and resolved.
+The trajectory chronicles an intense development and debugging cycle for an AI-powered immigration application tool. The work began with successfully debugging and deploying the Case Finalizer backend feature. However, the focus immediately shifted to a critical user-reported security vulnerability in the Dr. Miguel document analysis AI, which was incorrectly approving invalid documents. This led to a major refactoring effort, fixing deep-seated bugs in the Pydantic models, policy engine, and fallback logic within  and .
 
-Following the backend enhancements, the focus shifted to fixing user-reported frontend bugs. The first was a non-functional View Details button for certain visas, traced to missing data in the  component. The second was a failed Review Letter button, caused by a frontend state mismatch with the backend API response in .
+Following the security fix, the system was deemed too restrictive, prompting a pivot to integrate a professional third-party API. After a brief, aborted attempt with Onfido, a strategic decision was made to implement a hybrid system combining the Google Vision API for professional-grade OCR with the improved Dr. Miguel AI for intelligent validation. This phase was dominated by a complex series of authentication challenges, iterating through API keys, environment variable loading issues, and ultimately succeeding with a full OAuth2 implementation.
 
-A major feature enhancement followed: evolving the cover letter module into an interactive, AI-driven workflow. This new flow enables the AI to either ask clarifying questions or directly format a satisfactory letter. This work was interrupted by a critical issue where the  budget was exhausted. The engineer pivoted to integrate the user's personal OpenAI API key, refactoring all AI agent calls (, ) to use the new key.
-
-The final phase involved upgrading the Case Finalizer from an MVP to a full version with PDF merging capabilities. This is the current task, which has encountered import and endpoint duplication errors in  during integration.
+With the document validation system finally robust, secure, and functional, the project pivoted again to a new major feature request: the Agente Coruja (Owl Agent), an intelligent, guided questionnaire system designed to auto-fill official USCIS forms. The most recent actions involved acknowledging this new requirement and creating the initial backend file to begin implementation.
 </analysis>
 
 <product_requirements>
-The application is an AI-powered self-service tool guiding users through the US immigration process.
+The application is an AI-powered, self-service platform designed to simplify the US immigration process for users.
 
-**Core Features Implemented:**
-*   **AI-Driven Application Workflow:** A step-by-step process including data entry, document uploads, and cover letter creation.
-*   **Intelligent Document Validator (Phases 1, 2, & 3):** An AI agent (Dr. Miguel) validates documents for quality and visa-specific rules using a YAML-based policy engine. Recent enhancements include regex-based field extraction, a Translation Gate for non-English documents, cross-document consistency checks, and automated document classification.
-*   **Interactive AI Cover Letter Module (Dra. Paula):** An AI persona assists users with their cover letters. The workflow was upgraded from a simple review to an intelligent, interactive process. If a user's letter is satisfactory, the AI formats it to official standards. If it's incomplete, the AI generates specific questions, uses the user's answers to rewrite the letter professionally, and presents it for final approval before saving.
-*   **Case Finalizer (In Progress):** A final module to audit the application, merge all documents into a master PDF package, and generate final instructions. The MVP is being upgraded to a full version with actual PDF generation.
+**Core Features & Status:**
+*   **Intelligent Document Validator:** Originally an in-house AI (Dr. Miguel), this system has been re-engineered into a robust hybrid model. It now uses the Google Vision API for high-accuracy Optical Character Recognition (OCR) and data extraction, feeding that structured data to the improved Dr. Miguel agent, which performs advanced validation, fraud detection, and consistency checks. The critical security flaw of approving invalid documents has been resolved.
+*   **Interactive AI Cover Letter Module:** An AI persona (Dra. Paula) assists users in drafting and formatting their cover letters through an interactive Q&A workflow.
+*   **Case Finalizer:** A fully functional backend module that audits the application, merges all documents into a master PDF, and generates final instructions.
+*   **Agente Coruja (Owl Agent) - In Progress:** This is the next major feature. It will be an intelligent, friendly questionnaire presented in the user's native language. The Owl Agent will guide the user through the questions in real-time. Upon completion, the answers will be validated by a Google API, used to auto-fill the official English USCIS form, and then presented to the user for final approval before being saved to their case file.
 </product_requirements>
 
 <key_technical_concepts>
-- **Full-stack:** React (Vite) frontend, Python FastAPI backend.
-- **Database:** MongoDB for data persistence.
-- **AI Integration:** Multi-agent architecture (Dr. Miguel and Dra. Paula) using OpenAI. The system was refactored from using a shared  to prioritizing a user-provided OpenAI API key.
-- **Configuration-as-Code:** YAML files define AI directives and granular document validation policies.
-- **PDF Generation:** New libraries (, , ) were added to support PDF merging and creation for the Case Finalizer.
+- **Full-Stack:** React (Vite) frontend with a Python FastAPI backend.
+- **Database:** MongoDB for application data storage.
+- **AI Integration:** A hybrid, multi-agent architecture. It uses the Google Vision API for professional OCR and an OpenAI-powered agent (Dr. Miguel) for contextual validation and analysis.
+- **Authentication:** Implementation of both Google Cloud API Keys and a full OAuth2 flow (using ) to securely connect to Google Cloud services.
+- **PDF Generation:** Utilizes libraries like  and  for the Case Finalizer feature.
 </key_technical_concepts>
 
 <code_architecture>
-The application is a monorepo with  and  directories.
+The application is a monorepo with distinct  and  directories.
 
 
 
 -   ****
-    -   **Importance:** The main FastAPI application file defining all API routes.
-    -   **Changes:** Heavily modified. New endpoints were added for Document Validator Phases 2 & 3. The cover letter endpoints () were completely refactored to support the new interactive Q&A flow. It was updated to integrate the  module, which led to import and endpoint duplication issues that were being fixed. All AI-related endpoints were updated to handle the new OpenAI client logic.
-
--   ****
-    -   **Importance:** The UI for the AI-powered cover letter feature.
-    -   **Changes:** Significantly refactored to support the new interactive workflow. State management was updated to handle questions from the AI, user answers, and the final AI-generated letter for approval. The UI was changed to display questions and the final review card. A bug related to handling the  status was also fixed.
-
--   ** & **
-    -   **Importance:** These files define the core logic for the AI agents (Dra. Paula and Dr. Miguel).
-    -   **Changes:** Both were refactored to prioritize using a user-provided . The code was updated to use the usage: openai [-h] [-v] [-b API_BASE] [-k API_KEY] [-p PROXY [PROXY ...]]
-              [-o ORGANIZATION] [-t {openai,azure}]
-              [--api-version API_VERSION] [--azure-endpoint AZURE_ENDPOINT]
-              [--azure-ad-token AZURE_AD_TOKEN] [-V]
-              {api,tools,migrate,grit} ...
-
-positional arguments:
-  {api,tools,migrate,grit}
-    api                 Direct API calls
-    tools               Client side tools for convenience
-
-options:
-  -h, --help            show this help message and exit
-  -v, --verbose         Set verbosity.
-  -b API_BASE, --api-base API_BASE
-                        What API base url to use.
-  -k API_KEY, --api-key API_KEY
-                        What API key to use.
-  -p PROXY [PROXY ...], --proxy PROXY [PROXY ...]
-                        What proxy to use.
-  -o ORGANIZATION, --organization ORGANIZATION
-                        Which organization to run as (will use your default
-                        organization if not specified)
-  -t {openai,azure}, --api-type {openai,azure}
-                        The backend API to call, must be `openai` or `azure`
-  --api-version API_VERSION
-                        The Azure API version, e.g.
-                        'https://learn.microsoft.com/en-us/azure/ai-
-                        services/openai/reference#rest-api-versioning'
-  --azure-endpoint AZURE_ENDPOINT
-                        The Azure endpoint, e.g.
-                        'https://endpoint.openai.azure.com'
-  --azure-ad-token AZURE_AD_TOKEN
-                        A token from Azure Active Directory,
-                        https://www.microsoft.com/en-
-                        us/security/business/identity-access/microsoft-entra-
-                        id
-  -V, --version         show program's version number and exit library directly, including making relevant methods  and instantiating the OpenAI client, while retaining the  as a fallback. The assistant ID for Dra. Paula was updated as per the user's request.
-
--   ****
-    -   **Importance:** Displays the specific requirements for a selected visa type.
-    -   **Changes:** Edited to add placeholder data for several visa types (I-130, I-485, etc.) to fix a bug where the View Details modal would appear empty because the component only had data for a limited set of visas.
+    -   **Importance:** The core FastAPI application, defining all API routes.
+    -   **Summary of Changes:** This file underwent massive changes. The  endpoint was completely refactored multiple times to fix security flaws, and then to orchestrate the hybrid validation flow, calling the new Google Vision API module and then the specialized AI agent. The fix for loading environment variables with  at the top of the file was a critical change.
 
 -   ** (New File)**
-    -   **Importance:** Contains the logic for the full version of the Case Finalizer feature.
-    -   **Summary:** This new module implements the full functionality of the final step, including actual PDF merging of all case documents using libraries like  and , generating a master packet, an instructions file, and a final checklist.
+    -   **Importance:** This module encapsulates all logic for communicating with Google Cloud AI services.
+    -   **Summary of Changes:** Created to handle OCR tasks. It was refactored multiple times to handle different Google APIs (Vision, Document AI) and authentication methods (API Key, OAuth2). It now successfully uses OAuth2 credentials to connect to the Google Vision API, with a fallback to mock data if the API is unavailable.
+
+-   ****
+    -   **Importance:** Defines the core logic and system prompts for the AI agents, particularly Dr. Miguel.
+    -   **Summary of Changes:** Was heavily debugged to fix a critical  error. The system prompt for Dr. Miguel was significantly enhanced to perform more detailed, forensic-style analysis based on the structured data received from the Google Vision API.
+
+-   ****
+    -   **Importance:** Contains rule-based logic for document validation scoring.
+    -   **Summary of Changes:** Was made more robust by replacing direct dictionary key access () with the safer  method to prevent  crashes, which were a source of instability.
+
+-   ** (New File)**
+    -   **Importance:** This is the placeholder file created to house the backend logic for the new Agente Coruja feature.
+    -   **Summary of Changes:** Newly created and currently empty. It will be the focus of the next development phase.
 </code_architecture>
 
 <pending_tasks>
-- **Complete Case Finalizer Debugging:** Resolve the remaining critical errors identified by the backend testing agent in the  integration, specifically focusing on ensuring the new endpoints in  are correctly defined, imported, and functional.
+- **Implement Agente Coruja Feature:** Build the complete, multi-step workflow for the friendly questionnaire as requested by the user. This includes backend API development, frontend UI, AI-guided interaction, Google API validation, and auto-filling of official USCIS forms.
+- **Fix  Bug:** A previously identified frontend bug, where selecting a visa type defaults to B-1/B-2, was superseded by the critical security issue and was never resolved.
 </pending_tasks>
 
 <current_work>
-The engineer was in the process of implementing the full version of the Case Finalizer feature, upgrading it from the initial MVP. This involved creating a new module, , with functionality for actual PDF merging and document package generation.
+The immediate focus has shifted to implementing the new Agente Coruja (Owl Agent) feature. The previous, intensive work on debugging and re-architecting the document validation system is now complete, with the hybrid Google Vision API + Dr. Miguel solution successfully tested and running.
 
-The immediate task was debugging the integration of this new module into the main FastAPI application, . The backend testing agent had identified critical issues, including duplicate API endpoints and incorrect import statements () being placed inside functions instead of at the top of the file.
+The user has provided a detailed set of requirements for the Owl Agent, which involves creating an interactive, multi-lingual questionnaire that guides the user, validates their input via a Google API, and then uses the data to automatically populate an official USCIS PDF form.
 
-The last actions performed were:
-1.  Moving the  import statement to the top of .
-2.  Removing the duplicated endpoints that were causing conflicts.
-3.  Attempting to restart the backend server to apply these fixes.
+The very last actions taken were:
+1.  Acknowledging the user's detailed request for this new feature.
+2.  Performing a preliminary search of the codebase to identify existing related files (like ).
+3.  Creating a new file, , to serve as the container for the backend logic of this new feature.
 
-The work was paused immediately after initiating the backend: stopped
-backend: started command, waiting to see if the fixes resolved the startup errors and made the new Case Finalizer endpoints accessible. The system is currently in a state of active debugging for this feature.
+The project is at the starting point of this new development cycle.
 </current_work>
 
 <optional_next_step>
-Restart the backend server and check the supervisor logs to confirm that the fixes to  have resolved the startup errors. Then, re-run the backend tests targeting the Case Finalizer endpoints to verify functionality.
+Begin implementing the backend for the Agente Coruja by creating the necessary API endpoints in  and developing the core business logic inside the new  module.
 </optional_next_step>
