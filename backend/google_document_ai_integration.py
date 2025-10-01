@@ -417,11 +417,16 @@ class HybridDocumentValidator:
             issues.append(f"⚠️ Qualidade de OCR baixa: {google_confidence:.1f}%")
         
         # Add Dr. Miguel issues
-        miguel_issues = miguel_result.get("issues", [])
-        if isinstance(miguel_issues, list):
-            issues.extend(miguel_issues)
-        elif isinstance(miguel_issues, str):
-            issues.append(miguel_issues)
+        if isinstance(miguel_result, str):
+            # Extract issues from string response
+            if "problema" in miguel_result.lower() or "erro" in miguel_result.lower():
+                issues.append(f"Dr. Miguel: {miguel_result[:200]}...")
+        else:
+            miguel_issues = miguel_result.get("issues", [])
+            if isinstance(miguel_issues, list):
+                issues.extend(miguel_issues)
+            elif isinstance(miguel_issues, str):
+                issues.append(miguel_issues)
         
         # Extract structured data from Google AI
         extracted_entities = google_result.get("extracted_entities", [])
