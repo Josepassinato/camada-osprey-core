@@ -1835,14 +1835,8 @@ class ComprehensiveEcosystemTester:
                 )
     
     # End of test_all_agents_openai_integration method
-                "payload": {
-                    "visa_type": "I-589",
-                    "applicant_letter": "Meu nome é João e estou solicitando asilo político nos Estados Unidos devido à perseguição que sofri no meu país de origem por causa das minhas opiniões políticas.",
-                    "review_data": {"status": "needs_formatting"}
-                }
-            },
-            {
-                "name": "Request Complement",
+    
+    def test_dr_paula_review_letter_specific(self):
                 "endpoint": "/llm/dr-paula/request-complement",
                 "payload": {
                     "visa_type": "I-589",
