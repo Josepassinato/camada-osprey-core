@@ -3041,28 +3041,46 @@ class ComprehensiveEcosystemTester:
                     f"Exception: {str(e)}"
                 )
     def run_all_tests(self):
-        """SPECIFIC TEST FOR DR. PAULA REVIEW-LETTER ENDPOINT - User Request Priority"""
-        print("🚨 TESTE ESPECÍFICO DO ENDPOINT REVIEW-LETTER DO DR. PAULA")
+        """INVESTIGAÇÃO CHAVE OPENAI DO USUÁRIO - User Request Priority"""
+        print("🔍 INVESTIGAÇÃO CHAVE OPENAI DO USUÁRIO NO BANCO DE DADOS")
         print("=" * 80)
         print(f"Backend URL: {BACKEND_URL}")
         print(f"API Base: {API_BASE}")
         print("=" * 80)
         print()
         
-        # PRIORITY 1: SPECIFIC TEST for Dr. Paula review-letter endpoint as requested
-        print("🎯 PRIORITY 1: TESTE ESPECÍFICO - DR. PAULA REVIEW-LETTER ENDPOINT...")
+        # PRIORITY 1: USER OPENAI KEY INVESTIGATION (as requested)
+        print("🎯 PRIORITY 1: INVESTIGAÇÃO CHAVE OPENAI DO USUÁRIO...")
+        print("-" * 60)
+        self.test_user_openai_key_investigation()
+        print()
+        
+        # PRIORITY 2: DATABASE STRUCTURE INVESTIGATION
+        print("🎯 PRIORITY 2: INVESTIGAÇÃO ESTRUTURA DO BANCO DE DADOS...")
+        print("-" * 60)
+        self.test_mongodb_database_structure_investigation()
+        print()
+        
+        # PRIORITY 3: EMERGENT_LLM_KEY STATUS CHECK
+        print("🎯 PRIORITY 3: VERIFICAÇÃO STATUS EMERGENT_LLM_KEY...")
+        print("-" * 60)
+        self.test_emergent_llm_key_status()
+        print()
+        
+        # PRIORITY 4: SPECIFIC TEST for Dr. Paula review-letter endpoint as requested
+        print("🎯 PRIORITY 4: TESTE ESPECÍFICO - DR. PAULA REVIEW-LETTER ENDPOINT...")
         print("-" * 60)
         self.test_dr_paula_review_letter_specific()
         print()
         
-        # PRIORITY 2: TARGETED TEST for the 3 specific endpoints mentioned in review request
-        print("🎯 PRIORITY 2: TARGETED TEST - 3 PROBLEMATIC ENDPOINTS...")
+        # PRIORITY 5: TARGETED TEST for the 3 specific endpoints mentioned in review request
+        print("🎯 PRIORITY 5: TARGETED TEST - 3 PROBLEMATIC ENDPOINTS...")
         print("-" * 60)
         self.test_phase2_phase3_targeted_endpoints()
         print()
         
-        # PRIORITY 1: FINAL VALIDATION OF FIXED PHASE 2&3 ENDPOINTS (URGENT)
-        print("🎯 PRIORITY 1: FINAL VALIDATION OF FIXED PHASE 2&3 ENDPOINTS...")
+        # PRIORITY 6: FINAL VALIDATION OF FIXED PHASE 2&3 ENDPOINTS (URGENT)
+        print("🎯 PRIORITY 6: FINAL VALIDATION OF FIXED PHASE 2&3 ENDPOINTS...")
         print("-" * 60)
         self.test_phase2_phase3_final_validation()
         print()
