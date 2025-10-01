@@ -527,8 +527,10 @@ class HybridDocumentValidator:
         }
         
         # Create professional assessment
+        api_status = "API Real" if not self.google_processor.is_mock_mode else "Mock Mode"
+        
         if is_valid:
-            assessment = f"✅ HÍBRIDO: Documento aprovado (Google AI: {google_confidence:.1f}% + Dr. Miguel: {miguel_confidence:.1f}% = {combined_confidence:.1f}%)"
+            assessment = f"✅ HÍBRIDO: Documento aprovado (Google Vision {api_status}: {google_confidence:.1f}% + Dr. Miguel: {miguel_confidence:.1f}% = {combined_confidence:.1f}%)"
         elif combined_confidence >= 50:
             assessment = f"⚠️ HÍBRIDO: Documento requer revisão manual (Confiança: {combined_confidence:.1f}%)"
         else:
