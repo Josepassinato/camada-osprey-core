@@ -642,6 +642,21 @@ frontend:
       - working: true
         agent: "testing"
         comment: "✅ PHASE 2&3 API ENDPOINTS ROUTER FIX SUCCESSFUL: URGENT re-testing confirms the router registration fix worked! 5 out of 6 Phase 2&3 endpoints are now accessible (83.3% success rate): ✅ POST /api/documents/classify (HTTP 200), ✅ POST /api/documents/extract-fields (HTTP 422 - accessible), ✅ POST /api/documents/analyze-language (HTTP 200), ✅ POST /api/documents/check-consistency (HTTP 200), ✅ POST /api/documents/validate-multiple (HTTP 200). Only GET /api/documents/validation-capabilities returns 404. The critical router registration issue has been resolved - endpoints are no longer returning 405 Method Not Allowed errors."
+      - working: true
+        agent: "testing"
+        comment: "✅ PHASE 2&3 ENDPOINTS TARGETED VERIFICATION COMPLETED: After backend syntax error fix, comprehensive testing of the 3 previously problematic endpoints shows significant improvement: ✅ POST /api/documents/extract-fields: Now accessible (HTTP 422), endpoint properly registered and responding, ✅ POST /api/documents/check-consistency: Now working (HTTP 200), successfully processing requests and returning consistency analysis, ❌ GET /api/documents/validation-capabilities: Still returning 404 despite being defined in code with authentication. SUCCESS RATE: 2/3 endpoints (66.7%) now working after cleanup. Major progress achieved - duplicate code cleanup resolved most routing issues."
+
+  - task: "GET /api/documents/validation-capabilities Endpoint Issue"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ VALIDATION CAPABILITIES ENDPOINT NOT ACCESSIBLE: GET /api/documents/validation-capabilities returns HTTP 404 'Document not found' despite being properly defined in server.py at line 5605. Endpoint requires authentication (current_user dependency) and authentication is working, but endpoint still not accessible. Issue may be related to routing conflict or endpoint registration problem. Requires investigation by main agent."
 
 metadata:
   created_by: "testing_agent"
