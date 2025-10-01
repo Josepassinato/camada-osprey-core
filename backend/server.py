@@ -6382,11 +6382,14 @@ async def login_owl_user(request: dict):
             {"$set": {"last_login": datetime.utcnow()}}
         )
         
-        # Get user's saved sessions
+        # Get user's sessions
         sessions = await db.owl_sessions.find({
             "user_email": email,
-            "status": {"$in": ["active", "paused", "in_progress"]}
+            "status": {"$in": ["active", "paused", "saved_for_later", "in_progress"]}
         }).to_list(length=None)
+        
+        # Serialize sessions
+        serialized_sessions = serialize_doc(sessions)
         
         return {
             "success": True,
@@ -6396,7 +6399,7 @@ async def login_owl_user(request: dict):
                 "email": user["email"],
                 "name": user.get("name", "")
             },
-            "saved_sessions": sessions,
+            "saved_sessions": serialized_sessions,
             "timestamp": datetime.utcnow().isoformat()
         }
         
