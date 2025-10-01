@@ -186,118 +186,55 @@ export const OwlAgent: React.FC = () => {
                 Iniciar Nova Aplicação
               </h3>
 
-          {/* Features Grid */}
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            <Card className="text-center hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <Sparkles className="w-6 h-6 text-blue-600" />
+              
+              <div className="space-y-4">
+                {/* Visa Type Selection */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Tipo de Visto *</label>
+                  <Select value={selectedVisa} onValueChange={setSelectedVisa}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione o tipo de visto" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {visaTypes.map((visa) => (
+                        <SelectItem key={visa.value} value={visa.value}>
+                          <div className="py-1">
+                            <div className="font-medium">{visa.label}</div>
+                            <div className="text-xs text-gray-500">{visa.description}</div>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <CardTitle className="text-lg">Orientação Inteligente</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Receba dicas contextuais e orientações em tempo real baseadas no seu tipo de visto
-                </p>
-              </CardContent>
-            </Card>
 
-            <Card className="text-center hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <FileText className="w-6 h-6 text-green-600" />
+                {/* Language Selection */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Idioma</label>
+                  <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pt">🇧🇷 Português</SelectItem>
+                      <SelectItem value="en">🇺🇸 English</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <CardTitle className="text-lg">Validação Automática</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Validação progressiva com pontuação visual e feedback instantâneo para cada campo
-                </p>
-              </CardContent>
-            </Card>
 
-            <Card className="text-center hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <Languages className="w-6 h-6 text-purple-600" />
-                </div>
-                <CardTitle className="text-lg">Multi-idioma</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Suporte completo em Português e Inglês com alternância durante a sessão
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Start Questionnaire Section */}
-          <Card className="max-w-2xl mx-auto">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl flex items-center justify-center gap-2">
-                <span className="text-2xl">🚀</span>
-                Iniciar Questionário Inteligente
-              </CardTitle>
-              <p className="text-gray-600">
-                Selecione seu tipo de visto e idioma preferido para começar
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Visa Type Selection */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Tipo de Visto *
-                </label>
-                <Select value={selectedVisa} onValueChange={setSelectedVisa}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione o tipo de visto" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {visaTypes.map((visa) => (
-                      <SelectItem key={visa.value} value={visa.value}>
-                        {visa.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {/* Start Button */}
+                <Button
+                  onClick={handleStartQuestionnaire}
+                  disabled={!selectedVisa}
+                  className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {selectedVisa 
+                    ? `Iniciar Questionário Inteligente - ${selectedVisa}`
+                    : 'Selecione um tipo de visto'
+                  }
+                </Button>
               </div>
-
-              {/* Language Selection */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Idioma Preferido
-                </label>
-                <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {languages.map((lang) => (
-                      <SelectItem key={lang.value} value={lang.value}>
-                        {lang.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Start Button */}
-              <Button
-                onClick={handleStartQuestionnaire}
-                disabled={!selectedVisa}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-6"
-              >
-                Iniciar Questionário Inteligente
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-
-              {!selectedVisa && (
-                <p className="text-sm text-gray-500 text-center">
-                  Selecione um tipo de visto para continuar
-                </p>
-              )}
-            </CardContent>
-          </Card>
+            </div>
 
           {/* Benefits Section */}
           <div className="mt-16 text-center">
