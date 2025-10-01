@@ -3001,7 +3001,7 @@ async def get_finalization_status(job_id: str):
     try:
         from case_finalizer_complete import case_finalizer_complete
         
-        result = case_finalizer_complete.get_status(job_id)
+        result = case_finalizer_complete.get_job_status(job_id)
         
         if result["success"]:
             return {
