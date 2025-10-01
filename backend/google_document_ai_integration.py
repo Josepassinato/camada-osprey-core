@@ -367,14 +367,14 @@ class HybridDocumentValidator:
                     "valid": False,
                     "legible": False,
                     "completeness": 0,
-                    "issues": [f"❌ Google Document AI falhou: {google_result.get('error', 'Unknown error')}"],
+                    "issues": [f"❌ Google Vision API falhou: {google_result.get('error', 'Unknown error')}"],
                     "extracted_data": {
                         "document_type": document_type,
                         "file_name": filename,
                         "validation_status": "FAILED",
                         "error": google_result.get('error')
                     },
-                    "dra_paula_assessment": f"❌ Processamento de documento falhou: {google_result.get('error_type', 'unknown')}"
+                    "dra_paula_assessment": f"❌ Processamento OCR falhou: {google_result.get('error_type', 'unknown')}"
                 }
             
             # STEP 2: Dr. Miguel - AI-powered validation and fraud detection
