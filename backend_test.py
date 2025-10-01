@@ -1081,82 +1081,261 @@ class ComprehensiveEcosystemTester:
                     f"Exception: {str(e)}"
                 )
     
-    def test_system_integration_form_code(self):
-        """Test SYSTEM INTEGRATION - Form code issue resolution"""
-        print("🔗 TESTING SYSTEM INTEGRATION...")
+    def test_form_code_mismatch_investigation(self):
+        """CRITICAL FORM CODE MISMATCH INVESTIGATION - Debug H-1B vs B-1/B-2 issue"""
+        print("🚨 CRITICAL FORM CODE MISMATCH INVESTIGATION...")
         
-        # Test auto-application flow
+        # Test 1: Auto-Application Start with H-1B form_code
         try:
-            # Start auto-application
-            start_response = self.session.post(f"{API_BASE}/auto-application/start", json={})
+            print("📋 Test 1: Starting auto-application with H-1B form_code...")
+            start_payload = {
+                "form_code": "H-1B"
+            }
+            
+            start_response = self.session.post(f"{API_BASE}/auto-application/start", json=start_payload)
             
             if start_response.status_code == 200:
                 start_data = start_response.json()
-                # Extract case_id from nested case object
-                case_id = start_data.get("case", {}).get("case_id") or start_data.get("case_id")
+                case_data = start_data.get("case", {})
+                case_id = case_data.get("case_id")
+                form_code_returned = case_data.get("form_code")
                 
-                if case_id:
-                    # Update case with H-1B form code
-                    update_payload = {
-                        "form_code": "H-1B"
+                success = form_code_returned == "H-1B"
+                
+                self.log_test(
+                    "Form Code Mismatch - H-1B Start Test",
+                    success,
+                    f"Started with H-1B, got: {form_code_returned}",
+                    {
+                        "case_id": case_id,
+                        "requested_form_code": "H-1B",
+                        "returned_form_code": form_code_returned,
+                        "case_structure": list(case_data.keys()) if case_data else []
                     }
+                )
+                
+                # Test 2: Retrieve case to verify persistence
+                if case_id:
+                    print(f"📋 Test 2: Retrieving case {case_id} to verify form_code persistence...")
+                    get_response = self.session.get(f"{API_BASE}/auto-application/case/{case_id}")
                     
-                    update_response = self.session.put(
-                        f"{API_BASE}/auto-application/case/{case_id}",
-                        json=update_payload
-                    )
-                    
-                    if update_response.status_code == 200:
-                        # Retrieve case to verify form_code
-                        get_response = self.session.get(f"{API_BASE}/auto-application/case/{case_id}")
+                    if get_response.status_code == 200:
+                        get_data = get_response.json()
+                        retrieved_case = get_data.get("case", {})
+                        retrieved_form_code = retrieved_case.get("form_code")
                         
-                        if get_response.status_code == 200:
-                            case_data = get_response.json()
-                            form_code = case_data.get("form_code")
+                        success = retrieved_form_code == "H-1B"
+                        
+                        self.log_test(
+                            "Form Code Mismatch - H-1B Retrieval Test",
+                            success,
+                            f"Retrieved case has form_code: {retrieved_form_code}",
+                            {
+                                "case_id": case_id,
+                                "expected_form_code": "H-1B",
+                                "retrieved_form_code": retrieved_form_code,
+                                "case_status": retrieved_case.get("status"),
+                                "created_at": retrieved_case.get("created_at")
+                            }
+                        )
+                        
+                        # Test 3: Update case to F-1 and verify
+                        print(f"📋 Test 3: Updating case {case_id} from H-1B to F-1...")
+                        update_payload = {
+                            "form_code": "F-1"
+                        }
+                        
+                        update_response = self.session.put(
+                            f"{API_BASE}/auto-application/case/{case_id}",
+                            json=update_payload
+                        )
+                        
+                        if update_response.status_code == 200:
+                            update_data = update_response.json()
+                            updated_case = update_data.get("case", {})
+                            updated_form_code = updated_case.get("form_code")
                             
-                            success = form_code == "H-1B"
+                            success = updated_form_code == "F-1"
                             
                             self.log_test(
-                                "System Integration - Form Code Resolution",
+                                "Form Code Mismatch - F-1 Update Test",
                                 success,
-                                f"Form code correctly set to: {form_code}",
+                                f"Updated to F-1, got: {updated_form_code}",
                                 {
                                     "case_id": case_id,
-                                    "expected": "H-1B",
-                                    "actual": form_code
+                                    "requested_form_code": "F-1",
+                                    "updated_form_code": updated_form_code,
+                                    "update_successful": update_response.status_code == 200
                                 }
                             )
+                            
+                            # Test 4: Final verification - retrieve again
+                            print(f"📋 Test 4: Final verification - retrieving case {case_id} after F-1 update...")
+                            final_get_response = self.session.get(f"{API_BASE}/auto-application/case/{case_id}")
+                            
+                            if final_get_response.status_code == 200:
+                                final_data = final_get_response.json()
+                                final_case = final_data.get("case", {})
+                                final_form_code = final_case.get("form_code")
+                                
+                                success = final_form_code == "F-1"
+                                
+                                self.log_test(
+                                    "Form Code Mismatch - Final F-1 Verification",
+                                    success,
+                                    f"Final verification shows form_code: {final_form_code}",
+                                    {
+                                        "case_id": case_id,
+                                        "expected_form_code": "F-1",
+                                        "final_form_code": final_form_code,
+                                        "persistence_working": success
+                                    }
+                                )
                         else:
                             self.log_test(
-                                "System Integration - Form Code Resolution",
+                                "Form Code Mismatch - F-1 Update Test",
                                 False,
-                                f"Get case failed: HTTP {get_response.status_code}",
-                                get_response.text
+                                f"Update failed: HTTP {update_response.status_code}",
+                                update_response.text
                             )
                     else:
                         self.log_test(
-                            "System Integration - Form Code Resolution",
+                            "Form Code Mismatch - H-1B Retrieval Test",
                             False,
-                            f"Update case failed: HTTP {update_response.status_code}",
-                            update_response.text
+                            f"Get case failed: HTTP {get_response.status_code}",
+                            get_response.text
                         )
-                else:
-                    self.log_test(
-                        "System Integration - Form Code Resolution",
-                        False,
-                        f"No case_id found in response structure: {start_data}",
-                        start_data
-                    )
             else:
                 self.log_test(
-                    "System Integration - Form Code Resolution",
+                    "Form Code Mismatch - H-1B Start Test",
                     False,
-                    f"Start auto-application failed: HTTP {start_response.status_code}",
+                    f"Start failed: HTTP {start_response.status_code}",
                     start_response.text
                 )
         except Exception as e:
             self.log_test(
-                "System Integration - Form Code Resolution",
+                "Form Code Mismatch Investigation",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 5: Test B-1/B-2 default behavior
+        try:
+            print("📋 Test 5: Testing B-1/B-2 default behavior...")
+            b1b2_payload = {
+                "form_code": "B-1/B-2"
+            }
+            
+            b1b2_response = self.session.post(f"{API_BASE}/auto-application/start", json=b1b2_payload)
+            
+            if b1b2_response.status_code == 200:
+                b1b2_data = b1b2_response.json()
+                b1b2_case = b1b2_data.get("case", {})
+                b1b2_form_code = b1b2_case.get("form_code")
+                
+                success = b1b2_form_code == "B-1/B-2"
+                
+                self.log_test(
+                    "Form Code Mismatch - B-1/B-2 Default Test",
+                    success,
+                    f"B-1/B-2 request returned: {b1b2_form_code}",
+                    {
+                        "requested_form_code": "B-1/B-2",
+                        "returned_form_code": b1b2_form_code,
+                        "case_id": b1b2_case.get("case_id")
+                    }
+                )
+            else:
+                self.log_test(
+                    "Form Code Mismatch - B-1/B-2 Default Test",
+                    False,
+                    f"B-1/B-2 start failed: HTTP {b1b2_response.status_code}",
+                    b1b2_response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Form Code Mismatch - B-1/B-2 Default Test",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 6: Test with no form_code (null/empty)
+        try:
+            print("📋 Test 6: Testing with no form_code (null/empty)...")
+            empty_payload = {}
+            
+            empty_response = self.session.post(f"{API_BASE}/auto-application/start", json=empty_payload)
+            
+            if empty_response.status_code == 200:
+                empty_data = empty_response.json()
+                empty_case = empty_data.get("case", {})
+                empty_form_code = empty_case.get("form_code")
+                
+                self.log_test(
+                    "Form Code Mismatch - Empty Form Code Test",
+                    True,  # Just log what happens
+                    f"Empty request returned form_code: {empty_form_code}",
+                    {
+                        "requested_form_code": None,
+                        "returned_form_code": empty_form_code,
+                        "case_id": empty_case.get("case_id"),
+                        "default_behavior": empty_form_code == "B-1/B-2" if empty_form_code else "No default"
+                    }
+                )
+            else:
+                self.log_test(
+                    "Form Code Mismatch - Empty Form Code Test",
+                    False,
+                    f"Empty start failed: HTTP {empty_response.status_code}",
+                    empty_response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Form Code Mismatch - Empty Form Code Test",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 7: Test invalid form_code
+        try:
+            print("📋 Test 7: Testing with invalid form_code...")
+            invalid_payload = {
+                "form_code": "INVALID-FORM"
+            }
+            
+            invalid_response = self.session.post(f"{API_BASE}/auto-application/start", json=invalid_payload)
+            
+            if invalid_response.status_code == 200:
+                invalid_data = invalid_response.json()
+                invalid_case = invalid_data.get("case", {})
+                invalid_form_code = invalid_case.get("form_code")
+                
+                self.log_test(
+                    "Form Code Mismatch - Invalid Form Code Test",
+                    True,  # Just log what happens
+                    f"Invalid request returned form_code: {invalid_form_code}",
+                    {
+                        "requested_form_code": "INVALID-FORM",
+                        "returned_form_code": invalid_form_code,
+                        "case_id": invalid_case.get("case_id"),
+                        "validation_working": invalid_form_code != "INVALID-FORM"
+                    }
+                )
+            else:
+                # This might be expected behavior (validation error)
+                self.log_test(
+                    "Form Code Mismatch - Invalid Form Code Test",
+                    True,  # Validation error is good
+                    f"Invalid form_code properly rejected: HTTP {invalid_response.status_code}",
+                    {
+                        "status_code": invalid_response.status_code,
+                        "validation_working": True,
+                        "error_response": invalid_response.text[:200]
+                    }
+                )
+        except Exception as e:
+            self.log_test(
+                "Form Code Mismatch - Invalid Form Code Test",
                 False,
                 f"Exception: {str(e)}"
             )
