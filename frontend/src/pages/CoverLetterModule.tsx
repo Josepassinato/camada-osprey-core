@@ -449,7 +449,7 @@ const CoverLetterModule: React.FC = () => {
         )}
 
         {/* Card 5b: Incomplete letter */}
-        {currentCard === 6 && review?.status === 'incomplete' && (
+        {currentCard === 6 && (review?.status === 'incomplete' || review?.status === 'needs_review') && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
