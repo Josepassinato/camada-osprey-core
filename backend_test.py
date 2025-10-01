@@ -8135,6 +8135,17 @@ class ComprehensiveEcosystemTester:
         # System Integration Tests
         self.test_system_integration_form_code()
         
+        # NEW: OWL AGENT PAYMENT & DOWNLOAD SYSTEM TESTS
+        print("\n💳 FINAL PHASE: OWL AGENT PAYMENT & DOWNLOAD SYSTEM")
+        print("=" * 80)
+        print("Testing Stripe integration, secure downloads, privacy compliance")
+        print("- Payment initiation with fixed pricing")
+        print("- Payment status polling and webhook handling")
+        print("- Secure download system with expiry and limits")
+        print("- Privacy compliance and data deletion")
+        print("-" * 80)
+        self.test_owl_agent_payment_download_system()
+        
         # Generate final comprehensive report
         self.generate_final_report()
     
