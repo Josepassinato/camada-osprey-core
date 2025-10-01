@@ -375,8 +375,27 @@ class HybridDocumentValidator:
         
         # Extract key data
         google_confidence = google_result.get("overall_confidence", 0) * 100
-        miguel_confidence = miguel_result.get("confidence_score", 0)
-        miguel_verdict = miguel_result.get("verdict", "UNKNOWN")
+        
+        # Parse Dr. Miguel's string response
+        miguel_confidence = 50  # Default confidence
+        miguel_verdict = "NECESSITA_REVISÃO"  # Default verdict
+        
+        if isinstance(miguel_result, str):
+            # Try to extract confidence and verdict from string response
+            miguel_text = miguel_result.lower()
+            if "aprovado" in miguel_text:
+                miguel_verdict = "APROVADO"
+                miguel_confidence = 85
+            elif "rejeitado" in miguel_text:
+                miguel_verdict = "REJEITADO"
+                miguel_confidence = 15
+            else:
+                miguel_verdict = "NECESSITA_REVISÃO"
+                miguel_confidence = 50
+        else:
+            # If it's a dict (shouldn't happen with current implementation)
+            miguel_confidence = miguel_result.get("confidence_score", 50)
+            miguel_verdict = miguel_result.get("verdict", "NECESSITA_REVISÃO")
         
         # Calculate combined confidence (weighted average)
         # Google AI: 40% weight (OCR accuracy)
