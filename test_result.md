@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "TESTE VALIDAÇÃO DOS NOVOS VALIDADORES DE ALTA PRECISÃO: Testar os novos validadores baseados no plano de alta precisão que foram integrados ao sistema. Incluindo normalizador de datas, validador USCIS receipt (I-797), validador SSN, parser MRZ com checksums, integração com sistema atual, e testes de KPI."
+user_problem_statement: "IMPLEMENTAÇÃO DAS FASES 2 E 3 DO DOCUMENT VALIDATOR: Implementar as funcionalidades avançadas de validação de documentos incluindo Field Extraction via Regex (Phase 2), Translation Gate (Phase 2), Cross-Document Consistency (Phase 3), Automated Document Classification (Phase 3) e Advanced OCR Integration (Phase 3). Expandir o sistema atual com estas capacidades avançadas."
 
 backend:
   - task: "High-Precision Date Normalizer (normalize_date)"
