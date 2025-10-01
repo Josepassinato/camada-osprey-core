@@ -594,8 +594,25 @@ class DocumentValidationAgent(BaseSpecializedAgent):
             
             validation_prompt = self._get_enhanced_validation_prompt(document_data, document_type, visa_type, case_context)
             
-            # Continue with the rest of the method implementation
-            response = llm.generate_response(system_prompt, validation_prompt)
+            # Generate response using appropriate method
+            if use_openai:
+                from openai import AsyncOpenAI
+                client = AsyncOpenAI(api_key=api_key)
+                
+                openai_response = await client.chat.completions.create(
+                    model="gpt-4",
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": validation_prompt}
+                    ],
+                    max_tokens=1500,
+                    temperature=0.3
+                )
+                
+                response = openai_response.choices[0].message.content
+            else:
+                # Use EmergentLLM fallback
+                response = llm.generate_response(system_prompt, validation_prompt)
             
             return {
                 "agent": "Dr. Miguel - Validador",
