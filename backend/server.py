@@ -5638,7 +5638,7 @@ async def analyze_document_with_professional_api(
                 "completeness": 0,
                 "issues": ["❌ Arquivo muito grande (máximo: 10MB)"],
                 "extracted_data": {"validation_status": "REJECTED", "reason": "File too large"},
-                "dra_paula_assessment": "❌ Onfido: Arquivo excede limite permitido"
+                "dra_paula_assessment": "❌ Híbrido: Arquivo excede limite permitido"
             }
         
         if file_size < 10000:  # 10KB minimum for quality
