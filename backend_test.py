@@ -1833,71 +1833,8 @@ class ComprehensiveEcosystemTester:
                     False,
                     f"Exception: {str(e)}"
                 )
-                        {
-                            "success_indicators": success_indicators,
-                            "dr_paula_available": dr_paula_available,
-                            "response_size": len(str(data)),
-                            "visa_type": data.get("visa_type", "N/A"),
-                            "has_review": "review" in data,
-                            "openai_key_working": overall_success
-                        }
-                    )
-                    
-                    # Additional detailed logging for debugging
-                    if "review" in data:
-                        review = data["review"]
-                        print(f"Review Object Keys: {list(review.keys()) if isinstance(review, dict) else 'Not a dict'}")
-                        
-                    return overall_success
-                    
-                except json.JSONDecodeError as e:
-                    self.log_test(
-                        "🚨 URGENT - Dr. Paula Review Letter I-589",
-                        False,
-                        f"❌ JSON PARSING ERROR: {str(e)} - Response not in valid JSON format",
-                        {
-                            "error": "JSON parsing failed",
-                            "response_text": response.text[:500],
-                            "json_error": str(e)
-                        }
-                    )
-                    return False
-                    
-            else:
-                self.log_test(
-                    "🚨 URGENT - Dr. Paula Review Letter I-589",
-                    False,
-                    f"❌ HTTP ERROR: {response.status_code}",
-                    {
-                        "status_code": response.status_code,
-                        "response_text": response.text[:500],
-                        "headers": dict(response.headers)
-                    }
-                )
-                return False
-                
-        except Exception as e:
-            self.log_test(
-                "🚨 URGENT - Dr. Paula Review Letter I-589",
-                False,
-                f"❌ EXCEPTION: {str(e)}",
-                {"exception": str(e)}
-            )
-            return False
     
-    def test_all_dr_paula_endpoints_openai_key(self):
-        """Test all Dr. Paula endpoints with new OpenAI key"""
-        print("🔍 Testing All Dr. Paula Endpoints with New OpenAI Key...")
-        
-        endpoints_to_test = [
-            {
-                "name": "Generate Directives I-589",
-                "endpoint": "/llm/dr-paula/generate-directives",
-                "payload": {"visa_type": "I-589", "language": "pt"}
-            },
-            {
-                "name": "Format Official Letter",
-                "endpoint": "/llm/dr-paula/format-official-letter",
+    # End of test_all_agents_openai_integration method
                 "payload": {
                     "visa_type": "I-589",
                     "applicant_letter": "Meu nome é João e estou solicitando asilo político nos Estados Unidos devido à perseguição que sofri no meu país de origem por causa das minhas opiniões políticas.",
