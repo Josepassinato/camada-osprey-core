@@ -1692,7 +1692,7 @@ class ComprehensiveEcosystemTester:
                 "BACKUP - Dr. Paula Generate Directives I-589",
                 False,
                 f"Exception: {str(e)}"
-            ): "success" in data,
+            )
                         "success_is_true": data.get("success") is True,
                         "has_review_object": "review" in data,
                         "no_budget_exceeded": "Budget exceeded" not in str(data),
