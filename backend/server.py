@@ -7032,6 +7032,11 @@ async def startup_db_client():
             await db.owl_generated_forms.create_index("visa_type")
             await db.owl_generated_forms.create_index("created_at")
             
+            # Owl Agent user authentication indexes
+            await db.owl_users.create_index("email", unique=True)
+            await db.owl_users.create_index("user_id", unique=True)
+            await db.owl_users.create_index("created_at")
+            
             logger.info("Database indexes created successfully for optimized performance!")
             
         except Exception as index_error:
