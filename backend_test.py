@@ -24,20 +24,23 @@ print(f"🌐 PRODUCTION VERIFICATION TARGET: {BACKEND_URL}")
 print(f"🎯 API BASE: {API_BASE}")
 print("="*80)
 
-class ComprehensiveImmigrationAPITester:
+class ProductionVerificationTester:
     def __init__(self):
         self.test_results = []
         self.session = requests.Session()
         self.session.headers.update({
             'Content-Type': 'application/json',
-            'User-Agent': 'ImmigrationAPITester/1.0'
+            'User-Agent': 'ProductionVerificationTester/1.0'
         })
         self.auth_token = None
-        self.test_user_email = f"test_{uuid.uuid4().hex[:8]}@immigration.test"
-        self.test_user_password = "TestPassword123!"
+        # Use realistic Brazilian user data for Carlos Silva simulation
+        self.carlos_email = f"carlos.silva.{uuid.uuid4().hex[:6]}@gmail.com"
+        self.carlos_password = "CarlosSilva2024!"
         self.owl_session_id = None
         self.auto_case_id = None
-        self.setup_test_authentication()
+        self.carlos_case_id = None
+        print(f"🇧🇷 Carlos Silva Test User: {self.carlos_email}")
+        print("="*80)
         
     def log_test(self, test_name: str, success: bool, details: str = "", response_data: Any = None):
         """Log test result"""
