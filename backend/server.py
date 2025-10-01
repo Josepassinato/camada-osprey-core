@@ -6610,7 +6610,22 @@ async def get_user_sessions(user_email: str):
         raise
     except Exception as e:
         logger.error(f"Error getting user sessions: {e}")
-        raise HTTPException(status_code=500, detail=f"Error getting sessions: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Session error: {str(e)}")
+
+# Alternative endpoint for user sessions (supports different URL patterns)
+@api_router.get("/owl/user-sessions/{user_email}")
+async def get_user_sessions_alt(user_email: str):
+    """Alternative endpoint to get user sessions"""
+    return await get_user_sessions(user_email)
+
+# POST version for cases where email contains special characters
+@api_router.post("/owl/user-sessions")
+async def get_user_sessions_by_post(request: dict):
+    """Get user sessions via POST (for emails with special chars)"""
+    user_email = request.get("email", "").strip().lower()
+    if not user_email:
+        raise HTTPException(status_code=400, detail="Email is required")
+    return await get_user_sessions(user_email)
 
 @api_router.post("/owl-agent/resume-session")
 async def resume_saved_session(request: dict):
