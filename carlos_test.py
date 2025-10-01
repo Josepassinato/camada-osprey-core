@@ -476,8 +476,9 @@ class CarlosH1BSimulator:
             
             if response.status_code == 200:
                 data = response.json()
-                form_generated = data.get('uscis_form_generated', False)
-                progress = data.get('progress_percentage', 0)
+                case_data = data.get('case', {})
+                form_generated = case_data.get('uscis_form_generated', False)
+                progress = case_data.get('progress_percentage', 0)
                 
                 success = form_generated and progress >= 90
                 
