@@ -83,16 +83,32 @@ class ImmigrationExpert:
     async def _call_dra_paula(self, prompt: str, session_id: str = None) -> str:
         """
         Call Dra. Paula B2C assistant specifically
-        Uses the trained assistant with immigration knowledge base
+        Uses OpenAI directly or emergentintegrations based on availability
         """
         try:
-            # If we have an assistant_id, we can use it with emergentintegrations
-            # For now, we'll use the standard LlmChat but with Dra. Paula's enhanced prompt
-            chat = LlmChat(
-                api_key=self.api_key,
-                session_id=session_id or f"dra_paula_{hash(prompt) % 10000}",
-                system_message=self.system_prompt
-            ).with_model(self.provider, self.model)
+            if self.use_openai_direct and self.openai_key:
+                # Use OpenAI directly
+                import openai
+                openai.api_key = self.openai_key
+                
+                response = await openai.ChatCompletion.acreate(
+                    model="gpt-4",
+                    messages=[
+                        {"role": "system", "content": self.system_prompt},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=2000,
+                    temperature=0.7
+                )
+                
+                return response.choices[0].message.content
+            else:
+                # Use emergentintegrations (fallback)
+                chat = LlmChat(
+                    api_key=self.api_key,
+                    session_id=session_id or f"dra_paula_{hash(prompt) % 10000}",
+                    system_message=self.system_prompt
+                ).with_model(self.provider, self.model)
             
             # Enhanced prompt for Dra. Paula's context
             enhanced_prompt = f"""
