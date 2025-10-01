@@ -789,12 +789,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Enhanced Dr. Miguel Prompt - 7-Layer Forensic Analysis"
-    - "Case Finalizer Frontend UI Integration Testing"
+    - "Hybrid Google Document AI + Dr. Miguel Integration"
+    - "Identity Validation Enhancement"
   stuck_tasks:
-    - "Enhanced Dr. Miguel Prompt - 7-Layer Forensic Analysis"
+    - "Dr. Miguel Identity Validation (needs improvement for different person detection)"
   test_all: false
-  test_priority: "high_first"
+  test_priority: "critical_first"
 
 agent_communication:
   - agent: "testing"
