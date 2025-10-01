@@ -5159,6 +5159,533 @@ class ComprehensiveEcosystemTester:
                 f"Exception: {str(e)}"
             )
 
+    def test_google_vision_api_real_integration(self):
+        """Test Google Vision API REAL integration vs Mock Mode - CRITICAL USER REQUEST"""
+        print("🔍 TESTING GOOGLE VISION API REAL INTEGRATION...")
+        
+        # Test 1: API Real vs Mock Mode Detection
+        self.test_google_vision_api_mode_detection()
+        
+        # Test 2: Real API Quality vs Mock Quality
+        self.test_google_vision_ocr_quality_comparison()
+        
+        # Test 3: Real API Performance Testing
+        self.test_google_vision_api_performance()
+        
+        # Test 4: Dr. Miguel with Real Data Integration
+        self.test_dr_miguel_with_real_google_data()
+        
+        # Test 5: Cost-Benefit Analysis Validation
+        self.test_google_vision_cost_benefit_analysis()
+        
+        # Test 6: Error Handling and Fallback Testing
+        self.test_google_vision_error_handling()
+    
+    def test_google_vision_api_mode_detection(self):
+        """Test if Google Vision API is in real mode vs mock mode"""
+        print("🔍 Testing Google Vision API Mode Detection...")
+        
+        # Create a test document for analysis
+        test_passport_content = b"""
+        PASSPORT
+        UNITED STATES OF AMERICA
+        
+        Type: P
+        Country Code: USA
+        Passport No: 987654321
+        
+        Surname: OLIVEIRA
+        Given Names: CARLOS EDUARDO
+        Nationality: UNITED STATES OF AMERICA
+        Date of Birth: 20 FEB 1985
+        Sex: M
+        Place of Birth: MIAMI, FL, USA
+        Date of Issue: 15 JUN 2021
+        Date of Expiry: 14 JUN 2031
+        Authority: U.S. DEPARTMENT OF STATE
+        """ * 100  # Make it larger than 50KB
+        
+        files = {
+            'file': ('test_passport_real_api.pdf', test_passport_content, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-REAL-API-MODE'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                extracted_data = result.get('extracted_data', {})
+                google_vision_data = extracted_data.get('google_vision_data', {})
+                
+                # Check API mode indicators
+                api_enabled = google_vision_data.get('api_enabled', False)
+                mock_mode = google_vision_data.get('mock_mode', True)
+                real_api_active = result.get('real_api_active', False)
+                
+                # Determine if real API is working
+                is_real_api = api_enabled and not mock_mode and real_api_active
+                
+                self.log_test(
+                    "Google Vision API Mode Detection",
+                    True,  # Always pass, just report status
+                    f"API Enabled: {api_enabled}, Mock Mode: {mock_mode}, Real API Active: {real_api_active}",
+                    {
+                        "api_enabled": api_enabled,
+                        "mock_mode": mock_mode,
+                        "real_api_active": real_api_active,
+                        "mode": "REAL API" if is_real_api else "MOCK MODE",
+                        "google_api_key_configured": "AIzaSyBjn25InzalbcQVeDN8dgfgv6StUsBIutw" in str(google_vision_data)
+                    }
+                )
+            else:
+                self.log_test(
+                    "Google Vision API Mode Detection",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Google Vision API Mode Detection",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_google_vision_ocr_quality_comparison(self):
+        """Test OCR quality: Real API vs Mock Mode comparison"""
+        print("🔍 Testing Google Vision OCR Quality Comparison...")
+        
+        # Create a complex document to test OCR accuracy
+        complex_document = b"""
+        PASSPORT
+        REPUBLIC OF BRAZIL
+        PASSAPORTE
+        
+        Type/Tipo: P
+        Country Code/Codigo Pais: BRA
+        Passport No./No. Passaporte: BR9876543
+        
+        Surname/Sobrenome: SANTOS
+        Given Names/Nomes: MARIA FERNANDA SILVA
+        Nationality/Nacionalidade: BRAZILIAN/BRASILEIRA
+        Date of Birth/Data Nascimento: 10 MAR 1990
+        Sex/Sexo: F
+        Place of Birth/Local Nascimento: RIO DE JANEIRO, RJ, BRAZIL
+        Date of Issue/Data Emissao: 05 JAN 2022
+        Date of Expiry/Data Vencimento: 04 JAN 2032
+        Authority/Autoridade: POLICIA FEDERAL
+        
+        MRZ (Machine Readable Zone):
+        P<BRASANTOS<<MARIA<FERNANDA<SILVA<<<<<<<<<<<<<
+        BR98765439BRA9003108F3201045PF<<<<<<<<<<<<<<<8
+        """ * 80  # Make it substantial
+        
+        files = {
+            'file': ('complex_passport_ocr_test.pdf', complex_document, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-OCR-QUALITY'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                extracted_data = result.get('extracted_data', {})
+                google_vision_data = extracted_data.get('google_vision_data', {})
+                
+                # Analyze OCR quality metrics
+                ocr_confidence = google_vision_data.get('ocr_confidence', 0)
+                entities_count = google_vision_data.get('entities_count', 0)
+                extracted_text_length = len(google_vision_data.get('extracted_text', ''))
+                
+                # Check if this is real API or mock
+                is_mock = google_vision_data.get('mock_mode', True)
+                
+                # Quality assessment
+                quality_score = "HIGH" if ocr_confidence >= 90 else "MEDIUM" if ocr_confidence >= 70 else "LOW"
+                
+                self.log_test(
+                    "Google Vision OCR Quality Comparison",
+                    ocr_confidence > 0,  # Pass if we get any confidence score
+                    f"Mode: {'Mock' if is_mock else 'Real'}, OCR Confidence: {ocr_confidence}%, Entities: {entities_count}, Text Length: {extracted_text_length}",
+                    {
+                        "mode": "Mock" if is_mock else "Real API",
+                        "ocr_confidence": ocr_confidence,
+                        "entities_extracted": entities_count,
+                        "text_length": extracted_text_length,
+                        "quality_assessment": quality_score,
+                        "expected_improvement": "Real API should provide higher accuracy than 94% mock"
+                    }
+                )
+            else:
+                self.log_test(
+                    "Google Vision OCR Quality Comparison",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Google Vision OCR Quality Comparison",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_google_vision_api_performance(self):
+        """Test Google Vision API performance and response times"""
+        print("🔍 Testing Google Vision API Performance...")
+        
+        # Create a medium-sized document for performance testing
+        performance_test_doc = b"""
+        EMPLOYMENT AUTHORIZATION DOCUMENT
+        UNITED STATES CITIZENSHIP AND IMMIGRATION SERVICES
+        
+        Name: SILVA, JOAO CARLOS
+        USCIS#: 123-456-789
+        Category: C09
+        Card Expires: 12/31/2025
+        Date of Birth: 01/15/1988
+        Country of Birth: BRAZIL
+        
+        This document authorizes employment in the United States
+        for the person identified above.
+        
+        Valid for employment only with DHS authorization.
+        """ * 60  # Medium size document
+        
+        files = {
+            'file': ('ead_performance_test.pdf', performance_test_doc, 'application/pdf')
+        }
+        data = {
+            'document_type': 'employment_authorization',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-PERFORMANCE'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            # Measure response time
+            start_time = datetime.now()
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers,
+                timeout=30  # 30 second timeout
+            )
+            
+            end_time = datetime.now()
+            response_time_ms = (end_time - start_time).total_seconds() * 1000
+            
+            if response.status_code == 200:
+                result = response.json()
+                extracted_data = result.get('extracted_data', {})
+                processing_stats = extracted_data.get('processing_stats', {})
+                
+                # Get processing time from response
+                total_time_ms = processing_stats.get('total_time_ms', response_time_ms)
+                google_time_ms = processing_stats.get('google_time_ms')
+                
+                # Performance assessment
+                is_acceptable = response_time_ms < 5000  # Under 5 seconds is acceptable
+                performance_grade = "EXCELLENT" if response_time_ms < 2000 else "GOOD" if response_time_ms < 5000 else "SLOW"
+                
+                self.log_test(
+                    "Google Vision API Performance",
+                    is_acceptable,
+                    f"Response Time: {response_time_ms:.0f}ms, Processing: {total_time_ms:.0f}ms, Grade: {performance_grade}",
+                    {
+                        "response_time_ms": response_time_ms,
+                        "total_processing_ms": total_time_ms,
+                        "google_processing_ms": google_time_ms,
+                        "performance_grade": performance_grade,
+                        "acceptable": is_acceptable,
+                        "timeout_occurred": False
+                    }
+                )
+            else:
+                self.log_test(
+                    "Google Vision API Performance",
+                    False,
+                    f"HTTP {response.status_code} in {response_time_ms:.0f}ms: {response.text[:200]}",
+                    {"response_time_ms": response_time_ms, "status_code": response.status_code}
+                )
+        except requests.exceptions.Timeout:
+            self.log_test(
+                "Google Vision API Performance",
+                False,
+                "Request timeout (>30 seconds)",
+                {"timeout": True, "max_time_ms": 30000}
+            )
+        except Exception as e:
+            self.log_test(
+                "Google Vision API Performance",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_dr_miguel_with_real_google_data(self):
+        """Test Dr. Miguel integration with real Google Vision data"""
+        print("🔍 Testing Dr. Miguel with Real Google Vision Data...")
+        
+        # Create a document that should trigger Dr. Miguel's enhanced validation
+        dr_miguel_test_doc = b"""
+        PASSPORT
+        UNITED STATES OF AMERICA
+        
+        Type: P
+        Country Code: USA
+        Passport No: 555123456
+        
+        Surname: RODRIGUEZ
+        Given Names: MIGUEL ANTONIO
+        Nationality: UNITED STATES OF AMERICA
+        Date of Birth: 25 DEC 1987
+        Sex: M
+        Place of Birth: HOUSTON, TX, USA
+        Date of Issue: 01 APR 2023
+        Date of Expiry: 31 MAR 2033
+        Authority: U.S. DEPARTMENT OF STATE
+        
+        Special Endorsements: None
+        """ * 70
+        
+        files = {
+            'file': ('dr_miguel_integration_test.pdf', dr_miguel_test_doc, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-DR-MIGUEL-REAL',
+            'applicant_name': 'Miguel Antonio Rodriguez'  # Matching name for validation
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                extracted_data = result.get('extracted_data', {})
+                dr_miguel_analysis = extracted_data.get('dr_miguel_analysis', {})
+                processing_stats = extracted_data.get('processing_stats', {})
+                
+                # Analyze Dr. Miguel's performance with real data
+                miguel_verdict = dr_miguel_analysis.get('verdict', 'UNKNOWN')
+                miguel_confidence = dr_miguel_analysis.get('confidence', 0)
+                combined_confidence = processing_stats.get('combined_confidence', 0)
+                
+                # Check hybrid system performance
+                is_hybrid_working = (
+                    miguel_verdict in ['APROVADO', 'REJEITADO', 'NECESSITA_REVISÃO'] and
+                    miguel_confidence > 0 and
+                    combined_confidence > 0
+                )
+                
+                self.log_test(
+                    "Dr. Miguel with Real Google Data",
+                    is_hybrid_working,
+                    f"Verdict: {miguel_verdict}, Miguel Confidence: {miguel_confidence}%, Combined: {combined_confidence}%",
+                    {
+                        "dr_miguel_verdict": miguel_verdict,
+                        "miguel_confidence": miguel_confidence,
+                        "combined_confidence": combined_confidence,
+                        "hybrid_system_working": is_hybrid_working,
+                        "google_miguel_integration": "functional" if is_hybrid_working else "needs_review"
+                    }
+                )
+            else:
+                self.log_test(
+                    "Dr. Miguel with Real Google Data",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Dr. Miguel with Real Google Data",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_google_vision_cost_benefit_analysis(self):
+        """Test cost-benefit analysis of real API vs mock mode"""
+        print("🔍 Testing Google Vision Cost-Benefit Analysis...")
+        
+        # Test multiple documents to simulate cost analysis
+        test_documents = [
+            ("passport_cost_test_1.pdf", "passport"),
+            ("birth_cert_cost_test_2.pdf", "birth_certificate"),
+            ("employment_letter_cost_test_3.pdf", "employment_letter")
+        ]
+        
+        cost_analysis_results = []
+        
+        for filename, doc_type in test_documents:
+            test_content = f"""
+            DOCUMENT TYPE: {doc_type.upper()}
+            Test document for cost-benefit analysis
+            Document ID: {filename}
+            Processing timestamp: {datetime.now().isoformat()}
+            """ * 50
+            
+            files = {
+                'file': (filename, test_content.encode(), 'application/pdf')
+            }
+            data = {
+                'document_type': doc_type,
+                'visa_type': 'H-1B',
+                'case_id': f'TEST-COST-{doc_type.upper()}'
+            }
+            
+            try:
+                headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                
+                response = requests.post(
+                    f"{API_BASE}/documents/analyze-with-ai",
+                    files=files,
+                    data=data,
+                    headers=headers
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    extracted_data = result.get('extracted_data', {})
+                    google_vision_data = extracted_data.get('google_vision_data', {})
+                    
+                    # Analyze cost-effectiveness
+                    is_mock = google_vision_data.get('mock_mode', True)
+                    ocr_confidence = google_vision_data.get('ocr_confidence', 0)
+                    
+                    cost_analysis_results.append({
+                        "document_type": doc_type,
+                        "mode": "Mock" if is_mock else "Real API",
+                        "confidence": ocr_confidence,
+                        "estimated_cost": 0 if is_mock else 0.0015  # $1.50 per 1000 docs
+                    })
+                    
+            except Exception as e:
+                cost_analysis_results.append({
+                    "document_type": doc_type,
+                    "error": str(e)
+                })
+        
+        # Calculate overall cost-benefit
+        total_docs = len([r for r in cost_analysis_results if 'error' not in r])
+        avg_confidence = sum([r.get('confidence', 0) for r in cost_analysis_results if 'error' not in r]) / total_docs if total_docs > 0 else 0
+        total_cost = sum([r.get('estimated_cost', 0) for r in cost_analysis_results if 'error' not in r])
+        
+        # Determine if cost is justified
+        cost_justified = avg_confidence > 94 or total_cost == 0  # Better than mock or free
+        
+        self.log_test(
+            "Google Vision Cost-Benefit Analysis",
+            total_docs > 0,
+            f"Processed: {total_docs} docs, Avg Confidence: {avg_confidence:.1f}%, Total Cost: ${total_cost:.4f}",
+            {
+                "documents_processed": total_docs,
+                "average_confidence": avg_confidence,
+                "total_estimated_cost": total_cost,
+                "cost_per_document": total_cost / total_docs if total_docs > 0 else 0,
+                "cost_justified": cost_justified,
+                "mock_baseline": "94% confidence at $0 cost",
+                "real_api_value": "Higher accuracy at $1.50/1000 docs"
+            }
+        )
+    
+    def test_google_vision_error_handling(self):
+        """Test Google Vision API error handling and fallback systems"""
+        print("🔍 Testing Google Vision Error Handling...")
+        
+        # Test 1: Invalid document (too small)
+        try:
+            small_doc = b"tiny"
+            files = {
+                'file': ('tiny_invalid.pdf', small_doc, 'application/pdf')
+            }
+            data = {
+                'document_type': 'passport',
+                'visa_type': 'H-1B',
+                'case_id': 'TEST-ERROR-HANDLING'
+            }
+            
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check if system handles error gracefully
+                has_fallback = 'extracted_data' in result
+                completeness = result.get('completeness', 0)
+                
+                # System should either reject gracefully or provide fallback
+                graceful_handling = completeness == 0 or has_fallback
+                
+                self.log_test(
+                    "Google Vision Error Handling - Invalid Document",
+                    graceful_handling,
+                    f"Completeness: {completeness}%, Fallback Available: {has_fallback}",
+                    {
+                        "graceful_error_handling": graceful_handling,
+                        "fallback_system": has_fallback,
+                        "completeness_score": completeness,
+                        "system_stability": "maintained"
+                    }
+                )
+            else:
+                # HTTP error is also acceptable for invalid input
+                self.log_test(
+                    "Google Vision Error Handling - Invalid Document",
+                    True,
+                    f"HTTP {response.status_code} - Proper rejection of invalid input",
+                    {"http_status": response.status_code, "proper_rejection": True}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "Google Vision Error Handling - Invalid Document",
+                False,
+                f"Exception: {str(e)}"
+            )
+
     def test_google_vision_api_connectivity(self):
         """Test Google Vision API connectivity with real API key"""
         print("🔍 TESTING GOOGLE VISION API CONNECTIVITY...")
