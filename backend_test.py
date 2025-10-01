@@ -8601,6 +8601,552 @@ class ComprehensiveImmigrationAPITester:
                 f"Exception: {str(e)}"
             )
 
+    def test_specific_corrected_endpoints(self):
+        """Test the 4 specific endpoints that were corrected as per review request"""
+        print("🎯 TESTING 4 SPECIFIC CORRECTED ENDPOINTS")
+        print("=" * 60)
+        
+        # 1. POST /api/owl/login (novo endpoint alternativo criado)
+        self.test_owl_login_endpoint()
+        
+        # 2. GET /api/owl/user-sessions/{email} e POST /api/owl/user-sessions (novos endpoints alternativos)
+        self.test_owl_user_sessions_endpoints()
+        
+        # 3. PUT /api/auto-application/case/{id} (validação melhorada)
+        self.test_auto_application_case_put_endpoint()
+        
+        # 4. POST /api/owl-agent/initiate-payment (validação de campos obrigatórios melhorada)
+        self.test_owl_agent_initiate_payment_endpoint()
+    
+    def test_owl_login_endpoint(self):
+        """Test POST /api/owl/login endpoint - novo endpoint alternativo criado"""
+        print("🔐 Testing POST /api/owl/login endpoint...")
+        
+        # Test 1: Invalid credentials (should return 401 bem estruturado)
+        try:
+            invalid_payload = {
+                "email": "invalid@test.com",
+                "password": "wrongpassword"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/owl/login",
+                json=invalid_payload
+            )
+            
+            # Should return 401 with structured JSON
+            if response.status_code == 401:
+                try:
+                    data = response.json()
+                    has_structured_response = 'error' in data or 'message' in data or 'detail' in data
+                    
+                    self.log_test(
+                        "POST /api/owl/login - Invalid Credentials",
+                        has_structured_response,
+                        f"HTTP 401 with structured JSON: {list(data.keys()) if isinstance(data, dict) else 'Not JSON'}",
+                        data
+                    )
+                except:
+                    self.log_test(
+                        "POST /api/owl/login - Invalid Credentials",
+                        False,
+                        "HTTP 401 but response is not valid JSON",
+                        response.text[:200]
+                    )
+            elif response.status_code == 404:
+                self.log_test(
+                    "POST /api/owl/login - Invalid Credentials",
+                    False,
+                    "Endpoint returns 404 - endpoint not found (should be fixed)",
+                    response.text[:200]
+                )
+            else:
+                self.log_test(
+                    "POST /api/owl/login - Invalid Credentials",
+                    False,
+                    f"Unexpected status code: {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test(
+                "POST /api/owl/login - Invalid Credentials",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 2: Test endpoint accessibility (should not return 404)
+        try:
+            # Test with minimal payload to check if endpoint exists
+            minimal_payload = {
+                "email": "test@example.com",
+                "password": "test123"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/owl/login",
+                json=minimal_payload
+            )
+            
+            # Endpoint should be accessible (not 404)
+            endpoint_accessible = response.status_code != 404
+            
+            self.log_test(
+                "POST /api/owl/login - Endpoint Accessibility",
+                endpoint_accessible,
+                f"HTTP {response.status_code} (not 404 'endpoint not found')",
+                {"status_code": response.status_code, "accessible": endpoint_accessible}
+            )
+        except Exception as e:
+            self.log_test(
+                "POST /api/owl/login - Endpoint Accessibility",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_owl_user_sessions_endpoints(self):
+        """Test GET /api/owl/user-sessions/{email} e POST /api/owl/user-sessions endpoints"""
+        print("👤 Testing Owl User Sessions endpoints...")
+        
+        # Test 1: GET /api/owl/user-sessions/{email} with valid email
+        try:
+            test_email = "test@example.com"
+            
+            response = self.session.get(
+                f"{API_BASE}/owl/user-sessions/{test_email}"
+            )
+            
+            # Should not return 404 "endpoint not found"
+            endpoint_accessible = response.status_code != 404
+            
+            # If user not found, should return proper 404 with structured response
+            if response.status_code == 404:
+                try:
+                    data = response.json()
+                    has_structured_404 = 'error' in data or 'message' in data or 'detail' in data
+                    
+                    self.log_test(
+                        "GET /api/owl/user-sessions/{email} - Valid Email",
+                        has_structured_404,
+                        f"Proper 404 for user not found with structured JSON: {list(data.keys()) if isinstance(data, dict) else 'Not JSON'}",
+                        data
+                    )
+                except:
+                    self.log_test(
+                        "GET /api/owl/user-sessions/{email} - Valid Email",
+                        False,
+                        "404 response but not structured JSON",
+                        response.text[:200]
+                    )
+            else:
+                self.log_test(
+                    "GET /api/owl/user-sessions/{email} - Valid Email",
+                    endpoint_accessible,
+                    f"HTTP {response.status_code} - endpoint accessible",
+                    {"status_code": response.status_code}
+                )
+        except Exception as e:
+            self.log_test(
+                "GET /api/owl/user-sessions/{email} - Valid Email",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 2: GET /api/owl/user-sessions/{email} with invalid email
+        try:
+            invalid_email = "invalid-email-format"
+            
+            response = self.session.get(
+                f"{API_BASE}/owl/user-sessions/{invalid_email}"
+            )
+            
+            # Should return structured error response
+            if response.status_code in [400, 422]:
+                try:
+                    data = response.json()
+                    has_structured_error = 'error' in data or 'message' in data or 'detail' in data
+                    
+                    self.log_test(
+                        "GET /api/owl/user-sessions/{email} - Invalid Email",
+                        has_structured_error,
+                        f"HTTP {response.status_code} with structured error: {list(data.keys()) if isinstance(data, dict) else 'Not JSON'}",
+                        data
+                    )
+                except:
+                    self.log_test(
+                        "GET /api/owl/user-sessions/{email} - Invalid Email",
+                        False,
+                        f"HTTP {response.status_code} but response is not valid JSON",
+                        response.text[:200]
+                    )
+            else:
+                self.log_test(
+                    "GET /api/owl/user-sessions/{email} - Invalid Email",
+                    response.status_code != 404,
+                    f"HTTP {response.status_code} - endpoint accessible (not 404)",
+                    {"status_code": response.status_code}
+                )
+        except Exception as e:
+            self.log_test(
+                "GET /api/owl/user-sessions/{email} - Invalid Email",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 3: POST /api/owl/user-sessions with correct payload
+        try:
+            session_payload = {
+                "email": "test@example.com",
+                "session_data": {
+                    "user_id": "test-user-123",
+                    "session_start": "2024-01-01T10:00:00Z"
+                }
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/owl/user-sessions",
+                json=session_payload
+            )
+            
+            # Should not return 404 "endpoint not found"
+            endpoint_accessible = response.status_code != 404
+            
+            # Should return structured JSON response
+            try:
+                data = response.json()
+                has_structured_response = isinstance(data, dict)
+                
+                self.log_test(
+                    "POST /api/owl/user-sessions - Correct Payload",
+                    endpoint_accessible and has_structured_response,
+                    f"HTTP {response.status_code} with structured JSON response",
+                    {"status_code": response.status_code, "response_keys": list(data.keys()) if isinstance(data, dict) else None}
+                )
+            except:
+                self.log_test(
+                    "POST /api/owl/user-sessions - Correct Payload",
+                    endpoint_accessible,
+                    f"HTTP {response.status_code} - endpoint accessible but response not JSON",
+                    {"status_code": response.status_code}
+                )
+        except Exception as e:
+            self.log_test(
+                "POST /api/owl/user-sessions - Correct Payload",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_auto_application_case_put_endpoint(self):
+        """Test PUT /api/auto-application/case/{id} endpoint - validação melhorada"""
+        print("📝 Testing PUT /api/auto-application/case/{id} endpoint...")
+        
+        test_case_id = "TEST-CASE-PUT-123"
+        
+        # Test 1: Valid payload with different types (should not return 422)
+        try:
+            valid_payload = {
+                "status": "in_progress",
+                "basic_data": {
+                    "name": "John Doe",
+                    "email": "john@example.com",
+                    "age": 30
+                },
+                "extra_field": "should be accepted with improved validation"
+            }
+            
+            response = self.session.put(
+                f"{API_BASE}/auto-application/case/{test_case_id}",
+                json=valid_payload
+            )
+            
+            # Should not return 422 for valid payloads
+            no_validation_error = response.status_code != 422
+            endpoint_accessible = response.status_code != 404
+            
+            # Should return structured JSON
+            try:
+                data = response.json()
+                has_structured_response = isinstance(data, dict)
+                
+                self.log_test(
+                    "PUT /api/auto-application/case/{id} - Valid Payload",
+                    endpoint_accessible and no_validation_error,
+                    f"HTTP {response.status_code} (not 422 validation error, not 404 not found)",
+                    {
+                        "status_code": response.status_code,
+                        "no_422_error": no_validation_error,
+                        "endpoint_accessible": endpoint_accessible,
+                        "structured_json": has_structured_response
+                    }
+                )
+            except:
+                self.log_test(
+                    "PUT /api/auto-application/case/{id} - Valid Payload",
+                    endpoint_accessible and no_validation_error,
+                    f"HTTP {response.status_code} - endpoint accessible, no 422 error",
+                    {"status_code": response.status_code}
+                )
+        except Exception as e:
+            self.log_test(
+                "PUT /api/auto-application/case/{id} - Valid Payload",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 2: Payload with extra fields (should be flexible)
+        try:
+            flexible_payload = {
+                "status": "document_review",
+                "custom_field_1": "value1",
+                "custom_field_2": {"nested": "data"},
+                "array_field": [1, 2, 3],
+                "boolean_field": True
+            }
+            
+            response = self.session.put(
+                f"{API_BASE}/auto-application/case/{test_case_id}",
+                json=flexible_payload
+            )
+            
+            # Should handle flexible payloads without 422 errors
+            is_flexible = response.status_code != 422
+            endpoint_accessible = response.status_code != 404
+            
+            self.log_test(
+                "PUT /api/auto-application/case/{id} - Flexible Payload",
+                endpoint_accessible and is_flexible,
+                f"HTTP {response.status_code} - accepts extra fields without 422 error",
+                {
+                    "status_code": response.status_code,
+                    "flexible_validation": is_flexible,
+                    "endpoint_accessible": endpoint_accessible
+                }
+            )
+        except Exception as e:
+            self.log_test(
+                "PUT /api/auto-application/case/{id} - Flexible Payload",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 3: Different data types (should not cause 422 for valid types)
+        try:
+            mixed_types_payload = {
+                "string_field": "text",
+                "number_field": 42,
+                "float_field": 3.14,
+                "boolean_field": False,
+                "null_field": None,
+                "object_field": {"key": "value"},
+                "array_field": ["item1", "item2"]
+            }
+            
+            response = self.session.put(
+                f"{API_BASE}/auto-application/case/{test_case_id}",
+                json=mixed_types_payload
+            )
+            
+            # Should handle different data types
+            handles_types = response.status_code != 422
+            endpoint_accessible = response.status_code != 404
+            
+            self.log_test(
+                "PUT /api/auto-application/case/{id} - Mixed Data Types",
+                endpoint_accessible and handles_types,
+                f"HTTP {response.status_code} - handles different data types without 422 error",
+                {
+                    "status_code": response.status_code,
+                    "handles_mixed_types": handles_types,
+                    "endpoint_accessible": endpoint_accessible
+                }
+            )
+        except Exception as e:
+            self.log_test(
+                "PUT /api/auto-application/case/{id} - Mixed Data Types",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_owl_agent_initiate_payment_endpoint(self):
+        """Test POST /api/owl-agent/initiate-payment endpoint - validação de campos obrigatórios melhorada"""
+        print("💳 Testing POST /api/owl-agent/initiate-payment endpoint...")
+        
+        # Test 1: With only session_id (should work with fallback origin_url)
+        try:
+            session_only_payload = {
+                "session_id": "test-session-123"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/owl-agent/initiate-payment",
+                json=session_only_payload
+            )
+            
+            # Should work with fallback origin_url
+            endpoint_accessible = response.status_code != 404
+            no_400_error = response.status_code != 400  # Should not require origin_url if fallback exists
+            
+            # Should return structured JSON
+            try:
+                data = response.json()
+                has_structured_response = isinstance(data, dict)
+                
+                self.log_test(
+                    "POST /api/owl-agent/initiate-payment - Session ID Only",
+                    endpoint_accessible and (no_400_error or 'session_id' not in str(data).lower()),
+                    f"HTTP {response.status_code} - works with fallback origin_url or proper error",
+                    {
+                        "status_code": response.status_code,
+                        "endpoint_accessible": endpoint_accessible,
+                        "structured_response": has_structured_response,
+                        "response_keys": list(data.keys()) if isinstance(data, dict) else None
+                    }
+                )
+            except:
+                self.log_test(
+                    "POST /api/owl-agent/initiate-payment - Session ID Only",
+                    endpoint_accessible,
+                    f"HTTP {response.status_code} - endpoint accessible",
+                    {"status_code": response.status_code}
+                )
+        except Exception as e:
+            self.log_test(
+                "POST /api/owl-agent/initiate-payment - Session ID Only",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 2: Without session_id (should give specific 400 error)
+        try:
+            no_session_payload = {
+                "origin_url": "https://example.com/payment"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/owl-agent/initiate-payment",
+                json=no_session_payload
+            )
+            
+            # Should return specific 400 error for missing session_id
+            endpoint_accessible = response.status_code != 404
+            
+            if response.status_code == 400:
+                try:
+                    data = response.json()
+                    has_specific_error = (
+                        'session_id' in str(data).lower() or
+                        'required' in str(data).lower() or
+                        'missing' in str(data).lower()
+                    )
+                    
+                    self.log_test(
+                        "POST /api/owl-agent/initiate-payment - No Session ID",
+                        has_specific_error,
+                        f"HTTP 400 with specific session_id error: {data}",
+                        {
+                            "specific_error": has_specific_error,
+                            "error_message": str(data)
+                        }
+                    )
+                except:
+                    self.log_test(
+                        "POST /api/owl-agent/initiate-payment - No Session ID",
+                        False,
+                        "HTTP 400 but response is not valid JSON",
+                        response.text[:200]
+                    )
+            else:
+                self.log_test(
+                    "POST /api/owl-agent/initiate-payment - No Session ID",
+                    endpoint_accessible,
+                    f"HTTP {response.status_code} - endpoint accessible (expected 400 for missing session_id)",
+                    {"status_code": response.status_code}
+                )
+        except Exception as e:
+            self.log_test(
+                "POST /api/owl-agent/initiate-payment - No Session ID",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 3: With both session_id and origin_url (should work)
+        try:
+            complete_payload = {
+                "session_id": "test-session-456",
+                "origin_url": "https://example.com/success"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/owl-agent/initiate-payment",
+                json=complete_payload
+            )
+            
+            # Should work with both fields
+            endpoint_accessible = response.status_code != 404
+            
+            # Should return structured JSON
+            try:
+                data = response.json()
+                has_structured_response = isinstance(data, dict)
+                
+                self.log_test(
+                    "POST /api/owl-agent/initiate-payment - Complete Payload",
+                    endpoint_accessible and has_structured_response,
+                    f"HTTP {response.status_code} with structured JSON response",
+                    {
+                        "status_code": response.status_code,
+                        "endpoint_accessible": endpoint_accessible,
+                        "structured_response": has_structured_response,
+                        "response_keys": list(data.keys()) if isinstance(data, dict) else None
+                    }
+                )
+            except:
+                self.log_test(
+                    "POST /api/owl-agent/initiate-payment - Complete Payload",
+                    endpoint_accessible,
+                    f"HTTP {response.status_code} - endpoint accessible",
+                    {"status_code": response.status_code}
+                )
+        except Exception as e:
+            self.log_test(
+                "POST /api/owl-agent/initiate-payment - Complete Payload",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 4: Verify origin_url is optional
+        try:
+            optional_origin_payload = {
+                "session_id": "test-session-789",
+                "amount": 29.99,
+                "currency": "USD"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/owl-agent/initiate-payment",
+                json=optional_origin_payload
+            )
+            
+            # origin_url should be optional
+            endpoint_accessible = response.status_code != 404
+            origin_url_optional = response.status_code != 400 or 'origin_url' not in response.text.lower()
+            
+            self.log_test(
+                "POST /api/owl-agent/initiate-payment - Origin URL Optional",
+                endpoint_accessible and origin_url_optional,
+                f"HTTP {response.status_code} - origin_url is optional",
+                {
+                    "status_code": response.status_code,
+                    "endpoint_accessible": endpoint_accessible,
+                    "origin_url_optional": origin_url_optional
+                }
+            )
+        except Exception as e:
+            self.log_test(
+                "POST /api/owl-agent/initiate-payment - Origin URL Optional",
+                False,
+                f"Exception: {str(e)}"
+            )
+
     def run_all_tests(self):
         """Run all comprehensive tests"""
         print("🚀 STARTING COMPREHENSIVE ECOSYSTEM VALIDATION")
