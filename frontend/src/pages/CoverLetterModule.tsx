@@ -159,10 +159,17 @@ const CoverLetterModule: React.FC = () => {
         const data = await response.json();
         setReview(data.review);
         
-        if (data.review?.status === 'complete') {
-          setCurrentCard(5); // Complete letter
+        if (data.review?.status === 'ready_for_formatting') {
+          // Carta satisfatória - formatar diretamente
+          await formatOfficialLetter();
+        } else if (data.review?.status === 'needs_questions') {
+          // Carta incompleta - fazer perguntas
+          setQuestions(data.review.questions || []);
+          setCurrentCard(6); // Card de perguntas
+        } else if (data.review?.status === 'complete') {
+          setCurrentCard(5); // Complete letter (caso existente)
         } else {
-          setCurrentCard(6); // Incomplete letter
+          setCurrentCard(6); // Fallback para incomplete
         }
       } else {
         throw new Error('Falha ao revisar carta');
