@@ -1551,13 +1551,14 @@ class ComprehensiveEcosystemTester:
                 data = response.json()
                 
                 # Verificar se retorna 10 cenários suportados
-                scenarios = data.get("supported_scenarios", [])
+                capabilities = data.get("capabilities", {})
+                scenarios = capabilities.get("supported_scenarios", [])
                 has_10_scenarios = len(scenarios) >= 10
                 
                 # Verificar features habilitadas
-                features = data.get("features", {})
+                features = capabilities.get("features", {})
                 pdf_merging = features.get("pdf_merging", False)
-                templates = features.get("templates", False)
+                templates = features.get("instruction_templates", False)  # Correct key name
                 
                 success = has_10_scenarios and pdf_merging and templates
                 
