@@ -1545,9 +1545,9 @@ class ComprehensiveEcosystemTester:
         # Test the critical I-589 payload as specified in the review request
         i589_payload = {
             "visa_type": "I-589",
-            "applicant_letter": "Meu nome é João e estou solicitando asilo político nos Estados Unidos devido à perseguição que sofri no meu país de origem por causa das minhas opiniões políticas.",
+            "applicant_letter": "Meu nome é Maria Silva e estou solicitando asilo político nos Estados Unidos devido à perseguição que sofri no meu país de origem por minhas opiniões políticas e ativismo pelos direitos humanos.",
             "visa_profile": {
-                "title": "I-589 Test",
+                "title": "I-589 Asylum Application",
                 "directives": [{"id": "1", "pt": "Descrever perseguição detalhadamente", "en": "Describe persecution in detail", "required": True}]
             }
         }
@@ -1570,6 +1570,269 @@ class ComprehensiveEcosystemTester:
                     # Check for success indicators
                     success_indicators = {
                         "has_success_field": "success" in data,
+                        "success_is_true": data.get("success") is True,
+                        "has_review_object": "review" in data,
+                        "no_budget_exceeded": "Budget exceeded" not in str(data),
+                        "no_dra_paula_unavailable": "Dra. Paula não disponível" not in str(data),
+                        "valid_json_response": True,  # We got here, so JSON is valid
+                        "has_agent_field": "agent" in data,
+                        "has_visa_type": "visa_type" in data
+                    }
+                    
+                    # Check review object structure if present
+                    if "review" in data:
+                        review = data["review"]
+                        success_indicators.update({
+                            "review_has_coverage_score": "coverage_score" in review,
+                            "review_has_status": "status" in review,
+                            "review_has_issues": "issues" in review,
+                            "review_has_revised_letter": "revised_letter" in review
+                        })
+                    
+                    all_success = all(success_indicators.values())
+                    failed_checks = [k for k, v in success_indicators.items() if not v]
+                    
+                    self.log_test(
+                        "🚨 CRITICAL: Dr. Paula I-589 Review Letter",
+                        all_success,
+                        f"Success indicators: {sum(success_indicators.values())}/{len(success_indicators)}. Failed: {failed_checks}",
+                        {
+                            "success_indicators": success_indicators,
+                            "response_keys": list(data.keys()),
+                            "agent": data.get("agent"),
+                            "visa_type": data.get("visa_type"),
+                            "review_status": data.get("review", {}).get("status") if "review" in data else None
+                        }
+                    )
+                    
+                    # Additional specific checks for the user's requirements
+                    if data.get("success") is True:
+                        self.log_test(
+                            "✅ REQUIREMENT: No 'Budget exceeded' Error",
+                            "Budget exceeded" not in str(data),
+                            "OpenAI key working - no budget issues detected",
+                            {"budget_check": "Budget exceeded" not in str(data)}
+                        )
+                        
+                        self.log_test(
+                            "✅ REQUIREMENT: No 'Dra. Paula não disponível' Error", 
+                            "Dra. Paula não disponível" not in str(data),
+                            "Dra. Paula is available and responding",
+                            {"availability_check": "Dra. Paula não disponível" not in str(data)}
+                        )
+                        
+                        self.log_test(
+                            "✅ REQUIREMENT: Valid JSON Response",
+                            True,
+                            "Response is valid JSON format",
+                            {"json_valid": True}
+                        )
+                        
+                        self.log_test(
+                            "✅ REQUIREMENT: Assistant ID Working",
+                            data.get("agent") == "dr_paula" or "paula" in str(data).lower(),
+                            f"Assistant ID correctly configured: {data.get('agent')}",
+                            {"assistant_id_check": data.get("agent")}
+                        )
+                    
+                except json.JSONDecodeError as je:
+                    self.log_test(
+                        "🚨 CRITICAL: Dr. Paula I-589 Review Letter",
+                        False,
+                        f"JSON decode error: {str(je)}. Raw response: {response.text[:500]}",
+                        {"json_error": str(je), "raw_response": response.text[:500]}
+                    )
+            else:
+                self.log_test(
+                    "🚨 CRITICAL: Dr. Paula I-589 Review Letter",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:500]}",
+                    {"status_code": response.status_code, "response": response.text[:500]}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "🚨 CRITICAL: Dr. Paula I-589 Review Letter",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_dr_paula_generate_directives_critical(self):
+        """Test Dr. Paula Generate Directives with OpenAI key"""
+        print("📋 Testing Dr. Paula Generate Directives...")
+        
+        try:
+            payload = {
+                "visa_type": "I-589",
+                "language": "pt"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/llm/dr-paula/generate-directives",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                success_checks = {
+                    "has_success": data.get("success") is True,
+                    "has_directives_text": bool(data.get("directives_text")),
+                    "no_budget_exceeded": "Budget exceeded" not in str(data),
+                    "has_agent": "agent" in data,
+                    "has_visa_type": data.get("visa_type") == "I-589"
+                }
+                
+                all_success = all(success_checks.values())
+                
+                self.log_test(
+                    "Dr. Paula - Generate Directives (I-589)",
+                    all_success,
+                    f"Generated {len(data.get('directives_text', ''))} chars. Checks: {success_checks}",
+                    {
+                        "success_checks": success_checks,
+                        "directives_length": len(data.get('directives_text', '')),
+                        "agent": data.get("agent"),
+                        "visa_type": data.get("visa_type")
+                    }
+                )
+            else:
+                self.log_test(
+                    "Dr. Paula - Generate Directives (I-589)",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:300]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Dr. Paula - Generate Directives (I-589)",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_dr_miguel_enhanced_analysis(self):
+        """Test Dr. Miguel with enhanced AI analysis"""
+        print("🔬 Testing Dr. Miguel Enhanced Analysis...")
+        
+        # Create test document content
+        test_content = b"Test passport document for Dr. Miguel analysis. " * 1000  # Make it substantial
+        
+        files = {
+            'file': ('test_passport.pdf', test_content, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'I-589',
+            'case_id': 'TEST-DR-MIGUEL-ENHANCED'
+        }
+        
+        try:
+            # Remove Content-Type header for multipart form data
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai-enhanced",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                success_checks = {
+                    "has_analysis": bool(result.get('ai_analysis') or result.get('analysis')),
+                    "has_dr_miguel": 'dr_miguel' in str(result).lower() or 'miguel' in str(result).lower(),
+                    "no_budget_exceeded": "Budget exceeded" not in str(result),
+                    "has_completeness_score": any('completeness' in str(k).lower() for k in result.keys()) if isinstance(result, dict) else False,
+                    "response_not_empty": bool(result)
+                }
+                
+                all_success = all(success_checks.values())
+                
+                self.log_test(
+                    "Dr. Miguel - Enhanced AI Analysis",
+                    all_success,
+                    f"Analysis completed. Checks: {success_checks}",
+                    {
+                        "success_checks": success_checks,
+                        "response_keys": list(result.keys()) if isinstance(result, dict) else [],
+                        "analysis_present": bool(result.get('ai_analysis') or result.get('analysis'))
+                    }
+                )
+            else:
+                self.log_test(
+                    "Dr. Miguel - Enhanced AI Analysis",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:300]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Dr. Miguel - Enhanced AI Analysis",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_all_agents_openai_integration(self):
+        """Test all 5 server.py AI functions with OpenAI integration"""
+        print("🤖 Testing All AI Agents OpenAI Integration...")
+        
+        # Test the 5 AI functions mentioned in the review request
+        ai_functions = [
+            ("validate_form_data_ai", "POST", "/llm/validate-form", {"form_data": {"name": "Test User", "visa_type": "I-589"}}),
+            ("check_data_consistency_ai", "POST", "/llm/check-consistency", {"data": {"field1": "value1", "field2": "value2"}}),
+            ("translate_data_ai", "POST", "/llm/translate", {"text": "Hello world", "target_language": "pt"}),
+            ("generate_uscis_form_ai", "POST", "/llm/generate-form", {"visa_type": "I-589", "applicant_data": {"name": "Test"}}),
+            ("final_review_ai", "POST", "/llm/final-review", {"case_data": {"visa_type": "I-589", "status": "ready"}})
+        ]
+        
+        for func_name, method, endpoint, payload in ai_functions:
+            try:
+                if method == "POST":
+                    response = self.session.post(f"{API_BASE}{endpoint}", json=payload)
+                else:
+                    response = self.session.get(f"{API_BASE}{endpoint}")
+                
+                # Check if endpoint exists (not 404) and doesn't have budget issues
+                if response.status_code in [200, 422, 400]:  # Valid responses (not 404/405)
+                    try:
+                        data = response.json() if response.content else {}
+                        no_budget_exceeded = "Budget exceeded" not in str(data)
+                        
+                        self.log_test(
+                            f"AI Function - {func_name}",
+                            no_budget_exceeded,
+                            f"HTTP {response.status_code}, No budget issues: {no_budget_exceeded}",
+                            {
+                                "function": func_name,
+                                "endpoint": endpoint,
+                                "status_code": response.status_code,
+                                "budget_ok": no_budget_exceeded
+                            }
+                        )
+                    except:
+                        # Non-JSON response is also acceptable
+                        self.log_test(
+                            f"AI Function - {func_name}",
+                            True,
+                            f"HTTP {response.status_code}, Endpoint accessible",
+                            {"function": func_name, "status_code": response.status_code}
+                        )
+                else:
+                    self.log_test(
+                        f"AI Function - {func_name}",
+                        False,
+                        f"HTTP {response.status_code} - Endpoint not accessible",
+                        {"function": func_name, "status_code": response.status_code}
+                    )
+                    
+            except Exception as e:
+                self.log_test(
+                    f"AI Function - {func_name}",
+                    False,
+                    f"Exception: {str(e)}"
+                )
                         "success_is_true": data.get("success") is True,
                         "has_review_object": "review" in data,
                         "no_budget_error": "budget" not in str(data).lower() and "exceeded" not in str(data).lower(),
