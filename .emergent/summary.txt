@@ -1,73 +1,89 @@
 <analysis>
-The trajectory chronicles an intense development and debugging cycle for an AI-powered immigration application tool. The work began with successfully debugging and deploying the Case Finalizer backend feature. However, the focus immediately shifted to a critical user-reported security vulnerability in the Dr. Miguel document analysis AI, which was incorrectly approving invalid documents. This led to a major refactoring effort, fixing deep-seated bugs in the Pydantic models, policy engine, and fallback logic within  and .
+The trajectory documents a rapid, multi-phase feature development cycle for an AI immigration application tool. The work began by acknowledging a new major feature request: the Agente Coruja (Owl Agent), an intelligent questionnaire system.
 
-Following the security fix, the system was deemed too restrictive, prompting a pivot to integrate a professional third-party API. After a brief, aborted attempt with Onfido, a strategic decision was made to implement a hybrid system combining the Google Vision API for professional-grade OCR with the improved Dr. Miguel AI for intelligent validation. This phase was dominated by a complex series of authentication challenges, iterating through API keys, environment variable loading issues, and ultimately succeeding with a full OAuth2 implementation.
+Development proceeded through several distinct, user-driven phases. Phase 1 involved building the core backend for the Owl Agent, creating API endpoints in  and the agent's logic in . Phase 2 focused on the frontend, where a testing agent built the UI but uncovered a critical routing bug, which was subsequently fixed by ensuring a  was passed correctly.
 
-With the document validation system finally robust, secure, and functional, the project pivoted again to a new major feature request: the Agente Coruja (Owl Agent), an intelligent, guided questionnaire system designed to auto-fill official USCIS forms. The most recent actions involved acknowledging this new requirement and creating the initial backend file to begin implementation.
+Phase 3 introduced a user-requested feature for saving progress, requiring the implementation of a simple email/password authentication system. This involved adding new auth endpoints to the backend and new React components to the frontend. This phase also surfaced and resolved a critical technical bug related to MongoDB  JSON serialization.
+
+Phase 4 added a complete payment and finalization flow using Stripe, integrated via the  library. This included creating payment endpoints, frontend payment pages, and logic for downloading the final application package.
+
+The most recent work, Phase 5, addresses a user query about connecting the application to their custom domain, . The last actions involved inspecting environment files and searching the codebase, confirming the application is currently configured for a preview domain. The immediate next step is to address this domain configuration request.
 </analysis>
 
 <product_requirements>
-The application is an AI-powered, self-service platform designed to simplify the US immigration process for users.
+The application is an AI-powered platform to assist users with the US immigration process. The primary focus of the recent development has been the Agente Coruja (Owl Agent) feature.
 
-**Core Features & Status:**
-*   **Intelligent Document Validator:** Originally an in-house AI (Dr. Miguel), this system has been re-engineered into a robust hybrid model. It now uses the Google Vision API for high-accuracy Optical Character Recognition (OCR) and data extraction, feeding that structured data to the improved Dr. Miguel agent, which performs advanced validation, fraud detection, and consistency checks. The critical security flaw of approving invalid documents has been resolved.
-*   **Interactive AI Cover Letter Module:** An AI persona (Dra. Paula) assists users in drafting and formatting their cover letters through an interactive Q&A workflow.
-*   **Case Finalizer:** A fully functional backend module that audits the application, merges all documents into a master PDF, and generates final instructions.
-*   **Agente Coruja (Owl Agent) - In Progress:** This is the next major feature. It will be an intelligent, friendly questionnaire presented in the user's native language. The Owl Agent will guide the user through the questions in real-time. Upon completion, the answers will be validated by a Google API, used to auto-fill the official English USCIS form, and then presented to the user for final approval before being saved to their case file.
+**Agente Coruja - Intelligent Questionnaire:**
+*   **Goal:** Guide users through a multi-lingual, friendly questionnaire to auto-fill official USCIS forms.
+*   **Core Logic:** An AI (OpenAI GPT-5) provides real-time guidance, and user answers are validated.
+*   **Progress Saving:** Users must be able to save their progress. This is implemented with two options:
+    1.  **Continuous Navigation:** Progress is saved automatically for users who complete the form in one session.
+    2.  **Save and Return:** Users can create a simple account (email/password) to save their session and return later.
+*   **Finalization & Payment:** Upon completing the questionnaire, the user is directed to a payment page.
+    *   **Payment:** Stripe is used for payment processing.
+    *   **Delivery:** After successful payment, the user can either download the complete application package as a PDF or have it sent to their email.
+*   **Data Privacy:** The system must inform users that their data is deleted after the package is downloaded/sent, ensuring privacy.
+
+The overall goal is to provide a seamless, guided, and secure end-to-end experience for completing and obtaining immigration forms.
 </product_requirements>
 
 <key_technical_concepts>
-- **Full-Stack:** React (Vite) frontend with a Python FastAPI backend.
-- **Database:** MongoDB for application data storage.
-- **AI Integration:** A hybrid, multi-agent architecture. It uses the Google Vision API for professional OCR and an OpenAI-powered agent (Dr. Miguel) for contextual validation and analysis.
-- **Authentication:** Implementation of both Google Cloud API Keys and a full OAuth2 flow (using ) to securely connect to Google Cloud services.
-- **PDF Generation:** Utilizes libraries like  and  for the Case Finalizer feature.
+- **Full-Stack:** React frontend and Python FastAPI backend.
+- **Database:** MongoDB, with a critical fix implemented for  JSON serialization.
+- **AI Integration:** OpenAI GPT-5 (via  and ) for intelligent guidance.
+- **Payment Processing:** Real Stripe integration managed via the  library.
+- **Authentication:** A simple, custom-built email/password authentication system using  for password hashing.
+- **Asynchronous Programming:** Extensive use of  in the FastAPI backend for non-blocking database and API operations.
 </key_technical_concepts>
 
 <code_architecture>
-The application is a monorepo with distinct  and  directories.
+The application is a monorepo with a  (React) and  (FastAPI) directory.
 
 
 
 -   ****
-    -   **Importance:** The core FastAPI application, defining all API routes.
-    -   **Summary of Changes:** This file underwent massive changes. The  endpoint was completely refactored multiple times to fix security flaws, and then to orchestrate the hybrid validation flow, calling the new Google Vision API module and then the specialized AI agent. The fix for loading environment variables with  at the top of the file was a critical change.
+    -   **Importance:** The main FastAPI application file, defining all API routes, database connections, and startup/shutdown events.
+    -   **Summary of Changes:** This file was heavily modified to add multiple new API routers for the Owl Agent. This includes endpoints for starting sessions (), user authentication (, ), managing sessions (, ), and handling payments (, ). A crucial helper function, , was added to fix MongoDB  serialization errors.
 
--   ** (New File)**
-    -   **Importance:** This module encapsulates all logic for communicating with Google Cloud AI services.
-    -   **Summary of Changes:** Created to handle OCR tasks. It was refactored multiple times to handle different Google APIs (Vision, Document AI) and authentication methods (API Key, OAuth2). It now successfully uses OAuth2 credentials to connect to the Google Vision API, with a fallback to mock data if the API is unavailable.
+    
 
 -   ****
-    -   **Importance:** Defines the core logic and system prompts for the AI agents, particularly Dr. Miguel.
-    -   **Summary of Changes:** Was heavily debugged to fix a critical  error. The system prompt for Dr. Miguel was significantly enhanced to perform more detailed, forensic-style analysis based on the structured data received from the Google Vision API.
+    -   **Importance:** Contains the core business logic for the Owl Agent's questionnaire, including field definitions, guidance prompts, and validation rules.
+    -   **Summary of Changes:** The file was populated with extensive dictionaries defining form fields, their types, validation rules, and AI-powered guidance prompts, forming the brain of the questionnaire.
 
 -   ****
-    -   **Importance:** Contains rule-based logic for document validation scoring.
-    -   **Summary of Changes:** Was made more robust by replacing direct dictionary key access () with the safer  method to prevent  crashes, which were a source of instability.
+    -   **Importance:** The root component of the React application, responsible for defining the application's routing structure.
+    -   **Summary of Changes:** New routes were added to handle the new pages for the Owl Agent flow, including , , and .
 
--   ** (New File)**
-    -   **Importance:** This is the placeholder file created to house the backend logic for the new Agente Coruja feature.
-    -   **Summary of Changes:** Newly created and currently empty. It will be the focus of the next development phase.
+-   ****
+    -   **Importance:** The main entry point page for the Owl Agent feature. It manages the user's state, determining whether to show the authentication/session selection screen or the questionnaire itself.
+    -   **Summary of Changes:** Integrated the  and  components to create a comprehensive landing page for the feature. It now handles logic for starting new sessions for anonymous or authenticated users.
+
+-   ** & **
+    -   **Importance:** These new pages handle the final step of the user journey.
+    -   **Summary of Changes:**  was created to fetch a Stripe checkout session from the backend and redirect the user to Stripe.  is the landing page after a successful payment, providing download/email options and the privacy disclaimer.
+
+-   ****
+    -   **Importance:** A new component created to handle user registration and login.
+    -   **Summary of Changes:** This component provides the UI form for new and returning users to create an account or log in to access their saved questionnaire sessions.
 </code_architecture>
 
 <pending_tasks>
-- **Implement Agente Coruja Feature:** Build the complete, multi-step workflow for the friendly questionnaire as requested by the user. This includes backend API development, frontend UI, AI-guided interaction, Google API validation, and auto-filling of official USCIS forms.
-- **Fix  Bug:** A previously identified frontend bug, where selecting a visa type defaults to B-1/B-2, was superseded by the critical security issue and was never resolved.
+- **Configure Custom Domain:** The user wants the application to be connected to . The current setup uses a preview URL ().
+- **Fix  Bug:** An old, unresolved bug where selecting a visa type defaults to B-1/B-2 was mentioned in the initial project context but never addressed.
 </pending_tasks>
 
 <current_work>
-The immediate focus has shifted to implementing the new Agente Coruja (Owl Agent) feature. The previous, intensive work on debugging and re-architecting the document validation system is now complete, with the hybrid Google Vision API + Dr. Miguel solution successfully tested and running.
+The immediate task is responding to the user's request to connect the application to their custom domain, . The previous engineer has already performed the initial investigation and confirmed that the application is not currently configured for this domain.
 
-The user has provided a detailed set of requirements for the Owl Agent, which involves creating an interactive, multi-lingual questionnaire that guides the user, validates their input via a Google API, and then uses the data to automatically populate an official USCIS PDF form.
+The last actions taken were:
+1.  Reading the frontend environment configuration file: , which revealed .
+2.  Reading the backend environment configuration file: .
+3.  Searching the entire application for any references to the custom domain or the preview domain: .
 
-The very last actions taken were:
-1.  Acknowledging the user's detailed request for this new feature.
-2.  Performing a preliminary search of the codebase to identify existing related files (like ).
-3.  Creating a new file, , to serve as the container for the backend logic of this new feature.
-
-The project is at the starting point of this new development cycle.
+This investigation confirmed the current URL configuration and established that no part of the codebase is hardcoded to the user's desired domain. The work is paused at the point of needing to formulate a plan to assist the user with the domain setup.
 </current_work>
 
 <optional_next_step>
-Begin implementing the backend for the Agente Coruja by creating the necessary API endpoints in  and developing the core business logic inside the new  module.
+Explain to the user that the application is currently on a preview domain and outline the steps required to connect it to . This involves DNS configuration on their domain provider and updating environment variables.
 </optional_next_step>
