@@ -236,48 +236,20 @@ export const OwlAgent: React.FC = () => {
               </div>
             </div>
 
-          {/* Benefits Section */}
-          <div className="mt-16 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">
-              Por que usar o Agente Coruja?
-            </h2>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="text-3xl mb-3">⚡</div>
-                <h3 className="font-semibold mb-2">Rápido e Eficiente</h3>
-                <p className="text-sm text-gray-600">
-                  Complete questionários em minutos, não horas
-                </p>
-              </div>
-              
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="text-3xl mb-3">🎯</div>
-                <h3 className="font-semibold mb-2">Precisão Garantida</h3>
-                <p className="text-sm text-gray-600">
-                  Validação com IA e APIs do Google
-                </p>
-              </div>
-              
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="text-3xl mb-3">📋</div>
-                <h3 className="font-semibold mb-2">Formulários USCIS</h3>
-                <p className="text-sm text-gray-600">
-                  Geração automática de PDFs oficiais
-                </p>
-              </div>
-              
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="text-3xl mb-3">💾</div>
-                <h3 className="font-semibold mb-2">Progresso Salvo</h3>
-                <p className="text-sm text-gray-600">
-                  Continue de onde parou a qualquer momento
-                </p>
-              </div>
+            {/* Features Info */}
+            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+              <h4 className="font-semibold text-gray-800 text-sm">✨ Funcionalidades:</h4>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• Orientação inteligente em tempo real</li>
+                <li>• Validação automática com Google APIs</li>
+                <li>• Geração automática de formulários USCIS</li>
+                <li>• Salvamento automático do progresso</li>
+                <li>• Suporte completo em português e inglês</li>
+              </ul>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
-    </OwlSessionProvider>
+    </div>
   );
 };
