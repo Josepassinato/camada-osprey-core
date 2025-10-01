@@ -2963,13 +2963,13 @@ async def specialized_immigration_letter_writing(request: dict):
 async def start_case_finalization(case_id: str, request: dict):
     """Inicia processo de finalização do caso"""
     try:
-        from case_finalizer import case_finalizer
+        from case_finalizer_complete import case_finalizer_complete
         
         scenario_key = request.get("scenario_key", "H-1B_basic")
         postage = request.get("postage", "USPS")
         language = request.get("language", "pt")
         
-        result = case_finalizer.start_finalization(
+        result = case_finalizer_complete.start_finalization(
             case_id=case_id,
             scenario_key=scenario_key,
             postage=postage,
