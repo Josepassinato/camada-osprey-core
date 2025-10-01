@@ -5103,7 +5103,15 @@ async def validate_form_data_ai(case, friendly_form_data, basic_data):
         from emergentintegrations import EmergentLLM
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
         
-        llm = EmergentLLM(api_key=os.environ.get('EMERGENT_LLM_KEY'))
+        # Use OpenAI directly or fallback to EmergentLLM
+        openai_key = os.environ.get('OPENAI_API_KEY')
+        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
+        
+        if openai_key:
+            use_openai = True
+        else:
+            llm = EmergentLLM(api_key=emergent_key)
+            use_openai = False
         
         # Get Dra. Paula's enhanced knowledge for validation
         visa_type = case.get('form_code', 'N/A')
@@ -5266,7 +5274,15 @@ async def generate_uscis_form_ai(case, friendly_form_data, basic_data):
         from emergentintegrations import EmergentLLM
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
         
-        llm = EmergentLLM(api_key=os.environ.get('EMERGENT_LLM_KEY'))
+        # Use OpenAI directly or fallback to EmergentLLM
+        openai_key = os.environ.get('OPENAI_API_KEY')
+        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
+        
+        if openai_key:
+            use_openai = True
+        else:
+            llm = EmergentLLM(api_key=emergent_key)
+            use_openai = False
         
         form_code = case.get("form_code", "")
         
@@ -5331,7 +5347,15 @@ async def final_review_ai(case):
         from emergentintegrations import EmergentLLM
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
         
-        llm = EmergentLLM(api_key=os.environ.get('EMERGENT_LLM_KEY'))
+        # Use OpenAI directly or fallback to EmergentLLM
+        openai_key = os.environ.get('OPENAI_API_KEY')
+        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
+        
+        if openai_key:
+            use_openai = True
+        else:
+            llm = EmergentLLM(api_key=emergent_key)
+            use_openai = False
         
         # Get Dra. Paula's enhanced knowledge for final review
         form_code = case.get('form_code', '')
