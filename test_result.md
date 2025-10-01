@@ -547,6 +547,18 @@ frontend:
         agent: "testing"
         comment: "✅ FORM CODE MISMATCH INVESTIGATION COMPLETED - BACKEND APIs WORKING CORRECTLY! Comprehensive investigation of the reported critical bug where 'User selects H-1B but system creates B-1/B-2 case' has been completed with extensive testing: ✅ BACKEND API VALIDATION: All auto-application endpoints working correctly (/api/auto-application/start, PUT /api/auto-application/case/{case_id}, GET /api/auto-application/case/{case_id}), ✅ FORM CODE PERSISTENCE: H-1B form_code correctly stored and retrieved from MongoDB database, B-1/B-2 form_code correctly stored and retrieved, no cross-contamination between cases, ✅ ENUM VALIDATION: USCISForm enum properly validates H-1B, B-1/B-2, F-1, O-1 and correctly rejects invalid values, ✅ COMPREHENSIVE FLOW TESTING: Standard H-1B flow (start → select → retrieve) working perfectly, Direct H-1B creation working correctly, B-1/B-2 to H-1B changes working properly, Multiple form code updates working correctly, ✅ DATABASE VERIFICATION: Direct MongoDB queries confirm form_code values are stored correctly (H-1B cases show 'H-1B', B-1/B-2 cases show 'B-1/B-2'), ✅ EDGE CASE TESTING: Default behavior (no form_code) working correctly, Empty/null form_code handling working properly, Sequential operations show no cross-contamination. CONCLUSION: The backend APIs are functioning correctly. The reported issue is likely in the FRONTEND CODE, not the backend. All 4 comprehensive test scenarios passed with 100% success rate. Backend form_code system is production-ready and working as designed."
 
+  - task: "Ver Detalhes Button Modal Testing - All Visa Types"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/SelectForm.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "🔍 TESTING REQUIRED: User reported that 'Ver Detalhes' buttons for visa types I-130, I-485, I-589, I-751, I-765, I-90, N-400 were showing empty modals or errors. Need to test all visa types to verify modal functionality, content display, and ensure previously working visas (H-1B, B-1/B-2, F-1, O-1) still function correctly. Testing will focus on modal opening, content validation, and proper closing functionality."
+
   - task: "Phase 2 Field Extraction Engine Implementation"
     implemented: true
     working: true
