@@ -5158,7 +5158,16 @@ async def validate_form_data_ai(case, friendly_form_data, basic_data):
         }}
         """
         
-        response = llm.chat([{"role": "user", "content": validation_prompt}])
+        if use_openai:
+            response = openai.chat.completions.create(
+                model="gpt-4",
+                messages=[{"role": "user", "content": validation_prompt}],
+                max_tokens=2000,
+                temperature=0.3
+            )
+            response_text = response.choices[0].message.content
+        else:
+            response_text = llm.chat([{"role": "user", "content": validation_prompt}])
         
         try:
             ai_response = json.loads(response.strip())
