@@ -2963,7 +2963,7 @@ async def specialized_immigration_letter_writing(request: dict):
 async def start_case_finalization(case_id: str, request: dict):
     """Inicia processo de finalização do caso"""
     try:
-        from case_finalizer_complete import case_finalizer_complete
+        # Importação movida para o topo
         
         scenario_key = request.get("scenario_key", "H-1B_basic")
         postage = request.get("postage", "USPS")
@@ -2999,7 +2999,7 @@ async def start_case_finalization(case_id: str, request: dict):
 async def get_finalization_status(job_id: str):
     """Obtém status da finalização"""
     try:
-        from case_finalizer_complete import case_finalizer_complete
+        # Importação movida para o topo
         
         result = case_finalizer_complete.get_job_status(job_id)
         
@@ -3023,7 +3023,7 @@ async def get_finalization_status(job_id: str):
 async def accept_finalization_consent(case_id: str, request: dict):
     """Aceita consentimento para liberação dos downloads"""
     try:
-        from case_finalizer_complete import case_finalizer_complete
+        # Importação movida para o topo
         
         consent_hash = request.get("consent_hash", "")
         
@@ -6068,7 +6068,7 @@ async def analyze_with_ai_enhanced(
 async def get_case_finalizer_capabilities(case_id: str, current_user = Depends(get_current_user)):
     """Retorna capacidades disponíveis no Case Finalizer completo"""
     try:
-        from case_finalizer_complete import case_finalizer_complete
+        # Importação movida para o topo
         
         return {
             "status": "success",
@@ -6101,7 +6101,7 @@ async def get_case_finalizer_capabilities(case_id: str, current_user = Depends(g
 async def download_instructions(job_id: str, current_user = Depends(get_current_user)):
     """Download das instruções geradas"""
     try:
-        from case_finalizer_complete import case_finalizer_complete
+        # Importação movida para o topo
         from fastapi.responses import JSONResponse
         
         job_status = case_finalizer_complete.get_job_status(job_id)
@@ -6134,7 +6134,7 @@ async def download_instructions(job_id: str, current_user = Depends(get_current_
 async def download_checklist(job_id: str, current_user = Depends(get_current_user)):
     """Download do checklist gerado"""
     try:
-        from case_finalizer_complete import case_finalizer_complete
+        # Importação movida para o topo
         from fastapi.responses import JSONResponse
         
         job_status = case_finalizer_complete.get_job_status(job_id)
@@ -6166,7 +6166,7 @@ async def download_checklist(job_id: str, current_user = Depends(get_current_use
 async def download_master_packet(job_id: str, current_user = Depends(get_current_user)):
     """Download do master packet (PDF)"""
     try:
-        from case_finalizer_complete import case_finalizer_complete
+        # Importação movida para o topo
         from fastapi.responses import FileResponse
         import os
         
@@ -6274,7 +6274,7 @@ async def startup_db_client():
 async def download_instructions(job_id: str, current_user = Depends(get_current_user)):
     """Download das instruções geradas"""
     try:
-        from case_finalizer_complete import case_finalizer_complete
+        # Importação movida para o topo
         from fastapi.responses import JSONResponse
         
         job_status = case_finalizer_complete.get_job_status(job_id)
@@ -6307,7 +6307,7 @@ async def download_instructions(job_id: str, current_user = Depends(get_current_
 async def download_checklist(job_id: str, current_user = Depends(get_current_user)):
     """Download do checklist gerado"""
     try:
-        from case_finalizer_complete import case_finalizer_complete
+        # Importação movida para o topo
         from fastapi.responses import JSONResponse
         
         job_status = case_finalizer_complete.get_job_status(job_id)
@@ -6339,7 +6339,7 @@ async def download_checklist(job_id: str, current_user = Depends(get_current_use
 async def download_master_packet(job_id: str, current_user = Depends(get_current_user)):
     """Download do master packet (PDF)"""
     try:
-        from case_finalizer_complete import case_finalizer_complete
+        # Importação movida para o topo
         from fastapi.responses import FileResponse
         import os
         
