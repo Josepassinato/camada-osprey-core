@@ -540,15 +540,18 @@ frontend:
 
   - task: "Case Finalizer MVP System"
     implemented: true
-    working: true
+    working: false
     file: "/app/backend/case_finalizer.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
       - working: true
         agent: "testing"
         comment: "✅ CASE FINALIZER MVP SYSTEM EXCELLENT: 1) ✅ Core Endpoints Functional - POST /api/cases/{case_id}/finalize/start working with proper job_id generation and status responses, GET /api/cases/finalize/{job_id}/status providing detailed status polling with issues and links, POST /api/cases/{case_id}/finalize/accept implementing consent system with SHA-256 hash validation, 2) ✅ Content Endpoints Operational - GET /api/instructions/{instruction_id} returning instruction content with language support, GET /api/checklists/{checklist_id} providing verification checklists, GET /api/master-packets/{packet_id} serving master packet placeholders, 3) ✅ Knowledge Base Integration - H-1B scenario configured with fees (I-129: $460, H1B_CAP: $1500, PREMIUM: $2500) and USCIS Texas Service Center address, F-1 scenario with SEVIS fee ($350) and Student Exchange Visitor Program address, I-485 scenario with proper fees and Chicago Lockbox address, 4) ✅ Audit System Working - Document completeness checking functional, H-1B missing 'i797' document correctly detected, F-1 missing 'i20' and 'financial_documents' properly identified, 'needs_correction' status appropriately returned when documents incomplete, 5) ✅ Multi-Language Support - Portuguese and English instruction generation working, proper language-specific content formatting, 6) ✅ Error Handling Robust - Invalid scenarios rejected with supported scenarios list, invalid job IDs handled with proper error messages, invalid consent hashes rejected (non-64 character), 7) ✅ Scenario Support Complete - All 3 scenarios supported (H-1B_basic, F-1_basic, I-485_basic) with proper configuration. COMPREHENSIVE TESTING RESULTS: 17 tests executed, 15 passed (88.2% success rate), 2 expected failures due to missing documents (correct audit behavior). Case Finalizer MVP ready for production deployment with all core functionality operational."
+      - working: false
+        agent: "testing"
+        comment: "❌ TESTE FINAL CASE FINALIZER - CORREÇÕES NECESSÁRIAS: Comprehensive final testing revealed critical issues requiring immediate attention. RESULTS: 8 tests executed, 4 passed (50% success rate). ❌ CRITICAL FAILURES: 1) GET /api/cases/{case_id}/finalize/capabilities endpoint returning empty scenarios (0 scenarios instead of expected 10), no PDF merging or templates features detected, 2) Download endpoints failing with HTTP 400 errors: /api/download/instructions/{job_id}, /api/download/checklist/{job_id}, /api/download/master-packet/{job_id} all returning 400 status, 3) Missing capabilities endpoint implementation or configuration issues. ✅ WORKING COMPONENTS: H-1B and I-589 asylum scenario creation successful with proper job_id generation, Knowledge base validation working with correct H-1B fees ($460 I-129, $2805 Premium), Status polling functional returning 'needs_correction' appropriately. CONCLUSION: Case Finalizer core flow works but critical endpoints (capabilities, downloads) are failing. System requires significant fixes before production deployment."
 
   - task: "Form Code Mismatch Investigation (H-1B vs B-1/B-2)"
     implemented: true
