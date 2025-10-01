@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Case Finalizer MVP - Comprehensive Testing Suite
-Tests all Case Finalizer endpoints and functionality as requested
+VALIDAÇÃO FINAL COMPLETA DO ECOSSISTEMA - Comprehensive Testing Suite
+Tests all immigration system components for production certification
 """
 
 import requests
@@ -11,6 +11,8 @@ import uuid
 from datetime import datetime
 import os
 from typing import Dict, Any
+import base64
+import hashlib
 
 # Get backend URL from environment
 BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://docsage-9.preview.emergentagent.com')
