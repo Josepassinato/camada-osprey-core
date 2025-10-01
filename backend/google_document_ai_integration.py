@@ -44,6 +44,9 @@ class GoogleDocumentAIProcessor:
         self.is_mock_mode = True  # Force mock mode for testing
         # self.is_mock_mode = not (has_oauth2 or has_api_key)
         
+        # Set auth_method for mock mode
+        self.auth_method = "mock"
+        
         if self.is_mock_mode:
             logger.warning("🧪 Google Document AI in MOCK MODE - No credentials provided")
         else:
