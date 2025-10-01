@@ -5695,8 +5695,13 @@ class ComprehensiveEcosystemTester:
         print("=" * 80)
         print()
         
-        # FIRST: GOOGLE VISION API + DR. MIGUEL HYBRID SYSTEM TESTS - REAL API KEY TESTING
-        print("🔬 GOOGLE VISION API + DR. MIGUEL HYBRID SYSTEM TESTS")
+        # FIRST: GOOGLE VISION API REAL INTEGRATION TESTING - CRITICAL USER REQUEST
+        print("🔍 GOOGLE VISION API REAL INTEGRATION TESTING - CRITICAL USER REQUEST")
+        print("=" * 70)
+        self.test_google_vision_api_real_integration()
+        
+        # SECOND: GOOGLE VISION API + DR. MIGUEL HYBRID SYSTEM TESTS - REAL API KEY TESTING
+        print("\n🔬 GOOGLE VISION API + DR. MIGUEL HYBRID SYSTEM TESTS")
         print("=" * 60)
         self.test_google_vision_api_connectivity()
         self.test_hybrid_system_real_vs_mock()
