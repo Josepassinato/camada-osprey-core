@@ -405,10 +405,12 @@ class PolicyEngine:
         """
         # Pesos da política ou padrão
         scoring = policy.get("scoring", {
-            "critical_fields_weight": 0.4,
-            "quality_weight": 0.3,
-            "presence_checks_weight": 0.2,
-            "consistency_weight": 0.1
+            "critical_fields_weight": 0.35,
+            "quality_weight": 0.25,
+            "presence_checks_weight": 0.15,
+            "consistency_weight": 0.1,
+            "language_compliance_weight": 0.1,
+            "field_extraction_weight": 0.05
         })
         
         scores = []
