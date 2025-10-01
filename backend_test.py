@@ -10833,6 +10833,13 @@ class ComprehensiveImmigrationAPITester:
         
         case_id = None
         
+        # Create a separate session without authentication for anonymous case handling
+        anonymous_session = requests.Session()
+        anonymous_session.headers.update({
+            'Content-Type': 'application/json',
+            'User-Agent': 'ImmigrationAPITester/1.0'
+        })
+        
         try:
             # ETAPA 1: Case Creation
             print("ETAPA 1: 🆕 Case Creation...")
