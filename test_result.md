@@ -568,8 +568,8 @@ frontend:
   - task: "Dr. Paula Cover Letter Module - Review Letter"
     implemented: true
     working: true
-    file: "/app/frontend/src/pages/CoverLetterModule.tsx"
-    stuck_count: 2
+    file: "/app/backend/server.py"
+    stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
