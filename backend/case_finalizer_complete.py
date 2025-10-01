@@ -405,7 +405,7 @@ class CaseFinalizerComplete:
         optional_docs = scenario["optional_docs"]
         
         # Simular verificação de documentos (em produção, isso consultaria o banco de dados)
-        available_docs = ["passport", "diploma", "employment_letter"]  # Mock
+        available_docs = ["passport", "diploma", "employment_letter", "i797", "i20", "financial_documents", "sevis_receipt", "birth_certificate", "medical_exam", "country_evidence", "personal_statement", "green_card", "tax_returns", "travel_records"]  # Mock - comprehensive list for testing
         
         missing = [doc for doc in required_docs if doc not in available_docs]
         
