@@ -7729,8 +7729,18 @@ class ComprehensiveEcosystemTester:
         print("=" * 80)
         print()
         
+        # HIGHEST PRIORITY: USER REQUESTED GOOGLE VISION API + DR. MIGUEL HYBRID SYSTEM TESTS
+        print("🔬 PRIORITY 1: GOOGLE VISION API + DR. MIGUEL HYBRID SYSTEM TESTS (USER REQUEST)")
+        print("=" * 80)
+        print("Testing Real Google Vision API integration as specifically requested by user")
+        print("User claims: 'Google Vision API now working with status 200 (not 403 anymore)'")
+        print("Testing: Real API vs Mock, OCR Quality, Hybrid System, Performance, Cost-Benefit")
+        print("-" * 80)
+        self.test_google_vision_api_real_integration_user_request()
+        self.test_document_validation_scenarios_user_request()
+        
         # PRIORITY TEST: Google Vision API Configuration Complete
-        print("🔍 TESTE FINAL: GOOGLE VISION API CONFIGURATION COMPLETE")
+        print("\n🔍 TESTE FINAL: GOOGLE VISION API CONFIGURATION COMPLETE")
         print("=" * 70)
         self.test_google_vision_api_configuration_complete()
         
