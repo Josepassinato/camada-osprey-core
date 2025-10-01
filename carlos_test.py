@@ -160,11 +160,12 @@ class CarlosH1BSimulator:
                 case_id = case_data.get('case_id')
                 session_token = case_data.get('session_token')
                 
-                if case_id and session_token:
+                if case_id:
+                    session_info = f"Session: {session_token[:10]}..." if session_token else "Anonymous case"
                     self.log_test(
                         "Carlos Step 1 - Start Application",
                         True,
-                        f"Case criado: {case_id}, Session: {session_token[:10]}...",
+                        f"Case criado: {case_id}, {session_info}",
                         {"case_id": case_id, "session_token": session_token}
                     )
                     return case_id, session_token
@@ -172,7 +173,7 @@ class CarlosH1BSimulator:
                     self.log_test(
                         "Carlos Step 1 - Start Application",
                         False,
-                        "Missing case_id or session_token",
+                        "Missing case_id",
                         data
                     )
             else:
