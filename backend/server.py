@@ -5786,7 +5786,6 @@ async def startup_db_client():
         logger.error(f"Error connecting to MongoDB: {str(e)}")
         raise e
 
--e 
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
