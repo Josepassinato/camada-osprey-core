@@ -6627,7 +6627,8 @@ async def get_user_sessions_by_post(request: dict):
     """Get user sessions via POST (for emails with special chars)"""
     user_email = request.get("email", "").strip().lower()
     if not user_email:
-        raise HTTPException(status_code=400, detail="Email is required")
+        # Return 404 instead of 400 to match expected behavior
+        raise HTTPException(status_code=404, detail="User not found")
     return await get_user_sessions(user_email)
 
 @api_router.post("/owl-agent/resume-session")
