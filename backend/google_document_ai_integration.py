@@ -13,6 +13,10 @@ import base64
 from google.cloud import documentai
 from google.cloud import vision
 from google.api_core import exceptions as google_exceptions
+from google.auth.transport.requests import Request
+from google.oauth2.service_account import Credentials
+from google.oauth2 import service_account
+import google.auth
 import requests
 
 logger = logging.getLogger(__name__)
