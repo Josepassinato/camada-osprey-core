@@ -128,7 +128,9 @@ def test_carlos_silva_h1b_complete_journey():
         
         if response.status_code == 200:
             data = response.json()
-            basic_data = data.get('basic_data', {})
+            case_data = data.get('case', {})
+            basic_data = case_data.get('basic_data', {})
+            progress = case_data.get('progress_percentage')
             
             # Verify Carlos Silva data was stored
             name_stored = basic_data.get('nome') == carlos_data['nome']
@@ -137,7 +139,7 @@ def test_carlos_silva_h1b_complete_journey():
             log_test(
                 "ETAPA 3 - Dados Básicos",
                 name_stored and company_stored,
-                f"Nome: {basic_data.get('nome')}, Empresa: {basic_data.get('empresa')}, Progress: {data.get('progress_percentage')}%"
+                f"Nome: {basic_data.get('nome')}, Empresa: {basic_data.get('empresa')}, Progress: {progress}%"
             )
         else:
             log_test(
