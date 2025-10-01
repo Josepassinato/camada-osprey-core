@@ -546,8 +546,8 @@ class HybridDocumentValidator:
             elif filename.lower().endswith('.webp'):
                 mime_type = "image/webp"
             
-            # STEP 1: Google Vision API - Professional OCR and Data Extraction
-            logger.info("📋 Step 1: Google Vision API processing")
+            # STEP 1: Google Document AI - Professional document analysis
+            logger.info("📋 Step 1: Google Document AI processing")
             
             google_result = await self.google_processor.process_document(
                 file_content, filename, mime_type
