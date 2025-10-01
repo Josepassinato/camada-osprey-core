@@ -48,6 +48,54 @@ class ComprehensiveEcosystemTester:
             print(f"    Response: {response_data}")
         print()
     
+    def setup_test_authentication(self):
+        """Setup authentication for Phase 2&3 endpoints that require it"""
+        try:
+            # Try to create a test user
+            test_user_data = {
+                "email": "test@phase23.com",
+                "password": "testpassword123",
+                "first_name": "Test",
+                "last_name": "User"
+            }
+            
+            # Try to signup
+            signup_response = self.session.post(
+                f"{API_BASE}/auth/signup",
+                json=test_user_data
+            )
+            
+            if signup_response.status_code == 200:
+                signup_data = signup_response.json()
+                self.auth_token = signup_data.get('token')
+            else:
+                # Try to login if user already exists
+                login_data = {
+                    "email": test_user_data["email"],
+                    "password": test_user_data["password"]
+                }
+                
+                login_response = self.session.post(
+                    f"{API_BASE}/auth/login",
+                    json=login_data
+                )
+                
+                if login_response.status_code == 200:
+                    login_result = login_response.json()
+                    self.auth_token = login_result.get('token')
+            
+            # Set authorization header if we have a token
+            if self.auth_token:
+                self.session.headers.update({
+                    'Authorization': f'Bearer {self.auth_token}'
+                })
+                print(f"✅ Authentication setup successful")
+            else:
+                print(f"⚠️ Authentication setup failed - some tests may fail")
+                
+        except Exception as e:
+            print(f"⚠️ Authentication setup error: {e}")
+    
     def test_start_finalization_h1b_basic(self):
         """Test H-1B basic finalization start"""
         test_case_id = "TEST-CASE-H1B"
