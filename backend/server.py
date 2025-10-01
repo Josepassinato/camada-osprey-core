@@ -1846,28 +1846,9 @@ async def get_case_anonymous(case_id: str, session_token: Optional[str] = None, 
         raise HTTPException(status_code=500, detail=f"Error getting case: {str(e)}")
 
 @api_router.put("/auto-application/case/{case_id}")
-async def update_case_anonymous(case_id: str, request: dict, session_token: Optional[str] = None):
+async def update_case_anonymous(case_id: str, case_update: CaseUpdate, session_token: Optional[str] = None):
     """Update a specific case (anonymous or authenticated)"""
     try:
-        # Convert dict to CaseUpdate model with flexible validation
-        case_update = None
-        case_update_dict = None
-        
-        try:
-            # Filter out None values and unknown fields that might cause validation issues
-            filtered_data = {k: v for k, v in request.items() if v is not None}
-            case_update = CaseUpdate(**filtered_data)
-        except Exception as validation_error:
-            logger.warning(f"CaseUpdate validation failed, using flexible approach: {validation_error}")
-            # Fallback: use raw dict but only with known safe fields
-            safe_fields = [
-                "form_code", "status", "basic_data", "user_story_text", 
-                "simplified_form_responses", "progress_percentage", "current_step",
-                "uploaded_documents", "document_analysis", "ai_extracted_facts",
-                "uscis_form_data", "uscis_form_generated", "payment_status"
-            ]
-            case_update_dict = {k: v for k, v in request.items() if k in safe_fields and v is not None}
-        
         # Try authenticated user first
         try:
             current_user = await get_current_user_optional()
@@ -1877,11 +1858,7 @@ async def update_case_anonymous(case_id: str, request: dict, session_token: Opti
                     "user_id": current_user["id"]
                 })
                 if case:
-                    if case_update is not None:
-                        update_data = case_update.dict(exclude_none=True)
-                    else:
-                        update_data = case_update_dict
-                    
+                    update_data = case_update.dict(exclude_none=True)
                     update_data["updated_at"] = datetime.utcnow()
                     
                     await db.auto_cases.update_one(
@@ -1909,11 +1886,7 @@ async def update_case_anonymous(case_id: str, request: dict, session_token: Opti
         if not case:
             raise HTTPException(status_code=404, detail="Case not found")
         
-        if case_update is not None:
-            update_data = case_update.dict(exclude_none=True)
-        else:
-            update_data = case_update_dict
-        
+        update_data = case_update.dict(exclude_none=True)
         update_data["updated_at"] = datetime.utcnow()
         
         await db.auto_cases.update_one(
