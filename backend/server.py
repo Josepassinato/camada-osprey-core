@@ -6063,6 +6063,39 @@ async def analyze_with_ai_enhanced(
         logger.error(f"Error in enhanced AI analysis: {e}")
         raise HTTPException(status_code=500, detail=f"Enhanced analysis failed: {str(e)}")
 
+# Case Finalizer Capabilities Endpoint
+@api_router.get("/cases/{case_id}/finalize/capabilities")
+async def get_case_finalizer_capabilities(case_id: str, current_user = Depends(get_current_user)):
+    """Retorna capacidades disponíveis no Case Finalizer completo"""
+    try:
+        from case_finalizer_complete import case_finalizer_complete
+        
+        return {
+            "status": "success",
+            "capabilities": {
+                "supported_scenarios": list(case_finalizer_complete.supported_scenarios.keys()),
+                "features": {
+                    "pdf_merging": True,
+                    "instruction_templates": True,
+                    "advanced_audit": True,
+                    "fee_calculator": True,
+                    "address_lookup": True,
+                    "timeline_estimation": True,
+                    "quality_scoring": True
+                },
+                "supported_languages": ["pt", "en"],
+                "postage_options": ["USPS", "FedEx", "UPS"],
+                "file_formats": ["PDF"],
+                "max_file_size_mb": 100
+            },
+            "version": "2.0.0-complete",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting capabilities: {e}")
+        raise HTTPException(status_code=500, detail="Erro ao obter capacidades")
+
 app.include_router(api_router)
 
 app.add_middleware(
