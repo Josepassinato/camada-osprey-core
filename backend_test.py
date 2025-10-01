@@ -1667,6 +1667,15 @@ class ComprehensiveEcosystemTester:
         """Testar endpoints de download"""
         print(f"📥 TESTE FINAL 4: Downloads para job_id {job_id}")
         
+        # Ensure we have authentication
+        if not self.auth_token:
+            self.log_test(
+                "Download Endpoints Setup",
+                False,
+                "No authentication token available for download endpoints"
+            )
+            return
+        
         download_endpoints = [
             ("instructions", f"/api/download/instructions/{job_id}"),
             ("checklist", f"/api/download/checklist/{job_id}"),
@@ -1675,14 +1684,30 @@ class ComprehensiveEcosystemTester:
         
         for name, endpoint in download_endpoints:
             try:
+                # Use the session which has authentication headers
                 response = self.session.get(f"{BACKEND_URL}{endpoint}")
                 
                 success = response.status_code == 200
                 
+                if success:
+                    # Try to parse response for better details
+                    try:
+                        if 'application/json' in response.headers.get('content-type', ''):
+                            data = response.json()
+                            details = f"Type: {data.get('type', 'unknown')}, Ready: {data.get('download_ready', False)}"
+                        elif 'application/pdf' in response.headers.get('content-type', ''):
+                            details = f"PDF file, Size: {len(response.content)} bytes"
+                        else:
+                            details = f"Content-Type: {response.headers.get('content-type', 'unknown')}"
+                    except:
+                        details = f"HTTP {response.status_code}"
+                else:
+                    details = f"HTTP {response.status_code}: {response.text[:100]}"
+                
                 self.log_test(
                     f"Download {name.title()}",
                     success,
-                    f"HTTP {response.status_code}",
+                    details,
                     {
                         "endpoint": endpoint,
                         "content_type": response.headers.get("content-type", "unknown"),
