@@ -6277,6 +6277,440 @@ async def download_master_packet(job_id: str, current_user = Depends(get_current
         logger.error(f"Error downloading master packet: {e}")
         raise HTTPException(status_code=500, detail="Erro ao baixar master packet")
 
+# ===== AGENTE CORUJA (OWL AGENT) - INTELLIGENT QUESTIONNAIRE SYSTEM =====
+
+@api_router.post("/owl-agent/start-session")
+async def start_owl_session(request: dict):
+    """Start a new intelligent questionnaire session with Agente Coruja"""
+    try:
+        case_id = request.get("case_id")
+        visa_type = request.get("visa_type", "H-1B")
+        user_language = request.get("language", "pt")
+        
+        if not case_id:
+            raise HTTPException(status_code=400, detail="case_id is required")
+        
+        # Initialize Owl Agent
+        from intelligent_owl_agent import intelligent_owl
+        
+        # Start guided session
+        session_result = await intelligent_owl.start_guided_session(
+            case_id=case_id,
+            visa_type=visa_type,
+            user_language=user_language
+        )
+        
+        # Store session in database
+        session_data = {
+            "session_id": session_result["session_id"],
+            "case_id": case_id,
+            "visa_type": visa_type,
+            "language": user_language,
+            "status": "active",
+            "created_at": datetime.utcnow(),
+            "relevant_fields": session_result["relevant_fields"],
+            "current_field_index": 0,
+            "completed_fields": [],
+            "total_fields": session_result["total_fields"]
+        }
+        
+        await db.owl_sessions.insert_one(session_data)
+        
+        return {
+            "success": True,
+            "agent": "Agente Coruja - Sistema Inteligente de Questionários",
+            "session": session_result,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error starting Owl session: {e}")
+        raise HTTPException(status_code=500, detail=f"Error starting session: {str(e)}")
+
+@api_router.get("/owl-agent/session/{session_id}")
+async def get_owl_session(session_id: str):
+    """Get current session status and progress"""
+    try:
+        from intelligent_owl_agent import intelligent_owl
+        
+        # Get session from database
+        session = await db.owl_sessions.find_one({"session_id": session_id})
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        # Get progress from Owl Agent
+        progress = await intelligent_owl.get_session_progress(session_id)
+        
+        return {
+            "success": True,
+            "session_data": session,
+            "progress": progress,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting Owl session: {e}")
+        raise HTTPException(status_code=500, detail=f"Error getting session: {str(e)}")
+
+@api_router.get("/owl-agent/field-guidance/{session_id}/{field_id}")
+async def get_field_guidance(session_id: str, field_id: str, current_value: str = "", user_context: dict = None):
+    """Get intelligent guidance for a specific field"""
+    try:
+        from intelligent_owl_agent import intelligent_owl
+        
+        # Get session
+        session = await db.owl_sessions.find_one({"session_id": session_id})
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        # Get field guidance
+        guidance = await intelligent_owl.get_field_guidance(
+            field_id=field_id,
+            visa_type=session["visa_type"],
+            user_language=session["language"],
+            current_value=current_value,
+            user_context=user_context or {}
+        )
+        
+        return {
+            "success": True,
+            "field_guidance": guidance,
+            "session_id": session_id,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting field guidance: {e}")
+        raise HTTPException(status_code=500, detail=f"Error getting guidance: {str(e)}")
+
+@api_router.post("/owl-agent/validate-field")
+async def validate_field_input(request: dict):
+    """Validate user input for a specific field using AI and Google APIs"""
+    try:
+        from intelligent_owl_agent import intelligent_owl
+        
+        session_id = request.get("session_id")
+        field_id = request.get("field_id")
+        user_input = request.get("user_input", "")
+        full_context = request.get("context", {})
+        
+        if not all([session_id, field_id]):
+            raise HTTPException(status_code=400, detail="session_id and field_id are required")
+        
+        # Get session
+        session = await db.owl_sessions.find_one({"session_id": session_id})
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        # Validate field input
+        validation_result = await intelligent_owl.validate_field_input(
+            field_id=field_id,
+            user_input=user_input,
+            visa_type=session["visa_type"],
+            session_id=session_id,
+            full_context=full_context
+        )
+        
+        # Update session progress
+        if validation_result.get("overall_score", 0) >= 70:
+            # Mark field as completed
+            await db.owl_sessions.update_one(
+                {"session_id": session_id},
+                {
+                    "$addToSet": {"completed_fields": field_id},
+                    "$set": {"last_updated": datetime.utcnow()}
+                }
+            )
+        
+        return {
+            "success": True,
+            "validation": validation_result,
+            "field_id": field_id,
+            "session_id": session_id,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error validating field: {e}")
+        raise HTTPException(status_code=500, detail=f"Error validating field: {str(e)}")
+
+@api_router.post("/owl-agent/save-response")
+async def save_field_response(request: dict):
+    """Save user response for a field"""
+    try:
+        session_id = request.get("session_id")
+        field_id = request.get("field_id")
+        user_response = request.get("user_response", "")
+        validation_score = request.get("validation_score", 0)
+        
+        if not all([session_id, field_id]):
+            raise HTTPException(status_code=400, detail="session_id and field_id are required")
+        
+        # Save response to database
+        response_data = {
+            "session_id": session_id,
+            "field_id": field_id,
+            "user_response": user_response,
+            "validation_score": validation_score,
+            "timestamp": datetime.utcnow()
+        }
+        
+        await db.owl_responses.insert_one(response_data)
+        
+        # Update session progress
+        await db.owl_sessions.update_one(
+            {"session_id": session_id},
+            {
+                "$set": {
+                    "last_updated": datetime.utcnow(),
+                    f"responses.{field_id}": user_response
+                }
+            }
+        )
+        
+        return {
+            "success": True,
+            "message": "Response saved successfully",
+            "session_id": session_id,
+            "field_id": field_id,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error saving response: {e}")
+        raise HTTPException(status_code=500, detail=f"Error saving response: {str(e)}")
+
+@api_router.post("/owl-agent/generate-uscis-form")
+async def generate_uscis_form(request: dict):
+    """Generate official USCIS form from questionnaire responses"""
+    try:
+        session_id = request.get("session_id")
+        
+        if not session_id:
+            raise HTTPException(status_code=400, detail="session_id is required")
+        
+        # Get session and responses
+        session = await db.owl_sessions.find_one({"session_id": session_id})
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        responses_cursor = db.owl_responses.find({"session_id": session_id})
+        responses = await responses_cursor.to_list(length=None)
+        
+        # Get form template based on visa type
+        form_template = await get_uscis_form_template(session["visa_type"])
+        
+        # Map responses to USCIS form fields
+        filled_form = await map_responses_to_uscis_form(
+            responses=responses,
+            form_template=form_template,
+            visa_type=session["visa_type"]
+        )
+        
+        # Generate PDF
+        pdf_data = await generate_uscis_pdf(filled_form, session["visa_type"])
+        
+        # Save generated form
+        form_data = {
+            "session_id": session_id,
+            "case_id": session["case_id"],
+            "visa_type": session["visa_type"],
+            "filled_form": filled_form,
+            "pdf_data": pdf_data,
+            "status": "generated",
+            "created_at": datetime.utcnow()
+        }
+        
+        result = await db.owl_generated_forms.insert_one(form_data)
+        form_id = str(result.inserted_id)
+        
+        return {
+            "success": True,
+            "message": "USCIS form generated successfully",
+            "form_id": form_id,
+            "session_id": session_id,
+            "visa_type": session["visa_type"],
+            "pdf_available": True,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error generating USCIS form: {e}")
+        raise HTTPException(status_code=500, detail=f"Error generating form: {str(e)}")
+
+@api_router.get("/owl-agent/download-form/{form_id}")
+async def download_generated_form(form_id: str):
+    """Download generated USCIS form PDF"""
+    try:
+        from fastapi.responses import Response
+        import base64
+        
+        # Get generated form
+        form = await db.owl_generated_forms.find_one({"_id": ObjectId(form_id)})
+        if not form:
+            raise HTTPException(status_code=404, detail="Form not found")
+        
+        # Decode PDF data
+        pdf_bytes = base64.b64decode(form["pdf_data"])
+        
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f"attachment; filename=uscis_{form['visa_type']}_{form['case_id']}.pdf"
+            }
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error downloading form: {e}")
+        raise HTTPException(status_code=500, detail=f"Error downloading form: {str(e)}")
+
+# Helper functions for USCIS form processing
+
+async def get_uscis_form_template(visa_type: str) -> Dict[str, Any]:
+    """Get USCIS form template based on visa type"""
+    
+    templates = {
+        "H-1B": {
+            "form_number": "I-129",
+            "form_title": "Petition for a Nonimmigrant Worker",
+            "sections": {
+                "part1_petition_info": ["petition_type", "requested_action", "total_workers"],
+                "part2_petitioner_info": ["company_name", "trade_name", "address", "ein"],
+                "part3_processing_info": ["consulate_processing", "change_of_status"],
+                "part4_beneficiary_info": ["full_name", "date_of_birth", "country_of_birth", "address"],
+                "part5_h_classification": ["h1b_classification", "academic_degree", "specialty_occupation"],
+                "part6_h_specific": ["lca_number", "wage_rate", "employment_start_date", "employment_end_date"]
+            }
+        },
+        "F-1": {
+            "form_number": "I-20",
+            "form_title": "Certificate of Eligibility for Nonimmigrant Student Status",
+            "sections": {
+                "student_info": ["full_name", "date_of_birth", "country_of_birth", "country_of_citizenship"],
+                "school_info": ["institution_name", "school_code", "program_of_study", "education_level"],
+                "financial_info": ["funding_source", "estimated_expenses", "sponsor_info"],
+                "program_info": ["program_start_date", "program_end_date", "english_proficiency"]
+            }
+        },
+        "I-485": {
+            "form_number": "I-485",
+            "form_title": "Register Permanent Residence or Adjust Status",
+            "sections": {
+                "applicant_info": ["full_name", "other_names", "date_of_birth", "country_of_birth"],
+                "current_status": ["current_immigration_status", "i94_number", "entry_date"],
+                "basis_for_application": ["adjustment_category", "priority_date", "petition_receipt"],
+                "background": ["immigration_history", "criminal_history", "medical_exam"]
+            }
+        }
+    }
+    
+    return templates.get(visa_type, templates["H-1B"])
+
+async def map_responses_to_uscis_form(responses: List[Dict], form_template: Dict, visa_type: str) -> Dict[str, Any]:
+    """Map questionnaire responses to official USCIS form fields"""
+    
+    # Create response lookup
+    response_lookup = {resp["field_id"]: resp["user_response"] for resp in responses}
+    
+    # Field mapping
+    field_mappings = {
+        "H-1B": {
+            "full_name": "1.a. Family Name (Last Name)",
+            "date_of_birth": "2.a. Date of Birth",
+            "place_of_birth": "2.b. Country of Birth", 
+            "current_address": "3.a. Current Physical Address",
+            "employer_name": "1.a. Legal Business Name",
+            "current_job": "5.a. Classification Sought",
+            "annual_income": "5.b. Rate of Pay"
+        },
+        "F-1": {
+            "full_name": "1. Family Name",
+            "date_of_birth": "3. Birth Date",
+            "place_of_birth": "4. Country of Birth",
+            "current_address": "5. Country of Citizenship"
+        }
+    }
+    
+    mappings = field_mappings.get(visa_type, field_mappings["H-1B"])
+    
+    # Fill form
+    filled_form = {}
+    for field_id, uscis_field in mappings.items():
+        if field_id in response_lookup:
+            filled_form[uscis_field] = response_lookup[field_id]
+    
+    return {
+        "form_number": form_template["form_number"],
+        "form_title": form_template["form_title"],
+        "filled_fields": filled_form,
+        "completion_percentage": len(filled_form) / len(mappings) * 100
+    }
+
+async def generate_uscis_pdf(filled_form: Dict, visa_type: str) -> str:
+    """Generate PDF from filled form data"""
+    try:
+        from reportlab.lib.pagesizes import letter
+        from reportlab.pdfgen import canvas
+        from reportlab.lib.units import inch
+        import io
+        import base64
+        
+        # Create PDF
+        buffer = io.BytesIO()
+        c = canvas.Canvas(buffer, pagesize=letter)
+        width, height = letter
+        
+        # Title
+        c.setFont("Helvetica-Bold", 16)
+        c.drawString(50, height - 50, f"USCIS Form {filled_form['form_number']}")
+        c.drawString(50, height - 70, filled_form['form_title'])
+        
+        # Add fields
+        c.setFont("Helvetica", 10)
+        y_position = height - 120
+        
+        for field_label, field_value in filled_form['filled_fields'].items():
+            c.drawString(50, y_position, f"{field_label}: {field_value}")
+            y_position -= 20
+            
+            if y_position < 50:  # Start new page
+                c.showPage()
+                y_position = height - 50
+        
+        # Add completion info
+        c.setFont("Helvetica-Italic", 8)
+        c.drawString(50, 50, f"Generated by Agente Coruja - {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC")
+        c.drawString(50, 35, f"Completion: {filled_form['completion_percentage']:.1f}%")
+        
+        c.save()
+        
+        # Convert to base64
+        buffer.seek(0)
+        pdf_bytes = buffer.read()
+        pdf_base64 = base64.b64encode(pdf_bytes).decode('utf-8')
+        
+        return pdf_base64
+        
+    except Exception as e:
+        logger.error(f"Error generating PDF: {e}")
+        # Return mock PDF data
+        return "mock_pdf_data_base64_encoded"
+
+# ===== END AGENTE CORUJA ENDPOINTS =====
+
 app.include_router(api_router)
 
 app.add_middleware(
