@@ -1304,6 +1304,349 @@ class ComprehensiveEcosystemTester:
                 f"Exception: {str(e)}"
             )
     
+    def test_user_openai_key_investigation(self):
+        """INVESTIGAÇÃO CHAVE OPENAI DO USUÁRIO - Verificar chave OpenAI pessoal no banco de dados"""
+        print("🔍 INVESTIGAÇÃO CHAVE OPENAI DO USUÁRIO...")
+        
+        try:
+            # Step 1: Verify current user authentication and get user profile
+            profile_response = self.session.get(f"{API_BASE}/profile")
+            
+            if profile_response.status_code == 200:
+                user_profile = profile_response.json()
+                user_id = user_profile.get('id')
+                user_email = user_profile.get('email')
+                
+                self.log_test(
+                    "User Authentication - Get Profile",
+                    True,
+                    f"User authenticated: {user_email} (ID: {user_id})",
+                    {
+                        "user_id": user_id,
+                        "email": user_email,
+                        "profile_fields": list(user_profile.keys())
+                    }
+                )
+                
+                # Step 2: Check if user profile contains OpenAI key fields
+                openai_key_fields = [
+                    'openai_key', 'api_key', 'openai_api_key', 'keys', 
+                    'llm_key', 'personal_openai_key', 'user_openai_key'
+                ]
+                
+                found_key_fields = []
+                for field in openai_key_fields:
+                    if field in user_profile:
+                        found_key_fields.append(field)
+                        # Don't log the actual key value for security
+                        key_value = user_profile[field]
+                        if key_value:
+                            self.log_test(
+                                f"OpenAI Key Field Found - {field}",
+                                True,
+                                f"Field '{field}' exists with value (length: {len(str(key_value))})",
+                                {"field_name": field, "has_value": bool(key_value), "value_type": type(key_value).__name__}
+                            )
+                        else:
+                            self.log_test(
+                                f"OpenAI Key Field Found - {field}",
+                                False,
+                                f"Field '{field}' exists but is empty/null",
+                                {"field_name": field, "has_value": False}
+                            )
+                
+                if not found_key_fields:
+                    self.log_test(
+                        "OpenAI Key Fields Search",
+                        False,
+                        "No OpenAI key fields found in user profile",
+                        {
+                            "searched_fields": openai_key_fields,
+                            "available_fields": list(user_profile.keys()),
+                            "recommendation": "Check if OpenAI keys are stored in separate collection"
+                        }
+                    )
+                
+                # Step 3: Test direct MongoDB access (if possible through backend endpoint)
+                # This would require a special endpoint to query the database directly
+                # For now, we'll document what we found
+                
+                self.log_test(
+                    "User OpenAI Key Investigation Summary",
+                    len(found_key_fields) > 0,
+                    f"Found {len(found_key_fields)} potential OpenAI key fields in user profile",
+                    {
+                        "user_id": user_id,
+                        "user_email": user_email,
+                        "found_key_fields": found_key_fields,
+                        "total_profile_fields": len(user_profile),
+                        "next_steps": [
+                            "Check if keys are in separate API keys collection",
+                            "Verify if user has personal OpenAI key configured",
+                            "Test if EMERGENT_LLM_KEY can be replaced with user's key"
+                        ]
+                    }
+                )
+                
+            else:
+                self.log_test(
+                    "User Authentication - Get Profile",
+                    False,
+                    f"Failed to get user profile: HTTP {profile_response.status_code}",
+                    {
+                        "status_code": profile_response.status_code,
+                        "response": profile_response.text[:200],
+                        "auth_token_present": bool(self.auth_token)
+                    }
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "User OpenAI Key Investigation",
+                False,
+                f"Exception during investigation: {str(e)}"
+            )
+    
+    def test_mongodb_database_structure_investigation(self):
+        """INVESTIGAÇÃO ESTRUTURA DO BANCO DE DADOS - Verificar collections e estrutura de dados"""
+        print("🗄️ INVESTIGAÇÃO ESTRUTURA DO BANCO DE DADOS...")
+        
+        # Since we don't have direct MongoDB access, we'll try to infer structure from API responses
+        try:
+            # Step 1: Test user creation to see what fields are stored
+            test_user_data = {
+                "email": f"test_db_investigation_{int(time.time())}@example.com",
+                "password": "testpassword123",
+                "first_name": "Database",
+                "last_name": "Investigation"
+            }
+            
+            signup_response = self.session.post(f"{API_BASE}/auth/signup", json=test_user_data)
+            
+            if signup_response.status_code == 200:
+                signup_data = signup_response.json()
+                user_data = signup_data.get('user', {})
+                
+                self.log_test(
+                    "Database Structure - User Creation",
+                    True,
+                    f"User created successfully, fields: {list(user_data.keys())}",
+                    {
+                        "user_fields": list(user_data.keys()),
+                        "has_id": 'id' in user_data,
+                        "has_email": 'email' in user_data,
+                        "total_fields": len(user_data)
+                    }
+                )
+                
+                # Step 2: Login with the new user to get full profile
+                login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                    "email": test_user_data["email"],
+                    "password": test_user_data["password"]
+                })
+                
+                if login_response.status_code == 200:
+                    login_data = login_response.json()
+                    token = login_data.get('token')
+                    
+                    # Create a new session with this user's token
+                    temp_session = requests.Session()
+                    temp_session.headers.update({
+                        'Content-Type': 'application/json',
+                        'Authorization': f'Bearer {token}'
+                    })
+                    
+                    # Get full profile
+                    profile_response = temp_session.get(f"{API_BASE}/profile")
+                    
+                    if profile_response.status_code == 200:
+                        full_profile = profile_response.json()
+                        
+                        self.log_test(
+                            "Database Structure - Full User Profile",
+                            True,
+                            f"Full profile retrieved with {len(full_profile)} fields",
+                            {
+                                "profile_fields": list(full_profile.keys()),
+                                "nullable_fields": [k for k, v in full_profile.items() if v is None],
+                                "populated_fields": [k for k, v in full_profile.items() if v is not None],
+                                "potential_key_fields": [k for k in full_profile.keys() if 'key' in k.lower() or 'api' in k.lower()]
+                            }
+                        )
+                        
+                        # Step 3: Check what happens when we try to update profile with OpenAI key
+                        update_data = {
+                            "openai_key": "sk-test-key-for-investigation",
+                            "api_key": "test-api-key",
+                            "personal_openai_key": "sk-personal-test-key"
+                        }
+                        
+                        update_response = temp_session.put(f"{API_BASE}/profile", json=update_data)
+                        
+                        if update_response.status_code == 200:
+                            self.log_test(
+                                "Database Structure - OpenAI Key Update Test",
+                                True,
+                                "Profile update with OpenAI key fields succeeded",
+                                {"update_successful": True, "fields_attempted": list(update_data.keys())}
+                            )
+                            
+                            # Verify the update
+                            verify_response = temp_session.get(f"{API_BASE}/profile")
+                            if verify_response.status_code == 200:
+                                updated_profile = verify_response.json()
+                                
+                                key_fields_saved = []
+                                for field in update_data.keys():
+                                    if field in updated_profile and updated_profile[field]:
+                                        key_fields_saved.append(field)
+                                
+                                self.log_test(
+                                    "Database Structure - OpenAI Key Persistence",
+                                    len(key_fields_saved) > 0,
+                                    f"OpenAI key fields persisted: {key_fields_saved}",
+                                    {
+                                        "persisted_fields": key_fields_saved,
+                                        "attempted_fields": list(update_data.keys()),
+                                        "success_rate": f"{len(key_fields_saved)}/{len(update_data)}"
+                                    }
+                                )
+                        else:
+                            self.log_test(
+                                "Database Structure - OpenAI Key Update Test",
+                                False,
+                                f"Profile update failed: HTTP {update_response.status_code}",
+                                {
+                                    "status_code": update_response.status_code,
+                                    "response": update_response.text[:200],
+                                    "fields_attempted": list(update_data.keys())
+                                }
+                            )
+                    
+            else:
+                self.log_test(
+                    "Database Structure - User Creation",
+                    False,
+                    f"Failed to create test user: HTTP {signup_response.status_code}",
+                    signup_response.text[:200]
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "Database Structure Investigation",
+                False,
+                f"Exception during database investigation: {str(e)}"
+            )
+    
+    def test_emergent_llm_key_status(self):
+        """VERIFICAÇÃO STATUS EMERGENT_LLM_KEY - Testar se a chave atual está funcionando"""
+        print("🔑 VERIFICAÇÃO STATUS EMERGENT_LLM_KEY...")
+        
+        try:
+            # Test Dr. Paula endpoints that use EMERGENT_LLM_KEY
+            test_endpoints = [
+                {
+                    "name": "Dr. Paula - Generate Directives",
+                    "endpoint": "/llm/dr-paula/generate-directives",
+                    "payload": {"visa_type": "H1B", "language": "pt"}
+                },
+                {
+                    "name": "Dr. Paula - Review Letter",
+                    "endpoint": "/llm/dr-paula/review-letter", 
+                    "payload": {
+                        "visa_type": "H1B",
+                        "applicant_letter": "I am applying for H-1B visa. I have a job offer."
+                    }
+                },
+                {
+                    "name": "Chat with Dra. Paula",
+                    "endpoint": "/chat",
+                    "payload": {
+                        "message": "Olá, preciso de ajuda com visto H-1B",
+                        "session_id": "test_session_123"
+                    }
+                }
+            ]
+            
+            working_endpoints = 0
+            budget_exceeded_count = 0
+            
+            for test in test_endpoints:
+                try:
+                    response = self.session.post(f"{API_BASE}{test['endpoint']}", json=test['payload'])
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        
+                        # Check for budget exceeded messages
+                        response_text = str(data).lower()
+                        if 'budget' in response_text and 'exceeded' in response_text:
+                            budget_exceeded_count += 1
+                            self.log_test(
+                                f"EMERGENT_LLM_KEY Status - {test['name']}",
+                                False,
+                                "Budget exceeded detected in response",
+                                {
+                                    "endpoint": test['endpoint'],
+                                    "budget_exceeded": True,
+                                    "response_preview": str(data)[:200]
+                                }
+                            )
+                        else:
+                            working_endpoints += 1
+                            self.log_test(
+                                f"EMERGENT_LLM_KEY Status - {test['name']}",
+                                True,
+                                "Endpoint working normally",
+                                {
+                                    "endpoint": test['endpoint'],
+                                    "response_length": len(str(data)),
+                                    "has_content": bool(data)
+                                }
+                            )
+                    else:
+                        self.log_test(
+                            f"EMERGENT_LLM_KEY Status - {test['name']}",
+                            False,
+                            f"HTTP {response.status_code}",
+                            {
+                                "endpoint": test['endpoint'],
+                                "status_code": response.status_code,
+                                "response": response.text[:200]
+                            }
+                        )
+                        
+                except Exception as e:
+                    self.log_test(
+                        f"EMERGENT_LLM_KEY Status - {test['name']}",
+                        False,
+                        f"Exception: {str(e)}"
+                    )
+            
+            # Summary
+            total_endpoints = len(test_endpoints)
+            key_working = working_endpoints > 0 and budget_exceeded_count == 0
+            
+            self.log_test(
+                "EMERGENT_LLM_KEY Overall Status",
+                key_working,
+                f"Working: {working_endpoints}/{total_endpoints}, Budget exceeded: {budget_exceeded_count}",
+                {
+                    "working_endpoints": working_endpoints,
+                    "total_endpoints": total_endpoints,
+                    "budget_exceeded_count": budget_exceeded_count,
+                    "key_status": "WORKING" if key_working else "BUDGET_EXCEEDED" if budget_exceeded_count > 0 else "FAILING",
+                    "recommendation": "Use user's personal OpenAI key" if not key_working else "EMERGENT_LLM_KEY is working"
+                }
+            )
+            
+        except Exception as e:
+            self.log_test(
+                "EMERGENT_LLM_KEY Status Check",
+                False,
+                f"Exception during key status check: {str(e)}"
+            )
+
     def test_end_to_end_h1b_journey(self):
         """Test complete H-1B journey from start to finish"""
         print("🚀 TESTING END-TO-END H-1B JOURNEY...")
