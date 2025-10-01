@@ -1964,6 +1964,11 @@ class ComprehensiveEcosystemTester:
         
         # Categorize results by component
         components = {
+            "Phase 2 Field Extraction": [],
+            "Phase 2 Translation Gate": [],
+            "Phase 3 Document Classification": [],
+            "Phase 3 Cross-Document Consistency": [],
+            "Phase 2&3 Integration": [],
             "Policy Engine (FASE 1)": [],
             "Dr. Paula Cover Letter": [],
             "Case Finalizer MVP": [],
