@@ -5302,7 +5302,10 @@ async def translate_data_ai(case, friendly_form_data):
         """
         
         if use_openai:
-            response = openai.chat.completions.create(
+            from openai import AsyncOpenAI
+            client = AsyncOpenAI(api_key=openai_key)
+            
+            response = await client.chat.completions.create(
                 model="gpt-4",
                 messages=[{"role": "user", "content": translation_prompt}],
                 max_tokens=2000,
