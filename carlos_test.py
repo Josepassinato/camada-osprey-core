@@ -309,8 +309,9 @@ class CarlosH1BSimulator:
             
             if response.status_code == 200:
                 data = response.json()
-                uploaded_docs = data.get('uploaded_documents', [])
-                progress = data.get('progress_percentage', 0)
+                case_data = data.get('case', {})
+                uploaded_docs = case_data.get('uploaded_documents', [])
+                progress = case_data.get('progress_percentage', 0)
                 
                 success = (
                     len(uploaded_docs) == 3 and
