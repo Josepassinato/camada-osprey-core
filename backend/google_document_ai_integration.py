@@ -53,7 +53,7 @@ class GoogleDocumentAIProcessor:
     def _create_mock_response(self, filename: str, content_length: int) -> Dict[str, Any]:
         """Create realistic mock response for testing"""
         mock_data = {
-            "text": f"""
+            "text": """
             PASSPORT
             UNITED STATES OF AMERICA
             
@@ -534,7 +534,7 @@ class HybridDocumentValidator:
         """
         
         start_time = datetime.now()
-        logger.info(f"🔬 Starting HYBRID analysis - Google AI + Dr. Miguel")
+        logger.info("🔬 Starting HYBRID analysis - Google AI + Dr. Miguel")
         
         try:
             # Determine MIME type
@@ -547,7 +547,7 @@ class HybridDocumentValidator:
                 mime_type = "image/webp"
             
             # STEP 1: Google Vision API - Professional OCR and Data Extraction
-            logger.info(f"📋 Step 1: Google Vision API processing")
+            logger.info("📋 Step 1: Google Vision API processing")
             
             google_result = await self.google_processor.process_document(
                 file_content, filename, mime_type
@@ -569,7 +569,7 @@ class HybridDocumentValidator:
                 }
             
             # STEP 2: Dr. Miguel - AI-powered validation and fraud detection
-            logger.info(f"🧠 Step 2: Dr. Miguel AI validation")
+            logger.info("🧠 Step 2: Dr. Miguel AI validation")
             
             dr_miguel = await self._get_dr_miguel()
             
@@ -592,7 +592,7 @@ class HybridDocumentValidator:
             )
             
             # STEP 3: Combine and enhance results
-            logger.info(f"🔀 Step 3: Combining results")
+            logger.info("🔀 Step 3: Combining results")
             
             processing_time = (datetime.now() - start_time).total_seconds() * 1000
             
