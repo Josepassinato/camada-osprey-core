@@ -6278,7 +6278,251 @@ async def download_master_packet(job_id: str, current_user = Depends(get_current
         logger.error(f"Error downloading master packet: {e}")
         raise HTTPException(status_code=500, detail="Erro ao baixar master packet")
 
-# ===== AGENTE CORUJA (OWL AGENT) - INTELLIGENT QUESTIONNAIRE SYSTEM =====
+# ===== OWL AGENT AUTHENTICATION & PERSISTENCE SYSTEM =====
+
+@api_router.post("/owl-agent/auth/register")
+async def register_owl_user(request: dict):
+    """Register user for saving progress with email and password"""
+    try:
+        email = request.get("email", "").strip().lower()
+        password = request.get("password", "")
+        name = request.get("name", "")
+        
+        if not email or not password or len(password) < 6:
+            raise HTTPException(status_code=400, detail="Email and password (min 6 chars) are required")
+        
+        # Check if user already exists
+        existing_user = await db.owl_users.find_one({"email": email})
+        if existing_user:
+            raise HTTPException(status_code=409, detail="User already exists")
+        
+        # Hash password
+        import bcrypt
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        
+        # Create user
+        user_data = {
+            "user_id": f"owl_user_{int(time.time())}_{uuid.uuid4().hex[:8]}",
+            "email": email,
+            "name": name,
+            "password_hash": hashed_password,
+            "created_at": datetime.utcnow(),
+            "active_sessions": [],
+            "completed_applications": []
+        }
+        
+        result = await db.owl_users.insert_one(user_data)
+        
+        return {
+            "success": True,
+            "message": "User registered successfully",
+            "user_id": user_data["user_id"],
+            "email": email,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error registering owl user: {e}")
+        raise HTTPException(status_code=500, detail=f"Registration error: {str(e)}")
+
+@api_router.post("/owl-agent/auth/login")
+async def login_owl_user(request: dict):
+    """Login user to access saved progress"""
+    try:
+        email = request.get("email", "").strip().lower()
+        password = request.get("password", "")
+        
+        if not email or not password:
+            raise HTTPException(status_code=400, detail="Email and password are required")
+        
+        # Find user
+        user = await db.owl_users.find_one({"email": email})
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+        # Verify password
+        import bcrypt
+        if not bcrypt.checkpw(password.encode('utf-8'), user["password_hash"]):
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+        # Update last login
+        await db.owl_users.update_one(
+            {"user_id": user["user_id"]},
+            {"$set": {"last_login": datetime.utcnow()}}
+        )
+        
+        # Get user's saved sessions
+        sessions = await db.owl_sessions.find({
+            "user_email": email,
+            "status": {"$in": ["active", "paused", "in_progress"]}
+        }).to_list(length=None)
+        
+        return {
+            "success": True,
+            "message": "Login successful",
+            "user": {
+                "user_id": user["user_id"],
+                "email": user["email"],
+                "name": user.get("name", "")
+            },
+            "saved_sessions": sessions,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error logging in owl user: {e}")
+        raise HTTPException(status_code=500, detail=f"Login error: {str(e)}")
+
+@api_router.post("/owl-agent/save-for-later")
+async def save_session_for_later(request: dict):
+    """Save current session for later completion (requires user authentication)"""
+    try:
+        session_id = request.get("session_id")
+        user_email = request.get("user_email", "").strip().lower()
+        
+        if not session_id or not user_email:
+            raise HTTPException(status_code=400, detail="session_id and user_email are required")
+        
+        # Verify user exists
+        user = await db.owl_users.find_one({"email": user_email})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Get current session
+        session = await db.owl_sessions.find_one({"session_id": session_id})
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        # Update session with user info and save status
+        update_data = {
+            "user_email": user_email,
+            "user_id": user["user_id"],
+            "status": "saved_for_later",
+            "saved_at": datetime.utcnow(),
+            "last_updated": datetime.utcnow()
+        }
+        
+        await db.owl_sessions.update_one(
+            {"session_id": session_id},
+            {"$set": update_data}
+        )
+        
+        # Update user's active sessions
+        await db.owl_users.update_one(
+            {"user_id": user["user_id"]},
+            {
+                "$addToSet": {"active_sessions": session_id},
+                "$set": {"last_activity": datetime.utcnow()}
+            }
+        )
+        
+        return {
+            "success": True,
+            "message": "Session saved for later completion",
+            "session_id": session_id,
+            "user_email": user_email,
+            "saved_at": datetime.utcnow().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error saving session for later: {e}")
+        raise HTTPException(status_code=500, detail=f"Save error: {str(e)}")
+
+@api_router.get("/owl-agent/user-sessions/{user_email}")
+async def get_user_sessions(user_email: str):
+    """Get all saved sessions for a user"""
+    try:
+        user_email = user_email.strip().lower()
+        
+        # Verify user exists
+        user = await db.owl_users.find_one({"email": user_email})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Get user's sessions
+        sessions_cursor = db.owl_sessions.find({
+            "user_email": user_email,
+            "status": {"$in": ["active", "paused", "saved_for_later", "in_progress"]}
+        }).sort("last_updated", -1)
+        
+        sessions = await sessions_cursor.to_list(length=None)
+        
+        # Get progress for each session
+        for session in sessions:
+            responses_count = await db.owl_responses.count_documents({"session_id": session["session_id"]})
+            session["progress_percentage"] = min(100, (responses_count / session.get("total_fields", 1)) * 100)
+            session["responses_count"] = responses_count
+        
+        return {
+            "success": True,
+            "user_email": user_email,
+            "sessions": sessions,
+            "total_sessions": len(sessions),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting user sessions: {e}")
+        raise HTTPException(status_code=500, detail=f"Error getting sessions: {str(e)}")
+
+@api_router.post("/owl-agent/resume-session")
+async def resume_saved_session(request: dict):
+    """Resume a previously saved session"""
+    try:
+        session_id = request.get("session_id")
+        user_email = request.get("user_email", "").strip().lower()
+        
+        if not session_id or not user_email:
+            raise HTTPException(status_code=400, detail="session_id and user_email are required")
+        
+        # Verify session belongs to user
+        session = await db.owl_sessions.find_one({
+            "session_id": session_id,
+            "user_email": user_email
+        })
+        
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found or access denied")
+        
+        # Update session status to active
+        await db.owl_sessions.update_one(
+            {"session_id": session_id},
+            {
+                "$set": {
+                    "status": "active",
+                    "resumed_at": datetime.utcnow(),
+                    "last_updated": datetime.utcnow()
+                }
+            }
+        )
+        
+        # Get all responses for this session
+        responses_cursor = db.owl_responses.find({"session_id": session_id})
+        responses = await responses_cursor.to_list(length=None)
+        
+        return {
+            "success": True,
+            "message": "Session resumed successfully",
+            "session": session,
+            "responses": responses,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error resuming session: {e}")
+        raise HTTPException(status_code=500, detail=f"Resume error: {str(e)}")
+
+# ===== END OWL AGENT AUTHENTICATION SYSTEM =====
 
 @api_router.post("/owl-agent/start-session")
 async def start_owl_session(request: dict):
