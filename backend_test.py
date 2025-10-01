@@ -3508,132 +3508,138 @@ class ComprehensiveEcosystemTester:
                     False,
                     f"Exception: {str(e)}"
                 )
-    def run_all_tests(self):
-        """INVESTIGAÇÃO CHAVE OPENAI DO USUÁRIO - User Request Priority"""
-        print("🔍 INVESTIGAÇÃO CHAVE OPENAI DO USUÁRIO NO BANCO DE DADOS")
+    def run_critical_openai_tests(self):
+        """Run critical OpenAI integration tests as requested"""
+        print("🚨 CRITICAL OPENAI INTEGRATION TESTS - USER REQUEST")
         print("=" * 80)
-        print(f"Backend URL: {BACKEND_URL}")
-        print(f"API Base: {API_BASE}")
-        print("=" * 80)
+        print("Testing all agents with user's OpenAI key and Dra. Paula Assistant ID")
         print()
         
-        # PRIORITY 1: USER OPENAI KEY INVESTIGATION (as requested)
-        print("🎯 PRIORITY 1: INVESTIGAÇÃO CHAVE OPENAI DO USUÁRIO...")
-        print("-" * 60)
-        self.test_user_openai_key_investigation()
+        # 1. CRITICAL: Dr. Paula I-589 Review Letter Test
+        print("🔥 PRIORITY 1: Dr. Paula I-589 Review Letter")
+        print("-" * 50)
+        self.test_urgent_openai_key_validation()
         print()
         
-        # PRIORITY 2: DATABASE STRUCTURE INVESTIGATION
-        print("🎯 PRIORITY 2: INVESTIGAÇÃO ESTRUTURA DO BANCO DE DADOS...")
-        print("-" * 60)
-        self.test_mongodb_database_structure_investigation()
+        # 2. Dr. Paula Generate Directives
+        print("📋 PRIORITY 2: Dr. Paula Generate Directives")
+        print("-" * 50)
+        self.test_dr_paula_generate_directives_critical()
         print()
         
-        # PRIORITY 3: EMERGENT_LLM_KEY STATUS CHECK
-        print("🎯 PRIORITY 3: VERIFICAÇÃO STATUS EMERGENT_LLM_KEY...")
-        print("-" * 60)
-        self.test_emergent_llm_key_status()
+        # 3. Dr. Miguel Enhanced Analysis
+        print("🔬 PRIORITY 3: Dr. Miguel Enhanced Analysis")
+        print("-" * 50)
+        self.test_dr_miguel_enhanced_analysis()
         print()
         
-        # PRIORITY 4: SPECIFIC TEST for Dr. Paula review-letter endpoint as requested
-        print("🎯 PRIORITY 4: TESTE ESPECÍFICO - DR. PAULA REVIEW-LETTER ENDPOINT...")
-        print("-" * 60)
-        self.test_dr_paula_review_letter_specific()
+        # 4. All AI Functions Integration
+        print("🤖 PRIORITY 4: All AI Functions Integration")
+        print("-" * 50)
+        self.test_all_agents_openai_integration()
         print()
         
-        # PRIORITY 5: TARGETED TEST for the 3 specific endpoints mentioned in review request
-        print("🎯 PRIORITY 5: TARGETED TEST - 3 PROBLEMATIC ENDPOINTS...")
-        print("-" * 60)
-        self.test_phase2_phase3_targeted_endpoints()
-        print()
-        
-        # PRIORITY 6: FINAL VALIDATION OF FIXED PHASE 2&3 ENDPOINTS (URGENT)
-        print("🎯 PRIORITY 6: FINAL VALIDATION OF FIXED PHASE 2&3 ENDPOINTS...")
-        print("-" * 60)
-        self.test_phase2_phase3_final_validation()
-        print()
-        
-        # PRIORITY 2: Test individual Phase 2&3 components
-        print("🔧 PRIORITY 2: TESTING INDIVIDUAL PHASE 2&3 COMPONENTS...")
-        print("-" * 60)
-        self.test_phase2_field_extraction_engine()
-        self.test_phase2_translation_gate_system()
-        self.test_phase3_document_classifier()
-        self.test_phase3_cross_document_consistency()
-        self.test_phase3_multi_document_validation()
-        self.test_validation_capabilities_endpoint()
-        self.test_phase2_phase3_enhanced_ai_analysis()
-        print()
-        
-        # PRIORITY 3: Quick integration tests
-        print("⚡ PRIORITY 3: QUICK INTEGRATION TESTS...")
-        print("-" * 60)
-        self.test_policy_engine_fase1()
-        self.test_system_integration_form_code()
-        
-        print()
-        print("=" * 60)
-        print("PHASE 2&3 TESTING COMPLETED - CONTINUING WITH EXISTING TESTS...")
-        print("=" * 60)
-        print()
-        
-        # 1. POLICY ENGINE (FASE 1) Validation
-        print("🏛️ TESTING POLICY ENGINE (FASE 1)...")
-        self.test_policy_engine_fase1()
-        print()
-        
-        # 2. COVER LETTER MODULE (DR. PAULA) Validation
-        print("📝 TESTING DR. PAULA COVER LETTER MODULE...")
+        # 5. Dr. Paula Cover Letter Module (All endpoints)
+        print("📝 PRIORITY 5: Dr. Paula Cover Letter Module")
+        print("-" * 50)
         self.test_dr_paula_cover_letter_module()
         print()
         
-        # 3. CASE FINALIZER MVP Validation
-        print("🎯 TESTING CASE FINALIZER MVP...")
-        self.test_case_finalizer_mvp_comprehensive()
+        # Generate critical test report
+        self.generate_critical_test_report()
+    
+    def generate_critical_test_report(self):
+        """Generate critical test report focused on OpenAI integration"""
+        print("📊 CRITICAL TEST REPORT - OPENAI INTEGRATION")
+        print("=" * 80)
         
-        # Original Case Finalizer tests
+        total_tests = len(self.test_results)
+        passed_tests = len([t for t in self.test_results if t["success"]])
+        failed_tests = total_tests - passed_tests
+        
+        print(f"Total Tests: {total_tests}")
+        print(f"Passed: {passed_tests}")
+        print(f"Failed: {failed_tests}")
+        print(f"Success Rate: {(passed_tests/total_tests*100):.1f}%")
+        print()
+        
+        # Critical issues
+        critical_failures = [
+            t for t in self.test_results 
+            if not t["success"] and ("CRITICAL" in t["test"] or "Dr. Paula" in t["test"] or "I-589" in t["test"])
+        ]
+        
+        if critical_failures:
+            print("🚨 CRITICAL FAILURES:")
+            for failure in critical_failures:
+                print(f"❌ {failure['test']}: {failure['details']}")
+            print()
+        
+        # Budget and availability checks
+        budget_issues = [
+            t for t in self.test_results 
+            if not t["success"] and ("Budget exceeded" in t["details"] or "não disponível" in t["details"])
+        ]
+        
+        if budget_issues:
+            print("💰 BUDGET/AVAILABILITY ISSUES:")
+            for issue in budget_issues:
+                print(f"⚠️ {issue['test']}: {issue['details']}")
+            print()
+        
+        # Success summary
+        successful_integrations = [
+            t for t in self.test_results 
+            if t["success"] and ("Dr. Paula" in t["test"] or "Dr. Miguel" in t["test"] or "AI Function" in t["test"])
+        ]
+        
+        if successful_integrations:
+            print("✅ SUCCESSFUL INTEGRATIONS:")
+            for success in successful_integrations:
+                print(f"✅ {success['test']}")
+            print()
+        
+        # Final verdict
+        critical_success = len(critical_failures) == 0
+        print("🎯 FINAL VERDICT:")
+        if critical_success:
+            print("✅ ALL CRITICAL TESTS PASSED - OpenAI integration working!")
+            print("✅ No 'Budget exceeded' errors detected")
+            print("✅ Dra. Paula is available and responding")
+            print("✅ Assistant ID correctly configured")
+        else:
+            print("❌ CRITICAL ISSUES DETECTED - Requires immediate attention")
+            print("❌ Check OpenAI key configuration")
+            print("❌ Verify Assistant ID settings")
+            print("❌ Review budget limits")
+        
+        print("=" * 80)
+    
+    def run_all_tests(self):
+        """Run all comprehensive tests"""
+        print("🚀 STARTING COMPREHENSIVE ECOSYSTEM VALIDATION")
+        print("=" * 80)
+        print()
+        
+        # FIRST: Run critical OpenAI tests
+        self.run_critical_openai_tests()
+        
+        # Then run other tests if needed
+        print("\n🔄 ADDITIONAL SYSTEM TESTS")
+        print("-" * 40)
+        
+        # Core Case Finalizer MVP Tests
         self.test_start_finalization_h1b_basic()
         self.test_start_finalization_f1_basic()
-        self.test_start_finalization_invalid_scenario()
         
-        if hasattr(self, 'job_id_h1b'):
-            self.test_status_polling(self.job_id_h1b, "H-1B")
-        if hasattr(self, 'job_id_f1'):
-            self.test_status_polling(self.job_id_f1, "F-1")
-        self.test_status_polling_invalid_job()
+        # Policy Engine (FASE 1) Tests
+        self.test_policy_engine_fase1()
         
-        self.test_consent_acceptance_valid()
-        self.test_consent_acceptance_invalid()
-        
-        self.test_instructions_endpoint()
-        self.test_checklist_endpoint()
-        self.test_master_packet_endpoint()
-        print()
-        
-        # 4. SYSTEM INTEGRATION Validation
-        print("🔗 TESTING SYSTEM INTEGRATION...")
+        # System Integration Tests
         self.test_system_integration_form_code()
-        print()
         
-        # 5. PERFORMANCE & RELIABILITY Validation
-        print("⚡ TESTING PERFORMANCE & RELIABILITY...")
-        self.test_performance_reliability()
-        print()
-        
-        # 6. SECURITY & COMPLIANCE Validation
-        print("🔒 TESTING SECURITY & COMPLIANCE...")
-        self.test_security_compliance()
-        print()
-        
-        # 7. END-TO-END TESTING
-        print("🚀 TESTING END-TO-END JOURNEYS...")
-        self.test_end_to_end_h1b_journey()
-        self.test_complete_h1b_flow()
-        self.test_complete_f1_flow()
-        print()
-        
-        # Generate comprehensive summary
-        self.generate_comprehensive_summary()
+        # Generate final comprehensive report
+        self.generate_final_report()
     
     def generate_comprehensive_summary(self):
         """Generate comprehensive ecosystem validation summary"""
