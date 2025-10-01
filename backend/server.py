@@ -5170,7 +5170,7 @@ async def validate_form_data_ai(case, friendly_form_data, basic_data):
             response_text = llm.chat([{"role": "user", "content": validation_prompt}])
         
         try:
-            ai_response = json.loads(response.strip())
+            ai_response = json.loads(response_text.strip())
         except:
             ai_response = {"validation_issues": [], "overall_status": "approved", "completion_percentage": 100}
         
