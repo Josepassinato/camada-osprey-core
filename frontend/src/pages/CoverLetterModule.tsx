@@ -20,13 +20,31 @@ interface VisaDirectives {
   attachments_suggested: string[];
 }
 
+interface Question {
+  id: number;
+  question: string;
+  why_needed: string;
+  category: string;
+  answer?: string;
+}
+
 interface ReviewResult {
   visa_type: string;
   coverage_score: number;
-  status: 'complete' | 'incomplete' | 'needs_review';
-  issues: string[];
-  revised_letter: string | null;
+  status: 'complete' | 'incomplete' | 'needs_review' | 'needs_questions';
+  issues?: string[];
+  missing_areas?: string[];
+  questions?: Question[];
+  revised_letter?: string | null;
   next_action: string;
+}
+
+interface FinalLetter {
+  visa_type: string;
+  letter_text: string;
+  improvements_made: string[];
+  compliance_score: number;
+  ready_for_approval: boolean;
 }
 
 const CoverLetterModule: React.FC = () => {
