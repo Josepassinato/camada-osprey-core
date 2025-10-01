@@ -51,10 +51,91 @@ export const OwlAgent: React.FC = () => {
   ];
 
   const handleStartQuestionnaire = () => {
-    if (selectedVisa) {
-      navigate(`/owl-agent/questionnaire?visa=${selectedVisa}&lang=${selectedLanguage}`);
+    if (!selectedVisa) return;
+    
+    navigate(`/owl-agent/questionnaire?visa=${selectedVisa}&lang=${selectedLanguage}`);
+  };
+
+  const handleSaveProgressLogin = () => {
+    setAuthMode('save-progress');
+    setCurrentView('auth');
+  };
+
+  const handleAccessSavedApplications = () => {
+    setAuthMode('login');
+    setCurrentView('auth');
+  };
+
+  const handleLogin = (userData: User, sessions: SavedSession[] = []) => {
+    setUser(userData);
+    setSavedSessions(sessions);
+    setCurrentView('saved-sessions');
+  };
+
+  const handleResumeSession = async (sessionId: string) => {
+    const getBackendUrl = () => {
+      return import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || '';
+    };
+
+    try {
+      const response = await fetch(`${getBackendUrl()}/api/owl-agent/resume-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          session_id: sessionId,
+          user_email: user?.email,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to resume session');
+      }
+
+      const data = await response.json();
+      
+      // Navigate to questionnaire with session data
+      navigate(`/owl-agent/questionnaire?session=${sessionId}&visa=${data.session.visa_type}&lang=${data.session.language}`);
+      
+    } catch (error) {
+      console.error('Error resuming session:', error);
+      throw error;
     }
   };
+
+  const handleLogout = () => {
+    setUser(null);
+    setSavedSessions([]);
+    setCurrentView('main');
+  };
+
+  const handleBackToMain = () => {
+    setCurrentView('main');
+  };
+
+  // Render different views based on current state
+  if (currentView === 'auth') {
+    return (
+      <OwlAuth
+        mode={authMode}
+        onLogin={handleLogin}
+        onBack={handleBackToMain}
+      />
+    );
+  }
+
+  if (currentView === 'saved-sessions' && user) {
+    return (
+      <OwlSavedSessions
+        user={user}
+        sessions={savedSessions}
+        onResumeSession={handleResumeSession}
+        onBack={handleBackToMain}
+        onLogout={handleLogout}
+      />
+    );
+  }
 
   return (
     <OwlSessionProvider>
