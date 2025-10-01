@@ -551,8 +551,8 @@ const CoverLetterModule: React.FC = () => {
           </Card>
         )}
 
-        {/* Card 5b: Incomplete letter */}
-        {currentCard === 6 && (review?.status === 'incomplete' || review?.status === 'needs_review') && (
+        {/* Card 6: Questions or Issues */}
+        {currentCard === 6 && (review?.status === 'needs_questions' || review?.status === 'incomplete' || review?.status === 'needs_review') && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
