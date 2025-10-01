@@ -6801,7 +6801,7 @@ async def process_owl_delivery(stripe_session_id: str, payment: dict):
         
         # Create secure download record
         download_data = {
-            "download_id": f"DWN-{int(time.time())}-{uuid.uuid4().hex[:8]}",
+            "download_id": f"DWN-{int(time_module.time())}-{uuid.uuid4().hex[:8]}",
             "stripe_session_id": stripe_session_id,
             "owl_session_id": owl_session_id,
             "user_email": user_email,
