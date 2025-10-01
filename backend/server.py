@@ -5665,7 +5665,7 @@ async def analyze_document_with_professional_api(
         
         # Add additional context for immigration processing
         analysis_result.update({
-            "processed_by": "Google Document AI + Dr. Miguel Hybrid System",
+            "processed_by": "Google Vision API + Dr. Miguel Hybrid System",
             "processing_date": datetime.now().isoformat(),
             "file_size_mb": round(file_size / (1024 * 1024), 2),
             "immigration_compliant": analysis_result.get("completeness", 0) >= 75,
