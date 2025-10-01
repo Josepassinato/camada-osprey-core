@@ -28,6 +28,8 @@ class PolicyEngine:
         self.quality_checker = DocumentQualityChecker()
         self.field_extractor = field_extraction_engine
         self.translation_gate = translation_gate
+        self.consistency_engine = cross_document_consistency
+        self.document_classifier = document_classifier
         self._load_all_policies()
     
     def _load_all_policies(self):
