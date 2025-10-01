@@ -5606,9 +5606,9 @@ async def analyze_document_with_professional_api(
     applicant_name: str = Form(default="Unknown User")
 ):
     """
-    HYBRID PROFESSIONAL document analysis using Google Document AI + Dr. Miguel
-    COST-EFFECTIVE & INTELLIGENT - Professional OCR + AI-powered validation
-    Combines Google's enterprise OCR with Dr. Miguel's fraud detection
+    HYBRID PROFESSIONAL document analysis using Google Vision API + Dr. Miguel
+    COST-EFFECTIVE & INTELLIGENT - Real Google OCR + AI-powered validation
+    Combines Google's Vision API with Dr. Miguel's fraud detection
     """
     try:
         # Hybrid professional validation with Google Document AI + Dr. Miguel
