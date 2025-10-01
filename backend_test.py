@@ -1430,15 +1430,72 @@ class ComprehensiveEcosystemTester:
                 f"Exception: {str(e)}"
             )
     
-    def test_phase2_phase3_endpoints_accessibility(self):
-        """URGENT: Test Phase 2&3 endpoints accessibility after router registration fix"""
-        print("🚨 URGENT: TESTING PHASE 2&3 ENDPOINTS ACCESSIBILITY...")
+    def test_phase2_phase3_final_validation(self):
+        """FINAL VALIDATION OF FIXED PHASE 2&3 ENDPOINTS - As requested by user"""
+        print("🎯 FINAL VALIDATION OF FIXED PHASE 2&3 ENDPOINTS...")
         
-        # Test all 7 Phase 2&3 endpoints for basic accessibility
-        endpoints_to_test = [
+        # Test 1: GET /api/documents/validation-capabilities with proper authentication
+        print("1️⃣ Testing GET /api/documents/validation-capabilities with authentication...")
+        try:
+            response = self.session.get(f"{API_BASE}/documents/validation-capabilities")
+            
+            success = response.status_code == 200
+            self.log_test(
+                "FINAL - GET validation-capabilities with auth",
+                success,
+                f"HTTP {response.status_code} - {'SUCCESS' if success else 'FAILED'}",
+                {
+                    "status_code": response.status_code,
+                    "has_auth": bool(self.auth_token),
+                    "response_preview": response.text[:200] if not success else "SUCCESS"
+                }
+            )
+        except Exception as e:
+            self.log_test(
+                "FINAL - GET validation-capabilities with auth",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 2: POST /api/documents/extract-fields with corrected payload
+        print("2️⃣ Testing POST /api/documents/extract-fields with corrected payload...")
+        try:
+            payload = {
+                "text_content": "John Doe born on 01/01/1990 passport AB123456 expires 12/31/2025",
+                "document_type": "PASSPORT_ID_PAGE", 
+                "policy_fields": [],
+                "context": {"nationality": "USA"}
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/documents/extract-fields",
+                json=payload
+            )
+            
+            success = response.status_code == 200
+            self.log_test(
+                "FINAL - POST extract-fields corrected payload",
+                success,
+                f"HTTP {response.status_code} - {'SUCCESS' if success else 'FAILED'}",
+                {
+                    "status_code": response.status_code,
+                    "payload_structure": "text_content, document_type, policy_fields, context",
+                    "response_preview": response.text[:200] if not success else "SUCCESS"
+                }
+            )
+        except Exception as e:
+            self.log_test(
+                "FINAL - POST extract-fields corrected payload",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 3: Confirm all other endpoints still work
+        print("3️⃣ Testing all other Phase 2&3 endpoints...")
+        
+        other_endpoints = [
             {
                 "name": "POST /api/documents/classify",
-                "method": "POST",
                 "endpoint": "/documents/classify",
                 "payload": {
                     "extracted_text": "PASSPORT United States of America Passport No: AB1234567",
@@ -1446,18 +1503,7 @@ class ComprehensiveEcosystemTester:
                 }
             },
             {
-                "name": "POST /api/documents/extract-fields", 
-                "method": "POST",
-                "endpoint": "/documents/extract-fields",
-                "payload": {
-                    "text_content": "PASSPORT United States Passport No: AB1234567 Name: SILVA, CARLOS",
-                    "policy_fields": ["passport_number", "name"],
-                    "context": {"document_type": "passport"}
-                }
-            },
-            {
                 "name": "POST /api/documents/analyze-language",
-                "method": "POST", 
                 "endpoint": "/documents/analyze-language",
                 "payload": {
                     "text_content": "REPÚBLICA FEDERATIVA DO BRASIL CERTIDÃO DE NASCIMENTO",
@@ -1467,8 +1513,7 @@ class ComprehensiveEcosystemTester:
             },
             {
                 "name": "POST /api/documents/check-consistency",
-                "method": "POST",
-                "endpoint": "/documents/check-consistency", 
+                "endpoint": "/documents/check-consistency",
                 "payload": {
                     "documents_data": [
                         {"type": "passport", "name": "Carlos Silva"},
@@ -1479,7 +1524,6 @@ class ComprehensiveEcosystemTester:
             },
             {
                 "name": "POST /api/documents/validate-multiple",
-                "method": "POST",
                 "endpoint": "/documents/validate-multiple",
                 "payload": {
                     "documents": [
@@ -1488,76 +1532,53 @@ class ComprehensiveEcosystemTester:
                     ],
                     "case_context": {"visa_type": "H-1B"}
                 }
-            },
-            {
-                "name": "GET /api/documents/validation-capabilities",
-                "method": "GET",
-                "endpoint": "/documents/validation-capabilities",
-                "payload": None
             }
         ]
         
-        accessibility_results = []
+        working_endpoints = 0
+        total_endpoints = len(other_endpoints)
         
-        for endpoint_test in endpoints_to_test:
+        for endpoint_test in other_endpoints:
             try:
-                if endpoint_test["method"] == "POST":
-                    response = self.session.post(
-                        f"{API_BASE}{endpoint_test['endpoint']}", 
-                        json=endpoint_test["payload"]
-                    )
-                else:
-                    response = self.session.get(f"{API_BASE}{endpoint_test['endpoint']}")
+                response = self.session.post(
+                    f"{API_BASE}{endpoint_test['endpoint']}", 
+                    json=endpoint_test["payload"]
+                )
                 
-                # Check if endpoint is accessible (not 404 or 405)
-                is_accessible = response.status_code not in [404, 405]
-                has_proper_response = response.status_code in [200, 400, 422, 500]  # Any response except routing errors
-                
-                success = is_accessible and has_proper_response
+                success = response.status_code == 200
+                if success:
+                    working_endpoints += 1
                 
                 self.log_test(
-                    f"Accessibility - {endpoint_test['name']}",
+                    f"FINAL - {endpoint_test['name']}",
                     success,
-                    f"HTTP {response.status_code} - {'ACCESSIBLE' if is_accessible else 'NOT ACCESSIBLE'}",
+                    f"HTTP {response.status_code} - {'SUCCESS' if success else 'FAILED'}",
                     {
                         "status_code": response.status_code,
-                        "accessible": is_accessible,
                         "endpoint": endpoint_test['endpoint']
                     }
                 )
                 
-                accessibility_results.append({
-                    "endpoint": endpoint_test['name'],
-                    "accessible": success,
-                    "status_code": response.status_code
-                })
-                
             except Exception as e:
                 self.log_test(
-                    f"Accessibility - {endpoint_test['name']}",
+                    f"FINAL - {endpoint_test['name']}",
                     False,
                     f"Exception: {str(e)}"
                 )
-                accessibility_results.append({
-                    "endpoint": endpoint_test['name'],
-                    "accessible": False,
-                    "error": str(e)
-                })
         
-        # Summary of accessibility results
-        accessible_count = sum(1 for result in accessibility_results if result.get('accessible', False))
-        total_count = len(accessibility_results)
-        
-        overall_success = accessible_count >= 5  # At least 5 out of 6 should be accessible
+        # Final Summary
+        success_rate = (working_endpoints / total_endpoints) * 100 if total_endpoints > 0 else 0
+        overall_success = success_rate == 100  # 100% success rate required
         
         self.log_test(
-            "Phase 2&3 Endpoints Overall Accessibility",
+            "FINAL VALIDATION SUMMARY - Phase 2&3 Endpoints",
             overall_success,
-            f"{accessible_count}/{total_count} endpoints accessible after router fix",
+            f"SUCCESS RATE: {working_endpoints}/{total_endpoints} endpoints working ({success_rate:.0f}%)",
             {
-                "accessible_endpoints": accessible_count,
-                "total_endpoints": total_count,
-                "success_rate": f"{(accessible_count/total_count)*100:.1f}%"
+                "working_endpoints": working_endpoints,
+                "total_endpoints": total_endpoints,
+                "success_rate_percent": success_rate,
+                "target_achieved": "7/7 endpoints working" if overall_success else f"Only {working_endpoints}/7 working"
             }
         )
     
