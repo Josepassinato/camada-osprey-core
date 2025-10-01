@@ -6707,22 +6707,10 @@ async def initiate_owl_payment(request: dict):
         # Verify session exists and is completed
         session = await db.owl_sessions.find_one({"session_id": session_id})
         if not session:
-            # For testing purposes, allow test sessions
-            if session_id.startswith("test-"):
-                logger.warning(f"Using test session: {session_id}")
-                session = {
-                    "session_id": session_id,
-                    "visa_type": "H-1B",
-                    "total_fields": 10,
-                    "status": "completed"
-                }
-                # Create a mock responses count for test
-                responses_count = 10
-            else:
-                raise HTTPException(status_code=404, detail="Session not found")
-        else:
-            # Check if session is completed
-            responses_count = await db.owl_responses.count_documents({"session_id": session_id})
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        # Check if session is completed
+        responses_count = await db.owl_responses.count_documents({"session_id": session_id})
         completion_percentage = (responses_count / session.get("total_fields", 1)) * 100
         
         if completion_percentage < 90:  # Allow some flexibility
