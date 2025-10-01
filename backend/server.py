@@ -5840,7 +5840,12 @@ async def analyze_document_with_real_ai(
                     analysis_result["valid"] = False
                     analysis_result["legible"] = enhanced_result.get("legible", False)
                     analysis_result["completeness"] = min(dr_miguel_confidence, 30)  # Low score for rejected docs
-                    analysis_result["issues"] = enhanced_result.get("issues", ["Documento rejeitado pela validação"])
+                    issues_from_miguel = enhanced_result.get("issues", [])
+                    if isinstance(issues_from_miguel, str):
+                        issues_from_miguel = [issues_from_miguel]
+                    elif not isinstance(issues_from_miguel, list):
+                        issues_from_miguel = ["Documento rejeitado pela validação"]
+                    analysis_result["issues"] = issues_from_miguel if issues_from_miguel else ["Documento rejeitado pela validação"]
                 
                 # Combine assessments
                 dr_miguel_assessment = enhanced_result.get("verdict", "")
