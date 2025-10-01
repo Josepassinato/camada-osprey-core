@@ -18,8 +18,8 @@ from pydantic import BaseModel, Field, EmailStr
 import pydantic
 from typing import List, Optional, Dict, Any
 
-# Configure JSON encoder for ObjectId
-pydantic.json.ENCODERS_BY_TYPE[ObjectId] = str
+# Configure JSON encoder for ObjectId (Pydantic v2 compatible)
+# pydantic.json.ENCODERS_BY_TYPE[ObjectId] = str  # This is for Pydantic v1
 
 # Helper function to convert MongoDB documents to JSON-serializable format
 def serialize_doc(doc):
