@@ -485,7 +485,9 @@ class PolicyEngine:
             pass_count = sum(1 for check in policy_checks if check["result"] == "pass")
             total_count = len(policy_checks)
             policy_score = pass_count / total_count if total_count > 0 else 0.0
-            scores.append(policy_score * (scoring["critical_fields_weight"] + scoring["presence_checks_weight"]))
+            critical_weight = scoring.get("critical_fields_weight", 0.35)  # Default weight
+            presence_weight = scoring.get("presence_checks_weight", 0.15)  # Default weight
+            scores.append(policy_score * (critical_weight + presence_weight))
         
         # 3. Score de conformidade de idioma (Phase 2)
         language_analysis = result.get("language_analysis", {})
