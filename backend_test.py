@@ -252,6 +252,7 @@ class ProductionVerificationTester:
                 # Store case ID for subsequent tests
                 if has_case_id:
                     self.auto_case_id = case_data['case_id']
+                    print(f"    🔍 DEBUG: Stored case ID: {self.auto_case_id}")
                 
                 success = has_case_id and case_id_format and no_test_indicators and has_message
                 
