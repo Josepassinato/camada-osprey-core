@@ -1581,5 +1581,5 @@ class ComprehensiveEcosystemTester:
         print(f"📄 Detailed results saved to: /app/ecosystem_validation_results.json")
 
 if __name__ == "__main__":
-    tester = CaseFinalizerTester()
+    tester = ComprehensiveEcosystemTester()
     tester.run_all_tests()
