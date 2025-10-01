@@ -5351,7 +5351,16 @@ async def generate_uscis_form_ai(case, friendly_form_data, basic_data):
         Responda apenas "FORMULÁRIO_GERADO_DRA_PAULA" quando concluir.
         """
         
-        response = llm.chat([{"role": "user", "content": generation_prompt}])
+        if use_openai:
+            response = openai.chat.completions.create(
+                model="gpt-4",
+                messages=[{"role": "user", "content": generation_prompt}],
+                max_tokens=2000,
+                temperature=0.3
+            )
+            response_text = response.choices[0].message.content
+        else:
+            response_text = llm.chat([{"role": "user", "content": generation_prompt}])
         
         # Update case with generated USCIS form flag
         await db.auto_cases.update_one(
