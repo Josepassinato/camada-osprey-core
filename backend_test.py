@@ -12066,5 +12066,5 @@ class ComprehensiveImmigrationAPITester:
 
 if __name__ == "__main__":
     tester = ComprehensiveImmigrationAPITester()
-    # Run all tests including the 4 specific corrected endpoints
-    tester.run_all_tests()
+    # Run IMMEDIATE tests as requested by user - 4 problems + Carlos simulation
+    tester.run_immediate_tests()
