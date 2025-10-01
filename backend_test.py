@@ -1833,21 +1833,6 @@ class ComprehensiveEcosystemTester:
                     False,
                     f"Exception: {str(e)}"
                 )
-                        "success_is_true": data.get("success") is True,
-                        "has_review_object": "review" in data,
-                        "no_budget_error": "budget" not in str(data).lower() and "exceeded" not in str(data).lower(),
-                        "no_unavailable_error": "não está disponível" not in str(data).lower(),
-                        "valid_json_response": True  # We got here, so JSON is valid
-                    }
-                    
-                    # Check if Dr. Paula is available
-                    dr_paula_available = not any([
-                        "não está disponível" in str(data).lower(),
-                        "budget exceeded" in str(data).lower(),
-                        "budget has been exceeded" in str(data).lower()
-                    ])
-                    
-                    overall_success = all(success_indicators.values()) and dr_paula_available
                     
                     self.log_test(
                         "🚨 URGENT - Dr. Paula Review Letter I-589",
