@@ -44,7 +44,7 @@ def serialize_doc(doc):
         return result
     return doc
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, date, time, timezone, timedelta
 import json
 import jwt
 import bcrypt
