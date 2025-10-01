@@ -20,15 +20,19 @@ import io
 BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://iaimmigration.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
-class ComprehensiveEcosystemTester:
+class ComprehensiveImmigrationAPITester:
     def __init__(self):
         self.test_results = []
         self.session = requests.Session()
         self.session.headers.update({
             'Content-Type': 'application/json',
-            'User-Agent': 'CaseFinalizerTester/1.0'
+            'User-Agent': 'ImmigrationAPITester/1.0'
         })
         self.auth_token = None
+        self.test_user_email = f"test_{uuid.uuid4().hex[:8]}@immigration.test"
+        self.test_user_password = "TestPassword123!"
+        self.owl_session_id = None
+        self.auto_case_id = None
         self.setup_test_authentication()
         
     def log_test(self, test_name: str, success: bool, details: str = "", response_data: Any = None):
