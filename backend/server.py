@@ -6482,8 +6482,11 @@ async def get_user_sessions(user_email: str):
         
         sessions = await sessions_cursor.to_list(length=None)
         
+        # Serialize sessions to handle ObjectId
+        serialized_sessions = serialize_doc(sessions)
+        
         # Get progress for each session
-        for session in sessions:
+        for session in serialized_sessions:
             responses_count = await db.owl_responses.count_documents({"session_id": session["session_id"]})
             session["progress_percentage"] = min(100, (responses_count / session.get("total_fields", 1)) * 100)
             session["responses_count"] = responses_count
@@ -6491,8 +6494,8 @@ async def get_user_sessions(user_email: str):
         return {
             "success": True,
             "user_email": user_email,
-            "sessions": sessions,
-            "total_sessions": len(sessions),
+            "sessions": serialized_sessions,
+            "total_sessions": len(serialized_sessions),
             "timestamp": datetime.utcnow().isoformat()
         }
         
