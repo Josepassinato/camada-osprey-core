@@ -9301,7 +9301,7 @@ class ComprehensiveImmigrationAPITester:
                 "status": "form_selected"
             }
             
-            response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+            response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
             
             if response.status_code == 200:
                 data = response.json()
@@ -9355,7 +9355,7 @@ class ComprehensiveImmigrationAPITester:
                 "progress_percentage": 20
             }
             
-            response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+            response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
             
             if response.status_code == 200:
                 data = response.json()
@@ -9404,7 +9404,7 @@ class ComprehensiveImmigrationAPITester:
                 "progress_percentage": 40
             }
             
-            response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+            response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
             
             if response.status_code == 200:
                 data = response.json()
@@ -9476,7 +9476,7 @@ class ComprehensiveImmigrationAPITester:
                 "progress_percentage": 60
             }
             
-            response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+            response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
             
             if response.status_code == 200:
                 data = response.json()
@@ -9569,7 +9569,7 @@ class ComprehensiveImmigrationAPITester:
                 "progress_percentage": 90
             }
             
-            response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+            response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
             
             if response.status_code == 200:
                 data = response.json()
@@ -9609,7 +9609,7 @@ class ComprehensiveImmigrationAPITester:
                 "progress_percentage": 100
             }
             
-            response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+            response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
             
             if response.status_code == 200:
                 data = response.json()
@@ -9699,7 +9699,7 @@ class ComprehensiveImmigrationAPITester:
                 "status": "form_selected"
             }
             
-            response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+            response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
             
             if response.status_code == 200:
                 data = response.json()
@@ -9731,7 +9731,7 @@ class ComprehensiveImmigrationAPITester:
                 "progress_percentage": 20
             }
             
-            response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+            response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
             
             if response.status_code == 200:
                 data = response.json()
@@ -9826,7 +9826,7 @@ class ComprehensiveImmigrationAPITester:
                 "progress_percentage": 40
             }
             
-            response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+            response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
             
             if response.status_code == 200:
                 data = response.json()
@@ -9873,7 +9873,7 @@ class ComprehensiveImmigrationAPITester:
                 "progress_percentage": 60
             }
             
-            response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+            response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
             
             if response.status_code == 200:
                 data = response.json()
@@ -9911,7 +9911,7 @@ class ComprehensiveImmigrationAPITester:
                     "progress_percentage": 60 + (i * 5)  # 65, 70, 75, 80, 85
                 }
                 
-                response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+                response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
                 
                 if response.status_code == 200:
                     data = response.json()
@@ -9942,7 +9942,7 @@ class ComprehensiveImmigrationAPITester:
                 "progress_percentage": 90
             }
             
-            response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+            response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
             
             if response.status_code == 200:
                 data = response.json()
@@ -9967,7 +9967,7 @@ class ComprehensiveImmigrationAPITester:
                 "final_package_generated": True
             }
             
-            response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+            response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
             
             if response.status_code == 200:
                 data = response.json()
@@ -10877,7 +10877,7 @@ class ComprehensiveImmigrationAPITester:
             # ETAPA 3: Basic Data Storage
             print("ETAPA 3: 📝 Basic Data Storage...")
             payload = {"basic_data": carlos_data, "progress_percentage": 20}
-            response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+            response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
             if response.status_code == 200:
                 data = response.json()
                 self.log_test("Carlos H-1B Step 3 - Basic Data", True, f"Progress: {data.get('progress_percentage')}%", data)
@@ -10896,7 +10896,7 @@ class ComprehensiveImmigrationAPITester:
                 doc_response = requests.post(f"{API_BASE}/documents/analyze-with-ai", files=files, data=data_form, headers=headers)
             
             payload = {"progress_percentage": 40}
-            response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+            response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
             if response.status_code == 200:
                 self.log_test("Carlos H-1B Step 4 - Document Upload", True, "3 documents uploaded", {"documents": documents})
             else:
@@ -10921,7 +10921,7 @@ class ComprehensiveImmigrationAPITester:
                 "simplified_form_responses": responses,
                 "progress_percentage": 60
             }
-            response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+            response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
             if response.status_code == 200:
                 self.log_test("Carlos H-1B Step 5 - Story & Responses", True, f"Story: {len(story)} chars, Responses: {len(responses)}", {"story_length": len(story), "responses_count": len(responses)})
             else:
@@ -10933,7 +10933,7 @@ class ComprehensiveImmigrationAPITester:
             for i, step in enumerate(ai_steps):
                 progress = 65 + (i * 4)  # 65%, 69%, 73%, 77%, 81%
                 payload = {"progress_percentage": progress, "current_step": step}
-                response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+                response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
                 if response.status_code == 200:
                     self.log_test(f"Carlos H-1B Step 6.{i+1} - AI {step}", True, f"Progress: {progress}%", {"step": step, "progress": progress})
                 else:
@@ -10946,7 +10946,7 @@ class ComprehensiveImmigrationAPITester:
                 "progress_percentage": 90,
                 "current_step": "form_generated"
             }
-            response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+            response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
             if response.status_code == 200:
                 self.log_test("Carlos H-1B Step 7 - USCIS Form Generation", True, "Form generated successfully", {"uscis_form_generated": True})
             else:
@@ -10959,7 +10959,7 @@ class ComprehensiveImmigrationAPITester:
                 "progress_percentage": 100,
                 "current_step": "completed"
             }
-            response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+            response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
             if response.status_code == 200:
                 data = response.json()
                 final_progress = data.get('progress_percentage', 0)
