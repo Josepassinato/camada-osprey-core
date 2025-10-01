@@ -3968,7 +3968,10 @@ class ComprehensiveEcosystemTester:
 
 if __name__ == "__main__":
     tester = ComprehensiveEcosystemTester()
-    # Run only the urgent test first
-    tester.test_dr_paula_urgent_user_issue()
-    # Then run all tests
-    tester.run_all_tests()
+    print("🚨 TESTE FINAL - TODOS OS AGENTES CONECTADOS COM CHAVE OPENAI E DRA. PAULA")
+    print("=" * 80)
+    print("Testing all agents with user's OpenAI key and Assistant ID: asst_kkyn65SQFfkloH4SalOZfwwh")
+    print("=" * 80)
+    
+    # Run critical OpenAI integration tests
+    tester.run_critical_openai_tests()
