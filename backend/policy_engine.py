@@ -8,6 +8,7 @@ import re
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 import logging
+from datetime import datetime
 from document_catalog import document_catalog, DocumentType
 from document_quality_checker import DocumentQualityChecker
 from field_extraction_engine import field_extraction_engine
