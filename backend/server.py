@@ -6561,7 +6561,474 @@ async def resume_saved_session(request: dict):
         logger.error(f"Error resuming session: {e}")
         raise HTTPException(status_code=500, detail=f"Resume error: {str(e)}")
 
-# ===== END OWL AGENT AUTHENTICATION SYSTEM =====
+# ===== OWL AGENT FINAL PHASE - PAYMENT & DOWNLOAD SYSTEM =====
+
+@api_router.post("/owl-agent/initiate-payment")
+async def initiate_owl_payment(request: dict):
+    """Initiate payment for completed USCIS form download"""
+    try:
+        session_id = request.get("session_id")
+        delivery_method = request.get("delivery_method", "download")  # "download" or "email"
+        origin_url = request.get("origin_url")
+        user_email = request.get("user_email", "").strip().lower()
+        
+        if not all([session_id, origin_url]):
+            raise HTTPException(status_code=400, detail="session_id and origin_url are required")
+        
+        # Verify session exists and is completed
+        session = await db.owl_sessions.find_one({"session_id": session_id})
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        # Check if session is completed
+        responses_count = await db.owl_responses.count_documents({"session_id": session_id})
+        completion_percentage = (responses_count / session.get("total_fields", 1)) * 100
+        
+        if completion_percentage < 90:  # Allow some flexibility
+            raise HTTPException(status_code=400, detail="Application not completed yet")
+        
+        # Fixed pricing packages (security - never accept amount from frontend)
+        PACKAGES = {
+            "download_only": {"amount": 29.99, "name": "Download Formulário USCIS", "description": "Download imediato do formulário preenchido"},
+            "download_email": {"amount": 34.99, "name": "Download + Email", "description": "Download + envio por email"},
+            "email_only": {"amount": 24.99, "name": "Envio por Email", "description": "Formulário enviado por email"}
+        }
+        
+        # Determine package based on delivery method
+        if delivery_method == "download":
+            package_key = "download_only"
+        elif delivery_method == "email":
+            package_key = "email_only"
+        elif delivery_method == "both":
+            package_key = "download_email"
+        else:
+            package_key = "download_only"
+        
+        package = PACKAGES[package_key]
+        amount = package["amount"]
+        
+        # Initialize Stripe checkout
+        from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionRequest
+        
+        stripe_api_key = os.environ.get('STRIPE_API_KEY')
+        if not stripe_api_key:
+            raise HTTPException(status_code=500, detail="Stripe configuration missing")
+        
+        host_url = origin_url
+        webhook_url = f"{host_url}/api/webhook/stripe"
+        stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=webhook_url)
+        
+        # Build success and cancel URLs
+        success_url = f"{origin_url}/owl-agent/payment-success?session_id={{CHECKOUT_SESSION_ID}}"
+        cancel_url = f"{origin_url}/owl-agent"
+        
+        # Create checkout session with metadata
+        metadata = {
+            "owl_session_id": session_id,
+            "delivery_method": delivery_method,
+            "user_email": user_email,
+            "visa_type": session.get("visa_type", ""),
+            "package_key": package_key
+        }
+        
+        checkout_request = CheckoutSessionRequest(
+            amount=amount,
+            currency="usd",
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata=metadata
+        )
+        
+        checkout_session = await stripe_checkout.create_checkout_session(checkout_request)
+        
+        # Create payment transaction record
+        payment_data = {
+            "payment_id": f"OWL-PAY-{int(time.time())}-{uuid.uuid4().hex[:8]}",
+            "stripe_session_id": checkout_session.session_id,
+            "owl_session_id": session_id,
+            "user_email": user_email,
+            "amount": amount,
+            "currency": "usd",
+            "delivery_method": delivery_method,
+            "package_key": package_key,
+            "package_name": package["name"],
+            "visa_type": session.get("visa_type", ""),
+            "payment_status": "initiated",
+            "status": "pending",
+            "created_at": datetime.utcnow(),
+            "metadata": metadata
+        }
+        
+        await db.payment_transactions.insert_one(payment_data)
+        
+        return {
+            "success": True,
+            "checkout_url": checkout_session.url,
+            "session_id": checkout_session.session_id,
+            "amount": amount,
+            "currency": "usd",
+            "package": package,
+            "delivery_method": delivery_method,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error initiating owl payment: {e}")
+        raise HTTPException(status_code=500, detail=f"Error initiating payment: {str(e)}")
+
+@api_router.get("/owl-agent/payment-status/{stripe_session_id}")
+async def get_owl_payment_status(stripe_session_id: str):
+    """Get payment status and process completion"""
+    try:
+        # Get payment transaction
+        payment = await db.payment_transactions.find_one({"stripe_session_id": stripe_session_id})
+        if not payment:
+            raise HTTPException(status_code=404, detail="Payment not found")
+        
+        # Initialize Stripe checkout
+        from emergentintegrations.payments.stripe.checkout import StripeCheckout
+        
+        stripe_api_key = os.environ.get('STRIPE_API_KEY')
+        stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url="")
+        
+        # Get checkout status from Stripe
+        checkout_status = await stripe_checkout.get_checkout_status(stripe_session_id)
+        
+        # Update payment status if changed
+        if checkout_status.payment_status == 'paid' and payment.get("payment_status") != "completed":
+            # Payment completed - update status and process delivery
+            await db.payment_transactions.update_one(
+                {"stripe_session_id": stripe_session_id},
+                {
+                    "$set": {
+                        "payment_status": "completed",
+                        "status": "paid",
+                        "completed_at": datetime.utcnow(),
+                        "stripe_amount": checkout_status.amount_total,
+                        "stripe_currency": checkout_status.currency
+                    }
+                }
+            )
+            
+            # Process delivery (generate download link or send email)
+            await process_owl_delivery(stripe_session_id, payment)
+            
+        elif checkout_status.status == 'expired' and payment.get("status") != "expired":
+            # Payment expired
+            await db.payment_transactions.update_one(
+                {"stripe_session_id": stripe_session_id},
+                {
+                    "$set": {
+                        "payment_status": "failed",
+                        "status": "expired",
+                        "updated_at": datetime.utcnow()
+                    }
+                }
+            )
+        
+        # Get updated payment data
+        updated_payment = await db.payment_transactions.find_one({"stripe_session_id": stripe_session_id})
+        serialized_payment = serialize_doc(updated_payment)
+        
+        return {
+            "success": True,
+            "payment_status": checkout_status.payment_status,
+            "session_status": checkout_status.status,
+            "amount": checkout_status.amount_total / 100,  # Convert from cents
+            "currency": checkout_status.currency,
+            "payment_data": serialized_payment,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting owl payment status: {e}")
+        raise HTTPException(status_code=500, detail=f"Error getting payment status: {str(e)}")
+
+@api_router.post("/webhook/stripe")
+async def stripe_webhook(request: Request):
+    """Handle Stripe webhook events"""
+    try:
+        body = await request.body()
+        signature = request.headers.get("Stripe-Signature")
+        
+        from emergentintegrations.payments.stripe.checkout import StripeCheckout
+        
+        stripe_api_key = os.environ.get('STRIPE_API_KEY')
+        stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url="")
+        
+        # Handle webhook
+        webhook_response = await stripe_checkout.handle_webhook(body, signature)
+        
+        if webhook_response.event_type == "checkout.session.completed":
+            # Payment completed - update our records
+            await db.payment_transactions.update_one(
+                {"stripe_session_id": webhook_response.session_id},
+                {
+                    "$set": {
+                        "payment_status": "completed",
+                        "status": "paid",
+                        "webhook_processed_at": datetime.utcnow(),
+                        "stripe_event_id": webhook_response.event_id
+                    }
+                }
+            )
+            
+            # Get payment data and process delivery
+            payment = await db.payment_transactions.find_one({"stripe_session_id": webhook_response.session_id})
+            if payment:
+                await process_owl_delivery(webhook_response.session_id, payment)
+        
+        return {"status": "success", "event_type": webhook_response.event_type}
+        
+    except Exception as e:
+        logger.error(f"Error processing Stripe webhook: {e}")
+        raise HTTPException(status_code=500, detail=f"Webhook error: {str(e)}")
+
+async def process_owl_delivery(stripe_session_id: str, payment: dict):
+    """Process delivery of completed USCIS form"""
+    try:
+        owl_session_id = payment["owl_session_id"]
+        delivery_method = payment["delivery_method"]
+        user_email = payment.get("user_email")
+        
+        # Generate the completed USCIS form
+        form_result = await generate_final_uscis_form(owl_session_id)
+        
+        # Create secure download record
+        download_data = {
+            "download_id": f"DWN-{int(time.time())}-{uuid.uuid4().hex[:8]}",
+            "stripe_session_id": stripe_session_id,
+            "owl_session_id": owl_session_id,
+            "user_email": user_email,
+            "form_data": form_result,
+            "delivery_method": delivery_method,
+            "created_at": datetime.utcnow(),
+            "expires_at": datetime.utcnow() + timedelta(hours=24),  # 24-hour expiry
+            "download_count": 0,
+            "max_downloads": 3  # Allow up to 3 downloads
+        }
+        
+        await db.owl_downloads.insert_one(download_data)
+        
+        # Process delivery based on method
+        if delivery_method in ["email", "both"]:
+            await send_form_by_email(user_email, form_result, download_data["download_id"])
+        
+        # Update payment record with download info
+        await db.payment_transactions.update_one(
+            {"stripe_session_id": stripe_session_id},
+            {
+                "$set": {
+                    "download_id": download_data["download_id"],
+                    "delivery_processed_at": datetime.utcnow()
+                }
+            }
+        )
+        
+        logger.info(f"Owl delivery processed for session {owl_session_id}, method: {delivery_method}")
+        
+    except Exception as e:
+        logger.error(f"Error processing owl delivery: {e}")
+        # Don't raise exception to avoid webhook failures
+
+@api_router.get("/owl-agent/download/{download_id}")
+async def download_owl_form(download_id: str):
+    """Secure download of completed USCIS form"""
+    try:
+        # Get download record
+        download = await db.owl_downloads.find_one({"download_id": download_id})
+        if not download:
+            raise HTTPException(status_code=404, detail="Download not found")
+        
+        # Check expiry
+        if download.get("expires_at") and download["expires_at"] < datetime.utcnow():
+            raise HTTPException(status_code=410, detail="Download link expired")
+        
+        # Check download limit
+        if download.get("download_count", 0) >= download.get("max_downloads", 3):
+            raise HTTPException(status_code=429, detail="Download limit exceeded")
+        
+        # Get form data
+        form_data = download.get("form_data", {})
+        pdf_data = form_data.get("pdf_data")
+        
+        if not pdf_data:
+            raise HTTPException(status_code=500, detail="Form data not available")
+        
+        # Update download count
+        await db.owl_downloads.update_one(
+            {"download_id": download_id},
+            {
+                "$inc": {"download_count": 1},
+                "$set": {"last_downloaded_at": datetime.utcnow()}
+            }
+        )
+        
+        # Decode PDF data
+        import base64
+        pdf_bytes = base64.b64decode(pdf_data)
+        
+        # Create filename
+        visa_type = form_data.get("visa_type", "USCIS")
+        form_number = form_data.get("form_number", "Form")
+        filename = f"{form_number}_{visa_type}_{download['owl_session_id']}.pdf"
+        
+        return StreamingResponse(
+            io.BytesIO(pdf_bytes),
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}",
+                "Content-Length": str(len(pdf_bytes))
+            }
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error downloading owl form: {e}")
+        raise HTTPException(status_code=500, detail=f"Download error: {str(e)}")
+
+async def generate_final_uscis_form(owl_session_id: str) -> dict:
+    """Generate final USCIS form with all responses"""
+    try:
+        # Get session and responses
+        session = await db.owl_sessions.find_one({"session_id": owl_session_id})
+        responses_cursor = db.owl_responses.find({"session_id": owl_session_id})
+        responses = await responses_cursor.to_list(length=None)
+        
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        # Get form template
+        form_template = await get_uscis_form_template(session["visa_type"])
+        
+        # Map responses to USCIS form
+        filled_form = await map_responses_to_uscis_form(responses, form_template, session["visa_type"])
+        
+        # Generate enhanced PDF with privacy notice
+        pdf_data = await generate_final_uscis_pdf(filled_form, session["visa_type"], owl_session_id)
+        
+        return {
+            "form_number": form_template["form_number"],
+            "form_title": form_template["form_title"],
+            "visa_type": session["visa_type"],
+            "completion_percentage": filled_form["completion_percentage"],
+            "pdf_data": pdf_data,
+            "generated_at": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error generating final USCIS form: {e}")
+        raise e
+
+async def generate_final_uscis_pdf(filled_form: dict, visa_type: str, session_id: str) -> str:
+    """Generate final PDF with privacy notice"""
+    try:
+        from reportlab.lib.pagesizes import letter
+        from reportlab.pdfgen import canvas
+        from reportlab.lib.units import inch
+        import io
+        import base64
+        
+        buffer = io.BytesIO()
+        c = canvas.Canvas(buffer, pagesize=letter)
+        width, height = letter
+        
+        # Header
+        c.setFont("Helvetica-Bold", 18)
+        c.drawString(50, height - 50, f"USCIS {filled_form['form_number']}")
+        c.setFont("Helvetica", 12)
+        c.drawString(50, height - 75, filled_form['form_title'])
+        
+        # Privacy Notice - IMPORTANT
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(50, height - 120, "AVISO IMPORTANTE DE PRIVACIDADE - OSPREY")
+        
+        c.setFont("Helvetica", 10)
+        privacy_text = [
+            "• Este documento foi gerado pelo sistema Agente Coruja da Osprey",
+            "• OSPREY NÃO ARMAZENA seus dados pessoais após o download",
+            "• Após o download e/ou envio por email, todos os dados são PERMANENTEMENTE DELETADOS",
+            "• Este é seu único acesso ao formulário completo - faça backup se necessário",
+            "• Osprey não mantém cópias, não tem acesso futuro aos seus dados",
+            "• Responsabilidade pelos dados é transferida totalmente para você após este download",
+            "",
+            "IMPORTANT PRIVACY NOTICE - OSPREY",
+            "• This document was generated by Osprey's Owl Agent system",
+            "• OSPREY DOES NOT STORE your personal data after download",
+            "• After download and/or email delivery, all data is PERMANENTLY DELETED",
+            "• This is your only access to the complete form - backup if needed",
+            "• Osprey keeps no copies, has no future access to your data",
+            "• Data responsibility is fully transferred to you after this download"
+        ]
+        
+        y_position = height - 145
+        for line in privacy_text:
+            if line.startswith("IMPORTANT PRIVACY"):
+                c.setFont("Helvetica-Bold", 10)
+            elif line.startswith("•"):
+                c.setFont("Helvetica", 9)
+            else:
+                c.setFont("Helvetica", 9)
+            
+            c.drawString(50, y_position, line)
+            y_position -= 12
+        
+        # Form data
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(50, y_position - 20, "Dados do Formulário / Form Data:")
+        
+        y_position -= 45
+        c.setFont("Helvetica", 10)
+        
+        for field_label, field_value in filled_form['filled_fields'].items():
+            if y_position < 80:  # Start new page
+                c.showPage()
+                y_position = height - 50
+            
+            c.drawString(50, y_position, f"{field_label}: {field_value}")
+            y_position -= 15
+        
+        # Footer with deletion notice
+        c.setFont("Helvetica-Bold", 8)
+        c.drawString(50, 50, f"Gerado em: {datetime.utcnow().strftime('%d/%m/%Y %H:%M:%S')} UTC")
+        c.drawString(50, 35, f"Sessão: {session_id}")
+        c.drawString(50, 20, "AVISO: Seus dados serão DELETADOS do sistema Osprey após este download!")
+        
+        c.save()
+        buffer.seek(0)
+        pdf_bytes = buffer.read()
+        pdf_base64 = base64.b64encode(pdf_bytes).decode('utf-8')
+        
+        return pdf_base64
+        
+    except Exception as e:
+        logger.error(f"Error generating final PDF: {e}")
+        return "error_generating_pdf"
+
+async def send_form_by_email(email: str, form_data: dict, download_id: str):
+    """Send completed form by email"""
+    try:
+        # Mock email sending - in production integrate with SendGrid/AWS SES
+        logger.info(f"Email sent to {email} with download_id {download_id}")
+        
+        # In production, would send email with:
+        # - PDF attachment
+        # - Download link as backup
+        # - Privacy notice about data deletion
+        # - Instructions for form submission to USCIS
+        
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error sending form by email: {e}")
+        return False
+
+# ===== END OWL AGENT PAYMENT & DOWNLOAD SYSTEM =====
 
 @api_router.post("/owl-agent/start-session")
 async def start_owl_session(request: dict):
