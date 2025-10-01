@@ -699,10 +699,10 @@ class CaseFinalizerComplete:
         
         page_counter = len(content) + 2  # Aproximação para páginas do índice
         
-        for i, doc in enumerate(documents, 1):
-            doc_line = f"{i}. {doc['name']} ({doc['pages']} pages) - Pages {page_counter}-{page_counter + doc['pages'] - 1}"
+        for i, document in enumerate(documents, 1):
+            doc_line = f"{i}. {document['name']} ({document['pages']} pages) - Pages {page_counter}-{page_counter + document['pages'] - 1}"
             content.append(Paragraph(doc_line, styles['Normal']))
-            page_counter += doc['pages']
+            page_counter += document['pages']
         
         content.append(Spacer(1, 30))
         content.append(Paragraph("<i>This index is generated automatically. Please verify all documents are complete before submission.</i>", styles['Normal']))
