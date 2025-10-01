@@ -1,10 +1,31 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { ArrowRight, FileText, Languages, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { OwlSessionProvider } from '@/components/owl/OwlSessionManager';
+import { OwlAuth } from '../components/owl/OwlAuth';
+import { OwlSavedSessions } from '../components/owl/OwlSavedSessions';
+
+interface User {
+  user_id: string;
+  email: string;
+  name: string;
+}
+
+interface SavedSession {
+  session_id: string;
+  case_id: string;
+  visa_type: string;
+  language: string;
+  status: string;
+  created_at: string;
+  saved_at?: string;
+  progress_percentage: number;
+  responses_count: number;
+  total_fields: number;
+}
 
 export const OwlAgent: React.FC = () => {
   const [selectedVisa, setSelectedVisa] = useState<string>('');
