@@ -8073,7 +8073,16 @@ class ComprehensiveEcosystemTester:
         print("=" * 80)
         print()
         
-        # HIGHEST PRIORITY: USER REQUESTED GOOGLE VISION API + DR. MIGUEL HYBRID SYSTEM TESTS
+        # HIGHEST PRIORITY: AGENTE CORUJA (OWL AGENT) - NEW IMPLEMENTATION
+        print("🦉 PRIORITY 1: AGENTE CORUJA - INTELLIGENT QUESTIONNAIRE SYSTEM (NEW)")
+        print("=" * 80)
+        print("Testing new Owl Agent implementation with 7 endpoints:")
+        print("- Start Session, Get Session, Field Guidance, Validate Field")
+        print("- Save Response, Generate USCIS Form, Download Form")
+        print("-" * 80)
+        self.test_owl_agent_comprehensive()
+        
+        # SECOND PRIORITY: USER REQUESTED GOOGLE VISION API + DR. MIGUEL HYBRID SYSTEM TESTS
         print("🔬 PRIORITY 1: GOOGLE VISION API + DR. MIGUEL HYBRID SYSTEM TESTS (USER REQUEST)")
         print("=" * 80)
         print("Testing Real Google Vision API integration as specifically requested by user")
