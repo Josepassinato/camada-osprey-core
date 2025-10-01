@@ -1040,7 +1040,8 @@ class ComprehensiveEcosystemTester:
             
             if start_response.status_code == 200:
                 start_data = start_response.json()
-                case_id = start_data.get("case_id")
+                # Extract case_id from nested case object
+                case_id = start_data.get("case", {}).get("case_id") or start_data.get("case_id")
                 
                 if case_id:
                     # Update case with H-1B form code
@@ -1091,7 +1092,7 @@ class ComprehensiveEcosystemTester:
                     self.log_test(
                         "System Integration - Form Code Resolution",
                         False,
-                        "No case_id in start response",
+                        f"No case_id found in response structure: {start_data}",
                         start_data
                     )
             else:
