@@ -10,6 +10,7 @@ import json
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 import base64
+from google.cloud import documentai
 from google.cloud import vision
 from google.api_core import exceptions as google_exceptions
 import requests
