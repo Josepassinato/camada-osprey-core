@@ -695,15 +695,16 @@ class HybridDocumentValidator:
             "validation_status": "APPROVED" if is_valid else "REQUIRES_REVIEW" if combined_confidence >= 50 else "REJECTED",
             "visa_context": visa_type,
             "case_id": case_id,
-            "google_vision_data": {
+            "google_document_ai_data": {
                 "extracted_text": google_result.get("extracted_text", "")[:500] + "...",  # Truncate for storage
                 "entities_count": len(extracted_entities),
-                "ocr_confidence": google_confidence,
+                "confidence": google_confidence,
                 "page_count": google_result.get("page_count", 0),
                 "mock_mode": google_result.get("mock_mode", False),
                 "api_enabled": not self.google_processor.is_mock_mode,
                 "auth_method": self.google_processor.auth_method,
-                "project_id": self.google_processor.project_id
+                "project_id": self.google_processor.project_id,
+                "processor_type": google_result.get("processor_type", "mock")
             },
             "passport_fields": passport_fields,
             "dr_miguel_analysis": {
