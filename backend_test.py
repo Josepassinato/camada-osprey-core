@@ -4541,6 +4541,624 @@ class ComprehensiveEcosystemTester:
         
         print("=" * 80)
     
+    def test_hybrid_google_ai_dr_miguel_integration(self):
+        """Test HYBRID Google Document AI + Dr. Miguel Integration"""
+        print("🔬 TESTING HYBRID GOOGLE DOCUMENT AI + DR. MIGUEL INTEGRATION...")
+        
+        # Test 1: Basic Hybrid Functionality with Mock Google AI
+        self.test_hybrid_basic_functionality()
+        
+        # Test 2: Structured Data Extraction
+        self.test_hybrid_structured_data_extraction()
+        
+        # Test 3: Dr. Miguel Intelligent Validation
+        self.test_hybrid_dr_miguel_validation()
+        
+        # Test 4: Combined Scoring System (40% Google + 60% Miguel)
+        self.test_hybrid_scoring_system()
+        
+        # Test 5: Structured Response Format
+        self.test_hybrid_response_structure()
+        
+        # Test 6: Edge Cases and Security
+        self.test_hybrid_edge_cases()
+    
+    def test_hybrid_basic_functionality(self):
+        """Test basic hybrid functionality with simulated document"""
+        print("🔍 Testing Hybrid Basic Functionality...")
+        
+        # Create a realistic passport document for testing
+        passport_content = b"""
+        PASSPORT
+        UNITED STATES OF AMERICA
+        
+        Type: P
+        Country Code: USA
+        Passport No: 123456789
+        
+        Surname: SMITH
+        Given Names: JOHN MICHAEL
+        Nationality: UNITED STATES OF AMERICA
+        Date of Birth: 15 JAN 1990
+        Sex: M
+        Place of Birth: NEW YORK, NY, USA
+        Date of Issue: 10 MAR 2020
+        Date of Expiry: 09 MAR 2030
+        Authority: U.S. DEPARTMENT OF STATE
+        """ * 50  # Make it large enough
+        
+        files = {
+            'file': ('passport_john_smith.pdf', passport_content, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-HYBRID-BASIC',
+            'applicant_name': 'John Michael Smith'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check for hybrid system indicators
+                has_google_ai = result.get('google_ai_enabled', False)
+                has_dr_miguel = result.get('dr_miguel_enabled', False)
+                is_hybrid = result.get('hybrid_powered', False)
+                is_professional = result.get('professional_grade', False)
+                
+                # Check Google AI mock mode
+                extracted_data = result.get('extracted_data', {})
+                google_data = extracted_data.get('google_ai_data', {})
+                mock_mode = google_data.get('mock_mode', False)
+                
+                success = has_google_ai and has_dr_miguel and is_hybrid and is_professional
+                
+                self.log_test(
+                    "Hybrid Basic Functionality",
+                    success,
+                    f"Google AI: {has_google_ai}, Dr. Miguel: {has_dr_miguel}, Hybrid: {is_hybrid}, Mock: {mock_mode}",
+                    {
+                        "google_ai_enabled": has_google_ai,
+                        "dr_miguel_enabled": has_dr_miguel,
+                        "hybrid_powered": is_hybrid,
+                        "professional_grade": is_professional,
+                        "mock_mode": mock_mode,
+                        "completeness": result.get('completeness', 0)
+                    }
+                )
+            else:
+                self.log_test(
+                    "Hybrid Basic Functionality",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Hybrid Basic Functionality",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_hybrid_structured_data_extraction(self):
+        """Test structured data extraction from Google AI"""
+        print("🔍 Testing Hybrid Structured Data Extraction...")
+        
+        # Create passport with clear structured data
+        passport_content = b"""
+        PASSPORT
+        REPUBLIC OF BRAZIL
+        
+        Type: P
+        Country Code: BRA
+        Passport No: BR987654321
+        
+        Surname: SILVA
+        Given Names: MARIA FERNANDA
+        Nationality: BRAZILIAN
+        Date of Birth: 25 DEC 1985
+        Sex: F
+        Place of Birth: SAO PAULO, BRAZIL
+        Date of Issue: 15 JUN 2020
+        Date of Expiry: 14 JUN 2030
+        Authority: DPF
+        """ * 50
+        
+        files = {
+            'file': ('passport_maria_silva.pdf', passport_content, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-HYBRID-EXTRACTION'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check structured data extraction
+                extracted_data = result.get('extracted_data', {})
+                google_data = extracted_data.get('google_ai_data', {})
+                passport_fields = extracted_data.get('passport_fields', {})
+                
+                # Verify OCR confidence
+                ocr_confidence = google_data.get('ocr_confidence', 0)
+                entities_count = google_data.get('entities_count', 0)
+                
+                # Check if passport fields are extracted
+                has_passport_fields = bool(passport_fields)
+                has_extracted_text = len(google_data.get('extracted_text', '')) > 100
+                
+                success = ocr_confidence > 0 and entities_count > 0 and has_passport_fields
+                
+                self.log_test(
+                    "Hybrid Structured Data Extraction",
+                    success,
+                    f"OCR: {ocr_confidence}%, Entities: {entities_count}, Fields: {len(passport_fields)}",
+                    {
+                        "ocr_confidence": ocr_confidence,
+                        "entities_count": entities_count,
+                        "passport_fields_count": len(passport_fields),
+                        "has_extracted_text": has_extracted_text,
+                        "google_ai_working": bool(google_data)
+                    }
+                )
+            else:
+                self.log_test(
+                    "Hybrid Structured Data Extraction",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Hybrid Structured Data Extraction",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_hybrid_dr_miguel_validation(self):
+        """Test Dr. Miguel intelligent validation with Google AI context"""
+        print("🔍 Testing Hybrid Dr. Miguel Validation...")
+        
+        # Create a document that should trigger Dr. Miguel's fraud detection
+        suspicious_document = b"""
+        PASSPORT
+        SUSPICIOUS COUNTRY
+        
+        Type: P
+        Country Code: XXX
+        Passport No: 000000000
+        
+        Surname: TEST
+        Given Names: FAKE DOCUMENT
+        Nationality: UNKNOWN
+        Date of Birth: 01 JAN 1900
+        Sex: X
+        Place of Birth: NOWHERE
+        Date of Issue: 01 JAN 2000
+        Date of Expiry: 01 JAN 2001
+        Authority: FAKE AUTHORITY
+        """ * 50
+        
+        files = {
+            'file': ('suspicious_passport.pdf', suspicious_document, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-HYBRID-MIGUEL',
+            'applicant_name': 'Real Person Name'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check Dr. Miguel analysis
+                extracted_data = result.get('extracted_data', {})
+                miguel_analysis = extracted_data.get('dr_miguel_analysis', {})
+                
+                verdict = miguel_analysis.get('verdict', 'UNKNOWN')
+                confidence = miguel_analysis.get('confidence', 0)
+                
+                # Check if Dr. Miguel received Google AI context
+                google_data = extracted_data.get('google_ai_data', {})
+                has_context = bool(google_data)
+                
+                # Dr. Miguel should detect issues with suspicious document
+                is_properly_validated = verdict in ['REJEITADO', 'NECESSITA_REVISÃO'] or confidence < 75
+                
+                success = has_context and is_properly_validated
+                
+                self.log_test(
+                    "Hybrid Dr. Miguel Validation",
+                    success,
+                    f"Verdict: {verdict}, Confidence: {confidence}%, Context: {has_context}",
+                    {
+                        "dr_miguel_verdict": verdict,
+                        "dr_miguel_confidence": confidence,
+                        "has_google_context": has_context,
+                        "properly_validated": is_properly_validated,
+                        "agent_version": miguel_analysis.get('agent_version', 'Unknown')
+                    }
+                )
+            else:
+                self.log_test(
+                    "Hybrid Dr. Miguel Validation",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Hybrid Dr. Miguel Validation",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_hybrid_scoring_system(self):
+        """Test hybrid scoring system (40% Google AI + 60% Dr. Miguel)"""
+        print("🔍 Testing Hybrid Scoring System...")
+        
+        # Create a borderline document to test scoring
+        borderline_document = b"""
+        PASSPORT
+        UNITED STATES OF AMERICA
+        
+        Type: P
+        Country Code: USA
+        Passport No: 555666777
+        
+        Surname: JOHNSON
+        Given Names: ALEX
+        Nationality: UNITED STATES OF AMERICA
+        Date of Birth: 10 MAY 1985
+        Sex: M
+        Place of Birth: CHICAGO, IL, USA
+        Date of Issue: 20 FEB 2019
+        Date of Expiry: 19 FEB 2029
+        Authority: U.S. DEPARTMENT OF STATE
+        """ * 50
+        
+        files = {
+            'file': ('borderline_passport.pdf', borderline_document, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-HYBRID-SCORING'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check scoring components
+                extracted_data = result.get('extracted_data', {})
+                google_data = extracted_data.get('google_ai_data', {})
+                miguel_analysis = extracted_data.get('dr_miguel_analysis', {})
+                processing_stats = extracted_data.get('processing_stats', {})
+                
+                # Get individual scores
+                google_confidence = google_data.get('ocr_confidence', 0)
+                miguel_confidence = miguel_analysis.get('confidence', 0)
+                combined_confidence = processing_stats.get('combined_confidence', 0)
+                
+                # Verify scoring formula (40% Google + 60% Miguel)
+                expected_combined = (google_confidence * 0.4) + (miguel_confidence * 0.6)
+                scoring_accurate = abs(combined_confidence - expected_combined) < 5  # Allow 5% tolerance
+                
+                # Check threshold enforcement (75% for approval)
+                final_completeness = result.get('completeness', 0)
+                is_valid = result.get('valid', False)
+                threshold_enforced = (combined_confidence >= 75) == is_valid or combined_confidence < 75
+                
+                success = scoring_accurate and threshold_enforced and combined_confidence > 0
+                
+                self.log_test(
+                    "Hybrid Scoring System",
+                    success,
+                    f"Google: {google_confidence}%, Miguel: {miguel_confidence}%, Combined: {combined_confidence}%",
+                    {
+                        "google_confidence": google_confidence,
+                        "miguel_confidence": miguel_confidence,
+                        "combined_confidence": combined_confidence,
+                        "expected_combined": round(expected_combined, 1),
+                        "scoring_accurate": scoring_accurate,
+                        "threshold_enforced": threshold_enforced,
+                        "final_valid": is_valid
+                    }
+                )
+            else:
+                self.log_test(
+                    "Hybrid Scoring System",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Hybrid Scoring System",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_hybrid_response_structure(self):
+        """Test structured response format with both systems' data"""
+        print("🔍 Testing Hybrid Response Structure...")
+        
+        # Create a valid document for structure testing
+        valid_document = b"""
+        PASSPORT
+        CANADA
+        
+        Type: P
+        Country Code: CAN
+        Passport No: AB123456
+        
+        Surname: BROWN
+        Given Names: SARAH ELIZABETH
+        Nationality: CANADIAN
+        Date of Birth: 08 SEP 1992
+        Sex: F
+        Place of Birth: TORONTO, ON, CANADA
+        Date of Issue: 12 APR 2021
+        Date of Expiry: 11 APR 2031
+        Authority: PASSPORT CANADA
+        """ * 50
+        
+        files = {
+            'file': ('valid_passport.pdf', valid_document, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-HYBRID-STRUCTURE'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check main response structure
+                required_fields = ['valid', 'legible', 'completeness', 'issues', 'extracted_data', 'dra_paula_assessment']
+                has_required_fields = all(field in result for field in required_fields)
+                
+                # Check extracted_data structure
+                extracted_data = result.get('extracted_data', {})
+                required_extracted_fields = ['google_ai_data', 'dr_miguel_analysis', 'passport_fields', 'processing_stats']
+                has_extracted_structure = all(field in extracted_data for field in required_extracted_fields)
+                
+                # Check Google AI data structure
+                google_data = extracted_data.get('google_ai_data', {})
+                google_fields = ['extracted_text', 'entities_count', 'ocr_confidence', 'mock_mode']
+                has_google_structure = all(field in google_data for field in google_fields)
+                
+                # Check Dr. Miguel analysis structure
+                miguel_analysis = extracted_data.get('dr_miguel_analysis', {})
+                miguel_fields = ['verdict', 'confidence', 'agent_version']
+                has_miguel_structure = all(field in miguel_analysis for field in miguel_fields)
+                
+                # Check processing stats
+                processing_stats = extracted_data.get('processing_stats', {})
+                stats_fields = ['total_time_ms', 'combined_confidence']
+                has_stats_structure = all(field in processing_stats for field in stats_fields)
+                
+                success = (has_required_fields and has_extracted_structure and 
+                          has_google_structure and has_miguel_structure and has_stats_structure)
+                
+                self.log_test(
+                    "Hybrid Response Structure",
+                    success,
+                    f"Main: {has_required_fields}, Extracted: {has_extracted_structure}, Google: {has_google_structure}, Miguel: {has_miguel_structure}",
+                    {
+                        "has_required_fields": has_required_fields,
+                        "has_extracted_structure": has_extracted_structure,
+                        "has_google_structure": has_google_structure,
+                        "has_miguel_structure": has_miguel_structure,
+                        "has_stats_structure": has_stats_structure,
+                        "response_keys": list(result.keys()),
+                        "extracted_keys": list(extracted_data.keys())
+                    }
+                )
+            else:
+                self.log_test(
+                    "Hybrid Response Structure",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Hybrid Response Structure",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_hybrid_edge_cases(self):
+        """Test edge cases and security scenarios"""
+        print("🔍 Testing Hybrid Edge Cases...")
+        
+        # Test Case 1: Invalid document type
+        invalid_doc = b"This is clearly not a passport document" * 100
+        
+        files = {
+            'file': ('invalid_doc.pdf', invalid_doc, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-HYBRID-INVALID'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Should reject invalid document
+                is_valid = result.get('valid', True)  # Should be False
+                completeness = result.get('completeness', 100)  # Should be low
+                
+                # Check if both systems detected the issue
+                extracted_data = result.get('extracted_data', {})
+                validation_status = extracted_data.get('validation_status', 'APPROVED')
+                
+                # Should be rejected or require review
+                properly_rejected = (not is_valid or completeness < 50 or 
+                                   validation_status in ['REJECTED', 'REQUIRES_REVIEW'])
+                
+                self.log_test(
+                    "Hybrid Edge Cases - Invalid Document",
+                    properly_rejected,
+                    f"Valid: {is_valid}, Completeness: {completeness}%, Status: {validation_status}",
+                    {
+                        "is_valid": is_valid,
+                        "completeness": completeness,
+                        "validation_status": validation_status,
+                        "properly_rejected": properly_rejected
+                    }
+                )
+                
+                # Test Case 2: Different person document
+                different_person_doc = b"""
+                PASSPORT
+                UNITED KINGDOM
+                
+                Type: P
+                Country Code: GBR
+                Passport No: 987654321
+                
+                Surname: DIFFERENT
+                Given Names: PERSON NAME
+                Nationality: BRITISH
+                Date of Birth: 01 JAN 1980
+                Sex: F
+                Place of Birth: LONDON, UK
+                Date of Issue: 01 JAN 2020
+                Date of Expiry: 01 JAN 2030
+                Authority: HM PASSPORT OFFICE
+                """ * 50
+                
+                files2 = {
+                    'file': ('different_person.pdf', different_person_doc, 'application/pdf')
+                }
+                data2 = {
+                    'document_type': 'passport',
+                    'visa_type': 'H-1B',
+                    'case_id': 'TEST-HYBRID-DIFFERENT-PERSON',
+                    'applicant_name': 'John Smith'  # Different from document
+                }
+                
+                response2 = requests.post(
+                    f"{API_BASE}/documents/analyze-with-ai",
+                    files=files2,
+                    data=data2,
+                    headers=headers
+                )
+                
+                if response2.status_code == 200:
+                    result2 = response2.json()
+                    
+                    # Should detect name mismatch
+                    is_valid2 = result2.get('valid', True)
+                    completeness2 = result2.get('completeness', 100)
+                    
+                    # Check for identity validation
+                    issues = result2.get('issues', [])
+                    has_identity_issue = any('nome' in str(issue).lower() or 'name' in str(issue).lower() 
+                                           for issue in issues)
+                    
+                    identity_properly_handled = not is_valid2 or completeness2 < 75 or has_identity_issue
+                    
+                    self.log_test(
+                        "Hybrid Edge Cases - Different Person",
+                        identity_properly_handled,
+                        f"Valid: {is_valid2}, Completeness: {completeness2}%, Identity Issue: {has_identity_issue}",
+                        {
+                            "is_valid": is_valid2,
+                            "completeness": completeness2,
+                            "has_identity_issue": has_identity_issue,
+                            "issues_count": len(issues)
+                        }
+                    )
+                else:
+                    self.log_test(
+                        "Hybrid Edge Cases - Different Person",
+                        False,
+                        f"HTTP {response2.status_code}",
+                        response2.text
+                    )
+            else:
+                self.log_test(
+                    "Hybrid Edge Cases - Invalid Document",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Hybrid Edge Cases",
+                False,
+                f"Exception: {str(e)}"
+            )
+
     def run_all_tests(self):
         """Run all comprehensive tests"""
         print("🚀 STARTING COMPREHENSIVE ECOSYSTEM VALIDATION")
