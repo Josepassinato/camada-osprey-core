@@ -28,9 +28,13 @@ interface SavedSession {
 }
 
 export const OwlAgent: React.FC = () => {
+  const navigate = useNavigate();
   const [selectedVisa, setSelectedVisa] = useState<string>('');
   const [selectedLanguage, setSelectedLanguage] = useState<string>('pt');
-  const navigate = useNavigate();
+  const [currentView, setCurrentView] = useState<'main' | 'auth' | 'saved-sessions'>('main');
+  const [authMode, setAuthMode] = useState<'login' | 'save-progress'>('login');
+  const [user, setUser] = useState<User | null>(null);
+  const [savedSessions, setSavedSessions] = useState<SavedSession[]>([]);
 
   const visaTypes = [
     { value: 'H-1B', label: 'H-1B - Trabalhador Especializado' },
