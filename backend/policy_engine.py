@@ -126,19 +126,19 @@ class PolicyEngine:
                     translation_cert = self.translation_gate.check_translation_certificate(extracted_text)
                     result["translation_certificate"] = translation_cert
             
-            # 5. Verificações de consistência (se contexto do caso disponível)
+            # 6. Verificações de consistência (se contexto do caso disponível)
             if case_context:
                 consistency_result = self._check_consistency(policy, result["fields"], case_context)
                 result["consistency"] = consistency_result
             
-            # 6. Cálculo de score e decisão
-            score, decision = self._calculate_score_and_decision(policy, result)
+            # 7. Cálculo de score e decisão (Phase 2 enhanced)
+            score, decision = self._calculate_score_and_decision_enhanced(policy, result)
             result["overall_score"] = score
             result["decision"] = decision
             result["status"] = "done"
             
-            # 7. Gerar mensagens de feedback
-            result["messages"] = self._generate_user_messages(result)
+            # 8. Gerar mensagens de feedback avançadas
+            result["messages"] = self._generate_user_messages_enhanced(result)
             
             return result
             
