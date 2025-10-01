@@ -3498,6 +3498,101 @@ class ComprehensiveEcosystemTester:
                 self.log_test(
                     "Validation Capabilities Endpoint",
                     False,
+    
+    def run_form_code_investigation(self):
+        """Run focused form_code mismatch investigation"""
+        print("🚨 STARTING CRITICAL FORM CODE MISMATCH INVESTIGATION")
+        print("=" * 80)
+        print("🎯 FOCUS: Debug why H-1B/F-1 selections create B-1/B-2 cases")
+        print("=" * 80)
+        
+        # Run the comprehensive form code investigation
+        self.test_form_code_mismatch_investigation()
+        
+        # Print focused summary
+        self.print_form_code_summary()
+    
+    def print_form_code_summary(self):
+        """Print form code investigation summary"""
+        print("\n" + "=" * 80)
+        print("🚨 FORM CODE MISMATCH INVESTIGATION SUMMARY")
+        print("=" * 80)
+        
+        form_code_tests = [t for t in self.test_results if "Form Code Mismatch" in t["test"]]
+        
+        if not form_code_tests:
+            print("❌ NO FORM CODE TESTS COMPLETED")
+            return
+        
+        total_tests = len(form_code_tests)
+        passed_tests = len([t for t in form_code_tests if t["success"]])
+        failed_tests = total_tests - passed_tests
+        
+        print(f"📊 FORM CODE TEST RESULTS:")
+        print(f"   Total Tests: {total_tests}")
+        print(f"   ✅ Passed: {passed_tests}")
+        print(f"   ❌ Failed: {failed_tests}")
+        print()
+        
+        print("📋 DETAILED RESULTS:")
+        for test in form_code_tests:
+            status = "✅" if test["success"] else "❌"
+            print(f"   {status} {test['test']}")
+            print(f"      {test['details']}")
+            if test.get("response_data"):
+                response_data = test["response_data"]
+                if isinstance(response_data, dict):
+                    for key, value in response_data.items():
+                        print(f"      {key}: {value}")
+            print()
+        
+        # Analysis and recommendations
+        print("🔍 ANALYSIS:")
+        
+        h1b_start_test = next((t for t in form_code_tests if "H-1B Start Test" in t["test"]), None)
+        if h1b_start_test:
+            if h1b_start_test["success"]:
+                print("   ✅ H-1B form_code creation is working correctly")
+            else:
+                print("   ❌ H-1B form_code creation is FAILING - this is the root cause!")
+                
+        f1_update_test = next((t for t in form_code_tests if "F-1 Update Test" in t["test"]), None)
+        if f1_update_test:
+            if f1_update_test["success"]:
+                print("   ✅ F-1 form_code updates are working correctly")
+            else:
+                print("   ❌ F-1 form_code updates are FAILING")
+        
+        b1b2_test = next((t for t in form_code_tests if "B-1/B-2 Default Test" in t["test"]), None)
+        if b1b2_test:
+            if b1b2_test["success"]:
+                print("   ✅ B-1/B-2 form_code is working correctly")
+            else:
+                print("   ❌ B-1/B-2 form_code is also failing")
+        
+        empty_test = next((t for t in form_code_tests if "Empty Form Code Test" in t["test"]), None)
+        if empty_test and empty_test.get("response_data"):
+            default_behavior = empty_test["response_data"].get("default_behavior")
+            if default_behavior == "B-1/B-2":
+                print("   ⚠️ System defaults to B-1/B-2 when no form_code provided")
+            else:
+                print(f"   ℹ️ System default behavior: {default_behavior}")
+        
+        print()
+        print("🎯 RECOMMENDATIONS:")
+        
+        if failed_tests == 0:
+            print("   ✅ Backend APIs are working correctly!")
+            print("   🔍 Issue is likely in FRONTEND code (SelectForm.tsx)")
+            print("   📝 Check frontend form selection logic")
+        elif failed_tests > 0:
+            print("   ❌ Backend APIs have issues that need fixing:")
+            failed_test_names = [t["test"] for t in form_code_tests if not t["success"]]
+            for test_name in failed_test_names:
+                print(f"      • {test_name}")
+            print("   🔧 Fix backend form_code handling before testing frontend")
+        
+        print("=" * 80)
                     f"HTTP {response.status_code}",
                     response.text[:200]
                 )
