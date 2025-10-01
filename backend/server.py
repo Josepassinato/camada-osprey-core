@@ -5653,8 +5653,8 @@ async def analyze_document_with_professional_api(
                 "dra_paula_assessment": "❌ Híbrido: Qualidade de arquivo inadequada"
             }
         
-        # HYBRID PROFESSIONAL ANALYSIS - Google Vision API + Dr. Miguel
-        logger.info(f"🔬 Analyzing document with HYBRID system (Google Vision API + Dr. Miguel)")
+        # HYBRID PROFESSIONAL ANALYSIS - Google Document AI + Dr. Miguel
+        logger.info(f"🔬 Analyzing document with HYBRID system (Google Document AI + Dr. Miguel)")
         
         analysis_result = await hybrid_validator.analyze_document(
             file_content=file_content,
