@@ -774,10 +774,10 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Enhanced Dr. Miguel Prompt - 7-Layer Forensic Analysis"
     - "Case Finalizer Frontend UI Integration Testing"
-    - "TESTE FINAL - Case Finalizer Completo Após Correções"
   stuck_tasks:
-    - "TESTE FINAL - Case Finalizer Completo Após Correções"
+    - "Enhanced Dr. Miguel Prompt - 7-Layer Forensic Analysis"
   test_all: false
   test_priority: "high_first"
 
