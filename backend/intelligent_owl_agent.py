@@ -320,7 +320,7 @@ class IntelligentOwlAgent:
         
         # Get first field guidance
         first_field = relevant_fields[0] if relevant_fields else None
-        first_guidance = await self._get_field_guidance(first_field, visa_type, user_language) if first_field else None
+        first_guidance = await self.get_field_guidance(first_field.field_id, visa_type, user_language) if first_field else None
         
         return {
             "session_id": session_id,
