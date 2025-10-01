@@ -6269,38 +6269,6 @@ async def download_master_packet(job_id: str, current_user = Depends(get_current
         logger.error(f"Error downloading master packet: {e}")
         raise HTTPException(status_code=500, detail="Erro ao baixar master packet")
 
-@api_router.get("/cases/{case_id}/finalize/capabilities")
-async def get_case_finalizer_capabilities(case_id: str, current_user = Depends(get_current_user)):
-    """Retorna capacidades disponíveis no Case Finalizer completo"""
-    try:
-        from case_finalizer_complete import case_finalizer_complete
-        
-        return {
-            "status": "success",
-            "capabilities": {
-                "supported_scenarios": list(case_finalizer_complete.supported_scenarios.keys()),
-                "features": {
-                    "pdf_merging": True,
-                    "instruction_templates": True,
-                    "advanced_audit": True,
-                    "fee_calculator": True,
-                    "address_lookup": True,
-                    "timeline_estimation": True,
-                    "quality_scoring": True
-                },
-                "supported_languages": ["pt", "en"],
-                "postage_options": ["USPS", "FedEx", "UPS"],
-                "file_formats": ["PDF"],
-                "max_file_size_mb": 100
-            },
-            "version": "2.0.0-complete",
-            "timestamp": datetime.utcnow().isoformat()
-        }
-        
-    except Exception as e:
-        logger.error(f"Error getting capabilities: {e}")
-        raise HTTPException(status_code=500, detail="Erro ao obter capacidades")
-
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
