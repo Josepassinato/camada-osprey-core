@@ -338,6 +338,7 @@ class ProductionVerificationTester:
         # Test start session
         try:
             session_data = {
+                "case_id": self.auto_case_id if self.auto_case_id else "OWL-TEST-CASE",
                 "visa_type": "H-1B",
                 "language": "pt"
             }
