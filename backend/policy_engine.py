@@ -517,7 +517,8 @@ class PolicyEngine:
                         field_scores.append(0.0)
             
             field_extraction_score = sum(field_scores) / len(field_scores) if field_scores else 1.0
-            scores.append(field_extraction_score * scoring["field_extraction_weight"])
+            field_extraction_weight = scoring.get("field_extraction_weight", 0.05)  # Default weight
+            scores.append(field_extraction_score * field_extraction_weight)
         
         # 5. Score de consistência
         consistency_checks = result["consistency"]
