@@ -3159,33 +3159,48 @@ async def review_applicant_letter(request: dict):
         
         system_prompt = f"""
         Você é a Dra. Paula, especialista em processos imigratórios.
-        Analise a carta escrita pelo aplicante para o visto {visa_type} e gere perguntas específicas para completar as informações necessárias.
+        Analise a carta escrita pelo aplicante para o visto {visa_type}.
         
-        NOVO FLUXO OBJETICO:
-        1. Leia a carta do aplicante cuidadosamente
-        2. Compare com as exigências do visto {visa_type}
-        3. Identifique informações que estão FALTANDO ou IMPRECISAS
-        4. Gere 3-5 perguntas ESPECÍFICAS e OBJETIVAS para obter essas informações
-        5. As perguntas devem ser claras e diretas, focadas nos critérios do visto
+        FLUXO INTELIGENTE:
+        1. Primeiro, avalie se a carta já atende TODOS os critérios essenciais do visto {visa_type}
+        2. Se a carta ESTIVER SATISFATÓRIA (≥85% dos pontos cobertos):
+           - Retorne status "ready_for_formatting" 
+           - A carta será formatada diretamente no padrão oficial
+        3. Se a carta ESTIVER INCOMPLETA (<85% dos pontos):
+           - Retorne status "needs_questions"
+           - Gere 3-5 perguntas específicas e objetivas para completar
         
-        DIRETIVAS PARA {visa_type}:
+        CRITÉRIOS ESSENCIAIS PARA {visa_type}:
         {yaml.dump(visa_profile, default_flow_style=False, allow_unicode=True)}
         
         CARTA DO APLICANTE:
         {applicant_letter}
         
-        Responda em JSON seguindo este formato:
+        AVALIE E RESPONDA EM JSON:
+        
+        SE SATISFATÓRIA (≥85%):
         {{
             "review": {{
                 "visa_type": "{visa_type}",
-                "coverage_score": 0.0,
+                "coverage_score": 0.9,
+                "status": "ready_for_formatting",
+                "satisfied_criteria": ["critério 1", "critério 2"],
+                "next_action": "format_official_letter"
+            }}
+        }}
+        
+        SE INCOMPLETA (<85%):
+        {{
+            "review": {{
+                "visa_type": "{visa_type}",
+                "coverage_score": 0.6,
                 "status": "needs_questions",
                 "missing_areas": ["área 1", "área 2"],
                 "questions": [
                     {{
                         "id": 1,
                         "question": "Pergunta específica e objetiva?",
-                        "why_needed": "Explicação de por que essa informação é importante para o visto {visa_type}",
+                        "why_needed": "Por que essa informação é importante para o {visa_type}",
                         "category": "education/experience/motivation/etc"
                     }}
                 ],
