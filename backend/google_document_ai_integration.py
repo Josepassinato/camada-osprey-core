@@ -516,7 +516,7 @@ class HybridDocumentValidator:
     """Hybrid validator combining Google Vision API + Dr. Miguel"""
     
     def __init__(self):
-        self.google_processor = GoogleVisionAPIProcessor()
+        self.google_processor = GoogleDocumentAIProcessor()
         self.dr_miguel = None
         
     async def _get_dr_miguel(self):
