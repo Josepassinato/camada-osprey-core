@@ -371,13 +371,6 @@ class GoogleDocumentAIProcessor:
         except Exception as e:
             logger.error(f"❌ Vision API processing error: {e}")
             raise e
-                "file_info": {
-                    "filename": filename,
-                    "size_bytes": len(file_content),
-                    "processed_at": datetime.now().isoformat(),
-                    "mime_type": mime_type
-                }
-            }
             
             if response.status_code != 200:
                 logger.error(f"❌ Google Vision API error: {response.status_code} - {response.text}")
