@@ -259,8 +259,9 @@ class CarlosH1BSimulator:
             
             if response.status_code == 200:
                 data = response.json()
-                stored_basic_data = data.get('basic_data', {})
-                progress = data.get('progress_percentage', 0)
+                case_data = data.get('case', {})
+                stored_basic_data = case_data.get('basic_data', {})
+                progress = case_data.get('progress_percentage', 0)
                 
                 success = (
                     stored_basic_data.get('full_name') == carlos_data["nome_completo"] and
