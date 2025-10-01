@@ -137,31 +137,54 @@ export const OwlAgent: React.FC = () => {
     );
   }
 
+  // Main view
   return (
-    <OwlSessionProvider>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="container mx-auto px-4 py-12">
-          {/* Hero Section */}
-          <div className="text-center mb-12">
-            <div className="flex items-center justify-center gap-4 mb-6">
-              <div className="w-20 h-20 bg-white rounded-full shadow-lg flex items-center justify-center">
-                <span className="text-5xl">🦉</span>
-              </div>
-              <div className="text-left">
-                <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                  Agente Coruja
-                </h1>
-                <p className="text-xl text-blue-600 font-medium">
-                  Sistema Inteligente de Questionários
-                </p>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl">
+        <Card className="shadow-2xl border-0">
+          <CardHeader className="text-center space-y-4">
+            <div className="text-8xl animate-bounce">🦉</div>
+            <CardTitle className="text-3xl font-bold text-gray-800">
+              Agente Coruja
+            </CardTitle>
+            <CardDescription className="text-lg text-gray-600">
+              Sistema Inteligente de Questionários para Imigração
+            </CardDescription>
+            <div className="flex flex-wrap gap-2 justify-center">
+              <Badge variant="secondary" className="text-xs">🤖 IA Inteligente</Badge>
+              <Badge variant="secondary" className="text-xs">🌐 Multi-idioma</Badge>
+              <Badge variant="secondary" className="text-xs">📋 USCIS Forms</Badge>
+              <Badge variant="secondary" className="text-xs">💾 Salvamento Automático</Badge>
             </div>
-            
-            <p className="text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
-              Nosso assistente inteligente conduz você através de questionários personalizados,
-              valida suas respostas em tempo real e gera formulários USCIS oficiais automaticamente.
-            </p>
-          </div>
+          </CardHeader>
+
+          <CardContent className="space-y-6">
+            {/* Quick Access Buttons */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <Button
+                variant="outline"
+                onClick={handleAccessSavedApplications}
+                className="h-20 flex flex-col items-center justify-center space-y-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50"
+              >
+                <div className="text-2xl">📂</div>
+                <div className="text-sm font-medium">Minhas Aplicações Salvas</div>
+              </Button>
+              
+              <Button
+                variant="outline"
+                onClick={handleSaveProgressLogin}
+                className="h-20 flex flex-col items-center justify-center space-y-2 border-green-200 hover:border-green-400 hover:bg-green-50"
+              >
+                <div className="text-2xl">💾</div>
+                <div className="text-sm font-medium">Salvar Progresso</div>
+              </Button>
+            </div>
+
+            {/* New Application Section */}
+            <div className="border-t pt-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">
+                Iniciar Nova Aplicação
+              </h3>
 
           {/* Features Grid */}
           <div className="grid md:grid-cols-3 gap-6 mb-12">
