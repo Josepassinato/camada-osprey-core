@@ -2044,31 +2044,144 @@ class ComprehensiveEcosystemTester:
                 f"Exception: {str(e)}"
             )
 
+    def test_phase2_phase3_enhanced_ai_analysis(self):
+        """Test Phase 2&3 Enhanced AI Analysis endpoint"""
+        print("🤖 TESTING PHASE 2&3 ENHANCED AI ANALYSIS...")
+        
+        # Create test file content
+        test_content = b"Test passport document content for enhanced AI analysis. " * 100  # Make it larger than 1000 bytes
+        
+        files = {
+            'file': ('test_passport.pdf', test_content, 'application/pdf')
+        }
+        data = {
+            'document_type': 'PASSPORT_ID_PAGE',
+            'case_id': 'TEST-ENHANCED-AI'
+        }
+        
+        try:
+            # Remove Content-Type header for multipart form data
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai-enhanced",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check for Phase 2&3 features
+                has_validation = 'validation_result' in result
+                has_language_analysis = 'language_analysis' in result
+                has_phase2_features = 'phase_2_features' in result
+                has_phase3_features = 'phase_3_features' in result
+                
+                success = has_validation or has_language_analysis or has_phase2_features
+                
+                self.log_test(
+                    "Phase 2&3 - Enhanced AI Analysis",
+                    success,
+                    f"Validation: {has_validation}, Language: {has_language_analysis}, P2: {has_phase2_features}, P3: {has_phase3_features}",
+                    {
+                        "validation_present": has_validation,
+                        "language_analysis_present": has_language_analysis,
+                        "phase2_features": has_phase2_features,
+                        "phase3_features": has_phase3_features
+                    }
+                )
+            else:
+                self.log_test(
+                    "Phase 2&3 - Enhanced AI Analysis",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test(
+                "Phase 2&3 - Enhanced AI Analysis",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_validation_capabilities_endpoint(self):
+        """Test validation capabilities endpoint"""
+        print("📋 TESTING VALIDATION CAPABILITIES ENDPOINT...")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/documents/validation-capabilities")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                capabilities = data.get('capabilities', {})
+                phase2_features = capabilities.get('phase_2_features', {})
+                phase3_features = capabilities.get('phase_3_features', {})
+                
+                success = (
+                    data.get('status') == 'success' and
+                    len(phase2_features) > 0 and
+                    len(phase3_features) > 0
+                )
+                
+                self.log_test(
+                    "Validation Capabilities Endpoint",
+                    success,
+                    f"Status: {data.get('status')}, P2 features: {len(phase2_features)}, P3 features: {len(phase3_features)}",
+                    {
+                        "phase2_features": list(phase2_features.keys()),
+                        "phase3_features": list(phase3_features.keys()),
+                        "version": data.get('version')
+                    }
+                )
+            else:
+                self.log_test(
+                    "Validation Capabilities Endpoint",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test(
+                "Validation Capabilities Endpoint",
+                False,
+                f"Exception: {str(e)}"
+            )
+
     def run_all_tests(self):
-        """Run comprehensive ecosystem validation tests"""
-        print("🌟 VALIDAÇÃO FINAL COMPLETA DO ECOSSISTEMA - PHASE 2&3 ENHANCED")
+        """URGENT: Test Phase 2&3 endpoints after router registration fix"""
+        print("🚨 URGENT: PHASE 2&3 ENDPOINTS ACCESSIBILITY TESTING AFTER ROUTER FIX")
         print("=" * 80)
         print(f"Backend URL: {BACKEND_URL}")
         print(f"API Base: {API_BASE}")
         print("=" * 80)
         print()
         
-        # NEW: PHASE 2 & 3 COMPREHENSIVE TESTING
-        print("🚀 TESTING PHASE 2 & 3 DOCUMENT VALIDATOR ENHANCEMENTS...")
+        # PRIORITY 1: Test Phase 2&3 endpoints accessibility (URGENT)
+        print("🎯 PRIORITY 1: TESTING PHASE 2&3 ENDPOINTS ACCESSIBILITY...")
         print("-" * 60)
+        self.test_phase2_phase3_endpoints_accessibility()
+        print()
         
-        # Phase 2 Tests
+        # PRIORITY 2: Test individual Phase 2&3 components
+        print("🔧 PRIORITY 2: TESTING INDIVIDUAL PHASE 2&3 COMPONENTS...")
+        print("-" * 60)
         self.test_phase2_field_extraction_engine()
         self.test_phase2_translation_gate_system()
-        
-        # Phase 3 Tests  
         self.test_phase3_document_classifier()
         self.test_phase3_cross_document_consistency()
-        
-        # Integration Tests
-        self.test_phase23_enhanced_policy_engine()
-        self.test_phase23_comprehensive_analysis_endpoint()
+        self.test_phase3_multi_document_validation()
         self.test_validation_capabilities_endpoint()
+        self.test_phase2_phase3_enhanced_ai_analysis()
+        print()
+        
+        # PRIORITY 3: Quick integration tests
+        print("⚡ PRIORITY 3: QUICK INTEGRATION TESTS...")
+        print("-" * 60)
+        self.test_policy_engine_fase1()
+        self.test_system_integration_form_code()
         
         print()
         print("=" * 60)
