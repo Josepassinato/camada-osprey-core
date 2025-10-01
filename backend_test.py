@@ -6658,7 +6658,7 @@ class ComprehensiveEcosystemTester:
         # FIRST: GOOGLE VISION API REAL INTEGRATION TESTING - CRITICAL USER REQUEST
         print("\n🔍 GOOGLE VISION API REAL INTEGRATION TESTING - CRITICAL USER REQUEST")
         print("=" * 70)
-        self.test_google_vision_api_real_integration()
+        self.test_google_vision_api_real_integration_comprehensive()
         
         # SECOND: GOOGLE VISION API + DR. MIGUEL HYBRID SYSTEM TESTS - REAL API KEY TESTING
         print("\n🔬 GOOGLE VISION API + DR. MIGUEL HYBRID SYSTEM TESTS")
