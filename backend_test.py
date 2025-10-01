@@ -7224,6 +7224,505 @@ class ComprehensiveEcosystemTester:
                 f"Exception: {str(e)}"
             )
 
+    def test_google_vision_api_real_integration_user_request(self):
+        """Test REAL Google Vision API integration (not mock) as requested by user"""
+        print("🔍 TESTING GOOGLE VISION API REAL INTEGRATION - USER REQUEST...")
+        
+        # Create a realistic passport document for testing
+        passport_content = b"""
+        PASSPORT
+        REPUBLIC OF BRAZIL
+        
+        Type: P
+        Country Code: BRA
+        Passport No: BR987654321
+        
+        Surname: SILVA
+        Given Names: CARLOS EDUARDO
+        Nationality: BRAZILIAN
+        Date of Birth: 15 MAR 1985
+        Sex: M
+        Place of Birth: RIO DE JANEIRO, BRAZIL
+        Date of Issue: 10 JAN 2020
+        Date of Expiry: 09 JAN 2030
+        Authority: DPF
+        
+        MRZ:
+        P<BRASILVA<<CARLOS<EDUARDO<<<<<<<<<<<<<<<<<<<<<<
+        BR9876543<BRA8503159M3001096<<<<<<<<<<<<<<<<<<4
+        """ * 100  # Make it large enough to be realistic
+        
+        files = {
+            'file': ('passport_carlos_silva.pdf', passport_content, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-VISION-API-REAL',
+            'applicant_name': 'Carlos Eduardo Silva'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            start_time = time.time()
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers,
+                timeout=30
+            )
+            processing_time = (time.time() - start_time) * 1000
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check if real API is being used (not mock)
+                extracted_data = result.get('extracted_data', {})
+                google_ai_data = extracted_data.get('google_document_ai_data', {})
+                
+                api_enabled = google_ai_data.get('api_enabled', False)
+                mock_mode = google_ai_data.get('mock_mode', True)
+                processor_type = google_ai_data.get('processor_type', 'mock')
+                
+                # User claims API is now working with status 200
+                is_real_api = api_enabled and not mock_mode and processor_type == "vision_api"
+                
+                # Check OCR quality
+                extracted_text = google_ai_data.get('extracted_text', '')
+                entities_count = google_ai_data.get('entities_count', 0)
+                google_confidence = google_ai_data.get('confidence', 0)
+                
+                # Check hybrid system
+                dr_miguel_analysis = extracted_data.get('dr_miguel_analysis', {})
+                dr_miguel_confidence = dr_miguel_analysis.get('confidence', 0)
+                combined_confidence = extracted_data.get('processing_stats', {}).get('combined_confidence', 0)
+                
+                # Performance check
+                performance_ok = processing_time < 5000  # Under 5 seconds
+                
+                self.log_test(
+                    "Google Vision API Real Integration - User Request",
+                    is_real_api,
+                    f"API Enabled: {api_enabled}, Mock Mode: {mock_mode}, Processor: {processor_type}, OCR Quality: {google_confidence}%, Entities: {entities_count}, Combined: {combined_confidence}%, Time: {processing_time:.0f}ms",
+                    {
+                        "api_enabled": api_enabled,
+                        "mock_mode": mock_mode,
+                        "processor_type": processor_type,
+                        "google_confidence": google_confidence,
+                        "entities_count": entities_count,
+                        "dr_miguel_confidence": dr_miguel_confidence,
+                        "combined_confidence": combined_confidence,
+                        "processing_time_ms": processing_time,
+                        "performance_ok": performance_ok,
+                        "extracted_text_length": len(extracted_text)
+                    }
+                )
+                
+                # Test OCR Real Quality
+                ocr_quality_good = (
+                    google_confidence >= 70 and  # Good OCR confidence
+                    entities_count >= 5 and      # Multiple entities detected
+                    len(extracted_text) > 100    # Substantial text extracted
+                )
+                
+                self.log_test(
+                    "OCR Real Quality Test - User Request",
+                    ocr_quality_good,
+                    f"OCR Confidence: {google_confidence}%, Entities: {entities_count}, Text Length: {len(extracted_text)} chars",
+                    {
+                        "ocr_confidence": google_confidence,
+                        "entities_detected": entities_count,
+                        "text_extracted": len(extracted_text),
+                        "baseline_comparison": "Mock baseline: 94% confidence, 8 entities"
+                    }
+                )
+                
+                # Test Dr. Miguel with Real Data
+                dr_miguel_working = (
+                    dr_miguel_confidence > 0 and
+                    dr_miguel_analysis.get('verdict') in ['APROVADO', 'REJEITADO', 'NECESSITA_REVISÃO']
+                )
+                
+                self.log_test(
+                    "Dr. Miguel with Real Data - User Request",
+                    dr_miguel_working,
+                    f"Dr. Miguel Confidence: {dr_miguel_confidence}%, Verdict: {dr_miguel_analysis.get('verdict')}, Combined: {combined_confidence}%",
+                    {
+                        "dr_miguel_confidence": dr_miguel_confidence,
+                        "verdict": dr_miguel_analysis.get('verdict'),
+                        "combined_confidence": combined_confidence,
+                        "hybrid_formula": "40% Vision API + 60% Dr. Miguel"
+                    }
+                )
+                
+                # Test Performance Real
+                self.log_test(
+                    "Performance Real Test - User Request",
+                    performance_ok,
+                    f"Processing Time: {processing_time:.0f}ms (target: <5000ms)",
+                    {
+                        "processing_time_ms": processing_time,
+                        "target_ms": 5000,
+                        "performance_acceptable": performance_ok,
+                        "stability": "Connection stable" if response.status_code == 200 else "Connection issues"
+                    }
+                )
+                
+                # Test Cost-Benefit Analysis
+                cost_benefit_ready = (
+                    api_enabled and  # API configured
+                    not mock_mode and  # Not using free mock
+                    processor_type in ['vision_api', 'document_ai']  # Real processor
+                )
+                
+                self.log_test(
+                    "Cost-Benefit Analysis - User Request",
+                    cost_benefit_ready,
+                    f"Real API Active: {not mock_mode}, Cost Model: $1.50/1000 docs, Quality vs Mock: {google_confidence}% vs 94%",
+                    {
+                        "real_api_active": not mock_mode,
+                        "cost_per_1000_docs": "$1.50",
+                        "quality_vs_mock": f"{google_confidence}% vs 94%",
+                        "cost_justified": google_confidence >= 90  # Better than mock
+                    }
+                )
+                
+            else:
+                self.log_test(
+                    "Google Vision API Real Integration - User Request",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Google Vision API Real Integration - User Request",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_document_validation_scenarios_user_request(self):
+        """Test various document validation scenarios as requested"""
+        print("📋 TESTING DOCUMENT VALIDATION SCENARIOS - USER REQUEST...")
+        
+        # Test 1: Valid Document - Should approve with high confidence
+        self.test_valid_document_scenario_user_request()
+        
+        # Test 2: Invalid Document - Should reject appropriately  
+        self.test_invalid_document_scenario_user_request()
+        
+        # Test 3: Wrong Person - Should detect discrepancy
+        self.test_wrong_person_scenario_user_request()
+        
+        # Test 4: Wrong Type - Should identify problem
+        self.test_wrong_type_scenario_user_request()
+    
+    def test_valid_document_scenario_user_request(self):
+        """Test valid document should approve with high confidence"""
+        print("✅ Testing Valid Document Scenario - User Request...")
+        
+        valid_passport = b"""
+        PASSPORT
+        UNITED STATES OF AMERICA
+        
+        Type: P
+        Country Code: USA
+        Passport No: 123456789
+        
+        Surname: SMITH
+        Given Names: JOHN MICHAEL
+        Nationality: UNITED STATES OF AMERICA
+        Date of Birth: 15 JAN 1990
+        Sex: M
+        Place of Birth: NEW YORK, NY, USA
+        Date of Issue: 10 MAR 2020
+        Date of Expiry: 09 MAR 2030
+        Authority: U.S. DEPARTMENT OF STATE
+        
+        MRZ:
+        P<USASMITH<<JOHN<MICHAEL<<<<<<<<<<<<<<<<<<<<<<
+        123456789<USA9001159M3003096<<<<<<<<<<<<<<<<<<4
+        """ * 80
+        
+        files = {
+            'file': ('valid_passport_john_smith.pdf', valid_passport, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-VALID-DOC-USER',
+            'applicant_name': 'John Michael Smith'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                completeness = result.get('completeness', 0)
+                validity = result.get('validity', False)
+                
+                # Valid document should have high confidence
+                is_approved = completeness >= 75 and validity
+                
+                self.log_test(
+                    "Valid Document Scenario - User Request",
+                    is_approved,
+                    f"Completeness: {completeness}%, Validity: {validity}",
+                    {
+                        "completeness": completeness,
+                        "validity": validity,
+                        "expected": "Should approve with high confidence (≥75%)"
+                    }
+                )
+            else:
+                self.log_test(
+                    "Valid Document Scenario - User Request",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Valid Document Scenario - User Request",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_invalid_document_scenario_user_request(self):
+        """Test invalid document should reject appropriately"""
+        print("❌ Testing Invalid Document Scenario - User Request...")
+        
+        invalid_document = b"INVALID DOCUMENT - NOT A REAL PASSPORT" * 50
+        
+        files = {
+            'file': ('invalid_document.pdf', invalid_document, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-INVALID-DOC-USER'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                completeness = result.get('completeness', 0)
+                validity = result.get('validity', True)
+                
+                # Invalid document should be rejected
+                is_rejected = completeness < 50 or not validity
+                
+                self.log_test(
+                    "Invalid Document Scenario - User Request",
+                    is_rejected,
+                    f"Completeness: {completeness}%, Validity: {validity}",
+                    {
+                        "completeness": completeness,
+                        "validity": validity,
+                        "expected": "Should reject with low confidence (<50%)"
+                    }
+                )
+            else:
+                self.log_test(
+                    "Invalid Document Scenario - User Request",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Invalid Document Scenario - User Request",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_wrong_person_scenario_user_request(self):
+        """Test document from wrong person should detect discrepancy"""
+        print("👤 Testing Wrong Person Scenario - User Request...")
+        
+        wrong_person_passport = b"""
+        PASSPORT
+        REPUBLIC OF BRAZIL
+        
+        Type: P
+        Country Code: BRA
+        Passport No: BR555666777
+        
+        Surname: SANTOS
+        Given Names: MARIA FERNANDA
+        Nationality: BRAZILIAN
+        Date of Birth: 20 FEB 1988
+        Sex: F
+        Place of Birth: SAO PAULO, BRAZIL
+        Date of Issue: 15 JUN 2019
+        Date of Expiry: 14 JUN 2029
+        Authority: DPF
+        
+        MRZ:
+        P<BRASANTOS<<MARIA<FERNANDA<<<<<<<<<<<<<<<<<<<
+        BR5556667<BRA8802209F2906146<<<<<<<<<<<<<<<<<<8
+        """ * 80
+        
+        files = {
+            'file': ('passport_maria_santos.pdf', wrong_person_passport, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-WRONG-PERSON-USER',
+            'applicant_name': 'Carlos Eduardo Silva'  # Different person
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                completeness = result.get('completeness', 0)
+                validity = result.get('validity', True)
+                issues = result.get('issues', [])
+                
+                # Should detect name mismatch
+                name_mismatch_detected = (
+                    completeness < 75 or  # Lower confidence due to mismatch
+                    not validity or
+                    any('nome' in issue.lower() or 'name' in issue.lower() or 'pessoa' in issue.lower() for issue in issues)
+                )
+                
+                self.log_test(
+                    "Wrong Person Scenario - User Request",
+                    name_mismatch_detected,
+                    f"Completeness: {completeness}%, Validity: {validity}, Issues: {len(issues)}",
+                    {
+                        "completeness": completeness,
+                        "validity": validity,
+                        "issues_count": len(issues),
+                        "expected": "Should detect Maria Santos passport doesn't belong to Carlos Silva"
+                    }
+                )
+            else:
+                self.log_test(
+                    "Wrong Person Scenario - User Request",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Wrong Person Scenario - User Request",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_wrong_type_scenario_user_request(self):
+        """Test wrong document type should identify problem"""
+        print("📄 Testing Wrong Type Scenario - User Request...")
+        
+        birth_certificate = b"""
+        BIRTH CERTIFICATE
+        State of California
+        Department of Public Health
+        
+        This is to certify that:
+        Name: John Smith
+        Date of Birth: January 15, 1990
+        Place of Birth: Los Angeles, California
+        Father: Robert Smith
+        Mother: Mary Smith
+        
+        Registrar Signature: [Signature]
+        Date Issued: March 10, 2024
+        Certificate Number: BC-2024-001234
+        """ * 80
+        
+        files = {
+            'file': ('birth_certificate.pdf', birth_certificate, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',  # WRONG - claiming birth cert is passport
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-WRONG-TYPE-USER',
+            'applicant_name': 'John Smith'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                completeness = result.get('completeness', 0)
+                validity = result.get('validity', True)
+                issues = result.get('issues', [])
+                
+                # Should detect type mismatch
+                type_mismatch_detected = (
+                    completeness < 50 or  # Low confidence due to wrong type
+                    not validity or
+                    any('tipo' in issue.lower() or 'type' in issue.lower() for issue in issues)
+                )
+                
+                self.log_test(
+                    "Wrong Type Scenario - User Request",
+                    type_mismatch_detected,
+                    f"Completeness: {completeness}%, Validity: {validity}, Issues: {len(issues)}",
+                    {
+                        "completeness": completeness,
+                        "validity": validity,
+                        "issues_count": len(issues),
+                        "expected": "Should detect birth certificate is not a passport"
+                    }
+                )
+            else:
+                self.log_test(
+                    "Wrong Type Scenario - User Request",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Wrong Type Scenario - User Request",
+                False,
+                f"Exception: {str(e)}"
+            )
+
     def run_all_tests(self):
         """Run all comprehensive tests"""
         print("🚀 STARTING COMPREHENSIVE ECOSYSTEM VALIDATION")
