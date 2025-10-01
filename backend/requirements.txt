@@ -27,3 +27,4 @@ emergentintegrations==0.1.0
 bcrypt>=4.0.1
 PyYAML>=6.0.1
 PyPDF2>=3.0.1
+Pillow>=10.0.0
