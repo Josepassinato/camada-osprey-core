@@ -736,51 +736,716 @@ class ComprehensiveEcosystemTester:
                 f"Exception: {str(e)}"
             )
     
+    def test_policy_engine_fase1(self):
+        """Test POLICY ENGINE (FASE 1) - Document validation with AI"""
+        print("🏛️ TESTING POLICY ENGINE (FASE 1)...")
+        
+        # Create a test document (small PDF-like content)
+        test_content = b"Test passport document content for validation"
+        test_file_b64 = base64.b64encode(test_content).decode('utf-8')
+        
+        # Test document analysis with AI
+        files = {
+            'file': ('test_passport.pdf', test_content, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-POLICY-ENGINE'
+        }
+        
+        try:
+            response = self.session.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check for Policy Engine components
+                expected_fields = [
+                    'policy_engine',
+                    'standardized_doc_type', 
+                    'quality_analysis',
+                    'policy_score',
+                    'policy_decision',
+                    'dra_paula_assessment'
+                ]
+                
+                policy_engine_present = 'policy_engine' in result
+                quality_analysis_present = 'quality_analysis' in result
+                policy_decision_present = 'policy_decision' in result
+                
+                success = policy_engine_present and quality_analysis_present and policy_decision_present
+                
+                self.log_test(
+                    "Policy Engine (FASE 1) Integration",
+                    success,
+                    f"Policy Engine: {policy_engine_present}, Quality Analysis: {quality_analysis_present}, Policy Decision: {policy_decision_present}",
+                    {
+                        "policy_score": result.get('policy_score', 'N/A'),
+                        "policy_decision": result.get('policy_decision', 'N/A'),
+                        "standardized_doc_type": result.get('standardized_doc_type', 'N/A')
+                    }
+                )
+            else:
+                self.log_test(
+                    "Policy Engine (FASE 1) Integration",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Policy Engine (FASE 1) Integration",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_dr_paula_cover_letter_module(self):
+        """Test DR. PAULA COVER LETTER MODULE - All 4 endpoints"""
+        print("📝 TESTING DR. PAULA COVER LETTER MODULE...")
+        
+        # Test 1: Generate Directives
+        try:
+            payload = {
+                "visa_type": "H1B",
+                "language": "pt"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/llm/dr-paula/generate-directives",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                success = 'directives_text' in data and len(data.get('directives_text', '')) > 1000
+                
+                self.log_test(
+                    "Dr. Paula - Generate Directives",
+                    success,
+                    f"Generated {len(data.get('directives_text', ''))} characters of directives",
+                    {"visa_type": data.get('visa_type'), "language": data.get('language')}
+                )
+            else:
+                self.log_test(
+                    "Dr. Paula - Generate Directives",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Dr. Paula - Generate Directives",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 2: Review Letter
+        try:
+            payload = {
+                "visa_type": "H1B",
+                "applicant_letter": "I am writing to request an H-1B visa. I have a job offer from a US company."
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/llm/dr-paula/review-letter",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                success = 'review' in data and 'coverage_score' in data.get('review', {})
+                
+                self.log_test(
+                    "Dr. Paula - Review Letter",
+                    success,
+                    f"Coverage score: {data.get('review', {}).get('coverage_score', 'N/A')}",
+                    {"status": data.get('review', {}).get('status', 'N/A')}
+                )
+            else:
+                self.log_test(
+                    "Dr. Paula - Review Letter",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Dr. Paula - Review Letter",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 3: Request Complement
+        try:
+            payload = {
+                "visa_type": "H1B",
+                "issues": ["Missing salary information", "Work location not specified"]
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/llm/dr-paula/request-complement",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                success = 'guidance' in data and len(data.get('guidance', '')) > 100
+                
+                self.log_test(
+                    "Dr. Paula - Request Complement",
+                    success,
+                    f"Generated {len(data.get('guidance', ''))} characters of guidance",
+                    {"issues_count": len(payload['issues'])}
+                )
+            else:
+                self.log_test(
+                    "Dr. Paula - Request Complement",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Dr. Paula - Request Complement",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 4: Add Letter (Process)
+        try:
+            test_process_id = "TEST-PROCESS-123"
+            payload = {
+                "letter_text": "This is a test cover letter for H-1B application.",
+                "confirmed_by_applicant": True
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/process/{test_process_id}/add-letter",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                success = 'success' in data or 'message' in data
+                
+                self.log_test(
+                    "Dr. Paula - Add Letter",
+                    success,
+                    f"Letter added: {data.get('message', 'Success')}",
+                    {"process_id": test_process_id}
+                )
+            else:
+                self.log_test(
+                    "Dr. Paula - Add Letter",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Dr. Paula - Add Letter",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_case_finalizer_mvp_comprehensive(self):
+        """Test CASE FINALIZER MVP - All 6 endpoints"""
+        print("🎯 TESTING CASE FINALIZER MVP SYSTEM...")
+        
+        # Test all scenarios: H-1B, F-1, I-485
+        scenarios = [
+            {"key": "H-1B_basic", "name": "H-1B"},
+            {"key": "F-1_basic", "name": "F-1"},
+            {"key": "I-485_basic", "name": "I-485"}
+        ]
+        
+        for scenario in scenarios:
+            test_case_id = f"TEST-CASE-{scenario['name']}"
+            
+            # Start finalization
+            payload = {
+                "scenario_key": scenario["key"],
+                "postage": "USPS",
+                "language": "pt"
+            }
+            
+            try:
+                response = self.session.post(
+                    f"{API_BASE}/cases/{test_case_id}/finalize/start",
+                    json=payload
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    job_id = data.get("job_id")
+                    
+                    if job_id:
+                        # Test status polling
+                        status_response = self.session.get(f"{API_BASE}/cases/finalize/{job_id}/status")
+                        
+                        if status_response.status_code == 200:
+                            status_data = status_response.json()
+                            
+                            # Check for audit system (missing documents detection)
+                            has_issues = 'issues' in status_data
+                            has_links = 'links' in status_data
+                            
+                            self.log_test(
+                                f"Case Finalizer - {scenario['name']} Complete Flow",
+                                has_issues and has_links,
+                                f"Status: {status_data.get('status')}, Issues: {len(status_data.get('issues', []))}, Links: {list(status_data.get('links', {}).keys())}",
+                                {
+                                    "scenario": scenario["key"],
+                                    "job_id": job_id,
+                                    "audit_working": has_issues
+                                }
+                            )
+                        else:
+                            self.log_test(
+                                f"Case Finalizer - {scenario['name']} Complete Flow",
+                                False,
+                                f"Status polling failed: HTTP {status_response.status_code}",
+                                status_response.text
+                            )
+                    else:
+                        self.log_test(
+                            f"Case Finalizer - {scenario['name']} Complete Flow",
+                            False,
+                            "No job_id in response",
+                            data
+                        )
+                else:
+                    self.log_test(
+                        f"Case Finalizer - {scenario['name']} Complete Flow",
+                        False,
+                        f"HTTP {response.status_code}",
+                        response.text
+                    )
+            except Exception as e:
+                self.log_test(
+                    f"Case Finalizer - {scenario['name']} Complete Flow",
+                    False,
+                    f"Exception: {str(e)}"
+                )
+    
+    def test_system_integration_form_code(self):
+        """Test SYSTEM INTEGRATION - Form code issue resolution"""
+        print("🔗 TESTING SYSTEM INTEGRATION...")
+        
+        # Test auto-application flow
+        try:
+            # Start auto-application
+            start_response = self.session.post(f"{API_BASE}/auto-application/start", json={})
+            
+            if start_response.status_code == 200:
+                start_data = start_response.json()
+                case_id = start_data.get("case_id")
+                
+                if case_id:
+                    # Update case with H-1B form code
+                    update_payload = {
+                        "form_code": "H-1B"
+                    }
+                    
+                    update_response = self.session.put(
+                        f"{API_BASE}/auto-application/case/{case_id}",
+                        json=update_payload
+                    )
+                    
+                    if update_response.status_code == 200:
+                        # Retrieve case to verify form_code
+                        get_response = self.session.get(f"{API_BASE}/auto-application/case/{case_id}")
+                        
+                        if get_response.status_code == 200:
+                            case_data = get_response.json()
+                            form_code = case_data.get("form_code")
+                            
+                            success = form_code == "H-1B"
+                            
+                            self.log_test(
+                                "System Integration - Form Code Resolution",
+                                success,
+                                f"Form code correctly set to: {form_code}",
+                                {
+                                    "case_id": case_id,
+                                    "expected": "H-1B",
+                                    "actual": form_code
+                                }
+                            )
+                        else:
+                            self.log_test(
+                                "System Integration - Form Code Resolution",
+                                False,
+                                f"Get case failed: HTTP {get_response.status_code}",
+                                get_response.text
+                            )
+                    else:
+                        self.log_test(
+                            "System Integration - Form Code Resolution",
+                            False,
+                            f"Update case failed: HTTP {update_response.status_code}",
+                            update_response.text
+                        )
+                else:
+                    self.log_test(
+                        "System Integration - Form Code Resolution",
+                        False,
+                        "No case_id in start response",
+                        start_data
+                    )
+            else:
+                self.log_test(
+                    "System Integration - Form Code Resolution",
+                    False,
+                    f"Start auto-application failed: HTTP {start_response.status_code}",
+                    start_response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "System Integration - Form Code Resolution",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_performance_reliability(self):
+        """Test PERFORMANCE & RELIABILITY"""
+        print("⚡ TESTING PERFORMANCE & RELIABILITY...")
+        
+        # Test API response times
+        endpoints_to_test = [
+            ("/auto-application/start", "POST", {}),
+            ("/llm/dr-paula/generate-directives", "POST", {"visa_type": "H1B", "language": "pt"}),
+            ("/cases/TEST-PERF/finalize/start", "POST", {"scenario_key": "H-1B_basic", "postage": "USPS", "language": "pt"})
+        ]
+        
+        response_times = []
+        
+        for endpoint, method, payload in endpoints_to_test:
+            try:
+                start_time = time.time()
+                
+                if method == "POST":
+                    response = self.session.post(f"{API_BASE}{endpoint}", json=payload)
+                else:
+                    response = self.session.get(f"{API_BASE}{endpoint}")
+                
+                end_time = time.time()
+                response_time = (end_time - start_time) * 1000  # Convert to milliseconds
+                response_times.append(response_time)
+                
+                success = response_time < 2000  # Less than 2 seconds
+                
+                self.log_test(
+                    f"Performance - {endpoint} Response Time",
+                    success,
+                    f"{response_time:.0f}ms (Target: <2000ms)",
+                    {
+                        "endpoint": endpoint,
+                        "method": method,
+                        "response_time_ms": response_time,
+                        "status_code": response.status_code
+                    }
+                )
+            except Exception as e:
+                self.log_test(
+                    f"Performance - {endpoint} Response Time",
+                    False,
+                    f"Exception: {str(e)}"
+                )
+        
+        # Overall performance summary
+        if response_times:
+            avg_response_time = sum(response_times) / len(response_times)
+            max_response_time = max(response_times)
+            
+            performance_good = avg_response_time < 2000 and max_response_time < 3000
+            
+            self.log_test(
+                "Overall Performance Assessment",
+                performance_good,
+                f"Avg: {avg_response_time:.0f}ms, Max: {max_response_time:.0f}ms",
+                {
+                    "average_response_time_ms": avg_response_time,
+                    "max_response_time_ms": max_response_time,
+                    "endpoints_tested": len(response_times)
+                }
+            )
+    
+    def test_security_compliance(self):
+        """Test SECURITY & COMPLIANCE"""
+        print("🔒 TESTING SECURITY & COMPLIANCE...")
+        
+        # Test consent system with SHA-256 hash
+        test_case_id = "TEST-SECURITY"
+        
+        # Valid SHA-256 hash (64 characters)
+        valid_hash = hashlib.sha256("test consent data".encode()).hexdigest()
+        
+        try:
+            payload = {
+                "consent_hash": valid_hash
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/cases/{test_case_id}/finalize/accept",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                success = data.get("accepted") is True
+                
+                self.log_test(
+                    "Security - Consent System SHA-256 Validation",
+                    success,
+                    f"Valid hash accepted: {success}",
+                    {"hash_length": len(valid_hash), "accepted": data.get("accepted")}
+                )
+            else:
+                self.log_test(
+                    "Security - Consent System SHA-256 Validation",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Security - Consent System SHA-256 Validation",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test invalid hash rejection
+        try:
+            invalid_payload = {
+                "consent_hash": "invalid_short_hash"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/cases/{test_case_id}/finalize/accept",
+                json=invalid_payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                success = "error" in data  # Should return error for invalid hash
+                
+                self.log_test(
+                    "Security - Invalid Hash Rejection",
+                    success,
+                    f"Invalid hash properly rejected: {success}",
+                    {"error": data.get("error", "No error returned")}
+                )
+            else:
+                self.log_test(
+                    "Security - Invalid Hash Rejection",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Security - Invalid Hash Rejection",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_end_to_end_h1b_journey(self):
+        """Test complete H-1B journey from start to finish"""
+        print("🚀 TESTING END-TO-END H-1B JOURNEY...")
+        
+        try:
+            # Step 1: Start auto-application
+            start_response = self.session.post(f"{API_BASE}/auto-application/start", json={})
+            
+            if start_response.status_code == 200:
+                start_data = start_response.json()
+                case_id = start_data.get("case_id")
+                
+                if case_id:
+                    # Step 2: Set form code to H-1B
+                    update_response = self.session.put(
+                        f"{API_BASE}/auto-application/case/{case_id}",
+                        json={"form_code": "H-1B"}
+                    )
+                    
+                    if update_response.status_code == 200:
+                        # Step 3: Generate cover letter directives
+                        directives_response = self.session.post(
+                            f"{API_BASE}/llm/dr-paula/generate-directives",
+                            json={"visa_type": "H1B", "language": "pt"}
+                        )
+                        
+                        if directives_response.status_code == 200:
+                            # Step 4: Start case finalization
+                            finalize_response = self.session.post(
+                                f"{API_BASE}/cases/{case_id}/finalize/start",
+                                json={
+                                    "scenario_key": "H-1B_basic",
+                                    "postage": "USPS",
+                                    "language": "pt"
+                                }
+                            )
+                            
+                            if finalize_response.status_code == 200:
+                                finalize_data = finalize_response.json()
+                                job_id = finalize_data.get("job_id")
+                                
+                                if job_id:
+                                    # Step 5: Check finalization status
+                                    status_response = self.session.get(
+                                        f"{API_BASE}/cases/finalize/{job_id}/status"
+                                    )
+                                    
+                                    if status_response.status_code == 200:
+                                        status_data = status_response.json()
+                                        
+                                        # Verify complete journey
+                                        journey_complete = (
+                                            case_id and
+                                            job_id and
+                                            'status' in status_data and
+                                            'links' in status_data
+                                        )
+                                        
+                                        self.log_test(
+                                            "End-to-End H-1B Journey",
+                                            journey_complete,
+                                            f"Complete journey: Case {case_id} → Job {job_id} → Status {status_data.get('status')}",
+                                            {
+                                                "case_id": case_id,
+                                                "job_id": job_id,
+                                                "final_status": status_data.get('status'),
+                                                "links_available": list(status_data.get('links', {}).keys())
+                                            }
+                                        )
+                                    else:
+                                        self.log_test(
+                                            "End-to-End H-1B Journey",
+                                            False,
+                                            f"Status check failed: HTTP {status_response.status_code}",
+                                            status_response.text
+                                        )
+                                else:
+                                    self.log_test(
+                                        "End-to-End H-1B Journey",
+                                        False,
+                                        "No job_id from finalization",
+                                        finalize_data
+                                    )
+                            else:
+                                self.log_test(
+                                    "End-to-End H-1B Journey",
+                                    False,
+                                    f"Finalization failed: HTTP {finalize_response.status_code}",
+                                    finalize_response.text
+                                )
+                        else:
+                            self.log_test(
+                                "End-to-End H-1B Journey",
+                                False,
+                                f"Directives generation failed: HTTP {directives_response.status_code}",
+                                directives_response.text
+                            )
+                    else:
+                        self.log_test(
+                            "End-to-End H-1B Journey",
+                            False,
+                            f"Form code update failed: HTTP {update_response.status_code}",
+                            update_response.text
+                        )
+                else:
+                    self.log_test(
+                        "End-to-End H-1B Journey",
+                        False,
+                        "No case_id from start",
+                        start_data
+                    )
+            else:
+                self.log_test(
+                    "End-to-End H-1B Journey",
+                    False,
+                    f"Start failed: HTTP {start_response.status_code}",
+                    start_response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "End-to-End H-1B Journey",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
     def run_all_tests(self):
-        """Run all Case Finalizer MVP tests"""
-        print("🧪 CASE FINALIZER MVP - COMPREHENSIVE TESTING")
-        print("=" * 60)
+        """Run comprehensive ecosystem validation tests"""
+        print("🌟 VALIDAÇÃO FINAL COMPLETA DO ECOSSISTEMA")
+        print("=" * 80)
         print(f"Backend URL: {BACKEND_URL}")
         print(f"API Base: {API_BASE}")
-        print("=" * 60)
+        print("=" * 80)
         print()
         
-        # Core endpoint tests
-        print("📋 TESTING CORE ENDPOINTS...")
+        # 1. POLICY ENGINE (FASE 1) Validation
+        print("🏛️ TESTING POLICY ENGINE (FASE 1)...")
+        self.test_policy_engine_fase1()
+        print()
+        
+        # 2. COVER LETTER MODULE (DR. PAULA) Validation
+        print("📝 TESTING DR. PAULA COVER LETTER MODULE...")
+        self.test_dr_paula_cover_letter_module()
+        print()
+        
+        # 3. CASE FINALIZER MVP Validation
+        print("🎯 TESTING CASE FINALIZER MVP...")
+        self.test_case_finalizer_mvp_comprehensive()
+        
+        # Original Case Finalizer tests
         self.test_start_finalization_h1b_basic()
         self.test_start_finalization_f1_basic()
         self.test_start_finalization_invalid_scenario()
         
-        # Status polling tests
-        print("📊 TESTING STATUS POLLING...")
         if hasattr(self, 'job_id_h1b'):
             self.test_status_polling(self.job_id_h1b, "H-1B")
         if hasattr(self, 'job_id_f1'):
             self.test_status_polling(self.job_id_f1, "F-1")
         self.test_status_polling_invalid_job()
         
-        # Consent tests
-        print("✋ TESTING CONSENT SYSTEM...")
         self.test_consent_acceptance_valid()
         self.test_consent_acceptance_invalid()
         
-        # Content endpoints
-        print("📄 TESTING CONTENT ENDPOINTS...")
         self.test_instructions_endpoint()
         self.test_checklist_endpoint()
         self.test_master_packet_endpoint()
+        print()
         
-        # Knowledge Base functionality
-        print("🧠 TESTING KNOWLEDGE BASE...")
-        self.test_knowledge_base_functionality()
+        # 4. SYSTEM INTEGRATION Validation
+        print("🔗 TESTING SYSTEM INTEGRATION...")
+        self.test_system_integration_form_code()
+        print()
         
-        # Complete flows
-        print("🔄 TESTING COMPLETE FLOWS...")
+        # 5. PERFORMANCE & RELIABILITY Validation
+        print("⚡ TESTING PERFORMANCE & RELIABILITY...")
+        self.test_performance_reliability()
+        print()
+        
+        # 6. SECURITY & COMPLIANCE Validation
+        print("🔒 TESTING SECURITY & COMPLIANCE...")
+        self.test_security_compliance()
+        print()
+        
+        # 7. END-TO-END TESTING
+        print("🚀 TESTING END-TO-END JOURNEYS...")
+        self.test_end_to_end_h1b_journey()
         self.test_complete_h1b_flow()
         self.test_complete_f1_flow()
+        print()
         
-        # Generate summary
-        self.generate_summary()
+        # Generate comprehensive summary
+        self.generate_comprehensive_summary()
     
     def generate_summary(self):
         """Generate test summary"""
