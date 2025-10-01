@@ -45,10 +45,7 @@ export const OwlAgent: React.FC = () => {
     { value: 'B-1/B-2', label: 'B-1/B-2 - Turista/Negócios', description: 'Para visitas temporárias' }
   ];
 
-  const languages = [
-    { value: 'pt', label: 'Português' },
-    { value: 'en', label: 'English' },
-  ];
+  // Language options are now inline in the Select component
 
   const handleStartQuestionnaire = () => {
     if (!selectedVisa) return;
