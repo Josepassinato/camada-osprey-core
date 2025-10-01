@@ -15,7 +15,11 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 from pydantic import BaseModel, Field, EmailStr
+import pydantic
 from typing import List, Optional, Dict, Any
+
+# Configure JSON encoder for ObjectId
+pydantic.json.ENCODERS_BY_TYPE[ObjectId] = str
 import uuid
 from datetime import datetime, timedelta
 import json
