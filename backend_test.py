@@ -2698,16 +2698,22 @@ class ComprehensiveEcosystemTester:
                     f"Exception: {str(e)}"
                 )
     def run_all_tests(self):
-        """URGENT: Test Phase 2&3 endpoints after router registration fix"""
-        print("🚨 URGENT: PHASE 2&3 ENDPOINT FIXES VERIFICATION")
+        """SPECIFIC TEST FOR DR. PAULA REVIEW-LETTER ENDPOINT - User Request Priority"""
+        print("🚨 TESTE ESPECÍFICO DO ENDPOINT REVIEW-LETTER DO DR. PAULA")
         print("=" * 80)
         print(f"Backend URL: {BACKEND_URL}")
         print(f"API Base: {API_BASE}")
         print("=" * 80)
         print()
         
-        # PRIORITY 0: TARGETED TEST for the 3 specific endpoints mentioned in review request
-        print("🎯 PRIORITY 0: TARGETED TEST - 3 PROBLEMATIC ENDPOINTS...")
+        # PRIORITY 1: SPECIFIC TEST for Dr. Paula review-letter endpoint as requested
+        print("🎯 PRIORITY 1: TESTE ESPECÍFICO - DR. PAULA REVIEW-LETTER ENDPOINT...")
+        print("-" * 60)
+        self.test_dr_paula_review_letter_specific()
+        print()
+        
+        # PRIORITY 2: TARGETED TEST for the 3 specific endpoints mentioned in review request
+        print("🎯 PRIORITY 2: TARGETED TEST - 3 PROBLEMATIC ENDPOINTS...")
         print("-" * 60)
         self.test_phase2_phase3_targeted_endpoints()
         print()
