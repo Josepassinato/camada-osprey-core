@@ -1837,27 +1837,40 @@ class ComprehensiveEcosystemTester:
     # End of test_all_agents_openai_integration method
     
     def test_dr_paula_review_letter_specific(self):
-                "endpoint": "/llm/dr-paula/request-complement",
-                "payload": {
-                    "visa_type": "I-589",
-                    "issues": ["Descrever perseguição detalhadamente", "Fornecer evidências específicas"]
-                }
-            }
-        ]
+        """Test Dr. Paula review-letter endpoint specifically"""
+        print("📝 Testing Dr. Paula Review Letter Endpoint...")
         
-        working_count = 0
-        total_count = len(endpoints_to_test)
+        payload = {
+            "visa_type": "I-589",
+            "applicant_letter": "Meu nome é Maria Silva e estou solicitando asilo político nos Estados Unidos devido à perseguição que sofri no meu país de origem por minhas opiniões políticas e ativismo pelos direitos humanos."
+        }
         
-        for test in endpoints_to_test:
-            try:
-                print(f"Testing {test['name']}...")
-                response = self.session.post(f"{API_BASE}{test['endpoint']}", json=test['payload'])
+        try:
+            response = self.session.post(f"{API_BASE}/llm/dr-paula/review-letter", json=payload)
+            
+            if response.status_code == 200:
+                data = response.json()
+                success = data.get("success") is True and "Budget exceeded" not in str(data)
                 
-                if response.status_code == 200:
-                    try:
-                        data = response.json()
-                        
-                        # Check for budget exceeded or unavailable errors
+                self.log_test(
+                    "Dr. Paula Review Letter - I-589",
+                    success,
+                    f"Success: {success}, Response keys: {list(data.keys()) if isinstance(data, dict) else 'Not dict'}",
+                    data
+                )
+            else:
+                self.log_test(
+                    "Dr. Paula Review Letter - I-589",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:300]
+                )
+        except Exception as e:
+            self.log_test(
+                "Dr. Paula Review Letter - I-589",
+                False,
+                f"Exception: {str(e)}"
+            )
                         response_text = str(data).lower()
                         has_budget_error = any([
                             "budget exceeded" in response_text,
