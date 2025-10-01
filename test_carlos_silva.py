@@ -368,24 +368,26 @@ def test_carlos_silva_h1b_complete_journey():
         
         if response.status_code == 200:
             data = response.json()
-            is_completed = data.get('status') == 'completed'
-            progress_100 = data.get('progress_percentage') == 100
+            case_data = data.get('case', {})
+            is_completed = case_data.get('status') == 'completed'
+            progress_100 = case_data.get('progress_percentage') == 100
             
             log_test(
                 "ETAPA 8 - Aplicação Finalizada",
                 is_completed and progress_100,
-                f"Status: {data.get('status')}, Progress: {data.get('progress_percentage')}%"
+                f"Status: {case_data.get('status')}, Progress: {case_data.get('progress_percentage')}%"
             )
             
             # Final verification - get complete case
             verification_response = session.get(f"{API_BASE}/auto-application/case/{case_id}")
             if verification_response.status_code == 200:
                 final_data = verification_response.json()
+                final_case = final_data.get('case', {})
                 
                 log_test(
                     "ETAPA 8 - Verificação Final",
                     True,
-                    f"Case completo recuperado: {final_data.get('case_id')}"
+                    f"Case completo recuperado: {final_case.get('case_id')}"
                 )
     except Exception as e:
         log_test("ETAPA 8 - Aplicação Finalizada", False, f"Exception: {str(e)}")
