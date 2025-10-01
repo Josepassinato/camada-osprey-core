@@ -72,6 +72,8 @@ const App = () => (
           {/* Owl Agent Routes */}
           <Route path="/owl-agent" element={<OwlAgent />} />
           <Route path="/owl-agent/questionnaire" element={<OwlQuestionnairePage />} />
+          <Route path="/owl-agent/payment" element={<OwlPaymentPage />} />
+          <Route path="/owl-agent/payment-success" element={<OwlPaymentSuccessPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
