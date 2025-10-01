@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "TESTAR A NOVA INTEGRAÇÃO HÍBRIDA GOOGLE DOCUMENT AI + DR. MIGUEL: Validar o sistema híbrido implementado que combina Google Document AI (40%) para OCR profissional e extração de dados estruturados com Dr. Miguel (60%) para validação inteligente e detecção de fraudes. Sistema em modo mock para Google AI (não requer credenciais reais) com custo-benefício otimizado ($1.50/1000 docs vs $650+ do Onfido)."
+user_problem_statement: "IMPLEMENTAR AGENTE CORUJA - SISTEMA INTELIGENTE DE QUESTIONÁRIOS: Desenvolver o novo recurso 'Agente Coruja' que conduz usuários através de questionários inteligentes em tempo real, valida respostas usando Google APIs e OpenAI GPT-5, e gera formulários USCIS oficiais automaticamente preenchidos. Sistema multi-idioma (português/inglês) com orientação contextual e validação em tempo real."
 
 backend:
   - task: "Google Vision API Real Key Integration Testing"
