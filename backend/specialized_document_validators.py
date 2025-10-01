@@ -65,27 +65,42 @@ class PassportValidator:
             if cross_validation['has_discrepancies']:
                 issues.extend(cross_validation['discrepancies'])
         
-        # Check expiry status
-        if results['expiry_date']['is_valid']:
-            expiry_check = self._check_expiry_status(results['expiry_date']['normalized_value'])
+        # Check expiry status - FIX: Handle ValidationResult objects properly
+        if hasattr(results['expiry_date'], 'is_valid') and results['expiry_date'].is_valid:
+            expiry_check = self._check_expiry_status(results['expiry_date'].normalized_value)
             if expiry_check['is_expired']:
                 issues.append(f"CRITICAL: Passport expired on {expiry_check['expiry_date']}")
             elif expiry_check['expires_soon']:
                 issues.append(f"WARNING: Passport expires soon on {expiry_check['expiry_date']}")
         
-        # Calculate overall confidence
-        valid_fields = sum(1 for r in results.values() if isinstance(r, dict) and r.get('is_valid', False))
-        total_fields = len([r for r in results.values() if isinstance(r, dict)])
+        # Calculate overall confidence - FIX: Handle ValidationResult objects properly
+        valid_fields = sum(1 for r in results.values() if hasattr(r, 'is_valid') and r.is_valid)
+        total_fields = len([r for r in results.values() if hasattr(r, 'is_valid')])
         overall_confidence = (valid_fields / total_fields) * 100 if total_fields > 0 else 0
+        
+        # Convert ValidationResult objects to dictionaries for compatibility
+        results_dict = {}
+        for field_name, validation_result in results.items():
+            if hasattr(validation_result, 'is_valid'):
+                results_dict[field_name] = {
+                    'is_valid': validation_result.is_valid,
+                    'confidence': validation_result.confidence,
+                    'extracted_value': validation_result.extracted_value,
+                    'normalized_value': validation_result.normalized_value,
+                    'issues': getattr(validation_result, 'issues', []),
+                    'recommendations': getattr(validation_result, 'recommendations', [])
+                }
+            else:
+                results_dict[field_name] = validation_result
         
         return {
             'document_type': 'passport',
-            'validation_results': results,
+            'validation_results': results_dict,
             'overall_confidence': overall_confidence,
             'is_valid': overall_confidence >= 80 and len(issues) == 0,
             'issues': issues,
             'uscis_acceptable': overall_confidence >= 90 and all(
-                field in results and results[field].get('is_valid', False)
+                field in results_dict and results_dict[field].get('is_valid', False)
                 for field in ['full_name', 'passport_number', 'date_of_birth', 'expiry_date']
             )
         }
