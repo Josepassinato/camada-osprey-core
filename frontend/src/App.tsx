@@ -67,6 +67,9 @@ const App = () => (
           <Route path="/auto-application/case/:caseId/review" element={<VisualReview />} />
           <Route path="/auto-application/case/:caseId/payment" element={<PaymentAndDownload />} />
           <Route path="/auto-application/case/:caseId/finalize" element={<CaseFinalizer />} />
+          {/* Owl Agent Routes */}
+          <Route path="/owl-agent" element={<OwlAgent />} />
+          <Route path="/owl-agent/questionnaire" element={<OwlQuestionnairePage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
