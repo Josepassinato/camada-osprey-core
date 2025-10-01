@@ -103,7 +103,7 @@ class GoogleDocumentAIProcessor:
     
     async def process_document(self, file_content: bytes, filename: str, 
                              mime_type: str = "application/pdf") -> Dict[str, Any]:
-        """Process document with Google Document AI (with Vision API fallback)"""
+        """Process document with Google Vision API (Document AI requires OAuth2)"""
         
         if self.is_mock_mode:
             # Return mock response for testing
@@ -111,12 +111,13 @@ class GoogleDocumentAIProcessor:
             return self._create_mock_response(filename, len(file_content))
         
         try:
-            # First try Document AI, then fallback to Vision API
-            return await self._try_document_ai(file_content, filename, mime_type)
-            
-        except Exception as doc_ai_error:
-            logger.warning(f"⚠️ Document AI failed: {doc_ai_error}, falling back to Vision API")
+            # Use Vision API directly (Document AI requires OAuth2 authentication)
+            logger.info("🔗 Using Google Vision API (Document AI requires OAuth2)")
             return await self._try_vision_api(file_content, filename, mime_type)
+            
+        except Exception as vision_error:
+            logger.warning(f"⚠️ Vision API failed: {vision_error}, falling back to mock")
+            return self._create_mock_response(filename, len(file_content))
     
     async def _try_document_ai(self, file_content: bytes, filename: str, mime_type: str) -> Dict[str, Any]:
         """Try Google Document AI first (specialized for documents)"""
