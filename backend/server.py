@@ -5824,7 +5824,12 @@ async def analyze_document_with_real_ai(
                     analysis_result["valid"] = True
                     analysis_result["legible"] = True
                     analysis_result["completeness"] = dr_miguel_confidence
-                    analysis_result["issues"] = enhanced_result.get("issues", [])
+                    issues_from_miguel = enhanced_result.get("issues", [])
+                    if isinstance(issues_from_miguel, str):
+                        issues_from_miguel = [issues_from_miguel]
+                    elif not isinstance(issues_from_miguel, list):
+                        issues_from_miguel = []
+                    analysis_result["issues"] = issues_from_miguel
                 elif dr_miguel_verdict == "APROVADO" and policy_decision in ["ALERT", "PASS"]:
                     analysis_result["valid"] = False  # Require both systems to pass
                     analysis_result["legible"] = True
