@@ -1,0 +1,349 @@
+{
+  "timestamp": "2025-10-01T21:31:02.533071",
+  "api_base": "https://iaimmigration.preview.emergentagent.com/api",
+  "total_tests": 21,
+  "passed_tests": 17,
+  "failed_tests": 4,
+  "success_rate": 80.95238095238095,
+  "status": "\ud83d\udfe0 NEEDS MAJOR FIXES",
+  "categories": {
+    "Authentication": {
+      "passed": 3,
+      "failed": 1,
+      "tests": [
+        {
+          "test": "POST /api/auth/signup",
+          "success": true,
+          "details": "HTTP 200",
+          "timestamp": "2025-10-01T21:30:09.816649",
+          "response_data": null
+        },
+        {
+          "test": "POST /api/auth/login",
+          "success": true,
+          "details": "HTTP 200",
+          "timestamp": "2025-10-01T21:30:10.062123",
+          "response_data": null
+        },
+        {
+          "test": "POST /api/owl-agent/auth/register",
+          "success": true,
+          "details": "HTTP 200",
+          "timestamp": "2025-10-01T21:30:10.355924",
+          "response_data": null
+        },
+        {
+          "test": "POST /api/owl-agent/auth/login",
+          "success": false,
+          "details": "HTTP 401",
+          "timestamp": "2025-10-01T21:30:10.409890",
+          "response_data": null
+        }
+      ]
+    },
+    "Owl Agent": {
+      "passed": 3,
+      "failed": 2,
+      "tests": [
+        {
+          "test": "POST /api/owl-agent/start-session",
+          "success": true,
+          "details": "HTTP 200",
+          "timestamp": "2025-10-01T21:30:10.077685",
+          "response_data": null
+        },
+        {
+          "test": "POST /api/owl-agent/save-response",
+          "success": true,
+          "details": "HTTP 200",
+          "timestamp": "2025-10-01T21:30:10.093052",
+          "response_data": null
+        },
+        {
+          "test": "GET /api/owl-agent/user-sessions/{email}",
+          "success": false,
+          "details": "HTTP 404",
+          "timestamp": "2025-10-01T21:30:10.422958",
+          "response_data": null
+        },
+        {
+          "test": "POST /api/owl-agent/initiate-payment",
+          "success": false,
+          "details": "HTTP 400",
+          "timestamp": "2025-10-01T21:30:47.873420",
+          "response_data": null
+        },
+        {
+          "test": "GET /api/owl-agent/download/{download_id}",
+          "success": true,
+          "details": "HTTP 404",
+          "timestamp": "2025-10-01T21:30:49.171954",
+          "response_data": null
+        }
+      ]
+    },
+    "Auto Application": {
+      "passed": 2,
+      "failed": 1,
+      "tests": [
+        {
+          "test": "POST /api/auto-application/start",
+          "success": true,
+          "details": "HTTP 200",
+          "timestamp": "2025-10-01T21:30:10.438524",
+          "response_data": null
+        },
+        {
+          "test": "GET /api/auto-application/case/{case_id}",
+          "success": true,
+          "details": "HTTP 200",
+          "timestamp": "2025-10-01T21:30:10.494963",
+          "response_data": null
+        },
+        {
+          "test": "PUT /api/auto-application/case/{case_id}",
+          "success": false,
+          "details": "HTTP 422",
+          "timestamp": "2025-10-01T21:30:10.509422",
+          "response_data": null
+        }
+      ]
+    },
+    "Documents": {
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "test": "POST /api/documents/analyze-with-ai",
+          "success": true,
+          "details": "HTTP 200",
+          "timestamp": "2025-10-01T21:30:10.537730",
+          "response_data": null
+        },
+        {
+          "test": "GET /api/documents/analysis/kpis",
+          "success": true,
+          "details": "HTTP 200",
+          "timestamp": "2025-10-01T21:30:10.589477",
+          "response_data": null
+        },
+        {
+          "test": "GET /api/documents/analysis/performance",
+          "success": true,
+          "details": "HTTP 200",
+          "timestamp": "2025-10-01T21:30:10.598300",
+          "response_data": null
+        }
+      ]
+    },
+    "Dr. Paula LLM": {
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "test": "POST /api/llm/dr-paula/generate-directives",
+          "success": true,
+          "details": "HTTP 200",
+          "timestamp": "2025-10-01T21:30:31.935529",
+          "response_data": null
+        },
+        {
+          "test": "POST /api/llm/dr-paula/review-letter",
+          "success": true,
+          "details": "HTTP 200",
+          "timestamp": "2025-10-01T21:30:47.854229",
+          "response_data": null
+        },
+        {
+          "test": "POST /api/llm/dr-paula/request-complement",
+          "success": true,
+          "details": "HTTP 200",
+          "timestamp": "2025-10-01T21:30:47.864171",
+          "response_data": null
+        }
+      ]
+    },
+    "Stripe Payments": {
+      "passed": 1,
+      "failed": 0,
+      "tests": [
+        {
+          "test": "POST /api/webhook/stripe",
+          "success": true,
+          "details": "HTTP 200",
+          "timestamp": "2025-10-01T21:30:49.156891",
+          "response_data": null
+        }
+      ]
+    },
+    "Other Critical": {
+      "passed": 2,
+      "failed": 0,
+      "tests": [
+        {
+          "test": "POST /api/chat",
+          "success": true,
+          "details": "HTTP 200",
+          "timestamp": "2025-10-01T21:31:02.521985",
+          "response_data": null
+        },
+        {
+          "test": "POST /api/ai-processing/step",
+          "success": true,
+          "details": "HTTP 200",
+          "timestamp": "2025-10-01T21:31:02.532912",
+          "response_data": null
+        }
+      ]
+    }
+  },
+  "detailed_results": [
+    {
+      "test": "POST /api/auth/signup",
+      "success": true,
+      "details": "HTTP 200",
+      "timestamp": "2025-10-01T21:30:09.816649",
+      "response_data": null
+    },
+    {
+      "test": "POST /api/auth/login",
+      "success": true,
+      "details": "HTTP 200",
+      "timestamp": "2025-10-01T21:30:10.062123",
+      "response_data": null
+    },
+    {
+      "test": "POST /api/owl-agent/start-session",
+      "success": true,
+      "details": "HTTP 200",
+      "timestamp": "2025-10-01T21:30:10.077685",
+      "response_data": null
+    },
+    {
+      "test": "POST /api/owl-agent/save-response",
+      "success": true,
+      "details": "HTTP 200",
+      "timestamp": "2025-10-01T21:30:10.093052",
+      "response_data": null
+    },
+    {
+      "test": "POST /api/owl-agent/auth/register",
+      "success": true,
+      "details": "HTTP 200",
+      "timestamp": "2025-10-01T21:30:10.355924",
+      "response_data": null
+    },
+    {
+      "test": "POST /api/owl-agent/auth/login",
+      "success": false,
+      "details": "HTTP 401",
+      "timestamp": "2025-10-01T21:30:10.409890",
+      "response_data": null
+    },
+    {
+      "test": "GET /api/owl-agent/user-sessions/{email}",
+      "success": false,
+      "details": "HTTP 404",
+      "timestamp": "2025-10-01T21:30:10.422958",
+      "response_data": null
+    },
+    {
+      "test": "POST /api/auto-application/start",
+      "success": true,
+      "details": "HTTP 200",
+      "timestamp": "2025-10-01T21:30:10.438524",
+      "response_data": null
+    },
+    {
+      "test": "GET /api/auto-application/case/{case_id}",
+      "success": true,
+      "details": "HTTP 200",
+      "timestamp": "2025-10-01T21:30:10.494963",
+      "response_data": null
+    },
+    {
+      "test": "PUT /api/auto-application/case/{case_id}",
+      "success": false,
+      "details": "HTTP 422",
+      "timestamp": "2025-10-01T21:30:10.509422",
+      "response_data": null
+    },
+    {
+      "test": "POST /api/documents/analyze-with-ai",
+      "success": true,
+      "details": "HTTP 200",
+      "timestamp": "2025-10-01T21:30:10.537730",
+      "response_data": null
+    },
+    {
+      "test": "GET /api/documents/analysis/kpis",
+      "success": true,
+      "details": "HTTP 200",
+      "timestamp": "2025-10-01T21:30:10.589477",
+      "response_data": null
+    },
+    {
+      "test": "GET /api/documents/analysis/performance",
+      "success": true,
+      "details": "HTTP 200",
+      "timestamp": "2025-10-01T21:30:10.598300",
+      "response_data": null
+    },
+    {
+      "test": "POST /api/llm/dr-paula/generate-directives",
+      "success": true,
+      "details": "HTTP 200",
+      "timestamp": "2025-10-01T21:30:31.935529",
+      "response_data": null
+    },
+    {
+      "test": "POST /api/llm/dr-paula/review-letter",
+      "success": true,
+      "details": "HTTP 200",
+      "timestamp": "2025-10-01T21:30:47.854229",
+      "response_data": null
+    },
+    {
+      "test": "POST /api/llm/dr-paula/request-complement",
+      "success": true,
+      "details": "HTTP 200",
+      "timestamp": "2025-10-01T21:30:47.864171",
+      "response_data": null
+    },
+    {
+      "test": "POST /api/owl-agent/initiate-payment",
+      "success": false,
+      "details": "HTTP 400",
+      "timestamp": "2025-10-01T21:30:47.873420",
+      "response_data": null
+    },
+    {
+      "test": "POST /api/webhook/stripe",
+      "success": true,
+      "details": "HTTP 200",
+      "timestamp": "2025-10-01T21:30:49.156891",
+      "response_data": null
+    },
+    {
+      "test": "GET /api/owl-agent/download/{download_id}",
+      "success": true,
+      "details": "HTTP 404",
+      "timestamp": "2025-10-01T21:30:49.171954",
+      "response_data": null
+    },
+    {
+      "test": "POST /api/chat",
+      "success": true,
+      "details": "HTTP 200",
+      "timestamp": "2025-10-01T21:31:02.521985",
+      "response_data": null
+    },
+    {
+      "test": "POST /api/ai-processing/step",
+      "success": true,
+      "details": "HTTP 200",
+      "timestamp": "2025-10-01T21:31:02.532912",
+      "response_data": null
+    }
+  ]
+}
