@@ -1872,17 +1872,18 @@ class ComprehensiveEcosystemTester:
                 data = response.json()
                 
                 # Check for expected capabilities
-                expected_capabilities = [
-                    'field_extraction', 'language_analysis', 'document_classification',
-                    'cross_document_consistency', 'multi_document_validation'
-                ]
+                capabilities = data.get('capabilities', {})
+                phase2_features = capabilities.get('phase_2_features', {})
+                phase3_features = capabilities.get('phase_3_features', {})
                 
-                available_capabilities = data.get('capabilities', {})
-                phase2_capabilities = data.get('phase2_features', [])
-                phase3_capabilities = data.get('phase3_features', [])
+                phase2_count = len([k for k, v in phase2_features.items() if v])
+                phase3_count = len([k for k, v in phase3_features.items() if v])
                 
-                capabilities_found = sum(1 for cap in expected_capabilities if cap in available_capabilities)
-                success = capabilities_found >= 3  # At least 3 capabilities should be available
+                success = (
+                    data.get('status') == 'success' and
+                    phase2_count >= 3 and  # At least 3 Phase 2 features
+                    phase3_count >= 3      # At least 3 Phase 3 features
+                )
                 
                 self.log_test(
                     "Validation Capabilities Discovery",
