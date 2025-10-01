@@ -84,16 +84,34 @@ class BaseSpecializedAgent:
             Combine sua especialização com o conhecimento da Dra. Paula para dar a resposta mais precisa possível.
             """
             
-            chat = LlmChat(
-                api_key=self.api_key,
-                session_id=session_id,
-                system_message=system_message
-            ).with_model(self.provider, self.model)
-            
-            # Send the actual task as user message
-            user_message = UserMessage(text=prompt)
-            response = await chat.send_message(user_message)
-            return response
+            if self.use_openai_direct and self.openai_key:
+                # Use OpenAI directly with Dra. Paula's knowledge
+                from openai import AsyncOpenAI
+                client = AsyncOpenAI(api_key=self.openai_key)
+                
+                response = await client.chat.completions.create(
+                    model="gpt-4",
+                    messages=[
+                        {"role": "system", "content": system_message},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=1500,
+                    temperature=0.7
+                )
+                
+                return response.choices[0].message.content
+            else:
+                # Fallback to emergent integrations
+                chat = LlmChat(
+                    api_key=self.api_key,
+                    session_id=session_id,
+                    system_message=system_message
+                ).with_model(self.provider, self.model)
+                
+                # Send the actual task as user message
+                user_message = UserMessage(text=prompt)
+                response = await chat.send_message(user_message)
+                return response
             
         except Exception as e:
             logger.error(f"Error calling {self.agent_name} with Dra. Paula's knowledge: {e}")
