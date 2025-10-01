@@ -1,0 +1,381 @@
+{
+  "summary": {
+    "total_tests": 29,
+    "passed_tests": 22,
+    "failed_tests": 7,
+    "success_rate": 75.86206896551724,
+    "production_ready": false
+  },
+  "components": {
+    "Policy Engine (FASE 1)": 0,
+    "Dr. Paula Cover Letter": 2,
+    "Case Finalizer MVP": 11,
+    "System Integration": 0,
+    "Performance & Reliability": 4,
+    "Security & Compliance": 1,
+    "End-to-End Testing": 0
+  },
+  "detailed_results": [
+    {
+      "test": "Policy Engine (FASE 1) Integration",
+      "success": false,
+      "details": "HTTP 422",
+      "timestamp": "2025-10-01T00:11:39.139198",
+      "response_data": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"file\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"},{\"type\":\"missing\",\"loc\":[\"body\",\"document_type\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"},{\"type\":\"missing\",\"loc\":[\"body\",\"visa_type\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"},{\"type\":\"missing\",\"loc\":[\"body\",\"case_id\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"}]}"
+    },
+    {
+      "test": "Dr. Paula - Generate Directives",
+      "success": false,
+      "details": "Generated 71 characters of directives",
+      "timestamp": "2025-10-01T00:11:39.577303",
+      "response_data": {
+        "visa_type": "H1B",
+        "language": "pt"
+      }
+    },
+    {
+      "test": "Dr. Paula - Review Letter",
+      "success": true,
+      "details": "Coverage score: 0.8",
+      "timestamp": "2025-10-01T00:11:39.721778",
+      "response_data": {
+        "status": "needs_review"
+      }
+    },
+    {
+      "test": "Dr. Paula - Request Complement",
+      "success": false,
+      "details": "Generated 0 characters of guidance",
+      "timestamp": "2025-10-01T00:11:39.869046",
+      "response_data": {
+        "issues_count": 2
+      }
+    },
+    {
+      "test": "Dr. Paula - Add Letter",
+      "success": true,
+      "details": "Letter added: Success",
+      "timestamp": "2025-10-01T00:11:39.886489",
+      "response_data": {
+        "process_id": "TEST-PROCESS-123"
+      }
+    },
+    {
+      "test": "Case Finalizer - H-1B Complete Flow",
+      "success": true,
+      "details": "Status: needs_correction, Issues: 1, Links: []",
+      "timestamp": "2025-10-01T00:11:39.947977",
+      "response_data": {
+        "scenario": "H-1B_basic",
+        "job_id": "abd687fa-c08c-4149-b35f-bf372d3116cf",
+        "audit_working": true
+      }
+    },
+    {
+      "test": "Case Finalizer - F-1 Complete Flow",
+      "success": true,
+      "details": "Status: needs_correction, Issues: 2, Links: []",
+      "timestamp": "2025-10-01T00:11:40.048708",
+      "response_data": {
+        "scenario": "F-1_basic",
+        "job_id": "073b6b0a-4dd4-4fbb-aa5a-03d5674f965a",
+        "audit_working": true
+      }
+    },
+    {
+      "test": "Case Finalizer - I-485 Complete Flow",
+      "success": true,
+      "details": "Status: needs_correction, Issues: 2, Links: []",
+      "timestamp": "2025-10-01T00:11:40.112127",
+      "response_data": {
+        "scenario": "I-485_basic",
+        "job_id": "d54c9d3a-0f41-43a4-aaa0-51e32645ca31",
+        "audit_working": true
+      }
+    },
+    {
+      "test": "Start H-1B Finalization",
+      "success": true,
+      "details": "Job ID: d54f9550-8ff8-44f9-8c4a-bcba6d432b10, Status: needs_correction",
+      "timestamp": "2025-10-01T00:11:40.122562",
+      "response_data": {
+        "job_id": "d54f9550-8ff8-44f9-8c4a-bcba6d432b10",
+        "status": "needs_correction",
+        "message": "Finaliza\u00e7\u00e3o iniciada com sucesso"
+      }
+    },
+    {
+      "test": "Start F-1 Finalization",
+      "success": true,
+      "details": "Job ID: 0872e9b4-326e-4426-9f7e-a9f9c091a235, Status: needs_correction",
+      "timestamp": "2025-10-01T00:11:40.173767",
+      "response_data": {
+        "job_id": "0872e9b4-326e-4426-9f7e-a9f9c091a235",
+        "status": "needs_correction",
+        "message": "Finaliza\u00e7\u00e3o iniciada com sucesso"
+      }
+    },
+    {
+      "test": "Invalid Scenario Handling",
+      "success": true,
+      "details": "Correctly rejected invalid scenario, returned supported: ['H-1B_basic', 'F-1_basic', 'I-485_basic']",
+      "timestamp": "2025-10-01T00:11:40.183548",
+      "response_data": {
+        "error": "Cen\u00e1rio n\u00e3o suportado: INVALID_SCENARIO",
+        "supported_scenarios": [
+          "H-1B_basic",
+          "F-1_basic",
+          "I-485_basic"
+        ]
+      }
+    },
+    {
+      "test": "Status Polling - H-1B",
+      "success": true,
+      "details": "Status: needs_correction, Issues: 1, Links: []",
+      "timestamp": "2025-10-01T00:11:40.193122",
+      "response_data": {
+        "status": "needs_correction",
+        "issues": [
+          "i797"
+        ],
+        "links": {},
+        "created_at": "2025-10-01T00:11:40.118953+00:00",
+        "completed_at": null
+      }
+    },
+    {
+      "test": "Status Polling - F-1",
+      "success": true,
+      "details": "Status: needs_correction, Issues: 2, Links: []",
+      "timestamp": "2025-10-01T00:11:40.243730",
+      "response_data": {
+        "status": "needs_correction",
+        "issues": [
+          "i20",
+          "financial_documents"
+        ],
+        "links": {},
+        "created_at": "2025-10-01T00:11:40.129405+00:00",
+        "completed_at": null
+      }
+    },
+    {
+      "test": "Status Polling - Invalid Job ID",
+      "success": true,
+      "details": "Correctly returned error: Job n\u00e3o encontrado",
+      "timestamp": "2025-10-01T00:11:40.252908",
+      "response_data": {
+        "error": "Job n\u00e3o encontrado"
+      }
+    },
+    {
+      "test": "Consent Acceptance - Valid Hash",
+      "success": true,
+      "details": "Consent accepted: Downloads liberados ap\u00f3s aceite de consentimento",
+      "timestamp": "2025-10-01T00:11:40.303952",
+      "response_data": {
+        "accepted": true,
+        "message": "Downloads liberados ap\u00f3s aceite de consentimento"
+      }
+    },
+    {
+      "test": "Consent Acceptance - Invalid Hash",
+      "success": true,
+      "details": "Correctly rejected invalid hash: Hash de consentimento inv\u00e1lido",
+      "timestamp": "2025-10-01T00:11:40.313776",
+      "response_data": {
+        "error": "Hash de consentimento inv\u00e1lido"
+      }
+    },
+    {
+      "test": "Instructions Endpoint",
+      "success": true,
+      "details": "ID: test_instruction_123, Language: pt, Content length: 63",
+      "timestamp": "2025-10-01T00:11:40.322903",
+      "response_data": {
+        "instruction_id": "test_instruction_123",
+        "language": "pt"
+      }
+    },
+    {
+      "test": "Checklist Endpoint",
+      "success": true,
+      "details": "ID: test_checklist_456, Language: pt, Content length: 47",
+      "timestamp": "2025-10-01T00:11:40.372903",
+      "response_data": {
+        "checklist_id": "test_checklist_456",
+        "language": "pt"
+      }
+    },
+    {
+      "test": "Master Packet Endpoint",
+      "success": true,
+      "details": "ID: test_packet_789, Note: MVP - Em produ\u00e7\u00e3o retornaria PDF merged real",
+      "timestamp": "2025-10-01T00:11:40.381737",
+      "response_data": {
+        "packet_id": "test_packet_789"
+      }
+    },
+    {
+      "test": "System Integration - Form Code Resolution",
+      "success": false,
+      "details": "No case_id in start response",
+      "timestamp": "2025-10-01T00:11:40.432613",
+      "response_data": {
+        "message": "Auto-application case created successfully",
+        "case": {
+          "case_id": "OSP-1465517A",
+          "user_id": null,
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "basic_data": null,
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "created_at": "2025-10-01T00:11:40.387256",
+          "updated_at": "2025-10-01T00:11:40.387257",
+          "expires_at": "2025-10-08T00:11:40.387172"
+        }
+      }
+    },
+    {
+      "test": "Performance - /auto-application/start Response Time",
+      "success": true,
+      "details": "11ms (Target: <2000ms)",
+      "timestamp": "2025-10-01T00:11:40.443932",
+      "response_data": {
+        "endpoint": "/auto-application/start",
+        "method": "POST",
+        "response_time_ms": 11.22283935546875,
+        "status_code": 200
+      }
+    },
+    {
+      "test": "Performance - /llm/dr-paula/generate-directives Response Time",
+      "success": true,
+      "details": "137ms (Target: <2000ms)",
+      "timestamp": "2025-10-01T00:11:40.580575",
+      "response_data": {
+        "endpoint": "/llm/dr-paula/generate-directives",
+        "method": "POST",
+        "response_time_ms": 136.5833282470703,
+        "status_code": 200
+      }
+    },
+    {
+      "test": "Performance - /cases/TEST-PERF/finalize/start Response Time",
+      "success": true,
+      "details": "9ms (Target: <2000ms)",
+      "timestamp": "2025-10-01T00:11:40.589272",
+      "response_data": {
+        "endpoint": "/cases/TEST-PERF/finalize/start",
+        "method": "POST",
+        "response_time_ms": 8.640527725219727,
+        "status_code": 200
+      }
+    },
+    {
+      "test": "Overall Performance Assessment",
+      "success": true,
+      "details": "Avg: 52ms, Max: 137ms",
+      "timestamp": "2025-10-01T00:11:40.589330",
+      "response_data": {
+        "average_response_time_ms": 52.148898442586265,
+        "max_response_time_ms": 136.5833282470703,
+        "endpoints_tested": 3
+      }
+    },
+    {
+      "test": "Security - Consent System SHA-256 Validation",
+      "success": true,
+      "details": "Valid hash accepted: True",
+      "timestamp": "2025-10-01T00:11:40.639552",
+      "response_data": {
+        "hash_length": 64,
+        "accepted": true
+      }
+    },
+    {
+      "test": "Security - Invalid Hash Rejection",
+      "success": true,
+      "details": "Invalid hash properly rejected: True",
+      "timestamp": "2025-10-01T00:11:40.649597",
+      "response_data": {
+        "error": "Hash de consentimento inv\u00e1lido"
+      }
+    },
+    {
+      "test": "End-to-End H-1B Journey",
+      "success": false,
+      "details": "No case_id from start",
+      "timestamp": "2025-10-01T00:11:40.661272",
+      "response_data": {
+        "message": "Auto-application case created successfully",
+        "case": {
+          "case_id": "OSP-7C4E9E2E",
+          "user_id": null,
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "basic_data": null,
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "created_at": "2025-10-01T00:11:40.655799",
+          "updated_at": "2025-10-01T00:11:40.655800",
+          "expires_at": "2025-10-08T00:11:40.655737"
+        }
+      }
+    },
+    {
+      "test": "Complete H-1B Flow",
+      "success": false,
+      "details": "Checks: {'status_ready': False, 'has_links': False, 'has_instructions': False, 'has_checklist': False, 'has_master_packet': False}",
+      "timestamp": "2025-10-01T00:11:40.760606",
+      "response_data": {
+        "job_id": "094bc47b-6f28-46f6-86ab-f8f9afa8c266",
+        "status": "needs_correction",
+        "links": [],
+        "expected_fees": [
+          "I-129: $460",
+          "H1B_CAP: $1500",
+          "PREMIUM: $2500"
+        ],
+        "expected_address": "USCIS Texas Service Center"
+      }
+    },
+    {
+      "test": "Complete F-1 Flow",
+      "success": false,
+      "details": "Checks: {'status_ready': False, 'has_links': False, 'language_en': True}",
+      "timestamp": "2025-10-01T00:11:40.820444",
+      "response_data": {
+        "job_id": "65987652-cd2d-4827-a3cc-50a885aa3501",
+        "status": "needs_correction",
+        "links": [],
+        "expected_fees": [
+          "SEVIS: $350"
+        ],
+        "expected_address": "Student and Exchange Visitor Program"
+      }
+    }
+  ]
+}
