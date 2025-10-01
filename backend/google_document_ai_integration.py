@@ -544,9 +544,10 @@ class HybridDocumentValidator:
             "extracted_data": extracted_data,
             "dra_paula_assessment": assessment,
             "hybrid_powered": True,
-            "google_ai_enabled": True,
+            "google_vision_enabled": True,
             "dr_miguel_enabled": True,
-            "professional_grade": True
+            "professional_grade": True,
+            "real_api_active": not self.google_processor.is_mock_mode
         }
 
 
