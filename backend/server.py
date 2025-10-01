@@ -5829,7 +5829,12 @@ async def analyze_document_with_real_ai(
                     analysis_result["valid"] = False  # Require both systems to pass
                     analysis_result["legible"] = True
                     analysis_result["completeness"] = min(dr_miguel_confidence, 70)  # Reduced for partial approval
-                    analysis_result["issues"] = ["Documento requer revisão adicional"] + enhanced_result.get("issues", [])
+                    issues_from_miguel = enhanced_result.get("issues", [])
+                    if isinstance(issues_from_miguel, str):
+                        issues_from_miguel = [issues_from_miguel]
+                    elif not isinstance(issues_from_miguel, list):
+                        issues_from_miguel = []
+                    analysis_result["issues"] = ["Documento requer revisão adicional"] + issues_from_miguel
                 else:
                     # Reject if either system fails
                     analysis_result["valid"] = False
