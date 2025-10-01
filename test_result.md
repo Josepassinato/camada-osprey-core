@@ -735,9 +735,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Case Finalizer Complete System (Full Version)"
-    - "Enhanced PDF merging and document package generation"
-  stuck_tasks: []
+    - "Case Finalizer Frontend UI Integration Testing"
+    - "TESTE FINAL - Case Finalizer Completo Após Correções"
+  stuck_tasks:
+    - "TESTE FINAL - Case Finalizer Completo Após Correções"
   test_all: false
   test_priority: "high_first"
 
