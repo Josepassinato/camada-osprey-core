@@ -182,6 +182,81 @@ const CoverLetterModule: React.FC = () => {
     }
   };
 
+  // Formatar carta no padrão oficial (quando já está satisfatória)
+  const formatOfficialLetter = async () => {
+    try {
+      setLoading(true);
+      const response = await makeApiCall('/llm/dr-paula/format-official-letter', {
+        method: 'POST',
+        body: JSON.stringify({
+          visa_type: visaType,
+          applicant_letter: userDraft,
+          visa_profile: directives
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setFinalLetter(data.formatted_letter);
+        setCurrentCard(7); // Card de aprovação final
+      } else {
+        throw new Error('Falha ao formatar carta');
+      }
+    } catch (error) {
+      console.error('Error formatting letter:', error);
+      setError('Erro ao formatar carta oficial');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Processar respostas das perguntas e gerar carta final
+  const generateFinalLetter = async () => {
+    const questionsAndAnswers = questions.map(q => ({
+      question: q.question,
+      answer: q.answer || '',
+      category: q.category
+    }));
+
+    if (questionsAndAnswers.some(qa => !qa.answer.trim())) {
+      setError('Por favor, responda todas as perguntas antes de continuar');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await makeApiCall('/llm/dr-paula/generate-final-letter', {
+        method: 'POST',
+        body: JSON.stringify({
+          visa_type: visaType,
+          original_letter: userDraft,
+          questions_and_answers: questionsAndAnswers,
+          visa_profile: directives
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setFinalLetter(data.final_letter);
+        setCurrentCard(7); // Card de aprovação final
+      } else {
+        throw new Error('Falha ao gerar carta final');
+      }
+    } catch (error) {
+      console.error('Error generating final letter:', error);
+      setError('Erro ao gerar carta final');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Atualizar resposta da pergunta
+  const updateAnswer = (questionId: number, answer: string) => {
+    setQuestions(prev => prev.map(q => 
+      q.id === questionId ? { ...q, answer } : q
+    ));
+  };
+
   // Card 5a: Complete letter confirmation
   const confirmLetter = async () => {
     if (!review?.revised_letter) return;
