@@ -253,8 +253,8 @@ class ProductionVerificationTester:
                 self.log_test(
                     "POST /api/auto-application/start",
                     success,
-                    f"Case ID: {data.get('case_id', 'None')}, Format: {'✓' if case_id_format else '✗'}, Production: {'✓' if no_test_indicators else '✗'}",
-                    {"case_id": data.get('case_id'), "has_session": has_session_token}
+                    f"Case ID: {case_data.get('case_id', 'None')}, Format: {'✓' if case_id_format else '✗'}, Production: {'✓' if no_test_indicators else '✗'}",
+                    {"case_id": case_data.get('case_id'), "has_session": has_session_token, "has_message": has_message}
                 )
             else:
                 self.log_test(
