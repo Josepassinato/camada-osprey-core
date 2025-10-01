@@ -68,16 +68,25 @@ class IntelligentOwlAgent:
         self.google_validator = hybrid_validator
         
     def _setup_ai_client(self):
-        """Setup OpenAI client for intelligent responses"""
+        """Setup AI client using Emergent LLM key for OpenAI GPT-5"""
         try:
+            # Try Emergent LLM key first (supports OpenAI GPT-5)
+            emergent_key = os.environ.get('EMERGENT_LLM_KEY')
+            if emergent_key:
+                from emergentintegrations.llm.chat import LlmChat
+                client = LlmChat(api_key=emergent_key, model="gpt-4o")
+                logger.info("🤖 Owl Agent: Emergent LLM client initialized with GPT-4o")
+                return {"type": "emergent", "client": client}
+            
+            # Fallback to OpenAI directly
             import openai
-            api_key = os.environ.get('OPENAI_API_KEY')
-            if api_key:
-                client = openai.OpenAI(api_key=api_key)
+            openai_key = os.environ.get('OPENAI_API_KEY')
+            if openai_key:
+                client = openai.OpenAI(api_key=openai_key)
                 logger.info("🤖 Owl Agent: OpenAI client initialized")
-                return client
+                return {"type": "openai", "client": client}
             else:
-                logger.warning("⚠️ Owl Agent: No OpenAI key, using mock responses")
+                logger.warning("⚠️ Owl Agent: No AI keys found, using mock responses")
                 return None
         except Exception as e:
             logger.error(f"❌ Owl Agent: Failed to setup AI client: {e}")
