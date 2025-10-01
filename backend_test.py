@@ -2069,6 +2069,11 @@ class ComprehensiveEcosystemTester:
         
         print("🏆 PRODUCTION READINESS ASSESSMENT:")
         print("-" * 80)
+        print(f"Phase 2 Field Extraction: {'✅ READY' if phase2_field_extraction else '❌ NOT READY'}")
+        print(f"Phase 2 Translation Gate: {'✅ READY' if phase2_translation_gate else '❌ NOT READY'}")
+        print(f"Phase 3 Document Classification: {'✅ READY' if phase3_classification else '❌ NOT READY'}")
+        print(f"Phase 3 Cross-Document Consistency: {'✅ READY' if phase3_consistency else '❌ NOT READY'}")
+        print(f"Phase 2&3 Integration: {'✅ READY' if phase23_integration else '❌ NOT READY'}")
         print(f"Policy Engine (FASE 1): {'✅ READY' if policy_engine_working else '❌ NOT READY'}")
         print(f"Cover Letter Module: {'✅ READY' if cover_letter_working else '❌ NOT READY'}")
         print(f"Case Finalizer MVP: {'✅ READY' if case_finalizer_working else '❌ NOT READY'}")
