@@ -9153,8 +9153,19 @@ class ComprehensiveImmigrationAPITester:
         print("=" * 80)
         print()
         
-        # HIGHEST PRIORITY: AGENTE CORUJA (OWL AGENT) - NEW IMPLEMENTATION
-        print("🦉 PRIORITY 1: AGENTE CORUJA - INTELLIGENT QUESTIONNAIRE SYSTEM (NEW)")
+        # HIGHEST PRIORITY: TEST 4 SPECIFIC CORRECTED ENDPOINTS (USER REQUEST)
+        print("🎯 PRIORITY 1: TESTING 4 SPECIFIC CORRECTED ENDPOINTS (USER REQUEST)")
+        print("=" * 80)
+        print("Testing specific endpoints that were corrected:")
+        print("1. POST /api/owl/login (novo endpoint alternativo criado)")
+        print("2. GET /api/owl/user-sessions/{email} e POST /api/owl/user-sessions")
+        print("3. PUT /api/auto-application/case/{id} (validação melhorada)")
+        print("4. POST /api/owl-agent/initiate-payment (validação melhorada)")
+        print("-" * 80)
+        self.test_specific_corrected_endpoints()
+        
+        # SECOND PRIORITY: AGENTE CORUJA (OWL AGENT) - NEW IMPLEMENTATION
+        print("\n🦉 PRIORITY 2: AGENTE CORUJA - INTELLIGENT QUESTIONNAIRE SYSTEM (NEW)")
         print("=" * 80)
         print("Testing new Owl Agent implementation with 7 endpoints:")
         print("- Start Session, Get Session, Field Guidance, Validate Field")
