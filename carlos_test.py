@@ -435,8 +435,8 @@ class CarlosH1BSimulator:
                     step_status = data.get('status')
                     step_result = data.get('result')
                     
-                    # Be more lenient for AI processing - accept if we get a response
-                    success = (step_status in ['completed', 'success'] and step_result is not None) or (data.get('step') == step)
+                    # Be more lenient for AI processing - accept if we get a response with the correct step
+                    success = (step_status in ['completed', 'success'] and step_result is not None) or (data.get('step') == step and response.status_code == 200)
                     
                     self.log_test(
                         f"Carlos Step 6 - AI Processing ({step})",
