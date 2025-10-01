@@ -5218,9 +5218,18 @@ async def check_data_consistency_ai(case, friendly_form_data, basic_data):
         Responda "DADOS_CONSISTENTES_DRA_PAULA" se tudo estiver correto, ou liste inconsistências encontradas com orientações específicas da Dra. Paula para correção.
         """
         
-        response = llm.chat([{"role": "user", "content": consistency_prompt}])
+        if use_openai:
+            response = openai.chat.completions.create(
+                model="gpt-4",
+                messages=[{"role": "user", "content": consistency_prompt}],
+                max_tokens=2000,
+                temperature=0.3
+            )
+            response_text = response.choices[0].message.content
+        else:
+            response_text = llm.chat([{"role": "user", "content": consistency_prompt}])
         
-        if "DADOS_CONSISTENTES" in response:
+        if "DADOS_CONSISTENTES" in response_text:
             return {"details": "Dados verificados - Totalmente consistentes"}
         else:
             return {"details": "Dados verificados - Pequenas inconsistências identificadas e corrigidas"}
