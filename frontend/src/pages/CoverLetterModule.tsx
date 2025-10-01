@@ -31,10 +31,11 @@ interface Question {
 interface ReviewResult {
   visa_type: string;
   coverage_score: number;
-  status: 'complete' | 'incomplete' | 'needs_review' | 'needs_questions';
+  status: 'complete' | 'incomplete' | 'needs_review' | 'needs_questions' | 'ready_for_formatting';
   issues?: string[];
   missing_areas?: string[];
   questions?: Question[];
+  satisfied_criteria?: string[];
   revised_letter?: string | null;
   next_action: string;
 }
