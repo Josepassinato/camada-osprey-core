@@ -2446,6 +2446,257 @@ class ComprehensiveEcosystemTester:
         print("🎯 TARGETED TEST COMPLETED - Phase 2&3 Endpoint Fixes Verification")
         print()
 
+    def test_dr_paula_review_letter_specific(self):
+        """TESTE ESPECÍFICO DO ENDPOINT REVIEW-LETTER DO DR. PAULA - As requested by user"""
+        print("📝 TESTE ESPECÍFICO DO ENDPOINT REVIEW-LETTER DO DR. PAULA...")
+        
+        # Test 1: Valid payload as specified in the request
+        print("1️⃣ Testing with valid payload (H-1B scenario)...")
+        try:
+            payload = {
+                "visa_type": "H-1B",
+                "applicant_letter": "Meu nome é João Silva e sou um desenvolvedor de software com 5 anos de experiência. Estou me candidatando ao visto H-1B para trabalhar na empresa XYZ nos Estados Unidos. Tenho formação em Ciência da Computação e experiência em Python, JavaScript e React.",
+                "visa_profile": {
+                    "title": "H-1B Test",
+                    "directives": [
+                        {"id": "1", "pt": "Incluir experiência profissional", "en": "Include work experience", "required": True}
+                    ]
+                }
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/llm/dr-paula/review-letter",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check required response structure
+                has_success = data.get("success") is True
+                has_review = "review" in data
+                
+                if has_review:
+                    review = data["review"]
+                    has_visa_type = review.get("visa_type") == "H-1B"
+                    has_coverage_score = "coverage_score" in review
+                    has_status = "status" in review
+                    has_issues = "issues" in review
+                    has_revised_letter = "revised_letter" in review
+                    has_next_action = "next_action" in review
+                    
+                    structure_valid = all([has_visa_type, has_coverage_score, has_status, has_issues, has_revised_letter, has_next_action])
+                    
+                    self.log_test(
+                        "Dr. Paula Review Letter - Valid H-1B Payload",
+                        has_success and structure_valid,
+                        f"Success: {has_success}, Structure valid: {structure_valid}, Coverage: {review.get('coverage_score', 'N/A')}, Status: {review.get('status', 'N/A')}",
+                        {
+                            "response_structure": {
+                                "success": has_success,
+                                "has_review": has_review,
+                                "visa_type": review.get("visa_type"),
+                                "coverage_score": review.get("coverage_score"),
+                                "status": review.get("status"),
+                                "issues_count": len(review.get("issues", [])),
+                                "has_revised_letter": has_revised_letter,
+                                "next_action": review.get("next_action")
+                            }
+                        }
+                    )
+                else:
+                    self.log_test(
+                        "Dr. Paula Review Letter - Valid H-1B Payload",
+                        False,
+                        "Missing 'review' object in response",
+                        data
+                    )
+            else:
+                self.log_test(
+                    "Dr. Paula Review Letter - Valid H-1B Payload",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Dr. Paula Review Letter - Valid H-1B Payload",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 2: Empty letter scenario
+        print("2️⃣ Testing with empty letter...")
+        try:
+            payload = {
+                "visa_type": "H-1B",
+                "applicant_letter": "",
+                "visa_profile": {
+                    "title": "H-1B Test",
+                    "directives": [
+                        {"id": "1", "pt": "Incluir experiência profissional", "en": "Include work experience", "required": True}
+                    ]
+                }
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/llm/dr-paula/review-letter",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                has_error = data.get("success") is False and "error" in data
+                error_message = data.get("error", "")
+                
+                self.log_test(
+                    "Dr. Paula Review Letter - Empty Letter",
+                    has_error,
+                    f"Correctly rejected empty letter: {error_message}",
+                    {"success": data.get("success"), "error": error_message}
+                )
+            else:
+                self.log_test(
+                    "Dr. Paula Review Letter - Empty Letter",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Dr. Paula Review Letter - Empty Letter",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 3: Invalid payload (missing required fields)
+        print("3️⃣ Testing with invalid payload...")
+        try:
+            payload = {
+                "visa_type": "H-1B"
+                # Missing applicant_letter
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/llm/dr-paula/review-letter",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                has_error = data.get("success") is False
+                
+                self.log_test(
+                    "Dr. Paula Review Letter - Invalid Payload",
+                    has_error,
+                    f"Correctly handled invalid payload: {data.get('error', 'No error message')}",
+                    {"success": data.get("success"), "error": data.get("error")}
+                )
+            else:
+                self.log_test(
+                    "Dr. Paula Review Letter - Invalid Payload",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Dr. Paula Review Letter - Invalid Payload",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 4: Authentication test (if required)
+        print("4️⃣ Testing authentication requirements...")
+        try:
+            # Test without authentication
+            session_no_auth = requests.Session()
+            session_no_auth.headers.update({
+                'Content-Type': 'application/json',
+                'User-Agent': 'ReviewLetterTester/1.0'
+            })
+            
+            payload = {
+                "visa_type": "H-1B",
+                "applicant_letter": "Test letter for authentication check",
+                "visa_profile": {
+                    "title": "H-1B Test",
+                    "directives": [
+                        {"id": "1", "pt": "Incluir experiência profissional", "en": "Include work experience", "required": True}
+                    ]
+                }
+            }
+            
+            response = session_no_auth.post(
+                f"{API_BASE}/llm/dr-paula/review-letter",
+                json=payload
+            )
+            
+            # Check if endpoint requires authentication
+            requires_auth = response.status_code == 401 or response.status_code == 403
+            works_without_auth = response.status_code == 200
+            
+            self.log_test(
+                "Dr. Paula Review Letter - Authentication Check",
+                True,  # Always pass this test, just report the behavior
+                f"Endpoint behavior: {'Requires auth' if requires_auth else 'Works without auth' if works_without_auth else 'Other response'}",
+                {
+                    "status_code": response.status_code,
+                    "requires_authentication": requires_auth,
+                    "works_without_auth": works_without_auth,
+                    "with_auth_token": bool(self.auth_token)
+                }
+            )
+        except Exception as e:
+            self.log_test(
+                "Dr. Paula Review Letter - Authentication Check",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 5: Different visa types
+        print("5️⃣ Testing different visa types...")
+        visa_types = ["H-1B", "L1A", "O1", "F1"]
+        
+        for visa_type in visa_types:
+            try:
+                payload = {
+                    "visa_type": visa_type,
+                    "applicant_letter": f"Sou um profissional qualificado aplicando para o visto {visa_type}. Tenho experiência relevante e qualificações necessárias.",
+                    "visa_profile": {
+                        "title": f"{visa_type} Test",
+                        "directives": [
+                            {"id": "1", "pt": "Incluir qualificações", "en": "Include qualifications", "required": True}
+                        ]
+                    }
+                }
+                
+                response = self.session.post(
+                    f"{API_BASE}/llm/dr-paula/review-letter",
+                    json=payload
+                )
+                
+                success = response.status_code == 200
+                if success:
+                    data = response.json()
+                    success = data.get("success") is True and "review" in data
+                
+                self.log_test(
+                    f"Dr. Paula Review Letter - {visa_type} Visa Type",
+                    success,
+                    f"HTTP {response.status_code} - {'SUCCESS' if success else 'FAILED'}",
+                    {
+                        "visa_type": visa_type,
+                        "status_code": response.status_code,
+                        "success": success
+                    }
+                )
+            except Exception as e:
+                self.log_test(
+                    f"Dr. Paula Review Letter - {visa_type} Visa Type",
+                    False,
+                    f"Exception: {str(e)}"
+                )
     def run_all_tests(self):
         """URGENT: Test Phase 2&3 endpoints after router registration fix"""
         print("🚨 URGENT: PHASE 2&3 ENDPOINT FIXES VERIFICATION")
