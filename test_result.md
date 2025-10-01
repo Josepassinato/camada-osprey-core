@@ -648,15 +648,18 @@ frontend:
 
   - task: "GET /api/documents/validation-capabilities Endpoint Issue"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: false
         agent: "testing"
         comment: "❌ VALIDATION CAPABILITIES ENDPOINT NOT ACCESSIBLE: GET /api/documents/validation-capabilities returns HTTP 404 'Document not found' despite being properly defined in server.py at line 5605. Endpoint requires authentication (current_user dependency) and authentication is working, but endpoint still not accessible. Issue may be related to routing conflict or endpoint registration problem. Requires investigation by main agent."
+      - working: true
+        agent: "testing"
+        comment: "✅ VALIDATION CAPABILITIES ENDPOINT FIXED: Root cause identified and resolved - FastAPI route conflict where /documents/{document_id} was matching 'validation-capabilities' as a document ID parameter. Fixed by moving validation-capabilities endpoint definition before the parameterized route. Endpoint now returns HTTP 200 with proper capabilities JSON including Phase 2&3 features, supported document types, languages, and validation engines. Authentication working correctly with Bearer token."
 
 metadata:
   created_by: "testing_agent"
