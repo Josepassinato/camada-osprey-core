@@ -5611,8 +5611,8 @@ async def analyze_document_with_professional_api(
     Combines Google's enterprise OCR with Dr. Miguel's fraud detection
     """
     try:
-        # Professional validation with Onfido
-        logger.info(f"🏢 Starting PROFESSIONAL document analysis with Onfido - File: {file.filename}, Type: {document_type}")
+        # Hybrid professional validation with Google Document AI + Dr. Miguel
+        logger.info(f"🔬 Starting HYBRID document analysis (Google AI + Dr. Miguel) - File: {file.filename}, Type: {document_type}")
         
         # Basic file validation
         allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf']
