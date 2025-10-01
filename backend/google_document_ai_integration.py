@@ -332,12 +332,58 @@ class GoogleDocumentAIProcessor:
             }
             
         except Exception as e:
-            logger.error(f"❌ Google Vision API unexpected error: {e}")
+                logger.error(f"❌ Vision API fallback error: {e}")
+                return {
+                    "success": False,
+                    "error": f"Vision API processing failed: {e}",
+                    "error_type": "vision_fallback_error"
+                }
+        
+        except Exception as e:
+            logger.error(f"❌ All API processing failed: {e}")
             return {
                 "success": False,
                 "error": f"Document processing failed: {e}",
                 "error_type": "processing_error"
             }
+    
+    def _extract_document_ai_entities(self, document: Dict) -> List[Dict[str, Any]]:
+        """Extract structured entities from Document AI response"""
+        
+        entities = []
+        
+        # Extract from Document AI entities (if available)
+        doc_entities = document.get("entities", [])
+        for entity in doc_entities:
+            entities.append({
+                "type": entity.get("type", "unknown"),
+                "value": entity.get("textAnchor", {}).get("content", entity.get("mention_text", "")),
+                "confidence": entity.get("confidence", 0.0),
+                "normalized_value": entity.get("normalized_value", {}).get("text", "")
+            })
+        
+        # Extract from pages and form fields
+        pages = document.get("pages", [])
+        for page in pages:
+            # Form fields
+            form_fields = page.get("formFields", [])
+            for field in form_fields:
+                field_name = field.get("fieldName", {}).get("textAnchor", {}).get("content", "")
+                field_value = field.get("fieldValue", {}).get("textAnchor", {}).get("content", "")
+                
+                if field_name and field_value:
+                    entities.append({
+                        "type": f"form_field_{field_name.lower().replace(' ', '_')}",
+                        "value": field_value,
+                        "confidence": 0.9,
+                        "normalized_value": field_value.strip()
+                    })
+        
+        # If no structured entities, extract from text using regex
+        if not entities and document.get("text"):
+            entities = self._extract_entities_from_text(document["text"])
+        
+        return entities
     
     def _extract_entities_from_text(self, text: str) -> List[Dict[str, Any]]:
         """Extract structured entities from OCR text using regex patterns"""
