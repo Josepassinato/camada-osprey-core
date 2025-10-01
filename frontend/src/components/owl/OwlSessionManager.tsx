@@ -91,12 +91,16 @@ export const OwlSessionProvider: React.FC<OwlSessionProviderProps> = ({ children
   const startSession = async (visaType: string, language: string) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
+      // Generate a unique case ID for the owl session
+      const caseId = `OWL-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
       const response = await fetch(`${getBackendUrl()}/api/owl-agent/start-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          case_id: caseId,
           visa_type: visaType,
           language: language,
         }),
