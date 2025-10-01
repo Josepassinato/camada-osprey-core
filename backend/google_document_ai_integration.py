@@ -28,31 +28,62 @@ class GoogleDocumentAIProcessor:
         # Configuration from environment variables  
         self.api_key = os.environ.get('GOOGLE_API_KEY')
         self.client_id = os.environ.get('GOOGLE_CLIENT_ID')
+        self.client_secret = os.environ.get('GOOGLE_CLIENT_SECRET')
         self.project_id = os.environ.get('GOOGLE_CLOUD_PROJECT_ID', '891629358081')
         self.location = os.environ.get('GOOGLE_DOCUMENT_AI_LOCATION', 'us')
         
         # Check if we have credentials for real mode
-        self.is_mock_mode = not (self.api_key or self.client_id)
+        has_oauth2 = self.client_id and self.client_secret
+        has_api_key = self.api_key
+        
+        self.is_mock_mode = not (has_oauth2 or has_api_key)
         
         if self.is_mock_mode:
             logger.warning("🧪 Google Document AI in MOCK MODE - No credentials provided")
         else:
-            if self.api_key:
+            if has_oauth2:
+                logger.info(f"🔗 Google Document AI initialized with OAuth2 for project {self.project_id}")
+                
+                # Use OAuth2 for Document AI (preferred)
+                self.auth_method = "oauth2"
+                self.document_ai_endpoint = f"https://{self.location}-documentai.googleapis.com/v1/projects/{self.project_id}/locations/{self.location}/processors"
+                self.vision_endpoint = "https://vision.googleapis.com/v1/images:annotate"
+                
+                # Initialize OAuth2 credentials
+                self._init_oauth2_credentials()
+                
+            elif has_api_key:
                 logger.info(f"🔗 Google Document AI initialized with API key for project {self.project_id}")
                 
-                # Document AI REST endpoint
-                self.document_ai_endpoint = f"https://{self.location}-documentai.googleapis.com/v1/projects/{self.project_id}/locations/{self.location}/processors/GENERAL_PROCESSOR:process"
-                
-                # Fallback Vision API endpoint
+                # Fallback to API key for Vision API only
+                self.auth_method = "api_key"
                 self.vision_endpoint = f"https://vision.googleapis.com/v1/images:annotate?key={self.api_key}"
-                
-            elif self.client_id:
-                logger.info(f"🔗 Google Document AI initialized with OAuth2 Client ID: {self.client_id}")
-                self.document_ai_endpoint = f"https://{self.location}-documentai.googleapis.com/v1/projects/{self.project_id}/locations/{self.location}/processors/GENERAL_PROCESSOR:process"
-                self.vision_endpoint = "https://vision.googleapis.com/v1/images:annotate"
+                self.document_ai_endpoint = None  # Document AI doesn't work with API keys
+    
+    def _init_oauth2_credentials(self):
+        """Initialize OAuth2 credentials for Google APIs"""
+        try:
+            # For server-to-server, we'll use service account flow simulation
+            # This is a simplified approach - in production, you'd want proper service account JSON
             
-        # Track authentication method
-        self.auth_method = "api_key" if self.api_key else "oauth2" if self.client_id else "mock"
+            # Try to get default credentials first
+            try:
+                credentials, project = google.auth.default(
+                    scopes=['https://www.googleapis.com/auth/cloud-platform']
+                )
+                self.credentials = credentials
+                logger.info("✅ Using default Google credentials")
+                return
+            except Exception as e:
+                logger.warning(f"⚠️ Default credentials failed: {e}")
+            
+            # For now, we'll use the API key as fallback
+            logger.warning("🔑 OAuth2 credentials not fully configured, using API key fallback")
+            self.credentials = None
+            
+        except Exception as e:
+            logger.error(f"❌ OAuth2 initialization failed: {e}")
+            self.credentials = None
     
     def _create_mock_response(self, filename: str, content_length: int) -> Dict[str, Any]:
         """Create realistic mock response for testing"""
