@@ -150,7 +150,8 @@ export const OwlSessionProvider: React.FC<OwlSessionProviderProps> = ({ children
         body: JSON.stringify({
           session_id: state.session.session_id,
           field_id: fieldId,
-          value: value,
+          user_response: value,
+          validation_score: 100, // Default score, will be calculated by backend
         }),
       });
 
