@@ -608,5 +608,244 @@ class PolicyEngine:
         """
         return self._generate_user_messages_enhanced(result)
 
+    def auto_classify_document(self, 
+                              file_content: bytes, 
+                              filename: str, 
+                              extracted_text: str = "") -> Dict[str, Any]:
+        """
+        Classifica automaticamente o tipo do documento (Phase 3)
+        """
+        try:
+            classification_result = self.document_classifier.classify_document(
+                extracted_text, filename, len(file_content)
+            )
+            
+            return {
+                'auto_classification': classification_result,
+                'suggested_doc_type': classification_result.get('document_type'),
+                'confidence': classification_result.get('confidence', 0.0),
+                'status': classification_result.get('status', 'unknown'),
+                'alternatives': classification_result.get('candidates', [])[:3]  # Top 3 alternativas
+            }
+            
+        except Exception as e:
+            logger.error(f"Error in auto-classification: {e}")
+            return {
+                'auto_classification': {'error': str(e)},
+                'suggested_doc_type': 'UNKNOWN',
+                'confidence': 0.0,
+                'status': 'error',
+                'alternatives': []
+            }
+    
+    def validate_multiple_documents(self, 
+                                  documents_data: List[Dict[str, Any]],
+                                  case_context: Dict[str, Any] = None) -> Dict[str, Any]:
+        """
+        Valida múltiplos documentos com verificação de consistência (Phase 3)
+        """
+        try:
+            case_context = case_context or {}
+            individual_results = []
+            
+            # 1. Validar cada documento individualmente
+            for i, doc_data in enumerate(documents_data):
+                file_content = doc_data.get('file_content', b'')
+                filename = doc_data.get('filename', f'document_{i}')
+                extracted_text = doc_data.get('extracted_text', '')
+                doc_type = doc_data.get('doc_type', 'UNKNOWN')
+                
+                # Auto-classificar se tipo não especificado
+                if doc_type == 'UNKNOWN' or not doc_type:
+                    classification = self.auto_classify_document(file_content, filename, extracted_text)
+                    doc_type = classification['suggested_doc_type']
+                
+                # Validar individualmente
+                individual_result = self.validate_document(
+                    file_content, filename, doc_type, extracted_text, case_context
+                )
+                
+                individual_result['document_index'] = i
+                individual_result['original_filename'] = filename
+                individual_results.append(individual_result)
+            
+            # 2. Análise de consistência entre documentos (Phase 3)
+            consistency_result = {}
+            if len(individual_results) >= 2:
+                consistency_result = self.consistency_engine.analyze_document_consistency(
+                    individual_results, case_context
+                )
+            
+            # 3. Calcular score geral e decisão final
+            overall_score, final_decision, summary_issues = self._calculate_multi_document_score(
+                individual_results, consistency_result
+            )
+            
+            # 4. Gerar recomendações consolidadas
+            consolidated_recommendations = self._generate_multi_document_recommendations(
+                individual_results, consistency_result, summary_issues
+            )
+            
+            return {
+                'status': 'completed',
+                'document_count': len(documents_data),
+                'individual_results': individual_results,
+                'consistency_analysis': consistency_result,
+                'overall_score': overall_score,
+                'final_decision': final_decision,
+                'summary_issues': summary_issues,
+                'recommendations': consolidated_recommendations,
+                'timestamp': str(datetime.now())
+            }
+            
+        except Exception as e:
+            logger.error(f"Error in multi-document validation: {e}")
+            return {
+                'status': 'error',
+                'error_message': str(e),
+                'document_count': len(documents_data) if documents_data else 0,
+                'individual_results': [],
+                'consistency_analysis': {},
+                'overall_score': 0.0,
+                'final_decision': 'FAIL'
+            }
+    
+    def _calculate_multi_document_score(self, 
+                                      individual_results: List[Dict],
+                                      consistency_result: Dict) -> Tuple[float, str, List[Dict]]:
+        """
+        Calcula score geral para validação de múltiplos documentos
+        """
+        if not individual_results:
+            return 0.0, 'FAIL', []
+        
+        # 1. Score médio dos documentos individuais
+        individual_scores = [result.get('overall_score', 0.0) for result in individual_results]
+        avg_individual_score = sum(individual_scores) / len(individual_scores)
+        
+        # 2. Score de consistência
+        consistency_score = consistency_result.get('consistency_score', 1.0)
+        
+        # 3. Penalização por problemas críticos
+        critical_issues = []
+        
+        # Verificar problemas individuais críticos
+        for result in individual_results:
+            if result.get('decision') == 'FAIL':
+                critical_issues.append({
+                    'type': 'document_failure',
+                    'document': result.get('original_filename', 'unknown'),
+                    'messages': result.get('messages', [])
+                })
+        
+        # Verificar problemas de consistência críticos
+        if consistency_result.get('critical_issues'):
+            for issue in consistency_result['critical_issues']:
+                critical_issues.append({
+                    'type': 'consistency_failure',
+                    'rule': issue.get('rule_name', 'unknown'),
+                    'message': issue.get('message', 'Consistency issue detected')
+                })
+        
+        # 4. Calcular score final (ponderado)
+        weights = {
+            'individual_documents': 0.70,
+            'consistency': 0.30
+        }
+        
+        overall_score = (
+            avg_individual_score * weights['individual_documents'] +
+            consistency_score * weights['consistency']
+        )
+        
+        # 5. Determinar decisão final
+        has_critical_issues = len(critical_issues) > 0
+        has_document_failures = any(result.get('decision') == 'FAIL' for result in individual_results)
+        
+        if has_critical_issues or has_document_failures:
+            final_decision = 'FAIL'
+        elif overall_score >= 0.85:
+            final_decision = 'PASS'
+        elif overall_score >= 0.70:
+            final_decision = 'ALERT'
+        else:
+            final_decision = 'FAIL'
+        
+        return overall_score, final_decision, critical_issues
+    
+    def _generate_multi_document_recommendations(self, 
+                                               individual_results: List[Dict],
+                                               consistency_result: Dict,
+                                               summary_issues: List[Dict]) -> List[Dict]:
+        """
+        Gera recomendações consolidadas para múltiplos documentos
+        """
+        recommendations = []
+        
+        # 1. Recomendações baseadas em problemas críticos
+        if summary_issues:
+            recommendations.append({
+                'type': 'critical_issues',
+                'severity': 'critical',
+                'title': f'Critical Issues Found ({len(summary_issues)} issues)',
+                'description': 'Multiple critical issues detected that must be resolved',
+                'issues': summary_issues[:5],  # Limitar a 5 issues principais
+                'actions': [
+                    'Review and correct all identified critical issues',
+                    'Ensure all documents are authentic and complete',
+                    'Verify consistency of information across documents'
+                ]
+            })
+        
+        # 2. Recomendações de consistência
+        consistency_recommendations = consistency_result.get('recommendations', [])
+        for rec in consistency_recommendations[:3]:  # Limitar a 3 recomendações de consistência
+            recommendations.append(rec)
+        
+        # 3. Recomendações por tipo de problema comum
+        language_issues = []
+        quality_issues = []
+        
+        for result in individual_results:
+            filename = result.get('original_filename', 'unknown')
+            
+            # Verificar problemas de idioma
+            language_analysis = result.get('language_analysis', {})
+            if language_analysis.get('requires_action', False):
+                language_issues.append(filename)
+            
+            # Verificar problemas de qualidade
+            quality_status = result.get('quality', {}).get('status', 'ok')
+            if quality_status in ['fail', 'alert']:
+                quality_issues.append(filename)
+        
+        if language_issues:
+            recommendations.append({
+                'type': 'translation_required',
+                'severity': 'high',
+                'title': 'Translation Required',
+                'description': f'Documents require certified English translation: {", ".join(language_issues[:3])}',
+                'actions': [
+                    'Obtain certified translations from qualified translators',
+                    'Ensure translator provides certificate of accuracy',
+                    'Submit both original documents and certified translations'
+                ]
+            })
+        
+        if quality_issues:
+            recommendations.append({
+                'type': 'quality_improvement',
+                'severity': 'medium',
+                'title': 'Document Quality Issues',
+                'description': f'Quality issues detected in: {", ".join(quality_issues[:3])}',
+                'actions': [
+                    'Rescan documents with higher resolution',
+                    'Ensure documents are clearly legible',
+                    'Check for proper lighting and focus when photographing documents'
+                ]
+            })
+        
+        return recommendations
+
 # Instância global do policy engine
 policy_engine = PolicyEngine()
