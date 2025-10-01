@@ -10819,13 +10819,14 @@ class ComprehensiveImmigrationAPITester:
         try:
             # ETAPA 1: Case Creation
             print("ETAPA 1: 🆕 Case Creation...")
-            response = self.session.post(f"{API_BASE}/auto-application/start")
+            payload = {}  # Empty payload for anonymous case creation
+            response = self.session.post(f"{API_BASE}/auto-application/start", json=payload)
             if response.status_code == 200:
                 data = response.json()
                 case_id = data.get('case_id')
                 self.log_test("Carlos H-1B Step 1 - Case Creation", True, f"Case ID: {case_id}", data)
             else:
-                self.log_test("Carlos H-1B Step 1 - Case Creation", False, f"HTTP {response.status_code}")
+                self.log_test("Carlos H-1B Step 1 - Case Creation", False, f"HTTP {response.status_code}: {response.text}")
                 return
             
             # ETAPA 2: H-1B Visa Selection
