@@ -150,7 +150,9 @@ class CarlosH1BSimulator:
     def test_step1_start_application(self):
         """ETAPA 1: Criar caso inicial anônimo"""
         try:
-            response = self.session.post(f"{API_BASE}/auto-application/start")
+            # Send empty payload for anonymous case creation
+            payload = {}
+            response = self.session.post(f"{API_BASE}/auto-application/start", json=payload)
             
             if response.status_code == 200:
                 data = response.json()
