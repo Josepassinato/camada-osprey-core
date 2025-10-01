@@ -3022,11 +3022,11 @@ async def get_finalization_status(job_id: str):
 async def accept_finalization_consent(case_id: str, request: dict):
     """Aceita consentimento para liberação dos downloads"""
     try:
-        from case_finalizer import case_finalizer
+        from case_finalizer_complete import case_finalizer_complete
         
         consent_hash = request.get("consent_hash", "")
         
-        result = case_finalizer.accept_consent(
+        result = case_finalizer_complete.accept_consent(
             case_id=case_id,
             consent_hash=consent_hash
         )
