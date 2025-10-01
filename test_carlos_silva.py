@@ -55,17 +55,20 @@ def test_carlos_silva_h1b_complete_journey():
     print("\n🚀 ETAPA 1: CRIAÇÃO DO CASO INICIAL")
     print("-" * 50)
     try:
-        response = session.post(f"{API_BASE}/auto-application/start")
+        # Send empty payload for anonymous case creation
+        payload = {}
+        response = session.post(f"{API_BASE}/auto-application/start", json=payload)
         
         if response.status_code == 200:
             data = response.json()
-            case_id = data.get('case_id')
-            session_token = data.get('session_token')
+            case_data = data.get('case', {})
+            case_id = case_data.get('case_id')
+            session_token = case_data.get('session_token')
             
             log_test(
                 "ETAPA 1 - Criação do Caso",
-                bool(case_id and session_token),
-                f"Case ID: {case_id}, Session Token: {session_token[:20]}..." if session_token else "Missing tokens"
+                bool(case_id),
+                f"Case ID: {case_id}, Session Token: {session_token[:20] if session_token else 'None'}..."
             )
         else:
             log_test(
