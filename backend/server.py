@@ -6644,7 +6644,7 @@ async def initiate_owl_payment(request: dict):
         
         # Create payment transaction record
         payment_data = {
-            "payment_id": f"OWL-PAY-{int(time.time())}-{uuid.uuid4().hex[:8]}",
+            "payment_id": f"OWL-PAY-{int(time_module.time())}-{uuid.uuid4().hex[:8]}",
             "stripe_session_id": checkout_session.session_id,
             "owl_session_id": session_id,
             "user_email": user_email,
