@@ -10866,7 +10866,7 @@ class ComprehensiveImmigrationAPITester:
             payload = {"form_code": "H-1B"}
             url = f"{API_BASE}/auto-application/case/{case_id}"
             print(f"PUT URL: {url}")
-            response = self.session.put(url, json=payload)
+            response = anonymous_session.put(url, json=payload)
             if response.status_code == 200:
                 data = response.json()
                 case_data = data.get('case', {})
