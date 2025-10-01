@@ -259,14 +259,16 @@ const CoverLetterModule: React.FC = () => {
 
   // Card 5a: Complete letter confirmation
   const confirmLetter = async () => {
-    if (!review?.revised_letter) return;
+    // Use carta final se disponível, senão use carta revisada
+    const letterToSave = finalLetter?.letter_text || review?.revised_letter;
+    if (!letterToSave) return;
 
     try {
       setLoading(true);
       const response = await makeApiCall(`/process/${caseId}/add-letter`, {
         method: 'POST',
         body: JSON.stringify({
-          letter_text: review.revised_letter,
+          letter_text: letterToSave,
           visa_type: visaType,
           confirmed_by_applicant: true
         })
