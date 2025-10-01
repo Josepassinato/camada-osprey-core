@@ -448,14 +448,104 @@ class PolicyEngine:
         
         return overall_score, decision
     
-    def _generate_user_messages(self, result: Dict) -> List[str]:
+    def _calculate_score_and_decision_enhanced(self, policy: Dict, result: Dict) -> Tuple[float, str]:
         """
-        Gera mensagens de feedback para o usuário
+        Cálculo de score aprimorado (Phase 2) incluindo análise de idioma e extração avançada
+        """
+        # Pesos da política ou padrão aprimorado
+        scoring = policy.get("scoring", {
+            "critical_fields_weight": 0.35,
+            "quality_weight": 0.25,
+            "presence_checks_weight": 0.15,
+            "consistency_weight": 0.1,
+            "language_compliance_weight": 0.1,
+            "field_extraction_weight": 0.05
+        })
+        
+        scores = []
+        
+        # 1. Score de qualidade
+        quality_status = result["quality"].get("status", "fail")
+        quality_score = {"ok": 1.0, "alert": 0.7, "fail": 0.0}.get(quality_status, 0.0)
+        scores.append(quality_score * scoring["quality_weight"])
+        
+        # 2. Score de verificações de política
+        policy_checks = result["policy_checks"]
+        if policy_checks:
+            pass_count = sum(1 for check in policy_checks if check["result"] == "pass")
+            total_count = len(policy_checks)
+            policy_score = pass_count / total_count if total_count > 0 else 0.0
+            scores.append(policy_score * (scoring["critical_fields_weight"] + scoring["presence_checks_weight"]))
+        
+        # 3. Score de conformidade de idioma (Phase 2)
+        language_analysis = result.get("language_analysis", {})
+        language_compliant = language_analysis.get("compliance", {}).get("compliant", True)
+        language_score = 1.0 if language_compliant else 0.3  # Penalização por não-conformidade
+        scores.append(language_score * scoring["language_compliance_weight"])
+        
+        # 4. Score de extração de campos (Phase 2)
+        fields = result.get("fields", {})
+        if fields:
+            field_scores = []
+            
+            # Avaliar campos da política
+            policy_fields = fields.get("policy_fields", {})
+            for field_name, field_data in policy_fields.items():
+                if field_data.get("required", False):
+                    if field_data.get("found", False) and field_data.get("best_match"):
+                        best_match = field_data["best_match"]
+                        validation = best_match.get("validation", {})
+                        if validation.get("is_valid", False):
+                            field_scores.append(validation.get("confidence", 0.5))
+                        else:
+                            field_scores.append(0.0)
+                    else:
+                        field_scores.append(0.0)
+            
+            field_extraction_score = sum(field_scores) / len(field_scores) if field_scores else 1.0
+            scores.append(field_extraction_score * scoring["field_extraction_weight"])
+        
+        # 5. Score de consistência
+        consistency_checks = result["consistency"]
+        if consistency_checks:
+            pass_count = sum(1 for check in consistency_checks if check["result"] == "pass")
+            total_count = len(consistency_checks)
+            consistency_score = pass_count / total_count if total_count > 0 else 1.0
+            scores.append(consistency_score * scoring["consistency_weight"])
+        
+        overall_score = sum(scores) if scores else 0.0
+        
+        # Determinar decisão aprimorada
+        has_critical_fail = any(
+            check["result"] == "fail" and check["severity"] == "critical"
+            for check in policy_checks
+        )
+        
+        # Verificar se tradução é obrigatória e não está presente
+        requires_translation = language_analysis.get("requires_action", False)
+        has_translation_cert = result.get("translation_certificate", {}).get("has_translation_certificate", False)
+        translation_violation = requires_translation and not has_translation_cert
+        
+        if has_critical_fail or translation_violation:
+            decision = "FAIL"
+        elif overall_score >= 0.90:
+            decision = "PASS"  
+        elif overall_score >= 0.70:
+            decision = "ALERT"
+        else:
+            decision = "FAIL"
+        
+        return overall_score, decision
+    
+    def _generate_user_messages_enhanced(self, result: Dict) -> List[str]:
+        """
+        Gera mensagens de feedback avançadas para o usuário (Phase 2)
         """
         messages = []
         
         decision = result["decision"]
         
+        # Mensagem principal
         if decision == "PASS":
             messages.append("✅ Documento aprovado - Atende a todos os requisitos")
         elif decision == "ALERT":
@@ -463,12 +553,56 @@ class PolicyEngine:
         else:
             messages.append("❌ Documento rejeitado - Corrija os problemas identificados")
         
-        # Adicionar mensagens específicas de policy checks
+        # Mensagens de análise de idioma
+        language_analysis = result.get("language_analysis", {})
+        if language_analysis.get("requires_action", False):
+            compliance = language_analysis.get("compliance", {})
+            messages.append(f"🌐 Idioma: {compliance.get('message', 'Requer tradução certificada')}")
+            
+            # Adicionar recomendações específicas
+            recommendations = language_analysis.get("recommendations", [])
+            for rec in recommendations[:2]:  # Limitar a 2 recomendações principais
+                if rec.get("severity") in ["critical", "high"]:
+                    messages.append(f"• {rec.get('title', 'Recomendação')}: {rec.get('description', '')}")
+        
+        # Mensagens de verificação de política
         for check in result["policy_checks"]:
             if check["result"] == "fail" and check["severity"] in ["critical", "high"]:
                 messages.append(f"• {check['message']}")
         
+        # Mensagens de campos extraídos com problemas
+        fields = result.get("fields", {})
+        policy_fields = fields.get("policy_fields", {})
+        
+        missing_required = []
+        invalid_fields = []
+        
+        for field_name, field_data in policy_fields.items():
+            if field_data.get("required", False):
+                if not field_data.get("found", False):
+                    missing_required.append(field_name)
+                elif field_data.get("best_match"):
+                    best_match = field_data["best_match"]
+                    validation = best_match.get("validation", {})
+                    if not validation.get("is_valid", False):
+                        issues = validation.get("issues", [])
+                        if issues:
+                            invalid_fields.append(f"{field_name}: {issues[0]}")
+        
+        if missing_required:
+            messages.append(f"📋 Campos obrigatórios não encontrados: {', '.join(missing_required)}")
+        
+        if invalid_fields:
+            for invalid in invalid_fields[:3]:  # Limitar a 3 campos com problema
+                messages.append(f"❗ Campo inválido - {invalid}")
+        
         return messages
+
+    def _generate_user_messages(self, result: Dict) -> List[str]:
+        """
+        Gera mensagens de feedback para o usuário (método original mantido para compatibilidade)
+        """
+        return self._generate_user_messages_enhanced(result)
 
 # Instância global do policy engine
 policy_engine = PolicyEngine()
