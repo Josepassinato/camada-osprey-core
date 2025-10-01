@@ -720,12 +720,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "New Intelligent Cover Letter Flow Testing - COMPLETED"
-    - "Ver Detalhes Button Testing - All Visa Types"
-    - "Modal Content Validation for Previously Broken Visas"
-  stuck_tasks: []
+    - "Case Finalizer Complete System (Full Version)"
+    - "Enhanced PDF merging and document package generation"
+  stuck_tasks:
+    - "Case Finalizer Complete System (Full Version)"
   test_all: false
-  test_priority: "cover_letter_flow_validation_completed"
+  test_priority: "high_first"
 
 agent_communication:
   - agent: "testing"
