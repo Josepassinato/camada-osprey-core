@@ -6507,6 +6507,12 @@ async def login_owl_user(request: dict):
         logger.error(f"Error logging in owl user: {e}")
         raise HTTPException(status_code=500, detail=f"Login error: {str(e)}")
 
+# Alternative endpoint for login (supports different URL patterns)
+@api_router.post("/owl/login")  
+async def login_owl_user_alt(request: dict):
+    """Alternative login endpoint for Owl Agent"""
+    return await login_owl_user(request)
+
 @api_router.post("/owl-agent/save-for-later")
 async def save_session_for_later(request: dict):
     """Save current session for later completion (requires user authentication)"""
