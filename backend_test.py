@@ -2461,10 +2461,10 @@ class ComprehensiveEcosystemTester:
         self.test_phase2_phase3_targeted_endpoints()
         print()
         
-        # PRIORITY 1: Test Phase 2&3 endpoints accessibility (URGENT)
-        print("🎯 PRIORITY 1: TESTING PHASE 2&3 ENDPOINTS ACCESSIBILITY...")
+        # PRIORITY 1: FINAL VALIDATION OF FIXED PHASE 2&3 ENDPOINTS (URGENT)
+        print("🎯 PRIORITY 1: FINAL VALIDATION OF FIXED PHASE 2&3 ENDPOINTS...")
         print("-" * 60)
-        self.test_phase2_phase3_endpoints_accessibility()
+        self.test_phase2_phase3_final_validation()
         print()
         
         # PRIORITY 2: Test individual Phase 2&3 components
