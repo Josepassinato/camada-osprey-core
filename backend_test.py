@@ -6644,6 +6644,586 @@ class ComprehensiveEcosystemTester:
                 f"Exception: {str(e)}"
             )
 
+    def test_google_vision_api_real_integration_comprehensive(self):
+        """URGENT: Test Google Vision API REAL integration - API now responding with HTTP 200"""
+        print("🔬 TESTING GOOGLE VISION API REAL INTEGRATION...")
+        print("📊 User confirmed: API responding with HTTP 200 (not 403 anymore)")
+        print("🎯 Testing hybrid system in REAL mode (not mock)")
+        
+        # Test 1: API Real vs Mock Mode Detection
+        self.test_api_real_vs_mock_mode()
+        
+        # Test 2: Real OCR Quality vs Mock Baseline
+        self.test_real_ocr_quality_vs_mock()
+        
+        # Test 3: Performance with Real API
+        self.test_real_api_performance()
+        
+        # Test 4: Hybrid System with Real Google Vision
+        self.test_hybrid_system_real_mode()
+        
+        # Test 5: Cost-Benefit Analysis Real API
+        self.test_cost_benefit_real_api()
+        
+        # Test 6: Comparative Testing (Valid vs Invalid Documents)
+        self.test_comparative_real_api()
+    
+    def test_api_real_vs_mock_mode(self):
+        """Test if system detects API is active and switches from mock to real mode"""
+        print("🔍 Testing API Real vs Mock Mode Detection...")
+        
+        # Create a test document to trigger Google Vision API
+        test_passport = b"""
+        PASSPORT
+        UNITED STATES OF AMERICA
+        
+        Type: P
+        Country Code: USA
+        Passport No: 987654321
+        
+        Surname: OLIVEIRA
+        Given Names: CARLOS EDUARDO
+        Nationality: UNITED STATES OF AMERICA
+        Date of Birth: 20 MAR 1985
+        Sex: M
+        Place of Birth: MIAMI, FL, USA
+        Date of Issue: 15 JUN 2021
+        Date of Expiry: 14 JUN 2031
+        Authority: U.S. DEPARTMENT OF STATE
+        """ * 100  # Make it large enough
+        
+        files = {
+            'file': ('test_passport_real_api.pdf', test_passport, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-REAL-API-MODE',
+            'applicant_name': 'Carlos Eduardo Oliveira'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check if system is using real API (not mock mode)
+                extracted_data = result.get('extracted_data', {})
+                google_vision_data = extracted_data.get('google_vision_data', {})
+                
+                mock_mode = google_vision_data.get('mock_mode', True)
+                api_enabled = google_vision_data.get('api_enabled', False)
+                real_api_active = result.get('real_api_active', False)
+                auth_method = google_vision_data.get('auth_method', 'unknown')
+                
+                # System should detect real API is active
+                is_real_mode = (
+                    not mock_mode and
+                    api_enabled and
+                    real_api_active and
+                    auth_method in ['api_key', 'oauth2']
+                )
+                
+                self.log_test(
+                    "Google Vision API - Real vs Mock Mode",
+                    is_real_mode,
+                    f"Mock mode: {mock_mode}, API enabled: {api_enabled}, Real API active: {real_api_active}, Auth: {auth_method}",
+                    {
+                        "mock_mode": mock_mode,
+                        "api_enabled": api_enabled,
+                        "real_api_active": real_api_active,
+                        "auth_method": auth_method,
+                        "expected": "Should be in REAL mode, not mock"
+                    }
+                )
+            else:
+                self.log_test(
+                    "Google Vision API - Real vs Mock Mode",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Google Vision API - Real vs Mock Mode",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_real_ocr_quality_vs_mock(self):
+        """Test OCR quality with real API vs mock baseline (94%)"""
+        print("🔍 Testing Real OCR Quality vs Mock Baseline...")
+        
+        # Create a high-quality passport document for OCR testing
+        high_quality_passport = b"""
+        PASSPORT
+        REPUBLIC OF BRAZIL
+        
+        Type: P
+        Country Code: BRA
+        Passport No: BR7654321
+        
+        Surname: SILVA
+        Given Names: MARIA FERNANDA
+        Nationality: BRAZILIAN
+        Date of Birth: 10 FEB 1992
+        Sex: F
+        Place of Birth: SAO PAULO, BRAZIL
+        Date of Issue: 05 APR 2022
+        Date of Expiry: 04 APR 2032
+        Authority: DPF
+        
+        MRZ:
+        P<BRASILVA<<MARIA<FERNANDA<<<<<<<<<<<<<<<<<<<<<
+        BR7654321<BRA9202105F3204046<<<<<<<<<<<<<<<<<<8
+        """ * 80  # Large, detailed document
+        
+        files = {
+            'file': ('high_quality_passport.pdf', high_quality_passport, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-OCR-QUALITY',
+            'applicant_name': 'Maria Fernanda Silva'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check OCR quality metrics
+                extracted_data = result.get('extracted_data', {})
+                google_vision_data = extracted_data.get('google_vision_data', {})
+                
+                ocr_confidence = google_vision_data.get('ocr_confidence', 0)
+                entities_count = google_vision_data.get('entities_count', 0)
+                extracted_text_length = len(google_vision_data.get('extracted_text', ''))
+                mock_mode = google_vision_data.get('mock_mode', True)
+                
+                # Real API should provide superior OCR quality
+                # Mock baseline was 94% with 8 entities
+                is_superior_quality = (
+                    not mock_mode and  # Must be real API
+                    (ocr_confidence >= 90 or  # High confidence
+                     entities_count >= 6 or   # Good entity extraction
+                     extracted_text_length >= 200)  # Substantial text extraction
+                )
+                
+                self.log_test(
+                    "Google Vision API - Real OCR Quality",
+                    is_superior_quality,
+                    f"OCR confidence: {ocr_confidence}%, Entities: {entities_count}, Text length: {extracted_text_length}, Mock: {mock_mode}",
+                    {
+                        "ocr_confidence": ocr_confidence,
+                        "entities_count": entities_count,
+                        "extracted_text_length": extracted_text_length,
+                        "mock_mode": mock_mode,
+                        "baseline": "Mock mode: 94% confidence, 8 entities"
+                    }
+                )
+            else:
+                self.log_test(
+                    "Google Vision API - Real OCR Quality",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Google Vision API - Real OCR Quality",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_real_api_performance(self):
+        """Test performance with real API (<5 seconds)"""
+        print("🔍 Testing Real API Performance...")
+        
+        import time
+        
+        # Create a document for performance testing
+        performance_test_doc = b"PASSPORT PERFORMANCE TEST DOCUMENT. " * 200
+        
+        files = {
+            'file': ('performance_test.pdf', performance_test_doc, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-PERFORMANCE'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            start_time = time.time()
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers,
+                timeout=10  # 10 second timeout
+            )
+            
+            end_time = time.time()
+            response_time = end_time - start_time
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check processing time
+                extracted_data = result.get('extracted_data', {})
+                processing_stats = extracted_data.get('processing_stats', {})
+                total_time_ms = processing_stats.get('total_time_ms', response_time * 1000)
+                
+                # Performance should be under 5 seconds (5000ms)
+                is_acceptable_performance = response_time < 5.0
+                
+                self.log_test(
+                    "Google Vision API - Real API Performance",
+                    is_acceptable_performance,
+                    f"Response time: {response_time:.2f}s, Processing time: {total_time_ms:.0f}ms",
+                    {
+                        "response_time_seconds": round(response_time, 2),
+                        "processing_time_ms": total_time_ms,
+                        "target": "< 5 seconds",
+                        "acceptable": is_acceptable_performance
+                    }
+                )
+            else:
+                self.log_test(
+                    "Google Vision API - Real API Performance",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except requests.exceptions.Timeout:
+            self.log_test(
+                "Google Vision API - Real API Performance",
+                False,
+                "Request timed out (>10 seconds)",
+                {"timeout": "10 seconds", "expected": "< 5 seconds"}
+            )
+        except Exception as e:
+            self.log_test(
+                "Google Vision API - Real API Performance",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_hybrid_system_real_mode(self):
+        """Test hybrid system (Google Vision + Dr. Miguel) in real mode"""
+        print("🔍 Testing Hybrid System in Real Mode...")
+        
+        # Create a document that should trigger both systems
+        hybrid_test_doc = b"""
+        PASSPORT
+        FEDERATIVE REPUBLIC OF BRAZIL
+        
+        Type: P
+        Country Code: BRA
+        Passport No: BR1122334
+        
+        Surname: SANTOS
+        Given Names: JOAO CARLOS
+        Nationality: BRAZILIAN
+        Date of Birth: 25 DEC 1988
+        Sex: M
+        Place of Birth: RIO DE JANEIRO, BRAZIL
+        Date of Issue: 12 JAN 2023
+        Date of Expiry: 11 JAN 2033
+        Authority: DPF
+        """ * 60
+        
+        files = {
+            'file': ('hybrid_test_passport.pdf', hybrid_test_doc, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-HYBRID-REAL',
+            'applicant_name': 'Joao Carlos Santos'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check hybrid system components
+                extracted_data = result.get('extracted_data', {})
+                google_vision_data = extracted_data.get('google_vision_data', {})
+                dr_miguel_analysis = extracted_data.get('dr_miguel_analysis', {})
+                processing_stats = extracted_data.get('processing_stats', {})
+                
+                # Verify both systems are working
+                google_working = (
+                    not google_vision_data.get('mock_mode', True) and
+                    google_vision_data.get('ocr_confidence', 0) > 0
+                )
+                
+                dr_miguel_working = (
+                    dr_miguel_analysis.get('verdict') in ['APROVADO', 'REJEITADO', 'NECESSITA_REVISÃO'] and
+                    dr_miguel_analysis.get('confidence', 0) > 0
+                )
+                
+                # Check combined confidence (40% Google + 60% Dr. Miguel)
+                combined_confidence = processing_stats.get('combined_confidence', 0)
+                
+                hybrid_working = (
+                    google_working and
+                    dr_miguel_working and
+                    combined_confidence > 0 and
+                    result.get('hybrid_powered', False)
+                )
+                
+                self.log_test(
+                    "Google Vision API - Hybrid System Real Mode",
+                    hybrid_working,
+                    f"Google: {google_working}, Dr. Miguel: {dr_miguel_working}, Combined confidence: {combined_confidence}%",
+                    {
+                        "google_working": google_working,
+                        "dr_miguel_working": dr_miguel_working,
+                        "combined_confidence": combined_confidence,
+                        "hybrid_powered": result.get('hybrid_powered', False),
+                        "real_api_active": result.get('real_api_active', False)
+                    }
+                )
+            else:
+                self.log_test(
+                    "Google Vision API - Hybrid System Real Mode",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Google Vision API - Hybrid System Real Mode",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_cost_benefit_real_api(self):
+        """Test cost-benefit of real API ($1.50/1000 docs)"""
+        print("🔍 Testing Cost-Benefit Real API...")
+        
+        # Test with a document that should show cost tracking
+        cost_test_doc = b"COST BENEFIT TEST DOCUMENT FOR GOOGLE VISION API. " * 100
+        
+        files = {
+            'file': ('cost_test.pdf', cost_test_doc, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-COST-BENEFIT'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check if system is using paid API (not free mock)
+                extracted_data = result.get('extracted_data', {})
+                google_vision_data = extracted_data.get('google_vision_data', {})
+                
+                using_paid_api = (
+                    not google_vision_data.get('mock_mode', True) and
+                    google_vision_data.get('api_enabled', False)
+                )
+                
+                # Check if quality justifies cost
+                ocr_confidence = google_vision_data.get('ocr_confidence', 0)
+                entities_count = google_vision_data.get('entities_count', 0)
+                
+                quality_justifies_cost = (
+                    ocr_confidence >= 80 or  # High accuracy
+                    entities_count >= 5      # Good data extraction
+                )
+                
+                cost_benefit_positive = using_paid_api and quality_justifies_cost
+                
+                self.log_test(
+                    "Google Vision API - Cost-Benefit Analysis",
+                    cost_benefit_positive,
+                    f"Using paid API: {using_paid_api}, Quality: {ocr_confidence}% confidence, {entities_count} entities",
+                    {
+                        "using_paid_api": using_paid_api,
+                        "ocr_confidence": ocr_confidence,
+                        "entities_count": entities_count,
+                        "cost_model": "$1.50/1000 documents",
+                        "quality_justifies_cost": quality_justifies_cost
+                    }
+                )
+            else:
+                self.log_test(
+                    "Google Vision API - Cost-Benefit Analysis",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Google Vision API - Cost-Benefit Analysis",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_comparative_real_api(self):
+        """Test comparative analysis: valid vs invalid documents with real API"""
+        print("🔍 Testing Comparative Real API Analysis...")
+        
+        # Test 1: Valid document - should approve with high confidence
+        valid_passport = b"""
+        PASSPORT
+        UNITED STATES OF AMERICA
+        
+        Type: P
+        Country Code: USA
+        Passport No: 555666777
+        
+        Surname: JOHNSON
+        Given Names: MICHAEL ROBERT
+        Nationality: UNITED STATES OF AMERICA
+        Date of Birth: 08 JUL 1987
+        Sex: M
+        Place of Birth: CHICAGO, IL, USA
+        Date of Issue: 20 SEP 2022
+        Date of Expiry: 19 SEP 2032
+        Authority: U.S. DEPARTMENT OF STATE
+        """ * 70
+        
+        files = {
+            'file': ('valid_passport_real_api.pdf', valid_passport, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-VALID-REAL-API',
+            'applicant_name': 'Michael Robert Johnson'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            # Test valid document
+            valid_response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            valid_result = None
+            if valid_response.status_code == 200:
+                valid_result = valid_response.json()
+            
+            # Test 2: Invalid document - should reject correctly
+            invalid_doc = b"INVALID DOCUMENT NOT A PASSPORT. " * 50
+            
+            files_invalid = {
+                'file': ('invalid_doc.pdf', invalid_doc, 'application/pdf')
+            }
+            data_invalid = {
+                'document_type': 'passport',
+                'visa_type': 'H-1B',
+                'case_id': 'TEST-INVALID-REAL-API',
+                'applicant_name': 'Michael Robert Johnson'
+            }
+            
+            invalid_response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files_invalid,
+                data=data_invalid,
+                headers=headers
+            )
+            
+            invalid_result = None
+            if invalid_response.status_code == 200:
+                invalid_result = invalid_response.json()
+            
+            # Compare results
+            if valid_result and invalid_result:
+                valid_completeness = valid_result.get('completeness', 0)
+                invalid_completeness = invalid_result.get('completeness', 0)
+                
+                valid_using_real_api = not valid_result.get('extracted_data', {}).get('google_vision_data', {}).get('mock_mode', True)
+                invalid_using_real_api = not invalid_result.get('extracted_data', {}).get('google_vision_data', {}).get('mock_mode', True)
+                
+                # Real API should distinguish between valid and invalid documents
+                correct_discrimination = (
+                    valid_using_real_api and
+                    invalid_using_real_api and
+                    valid_completeness > invalid_completeness and
+                    valid_completeness >= 70 and  # Valid should score high
+                    invalid_completeness <= 30    # Invalid should score low
+                )
+                
+                self.log_test(
+                    "Google Vision API - Comparative Analysis",
+                    correct_discrimination,
+                    f"Valid: {valid_completeness}%, Invalid: {invalid_completeness}%, Both using real API: {valid_using_real_api and invalid_using_real_api}",
+                    {
+                        "valid_completeness": valid_completeness,
+                        "invalid_completeness": invalid_completeness,
+                        "valid_using_real_api": valid_using_real_api,
+                        "invalid_using_real_api": invalid_using_real_api,
+                        "correct_discrimination": correct_discrimination
+                    }
+                )
+            else:
+                self.log_test(
+                    "Google Vision API - Comparative Analysis",
+                    False,
+                    f"Failed to get both results. Valid: {valid_response.status_code}, Invalid: {invalid_response.status_code}",
+                    {
+                        "valid_status": valid_response.status_code,
+                        "invalid_status": invalid_response.status_code
+                    }
+                )
+        except Exception as e:
+            self.log_test(
+                "Google Vision API - Comparative Analysis",
+                False,
+                f"Exception: {str(e)}"
+            )
+
     def run_all_tests(self):
         """Run all comprehensive tests"""
         print("🚀 STARTING COMPREHENSIVE ECOSYSTEM VALIDATION")
