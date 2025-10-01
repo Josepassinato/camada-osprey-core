@@ -5597,15 +5597,17 @@ async def get_document_analysis_performance():
 
 # CRITICAL: Real Document Analysis Endpoint
 @api_router.post("/documents/analyze-with-ai")
-async def analyze_document_with_real_ai(
+async def analyze_document_with_professional_api(
     file: UploadFile = File(...),
     document_type: str = Form(...),
     visa_type: str = Form(...),
-    case_id: str = Form(...)
+    case_id: str = Form(...),
+    applicant_name: str = Form(default="Unknown User")
 ):
     """
-    REAL document analysis using Dr. Miguel's expertise
-    CRITICAL SECURITY FUNCTION - Validates actual document content
+    PROFESSIONAL document analysis using Onfido API
+    ENTERPRISE-GRADE SECURITY - Industry-leading document validation
+    Replaces Dr. Miguel with professional verification service
     """
     try:
         
