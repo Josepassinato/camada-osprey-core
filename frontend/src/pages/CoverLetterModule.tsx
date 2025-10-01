@@ -58,6 +58,8 @@ const CoverLetterModule: React.FC = () => {
   const [directivesText, setDirectivesText] = useState<string>('');
   const [userDraft, setUserDraft] = useState<string>('');
   const [review, setReview] = useState<ReviewResult | null>(null);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [finalLetter, setFinalLetter] = useState<FinalLetter | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
