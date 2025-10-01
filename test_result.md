@@ -589,6 +589,18 @@ frontend:
         agent: "testing"
         comment: "✅ CRITICAL FORM CODE MISMATCH INVESTIGATION COMPLETED - ROOT CAUSE IDENTIFIED! Comprehensive testing performed with 6 specific test scenarios: 1) ✅ H-1B Start Test - POST /api/auto-application/start with form_code: 'H-1B' correctly returns H-1B case, 2) ✅ H-1B Retrieval Test - GET /api/auto-application/case/{case_id} correctly retrieves H-1B form_code, 3) ❌ F-1 Update Test - PUT /api/auto-application/case/{case_id} failed with HTTP 404 (minor issue - case not found), 4) ✅ B-1/B-2 Default Test - B-1/B-2 form_code correctly handled, 5) ✅ Empty Form Code Test - System correctly handles null form_code (no default fallback to B-1/B-2), 6) ✅ Invalid Form Code Test - System correctly rejects invalid form_code with HTTP 422 validation error. CRITICAL FINDING: Backend APIs are working correctly! The form_code mismatch issue reported by frontend testing is NOT a backend problem. SUCCESS RATE: 5/6 tests passed (83.3%). RECOMMENDATION: The issue is in FRONTEND code (SelectForm.tsx) - check frontend form selection logic where user selections are not being properly passed to backend API calls."
 
+  - task: "Enhanced Dr. Miguel Prompt - 7-Layer Forensic Analysis"
+    implemented: true
+    working: false
+    file: "/app/backend/specialized_agents.py"
+    stuck_count: 2
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ PROMPT APRIMORADO DO DR. MIGUEL NÃO FUNCIONAL - ANÁLISE FORENSE DE 7 CAMADAS QUEBRADA! Comprehensive testing of the enhanced Dr. Miguel prompt for advanced forensic document validation reveals CRITICAL SYSTEM FAILURES: ❌ TESTE 1 (Análise Detalhada - Documento Válido): 0% completeness, no forensic layers detected (0/6), structured data extraction failing, expected JSON structure not returned, ❌ TESTE 2 (Detecção Avançada - Documento Tipo Errado): Wrong document type not detected, no technical analysis, no specific rejection reasons, forensic notes missing, ❌ TESTE 3 (Validação de Identidade): Fuzzy matching not working (José vs Jose failed), identity validation completely broken, belongs_to_applicant field missing, ❌ TESTE 4 (Análise Temporal): Days remaining calculation not working, expiry detection failing, USCIS validity checks broken, temporal_validation section empty, ❌ TESTE 5 (Sistema de Pontuação): Individual scoring components missing (authenticity_score=0, quality_score=0, completeness_score=0), 85% threshold not enforced, overall_confidence stuck at 0%, ❌ TESTE 6 (Extração de Dados Estruturados): personal_info/document_numbers/dates sections empty, recommendations/critical_issues missing, compliance_status not populated. ROOT CAUSE: 1) Policy Engine Error: 'language_compliance_weight' KeyError causing system failures, 2) Dr. Miguel Enhanced System Error: 'ValidationResult' object not subscriptable and 'str' object has no attribute 'update', 3) Enhanced forensic analysis method exists but fails due to underlying system errors. TAXA DE SUCESSO: 1/10 tests passed (10% success rate). CONCLUSÃO CRÍTICA: O prompt aprimorado de 7 camadas existe no código (specialized_agents.py lines 149-289) mas não está operacional devido a erros críticos no sistema de validação subjacente."
+
   - task: "Ver Detalhes Button Modal Testing - All Visa Types"
     implemented: true
     working: "NA"
