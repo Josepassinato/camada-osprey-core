@@ -5809,11 +5809,33 @@ async def analyze_document_with_real_ai(
             
             logger.info(f"✅ Análise aprimorada Dr. Miguel concluída: {enhanced_result.get('verdict', 'PROCESSADO')}")
             
-            # Merge enhanced results with Policy Engine results
+            # Merge enhanced results with Policy Engine results - SECURE VALIDATION
             if enhanced_result and isinstance(enhanced_result, dict):
                 # Update analysis result with enhanced data while preserving Policy Engine data
                 analysis_result["enhanced_analysis"] = enhanced_result
-                analysis_result["completeness"] = enhanced_result.get("confidence_score", analysis_result["completeness"])
+                
+                # SECURITY FIX: Only update completeness if document is actually valid
+                dr_miguel_verdict = enhanced_result.get("verdict", "REJEITADO")
+                dr_miguel_confidence = enhanced_result.get("confidence_score", 0)
+                
+                # Only approve if both Dr. Miguel and Policy Engine approve
+                policy_decision = analysis_result.get("policy_decision", "FAIL")
+                if dr_miguel_verdict == "APROVADO" and policy_decision == "PASS":
+                    analysis_result["valid"] = True
+                    analysis_result["legible"] = True
+                    analysis_result["completeness"] = dr_miguel_confidence
+                    analysis_result["issues"] = enhanced_result.get("issues", [])
+                elif dr_miguel_verdict == "APROVADO" and policy_decision in ["ALERT", "PASS"]:
+                    analysis_result["valid"] = False  # Require both systems to pass
+                    analysis_result["legible"] = True
+                    analysis_result["completeness"] = min(dr_miguel_confidence, 70)  # Reduced for partial approval
+                    analysis_result["issues"] = ["Documento requer revisão adicional"] + enhanced_result.get("issues", [])
+                else:
+                    # Reject if either system fails
+                    analysis_result["valid"] = False
+                    analysis_result["legible"] = enhanced_result.get("legible", False)
+                    analysis_result["completeness"] = min(dr_miguel_confidence, 30)  # Low score for rejected docs
+                    analysis_result["issues"] = enhanced_result.get("issues", ["Documento rejeitado pela validação"])
                 
                 # Combine assessments
                 dr_miguel_assessment = enhanced_result.get("verdict", "")
