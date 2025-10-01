@@ -103,7 +103,7 @@ class GoogleDocumentAIProcessor:
     
     async def process_document(self, file_content: bytes, filename: str, 
                              mime_type: str = "application/pdf") -> Dict[str, Any]:
-        """Process document with Google Vision API OCR"""
+        """Process document with Google Document AI (with Vision API fallback)"""
         
         if self.is_mock_mode:
             # Return mock response for testing
