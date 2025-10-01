@@ -6236,7 +6236,7 @@ async def download_master_packet(job_id: str, current_user = Depends(get_current
         raise HTTPException(status_code=500, detail="Erro ao baixar master packet")
 
 @api_router.get("/cases/{case_id}/finalize/capabilities")
-async def get_case_finalizer_capabilities(current_user = Depends(get_current_user)):
+async def get_case_finalizer_capabilities(case_id: str, current_user = Depends(get_current_user)):
     """Retorna capacidades disponíveis no Case Finalizer completo"""
     try:
         from case_finalizer_complete import case_finalizer_complete
