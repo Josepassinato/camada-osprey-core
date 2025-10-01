@@ -555,10 +555,14 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Case Finalizer MVP System"
+    - "Phase 2 Field Extraction Engine"
+    - "Phase 2 Translation Gate System"
+    - "Phase 3 Cross-Document Consistency"
+    - "Phase 3 Automated Document Classification"
+    - "Enhanced API Endpoints"
   stuck_tasks: []
   test_all: true
-  test_priority: "case_finalizer_mvp_complete"
+  test_priority: "phase2_phase3_validation"
 
 agent_communication:
   - agent: "testing"
