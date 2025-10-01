@@ -10962,8 +10962,9 @@ class ComprehensiveImmigrationAPITester:
             response = anonymous_session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
             if response.status_code == 200:
                 data = response.json()
-                final_progress = data.get('progress_percentage', 0)
-                final_status = data.get('status', '')
+                case_data = data.get('case', {})
+                final_progress = case_data.get('progress_percentage', 0)
+                final_status = case_data.get('status', '')
                 
                 simulation_success = final_progress == 100 and final_status == "completed"
                 self.log_test(
