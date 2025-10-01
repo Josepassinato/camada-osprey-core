@@ -10842,6 +10842,9 @@ class ComprehensiveImmigrationAPITester:
                 data = response.json()
                 case_data = data.get('case', {})
                 case_id = case_data.get('case_id')
+                if not case_id:
+                    self.log_test("Carlos H-1B Step 1 - Case Creation", False, "No case_id in response", data)
+                    return
                 self.log_test("Carlos H-1B Step 1 - Case Creation", True, f"Case ID: {case_id}", case_data)
             else:
                 self.log_test("Carlos H-1B Step 1 - Case Creation", False, f"HTTP {response.status_code}: {response.text}")
