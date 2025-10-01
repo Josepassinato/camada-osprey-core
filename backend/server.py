@@ -3159,15 +3159,14 @@ async def review_applicant_letter(request: dict):
         
         system_prompt = f"""
         Você é a Dra. Paula, especialista em processos imigratórios.
-        Revise a carta escrita pelo aplicante para o visto {visa_type}.
+        Analise a carta escrita pelo aplicante para o visto {visa_type} e gere perguntas específicas para completar as informações necessárias.
         
-        INSTRUÇÕES:
-        1. Verifique se cobre todas as exigências do visto {visa_type} baseado nas diretivas
-        2. Se faltar algo, liste em "issues"
-        3. Se completo, apenas ajuste redação e formalidade, SEM ALTERAR FATOS
-        4. Retorne em JSON com status, carta revisada (se completa) e lista de faltas (se houver)
-        5. NUNCA adicione dados não fornecidos pelo aplicante
-        6. Sempre finalize com o disclaimer
+        NOVO FLUXO OBJETICO:
+        1. Leia a carta do aplicante cuidadosamente
+        2. Compare com as exigências do visto {visa_type}
+        3. Identifique informações que estão FALTANDO ou IMPRECISAS
+        4. Gere 3-5 perguntas ESPECÍFICAS e OBJETIVAS para obter essas informações
+        5. As perguntas devem ser claras e diretas, focadas nos critérios do visto
         
         DIRETIVAS PARA {visa_type}:
         {yaml.dump(visa_profile, default_flow_style=False, allow_unicode=True)}
@@ -3180,10 +3179,17 @@ async def review_applicant_letter(request: dict):
             "review": {{
                 "visa_type": "{visa_type}",
                 "coverage_score": 0.0,
-                "status": "complete" ou "incomplete",
-                "issues": [],
-                "revised_letter": "carta revisada ou null",
-                "next_action": "present_to_applicant ou request_complement"
+                "status": "needs_questions",
+                "missing_areas": ["área 1", "área 2"],
+                "questions": [
+                    {{
+                        "id": 1,
+                        "question": "Pergunta específica e objetiva?",
+                        "why_needed": "Explicação de por que essa informação é importante para o visto {visa_type}",
+                        "category": "education/experience/motivation/etc"
+                    }}
+                ],
+                "next_action": "collect_answers"
             }}
         }}
         """
