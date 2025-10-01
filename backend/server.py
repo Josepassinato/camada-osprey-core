@@ -3004,12 +3004,13 @@ async def get_finalization_status(job_id: str):
         result = case_finalizer_complete.get_job_status(job_id)
         
         if result["success"]:
+            job = result["job"]
             return {
-                "status": result["status"],
-                "issues": result.get("issues", []),
-                "links": result.get("links", {}),
-                "created_at": result.get("created_at"),
-                "completed_at": result.get("completed_at")
+                "status": job.get("status", "processing"),
+                "issues": job.get("issues", []),
+                "links": job.get("links", {}),
+                "created_at": job.get("created_at"),
+                "completed_at": job.get("completed_at")
             }
         else:
             return {"error": result["error"]}
