@@ -891,7 +891,7 @@ class ComprehensiveEcosystemTester:
                 f"Exception: {str(e)}"
             )
         
-        # Test 2: Review Letter
+        # Test 2: Review Letter - URGENT USER ISSUE TEST
         try:
             payload = {
                 "visa_type": "H1B",
