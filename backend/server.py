@@ -6533,9 +6533,12 @@ async def start_owl_session(request: dict):
         case_id = request.get("case_id")
         visa_type = request.get("visa_type", "H-1B")
         user_language = request.get("language", "pt")
+        user_email = request.get("user_email", "").strip().lower()  # Optional for anonymous sessions
+        session_type = request.get("session_type", "anonymous")  # "anonymous" or "authenticated"
         
         if not case_id:
-            raise HTTPException(status_code=400, detail="case_id is required")
+            # Generate case_id if not provided
+            case_id = f"OWL-{Date.now()}-{Math.random().toString(36).substr(2, 9)}"
         
         # Initialize Owl Agent
         from intelligent_owl_agent import intelligent_owl
@@ -6553,6 +6556,7 @@ async def start_owl_session(request: dict):
             "case_id": case_id,
             "visa_type": visa_type,
             "language": user_language,
+            "session_type": session_type,
             "status": "active",
             "created_at": datetime.utcnow(),
             "relevant_fields": session_result["relevant_fields"],
@@ -6561,12 +6565,22 @@ async def start_owl_session(request: dict):
             "total_fields": session_result["total_fields"]
         }
         
+        # Add user info if authenticated session
+        if session_type == "authenticated" and user_email:
+            session_data["user_email"] = user_email
+            # Verify user exists
+            user = await db.owl_users.find_one({"email": user_email})
+            if user:
+                session_data["user_id"] = user["user_id"]
+        
         await db.owl_sessions.insert_one(session_data)
         
         return {
             "success": True,
             "agent": "Agente Coruja - Sistema Inteligente de Questionários",
             "session": session_result,
+            "session_type": session_type,
+            "user_email": user_email if user_email else None,
             "timestamp": datetime.utcnow().isoformat()
         }
         
