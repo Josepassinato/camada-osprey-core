@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-VALIDAÇÃO FINAL COMPLETA DO ECOSSISTEMA - Comprehensive Testing Suite
-Tests all immigration system components for production certification
+COMPREHENSIVE IMMIGRATION API TESTING SUITE
+Tests ALL immigration application APIs for production certification
+Covers: Authentication, Owl Agent, Auto-Application, Documents, Dr. Paula LLM, Stripe, and more
 """
 
 import requests
@@ -13,6 +14,7 @@ import os
 from typing import Dict, Any
 import base64
 import hashlib
+import io
 
 # Get backend URL from environment
 BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://iaimmigration.preview.emergentagent.com')
