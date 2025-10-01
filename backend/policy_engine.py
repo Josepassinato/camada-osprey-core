@@ -1,6 +1,6 @@
 """
-Policy Engine - Motor de políticas baseado em YAML
-Processa políticas de validação de documentos conforme especificação técnica
+Policy Engine - Motor de políticas baseado em YAML (Enhanced Phase 2)
+Processa políticas de validação de documentos com extração avançada de campos e translation gate
 """
 import yaml
 import os
@@ -10,6 +10,8 @@ from typing import Dict, Any, List, Optional, Tuple
 import logging
 from document_catalog import document_catalog, DocumentType
 from document_quality_checker import DocumentQualityChecker
+from field_extraction_engine import field_extraction_engine
+from translation_gate import translation_gate
 
 logger = logging.getLogger(__name__)
 
