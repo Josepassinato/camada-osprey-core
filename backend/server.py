@@ -5721,19 +5721,19 @@ async def analyze_document_with_real_ai(
         from policy_engine import policy_engine
         from document_catalog import document_catalog
         
-        # Initialize base analysis result
+        # Initialize base analysis result - SECURE DEFAULT (reject until proven valid)
         analysis_result = {
-            "valid": True,
-            "legible": True,
-            "completeness": 85,
-            "issues": [],
+            "valid": False,
+            "legible": False,
+            "completeness": 0,
+            "issues": ["Documento aguardando validação"],
             "extracted_data": {
                 "document_type": document_type,
                 "file_name": file.filename,
-                "validation_status": "PROCESSED",
+                "validation_status": "PENDING_VALIDATION",
                 "visa_context": visa_type
             },
-            "dra_paula_assessment": f"Documento {document_type} processado para {visa_type}"
+            "dra_paula_assessment": f"Documento {document_type} em análise para {visa_type}"
         }
         
         # FASE 1: Policy Engine Analysis (Quality + Policies + Catalog)
