@@ -12,6 +12,8 @@ from document_catalog import document_catalog, DocumentType
 from document_quality_checker import DocumentQualityChecker
 from field_extraction_engine import field_extraction_engine
 from translation_gate import translation_gate
+from cross_document_consistency import cross_document_consistency
+from document_classifier import document_classifier
 
 logger = logging.getLogger(__name__)
 
