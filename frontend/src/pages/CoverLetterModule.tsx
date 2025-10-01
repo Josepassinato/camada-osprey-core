@@ -675,6 +675,94 @@ const CoverLetterModule: React.FC = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Card 7: Final Letter Approval */}
+        {currentCard === 7 && finalLetter && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                <span>Carta Oficial Pronta</span>
+              </CardTitle>
+              <CardDescription>
+                Sua carta foi formatada no padrão oficial de imigração. Revise e aprove para continuar.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle2 className="h-5 w-5 text-green-500" />
+                      <span className="font-medium text-green-800">
+                        Conformidade: {Math.round((finalLetter.compliance_score || 0) * 100)}%
+                      </span>
+                    </div>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      Padrão Oficial
+                    </Badge>
+                  </div>
+                  {finalLetter.improvements_made && finalLetter.improvements_made.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-sm text-green-700 font-medium">Melhorias aplicadas:</p>
+                      <ul className="text-sm text-green-600 mt-1">
+                        {finalLetter.improvements_made.map((improvement, index) => (
+                          <li key={index}>• {improvement}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-3">Sua Carta Final:</h4>
+                  <div className="bg-gray-50 p-4 rounded-lg border max-h-96 overflow-y-auto">
+                    <pre className="whitespace-pre-wrap text-sm text-gray-700 font-sans leading-relaxed">
+                      {finalLetter.letter_text}
+                    </pre>
+                  </div>
+                </div>
+
+                <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                  <div className="flex items-start space-x-2">
+                    <AlertCircle className="h-5 w-5 text-yellow-500 mt-0.5" />
+                    <div className="text-sm text-yellow-800">
+                      <p className="font-medium">Confirmação importante:</p>
+                      <p>
+                        Todas as informações nesta carta são verdadeiras e foram fornecidas por você. 
+                        Esta carta será salva em sua pasta de documentos.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex space-x-3">
+                  <Button
+                    onClick={confirmLetter}
+                    disabled={loading}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Salvando...
+                      </>
+                    ) : (
+                      '✅ Aprovar e Continuar'
+                    )}
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentCard(3)}
+                  >
+                    Voltar e Reescrever
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
