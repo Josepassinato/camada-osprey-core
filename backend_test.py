@@ -2208,40 +2208,6 @@ class ComprehensiveEcosystemTester:
         
         # Generate critical test report
         self.generate_critical_test_report()
-                        
-                else:
-                    self.log_test(
-                        f"Dr. Paula - {test['name']}",
-                        False,
-                        f"❌ HTTP {response.status_code}",
-                        {"status_code": response.status_code, "response": response.text[:200]}
-                    )
-                    
-            except Exception as e:
-                self.log_test(
-                    f"Dr. Paula - {test['name']}",
-                    False,
-                    f"❌ Exception: {str(e)}",
-                    {"exception": str(e)}
-                )
-        
-        # Overall assessment
-        success_rate = (working_count / total_count) * 100
-        overall_success = working_count >= (total_count * 0.8)  # 80% success rate
-        
-        self.log_test(
-            "Dr. Paula Endpoints - Overall Assessment",
-            overall_success,
-            f"Success Rate: {working_count}/{total_count} ({success_rate:.1f}%)",
-            {
-                "working_endpoints": working_count,
-                "total_endpoints": total_count,
-                "success_rate": success_rate,
-                "openai_key_status": "✅ Working" if overall_success else "❌ Issues detected"
-            }
-        )
-        
-        return overall_success
     
     def test_emergent_llm_key_status(self):
         """VERIFICAÇÃO STATUS EMERGENT_LLM_KEY vs NEW OPENAI_API_KEY"""
