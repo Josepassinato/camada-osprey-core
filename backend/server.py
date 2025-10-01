@@ -5648,7 +5648,7 @@ async def analyze_document_with_professional_api(
                 "completeness": 0,
                 "issues": ["❌ Arquivo muito pequeno ou corrompido"],
                 "extracted_data": {"validation_status": "REJECTED", "reason": "File too small"},
-                "dra_paula_assessment": "❌ Onfido: Qualidade de arquivo inadequada"
+                "dra_paula_assessment": "❌ Híbrido: Qualidade de arquivo inadequada"
             }
         
         # HYBRID PROFESSIONAL ANALYSIS - Google Document AI + Dr. Miguel
