@@ -1859,6 +1859,9 @@ async def update_case_anonymous(case_id: str, request: dict, session_token: Opti
     """Update a specific case (anonymous or authenticated)"""
     try:
         # Convert dict to CaseUpdate model with flexible validation
+        case_update = None
+        case_update_dict = None
+        
         try:
             # Filter out None values and unknown fields that might cause validation issues
             filtered_data = {k: v for k, v in request.items() if v is not None}
@@ -1883,7 +1886,7 @@ async def update_case_anonymous(case_id: str, request: dict, session_token: Opti
                     "user_id": current_user["id"]
                 })
                 if case:
-                    if isinstance(case_update, CaseUpdate):
+                    if case_update is not None:
                         update_data = case_update.dict(exclude_none=True)
                     else:
                         update_data = case_update_dict
@@ -1915,7 +1918,7 @@ async def update_case_anonymous(case_id: str, request: dict, session_token: Opti
         if not case:
             raise HTTPException(status_code=404, detail="Case not found")
         
-        if isinstance(case_update, CaseUpdate):
+        if case_update is not None:
             update_data = case_update.dict(exclude_none=True)
         else:
             update_data = case_update_dict
