@@ -3641,6 +3641,36 @@ class ComprehensiveEcosystemTester:
         # Generate final comprehensive report
         self.generate_final_report()
     
+    def generate_final_report(self):
+        """Generate final comprehensive report"""
+        print("\n📊 FINAL COMPREHENSIVE REPORT")
+        print("=" * 80)
+        
+        total_tests = len(self.test_results)
+        passed_tests = len([t for t in self.test_results if t["success"]])
+        failed_tests = total_tests - passed_tests
+        
+        print(f"Total Tests: {total_tests}")
+        print(f"Passed: {passed_tests}")
+        print(f"Failed: {failed_tests}")
+        print(f"Success Rate: {(passed_tests/total_tests*100):.1f}%")
+        print()
+        
+        # Save results to file
+        with open('/app/test_results.json', 'w') as f:
+            json.dump({
+                "summary": {
+                    "total_tests": total_tests,
+                    "passed_tests": passed_tests,
+                    "failed_tests": failed_tests,
+                    "success_rate": (passed_tests/total_tests*100) if total_tests > 0 else 0
+                },
+                "detailed_results": self.test_results
+            }, f, indent=2)
+        
+        print(f"📄 Results saved to: /app/test_results.json")
+        print("=" * 80)
+    
     def generate_comprehensive_summary(self):
         """Generate comprehensive ecosystem validation summary"""
         print("\n" + "=" * 80)
