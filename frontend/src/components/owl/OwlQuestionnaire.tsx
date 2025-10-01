@@ -403,13 +403,15 @@ export const OwlQuestionnaire: React.FC = () => {
                 ) : (
                   <Button
                     onClick={() => {
-                      // Navigate to form generator
-                      console.log('Questionnaire completed!');
+                      // Navigate to payment page when questionnaire is complete
+                      const searchParams = new URLSearchParams();
+                      searchParams.set('session_id', state.session?.session_id || '');
+                      window.location.href = `/owl-agent/payment?${searchParams.toString()}`;
                     }}
                     disabled={!canGoNext}
                     className="bg-green-600 hover:bg-green-700"
                   >
-                    {language === 'pt' ? 'Finalizar' : 'Complete'}
+                    {language === 'pt' ? 'Finalizar e Fazer Download' : 'Complete and Download'}
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 )}
