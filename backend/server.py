@@ -6771,6 +6771,21 @@ async def startup_db_client():
             await db.chat_history.create_index("session_id")
             await db.chat_history.create_index("created_at")
             
+            # Owl Agent indexes
+            await db.owl_sessions.create_index("session_id", unique=True)
+            await db.owl_sessions.create_index("case_id")
+            await db.owl_sessions.create_index("status")
+            await db.owl_sessions.create_index("created_at")
+            
+            await db.owl_responses.create_index("session_id")
+            await db.owl_responses.create_index("field_id")
+            await db.owl_responses.create_index("timestamp")
+            
+            await db.owl_generated_forms.create_index("session_id")
+            await db.owl_generated_forms.create_index("case_id")
+            await db.owl_generated_forms.create_index("visa_type")
+            await db.owl_generated_forms.create_index("created_at")
+            
             logger.info("Database indexes created successfully for optimized performance!")
             
         except Exception as index_error:
