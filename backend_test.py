@@ -1873,21 +1873,44 @@ class ComprehensiveEcosystemTester:
             )
     
     def run_critical_openai_tests(self):
-                                "endpoint": test['endpoint'],
-                                "status_code": response.status_code,
-                                "has_budget_error": has_budget_error,
-                                "response_success": data.get("success", False),
-                                "response_size": len(str(data))
-                            }
-                        )
-                        
-                    except json.JSONDecodeError:
-                        self.log_test(
-                            f"Dr. Paula - {test['name']}",
-                            False,
-                            "❌ Invalid JSON response",
-                            {"response_text": response.text[:200]}
-                        )
+        """Run critical OpenAI integration tests as requested"""
+        print("🚨 CRITICAL OPENAI INTEGRATION TESTS - USER REQUEST")
+        print("=" * 80)
+        print("Testing all agents with user's OpenAI key and Dra. Paula Assistant ID")
+        print()
+        
+        # 1. CRITICAL: Dr. Paula I-589 Review Letter Test
+        print("🔥 PRIORITY 1: Dr. Paula I-589 Review Letter")
+        print("-" * 50)
+        self.test_urgent_openai_key_validation()
+        print()
+        
+        # 2. Dr. Paula Generate Directives
+        print("📋 PRIORITY 2: Dr. Paula Generate Directives")
+        print("-" * 50)
+        self.test_dr_paula_generate_directives_critical()
+        print()
+        
+        # 3. Dr. Miguel Enhanced Analysis
+        print("🔬 PRIORITY 3: Dr. Miguel Enhanced Analysis")
+        print("-" * 50)
+        self.test_dr_miguel_enhanced_analysis()
+        print()
+        
+        # 4. All AI Functions Integration
+        print("🤖 PRIORITY 4: All AI Functions Integration")
+        print("-" * 50)
+        self.test_all_agents_openai_integration()
+        print()
+        
+        # 5. Dr. Paula Cover Letter Module (All endpoints)
+        print("📝 PRIORITY 5: Dr. Paula Cover Letter Module")
+        print("-" * 50)
+        self.test_dr_paula_cover_letter_module()
+        print()
+        
+        # Generate critical test report
+        self.generate_critical_test_report()
                         
                 else:
                     self.log_test(
