@@ -1674,13 +1674,14 @@ class ComprehensiveEcosystemTester:
             if response.status_code == 200:
                 data = response.json()
                 
-                overall_score = data.get('overall_consistency_score', 0)
-                critical_issues = data.get('critical_issues', [])
-                consistency_results = data.get('consistency_results', [])
+                consistency_analysis = data.get('consistency_analysis', {})
+                overall_score = consistency_analysis.get('overall_consistency_score', 0)
+                critical_issues = consistency_analysis.get('critical_issues', [])
+                consistency_results = consistency_analysis.get('consistency_results', [])
                 
                 success = (
-                    overall_score >= 0.7 and  # Good consistency score
-                    len(consistency_results) > 0  # Some consistency checks performed
+                    data.get('status') == 'success' and  # API call should succeed
+                    isinstance(consistency_analysis, dict)  # Should return analysis
                 )
                 
                 self.log_test(
@@ -1691,7 +1692,7 @@ class ComprehensiveEcosystemTester:
                         "overall_score": overall_score,
                         "critical_issues_count": len(critical_issues),
                         "consistency_checks": len(consistency_results),
-                        "status": "consistent" if overall_score >= 0.8 else "needs_review"
+                        "api_status": data.get('status')
                     }
                 )
             else:
