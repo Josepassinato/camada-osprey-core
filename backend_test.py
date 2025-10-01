@@ -3602,15 +3602,6 @@ class ComprehensiveEcosystemTester:
             print("   🔧 Fix backend form_code handling before testing frontend")
         
         print("=" * 80)
-                    f"HTTP {response.status_code}",
-                    response.text[:200]
-                )
-        except Exception as e:
-            self.log_test(
-                "Validation Capabilities Endpoint",
-                False,
-                f"Exception: {str(e)}"
-            )
 
     def test_phase2_phase3_targeted_endpoints(self):
         """TARGETED TEST: Phase 2&3 Endpoint Fixes Verification - Focus on 3 problematic endpoints"""
