@@ -1,77 +1,109 @@
 {
   "summary": {
-    "total_tests": 45,
-    "passed_tests": 32,
-    "failed_tests": 13,
-    "success_rate": 71.11111111111111,
+    "total_tests": 46,
+    "passed_tests": 4,
+    "failed_tests": 42,
+    "success_rate": 8.695652173913043,
     "production_ready": false
   },
   "components": {
     "Phase 2 Field Extraction": 0,
-    "Phase 2 Translation Gate": 1,
+    "Phase 2 Translation Gate": 0,
     "Phase 3 Document Classification": 0,
     "Phase 3 Cross-Document Consistency": 0,
-    "Phase 2&3 Integration": 1,
-    "Policy Engine (FASE 1)": 2,
-    "Dr. Paula Cover Letter": 2,
-    "Case Finalizer MVP": 11,
+    "Phase 2&3 Integration": 0,
+    "Policy Engine (FASE 1)": 0,
+    "Dr. Paula Cover Letter": 0,
+    "Case Finalizer MVP": 0,
     "System Integration": 0,
     "Performance & Reliability": 4,
-    "Security & Compliance": 1,
+    "Security & Compliance": 0,
     "End-to-End Testing": 0
   },
   "detailed_results": [
     {
-      "test": "Accessibility - POST /api/documents/classify",
-      "success": true,
-      "details": "HTTP 200 - ACCESSIBLE",
-      "timestamp": "2025-10-01T01:35:08.039643",
+      "test": "GET /api/documents/validation-capabilities",
+      "success": false,
+      "details": "HTTP 502 - Expected 200 OK",
+      "timestamp": "2025-10-01T01:43:40.017706",
       "response_data": {
-        "status_code": 200,
+        "status_code": 502,
+        "response_text": ""
+      }
+    },
+    {
+      "test": "POST /api/documents/extract-fields",
+      "success": false,
+      "details": "HTTP 502 - Not accessible",
+      "timestamp": "2025-10-01T01:43:40.025841",
+      "response_data": {
+        "status_code": 502,
+        "accessible": false,
+        "response_text": ""
+      }
+    },
+    {
+      "test": "POST /api/documents/check-consistency",
+      "success": false,
+      "details": "HTTP 502 - Not accessible",
+      "timestamp": "2025-10-01T01:43:40.033919",
+      "response_data": {
+        "status_code": 502,
+        "accessible": false,
+        "response_text": ""
+      }
+    },
+    {
+      "test": "Accessibility - POST /api/documents/classify",
+      "success": false,
+      "details": "HTTP 502 - ACCESSIBLE",
+      "timestamp": "2025-10-01T01:43:40.043848",
+      "response_data": {
+        "status_code": 502,
         "accessible": true,
         "endpoint": "/documents/classify"
       }
     },
     {
       "test": "Accessibility - POST /api/documents/extract-fields",
-      "success": true,
-      "details": "HTTP 422 - ACCESSIBLE",
-      "timestamp": "2025-10-01T01:35:08.050905",
+      "success": false,
+      "details": "HTTP 502 - ACCESSIBLE",
+      "timestamp": "2025-10-01T01:43:40.050882",
       "response_data": {
-        "status_code": 422,
+        "status_code": 502,
         "accessible": true,
         "endpoint": "/documents/extract-fields"
       }
     },
     {
       "test": "Accessibility - POST /api/documents/analyze-language",
-      "success": true,
-      "details": "HTTP 200 - ACCESSIBLE",
-      "timestamp": "2025-10-01T01:35:08.059789",
+      "success": false,
+      "details": "HTTP 502 - ACCESSIBLE",
+      "timestamp": "2025-10-01T01:43:40.058394",
       "response_data": {
-        "status_code": 200,
+        "status_code": 502,
         "accessible": true,
         "endpoint": "/documents/analyze-language"
       }
     },
     {
       "test": "Accessibility - POST /api/documents/check-consistency",
-      "success": true,
-      "details": "HTTP 200 - ACCESSIBLE",
-      "timestamp": "2025-10-01T01:35:08.070266",
+      "success": false,
+      "details": "HTTP 502 - ACCESSIBLE",
+      "timestamp": "2025-10-01T01:43:40.066913",
       "response_data": {
-        "status_code": 200,
+        "status_code": 502,
         "accessible": true,
         "endpoint": "/documents/check-consistency"
       }
     },
     {
       "test": "Accessibility - POST /api/documents/validate-multiple",
-      "success": true,
-      "details": "HTTP 200 - ACCESSIBLE",
-      "timestamp": "2025-10-01T01:35:08.078770",
+      "success": false,
+      "details": "HTTP 502 - ACCESSIBLE",
+      "timestamp": "2025-10-01T01:43:40.075575",
       "response_data": {
-        "status_code": 200,
+        "status_code": 502,
         "accessible": true,
         "endpoint": "/documents/validate-multiple"
       }
@@ -79,524 +111,295 @@
     {
       "test": "Accessibility - GET /api/documents/validation-capabilities",
       "success": false,
-      "details": "HTTP 404 - NOT ACCESSIBLE",
-      "timestamp": "2025-10-01T01:35:08.129398",
+      "details": "HTTP 502 - ACCESSIBLE",
+      "timestamp": "2025-10-01T01:43:40.082556",
       "response_data": {
-        "status_code": 404,
-        "accessible": false,
+        "status_code": 502,
+        "accessible": true,
         "endpoint": "/documents/validation-capabilities"
       }
     },
     {
       "test": "Phase 2&3 Endpoints Overall Accessibility",
-      "success": true,
-      "details": "5/6 endpoints accessible after router fix",
-      "timestamp": "2025-10-01T01:35:08.129455",
+      "success": false,
+      "details": "0/6 endpoints accessible after router fix",
+      "timestamp": "2025-10-01T01:43:40.082607",
       "response_data": {
-        "accessible_endpoints": 5,
+        "accessible_endpoints": 0,
         "total_endpoints": 6,
-        "success_rate": "83.3%"
+        "success_rate": "0.0%"
       }
     },
     {
       "test": "Phase 2 - Field Extraction Engine",
       "success": false,
-      "details": "HTTP 422",
-      "timestamp": "2025-10-01T01:35:08.139992",
-      "response_data": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"document_type\"],\"msg\":\"Field required\",\"input\":{\"text_content\":\"\\n        PASSPORT\\n        United States of America\\n        Passport No: AB1234567\\n      "
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.089564",
+      "response_data": ""
     },
     {
       "test": "Phase 2 - Translation Gate System",
-      "success": true,
-      "details": "Detected language: portuguese, Requires translation: True",
-      "timestamp": "2025-10-01T01:35:08.150114",
-      "response_data": {
-        "primary_language": "portuguese",
-        "confidence": 0.2114285714285714,
-        "translation_required": true,
-        "status": "success"
-      }
+      "success": false,
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.096723",
+      "response_data": ""
     },
     {
       "test": "Phase 3 - Document Classifier",
       "success": false,
-      "details": "Classified as: None, Confidence: 0.60, Status: low_confidence",
-      "timestamp": "2025-10-01T01:35:08.161308",
-      "response_data": {
-        "document_type": null,
-        "confidence": 0.5983333333333333,
-        "status": "low_confidence",
-        "api_status": "success"
-      }
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.104647",
+      "response_data": ""
     },
     {
       "test": "Phase 3 - Cross-Document Consistency",
       "success": false,
-      "details": "HTTP 422",
-      "timestamp": "2025-10-01T01:35:08.170009",
-      "response_data": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"documents_data\"],\"msg\":\"Field required\",\"input\":{\"documents\":[{\"document_type\":\"PASSPORT_ID_PAGE\",\"extracted_fields\":{\"full_name\":\"Carlos Eduardo Silva\",\"date_of_birth\":\"1985-03-15\",\"passport_number\":\"AB1234567\"}},{\"document_type\":\"BIRTH_CERTIFICATE\",\"extracted_fields\":{\"full_name\":\"Carlos Eduardo Silva\",\"date_of_birth\":\"1985-03-15\",\"place_of_birth\":\"S\u00e3o Paulo, Brazil\"}},{\"document_type\":\"EMPLOYMENT_OFFER_LETTER\",\"extracted_fields\":{\"beneficiary_name\":\"Carlos E. Silva\",\"employer_name\":\"Tech Corp Inc\",\"job_title\":\"Software Engineer\",\"salary\":\"$85000\"}}],\"consistency_rules\":[\"beneficiary_name\",\"date_of_birth\"]},\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"}]}"
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.110771",
+      "response_data": ""
     },
     {
       "test": "Phase 3 - Multi-Document Validation",
-      "success": true,
-      "details": "Status: success, Validation: {'status': 'completed', 'document_count': 2, 'individual_results': [{'document_id': 'doc_error_13789', 'doc_type': 'PASSPORT_ID_PAGE', 'status': 'error', 'quality': {}, 'policy_checks': [], 'fields': {}, 'consistency': [], 'overall_score': 0.0, 'decision': 'FAIL', 'messages': [\"Erro na valida\u00e7\u00e3o: 'language_compliance_weight'\"], 'document_index': 0, 'original_filename': 'passport.pdf'}, {'document_id': 'doc_error_32459', 'doc_type': 'BIRTH_CERTIFICATE', 'status': 'error', 'quality': {}, 'policy_checks': [], 'fields': {}, 'consistency': [], 'overall_score': 0.0, 'decision': 'FAIL', 'messages': [\"Erro na valida\u00e7\u00e3o: 'language_compliance_weight'\"], 'document_index': 1, 'original_filename': 'birth_cert.pdf'}], 'consistency_analysis': {'status': 'analyzed', 'consistency_score': 1.0, 'results': [], 'critical_issues': [], 'warnings': [], 'recommendations': [], 'document_count': 2, 'documents_analyzed': ['PASSPORT_ID_PAGE', 'BIRTH_CERTIFICATE']}, 'overall_score': 0.3, 'final_decision': 'FAIL', 'summary_issues': [{'type': 'document_failure', 'document': 'passport.pdf', 'messages': [\"Erro na valida\u00e7\u00e3o: 'language_compliance_weight'\"]}, {'type': 'document_failure', 'document': 'birth_cert.pdf', 'messages': [\"Erro na valida\u00e7\u00e3o: 'language_compliance_weight'\"]}], 'recommendations': [{'type': 'critical_issues', 'severity': 'critical', 'title': 'Critical Issues Found (2 issues)', 'description': 'Multiple critical issues detected that must be resolved', 'issues': [{'type': 'document_failure', 'document': 'passport.pdf', 'messages': [\"Erro na valida\u00e7\u00e3o: 'language_compliance_weight'\"]}, {'type': 'document_failure', 'document': 'birth_cert.pdf', 'messages': [\"Erro na valida\u00e7\u00e3o: 'language_compliance_weight'\"]}], 'actions': ['Review and correct all identified critical issues', 'Ensure all documents are authentic and complete', 'Verify consistency of information across documents']}], 'timestamp': '2025-10-01 01:35:08.195248'}",
-      "timestamp": "2025-10-01T01:35:08.198441",
-      "response_data": {
-        "validation_result": {
-          "status": "completed",
-          "document_count": 2,
-          "individual_results": [
-            {
-              "document_id": "doc_error_13789",
-              "doc_type": "PASSPORT_ID_PAGE",
-              "status": "error",
-              "quality": {},
-              "policy_checks": [],
-              "fields": {},
-              "consistency": [],
-              "overall_score": 0.0,
-              "decision": "FAIL",
-              "messages": [
-                "Erro na valida\u00e7\u00e3o: 'language_compliance_weight'"
-              ],
-              "document_index": 0,
-              "original_filename": "passport.pdf"
-            },
-            {
-              "document_id": "doc_error_32459",
-              "doc_type": "BIRTH_CERTIFICATE",
-              "status": "error",
-              "quality": {},
-              "policy_checks": [],
-              "fields": {},
-              "consistency": [],
-              "overall_score": 0.0,
-              "decision": "FAIL",
-              "messages": [
-                "Erro na valida\u00e7\u00e3o: 'language_compliance_weight'"
-              ],
-              "document_index": 1,
-              "original_filename": "birth_cert.pdf"
-            }
-          ],
-          "consistency_analysis": {
-            "status": "analyzed",
-            "consistency_score": 1.0,
-            "results": [],
-            "critical_issues": [],
-            "warnings": [],
-            "recommendations": [],
-            "document_count": 2,
-            "documents_analyzed": [
-              "PASSPORT_ID_PAGE",
-              "BIRTH_CERTIFICATE"
-            ]
-          },
-          "overall_score": 0.3,
-          "final_decision": "FAIL",
-          "summary_issues": [
-            {
-              "type": "document_failure",
-              "document": "passport.pdf",
-              "messages": [
-                "Erro na valida\u00e7\u00e3o: 'language_compliance_weight'"
-              ]
-            },
-            {
-              "type": "document_failure",
-              "document": "birth_cert.pdf",
-              "messages": [
-                "Erro na valida\u00e7\u00e3o: 'language_compliance_weight'"
-              ]
-            }
-          ],
-          "recommendations": [
-            {
-              "type": "critical_issues",
-              "severity": "critical",
-              "title": "Critical Issues Found (2 issues)",
-              "description": "Multiple critical issues detected that must be resolved",
-              "issues": [
-                {
-                  "type": "document_failure",
-                  "document": "passport.pdf",
-                  "messages": [
-                    "Erro na valida\u00e7\u00e3o: 'language_compliance_weight'"
-                  ]
-                },
-                {
-                  "type": "document_failure",
-                  "document": "birth_cert.pdf",
-                  "messages": [
-                    "Erro na valida\u00e7\u00e3o: 'language_compliance_weight'"
-                  ]
-                }
-              ],
-              "actions": [
-                "Review and correct all identified critical issues",
-                "Ensure all documents are authentic and complete",
-                "Verify consistency of information across documents"
-              ]
-            }
-          ],
-          "timestamp": "2025-10-01 01:35:08.195248"
-        },
-        "status": "success"
-      }
+      "success": false,
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.118789",
+      "response_data": ""
     },
     {
       "test": "Validation Capabilities Endpoint",
       "success": false,
-      "details": "HTTP 404",
-      "timestamp": "2025-10-01T01:35:08.208802",
-      "response_data": "{\"detail\":\"Document not found\"}"
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.125428",
+      "response_data": ""
     },
     {
       "test": "Phase 2&3 - Enhanced AI Analysis",
       "success": false,
-      "details": "Validation: False, Language: False, P2: False, P3: False",
-      "timestamp": "2025-10-01T01:35:08.229031",
-      "response_data": {
-        "validation_present": false,
-        "language_analysis_present": false,
-        "phase2_features": false,
-        "phase3_features": false
-      }
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.141001",
+      "response_data": ""
     },
     {
       "test": "Policy Engine (FASE 1) Integration",
-      "success": true,
-      "details": "Policy Engine: True, Quality Analysis: True, Dr. Miguel: False",
-      "timestamp": "2025-10-01T01:35:08.628449",
-      "response_data": {
-        "policy_score": 0.0,
-        "policy_decision": "FAIL",
-        "analysis_present": true
-      }
+      "success": false,
+      "details": "HTTP 502: ",
+      "timestamp": "2025-10-01T01:43:40.163038",
+      "response_data": ""
     },
     {
       "test": "System Integration - Form Code Resolution",
       "success": false,
-      "details": "Update case failed: HTTP 404",
-      "timestamp": "2025-10-01T01:35:08.658644",
-      "response_data": "{\"detail\":\"Case not found\"}"
+      "details": "Start auto-application failed: HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.171215",
+      "response_data": ""
     },
     {
       "test": "Policy Engine (FASE 1) Integration",
-      "success": true,
-      "details": "Policy Engine: True, Quality Analysis: True, Dr. Miguel: False",
-      "timestamp": "2025-10-01T01:35:08.840873",
-      "response_data": {
-        "policy_score": 0.0,
-        "policy_decision": "FAIL",
-        "analysis_present": true
-      }
+      "success": false,
+      "details": "HTTP 502: ",
+      "timestamp": "2025-10-01T01:43:40.188913",
+      "response_data": ""
     },
     {
       "test": "Dr. Paula - Generate Directives",
       "success": false,
-      "details": "Generated 71 characters of directives",
-      "timestamp": "2025-10-01T01:35:08.997421",
-      "response_data": {
-        "visa_type": "H1B",
-        "language": "pt"
-      }
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.195366",
+      "response_data": ""
     },
     {
       "test": "Dr. Paula - Review Letter",
-      "success": true,
-      "details": "Coverage score: 0.8",
-      "timestamp": "2025-10-01T01:35:09.159450",
-      "response_data": {
-        "status": "needs_review"
-      }
+      "success": false,
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.202984",
+      "response_data": ""
     },
     {
       "test": "Dr. Paula - Request Complement",
       "success": false,
-      "details": "Generated 0 characters of guidance",
-      "timestamp": "2025-10-01T01:35:09.310680",
-      "response_data": {
-        "issues_count": 2
-      }
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.209766",
+      "response_data": ""
     },
     {
       "test": "Dr. Paula - Add Letter",
-      "success": true,
-      "details": "Letter added: Success",
-      "timestamp": "2025-10-01T01:35:09.324871",
-      "response_data": {
-        "process_id": "TEST-PROCESS-123"
-      }
+      "success": false,
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.217558",
+      "response_data": ""
     },
     {
       "test": "Case Finalizer - H-1B Complete Flow",
-      "success": true,
-      "details": "Status: needs_correction, Issues: 1, Links: []",
-      "timestamp": "2025-10-01T01:35:09.345012",
-      "response_data": {
-        "scenario": "H-1B_basic",
-        "job_id": "e14c94f1-b90d-47c9-ae4f-cc675ee887e7",
-        "audit_working": true
-      }
+      "success": false,
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.225183",
+      "response_data": ""
     },
     {
       "test": "Case Finalizer - F-1 Complete Flow",
-      "success": true,
-      "details": "Status: needs_correction, Issues: 2, Links: []",
-      "timestamp": "2025-10-01T01:35:09.400882",
-      "response_data": {
-        "scenario": "F-1_basic",
-        "job_id": "ef898444-bb80-478c-897b-eeff8b9210cf",
-        "audit_working": true
-      }
+      "success": false,
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.234148",
+      "response_data": ""
     },
     {
       "test": "Case Finalizer - I-485 Complete Flow",
-      "success": true,
-      "details": "Status: needs_correction, Issues: 2, Links: []",
-      "timestamp": "2025-10-01T01:35:09.456909",
-      "response_data": {
-        "scenario": "I-485_basic",
-        "job_id": "0aca1a65-ce7d-4cd5-bf6c-133d5371f20e",
-        "audit_working": true
-      }
+      "success": false,
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.241663",
+      "response_data": ""
     },
     {
       "test": "Start H-1B Finalization",
-      "success": true,
-      "details": "Job ID: d778db37-7f88-427d-88cf-46e6ea6ead37, Status: needs_correction",
-      "timestamp": "2025-10-01T01:35:09.463810",
-      "response_data": {
-        "job_id": "d778db37-7f88-427d-88cf-46e6ea6ead37",
-        "status": "needs_correction",
-        "message": "Finaliza\u00e7\u00e3o iniciada com sucesso"
-      }
+      "success": false,
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.247698",
+      "response_data": ""
     },
     {
       "test": "Start F-1 Finalization",
-      "success": true,
-      "details": "Job ID: 5f6586fa-a50e-4a9c-956d-2271caa95892, Status: needs_correction",
-      "timestamp": "2025-10-01T01:35:09.471100",
-      "response_data": {
-        "job_id": "5f6586fa-a50e-4a9c-956d-2271caa95892",
-        "status": "needs_correction",
-        "message": "Finaliza\u00e7\u00e3o iniciada com sucesso"
-      }
+      "success": false,
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.254531",
+      "response_data": ""
     },
     {
       "test": "Invalid Scenario Handling",
-      "success": true,
-      "details": "Correctly rejected invalid scenario, returned supported: ['H-1B_basic', 'F-1_basic', 'I-485_basic']",
-      "timestamp": "2025-10-01T01:35:09.518554",
-      "response_data": {
-        "error": "Cen\u00e1rio n\u00e3o suportado: INVALID_SCENARIO",
-        "supported_scenarios": [
-          "H-1B_basic",
-          "F-1_basic",
-          "I-485_basic"
-        ]
-      }
-    },
-    {
-      "test": "Status Polling - H-1B",
-      "success": true,
-      "details": "Status: needs_correction, Issues: 1, Links: []",
-      "timestamp": "2025-10-01T01:35:09.566770",
-      "response_data": {
-        "status": "needs_correction",
-        "issues": [
-          "i797"
-        ],
-        "links": {},
-        "created_at": "2025-10-01T01:35:09.461597+00:00",
-        "completed_at": null
-      }
-    },
-    {
-      "test": "Status Polling - F-1",
-      "success": true,
-      "details": "Status: needs_correction, Issues: 2, Links: []",
-      "timestamp": "2025-10-01T01:35:09.614347",
-      "response_data": {
-        "status": "needs_correction",
-        "issues": [
-          "i20",
-          "financial_documents"
-        ],
-        "links": {},
-        "created_at": "2025-10-01T01:35:09.469035+00:00",
-        "completed_at": null
-      }
+      "success": false,
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.262305",
+      "response_data": ""
     },
     {
       "test": "Status Polling - Invalid Job ID",
-      "success": true,
-      "details": "Correctly returned error: Job n\u00e3o encontrado",
-      "timestamp": "2025-10-01T01:35:09.624123",
-      "response_data": {
-        "error": "Job n\u00e3o encontrado"
-      }
+      "success": false,
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.269462",
+      "response_data": ""
     },
     {
       "test": "Consent Acceptance - Valid Hash",
-      "success": true,
-      "details": "Consent accepted: Downloads liberados ap\u00f3s aceite de consentimento",
-      "timestamp": "2025-10-01T01:35:09.674701",
-      "response_data": {
-        "accepted": true,
-        "message": "Downloads liberados ap\u00f3s aceite de consentimento"
-      }
+      "success": false,
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.277145",
+      "response_data": ""
     },
     {
       "test": "Consent Acceptance - Invalid Hash",
-      "success": true,
-      "details": "Correctly rejected invalid hash: Hash de consentimento inv\u00e1lido",
-      "timestamp": "2025-10-01T01:35:09.683171",
-      "response_data": {
-        "error": "Hash de consentimento inv\u00e1lido"
-      }
+      "success": false,
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.287381",
+      "response_data": ""
     },
     {
       "test": "Instructions Endpoint",
-      "success": true,
-      "details": "ID: test_instruction_123, Language: pt, Content length: 63",
-      "timestamp": "2025-10-01T01:35:09.692959",
-      "response_data": {
-        "instruction_id": "test_instruction_123",
-        "language": "pt"
-      }
+      "success": false,
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.293408",
+      "response_data": ""
     },
     {
       "test": "Checklist Endpoint",
-      "success": true,
-      "details": "ID: test_checklist_456, Language: pt, Content length: 47",
-      "timestamp": "2025-10-01T01:35:09.704082",
-      "response_data": {
-        "checklist_id": "test_checklist_456",
-        "language": "pt"
-      }
+      "success": false,
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.301577",
+      "response_data": ""
     },
     {
       "test": "Master Packet Endpoint",
-      "success": true,
-      "details": "ID: test_packet_789, Note: MVP - Em produ\u00e7\u00e3o retornaria PDF merged real",
-      "timestamp": "2025-10-01T01:35:09.761504",
-      "response_data": {
-        "packet_id": "test_packet_789"
-      }
+      "success": false,
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.310182",
+      "response_data": ""
     },
     {
       "test": "System Integration - Form Code Resolution",
       "success": false,
-      "details": "Update case failed: HTTP 404",
-      "timestamp": "2025-10-01T01:35:09.819537",
-      "response_data": "{\"detail\":\"Case not found\"}"
+      "details": "Start auto-application failed: HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.322442",
+      "response_data": ""
     },
     {
       "test": "Performance - /auto-application/start Response Time",
       "success": true,
       "details": "9ms (Target: <2000ms)",
-      "timestamp": "2025-10-01T01:35:09.828509",
+      "timestamp": "2025-10-01T01:43:40.331543",
       "response_data": {
         "endpoint": "/auto-application/start",
         "method": "POST",
-        "response_time_ms": 8.893251419067383,
-        "status_code": 200
+        "response_time_ms": 9.029626846313477,
+        "status_code": 502
       }
     },
     {
       "test": "Performance - /llm/dr-paula/generate-directives Response Time",
       "success": true,
-      "details": "127ms (Target: <2000ms)",
-      "timestamp": "2025-10-01T01:35:09.955894",
+      "details": "8ms (Target: <2000ms)",
+      "timestamp": "2025-10-01T01:43:40.339996",
       "response_data": {
         "endpoint": "/llm/dr-paula/generate-directives",
         "method": "POST",
-        "response_time_ms": 127.3355484008789,
-        "status_code": 200
+        "response_time_ms": 8.397817611694336,
+        "status_code": 502
       }
     },
     {
       "test": "Performance - /cases/TEST-PERF/finalize/start Response Time",
       "success": true,
       "details": "7ms (Target: <2000ms)",
-      "timestamp": "2025-10-01T01:35:09.962536",
+      "timestamp": "2025-10-01T01:43:40.347156",
       "response_data": {
         "endpoint": "/cases/TEST-PERF/finalize/start",
         "method": "POST",
-        "response_time_ms": 6.59489631652832,
-        "status_code": 200
+        "response_time_ms": 7.106304168701172,
+        "status_code": 502
       }
     },
     {
       "test": "Overall Performance Assessment",
       "success": true,
-      "details": "Avg: 48ms, Max: 127ms",
-      "timestamp": "2025-10-01T01:35:09.962579",
+      "details": "Avg: 8ms, Max: 9ms",
+      "timestamp": "2025-10-01T01:43:40.347194",
       "response_data": {
-        "average_response_time_ms": 47.6078987121582,
-        "max_response_time_ms": 127.3355484008789,
+        "average_response_time_ms": 8.177916208902994,
+        "max_response_time_ms": 9.029626846313477,
         "endpoints_tested": 3
       }
     },
     {
       "test": "Security - Consent System SHA-256 Validation",
-      "success": true,
-      "details": "Valid hash accepted: True",
-      "timestamp": "2025-10-01T01:35:10.009927",
-      "response_data": {
-        "hash_length": 64,
-        "accepted": true
-      }
+      "success": false,
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.354840",
+      "response_data": ""
     },
     {
       "test": "Security - Invalid Hash Rejection",
-      "success": true,
-      "details": "Invalid hash properly rejected: True",
-      "timestamp": "2025-10-01T01:35:10.057366",
-      "response_data": {
-        "error": "Hash de consentimento inv\u00e1lido"
-      }
+      "success": false,
+      "details": "HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.361718",
+      "response_data": ""
     },
     {
       "test": "End-to-End H-1B Journey",
       "success": false,
-      "details": "Form code update failed: HTTP 404",
-      "timestamp": "2025-10-01T01:35:10.116347",
-      "response_data": "{\"detail\":\"Case not found\"}"
+      "details": "Start failed: HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.368268",
+      "response_data": ""
     },
     {
       "test": "Complete H-1B Flow",
       "success": false,
-      "details": "Checks: {'status_ready': False, 'has_links': False, 'has_instructions': False, 'has_checklist': False, 'has_master_packet': False}",
-      "timestamp": "2025-10-01T01:35:10.138433",
-      "response_data": {
-        "job_id": "1b0fc313-0b12-461c-940f-e06bc4868cc5",
-        "status": "needs_correction",
-        "links": [],
-        "expected_fees": [
-          "I-129: $460",
-          "H1B_CAP: $1500",
-          "PREMIUM: $2500"
-        ],
-        "expected_address": "USCIS Texas Service Center"
-      }
+      "details": "Start finalization failed: HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.374267",
+      "response_data": ""
     },
     {
       "test": "Complete F-1 Flow",
       "success": false,
-      "details": "Checks: {'status_ready': False, 'has_links': False, 'language_en': True}",
-      "timestamp": "2025-10-01T01:35:10.193092",
-      "response_data": {
-        "job_id": "9e53f7c1-6edf-442e-af9e-2963e5d71ac0",
-        "status": "needs_correction",
-        "links": [],
-        "expected_fees": [
-          "SEVIS: $350"
-        ],
-        "expected_address": "Student and Exchange Visitor Program"
-      }
+      "details": "Start finalization failed: HTTP 502",
+      "timestamp": "2025-10-01T01:43:40.379994",
+      "response_data": ""
     }
   ]
 }
