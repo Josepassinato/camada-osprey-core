@@ -156,8 +156,9 @@ class CarlosH1BSimulator:
             
             if response.status_code == 200:
                 data = response.json()
-                case_id = data.get('case_id')
-                session_token = data.get('session_token')
+                case_data = data.get('case', {})
+                case_id = case_data.get('case_id')
+                session_token = case_data.get('session_token')
                 
                 if case_id and session_token:
                     self.log_test(
