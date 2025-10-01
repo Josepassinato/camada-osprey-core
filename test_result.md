@@ -465,9 +465,9 @@ frontend:
 
   - task: "Dr. Paula Cover Letter Module - Review Letter"
     implemented: true
-    working: true
+    working: false
     file: "/app/frontend/src/pages/CoverLetterModule.tsx"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
     needs_retesting: false
     status_history:
@@ -483,6 +483,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "✅ CRITICAL BUG FIX VERIFIED - 'REVISAR CARTA' BUTTON NOW WORKING! Comprehensive testing confirms the fix applied to line 452 in CoverLetterModule.tsx is successful. VERIFICATION RESULTS: 1) ✅ CODE FIX CONFIRMED - Line 452 now includes both 'incomplete' and 'needs_review' statuses: {currentCard === 6 && (review?.status === 'incomplete' || review?.status === 'needs_review')}, 2) ✅ BACKEND API WORKING - POST /api/llm/dr-paula/review-letter returns HTTP 200 with status 'needs_review' as expected, 3) ✅ FRONTEND MODULE LOADING - Cover Letter Module loads successfully with proper directives generation, 4) ✅ USER FLOW FUNCTIONAL - Users can write letters, click 'Revisar Carta' button, and the system processes the request, 5) ✅ STATUS HANDLING FIXED - Frontend now properly handles both 'incomplete' and 'needs_review' statuses from backend, 6) ✅ CARD RENDERING WORKING - Card 6 ('Carta Precisa de Complementação') now displays correctly when backend returns 'needs_review' status. CONCLUSION: The critical bug reported by user has been successfully resolved. The 'Revisar Carta' button now functions as expected, allowing users to review their cover letters and receive appropriate feedback."
+      - working: false
+        agent: "testing"
+        comment: "❌ URGENT INVESTIGATION COMPLETED - ROOT CAUSE IDENTIFIED: EMERGENT_LLM_KEY BUDGET EXCEEDED! Comprehensive investigation of user report 'Dra. Paula não está disponível no momento' and 'Resposta da IA não estava em formato JSON' reveals CRITICAL BUDGET ISSUE. DETAILED FINDINGS: 1) ❌ BUDGET EXCEEDED - Backend logs show: 'Budget has been exceeded! Current cost: 1.0038962500000004, Max budget: 1.0', 2) ✅ ENDPOINT ACCESSIBLE - POST /api/llm/dr-paula/review-letter returns HTTP 200 but with fallback responses, 3) ❌ LLM INTEGRATION FAILING - EMERGENT_LLM_KEY integration failing: 0 chars generated for I-589 directives, 4) ✅ FALLBACK SYSTEM WORKING - Backend provides structured fallback responses when LLM fails, 5) ❌ USER EXPERIENCE DEGRADED - Users see 'Resposta da IA não estava em formato JSON' because LLM calls fail and fallback responses trigger JSON parsing errors, 6) ❌ I-589 ASYLUM CASE AFFECTED - User's specific I-589 asylum visa case fails because LLM budget is exhausted. IMPACT: Dr. Paula appears 'unavailable' to users because EMERGENT_LLM_KEY has no remaining budget. SOLUTION REQUIRED: Increase EMERGENT_LLM_KEY budget or implement better budget management with user-friendly error messages."
 
   - task: "Dr. Paula Cover Letter Module - Request Complement"
     implemented: true
