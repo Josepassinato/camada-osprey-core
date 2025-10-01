@@ -271,13 +271,15 @@ def test_carlos_silva_h1b_complete_journey():
         
         if response.status_code == 200:
             data = response.json()
-            story_length = len(data.get('user_story_text', ''))
-            responses_count = len(data.get('simplified_form_responses', {}))
+            case_data = data.get('case', {})
+            story_length = len(case_data.get('user_story_text', ''))
+            responses_count = len(case_data.get('simplified_form_responses', {}))
+            progress = case_data.get('progress_percentage')
             
             log_test(
                 "ETAPA 5 - História do Usuário",
                 story_length > 500 and responses_count >= 8,
-                f"História: {story_length} chars, Respostas: {responses_count}, Progress: {data.get('progress_percentage')}%"
+                f"História: {story_length} chars, Respostas: {responses_count}, Progress: {progress}%"
             )
     except Exception as e:
         log_test("ETAPA 5 - História do Usuário", False, f"Exception: {str(e)}")
