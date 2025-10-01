@@ -282,15 +282,6 @@ class CaseUpdate(BaseModel):
     simplified_form_responses: Optional[Dict[str, Any]] = None
     progress_percentage: Optional[int] = None
     current_step: Optional[str] = None
-    uploaded_documents: Optional[List[str]] = None
-    document_analysis: Optional[Dict[str, Any]] = None
-    ai_extracted_facts: Optional[Dict[str, Any]] = None
-    uscis_form_data: Optional[Dict[str, Any]] = None
-    uscis_form_generated: Optional[bool] = None
-    payment_status: Optional[str] = None
-    
-    class Config:
-        extra = "allow"  # Allow additional fields for flexibility
 
 # Document Models (keeping existing ones)
 class UserDocument(BaseModel):
