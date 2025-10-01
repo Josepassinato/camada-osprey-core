@@ -445,6 +445,16 @@ class DocumentValidationAgent(BaseSpecializedAgent):
             processing_time = (datetime.utcnow() - start_time).total_seconds() * 1000
             
             # PHASE 6: Final Decision with KPI Tracking
+            # Ensure validation_result is not None to prevent errors
+            if validation_result is None:
+                validation_result = {
+                    'is_valid': False,
+                    'uscis_acceptable': False,
+                    'overall_confidence': 0,
+                    'issues': ['Validation failed - document could not be validated']
+                }
+                final_confidence = 0
+            
             is_valid = validation_result.get('is_valid', False)
             uscis_acceptable = validation_result.get('uscis_acceptable', False)
             
