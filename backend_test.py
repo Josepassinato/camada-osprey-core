@@ -1281,6 +1281,528 @@ class ComprehensiveEcosystemTester:
                 f"Exception: {str(e)}"
             )
     
+    def test_dr_paula_review_letter_comprehensive(self):
+        """COMPREHENSIVE TEST: Dr. Paula Review Letter - JSON Parsing Bug Fix Validation"""
+        print("🔍 TESTING DR. PAULA REVIEW-LETTER ENDPOINT - JSON PARSING BUG FIX...")
+        
+        # Test 1: Empty/Very Short Letter (Edge Case)
+        self.test_review_letter_empty_short()
+        
+        # Test 2: Letter with Special Characters
+        self.test_review_letter_special_characters()
+        
+        # Test 3: Uncommon Visa Types (I-589, O-1)
+        self.test_review_letter_uncommon_visa_types()
+        
+        # Test 4: Very Long Letter (Potential JSON Truncation)
+        self.test_review_letter_very_long()
+        
+        # Test 5: JSON Structure Validation
+        self.test_review_letter_json_structure()
+        
+        # Test 6: Fallback System Testing
+        self.test_review_letter_fallback_system()
+        
+        # Test 7: Log Verification
+        self.test_review_letter_log_verification()
+    
+    def test_review_letter_empty_short(self):
+        """Test empty and very short letters that might cause JSON issues"""
+        print("📝 Testing Empty/Short Letters...")
+        
+        test_cases = [
+            {"letter": "", "description": "Empty letter"},
+            {"letter": "Hi", "description": "Very short letter"},
+            {"letter": "I want visa.", "description": "Minimal letter"},
+            {"letter": "   ", "description": "Whitespace only"}
+        ]
+        
+        for case in test_cases:
+            try:
+                payload = {
+                    "visa_type": "H1B",
+                    "applicant_letter": case["letter"]
+                }
+                
+                response = self.session.post(
+                    f"{API_BASE}/llm/dr-paula/review-letter",
+                    json=payload
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    # Verify JSON structure is always valid
+                    has_review = 'review' in data
+                    has_success = 'success' in data
+                    
+                    if has_review:
+                        review = data['review']
+                        has_coverage_score = 'coverage_score' in review
+                        has_status = 'status' in review
+                        has_valid_score = isinstance(review.get('coverage_score'), (int, float))
+                        
+                        success = has_review and has_coverage_score and has_status and has_valid_score
+                        
+                        self.log_test(
+                            f"Review Letter - {case['description']}",
+                            success,
+                            f"JSON valid: {success}, Status: {review.get('status')}, Score: {review.get('coverage_score')}",
+                            {
+                                "test_case": case["description"],
+                                "json_structure_valid": success,
+                                "response_structure": list(data.keys())
+                            }
+                        )
+                    else:
+                        # Check if it's an error response (acceptable for empty letters)
+                        has_error = 'error' in data
+                        success = has_error and has_success
+                        
+                        self.log_test(
+                            f"Review Letter - {case['description']}",
+                            success,
+                            f"Proper error handling: {data.get('error', 'No error message')}",
+                            {"error_response": success}
+                        )
+                else:
+                    self.log_test(
+                        f"Review Letter - {case['description']}",
+                        False,
+                        f"HTTP {response.status_code}",
+                        response.text[:200]
+                    )
+            except Exception as e:
+                self.log_test(
+                    f"Review Letter - {case['description']}",
+                    False,
+                    f"Exception: {str(e)}"
+                )
+    
+    def test_review_letter_special_characters(self):
+        """Test letters with special characters that might break JSON parsing"""
+        print("📝 Testing Special Characters...")
+        
+        test_cases = [
+            {
+                "letter": 'Minha carta tem "aspas" e \'apostrofes\' e caracteres especiais: ç, ã, õ, é, à.',
+                "description": "Portuguese with quotes and accents"
+            },
+            {
+                "letter": "Letter with JSON-breaking chars: {}, [], \", \\, \n, \t, and unicode: 你好, مرحبا",
+                "description": "JSON-breaking characters"
+            },
+            {
+                "letter": "Letter with\nmultiple\nlines\nand\ttabs\tand\rcarriage\rreturns",
+                "description": "Multiline with control characters"
+            }
+        ]
+        
+        for case in test_cases:
+            try:
+                payload = {
+                    "visa_type": "H1B",
+                    "applicant_letter": case["letter"]
+                }
+                
+                response = self.session.post(
+                    f"{API_BASE}/llm/dr-paula/review-letter",
+                    json=payload
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    # Verify JSON structure is valid despite special characters
+                    has_review = 'review' in data
+                    
+                    if has_review:
+                        review = data['review']
+                        has_valid_structure = all(key in review for key in ['coverage_score', 'status'])
+                        
+                        self.log_test(
+                            f"Review Letter - {case['description']}",
+                            has_valid_structure,
+                            f"JSON parsed successfully with special chars, Status: {review.get('status')}",
+                            {
+                                "special_chars_handled": has_valid_structure,
+                                "coverage_score": review.get('coverage_score')
+                            }
+                        )
+                    else:
+                        self.log_test(
+                            f"Review Letter - {case['description']}",
+                            'error' in data,
+                            f"Error response: {data.get('error', 'No error')}"
+                        )
+                else:
+                    self.log_test(
+                        f"Review Letter - {case['description']}",
+                        False,
+                        f"HTTP {response.status_code}",
+                        response.text[:200]
+                    )
+            except Exception as e:
+                self.log_test(
+                    f"Review Letter - {case['description']}",
+                    False,
+                    f"Exception: {str(e)}"
+                )
+    
+    def test_review_letter_uncommon_visa_types(self):
+        """Test uncommon visa types that might cause AI to return non-JSON"""
+        print("📝 Testing Uncommon Visa Types...")
+        
+        test_cases = [
+            {
+                "visa_type": "I-589",
+                "letter": "I am seeking asylum in the United States due to persecution in my home country. I fear for my safety and that of my family.",
+                "description": "I-589 Asylum case"
+            },
+            {
+                "visa_type": "O-1",
+                "letter": "I am an artist with extraordinary ability. I have won several international awards and have been featured in major publications.",
+                "description": "O-1 Extraordinary ability"
+            },
+            {
+                "visa_type": "EB-5",
+                "letter": "I am investing $1.8 million in a new commercial enterprise that will create jobs for US workers.",
+                "description": "EB-5 Investor visa"
+            }
+        ]
+        
+        for case in test_cases:
+            try:
+                payload = {
+                    "visa_type": case["visa_type"],
+                    "applicant_letter": case["letter"]
+                }
+                
+                response = self.session.post(
+                    f"{API_BASE}/llm/dr-paula/review-letter",
+                    json=payload
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    # Verify JSON structure for uncommon visa types
+                    has_review = 'review' in data
+                    
+                    if has_review:
+                        review = data['review']
+                        correct_visa_type = review.get('visa_type') == case["visa_type"]
+                        has_valid_structure = all(key in review for key in ['coverage_score', 'status'])
+                        
+                        success = has_valid_structure and correct_visa_type
+                        
+                        self.log_test(
+                            f"Review Letter - {case['description']}",
+                            success,
+                            f"Visa type: {review.get('visa_type')}, Status: {review.get('status')}, Score: {review.get('coverage_score')}",
+                            {
+                                "visa_type_correct": correct_visa_type,
+                                "json_structure_valid": has_valid_structure
+                            }
+                        )
+                    else:
+                        self.log_test(
+                            f"Review Letter - {case['description']}",
+                            'error' in data,
+                            f"Error response: {data.get('error', 'No error')}"
+                        )
+                else:
+                    self.log_test(
+                        f"Review Letter - {case['description']}",
+                        False,
+                        f"HTTP {response.status_code}",
+                        response.text[:200]
+                    )
+            except Exception as e:
+                self.log_test(
+                    f"Review Letter - {case['description']}",
+                    False,
+                    f"Exception: {str(e)}"
+                )
+    
+    def test_review_letter_very_long(self):
+        """Test very long letters that might cause JSON truncation"""
+        print("📝 Testing Very Long Letters...")
+        
+        # Create a very long letter (5000+ characters)
+        long_letter = """
+        I am writing to express my strong interest in obtaining an H-1B visa to work in the United States.
+        My background includes extensive experience in software engineering, with particular expertise in
+        machine learning, artificial intelligence, and distributed systems architecture.
+        """ * 50  # Repeat to make it very long
+        
+        try:
+            payload = {
+                "visa_type": "H1B",
+                "applicant_letter": long_letter
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/llm/dr-paula/review-letter",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Verify JSON structure for very long letters
+                has_review = 'review' in data
+                
+                if has_review:
+                    review = data['review']
+                    has_valid_structure = all(key in review for key in ['coverage_score', 'status'])
+                    
+                    self.log_test(
+                        "Review Letter - Very Long Letter",
+                        has_valid_structure,
+                        f"Long letter processed, Status: {review.get('status')}, Score: {review.get('coverage_score')}",
+                        {
+                            "letter_length": len(long_letter),
+                            "json_structure_valid": has_valid_structure
+                        }
+                    )
+                else:
+                    self.log_test(
+                        "Review Letter - Very Long Letter",
+                        'error' in data,
+                        f"Error response: {data.get('error', 'No error')}"
+                    )
+            else:
+                self.log_test(
+                    "Review Letter - Very Long Letter",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test(
+                "Review Letter - Very Long Letter",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_review_letter_json_structure(self):
+        """Test that JSON structure is always valid and contains required fields"""
+        print("📝 Testing JSON Structure Validation...")
+        
+        payload = {
+            "visa_type": "H1B",
+            "applicant_letter": "I am applying for an H-1B visa. I have a computer science degree and 5 years of experience."
+        }
+        
+        try:
+            response = self.session.post(
+                f"{API_BASE}/llm/dr-paula/review-letter",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check top-level structure
+                required_top_level = ['success', 'agent', 'timestamp']
+                has_top_level = all(key in data for key in required_top_level)
+                
+                # Check review structure
+                has_review = 'review' in data
+                review_valid = False
+                
+                if has_review:
+                    review = data['review']
+                    required_review_fields = ['visa_type', 'coverage_score', 'status']
+                    review_valid = all(key in review for key in required_review_fields)
+                    
+                    # Validate data types
+                    coverage_score = review.get('coverage_score')
+                    status = review.get('status')
+                    
+                    score_valid = isinstance(coverage_score, (int, float)) and 0 <= coverage_score <= 1
+                    status_valid = status in ['needs_questions', 'complete', 'ready_for_formatting', 'needs_review']
+                    
+                    # Check questions array if status is needs_questions
+                    questions_valid = True
+                    if status == 'needs_questions':
+                        questions = review.get('questions', [])
+                        questions_valid = isinstance(questions, list)
+                        if questions:
+                            # Check first question structure
+                            first_q = questions[0]
+                            questions_valid = all(key in first_q for key in ['id', 'question', 'category'])
+                    
+                    structure_valid = review_valid and score_valid and status_valid and questions_valid
+                    
+                    self.log_test(
+                        "Review Letter - JSON Structure Validation",
+                        structure_valid,
+                        f"Structure valid: {structure_valid}, Score: {coverage_score}, Status: {status}",
+                        {
+                            "top_level_valid": has_top_level,
+                            "review_valid": review_valid,
+                            "score_valid": score_valid,
+                            "status_valid": status_valid,
+                            "questions_valid": questions_valid,
+                            "response_keys": list(data.keys()),
+                            "review_keys": list(review.keys()) if has_review else []
+                        }
+                    )
+                else:
+                    # Check if it's a valid error response
+                    has_error = 'error' in data
+                    self.log_test(
+                        "Review Letter - JSON Structure Validation",
+                        has_error and has_top_level,
+                        f"Valid error response structure: {data.get('error', 'No error')}"
+                    )
+            else:
+                self.log_test(
+                    "Review Letter - JSON Structure Validation",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test(
+                "Review Letter - JSON Structure Validation",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_review_letter_fallback_system(self):
+        """Test that fallback system works when AI returns invalid JSON"""
+        print("📝 Testing Fallback System...")
+        
+        # Test with a letter that might confuse the AI
+        confusing_letter = """
+        {This is not JSON but looks like it}
+        "I want to apply for visa": true,
+        [This might break JSON parsing]
+        My experience includes: {"years": 5, "invalid": json}
+        """
+        
+        try:
+            payload = {
+                "visa_type": "H1B",
+                "applicant_letter": confusing_letter
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/llm/dr-paula/review-letter",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # System should ALWAYS return valid JSON, even with fallback
+                has_review = 'review' in data
+                
+                if has_review:
+                    review = data['review']
+                    has_fallback_indicators = any(key in review for key in ['ai_note', 'error_note', 'raw_response'])
+                    has_valid_structure = all(key in review for key in ['coverage_score', 'status'])
+                    
+                    # Fallback should provide reasonable defaults
+                    coverage_score = review.get('coverage_score', 0)
+                    status = review.get('status', '')
+                    
+                    fallback_working = (
+                        has_valid_structure and
+                        isinstance(coverage_score, (int, float)) and
+                        status in ['needs_questions', 'complete', 'ready_for_formatting', 'needs_review']
+                    )
+                    
+                    self.log_test(
+                        "Review Letter - Fallback System",
+                        fallback_working,
+                        f"Fallback working: {fallback_working}, Has indicators: {has_fallback_indicators}, Score: {coverage_score}",
+                        {
+                            "fallback_working": fallback_working,
+                            "has_fallback_indicators": has_fallback_indicators,
+                            "coverage_score": coverage_score,
+                            "status": status
+                        }
+                    )
+                else:
+                    self.log_test(
+                        "Review Letter - Fallback System",
+                        'error' in data,
+                        f"Error response: {data.get('error', 'No error')}"
+                    )
+            else:
+                self.log_test(
+                    "Review Letter - Fallback System",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test(
+                "Review Letter - Fallback System",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_review_letter_log_verification(self):
+        """Test that proper logs are generated for debugging"""
+        print("📝 Testing Log Verification...")
+        
+        payload = {
+            "visa_type": "H1B",
+            "applicant_letter": "I am applying for H-1B visa with my computer science background."
+        }
+        
+        try:
+            response = self.session.post(
+                f"{API_BASE}/llm/dr-paula/review-letter",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check if response indicates logging is working
+                has_review = 'review' in data
+                has_timestamp = 'timestamp' in data
+                has_agent = 'agent' in data
+                
+                # Look for any debug information in response
+                debug_info_present = False
+                if has_review:
+                    review = data['review']
+                    debug_info_present = any(key in review for key in ['raw_response', 'ai_note', 'error_note'])
+                
+                logging_indicators = has_timestamp and has_agent
+                
+                self.log_test(
+                    "Review Letter - Log Verification",
+                    logging_indicators,
+                    f"Logging indicators present: {logging_indicators}, Debug info: {debug_info_present}",
+                    {
+                        "has_timestamp": has_timestamp,
+                        "has_agent": has_agent,
+                        "debug_info_present": debug_info_present,
+                        "agent": data.get('agent', 'Unknown')
+                    }
+                )
+            else:
+                self.log_test(
+                    "Review Letter - Log Verification",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test(
+                "Review Letter - Log Verification",
+                False,
+                f"Exception: {str(e)}"
+            )
+
     def test_dr_paula_cover_letter_module(self):
         """Test DR. PAULA COVER LETTER MODULE - All 4 endpoints"""
         print("📝 TESTING DR. PAULA COVER LETTER MODULE...")
