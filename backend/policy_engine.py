@@ -418,7 +418,8 @@ class PolicyEngine:
         # Score de qualidade
         quality_status = result["quality"].get("status", "fail")
         quality_score = {"ok": 1.0, "alert": 0.7, "fail": 0.0}.get(quality_status, 0.0)
-        scores.append(quality_score * scoring["quality_weight"])
+        quality_weight = scoring.get("quality_weight", 0.25)  # Default weight if missing
+        scores.append(quality_score * quality_weight)
         
         # Score de verificações de política
         policy_checks = result["policy_checks"]
