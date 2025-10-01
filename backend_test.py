@@ -916,7 +916,8 @@ class ProductionVerificationTester:
             "critical_failures": [f['test'] for f in critical_failures]
         }
 
-    def test_start_finalization_h1b_basic(self):
+
+if __name__ == "__main__":
         """Test H-1B basic finalization start"""
         test_case_id = "TEST-CASE-H1B"
         
