@@ -284,6 +284,21 @@ class ProductionVerificationTester:
             )
             return
         
+        print(f"    🔍 DEBUG: Using case ID: {self.auto_case_id}")
+        
+        # First try to GET the case to verify it exists
+        get_response = self.session.get(f"{API_BASE}/auto-application/case/{self.auto_case_id}")
+        print(f"    🔍 DEBUG: GET case status: {get_response.status_code}")
+        if get_response.status_code != 200:
+            print(f"    🔍 DEBUG: GET case failed: {get_response.text[:200]}")
+            self.log_test(
+                "PUT /api/auto-application/case/{id}",
+                False,
+                f"Case doesn't exist for GET: {get_response.status_code}",
+                get_response.text[:200]
+            )
+            return
+        
         # Test with H-1B form selection (production data)
         update_data = {
             "form_code": "H-1B",
