@@ -10,17 +10,17 @@ export const getBackendUrl = (): string => {
     
     // Preview environment detection
     if (hostname.includes('preview.emergentagent.com')) {
-      return 'https://immivisor.preview.emergentagent.com';
+      return 'https://visaai.preview.emergentagent.com';
     }
     
     // Production environment detection  
     if (hostname.includes('emergentagent.com') && !hostname.includes('preview')) {
-      return 'https://immivisor.preview.emergentagent.com'; // Will be updated for production
+      return 'https://visaai.preview.emergentagent.com'; // Will be updated for production
     }
   }
   
   // Fallback to environment variable or preview URL
-  return import.meta.env.VITE_BACKEND_URL || 'https://immivisor.preview.emergentagent.com';
+  return import.meta.env.VITE_BACKEND_URL || 'https://visaai.preview.emergentagent.com';
 };
 
 export const getApiUrl = (endpoint: string): string => {
