@@ -84,8 +84,8 @@ class GoogleVisionAPIProcessor:
         }
     
     async def process_document(self, file_content: bytes, filename: str, 
-                             mime_type: str = "application/pdf") -> Dict[str, Any]:
-        """Process document with Google Document AI OCR"""
+                             mime_type: str = "image/jpeg") -> Dict[str, Any]:
+        """Process document with Google Vision API OCR"""
         
         if self.is_mock_mode:
             # Return mock response for testing
@@ -93,49 +93,75 @@ class GoogleVisionAPIProcessor:
             return self._create_mock_response(filename, len(file_content))
         
         try:
-            # Prepare the document for processing
-            raw_document = documentai.RawDocument(
-                content=file_content,
-                mime_type=mime_type
+            # Convert file content to base64
+            import base64
+            encoded_content = base64.b64encode(file_content).decode('utf-8')
+            
+            # Prepare Vision API request
+            request_data = {
+                "requests": [
+                    {
+                        "image": {
+                            "content": encoded_content
+                        },
+                        "features": [
+                            {
+                                "type": "DOCUMENT_TEXT_DETECTION",
+                                "maxResults": 50
+                            }
+                        ]
+                    }
+                ]
+            }
+            
+            # Make API request
+            response = requests.post(
+                self.vision_endpoint,
+                json=request_data,
+                timeout=30
             )
             
-            # Configure the process request
-            request = documentai.ProcessRequest(
-                name=self.processor_name,
-                raw_document=raw_document
-            )
+            if response.status_code != 200:
+                logger.error(f"❌ Google Vision API error: {response.status_code} - {response.text}")
+                return {
+                    "success": False,
+                    "error": f"API request failed: {response.text}",
+                    "error_type": "api_error"
+                }
             
-            # Process the document
-            result = self.client.process_document(request=request)
-            document = result.document
+            result = response.json()
+            
+            # Check for errors in response
+            if "error" in result:
+                logger.error(f"❌ Google Vision API error: {result['error']}")
+                return {
+                    "success": False,
+                    "error": result["error"]["message"],
+                    "error_type": "vision_api_error"
+                }
             
             # Extract text and entities
-            extracted_text = document.text
+            responses = result.get("responses", [{}])
+            annotation = responses[0] if responses else {}
             
-            # Extract entities (structured data)
-            entities = []
-            for entity in document.entities:
-                entities.append({
-                    "type": entity.type_,
-                    "value": entity.mention_text,
-                    "confidence": entity.confidence,
-                    "normalized_value": getattr(entity.normalized_value, 'text', '') if entity.normalized_value else ''
-                })
+            # Get full text
+            text_annotations = annotation.get("textAnnotations", [])
+            extracted_text = text_annotations[0]["description"] if text_annotations else ""
             
-            # Calculate overall confidence
-            if entities:
-                overall_confidence = sum(e["confidence"] for e in entities) / len(entities)
-            else:
-                overall_confidence = 0.5  # Default if no entities found
+            # Extract entities from text (simulate structured data extraction)
+            entities = self._extract_entities_from_text(extracted_text)
+            
+            # Calculate confidence based on text quality
+            confidence = min(len(extracted_text) / 100.0, 1.0) if extracted_text else 0.0
             
             return {
                 "success": True,
                 "mock_mode": False,
                 "extracted_text": extracted_text,
                 "extracted_entities": entities,
-                "overall_confidence": overall_confidence,
-                "page_count": len(document.pages),
-                "processing_time": None,  # Google doesn't provide this
+                "overall_confidence": confidence,
+                "page_count": 1,
+                "processing_time": None,
                 "file_info": {
                     "filename": filename,
                     "size_bytes": len(file_content),
@@ -144,37 +170,107 @@ class GoogleVisionAPIProcessor:
                 }
             }
             
-        except google_exceptions.InvalidArgument as e:
-            logger.error(f"❌ Google Document AI - Invalid argument: {e}")
+        except requests.exceptions.Timeout as e:
+            logger.error(f"❌ Google Vision API timeout: {e}")
             return {
                 "success": False,
-                "error": f"Invalid document format: {e}",
-                "error_type": "invalid_argument"
+                "error": "Request timeout",
+                "error_type": "timeout"
             }
             
-        except google_exceptions.PermissionDenied as e:
-            logger.error(f"❌ Google Document AI - Permission denied: {e}")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"❌ Google Vision API request error: {e}")
             return {
                 "success": False,
-                "error": f"Authentication failed: {e}",
-                "error_type": "permission_denied"
-            }
-            
-        except google_exceptions.ResourceExhausted as e:
-            logger.error(f"❌ Google Document AI - Quota exceeded: {e}")
-            return {
-                "success": False,
-                "error": f"API quota exceeded: {e}",
-                "error_type": "quota_exceeded"
+                "error": f"Request failed: {e}",
+                "error_type": "request_error"
             }
             
         except Exception as e:
-            logger.error(f"❌ Google Document AI - Unexpected error: {e}")
+            logger.error(f"❌ Google Vision API unexpected error: {e}")
             return {
                 "success": False,
                 "error": f"Document processing failed: {e}",
                 "error_type": "processing_error"
             }
+    
+    def _extract_entities_from_text(self, text: str) -> List[Dict[str, Any]]:
+        """Extract structured entities from OCR text using regex patterns"""
+        import re
+        
+        entities = []
+        text_upper = text.upper()
+        
+        # Passport number patterns
+        passport_patterns = [
+            r'PASSPORT\s*N[O°]?\:?\s*([A-Z0-9]{6,15})',
+            r'DOCUMENT\s*N[O°]?\:?\s*([A-Z0-9]{6,15})',
+            r'N[O°]\s*([A-Z0-9]{6,15})',
+        ]
+        
+        for pattern in passport_patterns:
+            matches = re.findall(pattern, text_upper)
+            for match in matches:
+                entities.append({
+                    "type": "passport_number",
+                    "value": match.strip(),
+                    "confidence": 0.9,
+                    "normalized_value": match.strip()
+                })
+                break
+        
+        # Name patterns
+        name_patterns = [
+            r'SURNAME[:\s]+([A-Z\s]{2,30})',
+            r'FAMILY\s*NAME[:\s]+([A-Z\s]{2,30})',
+            r'GIVEN\s*NAMES?[:\s]+([A-Z\s]{2,30})',
+        ]
+        
+        for pattern in name_patterns:
+            matches = re.findall(pattern, text_upper)
+            for match in matches:
+                entity_type = "surname" if "SURNAME" in pattern or "FAMILY" in pattern else "given_names"
+                entities.append({
+                    "type": entity_type,
+                    "value": match.strip(),
+                    "confidence": 0.85,
+                    "normalized_value": match.strip()
+                })
+        
+        # Date patterns
+        date_patterns = [
+            r'DATE\s*OF\s*BIRTH[:\s]+(\d{1,2}\s*[A-Z]{3}\s*\d{4})',
+            r'DATE\s*OF\s*EXPIRY[:\s]+(\d{1,2}\s*[A-Z]{3}\s*\d{4})',
+            r'EXPIRY[:\s]+(\d{1,2}\s*[A-Z]{3}\s*\d{4})',
+        ]
+        
+        for pattern in date_patterns:
+            matches = re.findall(pattern, text_upper)
+            for match in matches:
+                entity_type = "date_of_birth" if "BIRTH" in pattern else "date_of_expiry"
+                entities.append({
+                    "type": entity_type,
+                    "value": match.strip(),
+                    "confidence": 0.8,
+                    "normalized_value": match.strip()
+                })
+        
+        # Nationality
+        nationality_patterns = [
+            r'NATIONALITY[:\s]+([A-Z\s]{5,30})',
+        ]
+        
+        for pattern in nationality_patterns:
+            matches = re.findall(pattern, text_upper)
+            for match in matches:
+                entities.append({
+                    "type": "nationality",
+                    "value": match.strip(),
+                    "confidence": 0.9,
+                    "normalized_value": match.strip()
+                })
+        
+        return entities
     
     def extract_passport_fields(self, entities: List[Dict]) -> Dict[str, Any]:
         """Extract specific passport fields from entities"""
