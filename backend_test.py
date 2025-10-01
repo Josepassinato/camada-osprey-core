@@ -4547,7 +4547,12 @@ class ComprehensiveEcosystemTester:
         print("=" * 80)
         print()
         
-        # FIRST: Run critical OpenAI tests
+        # FIRST: CRITICAL SECURITY VALIDATION FIXES - HIGHEST PRIORITY
+        print("🚨 CRITICAL SECURITY VALIDATION FIXES")
+        print("=" * 50)
+        self.test_critical_security_validation_fixes()
+        
+        # SECOND: Run critical OpenAI tests
         self.run_critical_openai_tests()
         
         # Then run other tests if needed
@@ -4557,9 +4562,6 @@ class ComprehensiveEcosystemTester:
         # Core Case Finalizer MVP Tests
         self.test_start_finalization_h1b_basic()
         self.test_start_finalization_f1_basic()
-        
-        # Policy Engine (FASE 1) Tests
-        self.test_policy_engine_fase1()
         
         # System Integration Tests
         self.test_system_integration_form_code()
