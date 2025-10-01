@@ -26,6 +26,8 @@ class ComprehensiveEcosystemTester:
             'Content-Type': 'application/json',
             'User-Agent': 'CaseFinalizerTester/1.0'
         })
+        self.auth_token = None
+        self.setup_test_authentication()
         
     def log_test(self, test_name: str, success: bool, details: str = "", response_data: Any = None):
         """Log test result"""
