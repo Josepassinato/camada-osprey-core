@@ -1953,21 +1953,6 @@ class ComprehensiveEcosystemTester:
                 False,
                 f"Exception: {str(e)}"
             )
-                        "success_is_true": data.get("success") is True,
-                        "has_review_object": "review" in data,
-                        "no_budget_exceeded": "Budget exceeded" not in str(data),
-                        "no_dra_paula_unavailable": "Dra. Paula não disponível" not in str(data),
-                        "valid_json_response": True,  # We got here, so JSON is valid
-                        "has_agent_field": "agent" in data,
-                        "has_visa_type": "visa_type" in data
-                    }
-                    
-                    # Check review object structure if present
-                    if "review" in data:
-                        review = data["review"]
-                        success_indicators.update({
-                            "review_has_coverage_score": "coverage_score" in review,
-                            "review_has_status": "status" in review,
                             "review_has_issues": "issues" in review,
                             "review_has_revised_letter": "revised_letter" in review
                         })
