@@ -231,6 +231,11 @@ class ProductionVerificationTester:
         print("📋 Testing Auto Application Start...")
         
         try:
+            # Ensure we have authentication token
+            if not self.auth_token:
+                self.log_test("POST /api/auto-application/start", False, "No authentication token available")
+                return
+            
             response = self.session.post(f"{API_BASE}/auto-application/start", json={})
             
             if response.status_code == 200:
