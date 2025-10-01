@@ -725,8 +725,7 @@ test_plan:
   current_focus:
     - "Case Finalizer Complete System (Full Version)"
     - "Enhanced PDF merging and document package generation"
-  stuck_tasks:
-    - "Case Finalizer Complete System (Full Version)"
+  stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
