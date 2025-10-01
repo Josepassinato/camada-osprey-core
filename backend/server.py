@@ -5160,7 +5160,10 @@ async def validate_form_data_ai(case, friendly_form_data, basic_data):
         """
         
         if use_openai:
-            response = openai.chat.completions.create(
+            from openai import AsyncOpenAI
+            client = AsyncOpenAI(api_key=openai_key)
+            
+            response = await client.chat.completions.create(
                 model="gpt-4",
                 messages=[{"role": "user", "content": validation_prompt}],
                 max_tokens=2000,
