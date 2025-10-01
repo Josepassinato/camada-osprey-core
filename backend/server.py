@@ -5278,7 +5278,16 @@ async def translate_data_ai(case, friendly_form_data):
         Responda apenas "TRADUÇÃO_COMPLETA_DRA_PAULA" quando terminar a tradução com expertise especializada.
         """
         
-        response = llm.chat([{"role": "user", "content": translation_prompt}])
+        if use_openai:
+            response = openai.chat.completions.create(
+                model="gpt-4",
+                messages=[{"role": "user", "content": translation_prompt}],
+                max_tokens=2000,
+                temperature=0.3
+            )
+            response_text = response.choices[0].message.content
+        else:
+            response_text = llm.chat([{"role": "user", "content": translation_prompt}])
         
         return {"details": "Tradução para inglês jurídico concluída com sucesso"}
         
