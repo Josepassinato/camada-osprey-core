@@ -5695,17 +5695,26 @@ class ComprehensiveEcosystemTester:
         print("=" * 80)
         print()
         
-        # FIRST: HYBRID GOOGLE DOCUMENT AI + DR. MIGUEL INTEGRATION - NEW FEATURE
-        print("🔬 HYBRID GOOGLE DOCUMENT AI + DR. MIGUEL INTEGRATION")
+        # FIRST: GOOGLE VISION API + DR. MIGUEL HYBRID SYSTEM TESTS - REAL API KEY TESTING
+        print("🔬 GOOGLE VISION API + DR. MIGUEL HYBRID SYSTEM TESTS")
+        print("=" * 60)
+        self.test_google_vision_api_connectivity()
+        self.test_hybrid_system_real_vs_mock()
+        self.test_dr_miguel_with_real_ocr_data()
+        self.test_cost_effectiveness_real_vs_mock()
+        self.test_error_handling_and_fallback()
+        
+        # SECOND: HYBRID GOOGLE DOCUMENT AI + DR. MIGUEL INTEGRATION - EXISTING FEATURE
+        print("\n🔬 HYBRID GOOGLE DOCUMENT AI + DR. MIGUEL INTEGRATION")
         print("=" * 50)
         self.test_hybrid_google_ai_dr_miguel_integration()
         
-        # SECOND: CRITICAL SECURITY VALIDATION FIXES - HIGHEST PRIORITY
-        print("🚨 CRITICAL SECURITY VALIDATION FIXES")
+        # THIRD: CRITICAL SECURITY VALIDATION FIXES - HIGHEST PRIORITY
+        print("\n🚨 CRITICAL SECURITY VALIDATION FIXES")
         print("=" * 50)
         self.test_critical_security_validation_fixes()
         
-        # SECOND: Run critical OpenAI tests
+        # FOURTH: Run critical OpenAI tests
         self.run_critical_openai_tests()
         
         # Then run other tests if needed
