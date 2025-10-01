@@ -5435,7 +5435,16 @@ async def final_review_ai(case):
         Se houver problemas, liste-os com orientações específicas para correção.
         """
         
-        response = llm.chat([{"role": "user", "content": review_prompt}])
+        if use_openai:
+            response = openai.chat.completions.create(
+                model="gpt-4",
+                messages=[{"role": "user", "content": review_prompt}],
+                max_tokens=2000,
+                temperature=0.3
+            )
+            response_text = response.choices[0].message.content
+        else:
+            response_text = llm.chat([{"role": "user", "content": review_prompt}])
         
         return {"details": "Revisão final concluída - Formulário aprovado para submissão"}
         
