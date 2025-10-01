@@ -556,54 +556,119 @@ const CoverLetterModule: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <AlertCircle className="h-5 w-5 text-yellow-500" />
-                <span>Carta Precisa de Complementação</span>
+                <AlertCircle className="h-5 w-5 text-blue-500" />
+                <span>
+                  {review?.status === 'needs_questions' 
+                    ? 'Perguntas Específicas para Completar sua Carta' 
+                    : 'Carta Precisa de Complementação'}
+                </span>
               </CardTitle>
               <CardDescription>
-                Alguns pontos importantes ainda precisam ser abordados na sua carta.
+                {review?.status === 'needs_questions'
+                  ? 'Responda às perguntas abaixo para que eu possa escrever sua carta no padrão oficial de imigração.'
+                  : 'Alguns pontos importantes ainda precisam ser abordados na sua carta.'}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                   <div className="flex items-center space-x-2 mb-2">
-                    <AlertCircle className="h-5 w-5 text-yellow-500" />
-                    <span className="font-medium text-yellow-800">
+                    <AlertCircle className="h-5 w-5 text-blue-500" />
+                    <span className="font-medium text-blue-800">
                       Cobertura: {Math.round((review.coverage_score || 0) * 100)}%
                     </span>
                   </div>
+                  {review?.missing_areas && review.missing_areas.length > 0 && (
+                    <div className="mt-2">
+                      <span className="text-sm text-blue-700">
+                        Áreas que precisam de mais informações: {review.missing_areas.join(', ')}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                <div>
-                  <h4 className="font-medium text-red-700 mb-2">Pontos a Complementar:</h4>
-                  <ul className="list-disc pl-5 space-y-1">
-                    {review.issues?.map((issue, index) => (
-                      <li key={index} className="text-red-600">{issue}</li>
+                {/* Perguntas específicas */}
+                {review?.status === 'needs_questions' && questions.length > 0 && (
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-blue-700 mb-3">
+                      Por favor, responda às seguintes perguntas:
+                    </h4>
+                    {questions.map((question, index) => (
+                      <Card key={question.id} className="border-blue-200">
+                        <CardContent className="p-4">
+                          <div className="space-y-3">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-900 mb-1">
+                                {index + 1}. {question.question}
+                              </label>
+                              <p className="text-xs text-gray-600 mb-2">
+                                💡 {question.why_needed}
+                              </p>
+                              <Textarea
+                                value={question.answer || ''}
+                                onChange={(e) => updateAnswer(question.id, e.target.value)}
+                                placeholder="Digite sua resposta aqui..."
+                                rows={3}
+                                className="w-full"
+                              />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
                     ))}
-                  </ul>
-                </div>
+                  </div>
+                )}
+
+                {/* Issues (modo antigo) */}
+                {review?.issues && review.issues.length > 0 && (
+                  <div>
+                    <h4 className="font-medium text-red-700 mb-2">Pontos a Complementar:</h4>
+                    <ul className="list-disc pl-5 space-y-1">
+                      {review.issues.map((issue, index) => (
+                        <li key={index} className="text-red-600">{issue}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 <div className="flex space-x-3">
-                  <Button
-                    onClick={requestComplement}
-                    disabled={loading}
-                    className="bg-[#FF6B35] hover:bg-[#FF6B35]/90"
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Carregando...
-                      </>
-                    ) : (
-                      'Ver Orientações Detalhadas'
-                    )}
-                  </Button>
+                  {review?.status === 'needs_questions' ? (
+                    <Button
+                      onClick={generateFinalLetter}
+                      disabled={loading || questions.some(q => !q.answer?.trim())}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Escrevendo Carta Final...
+                        </>
+                      ) : (
+                        '✍️ Escrever Carta Oficial'
+                      )}
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={requestComplement}
+                      disabled={loading}
+                      className="bg-[#FF6B35] hover:bg-[#FF6B35]/90"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Carregando...
+                        </>
+                      ) : (
+                        'Ver Orientações Detalhadas'
+                      )}
+                    </Button>
+                  )}
                   
                   <Button
                     variant="outline"
                     onClick={goBackToEdit}
                   >
-                    Editar Carta
+                    Voltar e Editar
                   </Button>
                 </div>
               </div>
