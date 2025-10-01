@@ -303,9 +303,22 @@ const SelectForm = () => {
 
       if (response.ok) {
         const data = await response.json();
-        // Store case ID for anonymous access
-        localStorage.setItem('osprey_current_case_id', data.case.case_id);
-        navigate(`/auto-application/case/${data.case.case_id}/basic-data`);
+        console.log('✅ New case created:', data);
+        
+        // Verify form_code was set correctly
+        if (data.case && data.case.form_code === formCode) {
+          console.log('✅ Form code verified:', data.case.form_code);
+          // Store case ID for anonymous access
+          localStorage.setItem('osprey_current_case_id', data.case.case_id);
+          navigate(`/auto-application/case/${data.case.case_id}/basic-data`);
+        } else {
+          console.error('❌ Form code mismatch!', {
+            expected: formCode,
+            actual: data.case?.form_code,
+            fullResponse: data
+          });
+          setError(`Erro: form_code incorreto (esperado: ${formCode}, recebido: ${data.case?.form_code})`);
+        }
       } else {
         setError('Erro ao criar caso. Tente novamente.');
       }
