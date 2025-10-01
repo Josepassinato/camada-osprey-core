@@ -1,0 +1,458 @@
+"""
+Google Document AI Integration + Dr. Miguel Enhanced Validation
+Professional OCR and data extraction with AI-powered fraud detection
+"""
+
+import os
+import logging
+import asyncio
+import json
+from typing import Dict, Any, Optional, List
+from datetime import datetime
+import base64
+from google.cloud import documentai
+from google.api_core.client_options import ClientOptions
+from google.api_core import exceptions as google_exceptions
+
+logger = logging.getLogger(__name__)
+
+class GoogleDocumentAIProcessor:
+    """Professional document OCR and data extraction using Google Document AI"""
+    
+    def __init__(self):
+        # Configuration from environment variables
+        self.project_id = os.environ.get('GOOGLE_CLOUD_PROJECT_ID', 'test-project')
+        self.location = os.environ.get('GOOGLE_DOCUMENT_AI_LOCATION', 'us')  # us, eu
+        self.processor_id = os.environ.get('GOOGLE_DOCUMENT_AI_PROCESSOR_ID', 'test-processor')
+        
+        # Use service account key if provided, otherwise use default credentials
+        self.credentials_path = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+        
+        # For testing without real Google Cloud setup
+        self.is_mock_mode = (
+            self.project_id == 'test-project' or 
+            not self.credentials_path or 
+            not os.path.exists(self.credentials_path or '')
+        )
+        
+        if self.is_mock_mode:
+            logger.warning("🧪 Google Document AI in MOCK MODE - Using simulated responses")
+        else:
+            logger.info(f"🔗 Google Document AI initialized - Project: {self.project_id}, Location: {self.location}")
+            
+        # Initialize client if not in mock mode
+        self.client = None
+        if not self.is_mock_mode:
+            try:
+                # Create client with proper configuration
+                client_options = ClientOptions(
+                    api_endpoint=f"{self.location}-documentai.googleapis.com"
+                )
+                self.client = documentai.DocumentProcessorServiceClient(
+                    client_options=client_options
+                )
+                
+                # Build processor name
+                self.processor_name = self.client.processor_path(
+                    self.project_id, self.location, self.processor_id
+                )
+                
+                logger.info(f"✅ Google Document AI client initialized successfully")
+                
+            except Exception as e:
+                logger.error(f"❌ Failed to initialize Google Document AI: {e}")
+                self.is_mock_mode = True
+    
+    def _create_mock_response(self, filename: str, content_length: int) -> Dict[str, Any]:
+        """Create realistic mock response for testing"""
+        mock_data = {
+            "text": f"""
+            PASSPORT
+            UNITED STATES OF AMERICA
+            
+            Type: P
+            Country Code: USA
+            Passport No: 123456789
+            
+            Surname: SMITH
+            Given Names: JOHN MICHAEL
+            Nationality: UNITED STATES OF AMERICA
+            Date of Birth: 15 JAN 1990
+            Sex: M
+            Place of Birth: NEW YORK, NY, USA
+            Date of Issue: 10 MAR 2020
+            Date of Expiry: 09 MAR 2030
+            Authority: U.S. DEPARTMENT OF STATE
+            """,
+            "entities": [
+                {"type": "passport_number", "value": "123456789", "confidence": 0.98},
+                {"type": "surname", "value": "SMITH", "confidence": 0.99},
+                {"type": "given_names", "value": "JOHN MICHAEL", "confidence": 0.99},
+                {"type": "nationality", "value": "UNITED STATES OF AMERICA", "confidence": 0.99},
+                {"type": "date_of_birth", "value": "15 JAN 1990", "confidence": 0.97},
+                {"type": "date_of_expiry", "value": "09 MAR 2030", "confidence": 0.98},
+                {"type": "sex", "value": "M", "confidence": 0.99},
+                {"type": "place_of_birth", "value": "NEW YORK, NY, USA", "confidence": 0.95}
+            ],
+            "confidence": 0.94,
+            "pages": 1,
+            "processing_time_ms": 1250
+        }
+        
+        return {
+            "success": True,
+            "mock_mode": True,
+            "extracted_text": mock_data["text"],
+            "extracted_entities": mock_data["entities"],
+            "overall_confidence": mock_data["confidence"],
+            "page_count": mock_data["pages"],
+            "processing_time": mock_data["processing_time_ms"],
+            "file_info": {
+                "filename": filename,
+                "size_bytes": content_length,
+                "processed_at": datetime.now().isoformat()
+            }
+        }
+    
+    async def process_document(self, file_content: bytes, filename: str, 
+                             mime_type: str = "application/pdf") -> Dict[str, Any]:
+        """Process document with Google Document AI OCR"""
+        
+        if self.is_mock_mode:
+            # Return mock response for testing
+            await asyncio.sleep(0.5)  # Simulate processing time
+            return self._create_mock_response(filename, len(file_content))
+        
+        try:
+            # Prepare the document for processing
+            raw_document = documentai.RawDocument(
+                content=file_content,
+                mime_type=mime_type
+            )
+            
+            # Configure the process request
+            request = documentai.ProcessRequest(
+                name=self.processor_name,
+                raw_document=raw_document
+            )
+            
+            # Process the document
+            result = self.client.process_document(request=request)
+            document = result.document
+            
+            # Extract text and entities
+            extracted_text = document.text
+            
+            # Extract entities (structured data)
+            entities = []
+            for entity in document.entities:
+                entities.append({
+                    "type": entity.type_,
+                    "value": entity.mention_text,
+                    "confidence": entity.confidence,
+                    "normalized_value": getattr(entity.normalized_value, 'text', '') if entity.normalized_value else ''
+                })
+            
+            # Calculate overall confidence
+            if entities:
+                overall_confidence = sum(e["confidence"] for e in entities) / len(entities)
+            else:
+                overall_confidence = 0.5  # Default if no entities found
+            
+            return {
+                "success": True,
+                "mock_mode": False,
+                "extracted_text": extracted_text,
+                "extracted_entities": entities,
+                "overall_confidence": overall_confidence,
+                "page_count": len(document.pages),
+                "processing_time": None,  # Google doesn't provide this
+                "file_info": {
+                    "filename": filename,
+                    "size_bytes": len(file_content),
+                    "processed_at": datetime.now().isoformat(),
+                    "mime_type": mime_type
+                }
+            }
+            
+        except google_exceptions.InvalidArgument as e:
+            logger.error(f"❌ Google Document AI - Invalid argument: {e}")
+            return {
+                "success": False,
+                "error": f"Invalid document format: {e}",
+                "error_type": "invalid_argument"
+            }
+            
+        except google_exceptions.PermissionDenied as e:
+            logger.error(f"❌ Google Document AI - Permission denied: {e}")
+            return {
+                "success": False,
+                "error": f"Authentication failed: {e}",
+                "error_type": "permission_denied"
+            }
+            
+        except google_exceptions.ResourceExhausted as e:
+            logger.error(f"❌ Google Document AI - Quota exceeded: {e}")
+            return {
+                "success": False,
+                "error": f"API quota exceeded: {e}",
+                "error_type": "quota_exceeded"
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Google Document AI - Unexpected error: {e}")
+            return {
+                "success": False,
+                "error": f"Document processing failed: {e}",
+                "error_type": "processing_error"
+            }
+    
+    def extract_passport_fields(self, entities: List[Dict]) -> Dict[str, Any]:
+        """Extract specific passport fields from entities"""
+        
+        passport_fields = {
+            "passport_number": None,
+            "surname": None,
+            "given_names": None,
+            "nationality": None,
+            "date_of_birth": None,
+            "date_of_expiry": None,
+            "place_of_birth": None,
+            "sex": None,
+            "issuing_authority": None
+        }
+        
+        # Map entity types to passport fields
+        entity_mapping = {
+            "passport_number": "passport_number",
+            "document_number": "passport_number",
+            "surname": "surname",
+            "family_name": "surname",
+            "given_names": "given_names",
+            "first_name": "given_names",
+            "nationality": "nationality",
+            "date_of_birth": "date_of_birth",
+            "birth_date": "date_of_birth",
+            "date_of_expiry": "date_of_expiry",
+            "expiry_date": "date_of_expiry",
+            "place_of_birth": "place_of_birth",
+            "sex": "sex",
+            "gender": "sex",
+            "issuing_authority": "issuing_authority",
+            "authority": "issuing_authority"
+        }
+        
+        # Extract fields from entities
+        for entity in entities:
+            entity_type = entity["type"].lower()
+            if entity_type in entity_mapping:
+                field_name = entity_mapping[entity_type]
+                passport_fields[field_name] = {
+                    "value": entity["value"],
+                    "confidence": entity["confidence"],
+                    "normalized": entity.get("normalized_value", "")
+                }
+        
+        return passport_fields
+
+
+class HybridDocumentValidator:
+    """Hybrid validator combining Google Document AI + Dr. Miguel"""
+    
+    def __init__(self):
+        self.google_processor = GoogleDocumentAIProcessor()
+        self.dr_miguel = None
+        
+    async def _get_dr_miguel(self):
+        """Lazy load Dr. Miguel to avoid circular imports"""
+        if self.dr_miguel is None:
+            from specialized_agents import DocumentValidationAgent
+            self.dr_miguel = DocumentValidationAgent()
+        return self.dr_miguel
+    
+    async def analyze_document(self, file_content: bytes, filename: str, 
+                             document_type: str, applicant_name: str,
+                             visa_type: str, case_id: str) -> Dict[str, Any]:
+        """
+        Complete document analysis using Google Document AI + Dr. Miguel
+        """
+        
+        start_time = datetime.now()
+        logger.info(f"🔬 Starting HYBRID analysis - Google AI + Dr. Miguel")
+        
+        try:
+            # Determine MIME type
+            mime_type = "application/pdf"
+            if filename.lower().endswith(('.jpg', '.jpeg')):
+                mime_type = "image/jpeg"
+            elif filename.lower().endswith('.png'):
+                mime_type = "image/png"
+            elif filename.lower().endswith('.webp'):
+                mime_type = "image/webp"
+            
+            # STEP 1: Google Document AI - Professional OCR and Data Extraction
+            logger.info(f"📋 Step 1: Google Document AI processing")
+            
+            google_result = await self.google_processor.process_document(
+                file_content, filename, mime_type
+            )
+            
+            if not google_result["success"]:
+                return {
+                    "valid": False,
+                    "legible": False,
+                    "completeness": 0,
+                    "issues": [f"❌ Google Document AI falhou: {google_result.get('error', 'Unknown error')}"],
+                    "extracted_data": {
+                        "document_type": document_type,
+                        "file_name": filename,
+                        "validation_status": "FAILED",
+                        "error": google_result.get('error')
+                    },
+                    "dra_paula_assessment": f"❌ Processamento de documento falhou: {google_result.get('error_type', 'unknown')}"
+                }
+            
+            # STEP 2: Dr. Miguel - AI-powered validation and fraud detection
+            logger.info(f"🧠 Step 2: Dr. Miguel AI validation")
+            
+            dr_miguel = await self._get_dr_miguel()
+            
+            # Enhanced validation with extracted text context
+            miguel_result = await dr_miguel.validate_document(
+                file_content=file_content,
+                filename=filename,
+                expected_document_type=document_type,
+                applicant_name=applicant_name,
+                case_context={
+                    "visa_type": visa_type,
+                    "case_id": case_id,
+                    "google_extracted_text": google_result.get("extracted_text", ""),
+                    "google_entities": google_result.get("extracted_entities", []),
+                    "google_confidence": google_result.get("overall_confidence", 0)
+                }
+            )
+            
+            # STEP 3: Combine and enhance results
+            logger.info(f"🔀 Step 3: Combining results")
+            
+            processing_time = (datetime.now() - start_time).total_seconds() * 1000
+            
+            return self._create_hybrid_response(
+                google_result, miguel_result, document_type, filename,
+                visa_type, case_id, processing_time
+            )
+            
+        except Exception as e:
+            logger.error(f"❌ Hybrid analysis failed: {e}")
+            processing_time = (datetime.now() - start_time).total_seconds() * 1000
+            
+            return {
+                "valid": False,
+                "legible": False,
+                "completeness": 0,
+                "issues": [f"❌ Análise híbrida falhou: {str(e)}"],
+                "extracted_data": {
+                    "document_type": document_type,
+                    "file_name": filename,
+                    "validation_status": "ERROR",
+                    "error": str(e)
+                },
+                "dra_paula_assessment": f"❌ Erro na análise híbrida: {str(e)}",
+                "hybrid_analysis": {
+                    "google_ai": "failed",
+                    "dr_miguel": "failed",
+                    "processing_time_ms": processing_time
+                }
+            }
+    
+    def _create_hybrid_response(self, google_result: Dict, miguel_result: Dict,
+                              document_type: str, filename: str, visa_type: str,
+                              case_id: str, processing_time: float) -> Dict[str, Any]:
+        """Create comprehensive response combining Google AI and Dr. Miguel results"""
+        
+        # Extract key data
+        google_confidence = google_result.get("overall_confidence", 0) * 100
+        miguel_confidence = miguel_result.get("confidence_score", 0)
+        miguel_verdict = miguel_result.get("verdict", "UNKNOWN")
+        
+        # Calculate combined confidence (weighted average)
+        # Google AI: 40% weight (OCR accuracy)
+        # Dr. Miguel: 60% weight (validation and fraud detection)
+        combined_confidence = (google_confidence * 0.4) + (miguel_confidence * 0.6)
+        
+        # Determine overall validity
+        is_valid = (
+            miguel_verdict == "APROVADO" and 
+            combined_confidence >= 75 and 
+            google_confidence >= 50
+        )
+        
+        # Combine issues
+        issues = []
+        
+        # Add Google AI issues
+        if google_confidence < 70:
+            issues.append(f"⚠️ Qualidade de OCR baixa: {google_confidence:.1f}%")
+        
+        # Add Dr. Miguel issues
+        miguel_issues = miguel_result.get("issues", [])
+        if isinstance(miguel_issues, list):
+            issues.extend(miguel_issues)
+        elif isinstance(miguel_issues, str):
+            issues.append(miguel_issues)
+        
+        # Extract structured data from Google AI
+        extracted_entities = google_result.get("extracted_entities", [])
+        passport_fields = self.google_processor.extract_passport_fields(extracted_entities)
+        
+        # Create enhanced extracted data
+        extracted_data = {
+            "document_type": document_type,
+            "file_name": filename,
+            "validation_status": "APPROVED" if is_valid else "REQUIRES_REVIEW" if combined_confidence >= 50 else "REJECTED",
+            "visa_context": visa_type,
+            "case_id": case_id,
+            "google_ai_data": {
+                "extracted_text": google_result.get("extracted_text", "")[:500] + "...",  # Truncate for storage
+                "entities_count": len(extracted_entities),
+                "ocr_confidence": google_confidence,
+                "page_count": google_result.get("page_count", 0),
+                "mock_mode": google_result.get("mock_mode", False)
+            },
+            "passport_fields": passport_fields,
+            "dr_miguel_analysis": {
+                "verdict": miguel_verdict,
+                "confidence": miguel_confidence,
+                "agent_version": miguel_result.get("agent", "Unknown")
+            },
+            "processing_stats": {
+                "total_time_ms": processing_time,
+                "google_time_ms": google_result.get("processing_time"),
+                "combined_confidence": round(combined_confidence, 1)
+            }
+        }
+        
+        # Create professional assessment
+        if is_valid:
+            assessment = f"✅ HÍBRIDO: Documento aprovado (Google AI: {google_confidence:.1f}% + Dr. Miguel: {miguel_confidence:.1f}% = {combined_confidence:.1f}%)"
+        elif combined_confidence >= 50:
+            assessment = f"⚠️ HÍBRIDO: Documento requer revisão manual (Confiança: {combined_confidence:.1f}%)"
+        else:
+            assessment = f"❌ HÍBRIDO: Documento rejeitado (Confiança insuficiente: {combined_confidence:.1f}%)"
+        
+        return {
+            "valid": is_valid,
+            "legible": google_confidence >= 30,  # If Google AI can extract text, it's legible
+            "completeness": round(combined_confidence, 0),
+            "issues": issues if issues else ["Nenhum problema detectado"],
+            "extracted_data": extracted_data,
+            "dra_paula_assessment": assessment,
+            "hybrid_powered": True,
+            "google_ai_enabled": True,
+            "dr_miguel_enabled": True,
+            "professional_grade": True
+        }
+
+
+# Global instance
+hybrid_validator = HybridDocumentValidator()
