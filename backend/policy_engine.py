@@ -100,10 +100,31 @@ class PolicyEngine:
             policy_checks = self._apply_policy_checks(policy, quality_result, extracted_text, case_context)
             result["policy_checks"] = policy_checks
             
-            # 4. Extração de campos (básica via regex)
+            # 4. Análise de idioma e requisitos de tradução (Phase 2)
+            language_analysis = self.translation_gate.analyze_document_language(
+                extracted_text, doc_type, filename
+            )
+            result["language_analysis"] = language_analysis
+            
+            # 5. Extração avançada de campos (Phase 2)
             if extracted_text:
-                fields_result = self._extract_fields(policy, extracted_text)
+                policy_fields = policy.get("required_fields", []) + policy.get("optional_fields", [])
+                extraction_context = {
+                    'document_type': doc_type,
+                    'case_context': case_context,
+                    'language_info': language_analysis
+                }
+                
+                # Usar motor avançado de extração
+                fields_result = self.field_extractor.extract_all_fields(
+                    extracted_text, policy_fields, extraction_context
+                )
                 result["fields"] = fields_result
+                
+                # Verificar certificado de tradução se necessário
+                if language_analysis.get('requires_action', False):
+                    translation_cert = self.translation_gate.check_translation_certificate(extracted_text)
+                    result["translation_certificate"] = translation_cert
             
             # 5. Verificações de consistência (se contexto do caso disponível)
             if case_context:
