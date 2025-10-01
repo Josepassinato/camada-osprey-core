@@ -743,7 +743,8 @@ class ProductionVerificationTester:
                 return
             
             start_data = start_response.json()
-            carlos_case_id = start_data.get('case_id')
+            case_data = start_data.get('case', {})
+            carlos_case_id = case_data.get('case_id')
             
             if not carlos_case_id:
                 self.log_test("Carlos Silva Journey", False, "No case ID returned", start_data)
