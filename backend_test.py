@@ -1713,9 +1713,8 @@ class ComprehensiveEcosystemTester:
         """
         
         payload = {
-            "text_content": passport_content,
-            "filename": "passport_carlos.pdf",
-            "file_size": 1024000
+            "extracted_text": passport_content,
+            "filename": "passport_carlos.pdf"
         }
         
         try:
