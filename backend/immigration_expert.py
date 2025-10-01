@@ -87,15 +87,25 @@ class ImmigrationExpert:
         """
         try:
             if self.use_openai_direct and self.openai_key:
-                # Use OpenAI directly
-                import openai
-                openai.api_key = self.openai_key
+                # Use OpenAI directly with new client
+                from openai import AsyncOpenAI
+                client = AsyncOpenAI(api_key=self.openai_key)
                 
-                response = await openai.ChatCompletion.acreate(
+                # Enhanced prompt for Dra. Paula's context
+                enhanced_prompt = f"""
+                [SISTEMA OSPREY - DRA. PAULA B2C]
+                Assistant ID: {self.assistant_id}
+                
+                {prompt}
+                
+                Por favor, responda como Dra. Paula B2C, especialista em imigração com foco em brasileiros nos EUA.
+                """
+                
+                response = await client.chat.completions.create(
                     model="gpt-4",
                     messages=[
                         {"role": "system", "content": self.system_prompt},
-                        {"role": "user", "content": prompt}
+                        {"role": "user", "content": enhanced_prompt}
                     ],
                     max_tokens=2000,
                     temperature=0.7
@@ -109,15 +119,15 @@ class ImmigrationExpert:
                     session_id=session_id or f"dra_paula_{hash(prompt) % 10000}",
                     system_message=self.system_prompt
                 ).with_model(self.provider, self.model)
-            
-            # Enhanced prompt for Dra. Paula's context
-            enhanced_prompt = f"""
-            [SISTEMA OSPREY - DRA. PAULA B2C]
-            Assistant ID: {self.assistant_id}
-            
-            {prompt}
-            
-            Por favor, responda como Dra. Paula B2C, especialista em imigração com foco em brasileiros nos EUA.
+                
+                # Enhanced prompt for Dra. Paula's context
+                enhanced_prompt = f"""
+                [SISTEMA OSPREY - DRA. PAULA B2C]
+                Assistant ID: {self.assistant_id}
+                
+                {prompt}
+                
+                Por favor, responda como Dra. Paula B2C, especialista em imigração com foco em brasileiros nos EUA.
             Use seu conhecimento especializado e sempre inclua disclaimers apropriados.
             """
             
