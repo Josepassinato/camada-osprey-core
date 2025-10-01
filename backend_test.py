@@ -1888,12 +1888,12 @@ class ComprehensiveEcosystemTester:
                 self.log_test(
                     "Validation Capabilities Discovery",
                     success,
-                    f"Found {capabilities_found}/{len(expected_capabilities)} capabilities",
+                    f"Phase 2 features: {phase2_count}, Phase 3 features: {phase3_count}",
                     {
-                        "total_capabilities": len(available_capabilities),
-                        "phase2_features": len(phase2_capabilities),
-                        "phase3_features": len(phase3_capabilities),
-                        "capabilities_list": list(available_capabilities.keys())
+                        "phase2_features": phase2_count,
+                        "phase3_features": phase3_count,
+                        "api_status": data.get('status'),
+                        "version": data.get('version')
                     }
                 )
             else:
