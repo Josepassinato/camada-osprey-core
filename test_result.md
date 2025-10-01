@@ -670,6 +670,18 @@ frontend:
         agent: "testing"
         comment: "✅ ENHANCED POLICY ENGINE INTEGRATION WORKING: Multi-document validation endpoint POST /api/documents/validate-multiple is accessible and functional after router fix. Successfully processes multiple documents, performs consistency analysis, and returns comprehensive validation results with individual document scores, consistency analysis, and recommendations. Integration with Phase 2&3 components confirmed operational."
 
+  - task: "TESTE FINAL - Case Finalizer Completo Após Correções"
+    implemented: true
+    working: false
+    file: "/app/backend/case_finalizer_complete.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ TESTE FINAL CASE FINALIZER COMPLETO - FUNCIONALIDADES CRÍTICAS FALHANDO: Teste final específico conforme solicitado na review request revelou problemas críticos que impedem o funcionamento completo do sistema. RESULTADOS DETALHADOS: 1) ❌ Endpoint de Capacidades FALHANDO - GET /api/cases/TEST-CASE-COMPLETE/finalize/capabilities retorna 0 cenários (esperado: 10), features PDF merging e templates não detectadas, 2) ❌ Downloads TODOS FALHANDO - GET /api/download/instructions/{job_id} retorna HTTP 400, GET /api/download/checklist/{job_id} retorna HTTP 400, GET /api/download/master-packet/{job_id} retorna HTTP 400, 3) ✅ Fluxo H-1B Básico FUNCIONANDO - POST /api/cases/TEST-H1B-COMPLETE/finalize/start cria job_id corretamente, status polling retorna 'needs_correction' apropriadamente, 4) ✅ Cenário I-589 Asylum FUNCIONANDO - POST /api/cases/TEST-ASYLUM-COMPLETE/finalize/start funciona com postage USPS e language pt, 5) ✅ Knowledge Base H-1B VALIDADO - Taxas corretas (I-129: $460, Premium: $2805), endereços FedEx vs USPS configurados. TAXA DE SUCESSO: 50% (4/8 testes). CONCLUSÃO: Sistema NÃO está 100% funcional conforme esperado. Endpoints críticos de capacidades e downloads precisam ser corrigidos antes da finalização."
+
   - task: "Phase 2&3 API Endpoints Implementation"
     implemented: true
     working: true
