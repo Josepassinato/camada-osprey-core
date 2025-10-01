@@ -18,7 +18,7 @@ class ImmigrationExpert:
     def __init__(self, 
                  provider: str = "openai", 
                  model: str = "gpt-4o",
-                 assistant_id: str = "asst_AV1O2IBTnDXpEZXiSSQGBT4",
+                 assistant_id: str = "asst_kkyn65SQFfkloH4SalOZfwwh",  # Dra. Paula Official Assistant ID
                  custom_system_prompt: Optional[str] = None):
         """
         Initialize the immigration expert agent - Dra. Paula B2C
