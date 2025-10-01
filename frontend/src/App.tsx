@@ -30,6 +30,8 @@ import CoverLetterModule from "./pages/CoverLetterModule";
 import CaseFinalizer from "./pages/CaseFinalizer";
 import { OwlAgent } from "./pages/OwlAgent";
 import { OwlQuestionnairePage } from "./pages/OwlQuestionnairePage";
+import { OwlPaymentPage } from "./pages/OwlPaymentPage";
+import { OwlPaymentSuccessPage } from "./pages/OwlPaymentSuccessPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
