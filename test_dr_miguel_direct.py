@@ -48,7 +48,92 @@ def create_test_passport_content():
     
     This is a valid Brazilian passport issued by the Federal Police (DPF)
     in accordance with ICAO Document 9303 standards.
-    """ * 5  # Make it substantial
+    
+    ADDITIONAL PASSPORT PAGES:
+    
+    PAGE 2: PERSONAL DATA
+    Full Name: João Carlos Silva
+    Nationality: Brazilian
+    Date of Birth: 15 January 1985
+    Place of Birth: São Paulo, SP, Brazil
+    Sex: Male
+    Height: 175 cm
+    
+    PAGE 3: EMERGENCY CONTACT
+    Contact Person: Maria Silva (Mother)
+    Address: Rua das Flores, 123, São Paulo, SP
+    Phone: +55 11 1234-5678
+    
+    PAGE 4: VISA PAGES
+    [Space for visa stamps and endorsements]
+    
+    PAGE 5-32: ADDITIONAL VISA PAGES
+    [Multiple blank pages for future visa stamps]
+    
+    SECURITY VERIFICATION:
+    This document contains multiple security features including:
+    - Intaglio printing with raised text
+    - Rainbow printing with color gradients
+    - Microprinting visible under magnification
+    - UV-reactive inks and fibers
+    - Tactile features for visually impaired
+    - Digital watermarks and security threads
+    - RFID chip with encrypted biometric data
+    - Optical security features and holograms
+    
+    TECHNICAL SPECIFICATIONS:
+    Document Size: 125mm x 88mm (ID-3 format)
+    Paper Type: Cotton-based security paper
+    Printing Method: Offset lithography with security features
+    Binding: Sewn binding with security thread
+    Pages: 32 pages total
+    Valid for: International travel to all countries
+    
+    ISSUING AUTHORITY INFORMATION:
+    Issued by: Departamento de Polícia Federal (DPF)
+    Issuing Office: São Paulo/SP
+    Authorization Code: DPF-SP-2020-123456
+    Officer ID: 987654
+    Digital Signature: [Encrypted signature data]
+    
+    BIOMETRIC DATA:
+    Facial Recognition: Encoded in RFID chip
+    Fingerprint Data: Stored in secure chip
+    Iris Scan: Available upon request
+    
+    TRAVEL HISTORY:
+    [This section would contain entry/exit stamps]
+    
+    ADDITIONAL INFORMATION:
+    This passport is valid for travel to all countries that recognize Brazilian travel documents.
+    The holder is entitled to consular protection from Brazilian diplomatic missions worldwide.
+    
+    EMERGENCY PROCEDURES:
+    In case of loss or theft, contact the nearest Brazilian consulate immediately.
+    Report to local police and obtain a police report.
+    Apply for emergency travel document if needed.
+    
+    RENEWAL INFORMATION:
+    This passport may be renewed up to 6 months before expiration.
+    Renewal applications must be submitted to DPF offices or Brazilian consulates.
+    Required documents: Previous passport, birth certificate, photos, and fees.
+    
+    LEGAL NOTICES:
+    This document is the property of the Federative Republic of Brazil.
+    Alteration, forgery, or misuse is punishable by law.
+    Maximum penalty: 2-6 years imprisonment plus fines.
+    
+    INTERNATIONAL AGREEMENTS:
+    This passport is issued in accordance with ICAO Document 9303.
+    Complies with international standards for machine-readable travel documents.
+    Recognized by all ICAO member countries.
+    
+    TECHNICAL SUPPORT:
+    For technical issues with the RFID chip, contact DPF technical support.
+    Phone: 0800-123-4567
+    Email: suporte.passaporte@dpf.gov.br
+    Website: www.pf.gov.br
+    """ * 20  # Make it much larger to exceed 50KB
 
 def test_direct_api_call():
     """Test the document analysis API directly"""
