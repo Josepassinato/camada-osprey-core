@@ -318,14 +318,17 @@ class HybridDocumentValidator:
             dr_miguel = await self._get_dr_miguel()
             
             # Enhanced validation with extracted text context
+            # Convert file content to string for Dr. Miguel
+            document_data = google_result.get("extracted_text", str(file_content)[:1000])
+            
             miguel_result = await dr_miguel.validate_document(
-                file_content=file_content,
-                filename=filename,
-                expected_document_type=document_type,
-                applicant_name=applicant_name,
+                document_data=document_data,
+                document_type=document_type,
                 case_context={
+                    "applicant_name": applicant_name,
                     "visa_type": visa_type,
                     "case_id": case_id,
+                    "filename": filename,
                     "google_extracted_text": google_result.get("extracted_text", ""),
                     "google_entities": google_result.get("extracted_entities", []),
                     "google_confidence": google_result.get("overall_confidence", 0)
