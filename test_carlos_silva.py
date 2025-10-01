@@ -342,12 +342,14 @@ def test_carlos_silva_h1b_complete_journey():
         
         if response.status_code == 200:
             data = response.json()
-            form_generated = data.get('uscis_form_generated', False)
+            case_data = data.get('case', {})
+            form_generated = case_data.get('uscis_form_generated', False)
+            progress = case_data.get('progress_percentage')
             
             log_test(
                 "ETAPA 7 - Formulário USCIS",
                 form_generated,
-                f"Form generated: {form_generated}, Progress: {data.get('progress_percentage')}%"
+                f"Form generated: {form_generated}, Progress: {progress}%"
             )
     except Exception as e:
         log_test("ETAPA 7 - Formulário USCIS", False, f"Exception: {str(e)}")
