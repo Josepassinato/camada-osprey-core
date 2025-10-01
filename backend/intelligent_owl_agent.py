@@ -236,6 +236,72 @@ class IntelligentOwlAgent:
             visa_specific=["I-130", "I-485", "K-1"]
         )
         
+        # Travel History Fields
+        guides["previous_us_travel"] = FieldGuide(
+            field_id="previous_us_travel",
+            question_pt="Você já visitou os Estados Unidos anteriormente?",
+            question_en="Have you previously traveled to the United States?",
+            explanation_pt="Esta informação é crucial para o USCIS. Se sim, forneça datas e motivos das visitas.",
+            explanation_en="This information is crucial for USCIS. If yes, provide dates and reasons for visits.",
+            examples=["Não, nunca visitei", "Sim, turismo em 2019", "Sim, negócios em 2020"],
+            validation_rules={
+                "required": True,
+                "travel_history_validation": True
+            },
+            importance_level=4,
+            visa_specific=["ALL"]
+        )
+        
+        # Financial Fields
+        guides["annual_income"] = FieldGuide(
+            field_id="annual_income",
+            question_pt="Qual é a sua renda anual em dólares americanos?",
+            question_en="What is your annual income in US dollars?",
+            explanation_pt="Informe sua renda total anual. Para H-1B, deve ser consistente com o LCA.",
+            explanation_en="Provide your total annual income. For H-1B, must be consistent with LCA.",
+            examples=["$65,000", "$85,000", "$120,000"],
+            validation_rules={
+                "required": True,
+                "format": "currency_usd",
+                "min_value": 0,
+                "h1b_wage_validation": True
+            },
+            importance_level=5,
+            visa_specific=["H-1B", "O-1", "L-1"]
+        )
+        
+        # Immigration History
+        guides["immigration_violations"] = FieldGuide(
+            field_id="immigration_violations",
+            question_pt="Você já teve alguma violação de status imigratório nos EUA?",
+            question_en="Have you ever had any immigration status violations in the US?",
+            explanation_pt="Seja completamente honesto. Omitir informações pode resultar em negação permanente.",
+            explanation_en="Be completely honest. Omitting information can result in permanent denial.",
+            examples=["Não, nunca", "Sim, overstay em 2015 (explicar)", "Não aplicável - primeira visita"],
+            validation_rules={
+                "required": True,
+                "honesty_critical": True
+            },
+            importance_level=5,
+            visa_specific=["ALL"]
+        )
+        
+        # USCIS-specific Fields
+        guides["petition_receipt_number"] = FieldGuide(
+            field_id="petition_receipt_number",
+            question_pt="Número de recibo da petição USCIS (se aplicável)?",
+            question_en="USCIS petition receipt number (if applicable)?",
+            explanation_pt="Para mudanças de status ou extensões. Formato: MSC, EAC, WAC, etc.",
+            explanation_en="For status changes or extensions. Format: MSC, EAC, WAC, etc.",
+            examples=["MSC2190123456", "EAC2190123456", "Não aplicável"],
+            validation_rules={
+                "format": "uscis_receipt",
+                "uscis_validation": True
+            },
+            importance_level=4,
+            visa_specific=["I-129", "I-485", "I-130"]
+        )
+        
         return guides
     
     async def start_guided_session(self, case_id: str, visa_type: str, user_language: str = "pt") -> Dict[str, Any]:
