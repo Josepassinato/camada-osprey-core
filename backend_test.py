@@ -10844,7 +10844,7 @@ class ComprehensiveImmigrationAPITester:
             # ETAPA 1: Case Creation
             print("ETAPA 1: 🆕 Case Creation...")
             payload = {}  # Empty payload for anonymous case creation
-            response = self.session.post(f"{API_BASE}/auto-application/start", json=payload)
+            response = anonymous_session.post(f"{API_BASE}/auto-application/start", json=payload)
             if response.status_code == 200:
                 data = response.json()
                 case_data = data.get('case', {})
