@@ -6130,6 +6130,143 @@ async def startup_db_client():
         logger.error(f"Error connecting to MongoDB: {str(e)}")
         raise e
 
+@api_router.get("/download/instructions/{job_id}")
+async def download_instructions(job_id: str, current_user = Depends(get_current_user)):
+    """Download das instruções geradas"""
+    try:
+        from case_finalizer_complete import case_finalizer_complete
+        from fastapi.responses import JSONResponse
+        
+        job_status = case_finalizer_complete.get_job_status(job_id)
+        
+        if not job_status["success"]:
+            raise HTTPException(status_code=404, detail="Job não encontrado")
+        
+        job = job_status["job"]
+        
+        if "instructions" not in job:
+            raise HTTPException(status_code=400, detail="Instruções ainda não geradas")
+        
+        instructions = job["instructions"]
+        
+        # Retornar instruções como JSON (em produção real, geraria PDF)
+        return JSONResponse({
+            "type": "instructions",
+            "job_id": job_id,
+            "content": instructions,
+            "download_ready": True
+        })
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error downloading instructions: {e}")
+        raise HTTPException(status_code=500, detail="Erro ao baixar instruções")
+
+@api_router.get("/download/checklist/{job_id}")
+async def download_checklist(job_id: str, current_user = Depends(get_current_user)):
+    """Download do checklist gerado"""
+    try:
+        from case_finalizer_complete import case_finalizer_complete
+        from fastapi.responses import JSONResponse
+        
+        job_status = case_finalizer_complete.get_job_status(job_id)
+        
+        if not job_status["success"]:
+            raise HTTPException(status_code=404, detail="Job não encontrado")
+        
+        job = job_status["job"]
+        
+        if "checklist" not in job:
+            raise HTTPException(status_code=400, detail="Checklist ainda não gerado")
+        
+        checklist = job["checklist"]
+        
+        return JSONResponse({
+            "type": "checklist",
+            "job_id": job_id,
+            "content": checklist,
+            "download_ready": True
+        })
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error downloading checklist: {e}")
+        raise HTTPException(status_code=500, detail="Erro ao baixar checklist")
+
+@api_router.get("/download/master-packet/{job_id}")
+async def download_master_packet(job_id: str, current_user = Depends(get_current_user)):
+    """Download do master packet (PDF)"""
+    try:
+        from case_finalizer_complete import case_finalizer_complete
+        from fastapi.responses import FileResponse
+        import os
+        
+        job_status = case_finalizer_complete.get_job_status(job_id)
+        
+        if not job_status["success"]:
+            raise HTTPException(status_code=404, detail="Job não encontrado")
+        
+        job = job_status["job"]
+        
+        if "master_packet" not in job:
+            raise HTTPException(status_code=400, detail="Master packet ainda não criado")
+        
+        master_packet = job["master_packet"]
+        
+        if not master_packet["success"]:
+            raise HTTPException(status_code=500, detail="Erro na criação do master packet")
+        
+        packet_path = master_packet["packet_path"]
+        
+        if not os.path.exists(packet_path):
+            raise HTTPException(status_code=404, detail="Arquivo do master packet não encontrado")
+        
+        return FileResponse(
+            path=packet_path,
+            filename=f"master_packet_{job_id}.pdf",
+            media_type="application/pdf"
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error downloading master packet: {e}")
+        raise HTTPException(status_code=500, detail="Erro ao baixar master packet")
+
+@api_router.get("/cases/{case_id}/finalize/capabilities")
+async def get_case_finalizer_capabilities(current_user = Depends(get_current_user)):
+    """Retorna capacidades disponíveis no Case Finalizer completo"""
+    try:
+        from case_finalizer_complete import case_finalizer_complete
+        
+        return {
+            "status": "success",
+            "capabilities": {
+                "supported_scenarios": list(case_finalizer_complete.supported_scenarios.keys()),
+                "features": {
+                    "pdf_merging": True,
+                    "instruction_templates": True,
+                    "advanced_audit": True,
+                    "fee_calculator": True,
+                    "address_lookup": True,
+                    "timeline_estimation": True,
+                    "quality_scoring": True
+                },
+                "supported_languages": ["pt", "en"],
+                "postage_options": ["USPS", "FedEx", "UPS"],
+                "file_formats": ["PDF"],
+                "max_file_size_mb": 100
+            },
+            "version": "2.0.0-complete",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting capabilities: {e}")
+        raise HTTPException(status_code=500, detail="Erro ao obter capacidades")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
