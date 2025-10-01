@@ -572,7 +572,18 @@ class DocumentValidationAgent(BaseSpecializedAgent):
             from emergentintegrations import EmergentLLM
             from visa_document_mapping import get_smart_extraction_prompt, get_visa_document_requirements
             
-            llm = EmergentLLM(api_key=os.environ.get('EMERGENT_LLM_KEY'))
+            # Use OpenAI directly or fallback to EmergentLLM
+            openai_key = os.environ.get('OPENAI_API_KEY')
+            emergent_key = os.environ.get('EMERGENT_LLM_KEY')
+            
+            if openai_key:
+                # Use OpenAI directly
+                use_openai = True
+                api_key = openai_key
+            else:
+                # Fallback to EmergentLLM
+                llm = EmergentLLM(api_key=emergent_key)
+                use_openai = False
             
             # Obter tipo de visto do contexto do caso
             visa_type = case_context.get('form_code', 'H-1B') if case_context else 'H-1B'
