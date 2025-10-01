@@ -608,14 +608,23 @@ class DocumentValidationAgent(BaseSpecializedAgent):
             
             return fallback_result
     
+    def _ensure_list(self, value):
+        """Ensure a value is a list, converting strings to single-item lists"""
+        if isinstance(value, list):
+            return value
+        elif isinstance(value, str):
+            return [value] if value else []
+        else:
+            return []
+    
     def _create_fail_result(self, reason: str, issues: List[str], confidence: float, recommendations: List[str]) -> Dict[str, Any]:
         """Cria resultado de falha padronizado"""
         return {
             "valid": False,
             "verdict": "FAIL",
             "confidence_score": confidence,
-            "issues": issues,
-            "recommendations": recommendations,
+            "issues": self._ensure_list(issues),
+            "recommendations": self._ensure_list(recommendations),
             "failure_reason": reason,
             "agent": "Dr. Miguel - Sistema de Alta Precisão v2.0"
         }
