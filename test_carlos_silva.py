@@ -95,12 +95,14 @@ def test_carlos_silva_h1b_complete_journey():
         
         if response.status_code == 200:
             data = response.json()
-            form_code = data.get('form_code')
+            case_data = data.get('case', {})
+            form_code = case_data.get('form_code')
+            status = case_data.get('status')
             
             log_test(
                 "ETAPA 2 - Seleção H-1B",
-                form_code == "H-1B",
-                f"Form code: {form_code}, Status: {data.get('status')}"
+                form_code == "H-1B" and status == "form_selected",
+                f"Form code: {form_code}, Status: {status}"
             )
         else:
             log_test(
