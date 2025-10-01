@@ -669,14 +669,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Phase 2 Field Extraction Engine"
-    - "Phase 2 Translation Gate System"
-    - "Phase 3 Cross-Document Consistency"
-    - "Phase 3 Automated Document Classification"
-    - "Enhanced API Endpoints"
+    - "Ver Detalhes Button Testing - All Visa Types"
+    - "Modal Content Validation for Previously Broken Visas"
+    - "I-130, I-485, I-589, I-751, I-765, I-90, N-400 Modal Testing"
   stuck_tasks: []
-  test_all: true
-  test_priority: "phase2_phase3_validation"
+  test_all: false
+  test_priority: "modal_functionality_validation"
 
 agent_communication:
   - agent: "testing"
