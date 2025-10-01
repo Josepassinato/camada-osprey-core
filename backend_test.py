@@ -6139,5 +6139,5 @@ class ComprehensiveEcosystemTester:
 
 if __name__ == "__main__":
     tester = ComprehensiveEcosystemTester()
-    # Run the form code mismatch investigation as requested
-    tester.run_form_code_investigation()
+    # Run all tests including Google Vision API + Dr. Miguel hybrid system
+    tester.run_all_tests()
