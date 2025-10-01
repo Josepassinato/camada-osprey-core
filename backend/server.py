@@ -6335,7 +6335,7 @@ async def get_owl_session(session_id: str):
         from intelligent_owl_agent import intelligent_owl
         
         # Get session from database
-        session = await db.owl_sessions.find_one({"session_id": session_id})
+        session = await db.owl_sessions.find_one({"session_id": session_id}, {"_id": 0})
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
         
