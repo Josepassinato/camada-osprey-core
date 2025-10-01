@@ -111,6 +111,86 @@ class GoogleDocumentAIProcessor:
             return self._create_mock_response(filename, len(file_content))
         
         try:
+            # First try Document AI, then fallback to Vision API
+            return await self._try_document_ai(file_content, filename, mime_type)
+            
+        except Exception as doc_ai_error:
+            logger.warning(f"⚠️ Document AI failed: {doc_ai_error}, falling back to Vision API")
+            return await self._try_vision_api(file_content, filename, mime_type)
+    
+    async def _try_document_ai(self, file_content: bytes, filename: str, mime_type: str) -> Dict[str, Any]:
+        """Try Google Document AI first (specialized for documents)"""
+        
+        try:
+            # Convert file content to base64
+            import base64
+            encoded_content = base64.b64encode(file_content).decode('utf-8')
+            
+            # Prepare Document AI request
+            request_data = {
+                "rawDocument": {
+                    "content": encoded_content,
+                    "mimeType": mime_type
+                }
+            }
+            
+            # Make Document AI API request
+            headers = {'Content-Type': 'application/json'}
+            
+            if self.auth_method == "api_key":
+                # Use API key authentication
+                doc_ai_url = f"{self.document_ai_endpoint}?key={self.api_key}"
+                response = requests.post(
+                    doc_ai_url,
+                    json=request_data,
+                    headers=headers,
+                    timeout=30
+                )
+            else:
+                # OAuth2 would need access token - fallback to Vision API
+                raise Exception("OAuth2 not implemented for Document AI, using Vision API fallback")
+            
+            if response.status_code != 200:
+                logger.error(f"❌ Document AI API error: {response.status_code} - {response.text}")
+                raise Exception(f"Document AI failed: {response.status_code}")
+            
+            result = response.json()
+            
+            # Parse Document AI response
+            document = result.get("document", {})
+            extracted_text = document.get("text", "")
+            
+            # Extract entities from Document AI
+            entities = self._extract_document_ai_entities(document)
+            
+            # Calculate confidence based on text quality and entities
+            confidence = min((len(extracted_text) / 200.0) + (len(entities) * 0.1), 1.0)
+            
+            return {
+                "success": True,
+                "mock_mode": False,
+                "extracted_text": extracted_text,
+                "extracted_entities": entities,
+                "overall_confidence": confidence,
+                "page_count": len(document.get("pages", [])),
+                "processing_time": None,
+                "processor_type": "document_ai",
+                "file_info": {
+                    "filename": filename,
+                    "size_bytes": len(file_content),
+                    "processed_at": datetime.now().isoformat(),
+                    "mime_type": mime_type
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Document AI processing error: {e}")
+            raise e
+    
+    async def _try_vision_api(self, file_content: bytes, filename: str, mime_type: str) -> Dict[str, Any]:
+        """Fallback to Google Vision API"""
+        
+        try:
             # Convert file content to base64
             import base64
             encoded_content = base64.b64encode(file_content).decode('utf-8')
@@ -132,27 +212,59 @@ class GoogleDocumentAIProcessor:
                 ]
             }
             
-            # Make API request with appropriate auth
+            # Make Vision API request
             headers = {'Content-Type': 'application/json'}
             
             if self.auth_method == "api_key":
-                # API key already in URL
                 response = requests.post(
                     self.vision_endpoint,
                     json=request_data,
                     headers=headers,
                     timeout=30
                 )
-            elif self.auth_method == "oauth2":
-                # For OAuth2, we would need to get access token first
-                # For now, let's try without auth and see what happens
-                logger.warning("⚠️ OAuth2 not fully implemented, using API key fallback")
-                response = requests.post(
-                    f"https://vision.googleapis.com/v1/images:annotate?key={self.api_key}" if self.api_key else self.vision_endpoint,
-                    json=request_data,
-                    headers=headers,
-                    timeout=30
-                )
+            else:
+                raise Exception("OAuth2 not implemented for Vision API fallback")
+            
+            if response.status_code != 200:
+                logger.error(f"❌ Vision API error: {response.status_code} - {response.text}")
+                return {
+                    "success": False,
+                    "error": f"Vision API failed: {response.text}",
+                    "error_type": "vision_api_error"
+                }
+            
+            result = response.json()
+            
+            # Parse Vision API response
+            responses = result.get("responses", [{}])
+            annotation = responses[0] if responses else {}
+            
+            # Get full text
+            text_annotations = annotation.get("textAnnotations", [])
+            extracted_text = text_annotations[0]["description"] if text_annotations else ""
+            
+            # Extract entities from text (simulate structured data extraction)
+            entities = self._extract_entities_from_text(extracted_text)
+            
+            # Calculate confidence based on text quality
+            confidence = min(len(extracted_text) / 100.0, 1.0) if extracted_text else 0.0
+            
+            return {
+                "success": True,
+                "mock_mode": False,
+                "extracted_text": extracted_text,
+                "extracted_entities": entities,
+                "overall_confidence": confidence,
+                "page_count": 1,
+                "processing_time": None,
+                "processor_type": "vision_api",
+                "file_info": {
+                    "filename": filename,
+                    "size_bytes": len(file_content),
+                    "processed_at": datetime.now().isoformat(),
+                    "mime_type": mime_type
+                }
+            }
             
             if response.status_code != 200:
                 logger.error(f"❌ Google Vision API error: {response.status_code} - {response.text}")
