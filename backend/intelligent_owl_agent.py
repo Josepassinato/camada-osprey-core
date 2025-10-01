@@ -345,7 +345,10 @@ class IntelligentOwlAgent:
     
     async def _get_ai_contextual_guidance(self, field_guide: FieldGuide, visa_type: str, 
                                         language: str, current_value: str, user_context: Dict) -> Dict[str, Any]:
-        """Get AI-powered contextual guidance"""
+        """Get AI-powered contextual guidance using Emergent LLM or OpenAI"""
+        
+        if not self.ai_client:
+            return {"ai_powered": False}
         
         prompt = f"""
         You are an intelligent immigration assistant helping with a {visa_type} application.
@@ -364,19 +367,27 @@ class IntelligentOwlAgent:
         """
         
         try:
-            response = await asyncio.to_thread(
-                self.ai_client.chat.completions.create,
-                model="gpt-4",
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=300,
-                temperature=0.7
-            )
-            
-            ai_guidance = response.choices[0].message.content
+            if self.ai_client["type"] == "emergent":
+                from emergentintegrations.llm.chat import UserMessage
+                response = await asyncio.to_thread(
+                    self.ai_client["client"].send_message,
+                    UserMessage(content=prompt)
+                )
+                ai_guidance = response.content
+            elif self.ai_client["type"] == "openai":
+                response = await asyncio.to_thread(
+                    self.ai_client["client"].chat.completions.create,
+                    model="gpt-4",
+                    messages=[{"role": "user", "content": prompt}],
+                    max_tokens=300,
+                    temperature=0.7
+                )
+                ai_guidance = response.choices[0].message.content
             
             return {
                 "ai_guidance": ai_guidance,
-                "ai_powered": True
+                "ai_powered": True,
+                "provider": self.ai_client["type"]
             }
             
         except Exception as e:
