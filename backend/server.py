@@ -6676,8 +6676,14 @@ async def initiate_owl_payment(request: dict):
         origin_url = request.get("origin_url")
         user_email = request.get("user_email", "").strip().lower()
         
-        if not all([session_id, origin_url]):
-            raise HTTPException(status_code=400, detail="session_id and origin_url are required")
+        # More flexible validation - origin_url is now optional with fallback
+        if not session_id:
+            raise HTTPException(status_code=400, detail="session_id is required")
+        
+        # Use fallback origin_url if not provided
+        if not origin_url:
+            origin_url = "https://iaimmigration.preview.emergentagent.com"
+            logger.warning("Using fallback origin_url for payment")
         
         # Verify session exists and is completed
         session = await db.owl_sessions.find_one({"session_id": session_id})
