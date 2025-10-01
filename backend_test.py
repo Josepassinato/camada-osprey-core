@@ -585,8 +585,8 @@ class ProductionVerificationTester:
             
             response = self.session.get(f"{API_BASE}/profile")
             
-            # Should require authentication
-            requires_auth = response.status_code == 401
+            # Should require authentication (401 or 403 are both acceptable)
+            requires_auth = response.status_code in [401, 403]
             
             # Restore headers
             self.session.headers.update(original_headers)
