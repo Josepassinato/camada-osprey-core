@@ -736,11 +736,11 @@ class HybridDocumentValidator:
         """Create comprehensive response combining Google AI and Dr. Miguel results"""
         
         # Extract key data
-        google_confidence = google_result.get("overall_confidence", 0.9) * 100  # Higher default for better completeness
+        google_confidence = google_result.get("overall_confidence", 0.7) * 100  # Realistic default
         
         # Parse Dr. Miguel's string response
-        miguel_confidence = 85  # Higher default confidence for better completeness 
-        miguel_verdict = "APROVADO"  # More optimistic default verdict
+        miguel_confidence = 70  # Realistic default confidence  
+        miguel_verdict = "NECESSITA_REVISÃO"  # Conservative default verdict
         
         if isinstance(miguel_result, str):
             # Try to extract confidence and verdict from string response
