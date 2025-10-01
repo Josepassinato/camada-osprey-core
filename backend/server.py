@@ -5623,7 +5623,7 @@ async def analyze_document_with_professional_api(
                 "completeness": 0,
                 "issues": [f"❌ Tipo de arquivo não suportado: {file.content_type}"],
                 "extracted_data": {"validation_status": "REJECTED", "reason": "Invalid file type"},
-                "dra_paula_assessment": "❌ Híbrido: Tipo de arquivo não aceito pelo sistema (Google AI + Dr. Miguel)"
+                "dra_paula_assessment": "❌ Híbrido: Tipo de arquivo não aceito pelo sistema (Google Vision + Dr. Miguel)"
             }
         
         # Read file content
