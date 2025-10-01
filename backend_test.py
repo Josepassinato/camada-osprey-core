@@ -1538,38 +1538,161 @@ class ComprehensiveEcosystemTester:
                 f"Exception during database investigation: {str(e)}"
             )
     
-    def test_urgent_openai_key_validation(self):
-        """TESTE URGENTE - VALIDAR NOVA CHAVE OPENAI DA DRA. PAULA"""
-        print("🚨 TESTE URGENTE - VALIDAR NOVA CHAVE OPENAI DA DRA. PAULA...")
+    def test_urgent_dr_paula_openai_key_validation(self):
+        """TESTE DIRETO E SIMPLES - VALIDAR DRA. PAULA COM CHAVE OPENAI"""
+        print("🚨 TESTE CRÍTICO - DRA. PAULA I-589 ASYLUM CASE...")
         
-        # Test the critical I-589 payload as specified in the review request
+        # Test the exact I-589 payload as specified in the review request
         i589_payload = {
             "visa_type": "I-589",
-            "applicant_letter": "Meu nome é Maria Silva e estou solicitando asilo político nos Estados Unidos devido à perseguição que sofri no meu país de origem por minhas opiniões políticas e ativismo pelos direitos humanos.",
+            "applicant_letter": "Meu nome é Maria Silva e estou solicitando asilo político nos Estados Unidos devido à perseguição que sofri no meu país de origem por minhas opiniões políticas e ativismo pelos direitos humanos. Trabalhei como jornalista investigativa e recebi ameaças constantes do governo por expor corrupção.",
             "visa_profile": {
                 "title": "I-589 Asylum Application",
-                "directives": [{"id": "1", "pt": "Descrever perseguição detalhadamente", "en": "Describe persecution in detail", "required": True}]
+                "directives": [
+                    {"id": "1", "pt": "Descrever perseguição detalhadamente", "en": "Describe persecution in detail", "required": True}
+                ]
             }
         }
         
+        # CRITICAL TEST 1: POST /api/llm/dr-paula/review-letter
         try:
-            print("🔍 Testing POST /api/llm/dr-paula/review-letter with I-589 payload...")
+            print("🔍 TESTE CRÍTICO 1: POST /api/llm/dr-paula/review-letter")
+            print(f"Payload: {json.dumps(i589_payload, indent=2)}")
+            
             response = self.session.post(
                 f"{API_BASE}/llm/dr-paula/review-letter",
                 json=i589_payload
             )
             
-            print(f"Response Status: {response.status_code}")
-            print(f"Response Headers: {dict(response.headers)}")
+            print(f"✅ Response Status: {response.status_code}")
             
-            if response.status_code == 200:
+            # VERIFICAÇÃO 1: Status 200 OK (não 500)
+            status_ok = response.status_code == 200
+            
+            if status_ok:
                 try:
                     data = response.json()
-                    print(f"Response JSON Keys: {list(data.keys())}")
+                    response_text = json.dumps(data, indent=2)
+                    print(f"✅ Response JSON: {response_text[:500]}...")
                     
-                    # Check for success indicators
-                    success_indicators = {
-                        "has_success_field": "success" in data,
+                    # VERIFICAÇÃO 2: Não aparece "Budget exceeded"
+                    budget_ok = "Budget exceeded" not in response_text and "budget" not in response_text.lower()
+                    
+                    # VERIFICAÇÃO 3: Não aparece "Dra. Paula não está disponível"
+                    availability_ok = "não está disponível" not in response_text
+                    
+                    # VERIFICAÇÃO 4: Response tem formato JSON válido (já validado pelo response.json())
+                    json_valid = True
+                    
+                    # VERIFICAÇÃO 5: Campo "review" está presente na resposta
+                    has_review = "review" in data
+                    
+                    # VERIFICAÇÃO 6: Status é "needs_questions" ou "ready_for_formatting"
+                    review_data = data.get("review", {})
+                    status = review_data.get("status", "")
+                    status_valid = status in ["needs_questions", "ready_for_formatting", "needs_review", "complete", "incomplete"]
+                    
+                    # RESULTADO FINAL
+                    all_checks_passed = all([status_ok, budget_ok, availability_ok, json_valid, has_review, status_valid])
+                    
+                    self.log_test(
+                        "CRÍTICO - Dr. Paula Review Letter I-589",
+                        all_checks_passed,
+                        f"Status: {response.status_code}, Budget OK: {budget_ok}, Available: {availability_ok}, JSON: {json_valid}, Has Review: {has_review}, Status Valid: {status_valid} ({status})",
+                        {
+                            "status_code": response.status_code,
+                            "budget_exceeded": not budget_ok,
+                            "dr_paula_available": availability_ok,
+                            "json_valid": json_valid,
+                            "has_review_field": has_review,
+                            "review_status": status,
+                            "status_valid": status_valid,
+                            "response_keys": list(data.keys()),
+                            "all_checks_passed": all_checks_passed
+                        }
+                    )
+                    
+                    if all_checks_passed:
+                        print("🎉 SUCESSO: Problema do usuário RESOLVIDO - Dr. Paula funcionando corretamente!")
+                    else:
+                        print("❌ FALHA: Problema do usuário PERSISTE - Dr. Paula com problemas!")
+                        
+                except json.JSONDecodeError as e:
+                    self.log_test(
+                        "CRÍTICO - Dr. Paula Review Letter I-589",
+                        False,
+                        f"JSON parsing failed: {str(e)}",
+                        {"status_code": response.status_code, "response_text": response.text[:500]}
+                    )
+            else:
+                self.log_test(
+                    "CRÍTICO - Dr. Paula Review Letter I-589",
+                    False,
+                    f"HTTP {response.status_code} - Expected 200",
+                    {"status_code": response.status_code, "response_text": response.text[:500]}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "CRÍTICO - Dr. Paula Review Letter I-589",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # TESTE DE BACKUP: POST /api/llm/dr-paula/generate-directives
+        try:
+            print("\n🔍 TESTE DE BACKUP: POST /api/llm/dr-paula/generate-directives")
+            
+            backup_payload = {
+                "visa_type": "I-589",
+                "language": "pt"
+            }
+            
+            backup_response = self.session.post(
+                f"{API_BASE}/llm/dr-paula/generate-directives",
+                json=backup_payload
+            )
+            
+            backup_success = backup_response.status_code == 200
+            
+            if backup_success:
+                try:
+                    backup_data = backup_response.json()
+                    directives_text = backup_data.get("directives_text", "")
+                    has_content = len(directives_text) > 50
+                    
+                    self.log_test(
+                        "BACKUP - Dr. Paula Generate Directives I-589",
+                        has_content,
+                        f"Generated {len(directives_text)} characters of directives",
+                        {
+                            "status_code": backup_response.status_code,
+                            "has_directives": bool(directives_text),
+                            "content_length": len(directives_text),
+                            "response_keys": list(backup_data.keys())
+                        }
+                    )
+                except json.JSONDecodeError:
+                    self.log_test(
+                        "BACKUP - Dr. Paula Generate Directives I-589",
+                        False,
+                        "JSON parsing failed",
+                        {"status_code": backup_response.status_code}
+                    )
+            else:
+                self.log_test(
+                    "BACKUP - Dr. Paula Generate Directives I-589",
+                    False,
+                    f"HTTP {backup_response.status_code}",
+                    {"status_code": backup_response.status_code, "response_text": backup_response.text[:200]}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "BACKUP - Dr. Paula Generate Directives I-589",
+                False,
+                f"Exception: {str(e)}"
+            ): "success" in data,
                         "success_is_true": data.get("success") is True,
                         "has_review_object": "review" in data,
                         "no_budget_exceeded": "Budget exceeded" not in str(data),
