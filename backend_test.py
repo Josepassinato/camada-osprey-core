@@ -5165,7 +5165,12 @@ class ComprehensiveEcosystemTester:
         print("=" * 80)
         print()
         
-        # FIRST: CRITICAL SECURITY VALIDATION FIXES - HIGHEST PRIORITY
+        # FIRST: HYBRID GOOGLE DOCUMENT AI + DR. MIGUEL INTEGRATION - NEW FEATURE
+        print("🔬 HYBRID GOOGLE DOCUMENT AI + DR. MIGUEL INTEGRATION")
+        print("=" * 50)
+        self.test_hybrid_google_ai_dr_miguel_integration()
+        
+        # SECOND: CRITICAL SECURITY VALIDATION FIXES - HIGHEST PRIORITY
         print("🚨 CRITICAL SECURITY VALIDATION FIXES")
         print("=" * 50)
         self.test_critical_security_validation_fixes()
