@@ -5651,14 +5651,16 @@ async def analyze_document_with_professional_api(
                 "dra_paula_assessment": "❌ Onfido: Qualidade de arquivo inadequada"
             }
         
-        # PROFESSIONAL DOCUMENT ANALYSIS WITH ONFIDO
-        logger.info(f"📋 Analyzing document with Onfido professional API")
+        # HYBRID PROFESSIONAL ANALYSIS - Google Document AI + Dr. Miguel
+        logger.info(f"🔬 Analyzing document with HYBRID system (Google AI + Dr. Miguel)")
         
-        analysis_result = await onfido_verifier.analyze_document(
+        analysis_result = await hybrid_validator.analyze_document(
             file_content=file_content,
             filename=file.filename,
+            document_type=document_type,
             applicant_name=applicant_name,
-            document_type=document_type.lower()
+            visa_type=visa_type,
+            case_id=case_id
         )
         
         # Add additional context for immigration processing
