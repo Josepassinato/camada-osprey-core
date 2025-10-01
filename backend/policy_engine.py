@@ -24,6 +24,8 @@ class PolicyEngine:
         self.policies_dir = Path(policies_dir or "policies")
         self.loaded_policies = {}
         self.quality_checker = DocumentQualityChecker()
+        self.field_extractor = field_extraction_engine
+        self.translation_gate = translation_gate
         self._load_all_policies()
     
     def _load_all_policies(self):
