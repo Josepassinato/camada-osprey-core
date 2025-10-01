@@ -43,7 +43,7 @@ class ProductionVerificationTester:
         print("="*80)
         
     def log_test(self, test_name: str, success: bool, details: str = "", response_data: Any = None):
-        """Log test result"""
+        """Log test result with production focus"""
         result = {
             "test": test_name,
             "success": success,
@@ -53,12 +53,12 @@ class ProductionVerificationTester:
         }
         self.test_results.append(result)
         
-        status = "✅ PASS" if success else "❌ FAIL"
+        status = "✅ PRODUÇÃO OK" if success else "❌ FALHA CRÍTICA"
         print(f"{status} {test_name}")
         if details:
-            print(f"    {details}")
+            print(f"    📋 {details}")
         if not success and response_data:
-            print(f"    Response: {response_data}")
+            print(f"    🔍 Response: {str(response_data)[:200]}...")
         print()
     
     def setup_test_authentication(self):
