@@ -105,6 +105,18 @@
 user_problem_statement: "IMPLEMENTAR AGENTE CORUJA - SISTEMA INTELIGENTE DE QUESTIONÁRIOS: Desenvolver o novo recurso 'Agente Coruja' que conduz usuários através de questionários inteligentes em tempo real, valida respostas usando Google APIs e OpenAI GPT-5, e gera formulários USCIS oficiais automaticamente preenchidos. Sistema multi-idioma (português/inglês) com orientação contextual e validação em tempo real."
 
 backend:
+  - task: "4 Specific Corrected Endpoints Testing"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 1
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "🎯 SPECIFIC CORRECTED ENDPOINTS TESTING COMPLETED: Tested 4 endpoints that were supposedly corrected. RESULTS: 1) ✅ POST /api/owl/login - WORKING: Returns proper 401 with structured JSON for invalid credentials, endpoint accessible (not 404), 2) ✅ GET /api/owl/user-sessions/{email} - WORKING: Returns proper 404 with structured JSON for user not found, endpoint accessible, 3) ✅ POST /api/owl/user-sessions - WORKING: Returns proper 404 with structured JSON, endpoint accessible, 4) ❌ PUT /api/auto-application/case/{id} - PARTIALLY WORKING: Endpoint accessible but has critical bug - returns 500 error 'cannot access local variable case_update' for valid payloads, flexible payloads work (200 OK), 5) ❌ POST /api/owl-agent/initiate-payment - PARTIALLY WORKING: Returns proper 400 error for missing session_id with specific error message, but returns 404 when session_id is provided (should work with fallback origin_url). CONCLUSION: 3/4 endpoints working correctly, 1 has critical validation bug, 1 has routing/implementation issue."
+
   - task: "Agente Coruja - API Endpoints Development"
     implemented: true
     working: true
