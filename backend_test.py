@@ -1833,11 +1833,6 @@ class ComprehensiveEcosystemTester:
                     False,
                     f"Exception: {str(e)}"
                 )
-                    
-                    self.log_test(
-                        "🚨 URGENT - Dr. Paula Review Letter I-589",
-                        overall_success,
-                        f"OpenAI Integration: {'✅ WORKING' if overall_success else '❌ FAILING'}, Dr. Paula Available: {dr_paula_available}",
                         {
                             "success_indicators": success_indicators,
                             "dr_paula_available": dr_paula_available,
