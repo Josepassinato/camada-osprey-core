@@ -10990,7 +10990,7 @@ class ComprehensiveImmigrationAPITester:
                         }
                     )
                 else:
-                    self.log_test("Carlos H-1B Complete Simulation", False, f"Final verification failed: {final_status}, {final_progress}%")
+                    self.log_test("🎉 CARLOS SILVA H-1B COMPLETE SIMULATION SUCCESS", False, f"Final verification failed: {final_status}, {final_progress}%")
             else:
                 self.log_test("Carlos H-1B Step 8 - Application Completion", False, f"HTTP {response.status_code}")
                 
