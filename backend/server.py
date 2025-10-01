@@ -53,6 +53,7 @@ import base64
 import mimetypes
 import re
 import openai
+import io
 from case_finalizer_complete import case_finalizer_complete
 from visa_specifications import get_visa_specifications, get_required_documents, get_key_questions, get_common_issues
 from visa_document_mapping import get_visa_document_requirements
