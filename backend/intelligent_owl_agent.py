@@ -63,9 +63,14 @@ class IntelligentOwlAgent:
         # AI Integration
         self.ai_client = self._setup_ai_client()
         
-        # Google Integration
-        from google_document_ai_integration import hybrid_validator
-        self.google_validator = hybrid_validator
+        # Google Integration for validation
+        try:
+            from google_document_ai_integration import GoogleDocumentAIProcessor
+            self.google_processor = GoogleDocumentAIProcessor()
+            logger.info("🔗 Owl Agent: Google API integration initialized")
+        except Exception as e:
+            logger.error(f"❌ Owl Agent: Google API initialization failed: {e}")
+            self.google_processor = None
         
     def _setup_ai_client(self):
         """Setup AI client using Emergent LLM key for OpenAI GPT-5"""
