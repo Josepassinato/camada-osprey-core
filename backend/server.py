@@ -5665,15 +5665,15 @@ async def analyze_document_with_professional_api(
         
         # Add additional context for immigration processing
         analysis_result.update({
-            "visa_context": visa_type,
-            "case_id": case_id,
-            "processed_by": "Onfido Professional API",
+            "processed_by": "Google Document AI + Dr. Miguel Hybrid System",
             "processing_date": datetime.now().isoformat(),
             "file_size_mb": round(file_size / (1024 * 1024), 2),
-            "immigration_compliant": analysis_result.get("completeness", 0) >= 75
+            "immigration_compliant": analysis_result.get("completeness", 0) >= 75,
+            "cost_effective": True,  # Much cheaper than Onfido
+            "ai_powered": True
         })
         
-        logger.info(f"✅ Onfido analysis completed - Valid: {analysis_result.get('valid')}, Score: {analysis_result.get('completeness')}%")
+        logger.info(f"✅ Hybrid analysis completed - Valid: {analysis_result.get('valid')}, Score: {analysis_result.get('completeness')}%")
         
         return analysis_result
         
