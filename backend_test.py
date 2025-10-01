@@ -2969,6 +2969,141 @@ class ComprehensiveEcosystemTester:
         
         print(f"📄 Detailed results saved to: /app/ecosystem_validation_results.json")
 
+    def test_dr_paula_urgent_user_issue(self):
+        """URGENT TEST - User reported Dra. Paula unavailable and JSON format errors"""
+        print("🚨 URGENT TEST - DR. PAULA AVAILABILITY AND I-589 ASYLUM CASE...")
+        
+        # Test the exact scenario user reported: I-589 asylum visa
+        try:
+            # Test 1: I-589 asylum letter review (user's exact case)
+            i589_letter = """
+            Eu sou um requerente de asilo do Brasil. Estou fugindo de perseguição política em meu país.
+            Preciso de proteção nos Estados Unidos devido às ameaças que recebi por minhas atividades políticas.
+            Tenho evidências da perseguição que sofri e temo por minha segurança se retornar ao Brasil.
+            """
+            
+            payload = {
+                "visa_type": "I-589",  # User's exact visa type
+                "applicant_letter": i589_letter
+            }
+            
+            print("🔍 Testing I-589 asylum letter review...")
+            response = self.session.post(
+                f"{API_BASE}/llm/dr-paula/review-letter",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check for the specific errors user reported
+                has_review = 'review' in data
+                has_success = data.get('success', False)
+                has_error = 'error' in data
+                error_message = data.get('error', '')
+                
+                # Check for budget/availability issues
+                is_budget_error = 'budget' in error_message.lower() or 'exceeded' in error_message.lower()
+                is_unavailable = 'não está disponível' in error_message or 'unavailable' in error_message.lower()
+                is_json_error = 'json' in error_message.lower() or 'formato' in error_message.lower()
+                
+                # Determine success based on whether we get a proper response or expected error
+                if has_success and has_review:
+                    success = True
+                    details = f"✅ Dr. Paula working - Review completed successfully"
+                elif is_budget_error:
+                    success = False
+                    details = f"❌ BUDGET EXCEEDED - {error_message}"
+                elif is_unavailable:
+                    success = False
+                    details = f"❌ DRA. PAULA UNAVAILABLE - {error_message}"
+                elif is_json_error:
+                    success = False
+                    details = f"❌ JSON FORMAT ERROR - {error_message}"
+                else:
+                    success = False
+                    details = f"❌ UNKNOWN ERROR - {error_message or 'No error message'}"
+                
+                self.log_test(
+                    "URGENT - Dr. Paula I-589 Asylum Review",
+                    success,
+                    details,
+                    {
+                        "visa_type": "I-589",
+                        "has_success": has_success,
+                        "has_review": has_review,
+                        "has_error": has_error,
+                        "error_message": error_message,
+                        "is_budget_error": is_budget_error,
+                        "is_unavailable": is_unavailable,
+                        "is_json_error": is_json_error,
+                        "full_response": data
+                    }
+                )
+                
+            else:
+                self.log_test(
+                    "URGENT - Dr. Paula I-589 Asylum Review",
+                    False,
+                    f"HTTP {response.status_code} - Endpoint not responding",
+                    response.text
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "URGENT - Dr. Paula I-589 Asylum Review",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 2: Check EMERGENT_LLM_KEY status
+        try:
+            print("🔑 Testing EMERGENT_LLM_KEY integration...")
+            
+            # Test a simple generate-directives call to check LLM integration
+            simple_payload = {
+                "visa_type": "I-589",
+                "language": "pt"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/llm/dr-paula/generate-directives",
+                json=simple_payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                has_directives = 'directives_text' in data and len(data.get('directives_text', '')) > 0
+                
+                self.log_test(
+                    "URGENT - EMERGENT_LLM_KEY Integration",
+                    has_directives,
+                    f"LLM integration {'working' if has_directives else 'failing'}: {len(data.get('directives_text', ''))} chars generated",
+                    {
+                        "has_directives": has_directives,
+                        "directives_length": len(data.get('directives_text', '')),
+                        "success": data.get('success', False),
+                        "error": data.get('error', 'No error')
+                    }
+                )
+            else:
+                self.log_test(
+                    "URGENT - EMERGENT_LLM_KEY Integration",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "URGENT - EMERGENT_LLM_KEY Integration",
+                False,
+                f"Exception: {str(e)}"
+            )
+
 if __name__ == "__main__":
     tester = ComprehensiveEcosystemTester()
+    # Run only the urgent test first
+    tester.test_dr_paula_urgent_user_issue()
+    # Then run all tests
     tester.run_all_tests()
