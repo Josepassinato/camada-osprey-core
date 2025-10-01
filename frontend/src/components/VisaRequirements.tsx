@@ -349,6 +349,244 @@ const VisaRequirements = ({ visaType, onClose }: VisaRequirementsProps) => {
           'Pode trabalhar no campus após 9 meses de estudos',
           'Válido durante todo o programa + 60 dias de grace period'
         ]
+      },
+      'I-130': {
+        title: 'I-130: Petição para Familiar',
+        description: 'Petição para parente imediato de cidadão americano ou residente permanente',
+        processingTime: '8-16 meses (dependendo da categoria)',
+        uscisfee: '$535',
+        eligibility: [
+          'Cidadão americano ou residente permanente legal',
+          'Relacionamento familiar qualificado',
+          'Capacidade de patrocinar financeiramente'
+        ],
+        documents: [
+          {
+            id: 'form_i130',
+            name: 'Formulário I-130',
+            description: 'Petição devidamente preenchida',
+            required: true,
+            needsTranslation: false,
+            examples: ['Formulário I-130 assinado', 'Taxa de processamento paga']
+          },
+          {
+            id: 'citizenship_proof',
+            name: 'Comprovação de Cidadania/Residência',
+            description: 'Documento que comprove status legal nos EUA',
+            required: true,
+            needsTranslation: false,
+            examples: ['Certidão de nascimento americana', 'Green Card', 'Passaporte americano']
+          }
+        ],
+        tips: [
+          'Categoria de parente determina tempo de espera',
+          'Parentes imediatos não têm cota numérica',
+          'Outros parentes entram em fila de espera'
+        ]
+      },
+      'I-485': {
+        title: 'I-485: Ajuste de Status',
+        description: 'Solicitação para se tornar residente permanente sem sair dos EUA',
+        processingTime: '8-14 meses',
+        uscisfee: '$1,140 + $85 (biometria)',
+        eligibility: [
+          'Status legal atual nos EUA',
+          'Petição I-130 ou I-140 aprovada',
+          'Priority date atual (se aplicável)'
+        ],
+        documents: [
+          {
+            id: 'form_i485',
+            name: 'Formulário I-485',
+            description: 'Aplicação para ajuste de status',
+            required: true,
+            needsTranslation: false,
+            examples: ['Formulário I-485 completo', 'Taxa de processamento']
+          },
+          {
+            id: 'medical_exam',
+            name: 'Exame Médico',
+            description: 'Exame médico por médico autorizado pelo USCIS',
+            required: true,
+            needsTranslation: false,
+            examples: ['Form I-693', 'Vacinas atualizadas', 'Exames laboratoriais']
+          }
+        ],
+        tips: [
+          'Permite trabalhar com EAD durante processamento',
+          'Pode viajar com Advance Parole',
+          'Entrevista pode ser necessária'
+        ]
+      },
+      'I-589': {
+        title: 'I-589: Solicitação de Asilo',
+        description: 'Pedido de proteção por perseguição ou medo fundamentado',
+        processingTime: '6 meses - 2 anos',
+        uscisfee: 'Sem taxa',
+        eligibility: [
+          'Estar fisicamente nos EUA',
+          'Aplicar dentro de 1 ano da chegada (com exceções)',
+          'Demonstrar perseguição ou medo fundamentado'
+        ],
+        documents: [
+          {
+            id: 'form_i589',
+            name: 'Formulário I-589',
+            description: 'Solicitação de asilo e proteção contra remoção',
+            required: true,
+            needsTranslation: false,
+            examples: ['Formulário I-589 detalhado', 'Declaração pessoal']
+          },
+          {
+            id: 'country_evidence',
+            name: 'Evidências do País',
+            description: 'Documentos que comprovem condições no país de origem',
+            required: true,
+            needsTranslation: true,
+            examples: ['Relatórios de direitos humanos', 'Artigos de jornal', 'Relatórios governamentais']
+          }
+        ],
+        tips: [
+          'Prazo de 1 ano é crucial',
+          'Consistência na história é essencial',
+          'Advogado especializado é recomendado'
+        ]
+      },
+      'I-751': {
+        title: 'I-751: Remoção de Condições',
+        description: 'Remoção das condições do green card baseado em casamento',
+        processingTime: '12-20 meses',
+        uscisfee: '$595 + $85 (biometria)',
+        eligibility: [
+          'Green card condicional de 2 anos',
+          'Ainda casado com cidadão/residente americano',
+          'Casamento de boa fé (não para imigração)'
+        ],
+        documents: [
+          {
+            id: 'form_i751',
+            name: 'Formulário I-751',
+            description: 'Petição para remover condições da residência',
+            required: true,
+            needsTranslation: false,
+            examples: ['Formulário I-751 conjunto', 'Taxa de processamento']
+          },
+          {
+            id: 'marriage_evidence',
+            name: 'Evidências do Casamento',
+            description: 'Provas de casamento genuíno e vida conjunta',
+            required: true,
+            needsTranslation: false,
+            examples: ['Contas conjuntas', 'Declaração de imposto conjunta', 'Fotos familiares']
+          }
+        ],
+        tips: [
+          'Aplicar 90 dias antes do vencimento do green card',
+          'Casamento deve ser genuíno',
+          'Entrevista pode ser necessária'
+        ]
+      },
+      'I-765': {
+        title: 'I-765: Autorização de Trabalho',
+        description: 'Solicitação de documento de autorização de emprego (EAD)',
+        processingTime: '3-5 meses',
+        uscisfee: '$410',
+        eligibility: [
+          'Categoria elegível para EAD',
+          'Status legal nos EUA',
+          'Necessidade econômica demonstrada (alguns casos)'
+        ],
+        documents: [
+          {
+            id: 'form_i765',
+            name: 'Formulário I-765',
+            description: 'Aplicação para autorização de emprego',
+            required: true,
+            needsTranslation: false,
+            examples: ['Formulário I-765 completo', 'Categoria específica marcada']
+          },
+          {
+            id: 'supporting_docs',
+            name: 'Documentos de Apoio',
+            description: 'Evidências da categoria de elegibilidade',
+            required: true,
+            needsTranslation: false,
+            examples: ['I-94', 'Aprovação I-485', 'Status de estudante F-1']
+          }
+        ],
+        tips: [
+          'Categoria determina elegibilidade',
+          'EAD é específico para categoria',
+          'Renovar antes do vencimento'
+        ]
+      },
+      'I-90': {
+        title: 'I-90: Renovação de Green Card',
+        description: 'Substituição ou renovação do cartão de residente permanente',
+        processingTime: '6-10 meses',
+        uscisfee: '$455 + $85 (biometria)',
+        eligibility: [
+          'Residente permanente legal',
+          'Green card vencido, perdido ou danificado',
+          'Informações desatualizadas no cartão'
+        ],
+        documents: [
+          {
+            id: 'form_i90',
+            name: 'Formulário I-90',
+            description: 'Aplicação para substituir cartão de residente permanente',
+            required: true,
+            needsTranslation: false,
+            examples: ['Formulário I-90 completo', 'Taxa de processamento']
+          },
+          {
+            id: 'current_green_card',
+            name: 'Green Card Atual',
+            description: 'Cópia do cartão atual (se disponível)',
+            required: false,
+            needsTranslation: false,
+            examples: ['Frente e verso do green card', 'Boletim de ocorrência se roubado']
+          }
+        ],
+        tips: [
+          'Renovar 6 meses antes do vencimento',
+          'Receipt notice serve como extensão temporária',
+          'Não afeta status de residente'
+        ]
+      },
+      'N-400': {
+        title: 'N-400: Naturalização',
+        description: 'Solicitação para se tornar cidadão americano',
+        processingTime: '8-14 meses',
+        uscisfee: '$640 + $85 (biometria)',
+        eligibility: [
+          'Residente permanente por 3-5 anos',
+          'Residência contínua nos EUA',
+          'Conhecimento de inglês e educação cívica'
+        ],
+        documents: [
+          {
+            id: 'form_n400',
+            name: 'Formulário N-400',
+            description: 'Aplicação para naturalização',
+            required: true,
+            needsTranslation: false,
+            examples: ['Formulário N-400 detalhado', 'Taxa de processamento']
+          },
+          {
+            id: 'tax_returns',
+            name: 'Declarações de Imposto',
+            description: 'Últimas 3-5 declarações de imposto',
+            required: true,
+            needsTranslation: false,
+            examples: ['Tax returns completas', 'Transcripts do IRS']
+          }
+        ],
+        tips: [
+          'Teste de inglês e educação cívica obrigatório',
+          'Residência contínua é crucial',
+          'Entrevista individual necessária'
+        ]
       }
     };
 
