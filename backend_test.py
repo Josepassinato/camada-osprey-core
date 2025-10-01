@@ -236,17 +236,19 @@ class ProductionVerificationTester:
             if response.status_code == 200:
                 data = response.json()
                 
-                # Production checks
-                has_case_id = 'case_id' in data and data['case_id']
-                has_session_token = 'session_token' in data
-                case_id_format = data.get('case_id', '').startswith('OSP-') if has_case_id else False
+                # Handle new response structure with nested case object
+                case_data = data.get('case', {})
+                has_case_id = 'case_id' in case_data and case_data['case_id']
+                has_session_token = 'session_token' in case_data
+                case_id_format = case_data.get('case_id', '').startswith('OSP-') if has_case_id else False
                 no_test_indicators = 'test' not in str(data).lower()
+                has_message = 'message' in data
                 
                 # Store case ID for subsequent tests
                 if has_case_id:
-                    self.auto_case_id = data['case_id']
+                    self.auto_case_id = case_data['case_id']
                 
-                success = has_case_id and case_id_format and no_test_indicators
+                success = has_case_id and case_id_format and no_test_indicators and has_message
                 
                 self.log_test(
                     "POST /api/auto-application/start",
