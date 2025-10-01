@@ -5611,43 +5611,69 @@ async def analyze_document_with_professional_api(
     Replaces Dr. Miguel with professional verification service
     """
     try:
+        # Professional validation with Onfido
+        logger.info(f"🏢 Starting PROFESSIONAL document analysis with Onfido - File: {file.filename}, Type: {document_type}")
         
-        # Validate file type and size
-        allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']
+        # Basic file validation
+        allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf']
         if file.content_type not in allowed_types:
             return {
                 "valid": False,
                 "legible": False,
                 "completeness": 0,
-                "issues": [f"❌ ERRO CRÍTICO: Tipo de arquivo '{file.content_type}' não permitido"],
+                "issues": [f"❌ Tipo de arquivo não suportado: {file.content_type}"],
                 "extracted_data": {"validation_status": "REJECTED", "reason": "Invalid file type"},
-                "dra_paula_assessment": "❌ DOCUMENTO REJEITADO: Tipo de arquivo não aceito pelo USCIS"
+                "dra_paula_assessment": "❌ Onfido: Tipo de arquivo não aceito pelo sistema profissional"
             }
         
-        # Check file size (10MB limit)
-        file_size = 0
+        # Read file content
         file_content = await file.read()
         file_size = len(file_content)
         
+        # File size validation
         if file_size > 10 * 1024 * 1024:  # 10MB
             return {
                 "valid": False,
                 "legible": False,
                 "completeness": 0,
-                "issues": ["❌ ERRO: Arquivo muito grande. Máximo: 10MB"],
+                "issues": ["❌ Arquivo muito grande (máximo: 10MB)"],
                 "extracted_data": {"validation_status": "REJECTED", "reason": "File too large"},
-                "dra_paula_assessment": "❌ DOCUMENTO REJEITADO: Arquivo excede limite de 10MB"
+                "dra_paula_assessment": "❌ Onfido: Arquivo excede limite permitido"
             }
         
-        if file_size < 50000:  # 50KB
+        if file_size < 10000:  # 10KB minimum for quality
             return {
                 "valid": False,
                 "legible": False,
                 "completeness": 0,
-                "issues": ["❌ ERRO: Arquivo muito pequeno. Pode estar corrompido"],
+                "issues": ["❌ Arquivo muito pequeno ou corrompido"],
                 "extracted_data": {"validation_status": "REJECTED", "reason": "File too small"},
-                "dra_paula_assessment": "❌ DOCUMENTO REJEITADO: Arquivo suspeito (muito pequeno)"
+                "dra_paula_assessment": "❌ Onfido: Qualidade de arquivo inadequada"
             }
+        
+        # PROFESSIONAL DOCUMENT ANALYSIS WITH ONFIDO
+        logger.info(f"📋 Analyzing document with Onfido professional API")
+        
+        analysis_result = await onfido_verifier.analyze_document(
+            file_content=file_content,
+            filename=file.filename,
+            applicant_name=applicant_name,
+            document_type=document_type.lower()
+        )
+        
+        # Add additional context for immigration processing
+        analysis_result.update({
+            "visa_context": visa_type,
+            "case_id": case_id,
+            "processed_by": "Onfido Professional API",
+            "processing_date": datetime.now().isoformat(),
+            "file_size_mb": round(file_size / (1024 * 1024), 2),
+            "immigration_compliant": analysis_result.get("completeness", 0) >= 75
+        })
+        
+        logger.info(f"✅ Onfido analysis completed - Valid: {analysis_result.get('valid')}, Score: {analysis_result.get('completeness')}%")
+        
+        return analysis_result
         
         # Validate document type against visa requirements (CORRECTED)
         from document_validation_database import get_required_documents_for_visa
