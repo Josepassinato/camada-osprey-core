@@ -2999,9 +2999,9 @@ async def start_case_finalization(case_id: str, request: dict):
 async def get_finalization_status(job_id: str):
     """Obtém status da finalização"""
     try:
-        from case_finalizer import case_finalizer
+        from case_finalizer_complete import case_finalizer_complete
         
-        result = case_finalizer.get_status(job_id)
+        result = case_finalizer_complete.get_status(job_id)
         
         if result["success"]:
             return {
