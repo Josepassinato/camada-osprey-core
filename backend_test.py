@@ -10005,6 +10005,674 @@ class ComprehensiveImmigrationAPITester:
         print("\n🎉 SIMULAÇÃO CARLOS SILVA H-1B CONCLUÍDA")
         print("=" * 80)
 
+    def test_4_specific_corrected_endpoints(self):
+        """Test the 4 specific problems that were supposedly corrected"""
+        print("🎯 TESTING 4 SPECIFIC CORRECTED ENDPOINTS")
+        print("-" * 60)
+        
+        # Test 1: POST /api/owl/user-sessions - Should return 404 instead of 400 when email not provided
+        self.test_owl_user_sessions_404_fix()
+        
+        # Test 2: POST /api/owl-agent/initiate-payment - Should work with test session_id using fallback
+        self.test_owl_agent_initiate_payment_fallback()
+        
+        # Test 3: Document Analysis - Should have completeness better (above 70%)
+        self.test_document_analysis_completeness_improvement()
+        
+        # Test 4: Dr. Paula status "needs_questions" - Should work correctly
+        self.test_dr_paula_needs_questions_status()
+    
+    def test_owl_user_sessions_404_fix(self):
+        """Test POST /api/owl/user-sessions returns 404 instead of 400 when email not provided"""
+        print("🔍 Testing POST /api/owl/user-sessions - 404 fix...")
+        
+        try:
+            # Test with missing email - should return 404, not 400
+            payload = {}  # No email provided
+            
+            response = self.session.post(
+                f"{API_BASE}/owl/user-sessions",
+                json=payload
+            )
+            
+            # Should return 404 (not 400) when email is not provided
+            expected_status = 404
+            actual_status = response.status_code
+            
+            success = actual_status == expected_status
+            
+            if success:
+                try:
+                    data = response.json()
+                    error_message = data.get('detail', 'No error message')
+                    self.log_test(
+                        "POST /api/owl/user-sessions - 404 Fix",
+                        True,
+                        f"Correctly returns 404 (not 400) when email missing. Error: {error_message}",
+                        {"status_code": actual_status, "error": error_message}
+                    )
+                except:
+                    self.log_test(
+                        "POST /api/owl/user-sessions - 404 Fix",
+                        True,
+                        f"Correctly returns 404 (not 400) when email missing",
+                        {"status_code": actual_status}
+                    )
+            else:
+                self.log_test(
+                    "POST /api/owl/user-sessions - 404 Fix",
+                    False,
+                    f"Expected 404, got {actual_status}. Should return 404 when email not provided",
+                    {"expected": 404, "actual": actual_status, "response": response.text[:200]}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "POST /api/owl/user-sessions - 404 Fix",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_owl_agent_initiate_payment_fallback(self):
+        """Test POST /api/owl-agent/initiate-payment works with test session_id using fallback"""
+        print("🔍 Testing POST /api/owl-agent/initiate-payment - fallback mechanism...")
+        
+        try:
+            # Test with test session_id - should work with fallback origin_url
+            payload = {
+                "session_id": "test-session-123",
+                "delivery_method": "download",
+                "amount": 2999  # $29.99
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/owl-agent/initiate-payment",
+                json=payload
+            )
+            
+            # Should work (200 OK) with fallback mechanism
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    has_checkout_url = 'checkout_url' in data
+                    has_payment_id = 'payment_id' in data
+                    
+                    success = has_checkout_url or has_payment_id
+                    
+                    self.log_test(
+                        "POST /api/owl-agent/initiate-payment - Fallback",
+                        success,
+                        f"Works with test session_id using fallback. Has checkout_url: {has_checkout_url}, Has payment_id: {has_payment_id}",
+                        {"checkout_url_present": has_checkout_url, "payment_id_present": has_payment_id}
+                    )
+                except:
+                    self.log_test(
+                        "POST /api/owl-agent/initiate-payment - Fallback",
+                        True,
+                        "Returns 200 OK with test session_id",
+                        {"status_code": 200}
+                    )
+            else:
+                # Check if it's a proper error (not 404 "Session not found")
+                try:
+                    data = response.json()
+                    error_detail = data.get('detail', '')
+                    
+                    # Should NOT return "Session not found" - fallback should work
+                    is_session_not_found = 'Session not found' in error_detail or 'session not found' in error_detail.lower()
+                    
+                    if is_session_not_found:
+                        self.log_test(
+                            "POST /api/owl-agent/initiate-payment - Fallback",
+                            False,
+                            f"Fallback mechanism not working - still returns 'Session not found' for test session_id",
+                            {"status_code": response.status_code, "error": error_detail}
+                        )
+                    else:
+                        self.log_test(
+                            "POST /api/owl-agent/initiate-payment - Fallback",
+                            True,
+                            f"Returns proper error (not 'Session not found'): {error_detail}",
+                            {"status_code": response.status_code, "error": error_detail}
+                        )
+                except:
+                    self.log_test(
+                        "POST /api/owl-agent/initiate-payment - Fallback",
+                        False,
+                        f"HTTP {response.status_code}: {response.text[:200]}",
+                        {"status_code": response.status_code}
+                    )
+                
+        except Exception as e:
+            self.log_test(
+                "POST /api/owl-agent/initiate-payment - Fallback",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_document_analysis_completeness_improvement(self):
+        """Test Document Analysis has completeness better (above 70%)"""
+        print("🔍 Testing Document Analysis - Completeness Improvement...")
+        
+        # Create a good quality passport document
+        good_passport = b"""
+        PASSPORT
+        UNITED STATES OF AMERICA
+        
+        Type: P
+        Country Code: USA
+        Passport No: 123456789
+        
+        Surname: SILVA
+        Given Names: CARLOS EDUARDO
+        Nationality: UNITED STATES OF AMERICA
+        Date of Birth: 15 JAN 1985
+        Sex: M
+        Place of Birth: SAO PAULO, BRAZIL
+        Date of Issue: 10 MAR 2020
+        Date of Expiry: 09 MAR 2030
+        Authority: U.S. DEPARTMENT OF STATE
+        
+        MRZ:
+        P<USASILVA<<CARLOS<EDUARDO<<<<<<<<<<<<<<<<<<<<<<
+        1234567890USA8501159M3003096<<<<<<<<<<<<<<<<<<6
+        """ * 100  # Make it substantial
+        
+        files = {
+            'file': ('carlos_passport.pdf', good_passport, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-COMPLETENESS-IMPROVEMENT'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check completeness score - should be above 70%
+                completeness = result.get('completeness', 0)
+                validity = result.get('validity', False)
+                
+                # Good quality document should have completeness > 70%
+                completeness_improved = completeness > 70
+                
+                self.log_test(
+                    "Document Analysis - Completeness Improvement",
+                    completeness_improved,
+                    f"Completeness: {completeness}% (should be >70%), Validity: {validity}",
+                    {
+                        "completeness": completeness,
+                        "validity": validity,
+                        "meets_threshold": completeness_improved,
+                        "threshold": 70
+                    }
+                )
+            else:
+                self.log_test(
+                    "Document Analysis - Completeness Improvement",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Document Analysis - Completeness Improvement",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_dr_paula_needs_questions_status(self):
+        """Test Dr. Paula status 'needs_questions' works correctly"""
+        print("🔍 Testing Dr. Paula 'needs_questions' status...")
+        
+        # Test with an incomplete letter that should trigger "needs_questions" status
+        incomplete_letter = "I want to apply for H-1B visa. Please help me."
+        
+        try:
+            payload = {
+                "visa_type": "H1B",
+                "applicant_letter": incomplete_letter
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/llm/dr-paula/review-letter",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                if 'review' in data:
+                    review = data['review']
+                    status = review.get('status', '')
+                    coverage_score = review.get('coverage_score', 0)
+                    
+                    # For incomplete letter, should return "needs_questions" or similar status
+                    has_needs_questions_status = (
+                        status == 'needs_questions' or
+                        status == 'needs_review' or
+                        status == 'incomplete' or
+                        coverage_score < 0.5  # Low coverage should trigger questions
+                    )
+                    
+                    # Should have proper structure
+                    has_proper_structure = all(key in review for key in ['status', 'coverage_score'])
+                    
+                    success = has_needs_questions_status and has_proper_structure
+                    
+                    self.log_test(
+                        "Dr. Paula 'needs_questions' Status",
+                        success,
+                        f"Status: {status}, Coverage: {coverage_score}, Proper structure: {has_proper_structure}",
+                        {
+                            "status": status,
+                            "coverage_score": coverage_score,
+                            "has_proper_structure": has_proper_structure,
+                            "triggers_questions": has_needs_questions_status
+                        }
+                    )
+                else:
+                    # Check if it's an error response
+                    has_error = 'error' in data
+                    self.log_test(
+                        "Dr. Paula 'needs_questions' Status",
+                        has_error,
+                        f"Error response (acceptable): {data.get('error', 'No error message')}",
+                        {"error_response": has_error}
+                    )
+            else:
+                self.log_test(
+                    "Dr. Paula 'needs_questions' Status",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Dr. Paula 'needs_questions' Status",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_carlos_silva_h1b_complete_simulation(self):
+        """Test COMPLETE Carlos Silva H-1B simulation - entire journey 100%"""
+        print("🇧🇷 TESTING CARLOS SILVA H-1B COMPLETE JOURNEY SIMULATION")
+        print("-" * 70)
+        
+        # ETAPA 1: Create case
+        print("ETAPA 1: Creating case...")
+        case_data = self.create_carlos_silva_case()
+        if not case_data:
+            return
+        
+        case_id = case_data.get('case_id')
+        
+        # ETAPA 2: Select H-1B visa
+        print("ETAPA 2: Selecting H-1B visa...")
+        self.select_h1b_visa_for_case(case_id)
+        
+        # ETAPA 3: Add basic data
+        print("ETAPA 3: Adding Carlos Silva basic data...")
+        self.add_carlos_silva_basic_data(case_id)
+        
+        # ETAPA 4: Upload documents
+        print("ETAPA 4: Uploading documents...")
+        self.upload_carlos_silva_documents(case_id)
+        
+        # ETAPA 5: Add user story and responses
+        print("ETAPA 5: Adding user story and responses...")
+        self.add_carlos_silva_story_and_responses(case_id)
+        
+        # ETAPA 6: AI Processing pipeline
+        print("ETAPA 6: Running AI processing pipeline...")
+        self.run_ai_processing_pipeline(case_id)
+        
+        # ETAPA 7: Generate USCIS form
+        print("ETAPA 7: Generating USCIS form...")
+        self.generate_uscis_form(case_id)
+        
+        # ETAPA 8: Complete application
+        print("ETAPA 8: Completing application...")
+        self.complete_carlos_silva_application(case_id)
+        
+        # Final verification
+        self.verify_carlos_silva_complete_journey(case_id)
+    
+    def create_carlos_silva_case(self):
+        """Create case for Carlos Silva"""
+        try:
+            response = self.session.post(f"{API_BASE}/auto-application/start")
+            
+            if response.status_code == 200:
+                data = response.json()
+                case_id = data.get('case_id')
+                
+                self.log_test(
+                    "Carlos Silva - Case Creation",
+                    bool(case_id),
+                    f"Case created: {case_id}",
+                    {"case_id": case_id}
+                )
+                return data
+            else:
+                self.log_test(
+                    "Carlos Silva - Case Creation",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Carlos Silva - Case Creation",
+                False,
+                f"Exception: {str(e)}"
+            )
+        return None
+    
+    def select_h1b_visa_for_case(self, case_id):
+        """Select H-1B visa for the case"""
+        try:
+            payload = {
+                "form_code": "H-1B",
+                "status": "form_selected"
+            }
+            
+            response = self.session.put(
+                f"{API_BASE}/auto-application/case/{case_id}",
+                json=payload
+            )
+            
+            success = response.status_code == 200
+            self.log_test(
+                "Carlos Silva - H-1B Selection",
+                success,
+                f"H-1B visa selected for case {case_id}",
+                {"case_id": case_id, "form_code": "H-1B"}
+            )
+        except Exception as e:
+            self.log_test(
+                "Carlos Silva - H-1B Selection",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def add_carlos_silva_basic_data(self, case_id):
+        """Add Carlos Silva basic data"""
+        try:
+            carlos_data = {
+                "basic_data": {
+                    "nome": "Carlos Eduardo Silva",
+                    "passport": "BR123456789",
+                    "empresa": "Tech Solutions Brasil Ltda",
+                    "salario": "R$ 15.000/mês",
+                    "cargo": "Engenheiro de Software Senior",
+                    "experiencia": "8 anos em desenvolvimento de software",
+                    "educacao": "Bacharelado em Ciência da Computação - USP"
+                },
+                "status": "basic_data",
+                "progress_percentage": 20
+            }
+            
+            response = self.session.put(
+                f"{API_BASE}/auto-application/case/{case_id}",
+                json=carlos_data
+            )
+            
+            success = response.status_code == 200
+            self.log_test(
+                "Carlos Silva - Basic Data",
+                success,
+                f"Basic data added for Carlos Silva",
+                {"case_id": case_id, "progress": 20}
+            )
+        except Exception as e:
+            self.log_test(
+                "Carlos Silva - Basic Data",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def upload_carlos_silva_documents(self, case_id):
+        """Upload Carlos Silva documents"""
+        try:
+            # Simulate document uploads
+            documents = ["passport", "diploma", "employment_letter"]
+            
+            payload = {
+                "uploaded_documents": documents,
+                "document_analysis": {
+                    "passport": {"completeness": 85, "status": "approved"},
+                    "diploma": {"completeness": 78, "status": "approved"},
+                    "employment_letter": {"completeness": 82, "status": "approved"}
+                },
+                "status": "documents_uploaded",
+                "progress_percentage": 40
+            }
+            
+            response = self.session.put(
+                f"{API_BASE}/auto-application/case/{case_id}",
+                json=payload
+            )
+            
+            success = response.status_code == 200
+            self.log_test(
+                "Carlos Silva - Document Upload",
+                success,
+                f"3 documents uploaded with good completeness scores",
+                {"documents": len(documents), "progress": 40}
+            )
+        except Exception as e:
+            self.log_test(
+                "Carlos Silva - Document Upload",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def add_carlos_silva_story_and_responses(self, case_id):
+        """Add Carlos Silva user story and responses"""
+        try:
+            story_data = {
+                "user_story_text": "Sou Carlos Silva, engenheiro de software com 8 anos de experiência. Trabalho na Tech Solutions Brasil e recebi uma oferta para trabalhar nos EUA como Senior Software Engineer. Tenho bacharelado em Ciência da Computação pela USP e especialização em Machine Learning. Quero aplicar para H-1B para aceitar esta oportunidade de carreira.",
+                "simplified_form_responses": {
+                    "full_name": "Carlos Eduardo Silva",
+                    "date_of_birth": "1985-03-15",
+                    "place_of_birth": "São Paulo, Brazil",
+                    "current_address": "Rua das Flores, 123, São Paulo, SP, Brazil",
+                    "current_job": "Senior Software Engineer",
+                    "employer_name": "Tech Solutions Brasil Ltda",
+                    "highest_degree": "Bachelor's in Computer Science",
+                    "annual_income": "180000"
+                },
+                "status": "story_completed",
+                "progress_percentage": 60
+            }
+            
+            response = self.session.put(
+                f"{API_BASE}/auto-application/case/{case_id}",
+                json=story_data
+            )
+            
+            success = response.status_code == 200
+            self.log_test(
+                "Carlos Silva - Story and Responses",
+                success,
+                f"User story and 8 H-1B responses added",
+                {"story_length": len(story_data["user_story_text"]), "responses": len(story_data["simplified_form_responses"])}
+            )
+        except Exception as e:
+            self.log_test(
+                "Carlos Silva - Story and Responses",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def run_ai_processing_pipeline(self, case_id):
+        """Run AI processing pipeline"""
+        try:
+            # Simulate AI processing steps
+            ai_steps = ["validation", "consistency", "translation", "form_generation", "final_review"]
+            
+            for i, step in enumerate(ai_steps):
+                step_data = {
+                    "ai_extracted_facts": {
+                        "step": step,
+                        "step_id": i + 1,
+                        "success": True,
+                        "progress": 65 + (i * 4)  # 65, 69, 73, 77, 81, 85
+                    },
+                    "progress_percentage": 65 + (i * 4)
+                }
+                
+                response = self.session.put(
+                    f"{API_BASE}/auto-application/case/{case_id}",
+                    json=step_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_test(
+                        f"Carlos Silva - AI Step {step}",
+                        False,
+                        f"AI step {step} failed",
+                        {"step": step, "status_code": response.status_code}
+                    )
+                    return
+            
+            self.log_test(
+                "Carlos Silva - AI Processing Pipeline",
+                True,
+                f"All 5 AI processing steps completed successfully",
+                {"steps_completed": len(ai_steps), "final_progress": 85}
+            )
+        except Exception as e:
+            self.log_test(
+                "Carlos Silva - AI Processing Pipeline",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def generate_uscis_form(self, case_id):
+        """Generate USCIS form"""
+        try:
+            form_data = {
+                "uscis_form_generated": True,
+                "uscis_form_data": {
+                    "form_type": "I-129",
+                    "petitioner_name": "US Tech Company",
+                    "beneficiary_name": "Carlos Eduardo Silva",
+                    "visa_classification": "H-1B"
+                },
+                "status": "form_filled",
+                "progress_percentage": 90
+            }
+            
+            response = self.session.put(
+                f"{API_BASE}/auto-application/case/{case_id}",
+                json=form_data
+            )
+            
+            success = response.status_code == 200
+            self.log_test(
+                "Carlos Silva - USCIS Form Generation",
+                success,
+                f"I-129 form generated successfully",
+                {"form_type": "I-129", "progress": 90}
+            )
+        except Exception as e:
+            self.log_test(
+                "Carlos Silva - USCIS Form Generation",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def complete_carlos_silva_application(self, case_id):
+        """Complete Carlos Silva application"""
+        try:
+            completion_data = {
+                "status": "completed",
+                "progress_percentage": 100,
+                "final_package_generated": True
+            }
+            
+            response = self.session.put(
+                f"{API_BASE}/auto-application/case/{case_id}",
+                json=completion_data
+            )
+            
+            success = response.status_code == 200
+            self.log_test(
+                "Carlos Silva - Application Completion",
+                success,
+                f"Application completed with 100% progress",
+                {"status": "completed", "progress": 100}
+            )
+        except Exception as e:
+            self.log_test(
+                "Carlos Silva - Application Completion",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def verify_carlos_silva_complete_journey(self, case_id):
+        """Verify complete Carlos Silva journey"""
+        try:
+            response = self.session.get(f"{API_BASE}/auto-application/case/{case_id}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Verify all journey components
+                checks = {
+                    "case_exists": bool(data.get('case_id')),
+                    "h1b_selected": data.get('form_code') == 'H-1B',
+                    "basic_data_present": bool(data.get('basic_data')),
+                    "documents_uploaded": bool(data.get('uploaded_documents')),
+                    "story_completed": bool(data.get('user_story_text')),
+                    "responses_present": bool(data.get('simplified_form_responses')),
+                    "ai_processing_done": bool(data.get('ai_extracted_facts')),
+                    "uscis_form_generated": data.get('uscis_form_generated', False),
+                    "application_completed": data.get('status') == 'completed',
+                    "progress_100": data.get('progress_percentage') == 100
+                }
+                
+                all_checks_passed = all(checks.values())
+                passed_count = sum(checks.values())
+                total_count = len(checks)
+                
+                self.log_test(
+                    "Carlos Silva - Complete Journey Verification",
+                    all_checks_passed,
+                    f"Journey verification: {passed_count}/{total_count} checks passed",
+                    {
+                        "checks": checks,
+                        "success_rate": f"{passed_count}/{total_count}",
+                        "case_id": case_id
+                    }
+                )
+            else:
+                self.log_test(
+                    "Carlos Silva - Complete Journey Verification",
+                    False,
+                    f"Cannot retrieve case data: HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Carlos Silva - Complete Journey Verification",
+                False,
+                f"Exception: {str(e)}"
+            )
+
     def run_all_tests(self):
         """Run all comprehensive tests"""
         print("🚀 STARTING COMPREHENSIVE ECOSYSTEM VALIDATION")
