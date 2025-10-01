@@ -16,52 +16,21 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-class GoogleDocumentAIProcessor:
-    """Professional document OCR and data extraction using Google Document AI"""
+class GoogleVisionAPIProcessor:
+    """Professional document OCR using Google Vision API with API key"""
     
     def __init__(self):
-        # Configuration from environment variables
-        self.project_id = os.environ.get('GOOGLE_CLOUD_PROJECT_ID', 'test-project')
-        self.location = os.environ.get('GOOGLE_DOCUMENT_AI_LOCATION', 'us')  # us, eu
-        self.processor_id = os.environ.get('GOOGLE_DOCUMENT_AI_PROCESSOR_ID', 'test-processor')
+        # Configuration from environment variables  
+        self.api_key = os.environ.get('GOOGLE_API_KEY')
         
-        # Use service account key if provided, otherwise use default credentials
-        self.credentials_path = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
-        
-        # For testing without real Google Cloud setup
-        self.is_mock_mode = (
-            self.project_id == 'test-project' or 
-            not self.credentials_path or 
-            not os.path.exists(self.credentials_path or '')
-        )
+        # Check if we have API key for real mode
+        self.is_mock_mode = not self.api_key
         
         if self.is_mock_mode:
-            logger.warning("🧪 Google Document AI in MOCK MODE - Using simulated responses")
+            logger.warning("🧪 Google Vision API in MOCK MODE - No API key provided")
         else:
-            logger.info(f"🔗 Google Document AI initialized - Project: {self.project_id}, Location: {self.location}")
-            
-        # Initialize client if not in mock mode
-        self.client = None
-        if not self.is_mock_mode:
-            try:
-                # Create client with proper configuration
-                client_options = ClientOptions(
-                    api_endpoint=f"{self.location}-documentai.googleapis.com"
-                )
-                self.client = documentai.DocumentProcessorServiceClient(
-                    client_options=client_options
-                )
-                
-                # Build processor name
-                self.processor_name = self.client.processor_path(
-                    self.project_id, self.location, self.processor_id
-                )
-                
-                logger.info(f"✅ Google Document AI client initialized successfully")
-                
-            except Exception as e:
-                logger.error(f"❌ Failed to initialize Google Document AI: {e}")
-                self.is_mock_mode = True
+            logger.info(f"🔗 Google Vision API initialized with real API key")
+            self.vision_endpoint = f"https://vision.googleapis.com/v1/images:annotate?key={self.api_key}"
     
     def _create_mock_response(self, filename: str, content_length: int) -> Dict[str, Any]:
         """Create realistic mock response for testing"""
