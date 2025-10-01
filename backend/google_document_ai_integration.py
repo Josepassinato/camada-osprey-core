@@ -22,15 +22,24 @@ class GoogleVisionAPIProcessor:
     def __init__(self):
         # Configuration from environment variables  
         self.api_key = os.environ.get('GOOGLE_API_KEY')
+        self.client_id = os.environ.get('GOOGLE_CLIENT_ID')
+        self.project_id = os.environ.get('GOOGLE_CLOUD_PROJECT_ID', '891629358081')
         
-        # Check if we have API key for real mode
-        self.is_mock_mode = not self.api_key
+        # Check if we have credentials for real mode
+        self.is_mock_mode = not (self.api_key or self.client_id)
         
         if self.is_mock_mode:
-            logger.warning("🧪 Google Vision API in MOCK MODE - No API key provided")
+            logger.warning("🧪 Google Vision API in MOCK MODE - No credentials provided")
         else:
-            logger.info(f"🔗 Google Vision API initialized with real API key")
-            self.vision_endpoint = f"https://vision.googleapis.com/v1/images:annotate?key={self.api_key}"
+            if self.api_key:
+                logger.info(f"🔗 Google Vision API initialized with API key for project {self.project_id}")
+                self.vision_endpoint = f"https://vision.googleapis.com/v1/images:annotate?key={self.api_key}"
+            elif self.client_id:
+                logger.info(f"🔗 Google Vision API initialized with OAuth2 Client ID: {self.client_id}")
+                self.vision_endpoint = "https://vision.googleapis.com/v1/images:annotate"
+            
+        # Track authentication method
+        self.auth_method = "api_key" if self.api_key else "oauth2" if self.client_id else "mock"
     
     def _create_mock_response(self, filename: str, content_length: int) -> Dict[str, Any]:
         """Create realistic mock response for testing"""
