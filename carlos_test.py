@@ -424,7 +424,7 @@ class CarlosH1BSimulator:
         for step in steps:
             try:
                 payload = {
-                    "step": step,
+                    "step_id": step,
                     "case_id": case_id
                 }
                 
