@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-COMPREHENSIVE IMMIGRATION API TESTING SUITE
-Tests ALL immigration application APIs for production certification
-Covers: Authentication, Owl Agent, Auto-Application, Documents, Dr. Paula LLM, Stripe, and more
+FINAL PRODUCTION VERIFICATION - IMMIGRATION SYSTEM
+Comprehensive production readiness testing for immigration application system
+Focus: Core APIs, No Mocks, Production Behavior, Carlos Silva Journey
 """
 
 import requests
@@ -19,6 +19,10 @@ import io
 # Get backend URL from environment
 BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://iaimmigration.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
+
+print(f"🌐 PRODUCTION VERIFICATION TARGET: {BACKEND_URL}")
+print(f"🎯 API BASE: {API_BASE}")
+print("="*80)
 
 class ComprehensiveImmigrationAPITester:
     def __init__(self):
