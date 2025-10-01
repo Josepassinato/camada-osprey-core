@@ -223,12 +223,14 @@ def test_carlos_silva_h1b_complete_journey():
         
         if response.status_code == 200:
             data = response.json()
-            docs_count = len(data.get('uploaded_documents', []))
+            case_data = data.get('case', {})
+            docs_count = len(case_data.get('uploaded_documents', []))
+            progress = case_data.get('progress_percentage')
             
             log_test(
                 "ETAPA 4 - Documentos Registrados",
                 docs_count == len(documents),
-                f"Documentos registrados: {docs_count}/{len(documents)}, Progress: {data.get('progress_percentage')}%"
+                f"Documentos registrados: {docs_count}/{len(documents)}, Progress: {progress}%"
             )
     except Exception as e:
         log_test("ETAPA 4 - Documentos Registrados", False, f"Exception: {str(e)}")
