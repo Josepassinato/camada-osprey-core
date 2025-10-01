@@ -322,10 +322,10 @@ class GoogleVisionAPIProcessor:
 
 
 class HybridDocumentValidator:
-    """Hybrid validator combining Google Document AI + Dr. Miguel"""
+    """Hybrid validator combining Google Vision API + Dr. Miguel"""
     
     def __init__(self):
-        self.google_processor = GoogleDocumentAIProcessor()
+        self.google_processor = GoogleVisionAPIProcessor()
         self.dr_miguel = None
         
     async def _get_dr_miguel(self):
