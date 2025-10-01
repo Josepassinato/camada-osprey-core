@@ -152,13 +152,16 @@ class GoogleDocumentAIProcessor:
             return self._create_mock_response(filename, len(file_content))
         
         try:
-            # Try Document AI if OAuth2 is available, otherwise use Vision API
-            if self.auth_method == "oauth2" and self.credentials:
+            # Prioritize API key (working) over OAuth2 (not implemented)
+            if self.auth_method == "api_key" and self.api_key:
+                logger.info("🔗 Using Google Vision API with API key")
+                return await self._try_vision_api(file_content, filename, mime_type)
+            elif self.auth_method == "oauth2" and self.credentials:
                 logger.info("🏗️ Using Google Document AI with OAuth2")
                 return await self._try_document_ai(file_content, filename, mime_type)
             else:
-                logger.info("🔗 Using Google Vision API with API key")
-                return await self._try_vision_api(file_content, filename, mime_type)
+                logger.warning("⚠️ No valid credentials, using mock mode")
+                return self._create_mock_response(filename, len(file_content))
             
         except Exception as api_error:
             logger.warning(f"⚠️ Google API failed: {api_error}, falling back to mock")
