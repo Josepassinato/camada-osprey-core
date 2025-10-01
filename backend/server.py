@@ -1846,34 +1846,29 @@ async def get_case_anonymous(case_id: str, session_token: Optional[str] = None, 
         raise HTTPException(status_code=500, detail=f"Error getting case: {str(e)}")
 
 @api_router.put("/auto-application/case/{case_id}")
-async def update_case_anonymous(case_id: str, case_update: CaseUpdate, session_token: Optional[str] = None):
+async def update_case_anonymous(case_id: str, case_update: CaseUpdate, session_token: Optional[str] = None, current_user = Depends(get_current_user_optional)):
     """Update a specific case (anonymous or authenticated)"""
     try:
         # Try authenticated user first
-        try:
-            current_user = await get_current_user_optional()
-            if current_user:
-                case = await db.auto_cases.find_one({
-                    "case_id": case_id,
-                    "user_id": current_user["id"]
-                })
-                if case:
-                    update_data = case_update.dict(exclude_none=True)
-                    update_data["updated_at"] = datetime.utcnow()
+        if current_user:
+            case = await db.auto_cases.find_one({
+                "case_id": case_id,
+                "user_id": current_user["id"]
+            })
+            if case:
+                update_data = case_update.dict(exclude_none=True)
+                update_data["updated_at"] = datetime.utcnow()
+                
+                await db.auto_cases.update_one(
+                    {"case_id": case_id},
+                    {"$set": update_data}
+                )
+                
+                updated_case = await db.auto_cases.find_one({"case_id": case_id})
+                if "_id" in updated_case:
+                    del updated_case["_id"]
                     
-                    await db.auto_cases.update_one(
-                        {"case_id": case_id},
-                        {"$set": update_data}
-                    )
-                    
-                    updated_case = await db.auto_cases.find_one({"case_id": case_id})
-                    if "_id" in updated_case:
-                        del updated_case["_id"]
-                        
-                    return {"message": "Case updated successfully", "case": updated_case}
-        except Exception as auth_error:
-            logger.debug(f"Auth user update failed: {auth_error}")
-            pass
+                return {"message": "Case updated successfully", "case": updated_case}
         
         # Anonymous update
         query = {"case_id": case_id}
