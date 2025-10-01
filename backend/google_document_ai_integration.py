@@ -534,7 +534,9 @@ class HybridDocumentValidator:
                 "ocr_confidence": google_confidence,
                 "page_count": google_result.get("page_count", 0),
                 "mock_mode": google_result.get("mock_mode", False),
-                "api_enabled": not self.google_processor.is_mock_mode
+                "api_enabled": not self.google_processor.is_mock_mode,
+                "auth_method": self.google_processor.auth_method,
+                "project_id": self.google_processor.project_id
             },
             "passport_fields": passport_fields,
             "dr_miguel_analysis": {
