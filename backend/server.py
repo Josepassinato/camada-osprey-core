@@ -6332,7 +6332,7 @@ async def register_owl_user(request: dict):
         
         # Create user
         user_data = {
-            "user_id": f"owl_user_{int(time.time())}_{uuid.uuid4().hex[:8]}",
+            "user_id": f"owl_user_{int(time_module.time())}_{uuid.uuid4().hex[:8]}",
             "email": email,
             "name": name,
             "password_hash": hashed_password,
