@@ -258,6 +258,9 @@ const SelectForm = () => {
       if (existingCaseId) {
         // Update existing case with form_code
         console.log('🔄 Updating existing case with form_code:', formCode);
+        console.log('🔄 Session token:', sessionToken);
+        console.log('🔄 Existing case ID:', existingCaseId);
+        
         const updateResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${existingCaseId}`, {
           method: 'PUT',
           headers: {
@@ -270,8 +273,16 @@ const SelectForm = () => {
         });
         
         if (updateResponse.ok) {
-          navigate(`/auto-application/case/${existingCaseId}/basic-data`);
-          return;
+          const updateData = await updateResponse.json();
+          console.log('✅ Case updated successfully:', updateData);
+          
+          // Verify the update was successful
+          if (updateData.case && updateData.case.form_code === formCode) {
+            navigate(`/auto-application/case/${existingCaseId}/basic-data`);
+            return;
+          } else {
+            console.log('⚠️ Form code mismatch after update, creating new case');
+          }
         } else {
           console.log('❌ Failed to update case, creating new one');
         }
