@@ -2041,6 +2041,11 @@ class ComprehensiveEcosystemTester:
             print()
         
         # Production readiness assessment
+        phase2_field_extraction = any(t["success"] for t in components["Phase 2 Field Extraction"])
+        phase2_translation_gate = any(t["success"] for t in components["Phase 2 Translation Gate"])
+        phase3_classification = any(t["success"] for t in components["Phase 3 Document Classification"])
+        phase3_consistency = any(t["success"] for t in components["Phase 3 Cross-Document Consistency"])
+        phase23_integration = any(t["success"] for t in components["Phase 2&3 Integration"])
         policy_engine_working = any(t["success"] for t in components["Policy Engine (FASE 1)"])
         cover_letter_working = any(t["success"] for t in components["Dr. Paula Cover Letter"])
         case_finalizer_working = len([t for t in components["Case Finalizer MVP"] if t["success"]]) >= 5
@@ -2049,6 +2054,11 @@ class ComprehensiveEcosystemTester:
         security_compliant = any(t["success"] for t in components["Security & Compliance"])
         
         production_ready = (
+            phase2_field_extraction and
+            phase2_translation_gate and
+            phase3_classification and
+            phase3_consistency and
+            phase23_integration and
             policy_engine_working and
             cover_letter_working and
             case_finalizer_working and
