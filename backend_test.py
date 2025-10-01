@@ -10851,14 +10851,17 @@ class ComprehensiveImmigrationAPITester:
                 return
             
             # ETAPA 2: H-1B Visa Selection
-            print("ETAPA 2: 📋 H-1B Visa Selection...")
+            print(f"ETAPA 2: 📋 H-1B Visa Selection... (Case ID: {case_id})")
             payload = {"form_code": "H-1B"}
-            response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=payload)
+            url = f"{API_BASE}/auto-application/case/{case_id}"
+            print(f"PUT URL: {url}")
+            response = self.session.put(url, json=payload)
             if response.status_code == 200:
                 data = response.json()
-                self.log_test("Carlos H-1B Step 2 - Visa Selection", True, f"Form code: {data.get('form_code')}", data)
+                case_data = data.get('case', {})
+                self.log_test("Carlos H-1B Step 2 - Visa Selection", True, f"Form code: {case_data.get('form_code')}", case_data)
             else:
-                self.log_test("Carlos H-1B Step 2 - Visa Selection", False, f"HTTP {response.status_code}")
+                self.log_test("Carlos H-1B Step 2 - Visa Selection", False, f"HTTP {response.status_code}: {response.text}")
             
             # ETAPA 3: Basic Data Storage
             print("ETAPA 3: 📝 Basic Data Storage...")
