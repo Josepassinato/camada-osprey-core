@@ -7043,7 +7043,7 @@ async def start_owl_session(request: dict):
         
         if not case_id:
             # Generate case_id if not provided
-            case_id = f"OWL-{int(time.time())}-{uuid.uuid4().hex[:8]}"
+            case_id = f"OWL-{int(time_module.time())}-{uuid.uuid4().hex[:8]}"
         
         # Initialize Owl Agent
         from intelligent_owl_agent import intelligent_owl
