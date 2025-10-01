@@ -310,11 +310,13 @@ def test_carlos_silva_h1b_complete_journey():
             
             if response.status_code == 200:
                 data = response.json()
+                case_data = data.get('case', {})
+                progress = case_data.get('progress_percentage')
                 
                 log_test(
                     f"ETAPA 6.{i} - {step['description']}",
                     True,
-                    f"Step: {step['step']}, Progress: {data.get('progress_percentage')}%"
+                    f"Step: {step['step']}, Progress: {progress}%"
                 )
             else:
                 log_test(
