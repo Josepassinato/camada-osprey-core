@@ -5606,9 +5606,9 @@ async def analyze_document_with_professional_api(
     applicant_name: str = Form(default="Unknown User")
 ):
     """
-    PROFESSIONAL document analysis using Onfido API
-    ENTERPRISE-GRADE SECURITY - Industry-leading document validation
-    Replaces Dr. Miguel with professional verification service
+    HYBRID PROFESSIONAL document analysis using Google Document AI + Dr. Miguel
+    COST-EFFECTIVE & INTELLIGENT - Professional OCR + AI-powered validation
+    Combines Google's enterprise OCR with Dr. Miguel's fraud detection
     """
     try:
         # Professional validation with Onfido
