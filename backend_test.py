@@ -1695,6 +1695,132 @@ class ComprehensiveEcosystemTester:
                 f"Exception: {str(e)}"
             )
     
+    def test_phase3_cross_document_consistency(self):
+        """Test Phase 3 Cross-Document Consistency"""
+        print("🔗 TESTING PHASE 3 CROSS-DOCUMENT CONSISTENCY...")
+        
+        # Test consistency check between documents
+        payload = {
+            "documents_data": [
+                {
+                    "type": "passport",
+                    "name": "Carlos Silva",
+                    "date_of_birth": "1985-03-15",
+                    "passport_number": "AB1234567"
+                },
+                {
+                    "type": "birth_certificate", 
+                    "name": "Carlos Eduardo Silva",
+                    "date_of_birth": "1985-03-15",
+                    "place_of_birth": "São Paulo"
+                }
+            ],
+            "case_context": {
+                "applicant_name": "Carlos Silva",
+                "visa_type": "H-1B"
+            }
+        }
+        
+        try:
+            response = self.session.post(
+                f"{API_BASE}/documents/check-consistency",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                consistency_analysis = data.get('consistency_analysis', {})
+                status = data.get('status')
+                
+                success = status == 'success'
+                
+                self.log_test(
+                    "Phase 3 - Cross-Document Consistency",
+                    success,
+                    f"Status: {status}, Analysis: {consistency_analysis}",
+                    {
+                        "consistency_analysis": consistency_analysis,
+                        "status": status
+                    }
+                )
+            else:
+                self.log_test(
+                    "Phase 3 - Cross-Document Consistency",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test(
+                "Phase 3 - Cross-Document Consistency",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_phase3_multi_document_validation(self):
+        """Test Phase 3 Multi-Document Validation"""
+        print("📋 TESTING PHASE 3 MULTI-DOCUMENT VALIDATION...")
+        
+        # Test validation of multiple documents
+        payload = {
+            "documents": [
+                {
+                    "filename": "passport.pdf",
+                    "type": "PASSPORT_ID_PAGE",
+                    "content": "Test passport content",
+                    "extracted_text": "PASSPORT United States Passport No: AB1234567"
+                },
+                {
+                    "filename": "birth_cert.pdf", 
+                    "type": "BIRTH_CERTIFICATE",
+                    "content": "Test birth certificate content",
+                    "extracted_text": "Birth Certificate Carlos Silva Born: March 15, 1985"
+                }
+            ],
+            "case_context": {
+                "visa_type": "H-1B",
+                "applicant_name": "Carlos Silva"
+            }
+        }
+        
+        try:
+            response = self.session.post(
+                f"{API_BASE}/documents/validate-multiple",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                validation_result = data.get('validation_result', {})
+                status = data.get('status')
+                
+                success = status == 'success'
+                
+                self.log_test(
+                    "Phase 3 - Multi-Document Validation",
+                    success,
+                    f"Status: {status}, Validation: {validation_result}",
+                    {
+                        "validation_result": validation_result,
+                        "status": status
+                    }
+                )
+            else:
+                self.log_test(
+                    "Phase 3 - Multi-Document Validation",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test(
+                "Phase 3 - Multi-Document Validation",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
     def test_phase3_document_classifier(self):
         """Test Phase 3 Automated Document Classification"""
         print("🏷️ TESTING PHASE 3 DOCUMENT CLASSIFIER...")
