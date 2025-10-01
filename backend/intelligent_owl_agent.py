@@ -627,6 +627,9 @@ class IntelligentOwlAgent:
                               visa_type: str, context: Dict = None) -> Dict[str, Any]:
         """Validate input using AI"""
         
+        if not self.ai_client:
+            return {"status": "unavailable", "message": "AI not available"}
+        
         prompt = f"""
         Validate this immigration form input:
         
@@ -644,27 +647,36 @@ class IntelligentOwlAgent:
         """
         
         try:
-            response = await asyncio.to_thread(
-                self.ai_client.chat.completions.create,
-                model="gpt-4",
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=200,
-                temperature=0.3
-            )
-            
-            ai_response = response.choices[0].message.content
+            if self.ai_client["type"] == "emergent":
+                from emergentintegrations.llm.chat import UserMessage
+                response = await asyncio.to_thread(
+                    self.ai_client["client"].send_message,
+                    UserMessage(content=prompt)
+                )
+                ai_response = response.content
+            elif self.ai_client["type"] == "openai":
+                response = await asyncio.to_thread(
+                    self.ai_client["client"].chat.completions.create,
+                    model="gpt-4",
+                    messages=[{"role": "user", "content": prompt}],
+                    max_tokens=200,
+                    temperature=0.3
+                )
+                ai_response = response.choices[0].message.content
             
             # Try to parse JSON response
             try:
                 import json
-                return json.loads(ai_response)
+                result = json.loads(ai_response)
+                result["provider"] = self.ai_client["type"]
+                return result
             except:
                 # If not JSON, create structured response
                 return {
                     "valid": True,
                     "confidence": 0.8,
                     "suggestions": [ai_response[:100] + "..." if len(ai_response) > 100 else ai_response],
-                    "provider": "openai"
+                    "provider": self.ai_client["type"]
                 }
                 
         except Exception as e:
