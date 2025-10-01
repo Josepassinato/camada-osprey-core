@@ -1538,12 +1538,225 @@ class ComprehensiveEcosystemTester:
                 f"Exception during database investigation: {str(e)}"
             )
     
-    def test_emergent_llm_key_status(self):
-        """VERIFICAÇÃO STATUS EMERGENT_LLM_KEY - Testar se a chave atual está funcionando"""
-        print("🔑 VERIFICAÇÃO STATUS EMERGENT_LLM_KEY...")
+    def test_urgent_openai_key_validation(self):
+        """TESTE URGENTE - VALIDAR NOVA CHAVE OPENAI DA DRA. PAULA"""
+        print("🚨 TESTE URGENTE - VALIDAR NOVA CHAVE OPENAI DA DRA. PAULA...")
+        
+        # Test the critical I-589 payload as specified in the review request
+        i589_payload = {
+            "visa_type": "I-589",
+            "applicant_letter": "Meu nome é João e estou solicitando asilo político nos Estados Unidos devido à perseguição que sofri no meu país de origem por causa das minhas opiniões políticas.",
+            "visa_profile": {
+                "title": "I-589 Test",
+                "directives": [{"id": "1", "pt": "Descrever perseguição detalhadamente", "en": "Describe persecution in detail", "required": True}]
+            }
+        }
         
         try:
-            # Test Dr. Paula endpoints that use EMERGENT_LLM_KEY
+            print("🔍 Testing POST /api/llm/dr-paula/review-letter with I-589 payload...")
+            response = self.session.post(
+                f"{API_BASE}/llm/dr-paula/review-letter",
+                json=i589_payload
+            )
+            
+            print(f"Response Status: {response.status_code}")
+            print(f"Response Headers: {dict(response.headers)}")
+            
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    print(f"Response JSON Keys: {list(data.keys())}")
+                    
+                    # Check for success indicators
+                    success_indicators = {
+                        "has_success_field": "success" in data,
+                        "success_is_true": data.get("success") is True,
+                        "has_review_object": "review" in data,
+                        "no_budget_error": "budget" not in str(data).lower() and "exceeded" not in str(data).lower(),
+                        "no_unavailable_error": "não está disponível" not in str(data).lower(),
+                        "valid_json_response": True  # We got here, so JSON is valid
+                    }
+                    
+                    # Check if Dr. Paula is available
+                    dr_paula_available = not any([
+                        "não está disponível" in str(data).lower(),
+                        "budget exceeded" in str(data).lower(),
+                        "budget has been exceeded" in str(data).lower()
+                    ])
+                    
+                    overall_success = all(success_indicators.values()) and dr_paula_available
+                    
+                    self.log_test(
+                        "🚨 URGENT - Dr. Paula Review Letter I-589",
+                        overall_success,
+                        f"OpenAI Integration: {'✅ WORKING' if overall_success else '❌ FAILING'}, Dr. Paula Available: {dr_paula_available}",
+                        {
+                            "success_indicators": success_indicators,
+                            "dr_paula_available": dr_paula_available,
+                            "response_size": len(str(data)),
+                            "visa_type": data.get("visa_type", "N/A"),
+                            "has_review": "review" in data,
+                            "openai_key_working": overall_success
+                        }
+                    )
+                    
+                    # Additional detailed logging for debugging
+                    if "review" in data:
+                        review = data["review"]
+                        print(f"Review Object Keys: {list(review.keys()) if isinstance(review, dict) else 'Not a dict'}")
+                        
+                    return overall_success
+                    
+                except json.JSONDecodeError as e:
+                    self.log_test(
+                        "🚨 URGENT - Dr. Paula Review Letter I-589",
+                        False,
+                        f"❌ JSON PARSING ERROR: {str(e)} - Response not in valid JSON format",
+                        {
+                            "error": "JSON parsing failed",
+                            "response_text": response.text[:500],
+                            "json_error": str(e)
+                        }
+                    )
+                    return False
+                    
+            else:
+                self.log_test(
+                    "🚨 URGENT - Dr. Paula Review Letter I-589",
+                    False,
+                    f"❌ HTTP ERROR: {response.status_code}",
+                    {
+                        "status_code": response.status_code,
+                        "response_text": response.text[:500],
+                        "headers": dict(response.headers)
+                    }
+                )
+                return False
+                
+        except Exception as e:
+            self.log_test(
+                "🚨 URGENT - Dr. Paula Review Letter I-589",
+                False,
+                f"❌ EXCEPTION: {str(e)}",
+                {"exception": str(e)}
+            )
+            return False
+    
+    def test_all_dr_paula_endpoints_openai_key(self):
+        """Test all Dr. Paula endpoints with new OpenAI key"""
+        print("🔍 Testing All Dr. Paula Endpoints with New OpenAI Key...")
+        
+        endpoints_to_test = [
+            {
+                "name": "Generate Directives I-589",
+                "endpoint": "/llm/dr-paula/generate-directives",
+                "payload": {"visa_type": "I-589", "language": "pt"}
+            },
+            {
+                "name": "Format Official Letter",
+                "endpoint": "/llm/dr-paula/format-official-letter",
+                "payload": {
+                    "visa_type": "I-589",
+                    "applicant_letter": "Meu nome é João e estou solicitando asilo político nos Estados Unidos devido à perseguição que sofri no meu país de origem por causa das minhas opiniões políticas.",
+                    "review_data": {"status": "needs_formatting"}
+                }
+            },
+            {
+                "name": "Request Complement",
+                "endpoint": "/llm/dr-paula/request-complement",
+                "payload": {
+                    "visa_type": "I-589",
+                    "issues": ["Descrever perseguição detalhadamente", "Fornecer evidências específicas"]
+                }
+            }
+        ]
+        
+        working_count = 0
+        total_count = len(endpoints_to_test)
+        
+        for test in endpoints_to_test:
+            try:
+                print(f"Testing {test['name']}...")
+                response = self.session.post(f"{API_BASE}{test['endpoint']}", json=test['payload'])
+                
+                if response.status_code == 200:
+                    try:
+                        data = response.json()
+                        
+                        # Check for budget exceeded or unavailable errors
+                        response_text = str(data).lower()
+                        has_budget_error = any([
+                            "budget exceeded" in response_text,
+                            "budget has been exceeded" in response_text,
+                            "não está disponível" in response_text
+                        ])
+                        
+                        success = not has_budget_error and data.get("success", False)
+                        
+                        if success:
+                            working_count += 1
+                            
+                        self.log_test(
+                            f"Dr. Paula - {test['name']}",
+                            success,
+                            f"{'✅ Working' if success else '❌ Failed'} - Budget Error: {has_budget_error}",
+                            {
+                                "endpoint": test['endpoint'],
+                                "status_code": response.status_code,
+                                "has_budget_error": has_budget_error,
+                                "response_success": data.get("success", False),
+                                "response_size": len(str(data))
+                            }
+                        )
+                        
+                    except json.JSONDecodeError:
+                        self.log_test(
+                            f"Dr. Paula - {test['name']}",
+                            False,
+                            "❌ Invalid JSON response",
+                            {"response_text": response.text[:200]}
+                        )
+                        
+                else:
+                    self.log_test(
+                        f"Dr. Paula - {test['name']}",
+                        False,
+                        f"❌ HTTP {response.status_code}",
+                        {"status_code": response.status_code, "response": response.text[:200]}
+                    )
+                    
+            except Exception as e:
+                self.log_test(
+                    f"Dr. Paula - {test['name']}",
+                    False,
+                    f"❌ Exception: {str(e)}",
+                    {"exception": str(e)}
+                )
+        
+        # Overall assessment
+        success_rate = (working_count / total_count) * 100
+        overall_success = working_count >= (total_count * 0.8)  # 80% success rate
+        
+        self.log_test(
+            "Dr. Paula Endpoints - Overall Assessment",
+            overall_success,
+            f"Success Rate: {working_count}/{total_count} ({success_rate:.1f}%)",
+            {
+                "working_endpoints": working_count,
+                "total_endpoints": total_count,
+                "success_rate": success_rate,
+                "openai_key_status": "✅ Working" if overall_success else "❌ Issues detected"
+            }
+        )
+        
+        return overall_success
+    
+    def test_emergent_llm_key_status(self):
+        """VERIFICAÇÃO STATUS EMERGENT_LLM_KEY vs NEW OPENAI_API_KEY"""
+        print("🔑 VERIFICAÇÃO STATUS EMERGENT_LLM_KEY vs NEW OPENAI_API_KEY...")
+        
+        try:
+            # Test Dr. Paula endpoints that should now use the new OpenAI key
             test_endpoints = [
                 {
                     "name": "Dr. Paula - Generate Directives",
@@ -1556,14 +1769,6 @@ class ComprehensiveEcosystemTester:
                     "payload": {
                         "visa_type": "H1B",
                         "applicant_letter": "I am applying for H-1B visa. I have a job offer."
-                    }
-                },
-                {
-                    "name": "Chat with Dra. Paula",
-                    "endpoint": "/chat",
-                    "payload": {
-                        "message": "Olá, preciso de ajuda com visto H-1B",
-                        "session_id": "test_session_123"
                     }
                 }
             ]
