@@ -5913,8 +5913,8 @@ async def analyze_document_with_professional_api(
                 "reason": str(e),
                 "provider": "Onfido"
             },
-            "dra_paula_assessment": f"❌ Onfido: Erro na análise profissional - {str(e)}",
-            "onfido_powered": True
+            "dra_paula_assessment": f"❌ Híbrido: Erro na análise (Google AI + Dr. Miguel) - {str(e)}",
+            "hybrid_powered": True
         }
 
 # Phase 2 & 3: Enhanced Document Validation Endpoints
