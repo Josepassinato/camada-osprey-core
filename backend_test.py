@@ -10850,6 +10850,10 @@ class ComprehensiveImmigrationAPITester:
                 self.log_test("Carlos H-1B Step 1 - Case Creation", False, f"HTTP {response.status_code}: {response.text}")
                 return
             
+            # Small delay to ensure database consistency
+            import time
+            time.sleep(1)
+            
             # ETAPA 2: H-1B Visa Selection
             print(f"ETAPA 2: 📋 H-1B Visa Selection... (Case ID: {case_id})")
             payload = {"form_code": "H-1B"}
