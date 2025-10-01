@@ -7555,6 +7555,18 @@ async def startup_db_client():
             await db.owl_users.create_index("user_id", unique=True)
             await db.owl_users.create_index("created_at")
             
+            # Owl Agent payment and download indexes
+            await db.payment_transactions.create_index("stripe_session_id", unique=True)
+            await db.payment_transactions.create_index("owl_session_id")
+            await db.payment_transactions.create_index("user_email")
+            await db.payment_transactions.create_index("payment_status")
+            await db.payment_transactions.create_index("created_at")
+            
+            await db.owl_downloads.create_index("download_id", unique=True)
+            await db.owl_downloads.create_index("stripe_session_id")
+            await db.owl_downloads.create_index("owl_session_id")
+            await db.owl_downloads.create_index("expires_at")
+            
             logger.info("Database indexes created successfully for optimized performance!")
             
         except Exception as index_error:
