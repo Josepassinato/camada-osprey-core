@@ -566,8 +566,8 @@ class DocumentValidationAgent(BaseSpecializedAgent):
                 "type_matches_expected": expected_document_type == validation_result.get('document_type', expected_document_type),
                 "quality_acceptable": quality_result['status'] in ['ok', 'alert'],
                 "uscis_acceptable": uscis_acceptable,
-                "issues": validation_result.get('issues', []) + quality_result.get('issues', []),
-                "recommendations": validation_result.get('recommendations', []) + quality_result.get('recommendations', []),
+                "issues": self._ensure_list(validation_result.get('issues', [])) + self._ensure_list(quality_result.get('issues', [])),
+                "recommendations": self._ensure_list(validation_result.get('recommendations', [])) + self._ensure_list(quality_result.get('recommendations', [])),
                 "detailed_analysis": {
                     "quality_assessment": quality_result,
                     "validation_results": validation_result,
