@@ -3498,8 +3498,15 @@ class ComprehensiveEcosystemTester:
                 self.log_test(
                     "Validation Capabilities Endpoint",
                     False,
-                    f"Exception: {str(e)}"
+                    f"HTTP {response.status_code}",
+                    response.text
                 )
+        except Exception as e:
+            self.log_test(
+                "Validation Capabilities Endpoint",
+                False,
+                f"Exception: {str(e)}"
+            )
     
     def run_form_code_investigation(self):
         """Run focused form_code mismatch investigation"""
