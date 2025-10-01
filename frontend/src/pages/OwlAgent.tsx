@@ -37,12 +37,12 @@ export const OwlAgent: React.FC = () => {
   const [savedSessions, setSavedSessions] = useState<SavedSession[]>([]);
 
   const visaTypes = [
-    { value: 'H-1B', label: 'H-1B - Trabalhador Especializado' },
-    { value: 'F-1', label: 'F-1 - Estudante' },
-    { value: 'I-485', label: 'I-485 - Ajuste de Status' },
-    { value: 'L-1', label: 'L-1 - Transferência Intraempresa' },
-    { value: 'O-1', label: 'O-1 - Habilidade Extraordinária' },
-    { value: 'B-1/B-2', label: 'B-1/B-2 - Negócios/Turismo' },
+    { value: 'H-1B', label: 'H-1B - Trabalhador Especializado', description: 'Para profissionais em ocupações especializadas' },
+    { value: 'F-1', label: 'F-1 - Estudante', description: 'Para estudos acadêmicos nos EUA' },
+    { value: 'I-485', label: 'I-485 - Ajuste de Status', description: 'Para residência permanente' },
+    { value: 'O-1', label: 'O-1 - Habilidade Extraordinária', description: 'Para pessoas com habilidades excepcionais' },
+    { value: 'L-1', label: 'L-1 - Transferência Interna', description: 'Para funcionários de empresas multinacionais' },
+    { value: 'B-1/B-2', label: 'B-1/B-2 - Turista/Negócios', description: 'Para visitas temporárias' }
   ];
 
   const languages = [
