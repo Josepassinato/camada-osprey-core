@@ -25,6 +25,7 @@ from emergentintegrations.llm.chat import LlmChat, UserMessage
 import openai
 import yaml
 from immigration_expert import ImmigrationExpert, create_immigration_expert
+from onfido_integration import onfido_verifier
 
 # Configure OpenAI
 openai.api_key = os.environ.get('OPENAI_API_KEY')
