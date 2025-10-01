@@ -10152,6 +10152,6 @@ class ComprehensiveImmigrationAPITester:
             )
 
 if __name__ == "__main__":
-    tester = ComprehensiveEcosystemTester()
-    # Run all tests including Google Vision API + Dr. Miguel hybrid system
+    tester = ComprehensiveImmigrationAPITester()
+    # Run all tests including the 4 specific corrected endpoints
     tester.run_all_tests()
