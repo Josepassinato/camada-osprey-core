@@ -1,0 +1,391 @@
+{
+  "timestamp": "2025-10-01T21:28:14.012966",
+  "api_base": "https://iaimmigration.preview.emergentagent.com/api",
+  "total_tests": 21,
+  "passed_tests": 7,
+  "failed_tests": 14,
+  "success_rate": 33.33333333333333,
+  "status": "\ud83d\udd34 NOT PRODUCTION READY",
+  "categories": {
+    "Auth": {
+      "passed": 1,
+      "failed": 2,
+      "tests": [
+        {
+          "test": "Auth Signup",
+          "success": true,
+          "details": "Token: True, User: True, Message: User created successfully",
+          "timestamp": "2025-10-01T21:27:40.470188",
+          "response_data": {
+            "has_required_fields": true
+          }
+        },
+        {
+          "test": "Auth Login",
+          "success": false,
+          "details": "HTTP 422",
+          "timestamp": "2025-10-01T21:27:40.483887",
+          "response_data": "{\"detail\":[{\"type\":\"value_error\",\"loc\":[\"body\",\"email\"],\"msg\":\"value is not a valid email address: The part after the @-sign is a special-use or reserved name that cannot be used with email.\",\"input\":"
+        },
+        {
+          "test": "Auth Dashboard",
+          "success": false,
+          "details": "No auth token available",
+          "timestamp": "2025-10-01T21:27:40.483942",
+          "response_data": null
+        }
+      ]
+    },
+    "Owl": {
+      "passed": 0,
+      "failed": 5,
+      "tests": [
+        {
+          "test": "Owl Start Session",
+          "success": false,
+          "details": "HTTP 404",
+          "timestamp": "2025-10-01T21:27:40.533622",
+          "response_data": "{\"detail\":\"Not Found\"}"
+        },
+        {
+          "test": "Owl Save Response",
+          "success": false,
+          "details": "HTTP 404",
+          "timestamp": "2025-10-01T21:27:40.543895",
+          "response_data": "{\"detail\":\"Not Found\"}"
+        },
+        {
+          "test": "Owl Register",
+          "success": false,
+          "details": "HTTP 404",
+          "timestamp": "2025-10-01T21:27:40.593992",
+          "response_data": "{\"detail\":\"Not Found\"}"
+        },
+        {
+          "test": "Owl Login",
+          "success": false,
+          "details": "HTTP 404",
+          "timestamp": "2025-10-01T21:27:40.603248",
+          "response_data": "{\"detail\":\"Not Found\"}"
+        },
+        {
+          "test": "Owl My Sessions",
+          "success": false,
+          "details": "HTTP 404",
+          "timestamp": "2025-10-01T21:27:40.612923",
+          "response_data": "{\"detail\":\"Not Found\"}"
+        }
+      ]
+    },
+    "Auto": {
+      "passed": 0,
+      "failed": 2,
+      "tests": [
+        {
+          "test": "Auto Application Start",
+          "success": false,
+          "details": "Case ID: None, Keys: ['message', 'case']",
+          "timestamp": "2025-10-01T21:27:40.664355",
+          "response_data": {
+            "case_created": false
+          }
+        },
+        {
+          "test": "Auto Application Visa Specs",
+          "success": false,
+          "details": "HTTP 405",
+          "timestamp": "2025-10-01T21:27:40.673621",
+          "response_data": "{\"detail\":\"Method Not Allowed\"}"
+        }
+      ]
+    },
+    "Documents": {
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "test": "Documents Analyze with AI",
+          "success": true,
+          "details": "Analysis completed, Keys: ['valid', 'legible', 'completeness', 'issues', 'extracted_data', 'dra_paula_assessment']",
+          "timestamp": "2025-10-01T21:27:40.695749",
+          "response_data": {
+            "analysis_completed": true
+          }
+        },
+        {
+          "test": "Documents Analysis KPIs",
+          "success": true,
+          "details": "KPIs retrieved, Keys: ['success', 'kpi_report', 'message']",
+          "timestamp": "2025-10-01T21:27:40.704717",
+          "response_data": {
+            "kpis_retrieved": true
+          }
+        },
+        {
+          "test": "Documents Analysis Performance",
+          "success": true,
+          "details": "Performance data retrieved, Keys: ['success', 'performance_metrics', 'targets', 'message']",
+          "timestamp": "2025-10-01T21:27:40.713632",
+          "response_data": {
+            "performance_retrieved": true
+          }
+        }
+      ]
+    },
+    "Dr.": {
+      "passed": 2,
+      "failed": 1,
+      "tests": [
+        {
+          "test": "Dr. Paula Generate Directives",
+          "success": true,
+          "details": "Directives generated, Keys: ['success', 'agent', 'visa_type', 'language', 'directives_text', 'directives_data', 'timestamp']",
+          "timestamp": "2025-10-01T21:27:58.789391",
+          "response_data": {
+            "directives_generated": true
+          }
+        },
+        {
+          "test": "Dr. Paula Review Letter",
+          "success": true,
+          "details": "Letter reviewed, Keys: ['success', 'agent', 'timestamp', 'review']",
+          "timestamp": "2025-10-01T21:28:13.862124",
+          "response_data": {
+            "letter_reviewed": true
+          }
+        },
+        {
+          "test": "Dr. Paula Request Complement",
+          "success": false,
+          "details": "Complement requested, Keys: ['success', 'error']",
+          "timestamp": "2025-10-01T21:28:13.872870",
+          "response_data": {
+            "complement_requested": false
+          }
+        }
+      ]
+    },
+    "Stripe": {
+      "passed": 1,
+      "failed": 2,
+      "tests": [
+        {
+          "test": "Stripe Create Checkout Session",
+          "success": false,
+          "details": "HTTP 404",
+          "timestamp": "2025-10-01T21:28:13.885305",
+          "response_data": "{\"detail\":\"Not Found\"}"
+        },
+        {
+          "test": "Stripe Webhook",
+          "success": false,
+          "details": "HTTP 404",
+          "timestamp": "2025-10-01T21:28:13.942935",
+          "response_data": "{\"detail\":\"Not Found\"}"
+        },
+        {
+          "test": "Stripe Download",
+          "success": true,
+          "details": "Download not found (404) - expected for test ID",
+          "timestamp": "2025-10-01T21:28:13.954449",
+          "response_data": {
+            "expected_404": true
+          }
+        }
+      ]
+    },
+    "Chat": {
+      "passed": 0,
+      "failed": 1,
+      "tests": [
+        {
+          "test": "Chat Endpoint",
+          "success": false,
+          "details": "HTTP 405",
+          "timestamp": "2025-10-01T21:28:14.004396",
+          "response_data": "{\"detail\":\"Method Not Allowed\"}"
+        }
+      ]
+    },
+    "AI": {
+      "passed": 0,
+      "failed": 1,
+      "tests": [
+        {
+          "test": "AI Processing Step",
+          "success": false,
+          "details": "HTTP 400",
+          "timestamp": "2025-10-01T21:28:14.012763",
+          "response_data": "{\"detail\":\"case_id and step_id are required\"}"
+        }
+      ]
+    }
+  },
+  "detailed_results": [
+    {
+      "test": "Auth Signup",
+      "success": true,
+      "details": "Token: True, User: True, Message: User created successfully",
+      "timestamp": "2025-10-01T21:27:40.470188",
+      "response_data": {
+        "has_required_fields": true
+      }
+    },
+    {
+      "test": "Auth Login",
+      "success": false,
+      "details": "HTTP 422",
+      "timestamp": "2025-10-01T21:27:40.483887",
+      "response_data": "{\"detail\":[{\"type\":\"value_error\",\"loc\":[\"body\",\"email\"],\"msg\":\"value is not a valid email address: The part after the @-sign is a special-use or reserved name that cannot be used with email.\",\"input\":"
+    },
+    {
+      "test": "Auth Dashboard",
+      "success": false,
+      "details": "No auth token available",
+      "timestamp": "2025-10-01T21:27:40.483942",
+      "response_data": null
+    },
+    {
+      "test": "Owl Start Session",
+      "success": false,
+      "details": "HTTP 404",
+      "timestamp": "2025-10-01T21:27:40.533622",
+      "response_data": "{\"detail\":\"Not Found\"}"
+    },
+    {
+      "test": "Owl Save Response",
+      "success": false,
+      "details": "HTTP 404",
+      "timestamp": "2025-10-01T21:27:40.543895",
+      "response_data": "{\"detail\":\"Not Found\"}"
+    },
+    {
+      "test": "Owl Register",
+      "success": false,
+      "details": "HTTP 404",
+      "timestamp": "2025-10-01T21:27:40.593992",
+      "response_data": "{\"detail\":\"Not Found\"}"
+    },
+    {
+      "test": "Owl Login",
+      "success": false,
+      "details": "HTTP 404",
+      "timestamp": "2025-10-01T21:27:40.603248",
+      "response_data": "{\"detail\":\"Not Found\"}"
+    },
+    {
+      "test": "Owl My Sessions",
+      "success": false,
+      "details": "HTTP 404",
+      "timestamp": "2025-10-01T21:27:40.612923",
+      "response_data": "{\"detail\":\"Not Found\"}"
+    },
+    {
+      "test": "Auto Application Start",
+      "success": false,
+      "details": "Case ID: None, Keys: ['message', 'case']",
+      "timestamp": "2025-10-01T21:27:40.664355",
+      "response_data": {
+        "case_created": false
+      }
+    },
+    {
+      "test": "Auto Application Visa Specs",
+      "success": false,
+      "details": "HTTP 405",
+      "timestamp": "2025-10-01T21:27:40.673621",
+      "response_data": "{\"detail\":\"Method Not Allowed\"}"
+    },
+    {
+      "test": "Documents Analyze with AI",
+      "success": true,
+      "details": "Analysis completed, Keys: ['valid', 'legible', 'completeness', 'issues', 'extracted_data', 'dra_paula_assessment']",
+      "timestamp": "2025-10-01T21:27:40.695749",
+      "response_data": {
+        "analysis_completed": true
+      }
+    },
+    {
+      "test": "Documents Analysis KPIs",
+      "success": true,
+      "details": "KPIs retrieved, Keys: ['success', 'kpi_report', 'message']",
+      "timestamp": "2025-10-01T21:27:40.704717",
+      "response_data": {
+        "kpis_retrieved": true
+      }
+    },
+    {
+      "test": "Documents Analysis Performance",
+      "success": true,
+      "details": "Performance data retrieved, Keys: ['success', 'performance_metrics', 'targets', 'message']",
+      "timestamp": "2025-10-01T21:27:40.713632",
+      "response_data": {
+        "performance_retrieved": true
+      }
+    },
+    {
+      "test": "Dr. Paula Generate Directives",
+      "success": true,
+      "details": "Directives generated, Keys: ['success', 'agent', 'visa_type', 'language', 'directives_text', 'directives_data', 'timestamp']",
+      "timestamp": "2025-10-01T21:27:58.789391",
+      "response_data": {
+        "directives_generated": true
+      }
+    },
+    {
+      "test": "Dr. Paula Review Letter",
+      "success": true,
+      "details": "Letter reviewed, Keys: ['success', 'agent', 'timestamp', 'review']",
+      "timestamp": "2025-10-01T21:28:13.862124",
+      "response_data": {
+        "letter_reviewed": true
+      }
+    },
+    {
+      "test": "Dr. Paula Request Complement",
+      "success": false,
+      "details": "Complement requested, Keys: ['success', 'error']",
+      "timestamp": "2025-10-01T21:28:13.872870",
+      "response_data": {
+        "complement_requested": false
+      }
+    },
+    {
+      "test": "Stripe Create Checkout Session",
+      "success": false,
+      "details": "HTTP 404",
+      "timestamp": "2025-10-01T21:28:13.885305",
+      "response_data": "{\"detail\":\"Not Found\"}"
+    },
+    {
+      "test": "Stripe Webhook",
+      "success": false,
+      "details": "HTTP 404",
+      "timestamp": "2025-10-01T21:28:13.942935",
+      "response_data": "{\"detail\":\"Not Found\"}"
+    },
+    {
+      "test": "Stripe Download",
+      "success": true,
+      "details": "Download not found (404) - expected for test ID",
+      "timestamp": "2025-10-01T21:28:13.954449",
+      "response_data": {
+        "expected_404": true
+      }
+    },
+    {
+      "test": "Chat Endpoint",
+      "success": false,
+      "details": "HTTP 405",
+      "timestamp": "2025-10-01T21:28:14.004396",
+      "response_data": "{\"detail\":\"Method Not Allowed\"}"
+    },
+    {
+      "test": "AI Processing Step",
+      "success": false,
+      "details": "HTTP 400",
+      "timestamp": "2025-10-01T21:28:14.012763",
+      "response_data": "{\"detail\":\"case_id and step_id are required\"}"
+    }
+  ]
+}
