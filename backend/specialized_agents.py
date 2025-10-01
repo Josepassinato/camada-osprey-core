@@ -432,7 +432,10 @@ class DocumentValidationAgent(BaseSpecializedAgent):
                         if visual_dob and visual_dob != mrz_data.get('date_of_birth'):
                             logger.warning(f"⚠️ Birth date mismatch: Visual={visual_dob}, MRZ={mrz_data['date_of_birth']}")
             
-            # PHASE 4.6: Calculate enhanced confidence with production validators
+            # PHASE 4.6: Calculate final confidence starting with validation result
+            final_confidence = validation_result.get('overall_confidence', 0)
+            
+            # PHASE 4.7: Enhance confidence with production validators if available
             if enhanced_confidence_scores:
                 enhanced_avg_confidence = sum(enhanced_confidence_scores) / len(enhanced_confidence_scores)
                 final_confidence = (final_confidence + enhanced_avg_confidence) / 2
@@ -442,7 +445,6 @@ class DocumentValidationAgent(BaseSpecializedAgent):
             processing_time = (datetime.utcnow() - start_time).total_seconds() * 1000
             
             # PHASE 6: Final Decision with KPI Tracking
-            final_confidence = validation_result.get('overall_confidence', 0)
             is_valid = validation_result.get('is_valid', False)
             uscis_acceptable = validation_result.get('uscis_acceptable', False)
             
