@@ -1980,7 +1980,17 @@ class ComprehensiveEcosystemTester:
         
         for test in self.test_results:
             test_name = test['test']
-            if 'Policy Engine' in test_name:
+            if 'Phase 2 - Field Extraction' in test_name:
+                components["Phase 2 Field Extraction"].append(test)
+            elif 'Phase 2 - Translation Gate' in test_name:
+                components["Phase 2 Translation Gate"].append(test)
+            elif 'Phase 3 - Document Classifier' in test_name:
+                components["Phase 3 Document Classification"].append(test)
+            elif 'Phase 3 - Cross-Document Consistency' in test_name:
+                components["Phase 3 Cross-Document Consistency"].append(test)
+            elif 'Phase 2&3' in test_name or 'Comprehensive Analysis' in test_name or 'Validation Capabilities' in test_name:
+                components["Phase 2&3 Integration"].append(test)
+            elif 'Policy Engine' in test_name:
                 components["Policy Engine (FASE 1)"].append(test)
             elif 'Dr. Paula' in test_name:
                 components["Dr. Paula Cover Letter"].append(test)
