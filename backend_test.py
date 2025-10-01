@@ -1871,23 +1871,8 @@ class ComprehensiveEcosystemTester:
                 False,
                 f"Exception: {str(e)}"
             )
-                        response_text = str(data).lower()
-                        has_budget_error = any([
-                            "budget exceeded" in response_text,
-                            "budget has been exceeded" in response_text,
-                            "não está disponível" in response_text
-                        ])
-                        
-                        success = not has_budget_error and data.get("success", False)
-                        
-                        if success:
-                            working_count += 1
-                            
-                        self.log_test(
-                            f"Dr. Paula - {test['name']}",
-                            success,
-                            f"{'✅ Working' if success else '❌ Failed'} - Budget Error: {has_budget_error}",
-                            {
+    
+    def run_critical_openai_tests(self):
                                 "endpoint": test['endpoint'],
                                 "status_code": response.status_code,
                                 "has_budget_error": has_budget_error,
