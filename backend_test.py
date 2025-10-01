@@ -1262,7 +1262,8 @@ class ComprehensiveEcosystemTester:
             
             if start_response.status_code == 200:
                 start_data = start_response.json()
-                case_id = start_data.get("case_id")
+                # Extract case_id from nested case object
+                case_id = start_data.get("case", {}).get("case_id") or start_data.get("case_id")
                 
                 if case_id:
                     # Step 2: Set form code to H-1B
