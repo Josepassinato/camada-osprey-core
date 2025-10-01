@@ -5915,7 +5915,7 @@ async def analyze_document_with_professional_api(
                 "reason": str(e),
                 "provider": "Onfido"
             },
-            "dra_paula_assessment": f"❌ Híbrido: Erro na análise (Google Vision API + Dr. Miguel) - {str(e)}",
+            "dra_paula_assessment": f"❌ Híbrido: Erro na análise (Google Document AI + Dr. Miguel) - {str(e)}",
             "hybrid_powered": True
         }
 
