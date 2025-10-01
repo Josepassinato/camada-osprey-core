@@ -382,9 +382,10 @@ class CarlosH1BSimulator:
             
             if response.status_code == 200:
                 data = response.json()
-                story = data.get('user_story_text', '')
-                responses = data.get('simplified_form_responses', {})
-                progress = data.get('progress_percentage', 0)
+                case_data = data.get('case', {})
+                story = case_data.get('user_story_text', '')
+                responses = case_data.get('simplified_form_responses', {})
+                progress = case_data.get('progress_percentage', 0)
                 
                 success = (
                     len(story) > 100 and
