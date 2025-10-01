@@ -5896,19 +5896,23 @@ async def analyze_document_with_professional_api(
             analysis_result["dr_miguel_error"] = str(enhanced_error)
             analysis_result["dra_paula_assessment"] += " | Dr. Miguel: Erro na análise avançada"
             
-            return analysis_result
-        
+            
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error in real document analysis: {str(e)}")
+        logger.error(f"❌ Erro na análise profissional Onfido: {str(e)}")
         return {
             "valid": False,
             "legible": False,
             "completeness": 0,
-            "issues": [f"❌ ERRO INTERNO: Falha na análise do documento - {str(e)}"],
-            "extracted_data": {"validation_status": "ERROR", "reason": str(e)},
-            "dra_paula_assessment": "❌ ERRO: Falha na validação. Tente enviar novamente."
+            "issues": [f"❌ Erro no sistema de validação profissional: {str(e)}"],
+            "extracted_data": {
+                "validation_status": "ERROR", 
+                "reason": str(e),
+                "provider": "Onfido"
+            },
+            "dra_paula_assessment": f"❌ Onfido: Erro na análise profissional - {str(e)}",
+            "onfido_powered": True
         }
 
 # Phase 2 & 3: Enhanced Document Validation Endpoints
