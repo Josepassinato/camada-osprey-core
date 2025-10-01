@@ -517,8 +517,9 @@ class CarlosH1BSimulator:
             
             if response.status_code == 200:
                 data = response.json()
-                status = data.get('status')
-                progress = data.get('progress_percentage', 0)
+                case_data = data.get('case', {})
+                status = case_data.get('status')
+                progress = case_data.get('progress_percentage', 0)
                 
                 success = status == "completed" and progress == 100
                 
