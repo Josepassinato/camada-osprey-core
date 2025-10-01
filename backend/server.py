@@ -1521,6 +1521,51 @@ async def get_user_documents(current_user = Depends(get_current_user)):
         logger.error(f"Error getting documents: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error getting documents: {str(e)}")
 
+@api_router.get("/documents/validation-capabilities")
+async def get_validation_capabilities(current_user = Depends(get_current_user)):
+    """
+    Get information about available validation capabilities (Phase 2 & 3 features)
+    """
+    try:
+        return {
+            "status": "success",
+            "capabilities": {
+                "phase_2_features": {
+                    "enhanced_field_extraction": True,
+                    "translation_gate": True,
+                    "advanced_regex_patterns": True,
+                    "high_precision_validators": True,
+                    "language_detection": True
+                },
+                "phase_3_features": {
+                    "auto_document_classification": True,
+                    "cross_document_consistency": True,
+                    "multi_document_validation": True,
+                    "advanced_ocr_integration": True,
+                    "comprehensive_scoring": True
+                },
+                "supported_document_types": [
+                    "PASSPORT_ID_PAGE", "BIRTH_CERTIFICATE", "MARRIAGE_CERT",
+                    "DEGREE_CERTIFICATE", "EMPLOYMENT_OFFER_LETTER", "I797_NOTICE",
+                    "I94_RECORD", "PAY_STUB", "TAX_RETURN_1040", "TRANSLATION_CERTIFICATE"
+                ],
+                "supported_languages": ["english", "portuguese", "spanish"],
+                "validation_engines": {
+                    "policy_engine": "Enhanced YAML-based validation",
+                    "field_extractor": "Advanced regex with ML validation",
+                    "translation_gate": "Language detection and requirements",
+                    "consistency_engine": "Cross-document verification",
+                    "document_classifier": "AI-powered type detection"
+                }
+            },
+            "version": "2.0.0-phase3",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting validation capabilities: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get capabilities: {str(e)}")
+
 @api_router.get("/documents/{document_id}")
 async def get_document_details(document_id: str, current_user = Depends(get_current_user)):
     """Get document details including AI analysis"""
