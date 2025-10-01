@@ -450,7 +450,8 @@ class HybridDocumentValidator:
             "dr_miguel_analysis": {
                 "verdict": miguel_verdict,
                 "confidence": miguel_confidence,
-                "agent_version": miguel_result.get("agent", "Unknown")
+                "agent_version": "Dr. Miguel - Validador de Documentos",
+                "raw_response": miguel_result[:200] + "..." if isinstance(miguel_result, str) and len(miguel_result) > 200 else miguel_result
             },
             "processing_stats": {
                 "total_time_ms": processing_time,
