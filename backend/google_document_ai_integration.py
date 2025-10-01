@@ -17,26 +17,34 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-class GoogleVisionAPIProcessor:
-    """Professional document OCR using Google Vision API with API key"""
+class GoogleDocumentAIProcessor:
+    """Professional document analysis using Google Cloud Document AI"""
     
     def __init__(self):
         # Configuration from environment variables  
         self.api_key = os.environ.get('GOOGLE_API_KEY')
         self.client_id = os.environ.get('GOOGLE_CLIENT_ID')
         self.project_id = os.environ.get('GOOGLE_CLOUD_PROJECT_ID', '891629358081')
+        self.location = os.environ.get('GOOGLE_DOCUMENT_AI_LOCATION', 'us')
         
         # Check if we have credentials for real mode
         self.is_mock_mode = not (self.api_key or self.client_id)
         
         if self.is_mock_mode:
-            logger.warning("🧪 Google Vision API in MOCK MODE - No credentials provided")
+            logger.warning("🧪 Google Document AI in MOCK MODE - No credentials provided")
         else:
             if self.api_key:
-                logger.info(f"🔗 Google Vision API initialized with API key for project {self.project_id}")
+                logger.info(f"🔗 Google Document AI initialized with API key for project {self.project_id}")
+                
+                # Document AI REST endpoint
+                self.document_ai_endpoint = f"https://{self.location}-documentai.googleapis.com/v1/projects/{self.project_id}/locations/{self.location}/processors/GENERAL_PROCESSOR:process"
+                
+                # Fallback Vision API endpoint
                 self.vision_endpoint = f"https://vision.googleapis.com/v1/images:annotate?key={self.api_key}"
+                
             elif self.client_id:
-                logger.info(f"🔗 Google Vision API initialized with OAuth2 Client ID: {self.client_id}")
+                logger.info(f"🔗 Google Document AI initialized with OAuth2 Client ID: {self.client_id}")
+                self.document_ai_endpoint = f"https://{self.location}-documentai.googleapis.com/v1/projects/{self.project_id}/locations/{self.location}/processors/GENERAL_PROCESSOR:process"
                 self.vision_endpoint = "https://vision.googleapis.com/v1/images:annotate"
             
         # Track authentication method
