@@ -769,18 +769,18 @@ class HybridDocumentValidator:
         # Dr. Miguel: 60% weight (validation and fraud detection)
         combined_confidence = (google_confidence * 0.4) + (miguel_confidence * 0.6)
         
-        # Determine overall validity (more lenient thresholds)
+        # Determine overall validity
         is_valid = (
             miguel_verdict == "APROVADO" and 
-            combined_confidence >= 65 and  # Reduced from 75
-            google_confidence >= 40        # Reduced from 50
+            combined_confidence >= 75 and 
+            google_confidence >= 50
         )
         
-        # Combine issues (more lenient warnings)
+        # Combine issues
         issues = []
         
         # Add Google AI issues
-        if google_confidence < 60:  # Reduced from 70
+        if google_confidence < 70:
             issues.append(f"⚠️ Qualidade de OCR baixa: {google_confidence:.1f}%")
         
         # Add Dr. Miguel issues
