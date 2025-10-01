@@ -25,6 +25,11 @@ class GoogleDocumentAIProcessor:
     """Professional document analysis using Google Cloud Document AI"""
     
     def __init__(self):
+        # Load environment variables from .env file
+        from dotenv import load_dotenv
+        from pathlib import Path
+        load_dotenv(Path(__file__).parent / '.env')
+        
         # Configuration from environment variables  
         self.api_key = os.environ.get('GOOGLE_API_KEY')
         self.client_id = os.environ.get('GOOGLE_CLIENT_ID')
@@ -41,24 +46,25 @@ class GoogleDocumentAIProcessor:
         if self.is_mock_mode:
             logger.warning("🧪 Google Document AI in MOCK MODE - No credentials provided")
         else:
-            if has_oauth2:
+            if has_api_key:
+                logger.info(f"🔗 Google Vision API initialized with API key for project {self.project_id}")
+                logger.info(f"🔑 API Key configured: {self.api_key[:20]}...")
+                
+                # Use API key for Vision API (working and available)
+                self.auth_method = "api_key"
+                self.vision_endpoint = f"https://vision.googleapis.com/v1/images:annotate?key={self.api_key}"
+                self.document_ai_endpoint = None  # Document AI doesn't work with API keys
+                
+            elif has_oauth2:
                 logger.info(f"🔗 Google Document AI initialized with OAuth2 for project {self.project_id}")
                 
-                # Use OAuth2 for Document AI (preferred)
+                # Use OAuth2 for Document AI (preferred but not implemented)
                 self.auth_method = "oauth2"
                 self.document_ai_endpoint = f"https://{self.location}-documentai.googleapis.com/v1/projects/{self.project_id}/locations/{self.location}/processors"
                 self.vision_endpoint = "https://vision.googleapis.com/v1/images:annotate"
                 
                 # Initialize OAuth2 credentials
                 self._init_oauth2_credentials()
-                
-            elif has_api_key:
-                logger.info(f"🔗 Google Document AI initialized with API key for project {self.project_id}")
-                
-                # Fallback to API key for Vision API only
-                self.auth_method = "api_key"
-                self.vision_endpoint = f"https://vision.googleapis.com/v1/images:annotate?key={self.api_key}"
-                self.document_ai_endpoint = None  # Document AI doesn't work with API keys
     
     def _init_oauth2_credentials(self):
         """Initialize OAuth2 credentials for Google APIs"""
