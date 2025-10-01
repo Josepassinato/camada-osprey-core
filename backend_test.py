@@ -1380,13 +1380,512 @@ class ComprehensiveEcosystemTester:
                 f"Exception: {str(e)}"
             )
     
+    def test_phase2_field_extraction_engine(self):
+        """Test Phase 2 Field Extraction Engine"""
+        print("🔍 TESTING PHASE 2 FIELD EXTRACTION ENGINE...")
+        
+        # Test enhanced field extraction endpoint
+        test_document_content = """
+        PASSPORT
+        United States of America
+        Passport No: AB1234567
+        Name: SILVA, CARLOS EDUARDO
+        Date of Birth: 15/03/1985
+        Expiry Date: 20/12/2030
+        Place of Birth: SAO PAULO, BRAZIL
+        """
+        
+        payload = {
+            "text_content": test_document_content,
+            "document_type": "PASSPORT_ID_PAGE",
+            "context": {
+                "nationality": "USA",
+                "document_type": "passport"
+            }
+        }
+        
+        try:
+            response = self.session.post(
+                f"{API_BASE}/documents/extract-fields",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check for expected field extractions
+                expected_fields = ['passport_number', 'date_fields', 'name_fields']
+                extractions = data.get('extractions', {})
+                
+                fields_found = sum(1 for field in expected_fields if field in extractions)
+                success = fields_found >= 2  # At least 2 field types should be found
+                
+                self.log_test(
+                    "Phase 2 - Field Extraction Engine",
+                    success,
+                    f"Extracted {fields_found}/{len(expected_fields)} field types: {list(extractions.keys())}",
+                    {
+                        "fields_extracted": list(extractions.keys()),
+                        "confidence_scores": {k: v[0].get('confidence', 0) if v else 0 for k, v in extractions.items()}
+                    }
+                )
+            else:
+                self.log_test(
+                    "Phase 2 - Field Extraction Engine",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Phase 2 - Field Extraction Engine",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_phase2_translation_gate_system(self):
+        """Test Phase 2 Translation Gate System"""
+        print("🌐 TESTING PHASE 2 TRANSLATION GATE SYSTEM...")
+        
+        # Test with Portuguese document
+        portuguese_document = """
+        REPÚBLICA FEDERATIVA DO BRASIL
+        CERTIDÃO DE NASCIMENTO
+        Nome: Carlos Eduardo Silva
+        Data de Nascimento: 15 de março de 1985
+        Local de Nascimento: São Paulo, SP
+        Nome do Pai: João Silva
+        Nome da Mãe: Maria Silva
+        """
+        
+        payload = {
+            "text_content": portuguese_document,
+            "document_type": "BIRTH_CERTIFICATE",
+            "filename": "certidao_nascimento.pdf"
+        }
+        
+        try:
+            response = self.session.post(
+                f"{API_BASE}/documents/analyze-language",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check language detection
+                language_detection = data.get('language_detection', {})
+                primary_language = language_detection.get('primary_language')
+                requires_translation = data.get('requires_action', False)
+                
+                success = (
+                    primary_language in ['portuguese', 'spanish'] and  # Should detect non-English
+                    requires_translation  # Should require translation for birth certificate
+                )
+                
+                self.log_test(
+                    "Phase 2 - Translation Gate System",
+                    success,
+                    f"Detected language: {primary_language}, Requires translation: {requires_translation}",
+                    {
+                        "primary_language": primary_language,
+                        "confidence": language_detection.get('confidence', 0),
+                        "translation_required": requires_translation,
+                        "status": data.get('status')
+                    }
+                )
+            else:
+                self.log_test(
+                    "Phase 2 - Translation Gate System",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Phase 2 - Translation Gate System",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_phase3_document_classifier(self):
+        """Test Phase 3 Automated Document Classification"""
+        print("🏷️ TESTING PHASE 3 DOCUMENT CLASSIFIER...")
+        
+        # Test passport classification
+        passport_content = """
+        PASSPORT
+        United States of America
+        P<USASILVA<<CARLOS<EDUARDO<<<<<<<<<<<<<<<<<<
+        AB12345671USA8503159M3012201<<<<<<<<<<<<<<04
+        Type: P
+        Country Code: USA
+        Passport No: AB1234567
+        Surname: SILVA
+        Given Names: CARLOS EDUARDO
+        """
+        
+        payload = {
+            "text_content": passport_content,
+            "filename": "passport_carlos.pdf",
+            "file_size": 1024000
+        }
+        
+        try:
+            response = self.session.post(
+                f"{API_BASE}/documents/classify",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                document_type = data.get('document_type')
+                confidence = data.get('confidence', 0)
+                status = data.get('status')
+                
+                success = (
+                    document_type == 'PASSPORT_ID_PAGE' and
+                    confidence >= 0.7 and
+                    status in ['high_confidence', 'medium_confidence']
+                )
+                
+                self.log_test(
+                    "Phase 3 - Document Classifier",
+                    success,
+                    f"Classified as: {document_type}, Confidence: {confidence:.2f}, Status: {status}",
+                    {
+                        "document_type": document_type,
+                        "confidence": confidence,
+                        "status": status,
+                        "candidates": len(data.get('candidates', []))
+                    }
+                )
+            else:
+                self.log_test(
+                    "Phase 3 - Document Classifier",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Phase 3 - Document Classifier",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_phase3_cross_document_consistency(self):
+        """Test Phase 3 Cross-Document Consistency Engine"""
+        print("🔗 TESTING PHASE 3 CROSS-DOCUMENT CONSISTENCY...")
+        
+        # Test with multiple documents for consistency check
+        documents = [
+            {
+                "document_type": "PASSPORT_ID_PAGE",
+                "extracted_fields": {
+                    "full_name": "Carlos Eduardo Silva",
+                    "date_of_birth": "1985-03-15",
+                    "passport_number": "AB1234567"
+                }
+            },
+            {
+                "document_type": "BIRTH_CERTIFICATE", 
+                "extracted_fields": {
+                    "full_name": "Carlos Eduardo Silva",
+                    "date_of_birth": "1985-03-15",
+                    "place_of_birth": "São Paulo, Brazil"
+                }
+            },
+            {
+                "document_type": "EMPLOYMENT_OFFER_LETTER",
+                "extracted_fields": {
+                    "beneficiary_name": "Carlos E. Silva",  # Slight variation
+                    "employer_name": "Tech Corp Inc",
+                    "job_title": "Software Engineer",
+                    "salary": "$85000"
+                }
+            }
+        ]
+        
+        payload = {
+            "documents": documents,
+            "consistency_rules": ["beneficiary_name", "date_of_birth"]
+        }
+        
+        try:
+            response = self.session.post(
+                f"{API_BASE}/documents/check-consistency",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                overall_score = data.get('overall_consistency_score', 0)
+                critical_issues = data.get('critical_issues', [])
+                consistency_results = data.get('consistency_results', [])
+                
+                success = (
+                    overall_score >= 0.7 and  # Good consistency score
+                    len(consistency_results) > 0  # Some consistency checks performed
+                )
+                
+                self.log_test(
+                    "Phase 3 - Cross-Document Consistency",
+                    success,
+                    f"Consistency score: {overall_score:.2f}, Critical issues: {len(critical_issues)}, Checks: {len(consistency_results)}",
+                    {
+                        "overall_score": overall_score,
+                        "critical_issues_count": len(critical_issues),
+                        "consistency_checks": len(consistency_results),
+                        "status": "consistent" if overall_score >= 0.8 else "needs_review"
+                    }
+                )
+            else:
+                self.log_test(
+                    "Phase 3 - Cross-Document Consistency",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Phase 3 - Cross-Document Consistency",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_phase23_enhanced_policy_engine(self):
+        """Test Enhanced Policy Engine with Phase 2&3 Integration"""
+        print("🏛️ TESTING ENHANCED POLICY ENGINE (PHASE 2&3)...")
+        
+        # Test multi-document validation endpoint
+        documents_data = [
+            {
+                "filename": "passport.pdf",
+                "file_content": base64.b64encode(b"Test passport content with MRZ P<USASILVA<<CARLOS").decode(),
+                "document_type": "PASSPORT_ID_PAGE"
+            },
+            {
+                "filename": "employment_letter.pdf", 
+                "file_content": base64.b64encode(b"Employment offer for Carlos Silva, Software Engineer, $85000 salary").decode(),
+                "document_type": "EMPLOYMENT_OFFER_LETTER"
+            }
+        ]
+        
+        payload = {
+            "documents": documents_data,
+            "visa_type": "H-1B",
+            "enable_auto_classification": True,
+            "enable_consistency_check": True,
+            "enable_language_analysis": True
+        }
+        
+        try:
+            response = self.session.post(
+                f"{API_BASE}/documents/validate-multiple",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                validation_results = data.get('validation_results', [])
+                consistency_analysis = data.get('consistency_analysis', {})
+                overall_score = data.get('overall_score', 0)
+                
+                success = (
+                    len(validation_results) == len(documents_data) and  # All documents processed
+                    overall_score > 0.5 and  # Reasonable overall score
+                    'consistency_analysis' in data  # Consistency analysis performed
+                )
+                
+                self.log_test(
+                    "Enhanced Policy Engine (Phase 2&3)",
+                    success,
+                    f"Processed {len(validation_results)} documents, Overall score: {overall_score:.2f}",
+                    {
+                        "documents_processed": len(validation_results),
+                        "overall_score": overall_score,
+                        "consistency_score": consistency_analysis.get('overall_consistency_score', 0),
+                        "auto_classification_enabled": True
+                    }
+                )
+            else:
+                self.log_test(
+                    "Enhanced Policy Engine (Phase 2&3)",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Enhanced Policy Engine (Phase 2&3)",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_phase23_comprehensive_analysis_endpoint(self):
+        """Test Phase 2&3 Comprehensive Analysis Endpoint"""
+        print("🔬 TESTING PHASE 2&3 COMPREHENSIVE ANALYSIS...")
+        
+        # Create test document with comprehensive content
+        test_content = b"""
+        PASSPORT
+        United States of America
+        P<USASILVA<<CARLOS<EDUARDO<<<<<<<<<<<<<<<<<<
+        AB12345671USA8503159M3012201<<<<<<<<<<<<<<04
+        
+        Passport No: AB1234567
+        Name: SILVA, CARLOS EDUARDO
+        Date of Birth: 15 MAR 1985
+        Expiry Date: 20 DEC 2030
+        Place of Birth: SAO PAULO, BRAZIL
+        """
+        
+        files = {
+            'file': ('passport_comprehensive.pdf', test_content, 'application/pdf')
+        }
+        data = {
+            'document_type': 'PASSPORT_ID_PAGE',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-COMPREHENSIVE-ANALYSIS',
+            'enable_field_extraction': 'true',
+            'enable_language_analysis': 'true',
+            'enable_classification': 'true'
+        }
+        
+        try:
+            # Remove Content-Type header for multipart form data
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai-enhanced",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check for Phase 2&3 enhancements
+                field_extraction = result.get('field_extraction', {})
+                language_analysis = result.get('language_analysis', {})
+                document_classification = result.get('document_classification', {})
+                policy_engine = result.get('policy_engine', {})
+                
+                phase2_features = bool(field_extraction or language_analysis)
+                phase3_features = bool(document_classification)
+                enhanced_analysis = bool(policy_engine)
+                
+                success = phase2_features and phase3_features and enhanced_analysis
+                
+                self.log_test(
+                    "Phase 2&3 - Comprehensive Analysis Endpoint",
+                    success,
+                    f"Phase 2 features: {phase2_features}, Phase 3 features: {phase3_features}, Enhanced analysis: {enhanced_analysis}",
+                    {
+                        "field_extraction_present": bool(field_extraction),
+                        "language_analysis_present": bool(language_analysis),
+                        "classification_present": bool(document_classification),
+                        "policy_engine_enhanced": bool(policy_engine),
+                        "overall_completeness": result.get('completeness_score', 0)
+                    }
+                )
+            else:
+                self.log_test(
+                    "Phase 2&3 - Comprehensive Analysis Endpoint",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Phase 2&3 - Comprehensive Analysis Endpoint",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_validation_capabilities_endpoint(self):
+        """Test Validation Capabilities Discovery Endpoint"""
+        print("📋 TESTING VALIDATION CAPABILITIES ENDPOINT...")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/documents/validation-capabilities")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check for expected capabilities
+                expected_capabilities = [
+                    'field_extraction', 'language_analysis', 'document_classification',
+                    'cross_document_consistency', 'multi_document_validation'
+                ]
+                
+                available_capabilities = data.get('capabilities', {})
+                phase2_capabilities = data.get('phase2_features', [])
+                phase3_capabilities = data.get('phase3_features', [])
+                
+                capabilities_found = sum(1 for cap in expected_capabilities if cap in available_capabilities)
+                success = capabilities_found >= 3  # At least 3 capabilities should be available
+                
+                self.log_test(
+                    "Validation Capabilities Discovery",
+                    success,
+                    f"Found {capabilities_found}/{len(expected_capabilities)} capabilities",
+                    {
+                        "total_capabilities": len(available_capabilities),
+                        "phase2_features": len(phase2_capabilities),
+                        "phase3_features": len(phase3_capabilities),
+                        "capabilities_list": list(available_capabilities.keys())
+                    }
+                )
+            else:
+                self.log_test(
+                    "Validation Capabilities Discovery",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Validation Capabilities Discovery",
+                False,
+                f"Exception: {str(e)}"
+            )
+
     def run_all_tests(self):
         """Run comprehensive ecosystem validation tests"""
-        print("🌟 VALIDAÇÃO FINAL COMPLETA DO ECOSSISTEMA")
+        print("🌟 VALIDAÇÃO FINAL COMPLETA DO ECOSSISTEMA - PHASE 2&3 ENHANCED")
         print("=" * 80)
         print(f"Backend URL: {BACKEND_URL}")
         print(f"API Base: {API_BASE}")
         print("=" * 80)
+        print()
+        
+        # NEW: PHASE 2 & 3 COMPREHENSIVE TESTING
+        print("🚀 TESTING PHASE 2 & 3 DOCUMENT VALIDATOR ENHANCEMENTS...")
+        print("-" * 60)
+        
+        # Phase 2 Tests
+        self.test_phase2_field_extraction_engine()
+        self.test_phase2_translation_gate_system()
+        
+        # Phase 3 Tests  
+        self.test_phase3_document_classifier()
+        self.test_phase3_cross_document_consistency()
+        
+        # Integration Tests
+        self.test_phase23_enhanced_policy_engine()
+        self.test_phase23_comprehensive_analysis_endpoint()
+        self.test_validation_capabilities_endpoint()
+        
+        print()
+        print("=" * 60)
+        print("PHASE 2&3 TESTING COMPLETED - CONTINUING WITH EXISTING TESTS...")
+        print("=" * 60)
         print()
         
         # 1. POLICY ENGINE (FASE 1) Validation
