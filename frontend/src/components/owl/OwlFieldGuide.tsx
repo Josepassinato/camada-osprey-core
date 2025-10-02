@@ -85,7 +85,7 @@ export const OwlFieldGuide: React.FC<OwlFieldGuideProps> = ({ fieldId, className
 
   const getImportanceColor = (level: number) => {
     if (level >= 4) return 'red';
-    if (level >= 3) return 'yellow';
+    if (level >= 3) return 'blue';
     return 'blue';
   };
 
