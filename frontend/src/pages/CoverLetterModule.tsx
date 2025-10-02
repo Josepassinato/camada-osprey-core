@@ -520,7 +520,7 @@ const CoverLetterModule: React.FC = () => {
                   <p className="text-blue-800 font-medium mb-2">
                     Confirmação Importante:
                   </p>
-                  <p className="text-yellow-700">
+                  <p className="text-blue-700">
                     Você confirma que estas informações são verdadeiras e fornecidas por você?
                   </p>
                 </div>
