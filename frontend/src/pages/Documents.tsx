@@ -534,7 +534,7 @@ const Documents = () => {
               <Card className="glass border-0">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-orange-500" />
+                    <Calendar className="h-5 w-5 text-blue-500" />
                     Próximas Expirações
                   </CardTitle>
                 </CardHeader>
