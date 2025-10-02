@@ -37,7 +37,7 @@ export const OwlValidationFeedback: React.FC<OwlValidationFeedbackProps> = ({
       case 'valid':
         return 'green';
       case 'warning':
-        return 'yellow';
+        return 'blue';
       case 'invalid':
         return 'red';
       default:
