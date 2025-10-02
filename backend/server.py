@@ -456,17 +456,23 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 # Helper function for optional authentication
 async def get_current_user_optional(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_optional)):
     """Get current user if authenticated, None if not"""
+    logger.info(f"get_current_user_optional called with credentials: {credentials is not None}")
     if not credentials:
+        logger.info("No credentials provided")
         return None
     try:
+        logger.info(f"Decoding token: {credentials.credentials[:20]}...")
         payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         user_id = payload.get("user_id")
+        logger.info(f"Extracted user_id: {user_id}")
         if not user_id:
             return None
         
         user = await db.users.find_one({"id": user_id})
+        logger.info(f"Found user: {user is not None}")
         return user
-    except:
+    except Exception as e:
+        logger.error(f"get_current_user_optional error: {e}")
         return None
 
 # Document helper functions (keeping existing ones)
