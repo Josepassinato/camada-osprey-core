@@ -1805,11 +1805,20 @@ async def debug_auth_header(authorization: Optional[str] = Header(None)):
 @api_router.get("/debug/current-user")
 async def debug_current_user(current_user = Depends(get_current_user_optional)):
     """Debug endpoint to test current user detection"""
-    return {
-        "current_user": current_user,
-        "user_id": current_user["id"] if current_user else None,
-        "has_user": current_user is not None
-    }
+    if current_user:
+        # Use serialize_doc to handle ObjectId serialization
+        serialized_user = serialize_doc(current_user)
+        return {
+            "current_user": serialized_user,
+            "user_id": serialized_user.get("id"),
+            "has_user": True
+        }
+    else:
+        return {
+            "current_user": None,
+            "user_id": None,
+            "has_user": False
+        }
 
 @api_router.post("/auto-application/start")
 async def start_auto_application(case_data: CaseCreate, current_user = Depends(get_current_user_optional)):
