@@ -341,7 +341,7 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Shield className="h-5 w-5 text-[#FF6B35]" />
+                <Shield className="h-5 w-5 text-[#3B82F6]" />
                 <span>Consentimento e Responsabilidade</span>
               </CardTitle>
               <CardDescription>
