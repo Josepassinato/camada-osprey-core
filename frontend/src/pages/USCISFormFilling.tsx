@@ -730,7 +730,7 @@ const USCISFormFilling = () => {
 
             {/* Important Note */}
             <Alert className="border-blue-400 bg-blue-50">
-              <AlertTriangle className="h-4 w-4 text-orange-600" />
+              <AlertTriangle className="h-4 w-4 text-blue-600" />
               <AlertDescription className="text-orange-800">
                 <strong>Importante:</strong> As informações preenchidas aqui serão utilizadas 
                 para gerar automaticamente o formulário USCIS oficial. Certifique-se de que 
