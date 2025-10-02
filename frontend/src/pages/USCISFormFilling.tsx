@@ -729,7 +729,7 @@ const USCISFormFilling = () => {
             )}
 
             {/* Important Note */}
-            <Alert className="border-orange-400 bg-orange-50">
+            <Alert className="border-blue-400 bg-blue-50">
               <AlertTriangle className="h-4 w-4 text-orange-600" />
               <AlertDescription className="text-orange-800">
                 <strong>Importante:</strong> As informações preenchidas aqui serão utilizadas 
