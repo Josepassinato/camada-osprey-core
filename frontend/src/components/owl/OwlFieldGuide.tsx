@@ -116,7 +116,7 @@ export const OwlFieldGuide: React.FC<OwlFieldGuideProps> = ({ fieldId, className
         {guide.tips && guide.tips.length > 0 && (
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Lightbulb className="w-4 h-4 text-yellow-600" />
+              <Lightbulb className="w-4 h-4 text-blue-600" />
               <h4 className="font-medium text-gray-900">Dicas importantes:</h4>
             </div>
             <ul className="space-y-1">
