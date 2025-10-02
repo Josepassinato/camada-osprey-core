@@ -1792,33 +1792,9 @@ async def reanalyze_document(document_id: str, current_user = Depends(get_curren
         raise HTTPException(status_code=500, detail=f"Error reanalyzing document: {str(e)}")
 
 # Auto-Application System Endpoints
-@api_router.get("/debug/auth-header")
-async def debug_auth_header(authorization: Optional[str] = Header(None)):
-    """Debug endpoint to test authorization header capture"""
-    return {
-        "raw_header": authorization,
-        "has_header": authorization is not None,
-        "starts_with_bearer": authorization.startswith("Bearer ") if authorization else False,
-        "token_extracted": authorization.replace("Bearer ", "") if authorization and authorization.startswith("Bearer ") else None
-    }
-
-@api_router.get("/debug/current-user")
-async def debug_current_user(current_user = Depends(get_current_user_optional)):
-    """Debug endpoint to test current user detection"""
-    if current_user:
-        # Use serialize_doc to handle ObjectId serialization
-        serialized_user = serialize_doc(current_user)
-        return {
-            "current_user": serialized_user,
-            "user_id": serialized_user.get("id"),
-            "has_user": True
-        }
-    else:
-        return {
-            "current_user": None,
-            "user_id": None,
-            "has_user": False
-        }
+# Remove debug endpoints - production ready
+# @api_router.get("/debug/auth-header") - REMOVED
+# @api_router.get("/debug/current-user") - REMOVED
 
 @api_router.post("/auto-application/start")
 async def start_auto_application(case_data: CaseCreate, current_user = Depends(get_current_user_optional)):
