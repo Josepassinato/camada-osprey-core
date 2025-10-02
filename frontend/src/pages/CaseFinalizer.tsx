@@ -203,7 +203,7 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
                 {step < 4 && (
                   <div
                     className={`flex-1 h-0.5 ml-4 ${
-                      currentStep > step ? 'bg-[#FF6B35]' : 'bg-gray-200'
+                      currentStep > step ? 'bg-[#3B82F6]' : 'bg-gray-200'
                     }`}
                   />
                 )}
