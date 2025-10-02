@@ -3,8 +3,19 @@
 @tailwind utilities;
 
 /* Remove any blue borders and backgrounds that might be applied by development tools */
-* {
+/* Force removal of any yellow/orange backgrounds */
+*, body, html {
   border-color: transparent !important;
+}
+
+/* Explicitly prevent yellow/orange backgrounds */
+body, html, #root, .app {
+  background-color: white !important;
+}
+
+/* Remove yellow/orange from any element */
+*[style*="yellow"], *[style*="#FFFF00"], *[style*="rgb(255, 255, 0)"] {
+  background-color: white !important;
 }
 
 /* Force white background for buttons and remove blue */
