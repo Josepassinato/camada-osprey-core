@@ -188,7 +188,7 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                     currentStep >= step
-                      ? 'bg-[#FF6B35] text-white'
+                      ? 'bg-[#3B82F6] text-white'
                       : 'bg-gray-200 text-gray-600'
                   }`}
                 >
