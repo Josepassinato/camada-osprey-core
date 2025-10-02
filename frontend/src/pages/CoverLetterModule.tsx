@@ -430,7 +430,7 @@ const CoverLetterModule: React.FC = () => {
                     </div>
                   )}
                   
-                  <Button onClick={proceedToWriting} className="bg-[#FF6B35] hover:bg-[#FF6B35]/90">
+                  <Button onClick={proceedToWriting} className="bg-[#3B82F6] hover:bg-[#3B82F6]/90">
                     Prosseguir para Redação
                   </Button>
                 </div>
