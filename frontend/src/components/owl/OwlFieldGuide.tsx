@@ -122,7 +122,7 @@ export const OwlFieldGuide: React.FC<OwlFieldGuideProps> = ({ fieldId, className
             <ul className="space-y-1">
               {guide.tips.map((tip, index) => (
                 <li key={index} className="text-sm text-gray-700 flex items-start gap-2">
-                  <span className="text-yellow-600 mt-1">💡</span>
+                  <span className="text-blue-600 mt-1">💡</span>
                   <span>{tip}</span>
                 </li>
               ))}
