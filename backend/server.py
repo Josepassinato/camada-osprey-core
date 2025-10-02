@@ -465,31 +465,23 @@ async def get_optional_token(authorization: Optional[str] = Header(None)):
     token = authorization.replace("Bearer ", "")
     return token
 
-# Helper function for optional authentication - FIXED VERSION
+# Helper function for optional authentication - PRODUCTION READY
 async def get_current_user_optional(token: Optional[str] = Depends(get_optional_token)):
-    """Get current user if authenticated, None if not - RELIABLE VERSION"""
-    logger.info(f"get_current_user_optional called with token: {token is not None}")
-    
+    """Get current user if authenticated, None if not - RELIABLE VERSION"""    
     if not token:
-        logger.info("No token provided")
         return None
     
     try:
-        logger.info(f"Decoding token: {token[:20]}...")
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         user_id = payload.get("user_id")
-        logger.info(f"Extracted user_id: {user_id}")
         
         if not user_id:
-            logger.warning("No user_id in token payload")
             return None
         
         user = await db.users.find_one({"id": user_id})
-        logger.info(f"Found user: {user is not None}")
         return user
         
-    except Exception as e:
-        logger.error(f"get_current_user_optional error: {e}")
+    except Exception:
         return None
 
 # Document helper functions (keeping existing ones)
