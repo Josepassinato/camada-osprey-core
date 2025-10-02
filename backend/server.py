@@ -453,24 +453,41 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-# Helper function for optional authentication
-async def get_current_user_optional(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_optional)):
-    """Get current user if authenticated, None if not"""
-    logger.info(f"get_current_user_optional called with credentials: {credentials is not None}")
-    if not credentials:
-        logger.info("No credentials provided")
+# Custom optional authentication dependency
+async def get_optional_token(authorization: Optional[str] = Header(None)):
+    """Extract Bearer token from Authorization header if present"""
+    if not authorization:
         return None
+    
+    if not authorization.startswith("Bearer "):
+        return None
+    
+    token = authorization.replace("Bearer ", "")
+    return token
+
+# Helper function for optional authentication - FIXED VERSION
+async def get_current_user_optional(token: Optional[str] = Depends(get_optional_token)):
+    """Get current user if authenticated, None if not - RELIABLE VERSION"""
+    logger.info(f"get_current_user_optional called with token: {token is not None}")
+    
+    if not token:
+        logger.info("No token provided")
+        return None
+    
     try:
-        logger.info(f"Decoding token: {credentials.credentials[:20]}...")
-        payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        logger.info(f"Decoding token: {token[:20]}...")
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         user_id = payload.get("user_id")
         logger.info(f"Extracted user_id: {user_id}")
+        
         if not user_id:
+            logger.warning("No user_id in token payload")
             return None
         
         user = await db.users.find_one({"id": user_id})
         logger.info(f"Found user: {user is not None}")
         return user
+        
     except Exception as e:
         logger.error(f"get_current_user_optional error: {e}")
         return None
