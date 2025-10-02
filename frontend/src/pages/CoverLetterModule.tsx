@@ -517,7 +517,7 @@ const CoverLetterModule: React.FC = () => {
                 </div>
 
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <p className="text-yellow-800 font-medium mb-2">
+                  <p className="text-blue-800 font-medium mb-2">
                     Confirmação Importante:
                   </p>
                   <p className="text-yellow-700">
