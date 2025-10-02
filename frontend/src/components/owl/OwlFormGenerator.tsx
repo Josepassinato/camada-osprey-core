@@ -90,7 +90,7 @@ export const OwlFormGenerator: React.FC<OwlFormGeneratorProps> = ({ className = 
 
   const getCompletionColor = (percentage: number) => {
     if (percentage >= 90) return 'green';
-    if (percentage >= 70) return 'yellow';
+    if (percentage >= 70) return 'blue';
     return 'red';
   };
 
