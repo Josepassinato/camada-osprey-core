@@ -728,7 +728,7 @@ const CoverLetterModule: React.FC = () => {
                 <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                   <div className="flex items-start space-x-2">
                     <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5" />
-                    <div className="text-sm text-yellow-800">
+                    <div className="text-sm text-blue-800">
                       <p className="font-medium">Confirmação importante:</p>
                       <p>
                         Todas as informações nesta carta são verdadeiras e foram fornecidas por você. 
