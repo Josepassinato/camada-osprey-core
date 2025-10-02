@@ -1792,6 +1792,16 @@ async def reanalyze_document(document_id: str, current_user = Depends(get_curren
         raise HTTPException(status_code=500, detail=f"Error reanalyzing document: {str(e)}")
 
 # Auto-Application System Endpoints
+@api_router.get("/debug/auth-header")
+async def debug_auth_header(authorization: Optional[str] = Header(None)):
+    """Debug endpoint to test authorization header capture"""
+    return {
+        "raw_header": authorization,
+        "has_header": authorization is not None,
+        "starts_with_bearer": authorization.startswith("Bearer ") if authorization else False,
+        "token_extracted": authorization.replace("Bearer ", "") if authorization and authorization.startswith("Bearer ") else None
+    }
+
 @api_router.get("/debug/current-user")
 async def debug_current_user(current_user = Depends(get_current_user_optional)):
     """Debug endpoint to test current user detection"""
