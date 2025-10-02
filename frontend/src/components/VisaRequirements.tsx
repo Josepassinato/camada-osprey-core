@@ -732,7 +732,7 @@ const VisaRequirements = ({ visaType, onClose }: VisaRequirementsProps) => {
       </Alert>
 
       {/* Translation Alert */}
-      <Alert className="border-orange-200 bg-orange-50">
+      <Alert className="border-blue-200 bg-blue-50">
         <AlertTriangle className="h-4 w-4 text-orange-600" />
         <AlertDescription>
           <div>
