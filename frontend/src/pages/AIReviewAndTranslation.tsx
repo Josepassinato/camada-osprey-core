@@ -345,7 +345,7 @@ const AIReviewAndTranslation = () => {
               <CardContent>
                 <div className="space-y-3">
                   {validationIssues.map((issue, index) => (
-                    <Alert key={index} className="border-orange-200">
+                    <Alert key={index} className="border-blue-200">
                       <AlertDescription className="text-orange-800">
                         <strong>{issue.field}:</strong> {issue.issue}
                         <br />
