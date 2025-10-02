@@ -346,7 +346,7 @@ const AIReviewAndTranslation = () => {
                 <div className="space-y-3">
                   {validationIssues.map((issue, index) => (
                     <Alert key={index} className="border-blue-200">
-                      <AlertDescription className="text-orange-800">
+                      <AlertDescription className="text-blue-800">
                         <strong>{issue.field}:</strong> {issue.issue}
                         <br />
                         <span className="text-sm">💡 {issue.suggestion}</span>
