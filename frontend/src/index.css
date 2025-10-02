@@ -206,6 +206,7 @@ Sistema de cores minimalista para aplicação de imigração
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background-color: white !important; /* Force white background */
   }
 
   /* Smooth scrolling */
