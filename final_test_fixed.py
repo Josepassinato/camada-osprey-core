@@ -371,10 +371,4 @@ if __name__ == "__main__":
     print("="*80)
     
     tester = FinalFixedTester()
-    success_rate = tester.run_final_fixed_test()
-    
-    print(f"\n🎯 RESULTADO FINAL: {success_rate:.1f}% de taxa de sucesso")
-    if success_rate >= 95:
-        print("✅ SISTEMA APROVADO PARA PRODUÇÃO!")
-    else:
-        print("⚠️ SISTEMA REQUER AJUSTES ADICIONAIS")
+    tester.run_final_fixed_test()
