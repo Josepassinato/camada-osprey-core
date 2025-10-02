@@ -279,7 +279,7 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
                 <Button
                   onClick={startFinalization}
                   disabled={loading}
-                  className="bg-[#FF6B35] hover:bg-[#FF6B35]/90 w-full"
+                  className="bg-[#3B82F6] hover:bg-[#3B82F6]/90 w-full"
                 >
                   {loading ? (
                     <>
@@ -366,7 +366,7 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
                 <Button
                   onClick={acceptConsent}
                   disabled={loading}
-                  className="bg-[#FF6B35] hover:bg-[#FF6B35]/90 w-full"
+                  className="bg-[#3B82F6] hover:bg-[#3B82F6]/90 w-full"
                 >
                   {loading ? (
                     <>
