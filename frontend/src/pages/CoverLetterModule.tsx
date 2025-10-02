@@ -398,7 +398,7 @@ const CoverLetterModule: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <FileText className="h-5 w-5 text-[#FF6B35]" />
+                <FileText className="h-5 w-5 text-[#3B82F6]" />
                 <span>Roteiro Informativo - {visaType}</span>
               </CardTitle>
               <CardDescription>
