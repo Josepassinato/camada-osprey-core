@@ -7,7 +7,7 @@
   border-color: transparent !important;
 }
 
-/* Force white background for buttons and remove yellow */
+/* Force white background for buttons and remove blue */
 button, .btn, [role="button"] {
   background-color: white !important;
 }
