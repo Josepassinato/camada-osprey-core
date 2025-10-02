@@ -487,7 +487,7 @@ const Dashboard = () => {
             {dashboardData.upcoming_expirations && dashboardData.upcoming_expirations.length > 0 && (
               <Card className="glass border-0 border-l-4 border-l-blue-500">
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-lg font-semibold flex items-center gap-2 text-orange-600">
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2 text-blue-600">
                     <AlertCircle className="h-5 w-5" />
                     Documentos Expirando
                   </CardTitle>
