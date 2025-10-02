@@ -488,7 +488,7 @@ const Documents = () => {
                             <div className="text-xs text-muted-foreground">Expira em</div>
                             <div className="text-sm font-medium flex items-center gap-1">
                               {getDaysUntilExpiration(doc.expiration_date) <= 30 && (
-                                <AlertTriangle className="h-3 w-3 text-orange-500" />
+                                <AlertTriangle className="h-3 w-3 text-blue-500" />
                               )}
                               {getDaysUntilExpiration(doc.expiration_date)} dias
                             </div>
