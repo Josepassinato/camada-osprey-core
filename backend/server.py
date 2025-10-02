@@ -92,6 +92,7 @@ db = None
 JWT_SECRET = os.environ.get('JWT_SECRET', 'osprey-secret-key-change-in-production')
 JWT_ALGORITHM = "HS256"
 security = HTTPBearer()
+security_optional = HTTPBearer(auto_error=False)
 
 # Create the main app without a prefix
 app = FastAPI(title="OSPREY Immigration API - B2C", version="2.0.0")
