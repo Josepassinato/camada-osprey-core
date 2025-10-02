@@ -97,7 +97,7 @@ export const OwlValidationFeedback: React.FC<OwlValidationFeedbackProps> = ({
               validation.score >= 80
                 ? 'bg-green-500'
                 : validation.score >= 60
-                ? 'bg-yellow-500'
+                ? 'bg-blue-500'
                 : 'bg-red-500'
             }`}
             style={{ width: `${validation.score}%` }}
