@@ -399,7 +399,7 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
                 {/* Master Packet */}
                 <div className="p-4 border rounded-lg hover:bg-gray-50">
                   <div className="flex items-center space-x-3 mb-3">
-                    <FileText className="h-8 w-8 text-[#FF6B35]" />
+                    <FileText className="h-8 w-8 text-[#3B82F6]" />
                     <div>
                       <h3 className="font-medium">Pacote Principal</h3>
                       <p className="text-sm text-gray-600">PDF com todos os documentos</p>
