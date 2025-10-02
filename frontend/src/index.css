@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Remove any yellow borders and backgrounds that might be applied by development tools */
+/* Remove any blue borders and backgrounds that might be applied by development tools */
 * {
   border-color: transparent !important;
 }
