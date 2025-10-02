@@ -335,7 +335,7 @@ const AIReviewAndTranslation = () => {
 
           {/* Validation Issues */}
           {validationIssues.length > 0 && (
-            <Card className="border-orange-400 bg-orange-50">
+            <Card className="border-blue-400 bg-blue-50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-orange-800">
                   <AlertTriangle className="h-5 w-5" />
