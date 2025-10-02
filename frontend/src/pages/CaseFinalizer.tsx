@@ -300,7 +300,7 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <AlertCircle className="h-5 w-5 text-yellow-500" />
+                <AlertCircle className="h-5 w-5 text-blue-500" />
                 <span>Correções Necessárias</span>
               </CardTitle>
               <CardDescription>
