@@ -312,7 +312,7 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
                 {job.issues.map((issue, index) => (
                   <div key={index} className="flex items-start space-x-3 p-3 bg-blue-50 rounded-lg">
                     <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5" />
-                    <span className="text-yellow-800">{issue}</span>
+                    <span className="text-blue-800">{issue}</span>
                   </div>
                 ))}
                 
