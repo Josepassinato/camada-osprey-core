@@ -462,7 +462,7 @@ const CoverLetterModule: React.FC = () => {
                   <Button
                     onClick={reviewLetter}
                     disabled={loading || !userDraft.trim()}
-                    className="bg-[#FF6B35] hover:bg-[#FF6B35]/90"
+                    className="bg-[#3B82F6] hover:bg-[#3B82F6]/90"
                   >
                     {loading ? (
                       <>
@@ -653,7 +653,7 @@ const CoverLetterModule: React.FC = () => {
                     <Button
                       onClick={requestComplement}
                       disabled={loading}
-                      className="bg-[#FF6B35] hover:bg-[#FF6B35]/90"
+                      className="bg-[#3B82F6] hover:bg-[#3B82F6]/90"
                     >
                       {loading ? (
                         <>
