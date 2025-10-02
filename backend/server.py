@@ -1768,6 +1768,15 @@ async def reanalyze_document(document_id: str, current_user = Depends(get_curren
         raise HTTPException(status_code=500, detail=f"Error reanalyzing document: {str(e)}")
 
 # Auto-Application System Endpoints
+@api_router.get("/debug/current-user")
+async def debug_current_user(current_user = Depends(get_current_user_optional)):
+    """Debug endpoint to test current user detection"""
+    return {
+        "current_user": current_user,
+        "user_id": current_user["id"] if current_user else None,
+        "has_user": current_user is not None
+    }
+
 @api_router.post("/auto-application/start")
 async def start_auto_application(case_data: CaseCreate, current_user = Depends(get_current_user_optional)):
     """Start a new auto-application case (anonymous or authenticated)"""
