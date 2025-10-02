@@ -408,7 +408,7 @@ const CoverLetterModule: React.FC = () => {
             <CardContent>
               {loading ? (
                 <div className="flex items-center space-x-3">
-                  <Loader2 className="h-5 w-5 animate-spin text-[#FF6B35]" />
+                  <Loader2 className="h-5 w-5 animate-spin text-[#3B82F6]" />
                   <span>Gerando roteiro informativo...</span>
                 </div>
               ) : (
