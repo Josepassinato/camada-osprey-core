@@ -372,7 +372,7 @@ const CoverLetterModule: React.FC = () => {
                 {step < 5 && (
                   <div
                     className={`flex-1 h-0.5 ml-4 ${
-                      currentCard > step ? 'bg-[#FF6B35]' : 'bg-gray-200'
+                      currentCard > step ? 'bg-[#3B82F6]' : 'bg-gray-200'
                     }`}
                   />
                 )}
