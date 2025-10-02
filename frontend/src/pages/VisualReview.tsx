@@ -468,7 +468,7 @@ const VisualReview = () => {
         )}
 
         {field.suggestion && (
-          <div className="text-xs text-orange-700 bg-orange-50 p-2 rounded">
+          <div className="text-xs text-blue-700 bg-blue-50 p-2 rounded">
             <Info className="h-3 w-3 inline mr-1" />
             {field.suggestion}
           </div>
