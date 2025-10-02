@@ -327,7 +327,7 @@ const CoverLetterModule: React.FC = () => {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-[#FF6B35]" />
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-[#3B82F6]" />
           <p className="text-gray-600">Carregando informações do caso...</p>
         </div>
       </div>
