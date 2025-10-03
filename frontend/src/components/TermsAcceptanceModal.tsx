@@ -187,7 +187,7 @@ const TermsAcceptanceModal = ({ isOpen, onAccept, onDecline }: TermsAcceptanceMo
                 </div>
               </div>
               <span className={`text-sm ${!hasScrolledToBottom ? 'text-gray-400' : 'text-gray-700'}`}>
-                Li e aceito os <Link to="/terms-of-service" className="text-blue-600 hover:underline">Termos de Uso</Link> da OSPREY
+                Li e aceito os <Link to="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Termos de Uso</Link> da OSPREY
               </span>
             </label>
 
