@@ -2,8 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { makeApiCall } from "@/utils/api";
-import { useTermsAcceptance } from "@/hooks/useTermsAcceptance";
-import TermsAcceptanceModal from "@/components/TermsAcceptanceModal";
 import { 
   ArrowRight,
   CheckCircle,
