@@ -40,7 +40,7 @@ const Footer = () => {
     {
       title: "Legal",
       links: [
-        { name: "Política de Privacidade", href: "#" },
+        { name: "Política de Privacidade", href: "/privacy-policy" },
         { name: "Termos de Uso", href: "#" },
         { name: "Cookies", href: "#" },
         { name: "Compliance", href: "#" },
