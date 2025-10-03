@@ -459,6 +459,13 @@ const AutoApplicationStart = () => {
           </div>
         </div>
       </footer>
+
+      {/* Terms Acceptance Modal */}
+      <TermsAcceptanceModal
+        isOpen={showTermsModal}
+        onAccept={acceptTerms}
+        onDecline={declineTerms}
+      />
     </div>
   );
 };
