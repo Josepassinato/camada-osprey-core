@@ -383,6 +383,11 @@ const SelectForm = () => {
       </div>
 
       <div className="px-4 py-6 sm:px-6 sm:py-8">
+        {/* Discrete Terms Acceptance */}
+        <div className="max-w-4xl mx-auto mb-8">
+          <DiscreteTermsAcceptance onAcceptanceChange={setTermsAccepted} />
+        </div>
+
         {error && (
           <div className="bg-white border border-black rounded-lg mb-6 p-4">
             <div className="flex items-center gap-3">
