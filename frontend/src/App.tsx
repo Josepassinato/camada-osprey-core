@@ -29,6 +29,7 @@ import PaymentAndDownload from "./pages/PaymentAndDownload";
 import CoverLetterModule from "./pages/CoverLetterModule";
 import CaseFinalizer from "./pages/CaseFinalizer";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
