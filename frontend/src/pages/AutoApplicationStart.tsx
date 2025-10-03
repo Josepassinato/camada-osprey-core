@@ -24,6 +24,7 @@ const AutoApplicationStart = () => {
   const navigate = useNavigate();
   const [agreed, setAgreed] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const { showTermsModal, termsAccepted, acceptTerms, declineTerms } = useTermsAcceptance();
   
   console.log('🔄 AutoApplicationStart rendered - agreed:', agreed, 'isCreating:', isCreating);
 
