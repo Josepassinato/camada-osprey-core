@@ -248,6 +248,12 @@ const SelectForm = () => {
   ];
 
   const createCase = async (formCode: string) => {
+    // Validate terms acceptance first
+    if (!termsAccepted) {
+      setError("Por favor, aceite os termos legais antes de prosseguir.");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
