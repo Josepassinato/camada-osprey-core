@@ -31,7 +31,7 @@ const AutoApplicationStart = () => {
   const startApplication = async () => {
     console.log('🔘 startApplication called');
     
-    if (!agreed) {
+    if (!termsAccepted) {
       alert('Por favor, aceite os termos para continuar.');
       return;
     }
