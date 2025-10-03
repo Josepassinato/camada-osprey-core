@@ -143,10 +143,10 @@ const TermsAcceptanceModal = ({ isOpen, onAccept, onDecline }: TermsAcceptanceMo
             <div className="bg-blue-50 rounded-xl p-4 text-sm">
               <p className="mb-2">Para informações detalhadas, consulte os documentos completos:</p>
               <div className="space-y-1">
-                <Link to="/terms-of-service" className="text-blue-600 hover:underline block">
+                <Link to="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline block">
                   → Termos de Uso Completos
                 </Link>
-                <Link to="/privacy-policy" className="text-blue-600 hover:underline block">
+                <Link to="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline block">
                   → Política de Privacidade Completa
                 </Link>
               </div>
