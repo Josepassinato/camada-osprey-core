@@ -487,7 +487,7 @@ const SelectForm = () => {
                     e.stopPropagation();
                     createCase(form.code);
                   }}
-                  disabled={isLoading && selectedForm === form.code}
+                  disabled={!termsAccepted || (isLoading && selectedForm === form.code)}
                 >
                   {isLoading && selectedForm === form.code ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
