@@ -46,6 +46,7 @@ const SelectForm = () => {
   const [error, setError] = useState("");
   const [showRequirements, setShowRequirements] = useState(false);
   const [selectedVisaType, setSelectedVisaType] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Listen for start application event from VisaRequirements component
   React.useEffect(() => {
