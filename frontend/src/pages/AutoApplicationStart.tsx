@@ -452,8 +452,8 @@ const AutoApplicationStart = () => {
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="text-2xl font-bold text-black mb-4 md:mb-0">Osprey</div>
             <div className="flex items-center space-x-6 text-sm text-gray-600">
-              <a href="#" className="hover:text-black transition-colors">Privacidade</a>
-              <a href="#" className="hover:text-black transition-colors">Termos</a>
+              <a href="/privacy-policy" className="hover:text-black transition-colors">Privacidade</a>
+              <a href="/terms-of-service" className="hover:text-black transition-colors">Termos</a>
               <a href="#" className="hover:text-black transition-colors">Suporte</a>
             </div>
           </div>
