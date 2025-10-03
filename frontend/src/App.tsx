@@ -68,6 +68,7 @@ const App = () => (
           <Route path="/auto-application/case/:caseId/payment" element={<PaymentAndDownload />} />
           <Route path="/auto-application/case/:caseId/finalize" element={<CaseFinalizer />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
