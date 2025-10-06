@@ -54,7 +54,7 @@ class PassportOCREngine:
             # 1. Extract MRZ using specialized method
             mrz_result = real_ocr_engine.extract_mrz_from_passport(image_data)
             
-            # 2. Extract full document text
+            # 2. Extract full document text  
             full_ocr_result = await real_ocr_engine.extract_text_from_image(
                 image_data, 
                 mode="document", 
