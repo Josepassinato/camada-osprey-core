@@ -560,11 +560,15 @@ class OCREngine:
     def get_engine_status(self) -> Dict[str, Any]:
         """Get status of available OCR engines"""
         return {
+            'google_vision_available': self.google_vision_available,
             'tesseract_available': self.tesseract_available,
             'easyocr_available': self.easyocr_reader is not None,
+            'engine_priority': ['Google Vision API', 'EasyOCR', 'Tesseract'],
             'tesseract_version': pytesseract.get_tesseract_version() if self.tesseract_available else None,
-            'supported_modes': list(self.tesseract_configs.keys()),
-            'supported_languages': ['eng', 'por'] if self.tesseract_available else []
+            'supported_modes': list(self.tesseract_configs.keys()) + ['google_vision_document', 'google_vision_text'],
+            'supported_languages': ['eng', 'por', 'es', 'auto'],
+            'google_api_key_configured': bool(os.getenv('GOOGLE_API_KEY')),
+            'recommended_engine': 'Google Vision API' if self.google_vision_available else ('EasyOCR' if self.easyocr_reader else 'Tesseract')
         }
 
 # Global instance
