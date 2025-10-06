@@ -6222,7 +6222,7 @@ app.include_router(api_router)
 
 # Include metrics router if available (non-intrusive)
 if METRICS_AVAILABLE:
-    api_router.include_router(metrics_router)
+    api_router.include_router(metrics_router, prefix="/metrics")
     logging.info("✅ Metrics system enabled")
 else:
     logging.info("ℹ️ Running without metrics system")
