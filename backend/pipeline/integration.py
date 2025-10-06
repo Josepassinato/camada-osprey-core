@@ -218,5 +218,46 @@ class PipelineIntegrator:
             'integration_version': '2.0.0'
         }
 
+def create_document_pipeline(document_type: str) -> DocumentAnalysisPipeline:
+    """
+    Create a specialized pipeline based on document type
+    
+    Args:
+        document_type: Type of document (passport, i797, birth_certificate, i765, etc.)
+    
+    Returns:
+        Configured Pipeline instance
+    """
+    pipeline_name = f"{document_type}_pipeline"
+    
+    # Create pipeline based on document type
+    if document_type.lower() in ['passport', 'passaporte']:
+        pipeline = DocumentAnalysisPipeline(pipeline_name)
+        pipeline.add_stage(passport_ocr_stage)
+        pipeline.add_stage(passport_mrz_stage)
+        
+    elif document_type.lower() in ['i797', 'i-797', 'notice_of_action']:
+        pipeline = DocumentAnalysisPipeline(pipeline_name)
+        pipeline.add_stage(i797_ocr_stage)
+        pipeline.add_stage(i797_validation_stage)
+        
+    elif document_type.lower() in ['birth_certificate', 'birth_cert', 'certidao_nascimento', 'certidão_nascimento']:
+        pipeline = DocumentAnalysisPipeline(pipeline_name)
+        pipeline.add_stage(birth_certificate_validation_stage)
+        
+    elif document_type.lower() in ['i765', 'i-765', 'ead', 'employment_authorization', 'employment_authorization_document']:
+        pipeline = DocumentAnalysisPipeline(pipeline_name)
+        pipeline.add_stage(i765_validation_stage)
+        
+    else:
+        # Generic pipeline for unknown document types
+        logger.warning(f"Unknown document type: {document_type}, using generic pipeline")
+        pipeline = DocumentAnalysisPipeline(f"generic_{document_type}_pipeline")
+        # Add basic OCR stage for unknown documents
+        # This can be expanded with more generic stages
+        
+    logger.info(f"Created pipeline for document type: {document_type}")
+    return pipeline
+
 # Global integrator instance
 pipeline_integrator = PipelineIntegrator()
