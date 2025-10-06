@@ -200,25 +200,7 @@ class PassportOCREngine:
             logger.error(f"MRZ OCR error: {e}")
             return ""
     
-    def _simulate_realistic_ocr_errors(self, text: str) -> str:
-        """
-        Simulates realistic OCR errors that might occur
-        """
-        import random
-        
-        if random.random() > 0.8:  # 20% chance of OCR errors
-            chars = list(text)
-            # Introduce 1-2 character errors
-            for _ in range(random.randint(0, 2)):
-                if chars:
-                    pos = random.randint(0, len(chars) - 1)
-                    if chars[pos] in ['0', '1', '8', '6']:
-                        # Common OCR confusions
-                        error_map = {'0': 'O', '1': 'I', '8': 'B', '6': 'G'}
-                        chars[pos] = error_map.get(chars[pos], chars[pos])
-            text = ''.join(chars)
-        
-        return text
+    # Removed simulated OCR errors method as we're using real OCR now
     
     def _ocr_full_document(self, image) -> str:
         """
