@@ -397,7 +397,7 @@ const AIPerformanceDashboard: React.FC<{ period: string }> = ({ period }) => {
               <div className="p-3 bg-gray-50 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium">Error Rate Target</span>
-                  <span className="text-xs text-gray-500">{'< 2%'}</span>
+                  <span className="text-xs text-gray-500">&lt; 2%</span>
                 </div>
                 <Progress 
                   value={Math.max(100 - (100 - analytics.success_rate) * 50, 0)} 
