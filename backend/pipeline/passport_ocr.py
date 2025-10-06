@@ -224,9 +224,9 @@ class PassportOCREngine:
             logger.error(f"Full document OCR error: {e}")
             return "Real OCR extraction failed"
     
-    def _post_process_results(self, mrz_text: str, full_text: str) -> Dict[str, Any]:
+    def _post_process_results(self, mrz_text: str, full_text: str, mrz_confidence: float = 0.8, processing_time: float = 0.0) -> Dict[str, Any]:
         """
-        Post-processes OCR results and extracts structured data
+        Post-processes real OCR results and extracts structured data
         """
         try:
             # Extract printed data from full text
@@ -235,16 +235,18 @@ class PassportOCREngine:
             # Clean and validate MRZ
             cleaned_mrz = self._clean_mrz_text(mrz_text)
             
-            # Estimate confidence based on text quality
-            confidence = self._estimate_ocr_confidence(mrz_text, full_text)
+            # Use provided confidence or estimate from text quality
+            confidence = mrz_confidence if mrz_confidence > 0 else self._estimate_ocr_confidence(mrz_text, full_text)
             
             return {
                 'mrz_text': cleaned_mrz,
                 'full_text': full_text,
                 'printed_data': printed_data,
                 'ocr_confidence': confidence,
-                'processing_method': 'specialized_passport_ocr',
-                'mrz_lines_detected': len(cleaned_mrz.split('\n')) if cleaned_mrz else 0
+                'processing_method': 'real_ocr_passport_engine',
+                'mrz_lines_detected': len(cleaned_mrz.split('\n')) if cleaned_mrz else 0,
+                'processing_time': processing_time,
+                'engine': 'real_ocr_combination'
             }
             
         except Exception as e:
@@ -254,7 +256,8 @@ class PassportOCREngine:
                 'full_text': full_text,
                 'printed_data': {},
                 'ocr_confidence': 0.5,
-                'processing_method': 'fallback',
+                'processing_method': 'real_ocr_fallback',
+                'processing_time': processing_time,
                 'error': str(e)
             }
     
