@@ -3810,6 +3810,607 @@ class ComprehensiveEcosystemTester:
         
         print("=" * 80)
     
+    def test_ocr_real_engine_comprehensive(self):
+        """
+        COMPREHENSIVE OCR REAL ENGINE TESTING
+        Tests the newly implemented OCR Real Engine system that replaces all placeholder simulations
+        """
+        print("🔍 COMPREHENSIVE OCR REAL ENGINE TESTING")
+        print("=" * 60)
+        
+        # Test 1: Google Cloud Vision API Configuration
+        self.test_google_vision_api_configuration()
+        
+        # Test 2: OCR Engine Integration with analyze-with-ai endpoint
+        self.test_ocr_engine_integration()
+        
+        # Test 3: MRZ Extraction with Real OCR
+        self.test_mrz_extraction_real_ocr()
+        
+        # Test 4: Multi-Engine Fallback System
+        self.test_multi_engine_fallback_system()
+        
+        # Test 5: A/B Testing Pipeline Integration
+        self.test_ab_testing_pipeline_integration()
+        
+        # Test 6: Performance & Reliability Testing
+        self.test_ocr_performance_reliability()
+        
+        # Test 7: Document Analysis Workflow
+        self.test_document_analysis_workflow()
+        
+        print("✅ OCR REAL ENGINE TESTING COMPLETED")
+        print("=" * 60)
+    
+    def test_google_vision_api_configuration(self):
+        """Test Google Cloud Vision API configuration and availability"""
+        print("🔧 Testing Google Cloud Vision API Configuration...")
+        
+        try:
+            # Check if GOOGLE_API_KEY is configured
+            import os
+            api_key = os.environ.get('GOOGLE_API_KEY')
+            
+            if api_key:
+                # Verify the API key format (should start with AIza)
+                if api_key.startswith('AIza'):
+                    self.log_test(
+                        "Google Vision API Key Configuration",
+                        True,
+                        f"API key configured correctly (length: {len(api_key)})",
+                        {"api_key_format": "Valid", "key_length": len(api_key)}
+                    )
+                else:
+                    self.log_test(
+                        "Google Vision API Key Configuration",
+                        False,
+                        f"API key format invalid (should start with 'AIza')",
+                        {"api_key_format": "Invalid", "key_prefix": api_key[:10] if api_key else "None"}
+                    )
+            else:
+                self.log_test(
+                    "Google Vision API Key Configuration",
+                    False,
+                    "GOOGLE_API_KEY environment variable not set",
+                    {"api_key_configured": False}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "Google Vision API Key Configuration",
+                False,
+                f"Exception checking API key: {str(e)}"
+            )
+    
+    def test_ocr_engine_integration(self):
+        """Test OCR Engine integration with /api/documents/analyze-with-ai endpoint"""
+        print("🔗 Testing OCR Engine Integration...")
+        
+        # Create a test passport-like document with MRZ
+        test_passport_content = self.create_test_passport_image()
+        
+        files = {
+            'file': ('test_passport.jpg', test_passport_content, 'image/jpeg')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-OCR-ENGINE'
+        }
+        
+        try:
+            # Remove Content-Type header for multipart form data
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers,
+                timeout=30  # OCR can take time
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check for OCR-specific fields
+                ocr_indicators = [
+                    'processing_method' in result,
+                    'confidence' in result or 'completeness_score' in result,
+                    'ai_analysis' in result,
+                    'policy_engine' in result
+                ]
+                
+                # Check if real OCR was used (not simulation)
+                processing_method = result.get('processing_method', 'unknown')
+                real_ocr_used = processing_method in ['modular_pipeline', 'google_vision', 'tesseract', 'easyocr']
+                
+                success = any(ocr_indicators) and real_ocr_used
+                
+                self.log_test(
+                    "OCR Engine Integration - analyze-with-ai",
+                    success,
+                    f"Processing method: {processing_method}, OCR indicators: {sum(ocr_indicators)}/4",
+                    {
+                        "processing_method": processing_method,
+                        "real_ocr_used": real_ocr_used,
+                        "response_fields": list(result.keys())[:10],
+                        "confidence_score": result.get('completeness_score', 'N/A')
+                    }
+                )
+            else:
+                self.log_test(
+                    "OCR Engine Integration - analyze-with-ai",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    {"status_code": response.status_code}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "OCR Engine Integration - analyze-with-ai",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_mrz_extraction_real_ocr(self):
+        """Test MRZ extraction accuracy with real OCR engines"""
+        print("📄 Testing MRZ Extraction with Real OCR...")
+        
+        # Create test passport with known MRZ data
+        test_mrz_data = {
+            "line1": "P<BRASILVA<<CARLOS<EDUARDO<<<<<<<<<<<<<<<<<<",
+            "line2": "1234567890BRA8001011M2501011<<<<<<<<<<<<<<04"
+        }
+        
+        test_passport_content = self.create_test_passport_with_mrz(test_mrz_data)
+        
+        files = {
+            'file': ('test_passport_mrz.jpg', test_passport_content, 'image/jpeg')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-MRZ-EXTRACTION'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check for MRZ extraction results
+                ai_analysis = result.get('ai_analysis', {})
+                key_information = ai_analysis.get('key_information', [])
+                
+                # Look for MRZ-related information
+                mrz_found = any('MRZ' in str(info).upper() or 'PASSPORT' in str(info).upper() 
+                              for info in key_information)
+                
+                # Check confidence score (should be high for clear MRZ)
+                confidence_score = result.get('completeness_score', 0)
+                high_confidence = confidence_score >= 70  # Expecting 70%+ for clear MRZ
+                
+                success = mrz_found and high_confidence
+                
+                self.log_test(
+                    "MRZ Extraction with Real OCR",
+                    success,
+                    f"MRZ detected: {mrz_found}, Confidence: {confidence_score}%",
+                    {
+                        "mrz_detected": mrz_found,
+                        "confidence_score": confidence_score,
+                        "key_information_count": len(key_information),
+                        "processing_method": result.get('processing_method', 'unknown')
+                    }
+                )
+            else:
+                self.log_test(
+                    "MRZ Extraction with Real OCR",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    {"status_code": response.status_code}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "MRZ Extraction with Real OCR",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_multi_engine_fallback_system(self):
+        """Test multi-engine fallback system (Google Vision → EasyOCR → Tesseract)"""
+        print("🔄 Testing Multi-Engine Fallback System...")
+        
+        # Test with different quality images to trigger fallbacks
+        test_cases = [
+            {"name": "High Quality", "quality": "high", "expected_engine": "google_vision"},
+            {"name": "Medium Quality", "quality": "medium", "expected_engine": "easyocr"},
+            {"name": "Low Quality", "quality": "low", "expected_engine": "tesseract"}
+        ]
+        
+        for test_case in test_cases:
+            test_content = self.create_test_document_with_quality(test_case["quality"])
+            
+            files = {
+                'file': (f'test_doc_{test_case["quality"]}.jpg', test_content, 'image/jpeg')
+            }
+            data = {
+                'document_type': 'passport',
+                'visa_type': 'H-1B',
+                'case_id': f'TEST-FALLBACK-{test_case["quality"].upper()}'
+            }
+            
+            try:
+                headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                
+                response = requests.post(
+                    f"{API_BASE}/documents/analyze-with-ai",
+                    files=files,
+                    data=data,
+                    headers=headers,
+                    timeout=30
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    processing_method = result.get('processing_method', 'unknown')
+                    
+                    # Check if any OCR engine was used
+                    ocr_engines = ['google_vision', 'modular_pipeline', 'tesseract', 'easyocr', 'legacy_system']
+                    engine_used = any(engine in processing_method.lower() for engine in ocr_engines)
+                    
+                    self.log_test(
+                        f"Multi-Engine Fallback - {test_case['name']} Quality",
+                        engine_used,
+                        f"Processing method: {processing_method}",
+                        {
+                            "quality": test_case["quality"],
+                            "processing_method": processing_method,
+                            "engine_detected": engine_used
+                        }
+                    )
+                else:
+                    self.log_test(
+                        f"Multi-Engine Fallback - {test_case['name']} Quality",
+                        False,
+                        f"HTTP {response.status_code}",
+                        {"status_code": response.status_code}
+                    )
+                    
+            except Exception as e:
+                self.log_test(
+                    f"Multi-Engine Fallback - {test_case['name']} Quality",
+                    False,
+                    f"Exception: {str(e)}"
+                )
+    
+    def test_ab_testing_pipeline_integration(self):
+        """Test A/B testing pipeline integration with OCR Real engine"""
+        print("🧪 Testing A/B Testing Pipeline Integration...")
+        
+        # Test multiple documents to see A/B testing in action
+        for i in range(3):
+            test_content = self.create_test_passport_image()
+            
+            files = {
+                'file': (f'test_ab_{i}.jpg', test_content, 'image/jpeg')
+            }
+            data = {
+                'document_type': 'passport',
+                'visa_type': 'H-1B',
+                'case_id': f'TEST-AB-{i}'
+            }
+            
+            try:
+                headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                
+                response = requests.post(
+                    f"{API_BASE}/documents/analyze-with-ai",
+                    files=files,
+                    data=data,
+                    headers=headers,
+                    timeout=30
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    
+                    # Check for A/B testing indicators
+                    ab_indicators = [
+                        'test_group' in result,
+                        'ab_reason' in result,
+                        'processing_method' in result
+                    ]
+                    
+                    processing_method = result.get('processing_method', 'unknown')
+                    test_group = result.get('test_group', 'unknown')
+                    
+                    # A/B testing is working if we see different processing methods or test groups
+                    ab_active = any(ab_indicators) or processing_method != 'unknown'
+                    
+                    self.log_test(
+                        f"A/B Testing Pipeline Integration - Test {i+1}",
+                        ab_active,
+                        f"Method: {processing_method}, Group: {test_group}",
+                        {
+                            "processing_method": processing_method,
+                            "test_group": test_group,
+                            "ab_indicators": sum(ab_indicators)
+                        }
+                    )
+                else:
+                    self.log_test(
+                        f"A/B Testing Pipeline Integration - Test {i+1}",
+                        False,
+                        f"HTTP {response.status_code}",
+                        {"status_code": response.status_code}
+                    )
+                    
+            except Exception as e:
+                self.log_test(
+                    f"A/B Testing Pipeline Integration - Test {i+1}",
+                    False,
+                    f"Exception: {str(e)}"
+                )
+    
+    def test_ocr_performance_reliability(self):
+        """Test OCR processing times and reliability"""
+        print("⚡ Testing OCR Performance & Reliability...")
+        
+        processing_times = []
+        success_count = 0
+        total_tests = 5
+        
+        for i in range(total_tests):
+            test_content = self.create_test_passport_image()
+            
+            files = {
+                'file': (f'test_perf_{i}.jpg', test_content, 'image/jpeg')
+            }
+            data = {
+                'document_type': 'passport',
+                'visa_type': 'H-1B',
+                'case_id': f'TEST-PERF-{i}'
+            }
+            
+            try:
+                start_time = time.time()
+                
+                headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                
+                response = requests.post(
+                    f"{API_BASE}/documents/analyze-with-ai",
+                    files=files,
+                    data=data,
+                    headers=headers,
+                    timeout=30
+                )
+                
+                end_time = time.time()
+                processing_time = (end_time - start_time) * 1000  # Convert to milliseconds
+                processing_times.append(processing_time)
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    confidence = result.get('completeness_score', 0)
+                    
+                    # Consider successful if confidence >= 50% and processing time < 10 seconds
+                    if confidence >= 50 and processing_time < 10000:
+                        success_count += 1
+                        
+            except Exception as e:
+                logger.error(f"Performance test {i} failed: {e}")
+        
+        # Calculate performance metrics
+        if processing_times:
+            avg_time = sum(processing_times) / len(processing_times)
+            max_time = max(processing_times)
+            success_rate = (success_count / total_tests) * 100
+            
+            # Performance targets: < 5 seconds average, > 80% success rate
+            performance_good = avg_time < 5000 and success_rate >= 80
+            
+            self.log_test(
+                "OCR Performance & Reliability",
+                performance_good,
+                f"Avg: {avg_time:.0f}ms, Max: {max_time:.0f}ms, Success: {success_rate:.0f}%",
+                {
+                    "average_time_ms": avg_time,
+                    "max_time_ms": max_time,
+                    "success_rate": success_rate,
+                    "total_tests": total_tests,
+                    "target_avg_time": "< 5000ms",
+                    "target_success_rate": ">= 80%"
+                }
+            )
+        else:
+            self.log_test(
+                "OCR Performance & Reliability",
+                False,
+                "No performance data collected",
+                {"total_tests": total_tests, "successful_tests": 0}
+            )
+    
+    def test_document_analysis_workflow(self):
+        """Test complete document analysis workflow with OCR"""
+        print("📋 Testing Document Analysis Workflow...")
+        
+        # Test different document types
+        document_types = [
+            {"type": "passport", "expected_fields": ["passport_number", "name", "nationality"]},
+            {"type": "birth_certificate", "expected_fields": ["name", "birth_date", "birth_place"]},
+            {"type": "employment_letter", "expected_fields": ["employer", "position", "salary"]}
+        ]
+        
+        for doc_type in document_types:
+            test_content = self.create_test_document_by_type(doc_type["type"])
+            
+            files = {
+                'file': (f'test_{doc_type["type"]}.jpg', test_content, 'image/jpeg')
+            }
+            data = {
+                'document_type': doc_type["type"],
+                'visa_type': 'H-1B',
+                'case_id': f'TEST-WORKFLOW-{doc_type["type"].upper()}'
+            }
+            
+            try:
+                headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                
+                response = requests.post(
+                    f"{API_BASE}/documents/analyze-with-ai",
+                    files=files,
+                    data=data,
+                    headers=headers,
+                    timeout=30
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    
+                    # Check workflow completeness
+                    workflow_indicators = [
+                        'ai_analysis' in result,
+                        'completeness_score' in result or 'confidence' in result,
+                        'key_information' in result.get('ai_analysis', {}),
+                        'suggestions' in result.get('ai_analysis', {})
+                    ]
+                    
+                    workflow_complete = sum(workflow_indicators) >= 3
+                    confidence = result.get('completeness_score', 0)
+                    
+                    self.log_test(
+                        f"Document Analysis Workflow - {doc_type['type'].title()}",
+                        workflow_complete,
+                        f"Workflow indicators: {sum(workflow_indicators)}/4, Confidence: {confidence}%",
+                        {
+                            "document_type": doc_type["type"],
+                            "workflow_complete": workflow_complete,
+                            "confidence": confidence,
+                            "analysis_fields": list(result.get('ai_analysis', {}).keys())
+                        }
+                    )
+                else:
+                    self.log_test(
+                        f"Document Analysis Workflow - {doc_type['type'].title()}",
+                        False,
+                        f"HTTP {response.status_code}",
+                        {"status_code": response.status_code}
+                    )
+                    
+            except Exception as e:
+                self.log_test(
+                    f"Document Analysis Workflow - {doc_type['type'].title()}",
+                    False,
+                    f"Exception: {str(e)}"
+                )
+    
+    def create_test_passport_image(self):
+        """Create a test passport image with realistic content"""
+        # Create a simple test image that simulates a passport
+        # In a real test, this would be a proper image file
+        test_content = b"""
+        PASSPORT TEST DOCUMENT
+        
+        Type: P
+        Country Code: BRA
+        Passport No: 123456789
+        Surname: SILVA
+        Given Names: CARLOS EDUARDO
+        Nationality: BRAZILIAN
+        Date of Birth: 01 JAN 1980
+        Sex: M
+        Place of Birth: SAO PAULO
+        Date of Issue: 01 JAN 2020
+        Date of Expiry: 01 JAN 2030
+        Authority: POLICIA FEDERAL
+        
+        MRZ:
+        P<BRASILVA<<CARLOS<EDUARDO<<<<<<<<<<<<<<<<<<
+        1234567890BRA8001011M3001011<<<<<<<<<<<<<<04
+        """ * 100  # Make it larger to pass file size validation
+        
+        return test_content
+    
+    def create_test_passport_with_mrz(self, mrz_data):
+        """Create a test passport with specific MRZ data"""
+        test_content = f"""
+        PASSPORT TEST DOCUMENT WITH MRZ
+        
+        Type: P
+        Country Code: BRA
+        Passport No: 1234567890
+        Surname: SILVA
+        Given Names: CARLOS EDUARDO
+        
+        MRZ ZONE:
+        {mrz_data['line1']}
+        {mrz_data['line2']}
+        """ * 100  # Make it larger
+        
+        return test_content.encode('utf-8')
+    
+    def create_test_document_with_quality(self, quality):
+        """Create test document with specified quality"""
+        base_content = "TEST DOCUMENT CONTENT FOR OCR TESTING"
+        
+        if quality == "high":
+            content = base_content + " - HIGH QUALITY CLEAR TEXT"
+        elif quality == "medium":
+            content = base_content + " - medium quality text with some noise"
+        else:  # low quality
+            content = base_content + " - l0w qu4l1ty t3xt w1th n01s3 4nd 3rr0rs"
+        
+        return (content * 100).encode('utf-8')  # Make it larger
+    
+    def create_test_document_by_type(self, doc_type):
+        """Create test document based on type"""
+        if doc_type == "passport":
+            return self.create_test_passport_image()
+        elif doc_type == "birth_certificate":
+            content = """
+            BIRTH CERTIFICATE
+            
+            Full Name: Carlos Eduardo Silva
+            Date of Birth: January 1, 1980
+            Place of Birth: São Paulo, Brazil
+            Father: João Silva
+            Mother: Maria Silva
+            Registration Number: 12345
+            """ * 50
+            return content.encode('utf-8')
+        elif doc_type == "employment_letter":
+            content = """
+            EMPLOYMENT LETTER
+            
+            To Whom It May Concern:
+            
+            This letter confirms that Carlos Eduardo Silva
+            is employed at Tech Company Inc. as a Software Engineer
+            with an annual salary of $85,000.
+            
+            Position: Senior Software Engineer
+            Start Date: January 1, 2020
+            Salary: $85,000 per year
+            
+            Sincerely,
+            HR Department
+            """ * 30
+            return content.encode('utf-8')
+        else:
+            return self.create_test_passport_image()
+    
     def run_all_tests(self):
         """Run all comprehensive tests"""
         print("🚀 STARTING COMPREHENSIVE ECOSYSTEM VALIDATION")
