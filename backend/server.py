@@ -1622,49 +1622,112 @@ async def get_user_documents(current_user = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail=f"Error getting documents: {str(e)}")
 
 @api_router.get("/documents/validation-capabilities")
-async def get_validation_capabilities(current_user = Depends(get_current_user)):
+async def get_validation_capabilities():
     """
-    Get information about available validation capabilities (Phase 2 & 3 features)
+    Get comprehensive information about validation capabilities
+    """
+    return {
+        "status": "success",
+        "capabilities": {
+            "phase_1": {
+                "description": "Basic Document Analysis",
+                "features": ["Document upload", "Basic OCR", "Simple validation"]
+            },
+            "phase_2": {
+                "description": "Enhanced Field Extraction",
+                "features": [
+                    "High-precision field extraction",
+                    "Translation gate with language detection", 
+                    "Advanced regex validation patterns",
+                    "Context-aware confidence scoring"
+                ]
+            },
+            "phase_3": {
+                "description": "Advanced Document Analysis",
+                "features": [
+                    "Cross-document consistency checking",
+                    "Automated document classification",
+                    "Multi-document validation workflows",
+                    "Enhanced OCR integration ready"
+                ]
+            },
+            "phase_4": {
+                "description": "Production OCR Engine",
+                "features": [
+                    "Google Cloud Vision API integration",
+                    "Multi-engine OCR framework",
+                    "High-precision MRZ extraction",
+                    "Real-time document processing"
+                ]
+            },
+            "phase_5": {
+                "description": "Comprehensive Consistency Engine",
+                "features": [
+                    "Cross-document validation",
+                    "Phonetic name matching",
+                    "Multi-document consistency reports",
+                    "Intelligent inconsistency detection"
+                ]
+            }
+        },
+        "endpoints": {
+            "classify": "/api/documents/classify",
+            "extract_fields": "/api/documents/extract-fields", 
+            "check_language": "/api/documents/analyze-language",
+            "check_consistency": "/api/documents/check-consistency",
+            "validate_multiple": "/api/documents/validate-multiple",
+            "analyze_enhanced": "/api/documents/analyze-with-ai-enhanced",
+            "multi_document_consistency": "/api/documents/validate-consistency"
+        },
+        "supported_document_types": [
+            "passport", "driver_license", "birth_certificate", 
+            "marriage_certificate", "i797", "i94", "visa_documents",
+            "i765_ead", "employment_authorization"
+        ],
+        "supported_languages": ["en", "es", "pt", "fr"],
+        "version": "5.0.0"
+    }
+
+@api_router.post("/documents/validate-consistency")
+async def validate_multi_document_consistency(
+    documents: List[Dict[str, Any]],
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Validate consistency across multiple documents
+    
+    Args:
+        documents: List of document data with validation results
+    
+    Returns:
+        Comprehensive consistency validation report
     """
     try:
+        logger.info(f"Multi-document consistency validation requested for {len(documents)} documents")
+        
+        # Import consistency pipeline
+        from pipeline.consistency_stage import multi_document_consistency_pipeline
+        
+        # Validate consistency
+        consistency_results = await multi_document_consistency_pipeline.validate_documents(documents)
+        
+        # Log results
+        logger.info(f"Consistency validation completed: {consistency_results.get('overall_status', 'unknown')}")
+        
         return {
             "status": "success",
-            "capabilities": {
-                "phase_2_features": {
-                    "enhanced_field_extraction": True,
-                    "translation_gate": True,
-                    "advanced_regex_patterns": True,
-                    "high_precision_validators": True,
-                    "language_detection": True
-                },
-                "phase_3_features": {
-                    "auto_document_classification": True,
-                    "cross_document_consistency": True,
-                    "multi_document_validation": True,
-                    "advanced_ocr_integration": True,
-                    "comprehensive_scoring": True
-                },
-                "supported_document_types": [
-                    "PASSPORT_ID_PAGE", "BIRTH_CERTIFICATE", "MARRIAGE_CERT",
-                    "DEGREE_CERTIFICATE", "EMPLOYMENT_OFFER_LETTER", "I797_NOTICE",
-                    "I94_RECORD", "PAY_STUB", "TAX_RETURN_1040", "TRANSLATION_CERTIFICATE"
-                ],
-                "supported_languages": ["english", "portuguese", "spanish"],
-                "validation_engines": {
-                    "policy_engine": "Enhanced YAML-based validation",
-                    "field_extractor": "Advanced regex with ML validation",
-                    "translation_gate": "Language detection and requirements",
-                    "consistency_engine": "Cross-document verification",
-                    "document_classifier": "AI-powered type detection"
-                }
-            },
-            "version": "2.0.0-phase3",
-            "timestamp": datetime.utcnow().isoformat()
+            "consistency_report": consistency_results,
+            "timestamp": datetime.now().isoformat(),
+            "user_id": current_user.get("user_id"),
+            "documents_count": len(documents)
         }
         
     except Exception as e:
-        logger.error(f"Error getting validation capabilities: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to get capabilities: {str(e)}")
+        logger.error(f"Multi-document consistency validation error: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Consistency validation failed: {str(e)}"
+        )
 
 @api_router.get("/documents/{document_id}")
 async def get_document_details(document_id: str, current_user = Depends(get_current_user)):
