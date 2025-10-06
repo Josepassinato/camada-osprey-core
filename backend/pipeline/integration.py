@@ -13,6 +13,10 @@ from .birth_certificate_validator import birth_certificate_validation_stage
 from .i765_validator import i765_validation_stage
 from .driver_license_validator import driver_license_validation_stage
 from .marriage_certificate_validator import marriage_certificate_validation_stage
+from .social_security_validator import social_security_card_validation_stage
+from .tax_documents_validator import tax_documents_validation_stage
+from .medical_records_validator import medical_records_validation_stage
+from .utility_bills_validator import utility_bills_validation_stage
 
 logger = logging.getLogger(__name__)
 
