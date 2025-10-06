@@ -425,44 +425,60 @@ class OCREngine:
                 preprocessing_method="failed"
             )
     
-    def extract_mrz_from_passport(self, image_data: Union[str, bytes]) -> Dict[str, Any]:
+    async def extract_mrz_from_passport(self, image_data: Union[str, bytes]) -> Dict[str, Any]:
         """
-        Specialized MRZ extraction with region detection
+        Specialized MRZ extraction with Google Vision API priority
         """
         try:
-            # Prepare image
-            image = self._prepare_image(image_data)
-            img_array = np.array(image)
+            # Try Google Vision first for highest accuracy
+            if self.google_vision_available:
+                try:
+                    vision_result = await google_vision_ocr.extract_mrz_from_passport(image_data)
+                    if vision_result['confidence'] > 0.6:  # Good confidence
+                        logger.info(f"Google Vision MRZ success: {vision_result['confidence']:.2f} confidence")
+                        return vision_result
+                    else:
+                        logger.warning("Google Vision MRZ low confidence, trying Tesseract")
+                except Exception as e:
+                    logger.warning(f"Google Vision MRZ failed, using Tesseract: {e}")
             
-            # Convert to grayscale
-            if len(img_array.shape) == 3:
-                gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+            # Fallback to Tesseract MRZ extraction
+            if self.tesseract_available:
+                # Prepare image
+                image = self._prepare_image(image_data)
+                img_array = np.array(image)
+                
+                # Convert to grayscale
+                if len(img_array.shape) == 3:
+                    gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+                else:
+                    gray = img_array
+                
+                # Detect MRZ region (bottom portion of passport)
+                height, width = gray.shape
+                mrz_region = gray[int(height * 0.65):, :]  # Bottom 35% of image
+                
+                # Preprocess MRZ region
+                processed_mrz = self._preprocess_mrz(mrz_region)
+                
+                # Extract text using Tesseract with MRZ config
+                mrz_text = pytesseract.image_to_string(
+                    processed_mrz,
+                    lang='eng',
+                    config=self.tesseract_configs['mrz']
+                )
+                
+                # Clean and validate MRZ format
+                mrz_lines = self._clean_mrz_text(mrz_text)
+                
+                return {
+                    'mrz_text': mrz_lines,
+                    'region_detected': True,
+                    'confidence': self._estimate_mrz_confidence(mrz_lines),
+                    'method': 'tesseract_specialized'
+                }
             else:
-                gray = img_array
-            
-            # Detect MRZ region (bottom portion of passport)
-            height, width = gray.shape
-            mrz_region = gray[int(height * 0.65):, :]  # Bottom 35% of image
-            
-            # Preprocess MRZ region
-            processed_mrz = self._preprocess_mrz(mrz_region)
-            
-            # Extract text using Tesseract with MRZ config
-            mrz_text = pytesseract.image_to_string(
-                processed_mrz,
-                lang='eng',
-                config=self.tesseract_configs['mrz']
-            )
-            
-            # Clean and validate MRZ format
-            mrz_lines = self._clean_mrz_text(mrz_text)
-            
-            return {
-                'mrz_text': mrz_lines,
-                'region_detected': True,
-                'confidence': self._estimate_mrz_confidence(mrz_lines),
-                'method': 'tesseract_specialized'
-            }
+                raise RuntimeError("No MRZ extraction engine available")
             
         except Exception as e:
             logger.error(f"MRZ extraction failed: {e}")
