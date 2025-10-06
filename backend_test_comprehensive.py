@@ -578,8 +578,9 @@ class ImmigrationSystemTester:
             
             if response.status_code == 200:
                 result = response.json()
-                has_guidance = 'guidance' in result
-                guidance_length = len(result.get('guidance', ''))
+                has_guidance = 'complement_request' in result or 'guidance' in result
+                guidance_text = result.get('complement_request', result.get('guidance', ''))
+                guidance_length = len(guidance_text)
                 
                 success = has_guidance and guidance_length > 10
                 
