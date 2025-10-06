@@ -424,14 +424,14 @@ class I797Validator:
         )
         
         # Calculate overall confidence
-        valid_fields = sum(1 for r in results.values() if r.get('is_valid', False))
+        valid_fields = sum(1 for r in results.values() if (isinstance(r, dict) and r.get('is_valid', False)) or (hasattr(r, 'is_valid') and r.is_valid))
         total_fields = len(results)
         overall_confidence = (valid_fields / total_fields) * 100
         
         # Critical requirements check
         critical_fields = ['receipt_number', 'notice_type', 'beneficiary']
         critical_valid = all(
-            field in results and results[field].get('is_valid', False)
+            field in results and ((isinstance(results[field], dict) and results[field].get('is_valid', False)) or (hasattr(results[field], 'is_valid') and results[field].is_valid))
             for field in critical_fields
         )
         
