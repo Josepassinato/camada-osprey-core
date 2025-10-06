@@ -81,12 +81,17 @@ class PassportOCREngine:
         """
         Pré-processa imagem de passaporte para melhor OCR
         """
+        if not CV2_AVAILABLE:
+            # Return placeholder if OpenCV not available
+            return "mock_processed_image"
+        
         try:
             # Decode base64 to PIL Image
             image_data = base64.b64decode(base64_image)
             pil_image = Image.open(io.BytesIO(image_data))
             
             # Convert to OpenCV format
+            import numpy as np
             image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
             
             # 1. Resize if too large (max 2000px width)
