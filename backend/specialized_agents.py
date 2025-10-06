@@ -394,15 +394,15 @@ class DocumentValidationAgent(BaseSpecializedAgent):
                     field_value = field_data.get('value', '')
                     
                     # Use os validadores de alta precisão
-                    validation_result = enhance_field_validation(
+                    field_validation_result = enhance_field_validation(
                         field_name=field_name,
                         field_value=field_value,
                         document_type=expected_document_type,
                         context=extracted_data.get('context', {})
                     )
                     
-                    field_validation_results.append(validation_result)
-                    enhanced_confidence_scores.append(validation_result['confidence'])
+                    field_validation_results.append(field_validation_result)
+                    enhanced_confidence_scores.append(field_validation_result['confidence'])
             
             # PHASE 4.5: MRZ Validation for Passports (PRODUCTION FEATURE)
             mrz_validation_result = None
