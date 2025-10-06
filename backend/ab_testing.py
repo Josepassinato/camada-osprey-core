@@ -90,6 +90,23 @@ class ABTestingManager:
         
         return False
     
+    def _is_likely_i797(self, document_type: str, filename: str) -> bool:
+        """Detecta se documento é provavelmente um I-797"""
+        i797_indicators = [
+            'i797', 'i-797', 'notice', 'uscis', 'receipt',
+            'approval', 'petition', 'immigration'
+        ]
+        
+        # Check document type
+        if any(indicator in document_type.lower() for indicator in i797_indicators):
+            return True
+        
+        # Check filename
+        if any(indicator in filename.lower() for indicator in i797_indicators):
+            return True
+        
+        return False
+    
     def record_analysis_result(self, 
                              test_group: str,
                              processing_time: float,
