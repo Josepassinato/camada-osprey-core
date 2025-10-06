@@ -48,8 +48,8 @@ const DocumentUpload = () => {
     { value: "police_clearance", label: "Antecedentes Criminais" },
     { value: "sponsor_documents", label: "Documentos do Sponsor" },
     { value: "photos", label: "Fotos" },
-    { value: "form_i130", label: "Formulário I-130" },
-    { value: "form_ds160", label: "Formulário DS-160" },
+    // Note: Formulários USCIS (I-129, I-130, I-485, etc.) são gerados automaticamente pela IA
+    // após o preenchimento do questionário amigável e salvos automaticamente após autorização
     { value: "other", label: "Outros" }
   ];
 
