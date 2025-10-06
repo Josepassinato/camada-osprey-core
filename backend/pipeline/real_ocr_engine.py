@@ -396,6 +396,10 @@ class OCREngine:
                 language_hints = ["pt"]
             
             # Call Google Vision API
+            google_vision_ocr = get_google_vision_ocr()
+            if not google_vision_ocr:
+                raise Exception("Google Vision OCR not available")
+                
             vision_result = await google_vision_ocr.detect_text(
                 image_data,
                 detection_type=detection_type,
