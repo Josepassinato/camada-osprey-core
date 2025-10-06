@@ -11,8 +11,8 @@ from .instrumentation import enable_instrumentation, disable_instrumentation
 
 logger = logging.getLogger(__name__)
 
-# Router separado para métricas
-metrics_router = APIRouter(prefix="/metrics", tags=["metrics"])
+# Router separado para métricas (sem prefix para evitar conflitos)
+metrics_router = APIRouter(tags=["metrics"])
 
 @metrics_router.get("/health")
 async def metrics_health_check():
