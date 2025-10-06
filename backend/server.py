@@ -6301,9 +6301,7 @@ async def download_master_packet(job_id: str, current_user = Depends(get_current
         logger.error(f"Error downloading master packet: {e}")
         raise HTTPException(status_code=500, detail="Erro ao baixar master packet")
 
-app.include_router(api_router)
-
-# Include metrics router if available (non-intrusive)
+# Include metrics router if available (non-intrusive) - BEFORE including api_router
 print(f"DEBUG: METRICS_AVAILABLE = {METRICS_AVAILABLE}")
 if METRICS_AVAILABLE:
     try:
@@ -6327,6 +6325,8 @@ else:
     @api_router.get("/metrics-test")
     async def metrics_integration_test():
         return {"status": "Metrics not available", "available": False}
+
+app.include_router(api_router)
 
 # Pipeline control endpoints (if available)
 if PIPELINE_AVAILABLE:
