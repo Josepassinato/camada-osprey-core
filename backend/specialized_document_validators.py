@@ -74,8 +74,8 @@ class PassportValidator:
                 issues.append(f"WARNING: Passport expires soon on {expiry_check['expiry_date']}")
         
         # Calculate overall confidence
-        valid_fields = sum(1 for r in results.values() if isinstance(r, dict) and r.get('is_valid', False))
-        total_fields = len([r for r in results.values() if isinstance(r, dict)])
+        valid_fields = sum(1 for r in results.values() if (isinstance(r, dict) and r.get('is_valid', False)) or (hasattr(r, 'is_valid') and r.is_valid))
+        total_fields = len([r for r in results.values() if isinstance(r, (dict, ValidationResult))])
         overall_confidence = (valid_fields / total_fields) * 100 if total_fields > 0 else 0
         
         return {
@@ -85,7 +85,7 @@ class PassportValidator:
             'is_valid': overall_confidence >= 80 and len(issues) == 0,
             'issues': issues,
             'uscis_acceptable': overall_confidence >= 90 and all(
-                field in results and results[field].get('is_valid', False)
+                field in results and ((isinstance(results[field], dict) and results[field].get('is_valid', False)) or (hasattr(results[field], 'is_valid') and results[field].is_valid))
                 for field in ['full_name', 'passport_number', 'date_of_birth', 'expiry_date']
             )
         }
