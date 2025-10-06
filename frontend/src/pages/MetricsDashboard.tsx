@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { BarChart3, Activity, Clock, CheckCircle, AlertTriangle } from "lucide-react";
+import ABTestingDashboard from "../components/ABTestingDashboard";
 
 const MetricsDashboard = () => {
   const [metrics, setMetrics] = useState<any>(null);
