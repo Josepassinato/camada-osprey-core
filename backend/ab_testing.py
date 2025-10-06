@@ -54,12 +54,14 @@ class ABTestingManager:
                 'test_group': 'legacy_forced'
             }
         
-        # Force pipeline for passports (nossa implementação está pronta)
-        if self.force_pipeline_for_passports and self._is_likely_passport(document_type, filename):
+        # Force pipeline for passports and I-797s (nossas implementações estão prontas)
+        if self.force_pipeline_for_passports and (self._is_likely_passport(document_type, filename) or 
+                                                  self._is_likely_i797(document_type, filename)):
+            doc_subtype = 'passport' if self._is_likely_passport(document_type, filename) else 'i797'
             return {
                 'use_pipeline': True,
-                'reason': 'passport_forced_pipeline',
-                'test_group': 'pipeline_passport'
+                'reason': f'{doc_subtype}_forced_pipeline',
+                'test_group': f'pipeline_{doc_subtype}'
             }
         
         # A/B testing baseado em hash do user_id para consistência
