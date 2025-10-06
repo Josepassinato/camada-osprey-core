@@ -1,6 +1,7 @@
 """
 Real OCR Engine - Production Implementation
 Engine OCR real para produção com múltiplas tecnologias
+Integra Google Vision API, Tesseract e EasyOCR para máxima precisão
 """
 
 import os
@@ -21,6 +22,9 @@ import easyocr
 import cv2
 import numpy as np
 from PIL import Image, ImageEnhance, ImageFilter
+
+# Google Vision OCR (highest accuracy)
+from .google_vision_ocr import google_vision_ocr, VisionOCRResult
 
 logger = logging.getLogger(__name__)
 
