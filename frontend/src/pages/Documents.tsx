@@ -162,8 +162,7 @@ const Documents = () => {
       'police_clearance': 'Antecedentes Criminais',
       'sponsor_documents': 'Documentos do Sponsor',
       'photos': 'Fotos',
-      'form_i130': 'Formulário I-130',
-      'form_ds160': 'Formulário DS-160',
+      'uscis_form': 'Formulário USCIS (Gerado por IA)',
       'other': 'Outros',
     };
     return labels[type as keyof typeof labels] || type.toUpperCase();
