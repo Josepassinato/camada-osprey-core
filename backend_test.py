@@ -5793,10 +5793,564 @@ MRZ extraction should work properly.
                 f"Exception: {str(e)}"
             )
 
+    def test_document_upload_functionality(self):
+        """Test comprehensive document upload functionality as requested"""
+        print("📄 TESTING DOCUMENT UPLOAD FUNCTIONALITY...")
+        
+        # Test 1: Upload Endpoints
+        self.test_upload_endpoints()
+        
+        # Test 2: Document Processing Pipeline
+        self.test_document_processing_pipeline()
+        
+        # Test 3: File Storage System
+        self.test_file_storage_system()
+        
+        # Test 4: Upload API Integration
+        self.test_upload_api_integration()
+        
+        # Test 5: Document Types and Validation
+        self.test_document_types_validation()
+        
+        # Test 6: Upload Scenarios
+        self.test_upload_scenarios()
+    
+    def test_upload_endpoints(self):
+        """Test /api/documents/upload endpoint with POST request"""
+        print("🔗 Testing Upload Endpoints...")
+        
+        # Test different file types
+        test_files = [
+            ("test_passport.pdf", b"PDF passport content " * 3000, "application/pdf"),
+            ("test_photo.jpg", b"JPEG photo content " * 3000, "image/jpeg"),
+            ("test_document.png", b"PNG document content " * 3000, "image/png"),
+            ("test_doc.docx", b"DOCX document content " * 3000, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        ]
+        
+        for filename, content, mime_type in test_files:
+            try:
+                # Prepare multipart form data
+                files = {
+                    'file': (filename, content, mime_type)
+                }
+                data = {
+                    'document_type': 'passport',
+                    'tags': 'test,upload',
+                    'expiration_date': '2025-12-31T23:59:59Z',
+                    'issue_date': '2020-01-01T00:00:00Z'
+                }
+                
+                # Remove Content-Type header for multipart form data
+                headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                
+                response = requests.post(
+                    f"{API_BASE}/documents/upload",
+                    files=files,
+                    data=data,
+                    headers=headers
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    success = 'document_id' in result and 'filename' in result
+                    
+                    self.log_test(
+                        f"Upload Endpoint - {filename}",
+                        success,
+                        f"Document uploaded successfully: {result.get('document_id', 'No ID')}",
+                        {"filename": result.get('filename'), "status": result.get('status')}
+                    )
+                else:
+                    self.log_test(
+                        f"Upload Endpoint - {filename}",
+                        False,
+                        f"HTTP {response.status_code}: {response.text[:200]}",
+                        response.text
+                    )
+            except Exception as e:
+                self.log_test(
+                    f"Upload Endpoint - {filename}",
+                    False,
+                    f"Exception: {str(e)}"
+                )
+    
+    def test_document_processing_pipeline(self):
+        """Test document analysis after upload"""
+        print("⚙️ Testing Document Processing Pipeline...")
+        
+        # Test OCR processing integration
+        test_content = b"Test passport document for OCR processing. " * 2000
+        
+        try:
+            files = {
+                'file': ('test_passport_ocr.pdf', test_content, 'application/pdf')
+            }
+            data = {
+                'document_type': 'passport',
+                'visa_type': 'H-1B',
+                'case_id': 'TEST-OCR-PROCESSING'
+            }
+            
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check for OCR processing indicators
+                ocr_processed = ('ai_analysis' in result or 
+                               'policy_engine' in result or 
+                               'completeness_score' in result)
+                
+                # Check for validator integration
+                validator_integration = ('dr_miguel_validation' in result or 
+                                       'policy_decision' in result or 
+                                       'quality_analysis' in result)
+                
+                # Check document classification
+                classification_working = ('document_type' in result or 
+                                        'classification' in result)
+                
+                success = ocr_processed and (validator_integration or classification_working)
+                
+                self.log_test(
+                    "Document Processing Pipeline",
+                    success,
+                    f"OCR: {ocr_processed}, Validation: {validator_integration}, Classification: {classification_working}",
+                    {
+                        "completeness_score": result.get('completeness_score', 'N/A'),
+                        "policy_decision": result.get('policy_decision', 'N/A'),
+                        "processing_method": result.get('processing_method', 'N/A')
+                    }
+                )
+            else:
+                self.log_test(
+                    "Document Processing Pipeline",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Document Processing Pipeline",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_file_storage_system(self):
+        """Test file storage and retrieval functionality"""
+        print("💾 Testing File Storage System...")
+        
+        # First upload a document
+        test_content = b"Test document for storage verification. " * 2000
+        document_id = None
+        
+        try:
+            # Upload document
+            files = {
+                'file': ('test_storage.pdf', test_content, 'application/pdf')
+            }
+            data = {
+                'document_type': 'passport',
+                'tags': 'storage,test'
+            }
+            
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            upload_response = requests.post(
+                f"{API_BASE}/documents/upload",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if upload_response.status_code == 200:
+                upload_result = upload_response.json()
+                document_id = upload_result.get('document_id')
+                
+                if document_id:
+                    # Test file retrieval
+                    retrieval_response = self.session.get(f"{API_BASE}/documents/{document_id}")
+                    
+                    if retrieval_response.status_code == 200:
+                        retrieval_result = retrieval_response.json()
+                        
+                        # Check metadata storage
+                        metadata_complete = all(field in retrieval_result for field in 
+                                              ['id', 'filename', 'document_type', 'file_size', 'created_at'])
+                        
+                        # Check file information
+                        file_info_present = ('mime_type' in retrieval_result and 
+                                           'original_filename' in retrieval_result)
+                        
+                        success = metadata_complete and file_info_present
+                        
+                        self.log_test(
+                            "File Storage System",
+                            success,
+                            f"Metadata: {metadata_complete}, File Info: {file_info_present}",
+                            {
+                                "document_id": document_id,
+                                "file_size": retrieval_result.get('file_size'),
+                                "mime_type": retrieval_result.get('mime_type')
+                            }
+                        )
+                    else:
+                        self.log_test(
+                            "File Storage System",
+                            False,
+                            f"Retrieval failed: HTTP {retrieval_response.status_code}",
+                            retrieval_response.text
+                        )
+                else:
+                    self.log_test(
+                        "File Storage System",
+                        False,
+                        "No document_id returned from upload",
+                        upload_result
+                    )
+            else:
+                self.log_test(
+                    "File Storage System",
+                    False,
+                    f"Upload failed: HTTP {upload_response.status_code}",
+                    upload_response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "File Storage System",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_upload_api_integration(self):
+        """Test multipart/form-data handling and CORS configuration"""
+        print("🔗 Testing Upload API Integration...")
+        
+        # Test multipart/form-data handling
+        test_content = b"Test multipart form data handling. " * 2000
+        
+        try:
+            files = {
+                'file': ('test_multipart.pdf', test_content, 'application/pdf')
+            }
+            data = {
+                'document_type': 'passport',
+                'tags': 'multipart,test',
+                'expiration_date': '2025-12-31T23:59:59Z'
+            }
+            
+            # Test with explicit multipart headers
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            headers['Accept'] = 'application/json'
+            
+            response = requests.post(
+                f"{API_BASE}/documents/upload",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            multipart_success = response.status_code == 200
+            
+            # Test CORS headers (if present)
+            cors_headers = {
+                'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
+            }
+            
+            cors_configured = any(cors_headers.values())
+            
+            # Test error handling for invalid files
+            invalid_files = {
+                'file': ('test_invalid.txt', b"Invalid file content", 'text/plain')
+            }
+            
+            invalid_response = requests.post(
+                f"{API_BASE}/documents/upload",
+                files=invalid_files,
+                data={'document_type': 'passport'},
+                headers=headers
+            )
+            
+            error_handling = invalid_response.status_code in [400, 422]
+            
+            success = multipart_success and error_handling
+            
+            self.log_test(
+                "Upload API Integration",
+                success,
+                f"Multipart: {multipart_success}, CORS: {cors_configured}, Error Handling: {error_handling}",
+                {
+                    "multipart_status": response.status_code,
+                    "cors_headers": cors_headers,
+                    "error_handling_status": invalid_response.status_code
+                }
+            )
+            
+        except Exception as e:
+            self.log_test(
+                "Upload API Integration",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_document_types_validation(self):
+        """Test upload of different document types"""
+        print("📋 Testing Document Types and Validation...")
+        
+        # Test different document types
+        document_types = [
+            ('passport', 'Passport document content'),
+            ('birth_certificate', 'Birth certificate content'),
+            ('marriage_certificate', 'Marriage certificate content'),
+            ('education_diploma', 'Education diploma content'),
+            ('employment_letter', 'Employment letter content')
+        ]
+        
+        for doc_type, content_text in document_types:
+            try:
+                test_content = (content_text + " " * 1000).encode()[:50000]  # Ensure minimum size
+                
+                files = {
+                    'file': (f'test_{doc_type}.pdf', test_content, 'application/pdf')
+                }
+                data = {
+                    'document_type': doc_type,
+                    'tags': f'{doc_type},validation'
+                }
+                
+                headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                
+                response = requests.post(
+                    f"{API_BASE}/documents/upload",
+                    files=files,
+                    data=data,
+                    headers=headers
+                )
+                
+                success = response.status_code == 200
+                
+                if success:
+                    result = response.json()
+                    self.log_test(
+                        f"Document Type - {doc_type}",
+                        True,
+                        f"Successfully uploaded {doc_type}",
+                        {"document_id": result.get('document_id'), "filename": result.get('filename')}
+                    )
+                else:
+                    self.log_test(
+                        f"Document Type - {doc_type}",
+                        False,
+                        f"HTTP {response.status_code}: {response.text[:200]}",
+                        response.text
+                    )
+                    
+            except Exception as e:
+                self.log_test(
+                    f"Document Type - {doc_type}",
+                    False,
+                    f"Exception: {str(e)}"
+                )
+    
+    def test_upload_scenarios(self):
+        """Test various upload scenarios"""
+        print("🎯 Testing Upload Scenarios...")
+        
+        # Test file size limits
+        self.test_file_size_limits()
+        
+        # Test concurrent uploads
+        self.test_concurrent_uploads()
+        
+        # Test invalid file types
+        self.test_invalid_file_types()
+    
+    def test_file_size_limits(self):
+        """Test file size validation"""
+        # Test file too small (under 50KB based on backend validation)
+        small_content = b"Small file content"
+        
+        try:
+            files = {
+                'file': ('small_file.pdf', small_content, 'application/pdf')
+            }
+            data = {
+                'document_type': 'passport'
+            }
+            
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/upload",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            # Should reject small files
+            small_file_rejected = response.status_code in [400, 422]
+            
+            # Test file too large (over 10MB based on backend validation)
+            large_content = b"Large file content " * 600000  # ~12MB
+            
+            large_files = {
+                'file': ('large_file.pdf', large_content, 'application/pdf')
+            }
+            
+            large_response = requests.post(
+                f"{API_BASE}/documents/upload",
+                files=large_files,
+                data=data,
+                headers=headers
+            )
+            
+            # Should reject large files
+            large_file_rejected = large_response.status_code in [400, 422]
+            
+            success = small_file_rejected and large_file_rejected
+            
+            self.log_test(
+                "File Size Limits",
+                success,
+                f"Small file rejected: {small_file_rejected}, Large file rejected: {large_file_rejected}",
+                {
+                    "small_file_status": response.status_code,
+                    "large_file_status": large_response.status_code
+                }
+            )
+            
+        except Exception as e:
+            self.log_test(
+                "File Size Limits",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_concurrent_uploads(self):
+        """Test concurrent upload handling"""
+        import threading
+        import time
+        
+        results = []
+        
+        def upload_file(file_num):
+            try:
+                content = f"Concurrent upload test file {file_num} ".encode() * 2000
+                
+                files = {
+                    'file': (f'concurrent_{file_num}.pdf', content, 'application/pdf')
+                }
+                data = {
+                    'document_type': 'passport',
+                    'tags': f'concurrent,test{file_num}'
+                }
+                
+                headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                
+                response = requests.post(
+                    f"{API_BASE}/documents/upload",
+                    files=files,
+                    data=data,
+                    headers=headers
+                )
+                
+                results.append({
+                    'file_num': file_num,
+                    'status_code': response.status_code,
+                    'success': response.status_code == 200
+                })
+                
+            except Exception as e:
+                results.append({
+                    'file_num': file_num,
+                    'status_code': 0,
+                    'success': False,
+                    'error': str(e)
+                })
+        
+        # Start 3 concurrent uploads
+        threads = []
+        for i in range(3):
+            thread = threading.Thread(target=upload_file, args=(i,))
+            threads.append(thread)
+            thread.start()
+        
+        # Wait for all threads to complete
+        for thread in threads:
+            thread.join()
+        
+        successful_uploads = sum(1 for r in results if r['success'])
+        success = successful_uploads >= 2  # At least 2 out of 3 should succeed
+        
+        self.log_test(
+            "Concurrent Uploads",
+            success,
+            f"Successful uploads: {successful_uploads}/3",
+            {"results": results}
+        )
+    
+    def test_invalid_file_types(self):
+        """Test rejection of invalid file types"""
+        invalid_files = [
+            ('test.exe', b'Executable content', 'application/x-executable'),
+            ('test.js', b'JavaScript content', 'application/javascript'),
+            ('test.py', b'Python script content', 'text/x-python')
+        ]
+        
+        rejected_count = 0
+        
+        for filename, content, mime_type in invalid_files:
+            try:
+                files = {
+                    'file': (filename, content, mime_type)
+                }
+                data = {
+                    'document_type': 'passport'
+                }
+                
+                headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                
+                response = requests.post(
+                    f"{API_BASE}/documents/upload",
+                    files=files,
+                    data=data,
+                    headers=headers
+                )
+                
+                if response.status_code in [400, 422]:
+                    rejected_count += 1
+                    
+            except Exception:
+                pass  # Expected for invalid files
+        
+        success = rejected_count >= 2  # Most invalid files should be rejected
+        
+        self.log_test(
+            "Invalid File Types",
+            success,
+            f"Invalid files rejected: {rejected_count}/{len(invalid_files)}",
+            {"rejected_count": rejected_count, "total_tested": len(invalid_files)}
+        )
+
     def run_all_tests(self):
         """Run all comprehensive tests"""
         print("🚀 STARTING COMPREHENSIVE ECOSYSTEM VALIDATION")
         print("=" * 80)
+        print()
+        
+        # PRIORITY: DOCUMENT UPLOAD FUNCTIONALITY TESTING (as requested in review)
+        print("📄 PRIORITY: DOCUMENT UPLOAD FUNCTIONALITY COMPREHENSIVE TESTING")
+        print("-" * 60)
+        self.test_document_upload_functionality()
         print()
         
         # PRIORITY: ADVANCED ANALYTICS SYSTEM TESTING (as requested in review)
