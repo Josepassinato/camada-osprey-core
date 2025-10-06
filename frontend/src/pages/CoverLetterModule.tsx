@@ -494,7 +494,7 @@ const CoverLetterModule: React.FC = () => {
                 <CheckCircle2 className="h-5 w-5 text-green-500" />
                 <span>Carta Revisada e Finalizada</span>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-gray-700">
                 Sua carta foi analisada e está completa. Revise o texto final e confirme.
               </CardDescription>
             </CardHeader>
