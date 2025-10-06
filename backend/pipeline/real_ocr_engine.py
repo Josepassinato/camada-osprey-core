@@ -437,6 +437,9 @@ class OCREngine:
             # Try Google Vision first for highest accuracy
             if self.google_vision_available:
                 try:
+                    google_vision_ocr = get_google_vision_ocr()
+                    if not google_vision_ocr:
+                        raise Exception("Google Vision OCR not available")
                     vision_result = await google_vision_ocr.extract_mrz_from_passport(image_data)
                     if vision_result['confidence'] > 0.6:  # Good confidence
                         logger.info(f"Google Vision MRZ success: {vision_result['confidence']:.2f} confidence")
