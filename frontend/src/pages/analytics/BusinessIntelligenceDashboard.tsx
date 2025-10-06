@@ -10,7 +10,6 @@ import {
   Globe,
   DollarSign,
   FileText,
-  Growth,
   Target
 } from "lucide-react";
 
