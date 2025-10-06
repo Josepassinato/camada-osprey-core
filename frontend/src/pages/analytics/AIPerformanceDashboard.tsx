@@ -370,7 +370,7 @@ const AIPerformanceDashboard: React.FC<{ period: string }> = ({ period }) => {
               <div className="p-3 bg-gray-50 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium">Response Time Target</span>
-                  <span className="text-xs text-gray-500">&lt; 2.0s</span>
+                  <span className="text-xs text-gray-500">{'< 2.0s'}</span>
                 </div>
                 <Progress 
                   value={Math.min((2000 / analytics.average_response_time_ms) * 100, 100)} 
