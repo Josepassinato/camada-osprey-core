@@ -61,21 +61,25 @@ class PassportOCREngine:
                 language="eng"
             )
             
-            # 3. Extract printed fields from full text
-            printed_data = self._extract_printed_fields(full_ocr_result.text)
+            # 3. Process combined results  
+            combined_confidence = max(mrz_result.get('confidence', 0), full_ocr_result.confidence)
+            total_processing_time = mrz_result.get('processing_time', 0) + full_ocr_result.processing_time
             
-            # 4. Combine results
-            result = {
-                'mrz_text': mrz_result['mrz_text'],
-                'full_text': full_ocr_result.text,
-                'printed_data': printed_data,
-                'ocr_confidence': max(mrz_result['confidence'], full_ocr_result.confidence),
-                'processing_method': 'real_ocr_engine',
-                'mrz_lines_detected': len(mrz_result['mrz_text'].split('\n')) if mrz_result['mrz_text'] else 0,
-                'mrz_region_detected': mrz_result['region_detected'],
+            # 4. Use post-processing method for final results
+            result = self._post_process_results(
+                mrz_text=mrz_result['mrz_text'],
+                full_text=full_ocr_result.text,
+                mrz_confidence=combined_confidence,
+                processing_time=total_processing_time
+            )
+            
+            # 5. Add additional metadata
+            result.update({
+                'mrz_region_detected': mrz_result.get('region_detected', False),
                 'engine_used': full_ocr_result.engine,
-                'processing_time': full_ocr_result.processing_time
-            }
+                'mrz_method': mrz_result.get('method', 'unknown'),
+                'engines_available': real_ocr_engine.get_engine_status()['engine_priority']
+            })
             
             logger.info(f"Real OCR extraction completed: {result['processing_method']}, confidence: {result['ocr_confidence']:.2f}")
             
