@@ -121,7 +121,11 @@ class PassportOCREngine:
         except Exception as e:
             logger.error(f"Image preprocessing error: {e}")
             # Return dummy processed image
-            return np.zeros((100, 100), dtype=np.uint8)
+            if CV2_AVAILABLE:
+                import numpy as np
+                return np.zeros((100, 100), dtype=np.uint8)
+            else:
+                return "mock_processed_image_error"
     
     def _detect_mrz_region(self, image: np.ndarray) -> np.ndarray:
         """
