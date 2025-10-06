@@ -6340,6 +6340,11 @@ if PIPELINE_AVAILABLE:
                     "available": True,
                     "stages": ["PassportOCR", "PassportClassification", "MRZParsing"],
                     "description": "High-precision passport analysis with MRZ validation"
+                },
+                "i797": {
+                    "available": True,
+                    "stages": ["I797OCR", "I797Classification", "I797Validation", "I797SecurityCheck"],
+                    "description": "USCIS I-797 Notice validation with Receipt Number verification"
                 }
             }
         }
