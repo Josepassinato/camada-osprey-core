@@ -738,12 +738,13 @@ metadata:
 
 test_plan:
   current_focus:
-    - "New Intelligent Cover Letter Flow Testing - COMPLETED"
-    - "Ver Detalhes Button Testing - All Visa Types"
-    - "Modal Content Validation for Previously Broken Visas"
-  stuck_tasks: []
+    - "Real OCR Engine Implementation (Phase 4 - Production OCR)"
+    - "Document Analysis KPIs and Performance Endpoints"
+    - "A/B Testing Integration with OCR Real"
+  stuck_tasks:
+    - "Case Finalizer MVP System"
   test_all: false
-  test_priority: "cover_letter_flow_validation_completed"
+  test_priority: "high_first"
 
 agent_communication:
   - agent: "testing"
