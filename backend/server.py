@@ -522,7 +522,9 @@ async def analyze_document_with_ai(document: UserDocument) -> Dict[str, Any]:
         Faça validação técnica rigorosa conforme protocolo Dr. Miguel.
         """
         
-        session_id = f"doc_analysis_{document.id}"
+        # Get document ID - handle both object and dict cases
+        doc_id = document.id if hasattr(document, 'id') else document.get('id') if isinstance(document, dict) else 'unknown'
+        session_id = f"doc_analysis_{doc_id}"
         dr_miguel_analysis = await validator._call_agent(validation_prompt, session_id)
 
         # Parse Dr. Miguel's JSON response
