@@ -1550,17 +1550,21 @@ async def upload_document(
             suggestions = ai_analysis.get('suggestions', [])
             status = DocumentStatus.approved if ai_analysis.get('validity_status') == 'valid' else DocumentStatus.requires_improvement
             
-            await db.documents.update_one(
-                {"id": document.id},
-                {
-                    "$set": {
-                        "ai_analysis": ai_analysis,
-                        "ai_suggestions": suggestions,
-                        "status": status.value,
-                        "updated_at": datetime.utcnow()
+            # Get document ID - handle both object and dict cases
+            doc_id = document.id if hasattr(document, 'id') else document.get('id') if isinstance(document, dict) else None
+            
+            if doc_id:
+                await db.documents.update_one(
+                    {"id": doc_id},
+                    {
+                        "$set": {
+                            "ai_analysis": ai_analysis,
+                            "ai_suggestions": suggestions,
+                            "status": status.value,
+                            "updated_at": datetime.utcnow()
+                        }
                     }
-                }
-            )
+                )
             
         except Exception as ai_error:
             logger.error(f"AI analysis failed: {str(ai_error)}")
