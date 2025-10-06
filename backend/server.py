@@ -6536,6 +6536,10 @@ else:
     async def metrics_integration_test():
         return {"status": "Metrics not available", "available": False}
 
+# Include advanced analytics router if available
+if ANALYTICS_AVAILABLE:
+    api_router.include_router(analytics_router)
+
 app.include_router(api_router)
 
 # Pipeline control endpoints (if available)
