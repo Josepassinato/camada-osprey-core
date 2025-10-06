@@ -30,6 +30,17 @@ from immigration_expert import ImmigrationExpert, create_immigration_expert
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
+# Advanced Analytics System
+try:
+    from analytics.collector import init_analytics_collector, get_analytics_collector
+    from analytics.endpoints import analytics_router
+    ANALYTICS_AVAILABLE = True
+    print("✅ Advanced Analytics system imported successfully")
+except ImportError as e:
+    ANALYTICS_AVAILABLE = False
+    print(f"⚠️ Advanced Analytics not available: {e}")
+    logging.warning("Advanced Analytics not available - continuing without analytics")
+
 # Sistema de Métricas Passivo (não-intrusivo)
 try:
     from metrics import metrics_router, enable_instrumentation
