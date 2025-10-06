@@ -6,8 +6,9 @@ Integra o pipeline modular com o sistema atual de forma não-intrusiva
 import logging
 import asyncio
 from typing import Dict, Any, Optional
-from .passport_stages import passport_pipeline
-from .i797_stages import i797_pipeline
+from .pipeline_framework import DocumentAnalysisPipeline
+from .passport_stages import passport_pipeline, PassportOCRStage, MRZParsingStage
+from .i797_stages import i797_pipeline, I797OCRStage, I797ValidationStage
 from .birth_certificate_validator import birth_certificate_validation_stage
 from .i765_validator import i765_validation_stage
 
