@@ -6266,6 +6266,11 @@ async def startup_db_client():
         
         logger.info("Successfully connected to MongoDB!")
         
+        # Initialize metrics system (non-intrusive)
+        if METRICS_AVAILABLE:
+            enable_instrumentation()
+            logger.info("✅ Metrics system initialized and ready to collect data")
+        
         # Create optimized indexes for better performance
         try:
             # Auto-application cases indexes
