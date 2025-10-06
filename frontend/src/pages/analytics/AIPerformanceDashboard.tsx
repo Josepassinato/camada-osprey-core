@@ -385,7 +385,7 @@ const AIPerformanceDashboard: React.FC<{ period: string }> = ({ period }) => {
               <div className="p-3 bg-gray-50 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium">Success Rate Target</span>
-                  <span className="text-xs text-gray-500">≥ 98%</span>
+                  <span className="text-xs text-gray-500">&ge; 98%</span>
                 </div>
                 <Progress value={analytics.success_rate} className="h-2" />
                 <div className="text-xs text-gray-600 mt-1">
