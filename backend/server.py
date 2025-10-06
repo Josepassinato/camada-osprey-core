@@ -441,17 +441,7 @@ def validate_file_type(mime_type: str) -> bool:
     ]
     return mime_type in supported_types
 
-# Instrumentar função de análise (se métricas disponíveis)
-if METRICS_AVAILABLE:
-    from metrics.instrumentation import monitor_document_analysis
-    
-    @monitor_document_analysis()
-    async def analyze_document_with_ai_instrumented(document: UserDocument) -> Dict[str, Any]:
-        return await analyze_document_with_ai_original(document)
-    
-    async def analyze_document_with_ai_original(document: UserDocument) -> Dict[str, Any]:
-else:
-    async def analyze_document_with_ai(document: UserDocument) -> Dict[str, Any]:
+async def analyze_document_with_ai(document: UserDocument) -> Dict[str, Any]:
     """Analyze document with Dr. Miguel's improved validation"""
     try:
         # Use Dr. Miguel for rigorous document validation
