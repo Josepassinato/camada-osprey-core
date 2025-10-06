@@ -77,7 +77,7 @@ class PassportOCREngine:
             # Fallback to basic text extraction
             return self._fallback_text_extraction(image_data)
     
-    def _preprocess_passport_image(self, base64_image: str) -> np.ndarray:
+    def _preprocess_passport_image(self, base64_image: str):
         """
         Pré-processa imagem de passaporte para melhor OCR
         """
