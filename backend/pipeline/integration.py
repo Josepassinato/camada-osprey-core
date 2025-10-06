@@ -263,6 +263,22 @@ def create_document_pipeline(document_type: str) -> DocumentAnalysisPipeline:
         pipeline = DocumentAnalysisPipeline(pipeline_name)
         pipeline.add_stage(marriage_certificate_validation_stage)
         
+    elif document_type.lower() in ['social_security_card', 'ssn_card', 'social_security', 'cartao_ssn']:
+        pipeline = DocumentAnalysisPipeline(pipeline_name)
+        pipeline.add_stage(social_security_card_validation_stage)
+        
+    elif document_type.lower() in ['tax_document', 'w2', 'w-2', '1040', '1099', 'tax_return', 'documento_fiscal']:
+        pipeline = DocumentAnalysisPipeline(pipeline_name)
+        pipeline.add_stage(tax_documents_validation_stage)
+        
+    elif document_type.lower() in ['medical_record', 'medical_report', 'lab_report', 'prescription', 'registro_medico']:
+        pipeline = DocumentAnalysisPipeline(pipeline_name)
+        pipeline.add_stage(medical_records_validation_stage)
+        
+    elif document_type.lower() in ['utility_bill', 'electric_bill', 'gas_bill', 'water_bill', 'phone_bill', 'internet_bill', 'conta_utilidade']:
+        pipeline = DocumentAnalysisPipeline(pipeline_name)
+        pipeline.add_stage(utility_bills_validation_stage)
+        
     else:
         # Generic pipeline for unknown document types
         logger.warning(f"Unknown document type: {document_type}, using generic pipeline")
