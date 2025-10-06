@@ -70,6 +70,7 @@ const App = () => (
           <Route path="/auto-application/case/:caseId/finalize" element={<CaseFinalizer />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/metrics" element={<MetricsDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
