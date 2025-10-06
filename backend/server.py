@@ -1682,7 +1682,7 @@ async def get_validation_capabilities():
         "supported_document_types": [
             "passport", "driver_license", "birth_certificate", 
             "marriage_certificate", "i797", "i94", "visa_documents",
-            "i765_ead", "employment_authorization"
+            "i765_ead", "employment_authorization", "social_security_card"
         ],
         "supported_languages": ["en", "es", "pt", "fr"],
         "version": "5.0.0"
