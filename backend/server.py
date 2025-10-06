@@ -564,9 +564,10 @@ async def analyze_document_with_ai(document: UserDocument) -> Dict[str, Any]:
             "next_steps": ["Upload realizado, aguarde revisão manual"]
         }
 
-# Usar função instrumentada se métricas estão disponíveis
+# Instrumentar função existente se métricas disponíveis (sem alterar comportamento)
 if METRICS_AVAILABLE:
-    analyze_document_with_ai = analyze_document_with_ai_instrumented
+    from metrics.instrumentation import monitor_document_analysis
+    analyze_document_with_ai = monitor_document_analysis()(analyze_document_with_ai)
 
 def determine_document_priority(document_type: DocumentType, expiration_date: Optional[datetime]) -> DocumentPriority:
     """Determine document priority based on type and expiration"""
