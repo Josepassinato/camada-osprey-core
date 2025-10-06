@@ -5799,12 +5799,17 @@ MRZ extraction should work properly.
         print("=" * 80)
         print()
         
-        # PRIORITY: NEW DOCUMENT VALIDATORS TESTING (as requested in review)
-        print("🆕 PRIORITY: NEW DOCUMENT VALIDATORS COMPREHENSIVE TESTING")
+        # PRIORITY: ADVANCED ANALYTICS SYSTEM TESTING (as requested in review)
+        print("📊 PRIORITY: ADVANCED ANALYTICS SYSTEM COMPREHENSIVE TESTING")
+        print("-" * 60)
+        self.test_advanced_analytics_system()
+        
+        # SECOND: NEW DOCUMENT VALIDATORS TESTING
+        print("\n🆕 NEW DOCUMENT VALIDATORS COMPREHENSIVE TESTING")
         print("-" * 60)
         self.test_new_document_validators()
         
-        # SECOND: OCR Real Engine Testing
+        # THIRD: OCR Real Engine Testing
         print("\n🔍 OCR REAL ENGINE COMPREHENSIVE TESTING")
         print("-" * 60)
         self.test_ocr_real_engine_comprehensive()
