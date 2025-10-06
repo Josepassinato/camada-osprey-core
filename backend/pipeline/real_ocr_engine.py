@@ -24,7 +24,7 @@ import numpy as np
 from PIL import Image, ImageEnhance, ImageFilter
 
 # Google Vision OCR (highest accuracy)
-from .google_vision_ocr import google_vision_ocr, VisionOCRResult
+from .google_vision_ocr import get_google_vision_ocr, VisionOCRResult
 
 logger = logging.getLogger(__name__)
 
