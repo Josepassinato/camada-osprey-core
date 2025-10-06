@@ -8,6 +8,8 @@ import asyncio
 from typing import Dict, Any, Optional
 from .passport_stages import passport_pipeline
 from .i797_stages import i797_pipeline
+from .birth_certificate_validator import birth_certificate_validation_stage
+from .i765_validator import i765_validation_stage
 
 logger = logging.getLogger(__name__)
 
