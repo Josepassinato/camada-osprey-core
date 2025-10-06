@@ -6213,6 +6213,13 @@ async def download_master_packet(job_id: str, current_user = Depends(get_current
 
 app.include_router(api_router)
 
+# Include metrics router if available (non-intrusive)
+if METRICS_AVAILABLE:
+    app.include_router(metrics_router)
+    logging.info("✅ Metrics system enabled")
+else:
+    logging.info("ℹ️ Running without metrics system")
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
