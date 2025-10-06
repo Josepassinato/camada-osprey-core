@@ -516,7 +516,7 @@ class PolicyEngine:
             pass_count = sum(1 for check in consistency_checks if check["result"] == "pass")
             total_count = len(consistency_checks)
             consistency_score = pass_count / total_count if total_count > 0 else 1.0
-            scores.append(consistency_score * scoring["consistency_weight"])
+            scores.append(consistency_score * scoring.get("consistency_weight", 0.1))
         
         overall_score = sum(scores) if scores else 0.0
         
