@@ -1,7 +1,8 @@
 """
-Real OCR Engine - Production Implementation
+Real OCR Engine - Production Implementation with Performance Optimization
 Engine OCR real para produção com múltiplas tecnologias
 Integra Google Vision API, Tesseract e EasyOCR para máxima precisão
+Inclui sistema de cache e monitoramento de performance
 """
 
 import os
@@ -25,6 +26,15 @@ from PIL import Image, ImageEnhance, ImageFilter
 
 # Google Vision OCR (highest accuracy)
 from .google_vision_ocr import get_google_vision_ocr, VisionOCRResult
+
+# Performance optimization imports
+try:
+    from cache.ocr_cache import ocr_cache, batch_processor
+    from monitoring.performance_monitor import performance_monitor, monitor_performance
+    CACHE_AVAILABLE = True
+except ImportError:
+    CACHE_AVAILABLE = False
+    logger.warning("Cache and monitoring systems not available")
 
 logger = logging.getLogger(__name__)
 
