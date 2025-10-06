@@ -39,6 +39,14 @@ class PipelineIntegrator:
             'i797_notice': i797_pipeline,
             'i797': i797_pipeline,
             'uscis_notice': i797_pipeline,
+            'birth_certificate': 'birth_certificate_pipeline',
+            'i765_ead': 'i765_pipeline',
+            'driver_license': 'driver_license_pipeline', 
+            'marriage_certificate': 'marriage_certificate_pipeline',
+            'social_security_card': 'social_security_pipeline',
+            'tax_document': 'tax_documents_pipeline',
+            'medical_record': 'medical_records_pipeline',
+            'utility_bill': 'utility_bills_pipeline',
             # Mais pipelines serão adicionados aqui
         }
     
