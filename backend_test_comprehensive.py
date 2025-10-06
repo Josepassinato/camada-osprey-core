@@ -383,7 +383,8 @@ class ImmigrationSystemTester:
             }
             data = {
                 'document_type': 'passport',
-                'visa_type': 'H-1B'
+                'visa_type': 'H-1B',
+                'case_id': f'TEST-VISION-{uuid.uuid4().hex[:8]}'
             }
             
             headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
