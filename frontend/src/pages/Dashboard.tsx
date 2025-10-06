@@ -433,6 +433,14 @@ const Dashboard = () => {
                   <FileText className="h-4 w-4" />
                   Meus Documentos
                 </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => navigate('/advanced-analytics')}
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  Advanced Analytics
+                </Button>
               </CardContent>
             </Card>
 
