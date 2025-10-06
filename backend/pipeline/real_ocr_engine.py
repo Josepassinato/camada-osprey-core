@@ -74,8 +74,8 @@ class OCREngine:
     def _check_google_vision(self) -> bool:
         """Check if Google Vision API is available and configured"""
         try:
-            api_key = os.getenv('GOOGLE_API_KEY')
-            if api_key and google_vision_ocr:
+            google_vision_ocr = get_google_vision_ocr()
+            if google_vision_ocr:
                 logger.info("Google Vision API available and configured")
                 return True
             else:
