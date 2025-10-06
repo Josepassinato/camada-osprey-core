@@ -435,5 +435,29 @@ class GoogleVisionOCR:
             'formats_supported': ['JPEG', 'PNG', 'GIF', 'BMP', 'WEBP', 'RAW', 'ICO', 'PDF', 'TIFF']
         }
 
-# Global instance
-google_vision_ocr = GoogleVisionOCR()
+# Global instance - only create if API key is available
+google_vision_ocr = None
+
+def get_google_vision_ocr():
+    """Get Google Vision OCR instance, creating it if needed and API key is available"""
+    global google_vision_ocr
+    if google_vision_ocr is None:
+        api_key = os.getenv('GOOGLE_API_KEY')
+        if api_key:
+            try:
+                google_vision_ocr = GoogleVisionOCR(api_key)
+            except Exception as e:
+                logger.warning(f"Failed to initialize Google Vision OCR: {e}")
+                google_vision_ocr = False  # Mark as failed
+        else:
+            logger.warning("Google Vision API key not configured")
+            google_vision_ocr = False
+    
+    return google_vision_ocr if google_vision_ocr is not False else None
+
+# Initialize on import if possible
+try:
+    google_vision_ocr = get_google_vision_ocr()
+except Exception as e:
+    logger.warning(f"Google Vision OCR initialization failed: {e}")
+    google_vision_ocr = None
