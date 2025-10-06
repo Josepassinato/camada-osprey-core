@@ -11,9 +11,9 @@ async def test_with_valid_mrz():
     print("🎯 Testando com MRZ VÁLIDA - Demonstrando Precisão 99%+")
     print("=" * 60)
     
-    # MRZ real válida de exemplo (dados simulados mas formato correto)
+    # MRZ válida com checksums corretos (exemplo padrão ICAO)
     valid_mrz = """P<UTOERIKSSON<<ANNA<MARIA<<<<<<<<<<<<<<<<<<<
-L898902C36UTO7408122F1204159ZE184226B<<<<<10"""
+L898902C<3UTO7408122F1204159<<<<<<<<<<<<<8"""
     
     try:
         # Dados impressos correspondentes
