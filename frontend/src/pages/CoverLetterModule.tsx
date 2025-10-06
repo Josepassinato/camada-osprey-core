@@ -490,7 +490,7 @@ const CoverLetterModule: React.FC = () => {
         {currentCard === 5 && review?.status === 'complete' && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
+              <CardTitle className="flex items-center space-x-2 text-gray-900">
                 <CheckCircle2 className="h-5 w-5 text-green-500" />
                 <span>Carta Revisada e Finalizada</span>
               </CardTitle>
