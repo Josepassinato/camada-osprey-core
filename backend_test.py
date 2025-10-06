@@ -1304,6 +1304,705 @@ class ComprehensiveEcosystemTester:
                 f"Exception: {str(e)}"
             )
     
+    def test_new_document_validators(self):
+        """TEST NEW DOCUMENT VALIDATORS - Social Security, Tax Documents, Medical Records, Utility Bills"""
+        print("🆕 TESTING NEW DOCUMENT VALIDATORS...")
+        
+        # Test 1: Social Security Card Validator
+        self.test_social_security_card_validator()
+        
+        # Test 2: Tax Documents Validator
+        self.test_tax_documents_validator()
+        
+        # Test 3: Medical Records Validator
+        self.test_medical_records_validator()
+        
+        # Test 4: Utility Bills Validator
+        self.test_utility_bills_validator()
+        
+        # Test 5: Integration with Pipeline System
+        self.test_new_validators_integration()
+    
+    def test_social_security_card_validator(self):
+        """Test Social Security Card Validator"""
+        print("🆔 Testing Social Security Card Validator...")
+        
+        # Test with simulated SSN card content
+        test_ssn_content = """
+        SOCIAL SECURITY
+        123-45-6789
+        
+        This number has been established for
+        JOHN SMITH DOE
+        
+        SIGNATURE: John S. Doe
+        
+        SOCIAL SECURITY ADMINISTRATION
+        """
+        
+        try:
+            # Test direct validator import and instantiation
+            from backend.pipeline.social_security_validator import SocialSecurityValidator
+            
+            validator = SocialSecurityValidator()
+            
+            self.log_test(
+                "Social Security Validator - Import and Instantiation",
+                True,
+                "Successfully imported and created SocialSecurityValidator instance",
+                {"validator_class": str(type(validator))}
+            )
+            
+            # Test validation method exists
+            has_validate_method = hasattr(validator, 'validate_social_security_card')
+            
+            self.log_test(
+                "Social Security Validator - Validation Method",
+                has_validate_method,
+                f"validate_social_security_card method exists: {has_validate_method}",
+                {"method_exists": has_validate_method}
+            )
+            
+            # Test SSN format validation
+            if hasattr(validator, '_validate_ssn_format'):
+                # Test valid SSN
+                valid_ssn_result = validator._validate_ssn_format("123-45-6789")
+                valid_ssn_success = (valid_ssn_result['area_valid'] and 
+                                   valid_ssn_result['group_valid'] and 
+                                   valid_ssn_result['serial_valid'])
+                
+                self.log_test(
+                    "Social Security Validator - Valid SSN Format",
+                    valid_ssn_success,
+                    f"Valid SSN validation: area={valid_ssn_result['area_valid']}, group={valid_ssn_result['group_valid']}, serial={valid_ssn_result['serial_valid']}",
+                    valid_ssn_result
+                )
+                
+                # Test invalid SSN ranges
+                invalid_ssn_result = validator._validate_ssn_format("000-12-3456")  # Invalid area
+                invalid_area_detected = not invalid_ssn_result['area_valid']
+                
+                self.log_test(
+                    "Social Security Validator - Invalid SSN Range Detection",
+                    invalid_area_detected,
+                    f"Invalid SSN area (000) correctly detected: {invalid_area_detected}",
+                    {"invalid_area_detected": invalid_area_detected, "issues": invalid_ssn_result['issues']}
+                )
+                
+                # Test 666 range
+                ssn_666_result = validator._validate_ssn_format("666-12-3456")
+                ssn_666_invalid = not ssn_666_result['area_valid']
+                
+                self.log_test(
+                    "Social Security Validator - 666 Range Detection",
+                    ssn_666_invalid,
+                    f"Invalid SSN area (666) correctly detected: {ssn_666_invalid}",
+                    {"666_detected": ssn_666_invalid}
+                )
+                
+                # Test 900-999 range
+                ssn_900_result = validator._validate_ssn_format("900-12-3456")
+                ssn_900_invalid = not ssn_900_result['area_valid']
+                
+                self.log_test(
+                    "Social Security Validator - 900-999 Range Detection",
+                    ssn_900_invalid,
+                    f"Invalid SSN area (900-999) correctly detected: {ssn_900_invalid}",
+                    {"900_range_detected": ssn_900_invalid}
+                )
+            
+            # Test security features detection
+            if hasattr(validator, '_detect_security_features'):
+                security_features = validator._detect_security_features(test_ssn_content)
+                has_security_features = len(security_features) > 0
+                
+                self.log_test(
+                    "Social Security Validator - Security Features Detection",
+                    has_security_features,
+                    f"Security features detected: {security_features}",
+                    {"features_count": len(security_features), "features": security_features}
+                )
+            
+            # Test employment restrictions checking
+            if hasattr(validator, '_check_employment_restrictions'):
+                restrictions = validator._check_employment_restrictions("NOT VALID FOR EMPLOYMENT")
+                restrictions_detected = len(restrictions) > 0
+                
+                self.log_test(
+                    "Social Security Validator - Employment Restrictions Detection",
+                    restrictions_detected,
+                    f"Employment restrictions detected: {restrictions}",
+                    {"restrictions": restrictions}
+                )
+        
+        except Exception as e:
+            self.log_test(
+                "Social Security Validator - Overall Test",
+                False,
+                f"Exception during Social Security Card validator testing: {str(e)}"
+            )
+    
+    def test_tax_documents_validator(self):
+        """Test Tax Documents Validator"""
+        print("📊 Testing Tax Documents Validator...")
+        
+        # Test with simulated W-2 content
+        test_w2_content = """
+        Form W-2 Wage and Tax Statement 2023
+        
+        Employee: JANE SMITH
+        SSN: 123-45-6789
+        
+        Employer: ACME CORPORATION
+        EIN: 12-3456789
+        
+        Wages: $75,000.00
+        Federal income tax withheld: $12,500.00
+        State income tax: $3,750.00
+        """
+        
+        try:
+            from backend.pipeline.tax_documents_validator import TaxDocumentsValidator
+            
+            validator = TaxDocumentsValidator()
+            
+            self.log_test(
+                "Tax Documents Validator - Import and Instantiation",
+                True,
+                "Successfully imported and created TaxDocumentsValidator instance",
+                {"validator_class": str(type(validator))}
+            )
+            
+            # Test document type identification
+            if hasattr(validator, '_identify_tax_document_type'):
+                doc_type = validator._identify_tax_document_type(test_w2_content)
+                is_w2_detected = doc_type == "W-2" or doc_type == "W2"
+                
+                self.log_test(
+                    "Tax Documents Validator - Document Type Identification",
+                    is_w2_detected,
+                    f"W-2 document type correctly identified: {doc_type}",
+                    {"detected_type": doc_type}
+                )
+            
+            # Test tax document verification
+            if hasattr(validator, '_verify_tax_document'):
+                is_tax_doc = validator._verify_tax_document(test_w2_content)
+                
+                self.log_test(
+                    "Tax Documents Validator - Tax Document Verification",
+                    is_tax_doc,
+                    f"Document correctly identified as tax document: {is_tax_doc}",
+                    {"is_tax_document": is_tax_doc}
+                )
+            
+            # Test taxpayer information extraction
+            test_1040_content = """
+            Form 1040 U.S. Individual Income Tax Return 2023
+            
+            Name: JOHN DOE
+            SSN: 987-65-4321
+            Address: 123 Main St, Anytown, ST 12345
+            
+            Total Income: $85,000
+            Adjusted Gross Income: $80,000
+            Taxable Income: $70,000
+            """
+            
+            if hasattr(validator, '_identify_tax_document_type'):
+                doc_type_1040 = validator._identify_tax_document_type(test_1040_content)
+                is_1040_detected = "1040" in doc_type_1040
+                
+                self.log_test(
+                    "Tax Documents Validator - 1040 Form Identification",
+                    is_1040_detected,
+                    f"1040 form correctly identified: {doc_type_1040}",
+                    {"detected_type": doc_type_1040}
+                )
+            
+            # Test 1099 form identification
+            test_1099_content = """
+            Form 1099-MISC Miscellaneous Income 2023
+            
+            Recipient: FREELANCER SMITH
+            Payer: CLIENT COMPANY LLC
+            
+            Nonemployee compensation: $25,000.00
+            """
+            
+            if hasattr(validator, '_identify_tax_document_type'):
+                doc_type_1099 = validator._identify_tax_document_type(test_1099_content)
+                is_1099_detected = "1099" in doc_type_1099
+                
+                self.log_test(
+                    "Tax Documents Validator - 1099 Form Identification",
+                    is_1099_detected,
+                    f"1099 form correctly identified: {doc_type_1099}",
+                    {"detected_type": doc_type_1099}
+                )
+            
+            # Test tax year validation
+            current_year = datetime.now().year
+            if hasattr(validator, 'valid_tax_years'):
+                valid_years = validator.valid_tax_years
+                has_current_year = current_year in valid_years
+                has_reasonable_range = len(valid_years) > 10
+                
+                self.log_test(
+                    "Tax Documents Validator - Tax Year Validation",
+                    has_current_year and has_reasonable_range,
+                    f"Tax year validation range: {len(valid_years)} years, includes current year: {has_current_year}",
+                    {"valid_years_count": len(valid_years), "includes_current": has_current_year}
+                )
+        
+        except Exception as e:
+            self.log_test(
+                "Tax Documents Validator - Overall Test",
+                False,
+                f"Exception during Tax Documents validator testing: {str(e)}"
+            )
+    
+    def test_medical_records_validator(self):
+        """Test Medical Records Validator"""
+        print("🏥 Testing Medical Records Validator...")
+        
+        # Test with simulated medical record content
+        test_medical_content = """
+        MEDICAL REPORT
+        
+        Patient Name: MARY JOHNSON
+        Patient ID: MRN123456
+        Date of Birth: 01/15/1985
+        Gender: Female
+        
+        Report Date: 12/15/2023
+        Physician: Dr. Sarah Wilson, MD
+        Medical License: MD12345
+        
+        Diagnosis: Hypertension, Type 2 Diabetes
+        Medications: Metformin 500mg, Lisinopril 10mg
+        Procedures: Blood pressure monitoring, HbA1c test
+        
+        Vital Signs:
+        Blood Pressure: 140/90
+        Temperature: 98.6°F
+        Heart Rate: 72 bpm
+        Weight: 165 lbs
+        
+        GENERAL HOSPITAL
+        123 Medical Center Drive
+        """
+        
+        try:
+            from backend.pipeline.medical_records_validator import MedicalRecordsValidator
+            
+            validator = MedicalRecordsValidator()
+            
+            self.log_test(
+                "Medical Records Validator - Import and Instantiation",
+                True,
+                "Successfully imported and created MedicalRecordsValidator instance",
+                {"validator_class": str(type(validator))}
+            )
+            
+            # Test medical record type identification
+            if hasattr(validator, '_identify_medical_record_type'):
+                record_type = validator._identify_medical_record_type(test_medical_content)
+                is_medical_report = "MEDICAL" in record_type.upper()
+                
+                self.log_test(
+                    "Medical Records Validator - Record Type Classification",
+                    is_medical_report,
+                    f"Medical record type identified: {record_type}",
+                    {"record_type": record_type}
+                )
+            
+            # Test medical record verification
+            if hasattr(validator, '_verify_medical_record'):
+                is_medical_record = validator._verify_medical_record(test_medical_content)
+                
+                self.log_test(
+                    "Medical Records Validator - Medical Record Verification",
+                    is_medical_record,
+                    f"Document correctly identified as medical record: {is_medical_record}",
+                    {"is_medical_record": is_medical_record}
+                )
+            
+            # Test PHI content detection
+            if hasattr(validator, '_check_phi_content'):
+                contains_phi = validator._check_phi_content(test_medical_content)
+                
+                self.log_test(
+                    "Medical Records Validator - PHI Content Detection",
+                    contains_phi,
+                    f"Protected Health Information detected: {contains_phi}",
+                    {"contains_phi": contains_phi}
+                )
+            
+            # Test different medical record types
+            test_lab_report = """
+            LABORATORY REPORT
+            
+            Patient: JOHN PATIENT
+            Lab Results:
+            Glucose: 95 mg/dL (Normal)
+            Cholesterol: 180 mg/dL (Normal)
+            Hemoglobin: 14.2 g/dL (Normal)
+            """
+            
+            if hasattr(validator, '_identify_medical_record_type'):
+                lab_type = validator._identify_medical_record_type(test_lab_report)
+                is_lab_report = "LAB" in lab_type.upper()
+                
+                self.log_test(
+                    "Medical Records Validator - Lab Report Classification",
+                    is_lab_report,
+                    f"Lab report correctly classified: {lab_type}",
+                    {"lab_report_type": lab_type}
+                )
+            
+            # Test prescription record
+            test_prescription = """
+            PRESCRIPTION
+            
+            Patient: PATIENT NAME
+            Rx: Amoxicillin 500mg
+            Take 3 times daily for 10 days
+            
+            Dr. Smith, MD
+            """
+            
+            if hasattr(validator, '_identify_medical_record_type'):
+                rx_type = validator._identify_medical_record_type(test_prescription)
+                is_prescription = "PRESCRIPTION" in rx_type.upper()
+                
+                self.log_test(
+                    "Medical Records Validator - Prescription Classification",
+                    is_prescription,
+                    f"Prescription correctly classified: {rx_type}",
+                    {"prescription_type": rx_type}
+                )
+        
+        except Exception as e:
+            self.log_test(
+                "Medical Records Validator - Overall Test",
+                False,
+                f"Exception during Medical Records validator testing: {str(e)}"
+            )
+    
+    def test_utility_bills_validator(self):
+        """Test Utility Bills Validator"""
+        print("⚡ Testing Utility Bills Validator...")
+        
+        # Test with simulated electric bill content
+        test_electric_bill = """
+        PACIFIC GAS & ELECTRIC COMPANY
+        Electric Bill Statement
+        
+        Account Holder: ROBERT SMITH
+        Account Number: 1234567890
+        Service Address: 456 Oak Street, San Francisco, CA 94102
+        Billing Address: 456 Oak Street, San Francisco, CA 94102
+        
+        Bill Date: 11/15/2023
+        Due Date: 12/05/2023
+        Service Period: 10/15/2023 to 11/15/2023
+        
+        Current Charges: $125.50
+        Previous Balance: $0.00
+        Total Amount Due: $125.50
+        
+        Current Usage: 450 kWh
+        Meter Number: E123456789
+        
+        Customer Service: 1-800-743-5000
+        """
+        
+        try:
+            from backend.pipeline.utility_bills_validator import UtilityBillsValidator
+            
+            validator = UtilityBillsValidator()
+            
+            self.log_test(
+                "Utility Bills Validator - Import and Instantiation",
+                True,
+                "Successfully imported and created UtilityBillsValidator instance",
+                {"validator_class": str(type(validator))}
+            )
+            
+            # Test utility type identification
+            if hasattr(validator, '_identify_utility_type'):
+                utility_type = validator._identify_utility_type(test_electric_bill)
+                is_electric = "ELECTRIC" in utility_type.upper()
+                
+                self.log_test(
+                    "Utility Bills Validator - Electric Bill Type Identification",
+                    is_electric,
+                    f"Electric utility type identified: {utility_type}",
+                    {"utility_type": utility_type}
+                )
+            
+            # Test utility bill verification
+            if hasattr(validator, '_verify_utility_bill'):
+                is_utility_bill = validator._verify_utility_bill(test_electric_bill)
+                
+                self.log_test(
+                    "Utility Bills Validator - Utility Bill Verification",
+                    is_utility_bill,
+                    f"Document correctly identified as utility bill: {is_utility_bill}",
+                    {"is_utility_bill": is_utility_bill}
+                )
+            
+            # Test gas bill identification
+            test_gas_bill = """
+            SOUTHERN CALIFORNIA GAS COMPANY
+            Natural Gas Statement
+            
+            Account Holder: JANE DOE
+            Account Number: GAS987654321
+            Service Address: 789 Pine Ave, Los Angeles, CA 90210
+            
+            Current Usage: 85 therms
+            Current Charges: $95.75
+            Total Amount Due: $95.75
+            """
+            
+            if hasattr(validator, '_identify_utility_type'):
+                gas_type = validator._identify_utility_type(test_gas_bill)
+                is_gas = "GAS" in gas_type.upper()
+                
+                self.log_test(
+                    "Utility Bills Validator - Gas Bill Type Identification",
+                    is_gas,
+                    f"Gas utility type identified: {gas_type}",
+                    {"gas_utility_type": gas_type}
+                )
+            
+            # Test water bill identification
+            test_water_bill = """
+            CITY WATER DEPARTMENT
+            Water and Sewer Bill
+            
+            Account Holder: MIKE JOHNSON
+            Account Number: WTR555666777
+            Service Address: 321 Water St, Anytown, CA 90000
+            
+            Water Usage: 1,250 gallons
+            Current Charges: $45.25
+            """
+            
+            if hasattr(validator, '_identify_utility_type'):
+                water_type = validator._identify_utility_type(test_water_bill)
+                is_water = "WATER" in water_type.upper()
+                
+                self.log_test(
+                    "Utility Bills Validator - Water Bill Type Identification",
+                    is_water,
+                    f"Water utility type identified: {water_type}",
+                    {"water_utility_type": water_type}
+                )
+            
+            # Test internet/phone bill identification
+            test_internet_bill = """
+            COMCAST XFINITY
+            Internet and Cable Service
+            
+            Account Holder: SARAH WILSON
+            Account Number: CMC123456789
+            Service Address: 654 Tech Blvd, Silicon Valley, CA 95000
+            
+            Internet Service: $79.99
+            Cable TV: $49.99
+            Total Amount Due: $129.98
+            """
+            
+            if hasattr(validator, '_identify_utility_type'):
+                internet_type = validator._identify_utility_type(test_internet_bill)
+                is_internet = "INTERNET" in internet_type.upper() or "PHONE" in internet_type.upper()
+                
+                self.log_test(
+                    "Utility Bills Validator - Internet/Phone Bill Type Identification",
+                    is_internet,
+                    f"Internet/Phone utility type identified: {internet_type}",
+                    {"internet_utility_type": internet_type}
+                )
+            
+            # Test account holder information extraction
+            if hasattr(validator, 'patterns') and 'account_holder' in validator.patterns:
+                account_patterns = validator.patterns['account_holder']
+                has_account_patterns = len(account_patterns) > 0
+                
+                self.log_test(
+                    "Utility Bills Validator - Account Holder Extraction Patterns",
+                    has_account_patterns,
+                    f"Account holder extraction patterns available: {len(account_patterns)}",
+                    {"pattern_count": len(account_patterns)}
+                )
+            
+            # Test billing information processing
+            if hasattr(validator, 'patterns') and 'total_amount_due' in validator.patterns:
+                billing_patterns = validator.patterns['total_amount_due']
+                has_billing_patterns = len(billing_patterns) > 0
+                
+                self.log_test(
+                    "Utility Bills Validator - Billing Information Processing",
+                    has_billing_patterns,
+                    f"Billing amount extraction patterns available: {len(billing_patterns)}",
+                    {"billing_pattern_count": len(billing_patterns)}
+                )
+            
+            # Test usage data extraction
+            if hasattr(validator, 'patterns') and 'current_usage' in validator.patterns:
+                usage_patterns = validator.patterns['current_usage']
+                has_usage_patterns = len(usage_patterns) > 0
+                
+                self.log_test(
+                    "Utility Bills Validator - Usage Data Extraction",
+                    has_usage_patterns,
+                    f"Usage data extraction patterns available: {len(usage_patterns)}",
+                    {"usage_pattern_count": len(usage_patterns)}
+                )
+        
+        except Exception as e:
+            self.log_test(
+                "Utility Bills Validator - Overall Test",
+                False,
+                f"Exception during Utility Bills validator testing: {str(e)}"
+            )
+    
+    def test_new_validators_integration(self):
+        """Test Integration of New Validators with Pipeline System"""
+        print("🔗 Testing New Validators Integration...")
+        
+        try:
+            # Test pipeline integration import
+            from backend.pipeline.integration import pipeline_integrator, create_document_pipeline
+            
+            self.log_test(
+                "New Validators Integration - Pipeline Import",
+                True,
+                "Successfully imported pipeline integration components",
+                {"integrator_available": True}
+            )
+            
+            # Test document type mapping
+            if hasattr(pipeline_integrator, 'document_type_mapping'):
+                mapping = pipeline_integrator.document_type_mapping
+                
+                # Check if new document types are mapped
+                new_doc_types = [
+                    'social_security_card',
+                    'tax_document', 
+                    'medical_record',
+                    'utility_bill'
+                ]
+                
+                mapped_types = []
+                for doc_type in new_doc_types:
+                    if doc_type in mapping:
+                        mapped_types.append(doc_type)
+                
+                all_mapped = len(mapped_types) == len(new_doc_types)
+                
+                self.log_test(
+                    "New Validators Integration - Document Type Mapping",
+                    all_mapped,
+                    f"New document types mapped: {mapped_types} / {new_doc_types}",
+                    {
+                        "mapped_types": mapped_types,
+                        "total_mappings": len(mapping),
+                        "all_mapped": all_mapped
+                    }
+                )
+            
+            # Test pipeline creation for new document types
+            test_doc_types = [
+                'social_security_card',
+                'tax_document',
+                'medical_record', 
+                'utility_bill'
+            ]
+            
+            created_pipelines = []
+            for doc_type in test_doc_types:
+                try:
+                    pipeline = create_document_pipeline(doc_type)
+                    if pipeline:
+                        created_pipelines.append(doc_type)
+                except Exception as e:
+                    self.log_test(
+                        f"Pipeline Creation - {doc_type}",
+                        False,
+                        f"Failed to create pipeline for {doc_type}: {str(e)}"
+                    )
+            
+            all_pipelines_created = len(created_pipelines) == len(test_doc_types)
+            
+            self.log_test(
+                "New Validators Integration - Pipeline Creation",
+                all_pipelines_created,
+                f"Pipelines created for: {created_pipelines}",
+                {
+                    "created_pipelines": created_pipelines,
+                    "success_rate": f"{len(created_pipelines)}/{len(test_doc_types)}"
+                }
+            )
+            
+            # Test pipeline stage integration
+            try:
+                from backend.pipeline.social_security_validator import social_security_card_validation_stage
+                from backend.pipeline.tax_documents_validator import tax_documents_validation_stage
+                from backend.pipeline.medical_records_validator import medical_records_validation_stage
+                from backend.pipeline.utility_bills_validator import utility_bills_validation_stage
+                
+                stages_imported = [
+                    social_security_card_validation_stage,
+                    tax_documents_validation_stage,
+                    medical_records_validation_stage,
+                    utility_bills_validation_stage
+                ]
+                
+                all_stages_available = all(stage is not None for stage in stages_imported)
+                
+                self.log_test(
+                    "New Validators Integration - Pipeline Stages",
+                    all_stages_available,
+                    f"All validation stages imported successfully: {all_stages_available}",
+                    {
+                        "stages_count": len(stages_imported),
+                        "all_available": all_stages_available
+                    }
+                )
+                
+            except Exception as e:
+                self.log_test(
+                    "New Validators Integration - Pipeline Stages",
+                    False,
+                    f"Failed to import validation stages: {str(e)}"
+                )
+            
+            # Test modular pipeline system recognition
+            integration_status = pipeline_integrator.get_integration_status()
+            has_new_pipelines = any(doc_type in integration_status.get('available_pipelines', []) 
+                                  for doc_type in ['social_security_card', 'tax_document', 'medical_record', 'utility_bill'])
+            
+            self.log_test(
+                "New Validators Integration - System Recognition",
+                has_new_pipelines,
+                f"New document types recognized by pipeline system: {has_new_pipelines}",
+                {
+                    "available_pipelines": integration_status.get('available_pipelines', []),
+                    "integration_version": integration_status.get('integration_version', 'unknown')
+                }
+            )
+        
+        except Exception as e:
+            self.log_test(
+                "New Validators Integration - Overall Test",
+                False,
+                f"Exception during integration testing: {str(e)}"
+            )
+    
     def test_user_openai_key_investigation(self):
         """INVESTIGAÇÃO CHAVE OPENAI DO USUÁRIO - Verificar chave OpenAI pessoal no banco de dados"""
         print("🔍 INVESTIGAÇÃO CHAVE OPENAI DO USUÁRIO...")
