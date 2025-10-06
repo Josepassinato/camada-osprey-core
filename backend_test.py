@@ -5293,6 +5293,506 @@ MRZ extraction should work properly.
         print("✅ FINAL OCR REAL ENGINE VALIDATION COMPLETED")
         print("=" * 50)
     
+    def test_advanced_analytics_system(self):
+        """Test ADVANCED ANALYTICS SYSTEM - All endpoints and components"""
+        print("📊 TESTING ADVANCED ANALYTICS SYSTEM...")
+        
+        # Test 1: Analytics Health Check
+        self.test_analytics_health_check()
+        
+        # Test 2: Document Processing Analytics
+        self.test_document_processing_analytics()
+        
+        # Test 3: User Journey Analytics
+        self.test_user_journey_analytics()
+        
+        # Test 4: AI Performance Analytics
+        self.test_ai_performance_analytics()
+        
+        # Test 5: Business Intelligence Analytics
+        self.test_business_intelligence_analytics()
+        
+        # Test 6: System Health Monitoring
+        self.test_system_health_monitoring()
+        
+        # Test 7: Performance Benchmarks
+        self.test_performance_benchmarks()
+        
+        # Test 8: Integration Testing
+        self.test_analytics_integration()
+    
+    def test_analytics_health_check(self):
+        """Test Analytics Health Check endpoint"""
+        print("🏥 Testing Analytics Health Check...")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/analytics/health")
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ["status", "timestamp", "cache_size", "services"]
+                
+                if all(field in data for field in required_fields):
+                    status_healthy = data["status"] == "healthy"
+                    has_services = isinstance(data["services"], list) and len(data["services"]) > 0
+                    
+                    self.log_test(
+                        "Analytics Health Check",
+                        status_healthy and has_services,
+                        f"Status: {data['status']}, Services: {data['services']}, Cache size: {data['cache_size']}",
+                        data
+                    )
+                else:
+                    missing = [f for f in required_fields if f not in data]
+                    self.log_test(
+                        "Analytics Health Check",
+                        False,
+                        f"Missing required fields: {missing}",
+                        data
+                    )
+            else:
+                self.log_test(
+                    "Analytics Health Check",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Analytics Health Check",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_document_processing_analytics(self):
+        """Test Document Processing Analytics endpoints"""
+        print("📄 Testing Document Processing Analytics...")
+        
+        # Test 1: Document Summary endpoint
+        try:
+            response = self.session.get(f"{API_BASE}/analytics/documents/summary?days=7")
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ["period", "total_documents", "average_processing_time_ms", "success_rate"]
+                
+                if all(field in data for field in required_fields):
+                    self.log_test(
+                        "Document Analytics - Summary (7 days)",
+                        True,
+                        f"Period: {data['period']}, Documents: {data['total_documents']}, Avg time: {data['average_processing_time_ms']}ms",
+                        {"period": data["period"], "total_documents": data["total_documents"]}
+                    )
+                else:
+                    missing = [f for f in required_fields if f not in data]
+                    self.log_test(
+                        "Document Analytics - Summary (7 days)",
+                        False,
+                        f"Missing required fields: {missing}",
+                        data
+                    )
+            else:
+                self.log_test(
+                    "Document Analytics - Summary (7 days)",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Document Analytics - Summary (7 days)",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 2: Document Analysis endpoint with POST
+        try:
+            payload = {
+                "start_date": "2024-01-01",
+                "end_date": "2024-12-31",
+                "metrics": ["processing_time", "confidence_score", "success_rate"],
+                "validator_types": ["passport", "employment_letter"]
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/analytics/documents/analysis",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ["total_documents_processed", "average_processing_time_ms", "validator_performance"]
+                
+                if all(field in data for field in required_fields):
+                    self.log_test(
+                        "Document Analytics - Analysis POST",
+                        True,
+                        f"Documents processed: {data['total_documents_processed']}, Validators: {len(data.get('validator_performance', {}))}",
+                        {"total_documents": data["total_documents_processed"]}
+                    )
+                else:
+                    missing = [f for f in required_fields if f not in data]
+                    self.log_test(
+                        "Document Analytics - Analysis POST",
+                        False,
+                        f"Missing required fields: {missing}",
+                        data
+                    )
+            else:
+                self.log_test(
+                    "Document Analytics - Analysis POST",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Document Analytics - Analysis POST",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_user_journey_analytics(self):
+        """Test User Journey Analytics endpoints"""
+        print("🛤️ Testing User Journey Analytics...")
+        
+        # Test 1: Conversion Funnel endpoint
+        try:
+            response = self.session.get(f"{API_BASE}/analytics/journey/funnel?days=30")
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ["period", "total_sessions", "conversion_funnel", "drop_off_analysis"]
+                
+                if all(field in data for field in required_fields):
+                    conversion_rate = data.get("overall_conversion_rate", 0)
+                    
+                    self.log_test(
+                        "User Journey - Conversion Funnel",
+                        True,
+                        f"Period: {data['period']}, Sessions: {data['total_sessions']}, Conversion: {conversion_rate}%",
+                        {"total_sessions": data["total_sessions"], "conversion_rate": conversion_rate}
+                    )
+                else:
+                    missing = [f for f in required_fields if f not in data]
+                    self.log_test(
+                        "User Journey - Conversion Funnel",
+                        False,
+                        f"Missing required fields: {missing}",
+                        data
+                    )
+            else:
+                self.log_test(
+                    "User Journey - Conversion Funnel",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "User Journey - Conversion Funnel",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_ai_performance_analytics(self):
+        """Test AI Performance Analytics endpoints"""
+        print("🤖 Testing AI Performance Analytics...")
+        
+        # Test AI Models Performance endpoint
+        try:
+            response = self.session.get(f"{API_BASE}/analytics/ai/models/performance?hours=24")
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ["period", "total_requests", "average_response_time_ms", "success_rate"]
+                
+                if all(field in data for field in required_fields):
+                    fastest_model = data.get("fastest_model", "N/A")
+                    most_reliable = data.get("most_reliable_model", "N/A")
+                    
+                    self.log_test(
+                        "AI Performance - Models Performance",
+                        True,
+                        f"Period: {data['period']}, Requests: {data['total_requests']}, Fastest: {fastest_model}, Most reliable: {most_reliable}",
+                        {
+                            "total_requests": data["total_requests"],
+                            "success_rate": data["success_rate"],
+                            "fastest_model": fastest_model
+                        }
+                    )
+                else:
+                    missing = [f for f in required_fields if f not in data]
+                    self.log_test(
+                        "AI Performance - Models Performance",
+                        False,
+                        f"Missing required fields: {missing}",
+                        data
+                    )
+            else:
+                self.log_test(
+                    "AI Performance - Models Performance",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "AI Performance - Models Performance",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_business_intelligence_analytics(self):
+        """Test Business Intelligence Analytics endpoints"""
+        print("💼 Testing Business Intelligence Analytics...")
+        
+        # Test Business Dashboard endpoint with different periods
+        periods = ["daily", "weekly", "monthly"]
+        
+        for period in periods:
+            try:
+                response = self.session.get(f"{API_BASE}/analytics/business/dashboard?period={period}")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    required_fields = ["period", "date_range", "overview", "insights"]
+                    
+                    if all(field in data for field in required_fields):
+                        overview = data.get("overview", {})
+                        insights = data.get("insights", {})
+                        
+                        self.log_test(
+                            f"Business Intelligence - Dashboard ({period})",
+                            True,
+                            f"Period: {data['period']}, Users: {overview.get('total_users', 0)}, Cases: {overview.get('total_cases', 0)}",
+                            {
+                                "period": period,
+                                "total_users": overview.get("total_users", 0),
+                                "total_cases": overview.get("total_cases", 0)
+                            }
+                        )
+                    else:
+                        missing = [f for f in required_fields if f not in data]
+                        self.log_test(
+                            f"Business Intelligence - Dashboard ({period})",
+                            False,
+                            f"Missing required fields: {missing}",
+                            data
+                        )
+                else:
+                    self.log_test(
+                        f"Business Intelligence - Dashboard ({period})",
+                        False,
+                        f"HTTP {response.status_code}",
+                        response.text
+                    )
+            except Exception as e:
+                self.log_test(
+                    f"Business Intelligence - Dashboard ({period})",
+                    False,
+                    f"Exception: {str(e)}"
+                )
+    
+    def test_system_health_monitoring(self):
+        """Test System Health Monitoring endpoints"""
+        print("🔍 Testing System Health Monitoring...")
+        
+        # Test 1: System Health endpoint
+        try:
+            response = self.session.get(f"{API_BASE}/analytics/system/health")
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ["overall_status", "system_metrics", "service_statuses"]
+                
+                if all(field in data for field in required_fields):
+                    overall_status = data.get("overall_status")
+                    active_alerts = data.get("active_alerts", [])
+                    
+                    self.log_test(
+                        "System Health - Health Status",
+                        True,
+                        f"Status: {overall_status}, Alerts: {len(active_alerts)}",
+                        {"overall_status": overall_status, "alerts_count": len(active_alerts)}
+                    )
+                else:
+                    missing = [f for f in required_fields if f not in data]
+                    self.log_test(
+                        "System Health - Health Status",
+                        False,
+                        f"Missing required fields: {missing}",
+                        data
+                    )
+            else:
+                self.log_test(
+                    "System Health - Health Status",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "System Health - Health Status",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test 2: Real-time Metrics endpoint
+        try:
+            response = self.session.get(f"{API_BASE}/analytics/system/realtime")
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ["system_health", "processing_queue", "services", "timestamp"]
+                
+                if all(field in data for field in required_fields):
+                    system_health = data.get("system_health", {})
+                    cpu_usage = system_health.get("cpu_usage", 0)
+                    memory_usage = system_health.get("memory_usage", 0)
+                    
+                    self.log_test(
+                        "System Health - Real-time Metrics",
+                        True,
+                        f"CPU: {cpu_usage}%, Memory: {memory_usage}%, Status: {system_health.get('status', 'unknown')}",
+                        {
+                            "cpu_usage": cpu_usage,
+                            "memory_usage": memory_usage,
+                            "status": system_health.get("status")
+                        }
+                    )
+                else:
+                    missing = [f for f in required_fields if f not in data]
+                    self.log_test(
+                        "System Health - Real-time Metrics",
+                        False,
+                        f"Missing required fields: {missing}",
+                        data
+                    )
+            else:
+                self.log_test(
+                    "System Health - Real-time Metrics",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "System Health - Real-time Metrics",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_performance_benchmarks(self):
+        """Test Performance Benchmarks endpoint"""
+        print("📈 Testing Performance Benchmarks...")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/analytics/benchmarks")
+            
+            if response.status_code == 200:
+                data = response.json()
+                expected_categories = ["document_processing", "ai_models", "user_journey", "system_health"]
+                
+                categories_present = [cat for cat in expected_categories if cat in data]
+                success = len(categories_present) >= 3  # At least 3 categories should be present
+                
+                if success:
+                    doc_processing = data.get("document_processing", {})
+                    ai_models = data.get("ai_models", {})
+                    
+                    self.log_test(
+                        "Performance Benchmarks",
+                        True,
+                        f"Categories: {categories_present}, Doc target: {doc_processing.get('target_processing_time_ms', 'N/A')}ms, AI target: {ai_models.get('target_response_time_ms', 'N/A')}ms",
+                        {
+                            "categories_found": categories_present,
+                            "total_categories": len(categories_present)
+                        }
+                    )
+                else:
+                    self.log_test(
+                        "Performance Benchmarks",
+                        False,
+                        f"Expected categories not found. Found: {categories_present}",
+                        data
+                    )
+            else:
+                self.log_test(
+                    "Performance Benchmarks",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+        except Exception as e:
+            self.log_test(
+                "Performance Benchmarks",
+                False,
+                f"Exception: {str(e)}"
+            )
+    
+    def test_analytics_integration(self):
+        """Test Analytics System Integration"""
+        print("🔗 Testing Analytics System Integration...")
+        
+        # Test that analytics router is properly included in main server
+        try:
+            # Test a few different endpoints to ensure router integration
+            endpoints_to_test = [
+                "/analytics/health",
+                "/analytics/documents/summary",
+                "/analytics/benchmarks"
+            ]
+            
+            successful_endpoints = 0
+            
+            for endpoint in endpoints_to_test:
+                try:
+                    response = self.session.get(f"{API_BASE}{endpoint}")
+                    if response.status_code in [200, 422]:  # 422 is acceptable for missing params
+                        successful_endpoints += 1
+                except:
+                    pass
+            
+            integration_success = successful_endpoints >= 2  # At least 2 endpoints should be accessible
+            
+            self.log_test(
+                "Analytics Integration - Router Integration",
+                integration_success,
+                f"Accessible endpoints: {successful_endpoints}/{len(endpoints_to_test)}",
+                {"accessible_endpoints": successful_endpoints, "total_tested": len(endpoints_to_test)}
+            )
+            
+        except Exception as e:
+            self.log_test(
+                "Analytics Integration - Router Integration",
+                False,
+                f"Exception: {str(e)}"
+            )
+        
+        # Test error handling when analytics service is unavailable
+        try:
+            # This test checks if the system gracefully handles analytics failures
+            # We can't easily simulate service failure, so we test with invalid parameters
+            response = self.session.get(f"{API_BASE}/analytics/documents/summary?days=invalid")
+            
+            # Should return an error response, not crash
+            error_handled = response.status_code in [400, 422, 500]
+            
+            self.log_test(
+                "Analytics Integration - Error Handling",
+                error_handled,
+                f"Invalid parameter handled gracefully: HTTP {response.status_code}",
+                {"status_code": response.status_code}
+            )
+            
+        except Exception as e:
+            self.log_test(
+                "Analytics Integration - Error Handling",
+                False,
+                f"Exception: {str(e)}"
+            )
+
     def run_all_tests(self):
         """Run all comprehensive tests"""
         print("🚀 STARTING COMPREHENSIVE ECOSYSTEM VALIDATION")
