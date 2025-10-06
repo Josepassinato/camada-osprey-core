@@ -509,17 +509,35 @@ class DocumentValidationAgent(BaseSpecializedAgent):
             processing_time = (datetime.utcnow() - start_time).total_seconds() * 1000
             
             # Fallback para sistema original
-            fallback_result = await self.validate_document(str(file_content), expected_document_type, {
+            fallback_result_str = await self.validate_document(str(file_content), expected_document_type, {
                 'applicant_name': applicant_name,
                 'visa_type': visa_type
             })
             
-            fallback_result.update({
+            # Convert string result to dict format
+            fallback_result = {
+                "valid": False,
+                "verdict": "ERROR",
+                "confidence_score": 0,
+                "document_type_identified": expected_document_type,
+                "type_matches_expected": True,
+                "quality_acceptable": False,
+                "uscis_acceptable": False,
+                "issues": [str(e)],
+                "recommendations": ["Tente enviar o documento novamente"],
+                "detailed_analysis": {
+                    "fallback_response": fallback_result_str
+                },
                 "agent": "Dr. Miguel - Sistema Fallback",
                 "fallback_used": True,
                 "original_error": str(e),
-                "processing_time_ms": processing_time
-            })
+                "processing_time_ms": processing_time,
+                "kpi_compliant": False,
+                "processing_performance": {
+                    "time_ms": processing_time,
+                    "within_target": processing_time <= 5000
+                }
+            }
             
             return fallback_result
     
