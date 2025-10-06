@@ -557,7 +557,7 @@ const CoverLetterModule: React.FC = () => {
         {currentCard === 6 && (review?.status === 'needs_questions' || review?.status === 'incomplete' || review?.status === 'needs_review') && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
+              <CardTitle className="flex items-center space-x-2 text-gray-900">
                 <AlertCircle className="h-5 w-5 text-blue-500" />
                 <span>
                   {review?.status === 'needs_questions' 
