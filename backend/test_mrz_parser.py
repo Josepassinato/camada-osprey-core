@@ -17,9 +17,9 @@ async def test_mrz_parser():
     print("🧪 Testando MRZ Parser - Prioridade 1 da Fase 2")
     print("=" * 50)
     
-    # MRZ de exemplo (formato válido)
-    sample_mrz = """P<USADOE<<JOHN<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-123456789<USA8001013M2512315<<<<<<<<<<<<<<<6"""
+    # MRZ de exemplo (formato válido - exatamente 44 caracteres por linha)
+    sample_mrz = """P<USADOE<<JOHN<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+123456789<USA8001013M2512315<<<<<<<<<<<<<06"""
     
     try:
         # Test 1: Parse MRZ básico
