@@ -14,6 +14,10 @@ from dataclasses import dataclass
 import time
 import json
 
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv()
+
 logger = logging.getLogger(__name__)
 
 @dataclass
