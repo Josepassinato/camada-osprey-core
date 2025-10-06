@@ -7,6 +7,7 @@ import logging
 import asyncio
 from typing import Dict, Any, Optional
 from .passport_stages import passport_pipeline
+from .i797_stages import i797_pipeline
 
 logger = logging.getLogger(__name__)
 
