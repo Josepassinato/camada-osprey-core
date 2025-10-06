@@ -251,6 +251,14 @@ def create_document_pipeline(document_type: str) -> DocumentAnalysisPipeline:
         pipeline = DocumentAnalysisPipeline(pipeline_name)
         pipeline.add_stage(i765_validation_stage)
         
+    elif document_type.lower() in ['driver_license', 'drivers_license', 'dl', 'carteira_motorista', 'cnh']:
+        pipeline = DocumentAnalysisPipeline(pipeline_name)
+        pipeline.add_stage(driver_license_validation_stage)
+        
+    elif document_type.lower() in ['marriage_certificate', 'marriage_cert', 'certidao_casamento', 'certidão_casamento']:
+        pipeline = DocumentAnalysisPipeline(pipeline_name)
+        pipeline.add_stage(marriage_certificate_validation_stage)
+        
     else:
         # Generic pipeline for unknown document types
         logger.warning(f"Unknown document type: {document_type}, using generic pipeline")
