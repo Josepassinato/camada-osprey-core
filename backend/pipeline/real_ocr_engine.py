@@ -101,6 +101,7 @@ class OCREngine:
                                     language: str = "eng") -> OCRResult:
         """
         Extract text from image using best available engine
+        Priority: Google Vision API > EasyOCR > Tesseract
         
         Args:
             image_data: Base64 string, bytes, or numpy array
@@ -113,13 +114,24 @@ class OCREngine:
         start_time = time.time()
         
         try:
-            # Convert input to PIL Image
-            image = self._prepare_image(image_data)
+            # Try Google Vision API first (highest accuracy)
+            if self.google_vision_available:
+                try:
+                    result = await self._extract_with_google_vision(image_data, mode, language)
+                    if result.confidence > 0.5:  # Good confidence threshold
+                        result.processing_time = time.time() - start_time
+                        return result
+                    else:
+                        logger.warning("Google Vision low confidence, trying fallback")
+                except Exception as e:
+                    logger.warning(f"Google Vision failed, using fallback: {e}")
             
-            # Preprocess image for better OCR
+            # Fallback to traditional OCR engines
+            # Convert input to PIL Image for traditional engines
+            image = self._prepare_image(image_data)
             processed_image = self._preprocess_image(image, mode)
             
-            # Choose best engine based on mode and availability
+            # Choose best traditional engine
             if mode == "mrz" and self.tesseract_available:
                 result = await self._extract_with_tesseract(processed_image, mode, language)
             elif self.easyocr_reader and mode in ["auto", "document"]:
@@ -135,7 +147,7 @@ class OCREngine:
             return result
             
         except Exception as e:
-            logger.error(f"OCR extraction failed: {e}")
+            logger.error(f"All OCR engines failed: {e}")
             return OCRResult(
                 text="",
                 confidence=0.0,
