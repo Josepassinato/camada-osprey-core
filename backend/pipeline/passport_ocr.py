@@ -127,7 +127,7 @@ class PassportOCREngine:
             else:
                 return "mock_processed_image_error"
     
-    def _detect_mrz_region(self, image: np.ndarray) -> np.ndarray:
+    def _detect_mrz_region(self, image):
         """
         Detecta e extrai região da MRZ usando características específicas
         """
