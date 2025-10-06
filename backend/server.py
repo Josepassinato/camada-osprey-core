@@ -6282,6 +6282,54 @@ else:
     async def metrics_integration_test():
         return {"status": "Metrics not available", "available": False}
 
+# Pipeline control endpoints (if available)
+if PIPELINE_AVAILABLE:
+    @api_router.get("/pipeline/status")
+    async def get_pipeline_status():
+        """Status do sistema de pipeline modular"""
+        return {
+            "status": "available",
+            "integration_status": pipeline_integrator.get_integration_status(),
+            "pipelines": {
+                "passport": {
+                    "available": True,
+                    "stages": ["PassportOCR", "PassportClassification", "MRZParsing"],
+                    "description": "High-precision passport analysis with MRZ validation"
+                }
+            }
+        }
+    
+    @api_router.post("/pipeline/enable")
+    async def enable_pipeline_system():
+        """Ativa sistema de pipeline modular"""
+        pipeline_integrator.enable_pipeline()
+        return {"message": "Pipeline system enabled", "status": "enabled"}
+    
+    @api_router.post("/pipeline/disable") 
+    async def disable_pipeline_system():
+        """Desativa sistema de pipeline modular (força uso legado)"""
+        pipeline_integrator.disable_pipeline()
+        return {"message": "Pipeline system disabled", "status": "disabled"}
+    
+    @api_router.post("/documents/analyze-with-pipeline")
+    async def analyze_document_with_pipeline_endpoint(document: UserDocument):
+        """
+        Endpoint para testar análise com pipeline modular
+        Alternativa ao endpoint padrão para comparação A/B
+        """
+        try:
+            result = await analyze_document_with_pipeline(document)
+            result["endpoint_used"] = "pipeline_endpoint"
+            return result
+        except Exception as e:
+            logger.error(f"Pipeline endpoint error: {e}")
+            raise HTTPException(status_code=500, detail=f"Pipeline analysis failed: {str(e)}")
+
+else:
+    @api_router.get("/pipeline/status")
+    async def get_pipeline_status_unavailable():
+        return {"status": "unavailable", "message": "Pipeline system not installed"}
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
