@@ -36,6 +36,16 @@ except ImportError as e:
     print(f"⚠️ Metrics system not available: {e}")
     logging.warning("Metrics system not available - continuing without metrics")
 
+# Sistema Pipeline Modular (não-intrusivo)
+try:
+    from pipeline import pipeline_integrator
+    PIPELINE_AVAILABLE = True
+    print("✅ Modular pipeline system imported successfully")
+except ImportError as e:
+    PIPELINE_AVAILABLE = False
+    print(f"⚠️ Modular pipeline not available: {e}")
+    logging.warning("Modular pipeline not available - using legacy only")
+
 # Configure OpenAI
 openai.api_key = os.environ.get('OPENAI_API_KEY')
 from specialized_agents import (
