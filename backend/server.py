@@ -154,8 +154,9 @@ class DocumentType(str, Enum):
     police_clearance = "police_clearance"
     sponsor_documents = "sponsor_documents"
     photos = "photos"
-    form_i130 = "form_i130"
-    form_ds160 = "form_ds160"
+    # Note: USCIS forms (I-129, I-130, I-485, etc.) are NOT uploaded manually
+    # They are generated automatically by AI after friendly form completion
+    # and saved automatically after user authorization
     other = "other"
 
 class DocumentStatus(str, Enum):
