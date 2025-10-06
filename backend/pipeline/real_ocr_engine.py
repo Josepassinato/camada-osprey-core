@@ -17,6 +17,10 @@ from concurrent.futures import ThreadPoolExecutor
 import io
 import time
 
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv()
+
 # Core OCR libraries
 import pytesseract
 import easyocr
