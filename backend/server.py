@@ -30,8 +30,10 @@ from immigration_expert import ImmigrationExpert, create_immigration_expert
 try:
     from metrics import metrics_router, enable_instrumentation
     METRICS_AVAILABLE = True
-except ImportError:
+    print("✅ Metrics system imported successfully")
+except ImportError as e:
     METRICS_AVAILABLE = False
+    print(f"⚠️ Metrics system not available: {e}")
     logging.warning("Metrics system not available - continuing without metrics")
 
 # Configure OpenAI
