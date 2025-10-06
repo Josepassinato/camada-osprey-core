@@ -581,6 +581,33 @@ if METRICS_AVAILABLE:
     from metrics.instrumentation import monitor_document_analysis
     analyze_document_with_ai = monitor_document_analysis()(analyze_document_with_ai)
 
+# Criar versão com pipeline modular (alternativa não-intrusiva)
+if PIPELINE_AVAILABLE:
+    async def analyze_document_with_pipeline(document: UserDocument) -> Dict[str, Any]:
+        """
+        Versão alternativa que usa pipeline modular para análise de documentos
+        Disponível como feature flag - não substitui função original
+        """
+        try:
+            # Detectar tipo de documento (simplificado por enquanto)
+            document_type = "passport"  # Por enquanto assume passaporte
+            
+            # Usar pipeline integrator
+            result = await pipeline_integrator.analyze_document_with_pipeline(
+                document_id=f"doc_{hash(document.content_base64)}", 
+                document_type=document_type,
+                content_base64=document.content_base64,
+                filename=document.name,
+                legacy_analyze_function=analyze_document_with_ai
+            )
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Pipeline analysis failed, using legacy: {e}")
+            # Fallback para sistema original
+            return await analyze_document_with_ai(document)
+
 def determine_document_priority(document_type: DocumentType, expiration_date: Optional[datetime]) -> DocumentPriority:
     """Determine document priority based on type and expiration"""
     high_priority_docs = [DocumentType.passport, DocumentType.medical_exam, DocumentType.police_clearance]
