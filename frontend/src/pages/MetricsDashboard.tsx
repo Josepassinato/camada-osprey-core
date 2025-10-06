@@ -267,6 +267,7 @@ const MetricsDashboard = () => {
         <div className="mt-6 text-center text-sm text-muted-foreground">
           <p>
             Sistema implementado de forma não-intrusiva • Coleta passiva de métricas • 
+            <strong className="text-blue-600">Pipeline Modular MRZ Parser ativo</strong> •
             Zero impacto na performance atual
           </p>
         </div>
