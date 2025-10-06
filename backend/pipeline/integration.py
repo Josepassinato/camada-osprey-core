@@ -218,7 +218,7 @@ class PipelineIntegrator:
             'integration_version': '2.0.0'
         }
 
-def create_document_pipeline(document_type: str) -> DocumentAnalysisPipeline:
+def create_document_pipeline(document_type: str) -> Pipeline:
     """
     Create a specialized pipeline based on document type
     
