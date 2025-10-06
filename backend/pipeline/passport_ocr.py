@@ -171,9 +171,12 @@ class PassportOCREngine:
             
         except Exception as e:
             logger.error(f"MRZ detection error: {e}")
-            # Return bottom portion as fallback
-            height = image.shape[0]
-            return image[int(height * 0.8):, :]
+            # Return fallback
+            if CV2_AVAILABLE and hasattr(image, 'shape'):
+                height = image.shape[0]
+                return image[int(height * 0.8):, :]
+            else:
+                return "mock_mrz_region_error"
     
     def _ocr_mrz_region(self, mrz_region: np.ndarray) -> str:
         """
