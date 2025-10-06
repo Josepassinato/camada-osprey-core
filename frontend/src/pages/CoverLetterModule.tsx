@@ -686,7 +686,7 @@ const CoverLetterModule: React.FC = () => {
                 <CheckCircle2 className="h-5 w-5 text-green-500" />
                 <span>Carta Oficial Pronta</span>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-gray-700">
                 Sua carta foi formatada no padrão oficial de imigração. Revise e aprove para continuar.
               </CardDescription>
             </CardHeader>
