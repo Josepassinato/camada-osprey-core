@@ -86,21 +86,19 @@ class PassportOCREngine:
             # Fallback to basic extraction
             return self._fallback_text_extraction(image_data)
     
-    def _preprocess_passport_image(self, base64_image: str):
+    def _preprocess_passport_image(self, base64_image: str) -> np.ndarray:
         """
-        Pré-processa imagem de passaporte para melhor OCR
+        Pré-processa imagem de passaporte para melhor OCR (now using real implementation)
         """
-        if not CV2_AVAILABLE:
-            # Return placeholder if OpenCV not available
-            return "mock_processed_image"
-        
         try:
             # Decode base64 to PIL Image
+            if base64_image.startswith('data:'):
+                base64_image = base64_image.split(',')[1]
+            
             image_data = base64.b64decode(base64_image)
             pil_image = Image.open(io.BytesIO(image_data))
             
             # Convert to OpenCV format
-            import numpy as np
             image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
             
             # 1. Resize if too large (max 2000px width)
@@ -129,12 +127,8 @@ class PassportOCREngine:
             
         except Exception as e:
             logger.error(f"Image preprocessing error: {e}")
-            # Return dummy processed image
-            if CV2_AVAILABLE:
-                import numpy as np
-                return np.zeros((100, 100), dtype=np.uint8)
-            else:
-                return "mock_processed_image_error"
+            # Return empty array on error
+            return np.zeros((100, 100), dtype=np.uint8)
     
     def _detect_mrz_region(self, image):
         """
