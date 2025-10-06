@@ -6244,5 +6244,5 @@ MRZ extraction should work properly.
 
 if __name__ == "__main__":
     tester = ComprehensiveEcosystemTester()
-    # Run the final Case Finalizer tests as requested in the review
-    tester.run_final_case_finalizer_tests()
+    # Run the Advanced Analytics System tests as requested in the review
+    tester.test_advanced_analytics_system()
