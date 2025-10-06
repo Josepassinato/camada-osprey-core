@@ -6370,10 +6370,43 @@ if PIPELINE_AVAILABLE:
             logger.error(f"Pipeline endpoint error: {e}")
             raise HTTPException(status_code=500, detail=f"Pipeline analysis failed: {str(e)}")
 
+    # A/B Testing endpoints
+    @api_router.get("/ab-testing/comparison")
+    async def get_ab_testing_comparison():
+        """Comparação A/B entre pipeline e legacy"""
+        from ab_testing import ab_testing_manager
+        return ab_testing_manager.get_test_comparison()
+    
+    @api_router.post("/ab-testing/configure")
+    async def configure_ab_testing(
+        pipeline_percentage: Optional[int] = None,
+        force_passport_pipeline: Optional[bool] = None,
+        enable_pipeline: Optional[bool] = None
+    ):
+        """Configura parâmetros do teste A/B"""
+        from ab_testing import ab_testing_manager
+        ab_testing_manager.configure_test(
+            pipeline_percentage=pipeline_percentage,
+            force_passport_pipeline=force_passport_pipeline,
+            enable_pipeline=enable_pipeline
+        )
+        return {"message": "A/B testing configured", "config": ab_testing_manager.get_test_comparison()['test_config']}
+    
+    @api_router.post("/ab-testing/reset")
+    async def reset_ab_testing():
+        """Reset resultados do teste A/B"""
+        from ab_testing import ab_testing_manager
+        ab_testing_manager.reset_test_results()
+        return {"message": "A/B test results reset"}
+
 else:
     @api_router.get("/pipeline/status")
     async def get_pipeline_status_unavailable():
         return {"status": "unavailable", "message": "Pipeline system not installed"}
+    
+    @api_router.get("/ab-testing/comparison")
+    async def get_ab_testing_comparison_unavailable():
+        return {"status": "unavailable", "message": "A/B testing requires pipeline system"}
 
 app.add_middleware(
     CORSMiddleware,
