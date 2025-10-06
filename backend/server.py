@@ -26,6 +26,10 @@ import openai
 import yaml
 from immigration_expert import ImmigrationExpert, create_immigration_expert
 
+# Load environment variables FIRST before importing modules that need them
+ROOT_DIR = Path(__file__).parent
+load_dotenv(ROOT_DIR / '.env')
+
 # Sistema de Métricas Passivo (não-intrusivo)
 try:
     from metrics import metrics_router, enable_instrumentation
