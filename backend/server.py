@@ -1729,6 +1729,142 @@ async def validate_multi_document_consistency(
             detail=f"Consistency validation failed: {str(e)}"
         )
 
+# Performance Monitoring Endpoints
+
+@api_router.get("/performance/stats")
+async def get_performance_stats(
+    operation: str = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Get performance statistics for operations
+    """
+    try:
+        from monitoring.performance_monitor import performance_monitor
+        
+        stats = performance_monitor.get_operation_stats(operation)
+        
+        return {
+            "status": "success",
+            "performance_stats": stats,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except ImportError:
+        return {
+            "status": "error",
+            "message": "Performance monitoring not available"
+        }
+    except Exception as e:
+        logger.error(f"Error getting performance stats: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/performance/health")
+async def get_system_health(current_user: dict = Depends(get_current_user)):
+    """
+    Get overall system health assessment
+    """
+    try:
+        from monitoring.performance_monitor import performance_monitor
+        
+        health = performance_monitor.get_system_health()
+        
+        return {
+            "status": "success",
+            "system_health": health,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except ImportError:
+        return {
+            "status": "error", 
+            "message": "Performance monitoring not available"
+        }
+    except Exception as e:
+        logger.error(f"Error getting system health: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/performance/cache-stats")
+async def get_cache_stats(current_user: dict = Depends(get_current_user)):
+    """
+    Get OCR cache statistics
+    """
+    try:
+        from cache.ocr_cache import ocr_cache
+        
+        stats = ocr_cache.get_stats()
+        
+        return {
+            "status": "success",
+            "cache_stats": stats,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except ImportError:
+        return {
+            "status": "error",
+            "message": "OCR cache not available"
+        }
+    except Exception as e:
+        logger.error(f"Error getting cache stats: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/performance/clear-cache")
+async def clear_ocr_cache(current_user: dict = Depends(get_current_user)):
+    """
+    Clear OCR cache (admin operation)
+    """
+    try:
+        from cache.ocr_cache import ocr_cache
+        
+        cleared_count = ocr_cache.clear_cache()
+        
+        return {
+            "status": "success",
+            "message": f"Cleared {cleared_count} cache entries",
+            "cleared_entries": cleared_count,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except ImportError:
+        return {
+            "status": "error",
+            "message": "OCR cache not available"
+        }
+    except Exception as e:
+        logger.error(f"Error clearing cache: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/performance/alerts")
+async def get_performance_alerts(
+    severity: str = None,
+    limit: int = 50,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Get performance alerts
+    """
+    try:
+        from monitoring.performance_monitor import performance_monitor
+        
+        alerts = performance_monitor.get_alerts(severity, limit)
+        
+        return {
+            "status": "success",
+            "alerts": alerts,
+            "alert_count": len(alerts),
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except ImportError:
+        return {
+            "status": "error",
+            "message": "Performance monitoring not available"
+        }
+    except Exception as e:
+        logger.error(f"Error getting performance alerts: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/documents/{document_id}")
 async def get_document_details(document_id: str, current_user = Depends(get_current_user)):
     """Get document details including AI analysis"""
