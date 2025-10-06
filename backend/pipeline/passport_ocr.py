@@ -39,9 +39,9 @@ class PassportOCREngine:
             '|': '1', ']': '1', '[': '1', ')': '0', '(': '0'
         }
     
-    def extract_text_from_passport(self, image_data: str, document_type: str = "passport") -> Dict[str, Any]:
+    async def extract_text_from_passport(self, image_data: str, document_type: str = "passport") -> Dict[str, Any]:
         """
-        Extrai texto de passaporte com foco especial na MRZ
+        Extrai texto de passaporte com foco especial na MRZ usando OCR real
         
         Args:
             image_data: Base64 encoded image
@@ -51,26 +51,39 @@ class PassportOCREngine:
             Dict com texto extraído e metadados
         """
         try:
-            # 1. Decode and preprocess image
-            processed_image = self._preprocess_passport_image(image_data)
+            # 1. Extract MRZ using specialized method
+            mrz_result = real_ocr_engine.extract_mrz_from_passport(image_data)
             
-            # 2. Extract MRZ region (most critical part)
-            mrz_region = self._detect_mrz_region(processed_image)
+            # 2. Extract full document text
+            full_ocr_result = await real_ocr_engine.extract_text_from_image(
+                image_data, 
+                mode="document", 
+                language="eng"
+            )
             
-            # 3. OCR on MRZ with high accuracy settings
-            mrz_text = self._ocr_mrz_region(mrz_region)
+            # 3. Extract printed fields from full text
+            printed_data = self._extract_printed_fields(full_ocr_result.text)
             
-            # 4. OCR on full document for other fields
-            full_text = self._ocr_full_document(processed_image)
+            # 4. Combine results
+            result = {
+                'mrz_text': mrz_result['mrz_text'],
+                'full_text': full_ocr_result.text,
+                'printed_data': printed_data,
+                'ocr_confidence': max(mrz_result['confidence'], full_ocr_result.confidence),
+                'processing_method': 'real_ocr_engine',
+                'mrz_lines_detected': len(mrz_result['mrz_text'].split('\n')) if mrz_result['mrz_text'] else 0,
+                'mrz_region_detected': mrz_result['region_detected'],
+                'engine_used': full_ocr_result.engine,
+                'processing_time': full_ocr_result.processing_time
+            }
             
-            # 5. Post-process and validate results
-            result = self._post_process_results(mrz_text, full_text)
+            logger.info(f"Real OCR extraction completed: {result['processing_method']}, confidence: {result['ocr_confidence']:.2f}")
             
             return result
             
         except Exception as e:
-            logger.error(f"Passport OCR error: {e}")
-            # Fallback to basic text extraction
+            logger.error(f"Real OCR extraction failed: {e}")
+            # Fallback to basic extraction
             return self._fallback_text_extraction(image_data)
     
     def _preprocess_passport_image(self, base64_image: str):
