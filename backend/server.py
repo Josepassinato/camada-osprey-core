@@ -26,6 +26,14 @@ import openai
 import yaml
 from immigration_expert import ImmigrationExpert, create_immigration_expert
 
+# Sistema de Métricas Passivo (não-intrusivo)
+try:
+    from metrics import metrics_router, enable_instrumentation
+    METRICS_AVAILABLE = True
+except ImportError:
+    METRICS_AVAILABLE = False
+    logging.warning("Metrics system not available - continuing without metrics")
+
 # Configure OpenAI
 openai.api_key = os.environ.get('OPENAI_API_KEY')
 from specialized_agents import (
