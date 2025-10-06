@@ -13,7 +13,7 @@ import os
 from typing import Dict, Any
 
 # Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://immidoc-validator.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://docucheck-2.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class FormCodeInvestigator:
