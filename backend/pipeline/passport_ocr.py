@@ -178,29 +178,23 @@ class PassportOCREngine:
             else:
                 return np.zeros((50, 200), dtype=np.uint8)
     
-    def _ocr_mrz_region(self, mrz_region) -> str:
+    async def _ocr_mrz_region(self, mrz_region: np.ndarray) -> str:
         """
-        Performs OCR specifically optimized for MRZ
-        For now, simulates high-accuracy MRZ reading
+        Performs OCR specifically optimized for MRZ using real OCR engine
         """
         try:
-            # Simulate MRZ reading with realistic results
-            # In production, this would use pytesseract with MRZ-specific config
+            # Convert numpy array to PIL Image for OCR engine
+            mrz_image = Image.fromarray(mrz_region)
             
-            # Mock high-quality MRZ text based on common passport patterns
-            simulated_mrz_lines = [
-                "P<USADOE<<JOHN<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<",
-                "123456789<USA8001013M2512315<<<<<<<<<<<<<<<6"
-            ]
+            # Use real OCR engine with MRZ mode
+            result = await real_ocr_engine.extract_text_from_image(
+                mrz_image,
+                mode="mrz",
+                language="eng"
+            )
             
-            # Apply some realistic OCR errors that our parser can handle
-            mrz_text = '\n'.join(simulated_mrz_lines)
-            
-            # Simulate occasional OCR errors
-            mrz_text = self._simulate_realistic_ocr_errors(mrz_text)
-            
-            logger.info(f"Extracted MRZ: {mrz_text}")
-            return mrz_text
+            logger.info(f"Real MRZ OCR extracted: {len(result.text)} chars, confidence: {result.confidence:.2f}")
+            return result.text
             
         except Exception as e:
             logger.error(f"MRZ OCR error: {e}")
