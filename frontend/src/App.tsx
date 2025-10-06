@@ -30,6 +30,7 @@ import CoverLetterModule from "./pages/CoverLetterModule";
 import CaseFinalizer from "./pages/CaseFinalizer";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import MetricsDashboard from "./pages/MetricsDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
