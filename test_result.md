@@ -750,9 +750,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Real OCR Engine Implementation (Phase 4 - Production OCR)"
-    - "Document Analysis KPIs and Performance Endpoints"
-    - "A/B Testing Integration with OCR Real"
+    - "Expanded Specific Validators (Phase 5 - Multi-Document Support)"
+    - "OCR Real Integration Complete"
+    - "Backend Metrics Stability"
   stuck_tasks:
     - "Case Finalizer MVP System"
   test_all: false
