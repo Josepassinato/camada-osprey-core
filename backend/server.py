@@ -574,6 +574,10 @@ else:
             "next_steps": ["Upload realizado, aguarde revisão manual"]
         }
 
+# Usar função instrumentada se métricas estão disponíveis
+if METRICS_AVAILABLE:
+    analyze_document_with_ai = analyze_document_with_ai_instrumented
+
 def determine_document_priority(document_type: DocumentType, expiration_date: Optional[datetime]) -> DocumentPriority:
     """Determine document priority based on type and expiration"""
     high_priority_docs = [DocumentType.passport, DocumentType.medical_exam, DocumentType.police_clearance]
