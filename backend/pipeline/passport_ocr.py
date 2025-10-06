@@ -130,19 +130,16 @@ class PassportOCREngine:
             # Return empty array on error
             return np.zeros((100, 100), dtype=np.uint8)
     
-    def _detect_mrz_region(self, image):
+    def _detect_mrz_region(self, image: np.ndarray) -> np.ndarray:
         """
-        Detecta e extrai região da MRZ usando características específicas
+        Detecta e extrai região da MRZ usando características específicas (real implementation)
         """
-        if not CV2_AVAILABLE:
-            return "mock_mrz_region"
-        
         try:
             # MRZ is typically in the bottom portion of passport
             height, width = image.shape[:2]
             
-            # Focus on bottom 30% of image where MRZ is located
-            bottom_region = image[int(height * 0.7):, :]
+            # Focus on bottom 35% of image where MRZ is located
+            bottom_region = image[int(height * 0.65):, :]
             
             # Apply threshold to highlight text
             _, thresh = cv2.threshold(bottom_region, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -174,12 +171,12 @@ class PassportOCREngine:
             
         except Exception as e:
             logger.error(f"MRZ detection error: {e}")
-            # Return fallback
-            if CV2_AVAILABLE and hasattr(image, 'shape'):
+            # Return fallback - bottom portion of image
+            if hasattr(image, 'shape') and len(image.shape) >= 2:
                 height = image.shape[0]
-                return image[int(height * 0.8):, :]
+                return image[int(height * 0.75):, :]
             else:
-                return "mock_mrz_region_error"
+                return np.zeros((50, 200), dtype=np.uint8)
     
     def _ocr_mrz_region(self, mrz_region) -> str:
         """
