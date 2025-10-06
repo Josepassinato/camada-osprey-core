@@ -6367,6 +6367,13 @@ async def startup_db_client():
             enable_instrumentation()
             logger.info("✅ Metrics system initialized and ready to collect data")
         
+        # Initialize pipeline system (non-intrusive)
+        if PIPELINE_AVAILABLE:
+            # Pipeline starts enabled but with fallback to legacy
+            pipeline_integrator.enable_pipeline()
+            pipeline_integrator.enable_fallback()
+            logger.info("✅ Modular pipeline system initialized with legacy fallback")
+        
         # Create optimized indexes for better performance
         try:
             # Auto-application cases indexes
