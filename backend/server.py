@@ -6656,6 +6656,14 @@ async def startup_db_client():
         
         logger.info("Successfully connected to MongoDB!")
         
+        # Initialize Advanced Analytics System
+        if ANALYTICS_AVAILABLE:
+            try:
+                init_analytics_collector(db)
+                print("✅ Advanced Analytics collector initialized")
+            except Exception as e:
+                print(f"⚠️ Failed to initialize Analytics collector: {e}")
+        
         # Initialize metrics system (non-intrusive)
         if METRICS_AVAILABLE:
             enable_instrumentation()
