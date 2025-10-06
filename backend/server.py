@@ -1485,9 +1485,54 @@ async def upload_document(
         # Save to database
         await db.documents.insert_one(document.dict())
         
-        # Analyze with AI in background
+        # Analyze with AI in background (A/B Testing between pipeline and legacy)
         try:
-            ai_analysis = await analyze_document_with_ai(document)
+            # Import A/B testing system
+            if PIPELINE_AVAILABLE:
+                from ab_testing import ab_testing_manager
+                import time
+                
+                # Determine which system to use
+                ab_decision = ab_testing_manager.should_use_pipeline(
+                    user_id=str(current_user.id),
+                    document_type=document_type.value,
+                    filename=document.filename
+                )
+                
+                analysis_start_time = time.time()
+                
+                if ab_decision['use_pipeline']:
+                    # Use modular pipeline
+                    ai_analysis = await analyze_document_with_pipeline(document)
+                    ai_analysis['processing_method'] = 'modular_pipeline'
+                    ai_analysis['test_group'] = ab_decision['test_group']
+                    ai_analysis['ab_reason'] = ab_decision['reason']
+                else:
+                    # Use legacy system
+                    ai_analysis = await analyze_document_with_ai(document)
+                    ai_analysis['processing_method'] = 'legacy_system'
+                    ai_analysis['test_group'] = ab_decision['test_group']
+                    ai_analysis['ab_reason'] = ab_decision['reason']
+                
+                analysis_end_time = time.time()
+                processing_time = analysis_end_time - analysis_start_time
+                
+                # Record A/B test result
+                confidence = ai_analysis.get('completeness_score', 50) / 100.0
+                success = ai_analysis.get('validity_status') == 'valid'
+                
+                ab_testing_manager.record_analysis_result(
+                    test_group=ab_decision['test_group'],
+                    processing_time=processing_time,
+                    confidence=confidence,
+                    success=success,
+                    analysis_result=ai_analysis
+                )
+                
+            else:
+                # Fallback to legacy only
+                ai_analysis = await analyze_document_with_ai(document)
+                ai_analysis['processing_method'] = 'legacy_only'
             
             # Update document with AI analysis
             suggestions = ai_analysis.get('suggestions', [])
