@@ -1570,10 +1570,14 @@ async def upload_document(
             logger.error(f"AI analysis failed: {str(ai_error)}")
             # Continue without AI analysis
         
+        # Get document attributes - handle both object and dict cases
+        doc_id = document.id if hasattr(document, 'id') else document.get('id') if isinstance(document, dict) else 'unknown'
+        doc_filename = document.filename if hasattr(document, 'filename') else document.get('filename') if isinstance(document, dict) else file.filename
+        
         return {
             "message": "Document uploaded successfully",
-            "document_id": document.id,
-            "filename": document.filename,
+            "document_id": doc_id,
+            "filename": doc_filename,
             "status": "uploaded",
             "ai_analysis_status": "completed"
         }
