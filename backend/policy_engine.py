@@ -486,7 +486,7 @@ class PolicyEngine:
         language_analysis = result.get("language_analysis", {})
         language_compliant = language_analysis.get("compliance", {}).get("compliant", True)
         language_score = 1.0 if language_compliant else 0.3  # Penalização por não-conformidade
-        scores.append(language_score * scoring["language_compliance_weight"])
+        scores.append(language_score * scoring.get("language_compliance_weight", 0.1))
         
         # 4. Score de extração de campos (Phase 2)
         fields = result.get("fields", {})
