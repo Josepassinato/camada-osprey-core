@@ -110,16 +110,102 @@ class OCREngine:
                                     mode: str = "auto",
                                     language: str = "eng") -> OCRResult:
         """
-        Extract text from image using best available engine
-        Priority: Google Vision API > EasyOCR > Tesseract
+        Extract text from image using best available engine with caching
+        Priority: Cache > Google Vision API > EasyOCR > Tesseract
         
         Args:
             image_data: Base64 string, bytes, or numpy array
             mode: OCR mode (auto, mrz, document, single_line, etc.)
             language: Language code (eng, por, etc.)
         
-        Returns:
+Returns:
             OCRResult with text and metadata
+        """
+        operation_name = f"ocr_extraction_{mode}"
+        start_time = time.time()
+        
+        try:
+            # Try cache first if available
+            if CACHE_AVAILABLE:
+                try:
+                    result_dict, was_cached = await ocr_cache.get_or_compute(
+                        str(image_data)[:1000] if isinstance(image_data, (str, bytes)) else str(hash(image_data.tobytes()))[:1000],
+                        self._extract_text_uncached,
+                        mode=mode,
+                        language=language,
+                        document_type=mode
+                    )
+                    
+                    # Convert dict back to OCRResult
+                    if was_cached:
+                        result = OCRResult(**result_dict)
+                        result.preprocessing_method = f"{result.preprocessing_method}_cached"
+                        
+                        # Record cache hit performance
+                        if 'monitoring' in globals() and performance_monitor:
+                            performance_monitor.record_metric(
+                                f"{operation_name}_cached", 
+                                time.time() - start_time, 
+                                True,
+                                {'cache_hit': True, 'confidence': result.confidence}
+                            )
+                        
+                        return result
+                    else:
+                        # Cache miss, result already computed
+                        result = OCRResult(**result_dict)
+                        
+                        # Record performance
+                        if 'monitoring' in globals() and performance_monitor:
+                            performance_monitor.record_metric(
+                                operation_name, 
+                                result.processing_time, 
+                                True,
+                                {'cache_hit': False, 'engine': result.engine, 'confidence': result.confidence}
+                            )
+                        
+                        return result
+                        
+                except Exception as e:
+                    logger.warning(f"Cache system error, falling back to direct processing: {e}")
+            
+            # Direct processing (no cache or cache failed)
+            result = await self._extract_text_uncached(image_data, mode, language)
+            
+            # Record performance if monitoring available
+            if CACHE_AVAILABLE and performance_monitor:
+                performance_monitor.record_metric(
+                    operation_name, 
+                    result.processing_time, 
+                    result.confidence > 0.1,  # Consider success if any text found
+                    {'engine': result.engine, 'confidence': result.confidence, 'cached': False}
+                )
+            
+            return result
+            
+        except Exception as e:
+            error_duration = time.time() - start_time
+            logger.error(f"All OCR engines failed: {e}")
+            
+            # Record failure
+            if CACHE_AVAILABLE and performance_monitor:
+                performance_monitor.record_metric(operation_name, error_duration, False, {'error': str(e)})
+            
+            return OCRResult(
+                text="",
+                confidence=0.0,
+                engine="error",
+                processing_time=error_duration,
+                language=language,
+                preprocessing_method="failed"
+            )
+    
+    async def _extract_text_uncached(self, 
+                                   image_data: Union[str, bytes, np.ndarray],
+                                   mode: str = "auto",
+                                   language: str = "eng") -> OCRResult:
+        """
+        Extract text without cache (original logic)
         """
         start_time = time.time()
         
@@ -157,7 +243,7 @@ class OCREngine:
             return result
             
         except Exception as e:
-            logger.error(f"All OCR engines failed: {e}")
+            logger.error(f"OCR processing failed: {e}")
             return OCRResult(
                 text="",
                 confidence=0.0,
