@@ -226,7 +226,7 @@ class PassportOCREngine:
         
         return text
     
-    def _ocr_full_document(self, image: np.ndarray) -> str:
+    def _ocr_full_document(self, image) -> str:
         """
         Performs OCR on full document to extract printed information
         """
