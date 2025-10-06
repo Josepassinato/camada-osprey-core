@@ -14,6 +14,12 @@ from .i765_validator import i765_validation_stage
 
 logger = logging.getLogger(__name__)
 
+# Create individual stage instances for pipeline factory
+passport_ocr_stage = PassportOCRStage()
+passport_mrz_stage = MRZParsingStage()
+i797_ocr_stage = I797OCRStage()
+i797_validation_stage = I797ValidationStage()
+
 class PipelineIntegrator:
     """
     Integrador que permite usar pipeline modular como alternativa ao sistema atual
