@@ -4,13 +4,20 @@ OCR engine otimizado para leitura de MRZ com pré-processamento específico
 """
 
 import re
-import cv2
-import numpy as np
 import base64
 import logging
 from typing import Dict, List, Any, Optional, Tuple
-from PIL import Image
 import io
+
+# Optional imports for image processing
+try:
+    import cv2
+    import numpy as np
+    from PIL import Image
+    CV2_AVAILABLE = True
+except ImportError:
+    CV2_AVAILABLE = False
+    logging.warning("OpenCV not available - using simplified image processing")
 
 # For now, we'll use a placeholder that simulates OCR with high accuracy
 # In production, we would use actual OCR libraries like pytesseract
