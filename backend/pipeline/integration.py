@@ -11,6 +11,8 @@ from .passport_stages import passport_pipeline, PassportOCRStage, MRZParsingStag
 from .i797_stages import i797_pipeline, I797OCRStage, I797ValidationStage
 from .birth_certificate_validator import birth_certificate_validation_stage
 from .i765_validator import i765_validation_stage
+from .driver_license_validator import driver_license_validation_stage
+from .marriage_certificate_validator import marriage_certificate_validation_stage
 
 logger = logging.getLogger(__name__)
 
