@@ -5299,12 +5299,17 @@ MRZ extraction should work properly.
         print("=" * 80)
         print()
         
-        # PRIORITY: OCR Real Engine Testing (as requested in review)
-        print("🔍 PRIORITY: OCR REAL ENGINE COMPREHENSIVE TESTING")
+        # PRIORITY: NEW DOCUMENT VALIDATORS TESTING (as requested in review)
+        print("🆕 PRIORITY: NEW DOCUMENT VALIDATORS COMPREHENSIVE TESTING")
+        print("-" * 60)
+        self.test_new_document_validators()
+        
+        # SECOND: OCR Real Engine Testing
+        print("\n🔍 OCR REAL ENGINE COMPREHENSIVE TESTING")
         print("-" * 60)
         self.test_ocr_real_engine_comprehensive()
         
-        # SECOND: Run critical OpenAI tests
+        # THIRD: Run critical OpenAI tests
         print("\n🔑 CRITICAL OPENAI INTEGRATION TESTS")
         print("-" * 40)
         self.run_critical_openai_tests()
