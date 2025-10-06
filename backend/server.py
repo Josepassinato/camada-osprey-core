@@ -1507,10 +1507,13 @@ async def upload_document(
                 import time
                 
                 # Determine which system to use
+                # Get document filename - handle both object and dict cases
+                doc_filename = document.filename if hasattr(document, 'filename') else document.get('filename') if isinstance(document, dict) else file.filename
+                
                 ab_decision = ab_testing_manager.should_use_pipeline(
                     user_id=str(current_user.id),
                     document_type=document_type.value,
-                    filename=document.filename
+                    filename=doc_filename
                 )
                 
                 analysis_start_time = time.time()
