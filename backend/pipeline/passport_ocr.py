@@ -131,6 +131,9 @@ class PassportOCREngine:
         """
         Detecta e extrai região da MRZ usando características específicas
         """
+        if not CV2_AVAILABLE:
+            return "mock_mrz_region"
+        
         try:
             # MRZ is typically in the bottom portion of passport
             height, width = image.shape[:2]
