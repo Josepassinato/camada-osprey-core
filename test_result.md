@@ -57,8 +57,8 @@
 ##   test_priority: "high_first"  # or "sequential" or "stuck_first"
 ##
 ## agent_communication:
-##     -agent: "main"  # or "testing" or "user"
-##     -message: "Communication message between agents"
+##     -agent: "main"
+##     -message: "Implemented 4 new document validators (Social Security Card, Tax Documents, Medical Records, Utility Bills) following the same modular pipeline architecture as existing validators. All validators include comprehensive data extraction, validation rules, confidence scoring, and integration with the real OCR engine. Updated pipeline integration system to support the new document types. Ready for backend testing of the new validation capabilities."
 
 # Protocol Guidelines for Main agent
 #
