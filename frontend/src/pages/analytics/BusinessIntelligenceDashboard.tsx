@@ -337,7 +337,7 @@ const BusinessIntelligenceDashboard: React.FC<{ period: string }> = ({ period })
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-medium text-blue-800">User Acquisition</h4>
-                <Growth className="h-5 w-5 text-blue-600" />
+                <TrendingUp className="h-5 w-5 text-blue-600" />
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between">
