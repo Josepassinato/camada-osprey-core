@@ -19,7 +19,7 @@ from .collector import get_analytics_collector
 logger = logging.getLogger(__name__)
 
 # Create analytics router
-analytics_router = APIRouter(prefix="/api/analytics", tags=["analytics"])
+analytics_router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 def get_analytics_analyzer() -> AnalyticsAnalyzer:
     """Get analytics analyzer instance"""
