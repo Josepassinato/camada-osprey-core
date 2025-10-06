@@ -6224,8 +6224,18 @@ app.include_router(api_router)
 if METRICS_AVAILABLE:
     api_router.include_router(metrics_router, prefix="/metrics")
     logging.info("✅ Metrics system enabled")
+    
+    # Test endpoint para verificar se integração está funcionando
+    @api_router.get("/metrics-test")
+    async def metrics_integration_test():
+        return {"status": "Metrics integration working", "available": True}
 else:
     logging.info("ℹ️ Running without metrics system")
+    
+    # Test endpoint para quando métricas não disponíveis
+    @api_router.get("/metrics-test")
+    async def metrics_integration_test():
+        return {"status": "Metrics not available", "available": False}
 
 app.add_middleware(
     CORSMiddleware,
