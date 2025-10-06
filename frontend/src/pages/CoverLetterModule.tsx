@@ -565,7 +565,7 @@ const CoverLetterModule: React.FC = () => {
                     : 'Carta Precisa de Complementação'}
                 </span>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-gray-700">
                 {review?.status === 'needs_questions'
                   ? 'Responda às perguntas abaixo para que eu possa escrever sua carta no padrão oficial de imigração.'
                   : 'Alguns pontos importantes ainda precisam ser abordados na sua carta.'}
