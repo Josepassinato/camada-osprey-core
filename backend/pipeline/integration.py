@@ -232,27 +232,27 @@ def create_document_pipeline(document_type: str) -> DocumentAnalysisPipeline:
     
     # Create pipeline based on document type
     if document_type.lower() in ['passport', 'passaporte']:
-        pipeline = Pipeline(pipeline_name)
+        pipeline = DocumentAnalysisPipeline(pipeline_name)
         pipeline.add_stage(passport_ocr_stage)
         pipeline.add_stage(passport_mrz_stage)
         
     elif document_type.lower() in ['i797', 'i-797', 'notice_of_action']:
-        pipeline = Pipeline(pipeline_name)
+        pipeline = DocumentAnalysisPipeline(pipeline_name)
         pipeline.add_stage(i797_ocr_stage)
         pipeline.add_stage(i797_validation_stage)
         
     elif document_type.lower() in ['birth_certificate', 'birth_cert', 'certidao_nascimento', 'certidão_nascimento']:
-        pipeline = Pipeline(pipeline_name)
+        pipeline = DocumentAnalysisPipeline(pipeline_name)
         pipeline.add_stage(birth_certificate_validation_stage)
         
     elif document_type.lower() in ['i765', 'i-765', 'ead', 'employment_authorization', 'employment_authorization_document']:
-        pipeline = Pipeline(pipeline_name)
+        pipeline = DocumentAnalysisPipeline(pipeline_name)
         pipeline.add_stage(i765_validation_stage)
         
     else:
         # Generic pipeline for unknown document types
         logger.warning(f"Unknown document type: {document_type}, using generic pipeline")
-        pipeline = Pipeline(f"generic_{document_type}_pipeline")
+        pipeline = DocumentAnalysisPipeline(f"generic_{document_type}_pipeline")
         # Add basic OCR stage for unknown documents
         # This can be expanded with more generic stages
         
