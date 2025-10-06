@@ -21,6 +21,9 @@ class PipelineIntegrator:
         self.fallback_to_legacy = True
         self.document_type_mapping = {
             'passport': passport_pipeline,
+            'i797_notice': i797_pipeline,
+            'i797': i797_pipeline,
+            'uscis_notice': i797_pipeline,
             # Mais pipelines serão adicionados aqui
         }
     
