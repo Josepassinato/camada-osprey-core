@@ -178,7 +178,7 @@ class PassportOCREngine:
             else:
                 return "mock_mrz_region_error"
     
-    def _ocr_mrz_region(self, mrz_region: np.ndarray) -> str:
+    def _ocr_mrz_region(self, mrz_region) -> str:
         """
         Performs OCR specifically optimized for MRZ
         For now, simulates high-accuracy MRZ reading
