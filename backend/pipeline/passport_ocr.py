@@ -1,5 +1,5 @@
 """
-Passport OCR Engine - Specialized for MRZ Reading
+Passport OCR Engine - Specialized for MRZ Reading  
 OCR engine otimizado para leitura de MRZ com pré-processamento específico
 """
 
@@ -8,19 +8,15 @@ import base64
 import logging
 from typing import Dict, List, Any, Optional, Tuple
 import io
+import asyncio
 
-# Optional imports for image processing
-try:
-    import cv2
-    import numpy as np
-    from PIL import Image
-    CV2_AVAILABLE = True
-except ImportError:
-    CV2_AVAILABLE = False
-    logging.warning("OpenCV not available - using simplified image processing")
+# Import real OCR engine
+from .real_ocr_engine import real_ocr_engine, OCRResult
 
-# For now, we'll use a placeholder that simulates OCR with high accuracy
-# In production, we would use actual OCR libraries like pytesseract
+# Required imports for image processing
+import cv2
+import numpy as np
+from PIL import Image
 
 logger = logging.getLogger(__name__)
 
