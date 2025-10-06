@@ -33,6 +33,7 @@ import TermsOfService from "./pages/TermsOfService";
 import MetricsDashboard from "./pages/MetricsDashboard";
 import PerformanceDashboard from "./pages/PerformanceDashboard";
 import ConsistencyDashboard from "./pages/ConsistencyDashboard";
+import AdvancedAnalytics from "./pages/AdvancedAnalytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
