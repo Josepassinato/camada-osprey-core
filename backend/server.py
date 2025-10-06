@@ -6221,15 +6221,23 @@ async def download_master_packet(job_id: str, current_user = Depends(get_current
 app.include_router(api_router)
 
 # Include metrics router if available (non-intrusive)
+print(f"DEBUG: METRICS_AVAILABLE = {METRICS_AVAILABLE}")
 if METRICS_AVAILABLE:
-    api_router.include_router(metrics_router, prefix="/metrics")
-    logging.info("✅ Metrics system enabled")
-    
-    # Test endpoint para verificar se integração está funcionando
-    @api_router.get("/metrics-test")
-    async def metrics_integration_test():
-        return {"status": "Metrics integration working", "available": True}
+    try:
+        print("DEBUG: Adding metrics router...")
+        api_router.include_router(metrics_router, prefix="/metrics")
+        print("DEBUG: Metrics router added successfully")
+        logging.info("✅ Metrics system enabled")
+        
+        # Test endpoint para verificar se integração está funcionando
+        @api_router.get("/metrics-test")
+        async def metrics_integration_test():
+            return {"status": "Metrics integration working", "available": True}
+        print("DEBUG: Test endpoint added")
+    except Exception as e:
+        print(f"DEBUG: Error adding metrics router: {e}")
 else:
+    print("DEBUG: Metrics not available")
     logging.info("ℹ️ Running without metrics system")
     
     # Test endpoint para quando métricas não disponíveis
