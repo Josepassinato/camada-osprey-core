@@ -15,6 +15,7 @@ import {
   Plus,
   ArrowRight,
   BarChart,
+  BarChart3,
   Calendar,
   Bell,
   GraduationCap
