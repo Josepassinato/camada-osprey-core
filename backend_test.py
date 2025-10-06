@@ -4417,7 +4417,14 @@ class ComprehensiveEcosystemTester:
         print("=" * 80)
         print()
         
-        # FIRST: Run critical OpenAI tests
+        # PRIORITY: OCR Real Engine Testing (as requested in review)
+        print("🔍 PRIORITY: OCR REAL ENGINE COMPREHENSIVE TESTING")
+        print("-" * 60)
+        self.test_ocr_real_engine_comprehensive()
+        
+        # SECOND: Run critical OpenAI tests
+        print("\n🔑 CRITICAL OPENAI INTEGRATION TESTS")
+        print("-" * 40)
         self.run_critical_openai_tests()
         
         # Then run other tests if needed
