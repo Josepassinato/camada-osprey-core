@@ -682,7 +682,7 @@ const CoverLetterModule: React.FC = () => {
         {currentCard === 7 && finalLetter && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
+              <CardTitle className="flex items-center space-x-2 text-gray-900">
                 <CheckCircle2 className="h-5 w-5 text-green-500" />
                 <span>Carta Oficial Pronta</span>
               </CardTitle>
