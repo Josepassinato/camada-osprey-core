@@ -220,6 +220,9 @@ const MetricsDashboard = () => {
           </div>
         </div>
 
+        {/* A/B Testing Dashboard */}
+        <ABTestingDashboard />
+
         {/* Performance Status */}
         <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200 p-6">
           <h3 className="text-lg font-semibold text-foreground mb-4">
