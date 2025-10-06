@@ -202,37 +202,27 @@ class PassportOCREngine:
     
     # Removed simulated OCR errors method as we're using real OCR now
     
-    def _ocr_full_document(self, image) -> str:
+    async def _ocr_full_document(self, image: np.ndarray) -> str:
         """
-        Performs OCR on full document to extract printed information
+        Performs OCR on full document to extract printed information using real OCR
         """
         try:
-            # Simulate extraction of printed passport data
-            simulated_data = """
-            PASSPORT
-            United States of America
+            # Convert numpy array to PIL Image for real OCR engine
+            pil_image = Image.fromarray(image)
             
-            Type: P
-            Country Code: USA
-            Passport No.: 123456789
+            # Use real OCR engine for full document extraction
+            result = await real_ocr_engine.extract_text_from_image(
+                pil_image,
+                mode="document",
+                language="eng"
+            )
             
-            Surname: DOE
-            Given Names: JOHN
-            
-            Nationality: USA
-            Date of Birth: 01 JAN 1980
-            Sex: M
-            Place of Birth: NEW YORK, NY
-            Date of Issue: 15 DEC 2020
-            Date of Expiry: 15 DEC 2030
-            Authority: U.S. DEPARTMENT OF STATE
-            """
-            
-            return simulated_data.strip()
+            logger.info(f"Full document OCR completed: {result.engine}, confidence: {result.confidence:.2f}")
+            return result.text
             
         except Exception as e:
             logger.error(f"Full document OCR error: {e}")
-            return "OCR extraction failed"
+            return "Real OCR extraction failed"
     
     def _post_process_results(self, mrz_text: str, full_text: str) -> Dict[str, Any]:
         """
