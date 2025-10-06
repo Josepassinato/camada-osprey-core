@@ -443,7 +443,7 @@ const CoverLetterModule: React.FC = () => {
         {currentCard === 3 && (
           <Card>
             <CardHeader>
-              <CardTitle>Redija sua Carta de Apresentação</CardTitle>
+              <CardTitle className="text-gray-900">Redija sua Carta de Apresentação</CardTitle>
               <CardDescription className="text-gray-700">
                 Baseie-se no roteiro informativo para cobrir todos os pontos necessários.
               </CardDescription>
