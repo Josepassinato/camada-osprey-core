@@ -42,13 +42,14 @@ class OCRResult:
 class OCREngine:
     """
     Production OCR Engine with multiple backend support
-    Supports Tesseract and EasyOCR with intelligent fallback
+    Priority: Google Vision API > EasyOCR > Tesseract
     """
     
     def __init__(self):
+        self.google_vision_available = self._check_google_vision()
         self.tesseract_available = self._check_tesseract()
         self.easyocr_reader = None
-        self.executor = ThreadPoolExecutor(max_workers=2)
+        self.executor = ThreadPoolExecutor(max_workers=3)
         
         # Initialize EasyOCR reader
         try:
@@ -66,6 +67,23 @@ class OCREngine:
             'sparse_text': '--oem 3 --psm 11',
             'dense_text': '--oem 3 --psm 6'
         }
+        
+        logger.info(f"OCR Engine initialized - Google Vision: {self.google_vision_available}, "
+                   f"Tesseract: {self.tesseract_available}, EasyOCR: {bool(self.easyocr_reader)}")
+    
+    def _check_google_vision(self) -> bool:
+        """Check if Google Vision API is available and configured"""
+        try:
+            api_key = os.getenv('GOOGLE_API_KEY')
+            if api_key and google_vision_ocr:
+                logger.info("Google Vision API available and configured")
+                return True
+            else:
+                logger.warning("Google Vision API not configured")
+                return False
+        except Exception as e:
+            logger.error(f"Google Vision API check failed: {e}")
+            return False
     
     def _check_tesseract(self) -> bool:
         """Check if Tesseract is available"""
