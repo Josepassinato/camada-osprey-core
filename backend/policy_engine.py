@@ -416,7 +416,7 @@ class PolicyEngine:
         # Score de qualidade
         quality_status = result["quality"].get("status", "fail")
         quality_score = {"ok": 1.0, "alert": 0.7, "fail": 0.0}.get(quality_status, 0.0)
-        scores.append(quality_score * scoring["quality_weight"])
+        scores.append(quality_score * scoring.get("quality_weight", 0.25))
         
         # Score de verificações de política
         policy_checks = result["policy_checks"]
@@ -424,7 +424,7 @@ class PolicyEngine:
             pass_count = sum(1 for check in policy_checks if check["result"] == "pass")
             total_count = len(policy_checks)
             policy_score = pass_count / total_count if total_count > 0 else 0.0
-            scores.append(policy_score * (scoring["critical_fields_weight"] + scoring["presence_checks_weight"]))
+            scores.append(policy_score * (scoring.get("critical_fields_weight", 0.35) + scoring.get("presence_checks_weight", 0.15)))
         
         # Score de consistência
         consistency_checks = result["consistency"]
@@ -432,7 +432,7 @@ class PolicyEngine:
             pass_count = sum(1 for check in consistency_checks if check["result"] == "pass")
             total_count = len(consistency_checks)
             consistency_score = pass_count / total_count if total_count > 0 else 1.0
-            scores.append(consistency_score * scoring["consistency_weight"])
+            scores.append(consistency_score * scoring.get("consistency_weight", 0.1))
         
         overall_score = sum(scores) if scores else 0.0
         
