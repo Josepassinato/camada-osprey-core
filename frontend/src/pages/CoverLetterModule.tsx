@@ -401,7 +401,7 @@ const CoverLetterModule: React.FC = () => {
                 <FileText className="h-5 w-5 text-[#FF6B35]" />
                 <span>Roteiro Informativo - {visaType}</span>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-gray-700">
                 Baseado nas exigências públicas do USCIS. Use este roteiro para estruturar sua carta.
               </CardDescription>
             </CardHeader>
