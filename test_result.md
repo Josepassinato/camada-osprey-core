@@ -822,11 +822,13 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Expanded Specific Validators (Phase 5 - Multi-Document Support)"
-    - "OCR Real Integration Complete"
-    - "Backend Metrics Stability"
+    - "Social Security Card Validator Implementation"
+    - "Tax Documents Validator Implementation" 
+    - "Medical Records Validator Implementation"
+    - "Utility Bills Validator Implementation"
+    - "New Validators Integration into Pipeline System"
   stuck_tasks:
-    - "Case Finalizer MVP System"
+    - "None"
   test_all: false
   test_priority: "high_first"
 
