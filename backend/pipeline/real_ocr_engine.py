@@ -371,6 +371,60 @@ class OCREngine:
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(self.executor, _run_easyocr)
     
+    async def _extract_with_google_vision(self, 
+                                        image_data: Union[str, bytes, np.ndarray],
+                                        mode: str,
+                                        language: str) -> OCRResult:
+        """Extract text using Google Cloud Vision API"""
+        try:
+            # Convert numpy array to bytes if needed
+            if isinstance(image_data, np.ndarray):
+                from PIL import Image
+                pil_image = Image.fromarray(image_data)
+                buffer = io.BytesIO()
+                pil_image.save(buffer, format='PNG')
+                image_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            
+            # Choose detection type based on mode
+            detection_type = "DOCUMENT_TEXT_DETECTION" if mode in ["document", "mrz"] else "TEXT_DETECTION"
+            
+            # Set language hints
+            language_hints = []
+            if language == "eng":
+                language_hints = ["en"]
+            elif language == "por":
+                language_hints = ["pt"]
+            
+            # Call Google Vision API
+            vision_result = await google_vision_ocr.detect_text(
+                image_data,
+                detection_type=detection_type,
+                language_hints=language_hints
+            )
+            
+            # Convert to OCRResult format
+            return OCRResult(
+                text=vision_result.text,
+                confidence=vision_result.confidence,
+                engine="google_vision",
+                processing_time=vision_result.processing_time,
+                language=vision_result.language,
+                bounding_boxes=vision_result.bounding_boxes,
+                preprocessing_method=f"google_vision_{mode}"
+            )
+            
+        except Exception as e:
+            logger.error(f"Google Vision extraction failed: {e}")
+            # Return low confidence result to trigger fallback
+            return OCRResult(
+                text="",
+                confidence=0.0,
+                engine="google_vision_failed",
+                processing_time=0.0,
+                language=language,
+                preprocessing_method="failed"
+            )
+    
     def extract_mrz_from_passport(self, image_data: Union[str, bytes]) -> Dict[str, Any]:
         """
         Specialized MRZ extraction with region detection
