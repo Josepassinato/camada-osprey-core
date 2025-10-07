@@ -1559,20 +1559,56 @@ async def upload_document(
             suggestions = ai_analysis.get('suggestions', [])
             status = DocumentStatus.approved if ai_analysis.get('validity_status') == 'valid' else DocumentStatus.requires_improvement
             
+            # ✅ COMPREHENSIVE DOCUMENT VALIDATION SYSTEM
+            validation_result = None
+            try:
+                from document_validation_system import document_validation_system
+                
+                # Extract data from AI analysis
+                extracted_text = ai_analysis.get('extracted_text', '')
+                extracted_fields = ai_analysis.get('extracted_data', {})
+                confidence = ai_analysis.get('confidence', 0.0)
+                
+                # Get applicant name from user profile
+                applicant_name = f"{current_user.get('first_name', '')} {current_user.get('last_name', '')}".strip()
+                
+                # Run comprehensive validation
+                validation_result = document_validation_system.validate_document_comprehensive(
+                    doc_type=document_type.value,
+                    extracted_fields=extracted_fields,
+                    extracted_text=extracted_text,
+                    applicant_name=applicant_name,
+                    confidence=confidence
+                )
+                
+                # Update status based on validation
+                if not validation_result['is_valid']:
+                    status = DocumentStatus.requires_improvement
+                
+                logger.info(f"✅ Document validation completed: {validation_result['is_valid']}")
+                
+            except Exception as val_error:
+                logger.error(f"⚠️ Document validation failed: {str(val_error)}")
+                # Continue without validation
+            
             # Get document ID - handle both object and dict cases
             doc_id = document.id if hasattr(document, 'id') else document.get('id') if isinstance(document, dict) else None
             
             if doc_id:
+                update_data = {
+                    "ai_analysis": ai_analysis,
+                    "ai_suggestions": suggestions,
+                    "status": status.value,
+                    "updated_at": datetime.utcnow()
+                }
+                
+                # Add validation result if available
+                if validation_result:
+                    update_data["validation_result"] = validation_result
+                
                 await db.documents.update_one(
                     {"id": doc_id},
-                    {
-                        "$set": {
-                            "ai_analysis": ai_analysis,
-                            "ai_suggestions": suggestions,
-                            "status": status.value,
-                            "updated_at": datetime.utcnow()
-                        }
-                    }
+                    {"$set": update_data}
                 )
             
         except Exception as ai_error:
