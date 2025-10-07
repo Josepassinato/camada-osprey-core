@@ -7271,7 +7271,14 @@ MRZ extraction should work properly.
                                             else:
                                                 self.log_test("TESTE 5: Continuar Aplicação (Atualizar)", False, f"HTTP {update_response.status_code}", update_response.text)
                                     else:
-                                        self.log_test("TESTE 4: Verificar Dashboard", False, f"Case {case_id} not found in dashboard", {"auto_applications_count": len(auto_applications)})
+                                        # Debug: Show what cases are in the dashboard
+                                        case_ids_in_dashboard = [app.get("case_id") or app.get("id") for app in auto_applications]
+                                        self.log_test("TESTE 4: Verificar Dashboard", False, f"Case {case_id} not found in dashboard", {
+                                            "auto_applications_count": len(auto_applications),
+                                            "case_ids_in_dashboard": case_ids_in_dashboard,
+                                            "looking_for": case_id,
+                                            "first_app_sample": auto_applications[0] if auto_applications else None
+                                        })
                                 else:
                                     self.log_test("TESTE 4: Verificar Dashboard", False, f"HTTP {dashboard_response.status_code}", dashboard_response.text)
                             else:
