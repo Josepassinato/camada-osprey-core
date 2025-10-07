@@ -603,6 +603,53 @@ class DocumentValidationAgent(BaseSpecializedAgent):
             "agent": "Dr. Miguel - Sistema de Alta Precisão v2.0"
         }
     
+    def _detect_document_type_from_text(self, text: str) -> str:
+        """Detecta o tipo de documento baseado no texto extraído"""
+        text_lower = text.lower()
+        
+        # Passport indicators
+        passport_keywords = ['passport', 'passaporte', 'república federativa', 'mrz', 'p<bra', 'nationality']
+        if any(keyword in text_lower for keyword in passport_keywords):
+            return 'passport'
+        
+        # Driver License indicators
+        license_keywords = ['carteira nacional de habilitação', 'cnh', 'detran', 'driver license', 'válida até', 'categoria']
+        if any(keyword in text_lower for keyword in license_keywords):
+            return 'driver_license'
+        
+        # I-797 indicators
+        i797_keywords = ['i-797', 'uscis', 'receipt number', 'notice type', 'petitioner']
+        if any(keyword in text_lower for keyword in i797_keywords):
+            return 'i797'
+        
+        # Birth Certificate indicators
+        birth_keywords = ['certidão de nascimento', 'birth certificate', 'registro civil', 'cartório']
+        if any(keyword in text_lower for keyword in birth_keywords):
+            return 'birth_certificate'
+        
+        # Marriage Certificate indicators
+        marriage_keywords = ['certidão de casamento', 'marriage certificate', 'matrimônio']
+        if any(keyword in text_lower for keyword in marriage_keywords):
+            return 'marriage_certificate'
+        
+        return None  # Unknown type
+    
+    def _translate_doc_type(self, doc_type: str) -> str:
+        """Traduz tipo de documento para português"""
+        translations = {
+            'passport': 'Passaporte',
+            'driver_license': 'Carteira de Motorista',
+            'i797': 'Formulário I-797',
+            'birth_certificate': 'Certidão de Nascimento',
+            'marriage_certificate': 'Certidão de Casamento',
+            'education_diploma': 'Diploma',
+            'education_transcript': 'Histórico Escolar',
+            'bank_statement': 'Extrato Bancário',
+            'tax_return': 'Declaração de IR',
+            'medical_exam': 'Exame Médico'
+        }
+        return translations.get(doc_type, doc_type.upper())
+    
     async def _extract_document_data_simulation(self, file_content: bytes, doc_type: str, file_name: str) -> Dict[str, Any]:
         """
         Simulação de extração de dados OCR
