@@ -74,14 +74,19 @@ const SaveAndContinueModal = ({
         localStorage.setItem('osprey_user', JSON.stringify(data.user));
         
         // Associate current case with user
-        await associateCaseWithUser(data.token);
-        
-        onSuccess(data.user);
-        toast({
-          title: "Login realizado com sucesso!",
-          description: "Sua aplicação foi salva em sua conta.",
-        });
-        onClose();
+        try {
+          await associateCaseWithUser(data.token);
+          
+          onSuccess(data.user);
+          toast({
+            title: "Login realizado com sucesso!",
+            description: "Sua aplicação foi salva em sua conta.",
+          });
+          onClose();
+        } catch (associateError) {
+          console.error('Association failed:', associateError);
+          setError('Login realizado, mas falhou ao salvar aplicação. Por favor, tente novamente.');
+        }
       } else {
         setError(data.message || 'Erro ao fazer login');
       }
