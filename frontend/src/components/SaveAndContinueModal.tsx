@@ -152,15 +152,30 @@ const SaveAndContinueModal = ({
 
   const associateCaseWithUser = async (token: string) => {
     try {
-      await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}/associate-user`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}/associate-user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
-        }
+        },
+        body: JSON.stringify({
+          current_stage: currentStage,
+          purchase_completed: false
+        })
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Failed to associate case:', errorData);
+        throw new Error(errorData.detail || 'Failed to associate case');
+      }
+      
+      const data = await response.json();
+      console.log('✅ Case associated successfully:', data);
+      return data;
     } catch (error) {
-      console.error('Error associating case with user:', error);
+      console.error('❌ Error associating case with user:', error);
+      throw error;
     }
   };
 
