@@ -477,13 +477,23 @@ Returns:
                                         language: str) -> OCRResult:
         """Extract text using Google Cloud Vision API"""
         try:
-            # Convert numpy array to bytes if needed
+            # Convert to base64 string if needed
             if isinstance(image_data, np.ndarray):
+                # NumPy array → PIL Image → bytes → base64
                 from PIL import Image
                 pil_image = Image.fromarray(image_data)
                 buffer = io.BytesIO()
                 pil_image.save(buffer, format='PNG')
                 image_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            elif isinstance(image_data, bytes):
+                # Raw bytes → base64 (THIS WAS MISSING!)
+                image_data = base64.b64encode(image_data).decode('utf-8')
+            elif isinstance(image_data, str) and not image_data.startswith('data:'):
+                # Already base64 string, use as is
+                pass
+            elif isinstance(image_data, str) and image_data.startswith('data:'):
+                # Data URL, extract base64 part
+                image_data = image_data.split(',')[1]
             
             # Choose detection type based on mode
             detection_type = "DOCUMENT_TEXT_DETECTION" if mode in ["document", "mrz"] else "TEXT_DETECTION"
