@@ -969,8 +969,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Advanced Analytics System testing completed successfully"
-    - "All new document validators tested and operational"
+    - "Comprehensive Document Validation System - Integration Testing"
+    - "Test POST /api/documents/upload with new validation"
+    - "Test GET /api/documents/analyze-all endpoint"
   stuck_tasks:
     - "None"
   test_all: false
