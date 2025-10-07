@@ -72,33 +72,45 @@ result = document_classifier.classify_document(
 
 ---
 
-### **2. GOOGLE CLOUD VISION OCR** ✅ **JÁ INTEGRADO**
-**Arquivo:** `/app/backend/pipeline/google_vision_ocr.py`  
-**Status:** ✅ Funcional com API key configurada  
+### **2. GOOGLE CLOUD DOCUMENT AI** ✅ **INTEGRADO (2025-01-07)**
+**Arquivo:** `/app/backend/pipeline/google_document_ai.py`  
+**Status:** ✅ Funcional e especializado para documentos de imigração  
 **API Key:** Configurada em `/app/backend/.env` como `GOOGLE_API_KEY`
 
 **O que faz:**
-- Extrai texto de imagens de documentos
+- **DOCUMENT_TEXT_DETECTION** - Mais preciso que OCR genérico para documentos
+- **LABEL_DETECTION** - Identifica tipo de documento automaticamente
+- **Extração de campos estruturados** - Por tipo de documento
+- **Extração de entidades** - Datas, números, emails, telefones
 - Suporta múltiplos idiomas (pt+en)
-- Retorna confiança do OCR
-- Modo 'document' para alta precisão
+
+**Tipos Especializados:**
+- Passaportes → Extrai MRZ, número, datas, nacionalidade
+- CNH/Driver License → Extrai número, validade, estado
+- Certidões → Extrai datas, nomes
+- I-797 → Extrai receipt number, notice type
+- Documentos fiscais → Extrai valores, datas
 
 **Como Usar:**
 ```python
-from pipeline.real_ocr_engine import real_ocr_engine
+from pipeline.google_document_ai import google_document_ai
 
-ocr_result = await real_ocr_engine.extract_text_from_image(
+result = await google_document_ai.process_document(
     image_data=file_content,
-    mode='document',
-    language='pt+en'
+    document_type='passport',  # ou driver_license, i797, etc.
+    language='pt'
 )
 
-# ocr_result.text → texto extraído
-# ocr_result.confidence → confiança (0-100)
-# ocr_result.engine → 'google_vision'
+# result.full_text → texto completo extraído
+# result.extracted_fields → campos estruturados por tipo
+# result.entities → entidades detectadas (datas, números)
+# result.confidence → confiança (0.0-1.0)
+# result.document_type → tipo identificado
 ```
 
-**❌ NUNCA usar dados simulados/fake quando há OCR real disponível!**
+**❌ NUNCA usar dados simulados/fake - Document AI é o método primário!**
+
+**Legacy:** `google_vision_ocr.py` e `real_ocr_engine.py` mantidos como fallback
 
 ---
 
