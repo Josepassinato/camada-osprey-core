@@ -1752,6 +1752,79 @@ async def get_validation_capabilities():
         "version": "5.0.0"
     }
 
+@api_router.get("/documents/analyze-all")
+async def analyze_all_documents(
+    visa_type: Optional[str] = None,
+    current_user = Depends(get_current_user)
+):
+    """
+    Análise final de todos os documentos do usuário
+    Retorna parecer se está satisfatório ou necessita mais documentos
+    """
+    try:
+        from document_validation_system import document_validation_system
+        
+        # Get all user documents
+        documents = await db.documents.find(
+            {"user_id": current_user["id"]}, 
+            {"_id": 0}
+        ).to_list(100)
+        
+        if not documents:
+            return {
+                "status": "no_documents",
+                "message": "Nenhum documento enviado ainda",
+                "final_verdict": "⚠️ NENHUM DOCUMENTO ENCONTRADO",
+                "recommendations": ["Comece enviando os documentos obrigatórios para seu tipo de visto."]
+            }
+        
+        # Get visa type from user's application if not provided
+        if not visa_type:
+            # Try to get from user's latest application
+            application = await db.auto_cases.find_one(
+                {"user_id": current_user["id"]},
+                sort=[("created_at", -1)]
+            )
+            if application and application.get('form_code'):
+                visa_type = application.get('form_code')
+            else:
+                visa_type = "H-1B"  # Default fallback
+        
+        # Get applicant data
+        applicant_data = {
+            "full_name": f"{current_user.get('first_name', '')} {current_user.get('last_name', '')}".strip(),
+            "email": current_user.get('email'),
+            "date_of_birth": current_user.get('date_of_birth')
+        }
+        
+        # Run comprehensive analysis
+        analysis = document_validation_system.analyze_all_documents(
+            documents=documents,
+            visa_type=visa_type,
+            applicant_data=applicant_data
+        )
+        
+        # Add user-friendly messages
+        analysis['user_friendly_status'] = {
+            'satisfactory': '✅ Sua documentação está completa e aprovada!',
+            'acceptable_with_warnings': '⚠️ Documentação aceitável, mas com algumas ressalvas.',
+            'incomplete': '📋 Documentação incompleta - faltam documentos obrigatórios.',
+            'requires_correction': '❌ Alguns documentos precisam ser corrigidos.'
+        }.get(analysis['status'], 'Status desconhecido')
+        
+        logger.info(f"✅ Document analysis completed for user {current_user['id']}: {analysis['status']}")
+        
+        return {
+            "status": "success",
+            "analysis": analysis,
+            "visa_type": visa_type,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error analyzing all documents: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error analyzing documents: {str(e)}")
+
 @api_router.post("/documents/validate-consistency")
 async def validate_multi_document_consistency(
     documents: List[Dict[str, Any]],
