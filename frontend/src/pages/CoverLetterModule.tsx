@@ -516,11 +516,11 @@ const CoverLetterModule: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                  <p className="text-yellow-800 font-medium mb-2">
+                <div className="bg-amber-50 p-4 rounded-lg border border-amber-300">
+                  <p className="text-amber-900 font-medium mb-2">
                     Confirmação Importante:
                   </p>
-                  <p className="text-yellow-700">
+                  <p className="text-amber-800">
                     Você confirma que estas informações são verdadeiras e fornecidas por você?
                   </p>
                 </div>
