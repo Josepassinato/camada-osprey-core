@@ -242,6 +242,7 @@ class AutoApplicationCase(BaseModel):
     session_token: Optional[str] = None  # For anonymous tracking
     form_code: Optional[USCISForm] = None
     status: CaseStatus = CaseStatus.created
+    is_anonymous: bool = True  # Default to anonymous
     
     # Basic Data
     basic_data: Optional[Dict[str, Any]] = None
