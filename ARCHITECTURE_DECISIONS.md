@@ -206,6 +206,11 @@ ocr_result = await real_ocr_engine.extract_text_from_image(
 
 **❌ NUNCA adicionar formulários USCIS na lista de upload manual!**
 
+**🐛 Bug Corrigido (2025-01-07):**
+- Removido "Formulário USCIS" da lista de documentos obrigatórios em DocumentUploadAuto.tsx
+- Estava na linha 298-307 em `generateDocumentRequirements()`
+- Agora formulários USCIS NÃO aparecem na lista de documentos para upload
+
 ---
 
 ### **7. SISTEMA DE SALVAMENTO** ✅ **FUNCIONANDO**
