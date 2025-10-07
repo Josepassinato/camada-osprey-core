@@ -7113,10 +7113,10 @@ MRZ extraction should work properly.
                                     dashboard_data = dashboard_response.json()
                                     auto_applications = dashboard_data.get("auto_applications", [])
                                     
-                                    # Find our case in dashboard
+                                    # Find our case in dashboard (dashboard uses 'id' field, not 'case_id')
                                     our_case = None
                                     for app in auto_applications:
-                                        if app.get("case_id") == case_id:
+                                        if app.get("case_id") == case_id or app.get("id") == case_id:
                                             our_case = app
                                             break
                                     
