@@ -137,14 +137,19 @@ const SaveAndContinueModal = ({
         localStorage.setItem('osprey_user', JSON.stringify(data.user));
         
         // Associate current case with user
-        await associateCaseWithUser(data.token);
-        
-        onSuccess(data.user);
-        toast({
-          title: "Conta criada com sucesso!",
-          description: "Sua aplicação foi salva em sua nova conta.",
-        });
-        onClose();
+        try {
+          await associateCaseWithUser(data.token);
+          
+          onSuccess(data.user);
+          toast({
+            title: "Conta criada com sucesso!",
+            description: "Sua aplicação foi salva em sua nova conta.",
+          });
+          onClose();
+        } catch (associateError) {
+          console.error('Association failed:', associateError);
+          setError('Conta criada, mas falhou ao salvar aplicação. Por favor, entre no Dashboard e continue sua aplicação.');
+        }
       } else {
         setError(data.message || 'Erro ao criar conta');
       }
