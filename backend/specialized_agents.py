@@ -368,6 +368,29 @@ class DocumentValidationAgent(BaseSpecializedAgent):
                 
                 logger.info(f"✅ OCR extraction completed: {len(extracted_text)} chars, confidence: {ocr_result.confidence if ocr_result else 0}%")
                 
+                # CRITICAL: Detect actual document type from extracted text
+                detected_doc_type = self._detect_document_type_from_text(extracted_text)
+                
+                # Check if detected type matches expected type
+                if detected_doc_type and detected_doc_type != expected_document_type:
+                    logger.warning(f"⚠️ DOCUMENT TYPE MISMATCH! Expected: {expected_document_type}, Detected: {detected_doc_type}")
+                    
+                    return self._create_fail_result(
+                        "TYPE_MISMATCH",
+                        [
+                            f"❌ ERRO CRÍTICO: Documento enviado não corresponde ao tipo esperado!",
+                            f"Esperado: {self._translate_doc_type(expected_document_type)}",
+                            f"Detectado: {self._translate_doc_type(detected_doc_type)}",
+                            f"Por favor, envie o documento correto."
+                        ],
+                        0.0,
+                        [
+                            f"Envie um {self._translate_doc_type(expected_document_type)} válido",
+                            "Verifique se está enviando o arquivo correto",
+                            "Certifique-se de que o documento está legível"
+                        ]
+                    )
+                
             except Exception as ocr_error:
                 logger.error(f"❌ OCR extraction failed: {str(ocr_error)}")
                 # Fallback to simulation only if OCR completely fails
