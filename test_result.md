@@ -5,6 +5,12 @@
 # THIS SECTION CONTAINS CRITICAL TESTING INSTRUCTIONS FOR BOTH AGENTS
 # BOTH MAIN_AGENT AND TESTING_AGENT MUST PRESERVE THIS ENTIRE BLOCK
 
+# ⚠️ CRITICAL: BEFORE IMPLEMENTING ANY FEATURE, ALWAYS READ:
+# 1. /app/ARCHITECTURE_DECISIONS.md - Existing implementations and decisions
+# 2. This file (test_result.md) - Testing history and results
+# 
+# This prevents reimplementing existing features and maintains consistency!
+
 # Communication Protocol:
 # If the `testing_agent` is available, main agent should delegate all testing tasks to it.
 #
