@@ -7696,21 +7696,21 @@ MRZ extraction should work properly.
 if __name__ == "__main__":
     tester = ComprehensiveEcosystemTester()
     
-    # Run the complete application save system test as requested
-    print("🚨 RUNNING COMPLETE APPLICATION SAVE SYSTEM TEST")
-    print("Testing complete flow: Create account → Start H-1B → Save data → Dashboard → Update → Verify")
+    # Run the new comprehensive document validation system tests as requested in review
+    print("🚨 RUNNING COMPREHENSIVE DOCUMENT VALIDATION SYSTEM TESTS")
+    print("Testing new features: Document Upload with Validation + Analyze All Documents")
     print("Backend URL:", API_BASE)
     print()
     
-    tester.test_complete_application_save_system()
+    tester.test_comprehensive_document_validation_system()
     
     # Print summary
     passed = len([r for r in tester.test_results if r["success"]])
     total = len(tester.test_results)
-    print(f"\n🎯 COMPLETE APPLICATION SAVE SYSTEM RESULTS: {passed}/{total} tests passed ({(passed/total)*100:.1f}%)")
+    print(f"\n🎯 COMPREHENSIVE DOCUMENT VALIDATION SYSTEM RESULTS: {passed}/{total} tests passed ({(passed/total)*100:.1f}%)")
     
     if passed == total:
-        print("🎉 ALL TESTS PASSED - APPLICATION SAVE SYSTEM WORKING PERFECTLY!")
+        print("🎉 ALL TESTS PASSED - DOCUMENT VALIDATION SYSTEM WORKING PERFECTLY!")
     else:
         print("❌ SOME TESTS FAILED - ISSUES DETECTED")
         failed_tests = [r["test"] for r in tester.test_results if not r["success"]]
