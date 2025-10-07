@@ -7223,11 +7223,14 @@ MRZ extraction should work properly.
                                                         if case_response.status_code == 200:
                                                             case_data = case_response.json()
                                                             
+                                                            # The GET endpoint returns {"case": {...}} format
+                                                            actual_case = case_data.get("case", case_data)
+                                                            
                                                             case_checks = {
-                                                                "all_data_present": bool(case_data.get("form_data")),
-                                                                "current_step_correct": case_data.get("current_step") == "friendly-form",
-                                                                "professional_info_present": bool(case_data.get("form_data", {}).get("professional_info")),
-                                                                "basic_info_present": bool(case_data.get("form_data", {}).get("basic_info"))
+                                                                "all_data_present": bool(actual_case.get("form_data")),
+                                                                "current_step_correct": actual_case.get("current_step") == "friendly-form",
+                                                                "professional_info_present": bool(actual_case.get("form_data", {}).get("professional_info")),
+                                                                "basic_info_present": bool(actual_case.get("form_data", {}).get("basic_info"))
                                                             }
                                                             
                                                             case_success = all(case_checks.values())
@@ -7237,9 +7240,10 @@ MRZ extraction should work properly.
                                                                 case_success,
                                                                 f"Case retrieval successful with all data - Checks: {case_checks}",
                                                                 {
-                                                                    "case_id": case_data.get("case_id"),
-                                                                    "form_data_keys": list(case_data.get("form_data", {}).keys()),
-                                                                    "current_step": case_data.get("current_step")
+                                                                    "case_id": actual_case.get("case_id"),
+                                                                    "form_data_keys": list(actual_case.get("form_data", {}).keys()),
+                                                                    "current_step": actual_case.get("current_step"),
+                                                                    "response_structure": list(case_data.keys())
                                                                 }
                                                             )
                                                             
