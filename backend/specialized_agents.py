@@ -343,30 +343,34 @@ class DocumentValidationAgent(BaseSpecializedAgent):
             # PHASE 2: Specialized Validation by Document Type
             specialized_validators = create_specialized_validators()
             
-            # Use REAL OCR extraction from pipeline
+            # Use GOOGLE DOCUMENT AI for specialized document processing
             try:
-                from pipeline.real_ocr_engine import real_ocr_engine
+                from pipeline.google_document_ai import google_document_ai
                 
-                # Extract text using real OCR
-                ocr_result = await real_ocr_engine.extract_text_from_image(
+                # Process document using Document AI (superior for immigration docs)
+                doc_ai_result = await google_document_ai.process_document(
                     image_data=file_content,
-                    mode='document',
-                    language='pt+en'
+                    document_type=expected_document_type,
+                    language='pt'
                 )
                 
-                extracted_text = ocr_result.text if ocr_result else ""
+                extracted_text = doc_ai_result.full_text
+                extracted_fields = doc_ai_result.extracted_fields
                 
-                # Use the extracted text to identify document type
+                # Use the extracted text and structured data
                 extracted_data = {
                     'file_name': file_name,
                     'file_size': len(file_content),
                     'doc_type': expected_document_type,
                     'extracted_text': extracted_text,
-                    'ocr_confidence': ocr_result.confidence if ocr_result else 0.0,
-                    'ocr_engine': ocr_result.engine if ocr_result else 'none'
+                    'extracted_fields': extracted_fields,
+                    'entities': doc_ai_result.entities,
+                    'ocr_confidence': doc_ai_result.confidence * 100,
+                    'ocr_engine': 'google_document_ai',
+                    'processing_time': doc_ai_result.processing_time
                 }
                 
-                logger.info(f"✅ OCR extraction completed: {len(extracted_text)} chars, confidence: {ocr_result.confidence if ocr_result else 0}%")
+                logger.info(f"✅ Document AI extraction: {len(extracted_text)} chars, {len(extracted_fields)} fields, confidence: {doc_ai_result.confidence*100:.1f}%")
                 
                 # CRITICAL: Detect actual document type using trained classifier
                 detected_doc_type = self._detect_document_type_from_text(extracted_text, file_name)
