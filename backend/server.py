@@ -2235,7 +2235,7 @@ async def patch_case_data(case_id: str, update_data: dict, current_user = Depend
         allowed_fields = [
             "status", "basic_data", "user_story_text", "simplified_form_responses", 
             "progress_percentage", "current_step", "documents", "extracted_facts",
-            "official_form_data", "ai_generated_uscis_form"
+            "official_form_data", "ai_generated_uscis_form", "form_data"
         ]
         
         for field in allowed_fields:
