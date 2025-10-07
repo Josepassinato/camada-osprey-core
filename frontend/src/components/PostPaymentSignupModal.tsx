@@ -110,15 +110,17 @@ const PostPaymentSignupModal = ({
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/register`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: signupData.name,
+          first_name: signupData.name.split(' ')[0] || signupData.name,
+          last_name: signupData.name.split(' ').slice(1).join(' ') || '',
           email: signupData.email,
-          password: signupData.password
+          password: signupData.password,
+          phone: ''
         }),
       });
 
