@@ -7139,13 +7139,13 @@ MRZ extraction should work properly.
                                             f"Dashboard shows application correctly - Checks: {dashboard_checks}",
                                             {
                                                 "case_found": True,
-                                                "case_id": our_case.get("case_id"),
+                                                "case_id": our_case.get("case_id") or our_case.get("id"),
                                                 "form_code": our_case.get("form_code"),
                                                 "current_step": our_case.get("current_step"),
                                                 "progress_percentage": our_case.get("progress_percentage"),
                                                 "status": our_case.get("status"),
-                                                "user_id": our_case.get("user_id"),
-                                                "is_anonymous": our_case.get("is_anonymous")
+                                                "type": our_case.get("type"),
+                                                "title": our_case.get("title")
                                             }
                                         )
                                         
