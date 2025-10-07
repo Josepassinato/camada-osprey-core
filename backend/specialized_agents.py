@@ -368,8 +368,8 @@ class DocumentValidationAgent(BaseSpecializedAgent):
                 
                 logger.info(f"✅ OCR extraction completed: {len(extracted_text)} chars, confidence: {ocr_result.confidence if ocr_result else 0}%")
                 
-                # CRITICAL: Detect actual document type from extracted text
-                detected_doc_type = self._detect_document_type_from_text(extracted_text)
+                # CRITICAL: Detect actual document type using trained classifier
+                detected_doc_type = self._detect_document_type_from_text(extracted_text, file_name)
                 
                 # Check if detected type matches expected type
                 if detected_doc_type and detected_doc_type != expected_document_type:
