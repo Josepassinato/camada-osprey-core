@@ -709,15 +709,30 @@ frontend:
 
   - task: "Comprehensive Document Validation System - Upload Integration"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "✅ COMPREHENSIVE VALIDATION INTEGRATED INTO UPLOAD: Successfully integrated document_validation_system into POST /api/documents/upload endpoint. After AI analysis (Dr. Miguel + OCR), system now runs comprehensive validation checking: 1) Legibility (min 50 chars, 60% OCR confidence), 2) Expiry dates (with minimum validity months per doc type), 3) Required fields (per document type), 4) Name matching (applicant name vs document). Validation result stored in document.validation_result with detailed errors/warnings. Status automatically set to requires_improvement if validation fails. ALL existing functionality preserved (A/B testing, pipeline, Dr. Miguel, Policy Engine). Ready for testing to verify integration works correctly."
+      - working: true
+        agent: "testing"
+        comment: "✅ DOCUMENT UPLOAD WITH VALIDATION WORKING PERFECTLY: Comprehensive testing completed with 100% success rate. 1) ✅ Valid Document Upload - POST /api/documents/upload successfully processes passport documents with comprehensive validation integration, returns proper response structure (message, document_id, filename, status), AI analysis completed successfully, 2) ✅ Legibility Check Integration - System properly handles documents with insufficient text (<50 chars), uploads succeed but validation flags legibility issues as designed, 3) ✅ Database Storage Verified - validation_result properly stored in MongoDB documents collection, document IDs generated correctly, 4) ✅ Existing Functionality Preserved - Dr. Miguel validation still working, A/B testing system operational, Policy Engine integration maintained, OCR processing functional. NEW VALIDATION SYSTEM: Validates legibility (text length + OCR confidence), expiry dates (with minimum validity requirements), required fields (per document type), name matching (applicant vs document). All tests passed - system ready for production."
+
+  - task: "Comprehensive Document Validation System - Analyze All Endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ ANALYZE ALL DOCUMENTS ENDPOINT WORKING EXCELLENTLY: New GET /api/documents/analyze-all endpoint fully functional with comprehensive document analysis capabilities. 1) ✅ Endpoint Structure Perfect - Returns proper JSON structure with status, analysis, visa_type, timestamp fields as specified, 2) ✅ Multi-Visa Support - Successfully tested H-1B, F-1, B-1/B-2 visa types, each returning correct visa-specific analysis, 3) ✅ Comprehensive Analysis Fields - All expected fields present: status, completeness_score, total_documents, valid_documents, invalid_documents, warnings, required_documents, missing_required, recommendations, final_verdict, 4) ✅ Document Processing - Correctly processes existing user documents (18+ documents detected), provides detailed analysis with completeness scores (0.75), identifies missing required documents (education_transcript), generates actionable recommendations, 5) ✅ Integration Working - Upload-Analyze integration confirmed: documents uploaded via /api/documents/upload are immediately reflected in analyze-all results, real-time document count updates working. FINAL VERDICT: ❌ NECESSITA CORREÇÕES properly displayed when documents need attention. System provides comprehensive document portfolio analysis for visa applications."
 
   - task: "Comprehensive Document Validation System - Analyze All Endpoint"
     implemented: true
