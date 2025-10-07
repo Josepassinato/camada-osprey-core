@@ -259,6 +259,7 @@ class AutoApplicationCase(BaseModel):
     # Form Data
     simplified_form_responses: Optional[Dict[str, Any]] = None
     official_form_data: Optional[Dict[str, Any]] = None
+    form_data: Optional[Dict[str, Any]] = None  # For flexible form data storage
     
     # Payment & Final
     payment_status: Optional[str] = None
