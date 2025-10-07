@@ -343,10 +343,37 @@ class DocumentValidationAgent(BaseSpecializedAgent):
             # PHASE 2: Specialized Validation by Document Type
             specialized_validators = create_specialized_validators()
             
-            # Simulate OCR extraction for now (would be real OCR in production)
-            extracted_data = await self._extract_document_data_simulation(
-                file_content, expected_document_type, file_name
-            )
+            # Use REAL OCR extraction from pipeline
+            try:
+                from pipeline.real_ocr_engine import real_ocr_engine
+                
+                # Extract text using real OCR
+                ocr_result = await real_ocr_engine.extract_text_from_image(
+                    image_data=file_content,
+                    mode='document',
+                    language='pt+en'
+                )
+                
+                extracted_text = ocr_result.text if ocr_result else ""
+                
+                # Use the extracted text to identify document type
+                extracted_data = {
+                    'file_name': file_name,
+                    'file_size': len(file_content),
+                    'doc_type': expected_document_type,
+                    'extracted_text': extracted_text,
+                    'ocr_confidence': ocr_result.confidence if ocr_result else 0.0,
+                    'ocr_engine': ocr_result.engine if ocr_result else 'none'
+                }
+                
+                logger.info(f"✅ OCR extraction completed: {len(extracted_text)} chars, confidence: {ocr_result.confidence if ocr_result else 0}%")
+                
+            except Exception as ocr_error:
+                logger.error(f"❌ OCR extraction failed: {str(ocr_error)}")
+                # Fallback to simulation only if OCR completely fails
+                extracted_data = await self._extract_document_data_simulation(
+                    file_content, expected_document_type, file_name
+                )
             
             # PHASE 3: Document-specific validation
             validation_result = None
