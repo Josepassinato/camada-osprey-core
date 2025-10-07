@@ -603,36 +603,51 @@ class DocumentValidationAgent(BaseSpecializedAgent):
             "agent": "Dr. Miguel - Sistema de Alta Precisão v2.0"
         }
     
-    def _detect_document_type_from_text(self, text: str) -> str:
-        """Detecta o tipo de documento baseado no texto extraído"""
-        text_lower = text.lower()
-        
-        # Passport indicators
-        passport_keywords = ['passport', 'passaporte', 'república federativa', 'mrz', 'p<bra', 'nationality']
-        if any(keyword in text_lower for keyword in passport_keywords):
-            return 'passport'
-        
-        # Driver License indicators
-        license_keywords = ['carteira nacional de habilitação', 'cnh', 'detran', 'driver license', 'válida até', 'categoria']
-        if any(keyword in text_lower for keyword in license_keywords):
-            return 'driver_license'
-        
-        # I-797 indicators
-        i797_keywords = ['i-797', 'uscis', 'receipt number', 'notice type', 'petitioner']
-        if any(keyword in text_lower for keyword in i797_keywords):
-            return 'i797'
-        
-        # Birth Certificate indicators
-        birth_keywords = ['certidão de nascimento', 'birth certificate', 'registro civil', 'cartório']
-        if any(keyword in text_lower for keyword in birth_keywords):
-            return 'birth_certificate'
-        
-        # Marriage Certificate indicators
-        marriage_keywords = ['certidão de casamento', 'marriage certificate', 'matrimônio']
-        if any(keyword in text_lower for keyword in marriage_keywords):
-            return 'marriage_certificate'
-        
-        return None  # Unknown type
+    def _detect_document_type_from_text(self, text: str, filename: str = '') -> str:
+        """
+        Detecta o tipo de documento usando o classificador treinado
+        Usa o DocumentClassifier que foi treinado para identificar múltiplos tipos
+        """
+        try:
+            from document_classifier import document_classifier
+            
+            # Usa o classificador treinado
+            classification = document_classifier.classify_document(
+                text_content=text,
+                filename=filename,
+                file_size=len(text)
+            )
+            
+            if classification['confidence'] >= 0.6:  # Threshold mínimo
+                detected_type = classification['document_type']
+                
+                # Mapeia tipos do classificador para tipos esperados
+                type_mapping = {
+                    'PASSPORT_ID_PAGE': 'passport',
+                    'BIRTH_CERTIFICATE': 'birth_certificate',
+                    'MARRIAGE_CERT': 'marriage_certificate',
+                    'I797_NOTICE': 'i797',
+                    'I94_RECORD': 'i94_record',
+                    'DEGREE_CERTIFICATE': 'education_diploma',
+                    'EMPLOYMENT_OFFER_LETTER': 'employment_letter',
+                    'PAY_STUB': 'pay_stub',
+                    'BANK_STATEMENT': 'bank_statement',
+                    'TAX_RETURN': 'tax_return',
+                    'DRIVER_LICENSE': 'driver_license'
+                }
+                
+                mapped_type = type_mapping.get(detected_type, None)
+                
+                logger.info(f"✅ Document classified: {detected_type} → {mapped_type} (confidence: {classification['confidence']})")
+                
+                return mapped_type
+            else:
+                logger.warning(f"⚠️ Low confidence classification: {classification['confidence']}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"❌ Classification failed: {str(e)}")
+            return None
     
     def _translate_doc_type(self, doc_type: str) -> str:
         """Traduz tipo de documento para português"""
