@@ -557,17 +557,62 @@ class DocumentValidationAgent(BaseSpecializedAgent):
             document_metrics = DocumentAnalysisKPIs()
             document_metrics.metrics_history.append(metrics)
             
-            # PHASE 8: Generate comprehensive response
+            # PHASE 8: Generate comprehensive response with SPECIFIC validation messages
+            all_issues = []
+            all_recommendations = []
+            
+            # Add validation issues
+            all_issues.extend(validation_result.get('issues', []))
+            all_issues.extend(quality_result.get('issues', []))
+            all_recommendations.extend(validation_result.get('recommendations', []))
+            all_recommendations.extend(quality_result.get('recommendations', []))
+            
+            # **CRITICAL USER-FRIENDLY VALIDATIONS**
+            
+            # 1. Check document type mismatch (using classifier confidence)
+            detected_doc_type = validation_result.get('document_type', expected_document_type)
+            if detected_doc_type != expected_document_type:
+                all_issues.append(f"❌ TIPO DE DOCUMENTO INCORRETO: Detectado '{detected_doc_type}', mas esperado '{expected_document_type}'")
+                all_recommendations.append(f"Por favor, envie um documento do tipo '{expected_document_type}' válido")
+            
+            # 2. Check name mismatch (if names are in extracted_data)
+            if 'extracted_fields' in extracted_data and applicant_name and applicant_name != 'Usuário':
+                doc_name = None
+                # Try to find name in various field names
+                for field_name in ['full_name', 'name', 'holder_name', 'applicant_name']:
+                    if field_name in extracted_data.get('extracted_fields', {}):
+                        field_data = extracted_data['extracted_fields'][field_name]
+                        if isinstance(field_data, dict):
+                            doc_name = field_data.get('value', '')
+                        else:
+                            doc_name = str(field_data)
+                        break
+                
+                if doc_name and doc_name.strip():
+                    # Simple name comparison (case insensitive, ignore accents)
+                    import unicodedata
+                    def normalize_name(name):
+                        # Remove accents and convert to lowercase
+                        return ''.join(c for c in unicodedata.normalize('NFD', name.lower()) if unicodedata.category(c) != 'Mn')
+                    
+                    applicant_normalized = normalize_name(applicant_name)
+                    doc_normalized = normalize_name(doc_name)
+                    
+                    # Check if names are significantly different (not substring match)
+                    if applicant_normalized not in doc_normalized and doc_normalized not in applicant_normalized:
+                        all_issues.append(f"❌ NOME NÃO CORRESPONDE: Documento em nome de '{doc_name}', mas aplicante é '{applicant_name}'")
+                        all_recommendations.append("Verifique se está enviando o documento correto com seu nome")
+            
             return {
-                "valid": decision == DecisionType.PASS,
-                "verdict": decision.value,
+                "valid": decision == DecisionType.PASS and len(all_issues) == 0,
+                "verdict": decision.value if len(all_issues) == 0 else "FAIL",
                 "confidence_score": final_confidence,
-                "document_type_identified": validation_result.get('document_type', expected_document_type),
-                "type_matches_expected": expected_document_type == validation_result.get('document_type', expected_document_type),
+                "document_type_identified": detected_doc_type,
+                "type_matches_expected": detected_doc_type == expected_document_type,
                 "quality_acceptable": quality_result['status'] in ['ok', 'alert'],
-                "uscis_acceptable": uscis_acceptable,
-                "issues": validation_result.get('issues', []) + quality_result.get('issues', []),
-                "recommendations": validation_result.get('recommendations', []) + quality_result.get('recommendations', []),
+                "uscis_acceptable": uscis_acceptable and len(all_issues) == 0,
+                "issues": all_issues,
+                "recommendations": all_recommendations,
                 "detailed_analysis": {
                     "quality_assessment": quality_result,
                     "validation_results": validation_result,
