@@ -553,9 +553,12 @@ class DocumentValidationAgent(BaseSpecializedAgent):
             all_recommendations.extend(quality_result.get('recommendations', []))
             
             # **CRITICAL USER-FRIENDLY VALIDATIONS**
+            logger.info(f"🔍 Starting user-friendly validations for {expected_document_type}")
             
             # 1. Check document type mismatch (using detected type from Google Document AI)
             detected_doc_type = extracted_data.get('detected_document_type', validation_result.get('document_type', expected_document_type))
+            logger.info(f"🔍 Detected type: {detected_doc_type}, Expected: {expected_document_type}")
+            
             if detected_doc_type != expected_document_type:
                 expected_translated = self._translate_doc_type(expected_document_type)
                 detected_translated = self._translate_doc_type(detected_doc_type)
