@@ -6351,13 +6351,19 @@ async def analyze_document_with_real_ai(
                     logger.debug(f"Could not parse date: {expiry_date_str} - {date_error}")
             
             # Update analysis result with validations
+            logger.info(f"🔍 FINAL VALIDATION RESULT: {len(validation_issues)} issues found")
             if validation_issues:
+                for i, issue in enumerate(validation_issues):
+                    logger.info(f"   Issue {i+1}: {issue}")
+                
                 analysis_result["issues"].extend(validation_issues)
                 analysis_result["valid"] = False
                 analysis_result["completeness"] = 0
                 analysis_result["dra_paula_assessment"] = f"❌ DOCUMENTO COM PROBLEMAS: {len(validation_issues)} erro(s) detectado(s)"
+                logger.info(f"✅ Updated analysis_result with {len(validation_issues)} issues")
             else:
                 analysis_result["dra_paula_assessment"] = f"✅ DOCUMENTO VALIDADO: Tipo correto, dados consistentes"
+                logger.info("✅ No validation issues found")
             
             # Add extraction data
             analysis_result["extracted_data"].update({
