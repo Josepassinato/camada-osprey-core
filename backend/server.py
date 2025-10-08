@@ -6231,14 +6231,18 @@ async def analyze_document_with_real_ai(
             logger.info(f"🔬 Iniciando validação com Google Document AI + lógica para {document_type}")
             
             # Import Google Document AI
-            from pipeline.google_document_ai import GoogleDocumentAIProcessor
+            from pipeline.google_document_ai import GoogleDocumentAI
             from dateutil import parser as date_parser
             import unicodedata
             
-            google_ai = GoogleDocumentAIProcessor()
+            google_ai = GoogleDocumentAI()
             
             # Extract data with Google Document AI
-            ocr_result = await google_ai.process_document(file_content, file.filename)
+            ocr_result = await google_ai.process_document(
+                file_content=file_content,
+                filename=file.filename,
+                doc_type=document_type
+            )
             
             # Get extracted data
             extracted_text = ocr_result.get('text', '')
