@@ -6249,10 +6249,20 @@ async def analyze_document_with_real_ai(
                 analysis_result["enhanced_analysis"] = enhanced_result
                 analysis_result["completeness"] = enhanced_result.get("confidence_score", analysis_result["completeness"])
                 
+                # **CRITICAL**: Add validation issues to be displayed in frontend
+                validation_issues = enhanced_result.get("issues", [])
+                if validation_issues:
+                    analysis_result["issues"].extend(validation_issues)
+                    analysis_result["valid"] = False  # Mark as invalid if there are issues
+                
                 # Combine assessments
                 dr_miguel_assessment = enhanced_result.get("verdict", "")
                 if dr_miguel_assessment and "Policy Engine" not in analysis_result["dra_paula_assessment"]:
                     analysis_result["dra_paula_assessment"] += f" | Dr. Miguel: {dr_miguel_assessment}"
+                
+                # Update completeness to 0 if validation failed
+                if not enhanced_result.get("valid", True):
+                    analysis_result["completeness"] = 0
             
             # Return combined analysis result (Policy Engine + Dr. Miguel)
             return analysis_result
