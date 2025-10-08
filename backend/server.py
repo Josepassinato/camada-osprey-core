@@ -6310,7 +6310,11 @@ async def analyze_document_with_real_ai(
             
             for field_name in ['expiration_date', 'expiry_date', 'valid_until', 'validade']:
                 if field_name in extracted_fields:
-                    expiry_date_str = extracted_fields[field_name].get('mentionText', '')
+                    field_value = extracted_fields[field_name]
+                    if isinstance(field_value, dict):
+                        expiry_date_str = field_value.get('mentionText', '') or field_value.get('value', '')
+                    else:
+                        expiry_date_str = str(field_value)
                     if expiry_date_str:
                         break
             
