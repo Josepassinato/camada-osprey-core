@@ -556,11 +556,13 @@ class DocumentValidationAgent(BaseSpecializedAgent):
             
             # **CRITICAL USER-FRIENDLY VALIDATIONS**
             
-            # 1. Check document type mismatch (using classifier confidence)
-            detected_doc_type = validation_result.get('document_type', expected_document_type)
+            # 1. Check document type mismatch (using detected type from Google Document AI)
+            detected_doc_type = extracted_data.get('detected_document_type', validation_result.get('document_type', expected_document_type))
             if detected_doc_type != expected_document_type:
-                all_issues.append(f"❌ TIPO DE DOCUMENTO INCORRETO: Detectado '{detected_doc_type}', mas esperado '{expected_document_type}'")
-                all_recommendations.append(f"Por favor, envie um documento do tipo '{expected_document_type}' válido")
+                expected_translated = self._translate_doc_type(expected_document_type)
+                detected_translated = self._translate_doc_type(detected_doc_type)
+                all_issues.append(f"❌ TIPO DE DOCUMENTO INCORRETO: Detectado '{detected_translated}', mas esperado '{expected_translated}'")
+                all_recommendations.append(f"Por favor, envie um documento do tipo '{expected_translated}' válido")
             
             # 2. Check name mismatch (if names are in extracted_data)
             if 'extracted_fields' in extracted_data and applicant_name and applicant_name != 'Usuário':
