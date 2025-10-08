@@ -570,6 +570,8 @@ class DocumentValidationAgent(BaseSpecializedAgent):
                 
         except Exception as e:
             logger.error(f"Erro na validação de alta precisão: {str(e)}")
+            import traceback
+            logger.error(f"Traceback completo: {traceback.format_exc()}")
             
             # Calculate processing time even on error
             processing_time = (datetime.utcnow() - start_time).total_seconds() * 1000
