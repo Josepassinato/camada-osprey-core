@@ -496,7 +496,19 @@ class DocumentValidationAgent(BaseSpecializedAgent):
             processing_time = (datetime.utcnow() - start_time).total_seconds() * 1000
             
             # PHASE 6: Final Decision with KPI Tracking
-            final_confidence = validation_result.get('overall_confidence', 0)
+            # Ensure validation_result is a dict (not a string or other type)
+            if not isinstance(validation_result, dict):
+                logger.warning(f"⚠️ validation_result is not a dict, it's {type(validation_result)}. Converting to dict.")
+                validation_result = {
+                    'overall_confidence': 0,
+                    'is_valid': False,
+                    'uscis_acceptable': False,
+                    'document_type': expected_document_type,
+                    'issues': [f"Invalid validation result type: {type(validation_result)}"],
+                    'recommendations': ['Please try uploading the document again']
+                }
+            
+            final_confidence = validation_result.get('overall_confidence', final_confidence)  # Keep previous confidence if not provided
             is_valid = validation_result.get('is_valid', False)
             uscis_acceptable = validation_result.get('uscis_acceptable', False)
             
