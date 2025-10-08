@@ -441,21 +441,37 @@ class I797Validator:
             extracted_data.get('valid_to', ''), 'valid_to'
         )
         
+        # Convert ValidationResult objects to dicts for serialization
+        serialized_results = {}
+        for key, value in results.items():
+            if isinstance(value, ValidationResult):
+                serialized_results[key] = {
+                    'field_name': value.field_name,
+                    'is_valid': value.is_valid,
+                    'confidence': value.confidence,
+                    'extracted_value': value.extracted_value,
+                    'normalized_value': value.normalized_value,
+                    'issues': value.issues,
+                    'recommendations': value.recommendations
+                }
+            else:
+                serialized_results[key] = value
+        
         # Calculate overall confidence
-        valid_fields = sum(1 for r in results.values() if (isinstance(r, dict) and r.get('is_valid', False)) or (hasattr(r, 'is_valid') and r.is_valid))
-        total_fields = len(results)
-        overall_confidence = (valid_fields / total_fields) * 100
+        valid_fields = sum(1 for r in serialized_results.values() if isinstance(r, dict) and r.get('is_valid', False))
+        total_fields = len(serialized_results)
+        overall_confidence = (valid_fields / total_fields) * 100 if total_fields > 0 else 0
         
         # Critical requirements check
         critical_fields = ['receipt_number', 'notice_type', 'beneficiary']
         critical_valid = all(
-            field in results and ((isinstance(results[field], dict) and results[field].get('is_valid', False)) or (hasattr(results[field], 'is_valid') and results[field].is_valid))
+            field in serialized_results and serialized_results[field].get('is_valid', False)
             for field in critical_fields
         )
         
         return {
             'document_type': 'i797',
-            'validation_results': results,
+            'validation_results': serialized_results,
             'overall_confidence': overall_confidence,
             'is_valid': critical_valid and overall_confidence >= 70,
             'critical_fields_valid': critical_valid,
