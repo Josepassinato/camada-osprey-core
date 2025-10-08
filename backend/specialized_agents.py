@@ -326,6 +326,7 @@ class DocumentValidationAgent(BaseSpecializedAgent):
         """
         
         start_time = datetime.utcnow()
+        final_confidence = 50.0  # Initialize confidence at the very beginning
         
         try:
             # PHASE 1: Quality Assessment
