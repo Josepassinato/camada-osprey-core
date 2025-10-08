@@ -6272,6 +6272,9 @@ async def analyze_document_with_real_ai(
                         applicant_name = f"{first_name} {last_name}"
             
             # VALIDATION 1: Document Type Check
+            logger.info(f"🔍 VALIDATION 1: Checking document type...")
+            logger.info(f"   → Detected: '{detected_type}' | Expected: '{document_type}'")
+            
             if detected_type and detected_type.lower() != document_type.lower():
                 doc_type_map = {
                     'driver_license': 'CNH',
@@ -6281,8 +6284,11 @@ async def analyze_document_with_real_ai(
                 }
                 detected_name = doc_type_map.get(detected_type.lower(), detected_type)
                 expected_name = doc_type_map.get(document_type.lower(), document_type)
-                validation_issues.append(f"❌ TIPO DE DOCUMENTO INCORRETO: Detectado '{detected_name}', mas esperado '{expected_name}'")
-                logger.warning(f"⚠️ Type mismatch: {detected_type} vs {document_type}")
+                issue_msg = f"❌ TIPO DE DOCUMENTO INCORRETO: Detectado '{detected_name}', mas esperado '{expected_name}'"
+                validation_issues.append(issue_msg)
+                logger.warning(f"⚠️ Type mismatch detected! Added issue: {issue_msg}")
+            else:
+                logger.info(f"✅ Type validation passed: {detected_type} == {document_type}")
             
             # VALIDATION 2: Name Check
             doc_name = None
