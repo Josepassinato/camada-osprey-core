@@ -430,6 +430,17 @@ class DocumentValidationAgent(BaseSpecializedAgent):
                     applicant_name=applicant_name
                 )
                 
+                # Ensure enhanced_result is a dict (safety check)
+                if not isinstance(enhanced_result, dict):
+                    logger.warning(f"⚠️ enhanced_result is not a dict, it's {type(enhanced_result)}. Converting.")
+                    enhanced_result = {
+                        'verdict': 'ERRO',
+                        'overall_confidence': 0,
+                        'type_matches_expected': False,
+                        'extracted_data': {},
+                        'issues': [f"Invalid result type: {type(enhanced_result)}"]
+                    }
+                
                 validation_result = {
                     'document_type': expected_document_type,
                     'is_valid': enhanced_result.get('verdict') == 'APROVADO',
