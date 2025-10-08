@@ -6244,11 +6244,11 @@ async def analyze_document_with_real_ai(
                 language='pt'  # Portuguese for Brazilian documents
             )
             
-            # Get extracted data
-            extracted_text = ocr_result.get('text', '')
-            extracted_fields = ocr_result.get('entities', {})
-            detected_type = ocr_result.get('document_type', document_type)
-            confidence = ocr_result.get('confidence', 0.0)
+            # Get extracted data (DocumentAIResult is a dataclass)
+            extracted_text = ocr_result.full_text if hasattr(ocr_result, 'full_text') else ''
+            extracted_fields = ocr_result.extracted_fields if hasattr(ocr_result, 'extracted_fields') else {}
+            detected_type = ocr_result.document_type if hasattr(ocr_result, 'document_type') else document_type
+            confidence = ocr_result.confidence if hasattr(ocr_result, 'confidence') else 0.0
             
             logger.info(f"✅ Google Document AI extraction complete - Type: {detected_type}, Confidence: {confidence}")
             
