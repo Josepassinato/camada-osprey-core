@@ -6250,7 +6250,12 @@ async def analyze_document_with_real_ai(
             detected_type = ocr_result.document_type if hasattr(ocr_result, 'document_type') else document_type
             confidence = ocr_result.confidence if hasattr(ocr_result, 'confidence') else 0.0
             
-            logger.info(f"✅ Google Document AI extraction complete - Type: {detected_type}, Confidence: {confidence}")
+            logger.info(f"✅ Google Document AI extraction complete")
+            logger.info(f"   → Detected Type: {detected_type}")
+            logger.info(f"   → Expected Type: {document_type}")
+            logger.info(f"   → Confidence: {confidence}")
+            logger.info(f"   → Extracted Text Length: {len(extracted_text)}")
+            logger.info(f"   → Extracted Fields: {list(extracted_fields.keys())}")
             
             # **LOGICAL VALIDATIONS** (NO AI needed!)
             validation_issues = []
