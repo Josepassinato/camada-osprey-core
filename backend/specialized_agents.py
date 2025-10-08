@@ -456,7 +456,12 @@ class DocumentValidationAgent(BaseSpecializedAgent):
             
             if 'extracted_fields' in extracted_data:
                 for field_name, field_data in extracted_data['extracted_fields'].items():
-                    field_value = field_data.get('value', '')
+                    # Handle both dict and string field_data
+                    if isinstance(field_data, dict):
+                        field_value = field_data.get('value', '')
+                    else:
+                        # field_data is already the value (string)
+                        field_value = str(field_data)
                     
                     # Use os validadores de alta precisão
                     field_validation_result = enhance_field_validation(
