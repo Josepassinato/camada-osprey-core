@@ -6226,53 +6226,137 @@ async def analyze_document_with_real_ai(
             logger.error(f"❌ Policy Engine FASE 1 error: {e}")
             analysis_result["policy_engine_error"] = str(e)
         
-        # Use Dr. Miguel ENHANCED SYSTEM for additional analysis (optional)
-        dr_miguel = DocumentValidationAgent()
-        
+        # FASE 2: GOOGLE DOCUMENT AI + LOGICAL VALIDATIONS (NO OpenAI!)
         try:
-            logger.info(f"🔬 Iniciando análise aprimorada Dr. Miguel para {document_type}")
+            logger.info(f"🔬 Iniciando validação com Google Document AI + lógica para {document_type}")
             
-            # Try the new enhanced validation system
-            enhanced_result = await dr_miguel.validate_document_enhanced(
-                file_content=file_content,
-                file_name=file.filename or f"document_{document_type}.{file.content_type.split('/')[-1]}",
-                expected_document_type=document_type,
-                visa_type=visa_type,
-                applicant_name='Usuário'  # Will be replaced with actual name when available
-            )
+            # Import Google Document AI
+            from pipeline.google_document_ai import GoogleDocumentAIProcessor
+            from dateutil import parser as date_parser
+            import unicodedata
             
-            logger.info(f"✅ Análise aprimorada Dr. Miguel concluída: {enhanced_result.get('verdict', 'PROCESSADO')}")
+            google_ai = GoogleDocumentAIProcessor()
             
-            # Merge enhanced results with Policy Engine results
-            if enhanced_result and isinstance(enhanced_result, dict):
-                # Update analysis result with enhanced data while preserving Policy Engine data
-                analysis_result["enhanced_analysis"] = enhanced_result
-                analysis_result["completeness"] = enhanced_result.get("confidence_score", analysis_result["completeness"])
+            # Extract data with Google Document AI
+            ocr_result = await google_ai.process_document(file_content, file.filename)
+            
+            # Get extracted data
+            extracted_text = ocr_result.get('text', '')
+            extracted_fields = ocr_result.get('entities', {})
+            detected_type = ocr_result.get('document_type', document_type)
+            confidence = ocr_result.get('confidence', 0.0)
+            
+            logger.info(f"✅ Google Document AI extraction complete - Type: {detected_type}, Confidence: {confidence}")
+            
+            # **LOGICAL VALIDATIONS** (NO AI needed!)
+            validation_issues = []
+            
+            # Get applicant name from case if available
+            applicant_name = "Carlos Eduardo Silva"  # Default - will be replaced with actual user data
+            if case_id:
+                case_doc = await db.auto_cases.find_one({"case_id": case_id})
+                if case_doc and case_doc.get('basic_data'):
+                    basic_data = case_doc['basic_data']
+                    first_name = basic_data.get('firstName', '')
+                    last_name = basic_data.get('lastName', '')
+                    if first_name and last_name:
+                        applicant_name = f"{first_name} {last_name}"
+            
+            # VALIDATION 1: Document Type Check
+            if detected_type and detected_type.lower() != document_type.lower():
+                doc_type_map = {
+                    'driver_license': 'CNH',
+                    'passport': 'Passaporte',
+                    'birth_certificate': 'Certidão de Nascimento',
+                    'id_card': 'RG/Identidade'
+                }
+                detected_name = doc_type_map.get(detected_type.lower(), detected_type)
+                expected_name = doc_type_map.get(document_type.lower(), document_type)
+                validation_issues.append(f"❌ TIPO DE DOCUMENTO INCORRETO: Detectado '{detected_name}', mas esperado '{expected_name}'")
+                logger.warning(f"⚠️ Type mismatch: {detected_type} vs {document_type}")
+            
+            # VALIDATION 2: Name Check
+            doc_name = None
+            for field_name in ['name', 'full_name', 'holder_name', 'given_names', 'surname']:
+                if field_name in extracted_fields:
+                    doc_name = extracted_fields[field_name].get('mentionText', '')
+                    if doc_name:
+                        break
+            
+            if doc_name and applicant_name and applicant_name != "Carlos Eduardo Silva":
+                # Normalize names for comparison (remove accents, lowercase)
+                def normalize_name(name):
+                    return ''.join(c for c in unicodedata.normalize('NFD', name.lower()) if unicodedata.category(c) != 'Mn')
                 
-                # **CRITICAL**: Add validation issues to be displayed in frontend
-                validation_issues = enhanced_result.get("issues", [])
-                if validation_issues:
-                    analysis_result["issues"].extend(validation_issues)
-                    analysis_result["valid"] = False  # Mark as invalid if there are issues
+                applicant_norm = normalize_name(applicant_name)
+                doc_norm = normalize_name(doc_name)
                 
-                # Combine assessments
-                dr_miguel_assessment = enhanced_result.get("verdict", "")
-                if dr_miguel_assessment and "Policy Engine" not in analysis_result["dra_paula_assessment"]:
-                    analysis_result["dra_paula_assessment"] += f" | Dr. Miguel: {dr_miguel_assessment}"
-                
-                # Update completeness to 0 if validation failed
-                if not enhanced_result.get("valid", True):
-                    analysis_result["completeness"] = 0
+                # Check if names are different (not substring match)
+                if applicant_norm not in doc_norm and doc_norm not in applicant_norm:
+                    validation_issues.append(f"❌ NOME NÃO CORRESPONDE: Documento em nome de '{doc_name}', mas aplicante é '{applicant_name}'")
+                    logger.warning(f"⚠️ Name mismatch: {doc_name} vs {applicant_name}")
             
-            # Return combined analysis result (Policy Engine + Dr. Miguel)
+            # VALIDATION 3: Expiry Date Check
+            expiry_date = None
+            expiry_date_str = None
+            
+            for field_name in ['expiration_date', 'expiry_date', 'valid_until', 'validade']:
+                if field_name in extracted_fields:
+                    expiry_date_str = extracted_fields[field_name].get('mentionText', '')
+                    if expiry_date_str:
+                        break
+            
+            if expiry_date_str:
+                try:
+                    from datetime import datetime, timezone
+                    expiry_date = date_parser.parse(expiry_date_str, dayfirst=True)
+                    current_date = datetime.now(timezone.utc).replace(tzinfo=None)
+                    
+                    # Check if expired
+                    if expiry_date < current_date:
+                        days_expired = (current_date - expiry_date).days
+                        validation_issues.append(f"❌ DOCUMENTO VENCIDO: Expirou em {expiry_date.strftime('%d/%m/%Y')} ({days_expired} dias atrás)")
+                        logger.warning(f"⚠️ Document expired: {expiry_date_str}")
+                    
+                    # Check if expiring soon (passport needs 6 months)
+                    elif document_type.lower() in ['passport', 'passport_id_page']:
+                        months_until_expiry = (expiry_date - current_date).days / 30
+                        if months_until_expiry < 6:
+                            validation_issues.append(f"⚠️ PASSAPORTE EXPIRA EM BREVE: Válido até {expiry_date.strftime('%d/%m/%Y')} (menos de 6 meses)")
+                
+                except Exception as date_error:
+                    logger.debug(f"Could not parse date: {expiry_date_str} - {date_error}")
+            
+            # Update analysis result with validations
+            if validation_issues:
+                analysis_result["issues"].extend(validation_issues)
+                analysis_result["valid"] = False
+                analysis_result["completeness"] = 0
+                analysis_result["dra_paula_assessment"] = f"❌ DOCUMENTO COM PROBLEMAS: {len(validation_issues)} erro(s) detectado(s)"
+            else:
+                analysis_result["dra_paula_assessment"] = f"✅ DOCUMENTO VALIDADO: Tipo correto, dados consistentes"
+            
+            # Add extraction data
+            analysis_result["extracted_data"].update({
+                "google_ai_confidence": confidence,
+                "detected_document_type": detected_type,
+                "extracted_fields": extracted_fields,
+                "extracted_text_length": len(extracted_text)
+            })
+            
+            logger.info(f"✅ Validation complete - Issues: {len(validation_issues)}")
+            
+            # Return combined analysis result (Policy Engine + Google AI + Logical Validations)
             return analysis_result
             
-        except Exception as enhanced_error:
-            logger.error(f"❌ Erro no sistema aprimorado Dr. Miguel: {str(enhanced_error)}")
+        except Exception as validation_error:
+            logger.error(f"❌ Erro na validação Google AI: {str(validation_error)}")
+            import traceback
+            logger.error(traceback.format_exc())
             
-            # Even if Dr. Miguel fails, return Policy Engine results
-            analysis_result["dr_miguel_error"] = str(enhanced_error)
-            analysis_result["dra_paula_assessment"] += " | Dr. Miguel: Erro na análise avançada"
+            # Return Policy Engine results even if Google AI fails
+            analysis_result["google_ai_error"] = str(validation_error)
+            analysis_result["dra_paula_assessment"] += " | Google AI: Erro na análise"
             
             return analysis_result
         
