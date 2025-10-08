@@ -433,7 +433,22 @@ const DocumentUploadAuto = () => {
       });
 
       if (response.ok) {
-        return await response.json();
+        const analysisResult = await response.json();
+        
+        // **CRITICAL FIX**: Ensure issues array exists and is properly formatted
+        if (!analysisResult.issues) {
+          analysisResult.issues = [];
+        }
+        
+        // Log for debugging
+        console.log('✅ Backend analysis result:', {
+          valid: analysisResult.valid,
+          completeness: analysisResult.completeness,
+          issuesCount: analysisResult.issues?.length || 0,
+          issues: analysisResult.issues
+        });
+        
+        return analysisResult;
       } else {
         throw new Error('API analysis failed');
       }
