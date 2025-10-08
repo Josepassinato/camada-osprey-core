@@ -6283,7 +6283,11 @@ async def analyze_document_with_real_ai(
             doc_name = None
             for field_name in ['name', 'full_name', 'holder_name', 'given_names', 'surname']:
                 if field_name in extracted_fields:
-                    doc_name = extracted_fields[field_name].get('mentionText', '')
+                    field_value = extracted_fields[field_name]
+                    if isinstance(field_value, dict):
+                        doc_name = field_value.get('mentionText', '') or field_value.get('value', '')
+                    else:
+                        doc_name = str(field_value)
                     if doc_name:
                         break
             
