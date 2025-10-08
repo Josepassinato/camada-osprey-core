@@ -603,6 +603,49 @@ class DocumentValidationAgent(BaseSpecializedAgent):
                         all_issues.append(f"❌ NOME NÃO CORRESPONDE: Documento em nome de '{doc_name}', mas aplicante é '{applicant_name}'")
                         all_recommendations.append("Verifique se está enviando o documento correto com seu nome")
             
+            # 3. Check document expiry date
+            if 'extracted_fields' in extracted_data:
+                expiry_date = None
+                expiry_date_str = None
+                
+                # Try to find expiry date in various field names
+                for field_name in ['expiry_date', 'expiration_date', 'valid_until', 'validade', 'data_validade']:
+                    if field_name in extracted_data.get('extracted_fields', {}):
+                        field_data = extracted_data['extracted_fields'][field_name]
+                        if isinstance(field_data, dict):
+                            expiry_date_str = field_data.get('value', '')
+                        else:
+                            expiry_date_str = str(field_data)
+                        break
+                
+                if expiry_date_str and expiry_date_str.strip():
+                    # Try to parse the date
+                    from dateutil import parser as date_parser
+                    try:
+                        expiry_date = date_parser.parse(expiry_date_str, dayfirst=True)
+                        current_date = datetime.utcnow()
+                        
+                        # Check if expired
+                        if expiry_date < current_date:
+                            days_expired = (current_date - expiry_date).days
+                            all_issues.append(f"❌ DOCUMENTO VENCIDO: Expirou em {expiry_date.strftime('%d/%m/%Y')} ({days_expired} dias atrás)")
+                            all_recommendations.append(f"Renove seu {expected_document_type} antes de submeter a aplicação")
+                        
+                        # Check if expiring soon (within 6 months for passport, 3 months for others)
+                        elif expected_document_type in ['passport', 'passport_id_page']:
+                            months_until_expiry = (expiry_date - current_date).days / 30
+                            if months_until_expiry < 6:
+                                all_issues.append(f"⚠️ PASSAPORTE EXPIRA EM BREVE: Válido até {expiry_date.strftime('%d/%m/%Y')} (menos de 6 meses)")
+                                all_recommendations.append("USCIS requer passaporte válido por pelo menos 6 meses além da data de entrada nos EUA")
+                        else:
+                            months_until_expiry = (expiry_date - current_date).days / 30
+                            if months_until_expiry < 3:
+                                all_issues.append(f"⚠️ DOCUMENTO EXPIRA EM BREVE: Válido até {expiry_date.strftime('%d/%m/%Y')} (menos de 3 meses)")
+                                all_recommendations.append("Considere renovar o documento antes da submissão")
+                    
+                    except Exception as date_parse_error:
+                        logger.debug(f"Could not parse expiry date '{expiry_date_str}': {str(date_parse_error)}")
+            
             return {
                 "valid": decision == DecisionType.PASS and len(all_issues) == 0,
                 "verdict": decision.value if len(all_issues) == 0 else "FAIL",
