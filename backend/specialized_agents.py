@@ -343,6 +343,9 @@ class DocumentValidationAgent(BaseSpecializedAgent):
             # PHASE 2: Specialized Validation by Document Type
             specialized_validators = create_specialized_validators()
             
+            # Initialize confidence score
+            final_confidence = 50.0  # Start with baseline confidence
+            
             # Use GOOGLE DOCUMENT AI for specialized document processing
             try:
                 from pipeline.google_document_ai import google_document_ai
