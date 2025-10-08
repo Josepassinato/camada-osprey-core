@@ -66,26 +66,44 @@ class PassportValidator:
                 issues.extend(cross_validation['discrepancies'])
         
         # Check expiry status
-        if results['expiry_date']['is_valid']:
-            expiry_check = self._check_expiry_status(results['expiry_date']['normalized_value'])
+        expiry_result = results['expiry_date']
+        if (isinstance(expiry_result, dict) and expiry_result.get('is_valid')) or (hasattr(expiry_result, 'is_valid') and expiry_result.is_valid):
+            normalized_expiry = expiry_result['normalized_value'] if isinstance(expiry_result, dict) else expiry_result.normalized_value
+            expiry_check = self._check_expiry_status(normalized_expiry)
             if expiry_check['is_expired']:
                 issues.append(f"CRITICAL: Passport expired on {expiry_check['expiry_date']}")
             elif expiry_check['expires_soon']:
                 issues.append(f"WARNING: Passport expires soon on {expiry_check['expiry_date']}")
         
+        # Convert ValidationResult objects to dicts for serialization
+        serialized_results = {}
+        for key, value in results.items():
+            if isinstance(value, ValidationResult):
+                serialized_results[key] = {
+                    'field_name': value.field_name,
+                    'is_valid': value.is_valid,
+                    'confidence': value.confidence,
+                    'extracted_value': value.extracted_value,
+                    'normalized_value': value.normalized_value,
+                    'issues': value.issues,
+                    'recommendations': value.recommendations
+                }
+            else:
+                serialized_results[key] = value
+        
         # Calculate overall confidence
-        valid_fields = sum(1 for r in results.values() if (isinstance(r, dict) and r.get('is_valid', False)) or (hasattr(r, 'is_valid') and r.is_valid))
-        total_fields = len([r for r in results.values() if isinstance(r, (dict, ValidationResult))])
+        valid_fields = sum(1 for r in serialized_results.values() if isinstance(r, dict) and r.get('is_valid', False))
+        total_fields = len(serialized_results)
         overall_confidence = (valid_fields / total_fields) * 100 if total_fields > 0 else 0
         
         return {
             'document_type': 'passport',
-            'validation_results': results,
+            'validation_results': serialized_results,
             'overall_confidence': overall_confidence,
             'is_valid': overall_confidence >= 80 and len(issues) == 0,
             'issues': issues,
             'uscis_acceptable': overall_confidence >= 90 and all(
-                field in results and ((isinstance(results[field], dict) and results[field].get('is_valid', False)) or (hasattr(results[field], 'is_valid') and results[field].is_valid))
+                field in serialized_results and serialized_results[field].get('is_valid', False)
                 for field in ['full_name', 'passport_number', 'date_of_birth', 'expiry_date']
             )
         }
