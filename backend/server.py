@@ -1515,7 +1515,7 @@ async def upload_document(
                 doc_filename = document.filename if hasattr(document, 'filename') else document.get('filename') if isinstance(document, dict) else file.filename
                 
                 ab_decision = ab_testing_manager.should_use_pipeline(
-                    user_id=str(current_user.id),
+                    user_id=str(current_user["id"]),
                     document_type=document_type.value,
                     filename=doc_filename
                 )
