@@ -6239,9 +6239,9 @@ async def analyze_document_with_real_ai(
             
             # Extract data with Google Document AI
             ocr_result = await google_ai.process_document(
-                file_content=file_content,
-                filename=file.filename,
-                doc_type=document_type
+                image_data=file_content,
+                document_type=document_type,
+                language='pt'  # Portuguese for Brazilian documents
             )
             
             # Get extracted data
