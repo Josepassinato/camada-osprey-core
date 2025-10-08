@@ -636,6 +636,8 @@ class DocumentValidationAgent(BaseSpecializedAgent):
                     except Exception as date_parse_error:
                         logger.debug(f"Could not parse expiry date '{expiry_date_str}': {str(date_parse_error)}")
             
+            logger.info(f"🔍 Final validation - Total issues: {len(all_issues)}, Issues: {all_issues}")
+            
             return {
                 "valid": decision == DecisionType.PASS and len(all_issues) == 0,
                 "verdict": decision.value if len(all_issues) == 0 else "FAIL",
