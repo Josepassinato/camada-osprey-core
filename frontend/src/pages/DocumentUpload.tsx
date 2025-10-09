@@ -44,11 +44,11 @@ const DocumentUpload = () => {
   // Get current user for tutor
   useEffect(() => {
     const token = localStorage.getItem('osprey_token');
-    if (token) {
-      // Extract user info from token or fetch from API
-      // For now, use a placeholder
-      setCurrentUser({ id: 'user_123', email: 'user@example.com' });
-    }
+    // Always set a user for the tutor demo, even without login
+    setCurrentUser({ 
+      id: token ? 'authenticated_user' : 'demo_user_123', 
+      email: token ? 'user@example.com' : 'demo@example.com' 
+    });
   }, []);
 
   // Initialize disclaimer hook
