@@ -492,9 +492,160 @@ class DocumentAnalysisTester:
                 
         except Exception as e:
             self.log_test(
-                "Real Vision - System Test",
+                "OpenAI Direct - System Test",
                 False,
-                f"❌ Exception in real vision system test: {str(e)}"
+                f"❌ Exception in OpenAI direct system test: {str(e)}"
+            )
+
+    def test_no_emergent_dependencies_validation(self):
+        """CRITICAL TEST: Verify Complete Elimination of Emergent Dependencies"""
+        print("🎯 CRITICAL TEST: No Emergent Dependencies Validation")
+        print("Cenário: Verificar que EMERGENT_LLM_KEY não é usado em lugar algum")
+        print("Objetivo: Confirmar uso exclusivo da chave pessoal OPENAI_API_KEY")
+        
+        try:
+            # STEP 1: Test Document Analysis Without Emergent
+            print("📄 STEP 1: Testing Document Analysis - No Emergent Usage")
+            
+            # Create a test document
+            test_doc_content = """PASSPORT
+REPÚBLICA FEDERATIVA DO BRASIL
+PASSPORT
+Type: P
+Country Code: BRA
+Passport No: BR987654321
+Surname: SILVA
+Given Names: CARLOS EDUARDO
+Nationality: BRAZILIAN
+Date of Birth: 15/03/1990
+Sex: M
+Place of Birth: SAO PAULO, SP
+Date of Issue: 10/01/2020
+Date of Expiry: 10/01/2030
+Authority: DPF
+""" + "Test passport content. " * 1000
+            
+            files = {
+                'file': ('test_passport_no_emergent.pdf', test_doc_content.encode('utf-8'), 'application/pdf')
+            }
+            data = {
+                'document_type': 'passport',
+                'visa_type': 'H-1B',
+                'case_id': 'NO-EMERGENT-TEST'
+            }
+            
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                extracted_data = result.get('extracted_data', {})
+                
+                # CRITICAL: Verify no emergent usage in response
+                response_text = str(result).lower()
+                emergent_terms = ['emergent_llm_key', 'emergentintegrations', 'llmchat', 'emergent']
+                no_emergent_in_response = not any(term in response_text for term in emergent_terms)
+                
+                # Verify OpenAI direct usage indicators
+                openai_terms = ['openai', 'native_llm', 'gpt-4o']
+                has_openai_indicators = any(term in response_text for term in openai_terms)
+                
+                # Check analysis method
+                analysis_method = extracted_data.get('analysis_method', '')
+                method_is_openai_direct = analysis_method in ['native_llm_restored', 'native_llm', 'openai_direct']
+                
+                self.log_test(
+                    "No Emergent - Document Analysis Response",
+                    no_emergent_in_response and method_is_openai_direct,
+                    f"✅ No emergent usage: method={analysis_method}, openai_indicators={has_openai_indicators}",
+                    {
+                        "no_emergent_in_response": no_emergent_in_response,
+                        "has_openai_indicators": has_openai_indicators,
+                        "method_is_openai_direct": method_is_openai_direct,
+                        "analysis_method": analysis_method,
+                        "response_contains_emergent": not no_emergent_in_response
+                    }
+                )
+                
+                # STEP 2: Verify API Key Requirements
+                print("🔑 STEP 2: Verifying API Key Requirements")
+                
+                # Check that system requires OPENAI_API_KEY
+                has_confidence = extracted_data.get('confidence', 0) > 0
+                has_extracted_data = len(extracted_data) > 0
+                analysis_successful = result.get('completeness', 0) > 0
+                
+                # System should work with user's OpenAI key
+                openai_key_working = has_confidence and has_extracted_data and analysis_successful
+                
+                self.log_test(
+                    "No Emergent - OpenAI Key Usage",
+                    openai_key_working,
+                    f"✅ OpenAI key working: confidence={extracted_data.get('confidence', 0)}, completeness={result.get('completeness', 0)}%",
+                    {
+                        "openai_key_working": openai_key_working,
+                        "has_confidence": has_confidence,
+                        "has_extracted_data": has_extracted_data,
+                        "analysis_successful": analysis_successful,
+                        "confidence_value": extracted_data.get('confidence', 0),
+                        "completeness": result.get('completeness', 0)
+                    }
+                )
+                
+                # STEP 3: Verify Real Analysis (Not Simulation)
+                print("🔍 STEP 3: Verifying Real Analysis vs Simulation")
+                
+                # Check for real analysis indicators
+                full_text = extracted_data.get('full_text_extracted', '')
+                has_substantial_text = len(full_text) > 100
+                
+                # Check that it's not using hardcoded simulation values
+                simulation_indicators = ['YC792396', '09/04/1970', 'SIMULATION', 'MOCK', 'FALLBACK']
+                no_simulation_values = not any(val in str(result).upper() for val in simulation_indicators)
+                
+                # Real analysis should have Portuguese assessment
+                dra_paula_assessment = result.get('dra_paula_assessment', '')
+                has_portuguese_assessment = len(dra_paula_assessment) > 50
+                
+                real_analysis_confirmed = (
+                    has_substantial_text and 
+                    no_simulation_values and 
+                    has_portuguese_assessment
+                )
+                
+                self.log_test(
+                    "No Emergent - Real Analysis Confirmed",
+                    real_analysis_confirmed,
+                    f"✅ Real analysis: text_len={len(full_text)}, no_simulation={no_simulation_values}, portuguese_assessment={has_portuguese_assessment}",
+                    {
+                        "real_analysis_confirmed": real_analysis_confirmed,
+                        "has_substantial_text": has_substantial_text,
+                        "no_simulation_values": no_simulation_values,
+                        "has_portuguese_assessment": has_portuguese_assessment,
+                        "full_text_length": len(full_text),
+                        "assessment_length": len(dra_paula_assessment)
+                    }
+                )
+                
+            else:
+                self.log_test(
+                    "No Emergent - Document Analysis",
+                    False,
+                    f"❌ Failed to analyze document: HTTP {response.status_code}",
+                    {"status_code": response.status_code, "error": response.text[:200]}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "No Emergent - Dependencies Test",
+                False,
+                f"❌ Exception: {str(e)}"
             )
 
     def test_img_7602_specific_document_analysis(self):
