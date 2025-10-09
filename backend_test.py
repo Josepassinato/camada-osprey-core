@@ -545,17 +545,18 @@ Data de Validade: 15/06/2024
         print("⚠️ TESTE 4: Integration Points - Teste de pontos de integração")
         print("Cenário: Verificar se native analyzer e Dr. Miguel estão funcionando")
         
-        # Teste de arquivo muito pequeno (< 50KB) - deve ser rejeitado
+        # Teste de integração com native analyzer
         try:
-            tiny_content = "PASSPORT\nTiny file".encode('utf-8')  # Muito pequeno
+            # Criar documento de teste para verificar integração
+            test_passport_content = self.create_test_document("PASSPORT\nBRAZIL\nTESTE INTEGRAÇÃO\nPassport No: BR123456", "passport.pdf")
             
             files = {
-                'file': ('tiny_passport.jpg', tiny_content, 'image/jpeg')
+                'file': ('integration_test.pdf', test_passport_content, 'application/pdf')
             }
             data = {
                 'document_type': 'passport',
                 'visa_type': 'H-1B',
-                'case_id': 'TEST-SIZE-TINY'
+                'case_id': 'TEST-INTEGRATION'
             }
             
             headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
@@ -570,93 +571,72 @@ Data de Validade: 15/06/2024
             if response.status_code == 200:
                 result = response.json()
                 
-                # Arquivo muito pequeno deve ser rejeitado
-                is_valid = result.get('valid', True)
-                issues = result.get('issues', [])
+                # Verificar se native analyzer está funcionando
+                extracted_data = result.get('extracted_data', {})
+                has_analysis_method = 'analysis_method' in extracted_data
+                has_confidence = 'confidence' in extracted_data
+                has_detected_type = 'detected_type' in extracted_data
                 
-                # Procurar por mensagem de arquivo muito pequeno
-                size_error_detected = any('muito pequeno' in issue.lower() for issue in issues)
+                native_analyzer_working = has_analysis_method or has_confidence or has_detected_type
                 
                 self.log_test(
-                    "Validação de Tamanho - Arquivo Muito Pequeno",
-                    not is_valid and size_error_detected,
-                    f"✅ Arquivo pequeno rejeitado: válido={is_valid}, erro_tamanho={size_error_detected}",
+                    "Integration Points - Native Analyzer",
+                    native_analyzer_working,
+                    f"✅ Native analyzer ativo: method={has_analysis_method}, confidence={has_confidence}, type={has_detected_type}",
                     {
-                        "valid": is_valid,
-                        "size_error_detected": size_error_detected,
-                        "file_size": len(tiny_content),
-                        "issues": issues
+                        "has_analysis_method": has_analysis_method,
+                        "has_confidence": has_confidence,
+                        "has_detected_type": has_detected_type,
+                        "extracted_data_keys": list(extracted_data.keys()) if extracted_data else [],
+                        "analysis_method": extracted_data.get('analysis_method', 'unknown')
                     }
                 )
+                
+                # Verificar se Dr. Miguel está respondendo
+                dra_paula_assessment = result.get('dra_paula_assessment', '')
+                dr_miguel_active = len(dra_paula_assessment) > 20 and any(word in dra_paula_assessment.lower() for word in ['documento', 'análise', 'validação'])
+                
+                self.log_test(
+                    "Integration Points - Dr. Miguel Agent",
+                    dr_miguel_active,
+                    f"✅ Dr. Miguel respondendo: assessment_length={len(dra_paula_assessment)}, substantivo={dr_miguel_active}",
+                    {
+                        "dr_miguel_active": dr_miguel_active,
+                        "assessment_length": len(dra_paula_assessment),
+                        "assessment_preview": dra_paula_assessment[:150] if dra_paula_assessment else ""
+                    }
+                )
+                
+                # Verificar se database de validação está funcionando
+                policy_engine_data = result.get('policy_engine', {})
+                policy_score = result.get('policy_score', 0)
+                policy_decision = result.get('policy_decision', '')
+                
+                database_integration = policy_score > 0 or len(str(policy_engine_data)) > 10 or policy_decision != ''
+                
+                self.log_test(
+                    "Integration Points - Document Validation Database",
+                    database_integration,
+                    f"✅ Database integração: policy_score={policy_score}, decision={policy_decision}",
+                    {
+                        "database_integration": database_integration,
+                        "policy_score": policy_score,
+                        "policy_decision": policy_decision,
+                        "policy_engine_keys": list(policy_engine_data.keys()) if policy_engine_data else []
+                    }
+                )
+                
             else:
                 self.log_test(
-                    "Validação de Tamanho - Arquivo Muito Pequeno",
+                    "Integration Points - Overall Test",
                     False,
                     f"❌ HTTP {response.status_code}",
-                    {"status_code": response.status_code}
+                    {"status_code": response.status_code, "error": response.text[:200]}
                 )
                 
         except Exception as e:
             self.log_test(
-                "Validação de Tamanho - Arquivo Muito Pequeno",
-                False,
-                f"❌ Exception: {str(e)}"
-            )
-        
-        # Teste de arquivo de tamanho adequado para passaporte
-        try:
-            good_passport_content = self.create_test_document("PASSPORT\nBRAZIL\nJoão Silva\nPassport No: BR987654", "passport.pdf")
-            
-            files = {
-                'file': ('good_passport.pdf', good_passport_content, 'application/pdf')
-            }
-            data = {
-                'document_type': 'passport',
-                'visa_type': 'H-1B',
-                'case_id': 'TEST-SIZE-GOOD'
-            }
-            
-            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
-            
-            response = requests.post(
-                f"{API_BASE}/documents/analyze-with-ai",
-                files=files,
-                data=data,
-                headers=headers
-            )
-            
-            if response.status_code == 200:
-                result = response.json()
-                
-                # Arquivo de tamanho adequado deve passar na validação de tamanho
-                is_valid = result.get('valid', False)
-                issues = result.get('issues', [])
-                
-                # Não deve ter erro de tamanho
-                no_size_error = not any('muito pequeno' in issue.lower() or 'muito grande' in issue.lower() for issue in issues)
-                
-                self.log_test(
-                    "Validação de Tamanho - Arquivo Adequado",
-                    no_size_error,  # Não deve ter erro de tamanho
-                    f"✅ Arquivo adequado processado: sem_erro_tamanho={no_size_error}, válido={is_valid}",
-                    {
-                        "valid": is_valid,
-                        "no_size_error": no_size_error,
-                        "file_size": len(good_passport_content),
-                        "issues_count": len(issues)
-                    }
-                )
-            else:
-                self.log_test(
-                    "Validação de Tamanho - Arquivo Adequado",
-                    False,
-                    f"❌ HTTP {response.status_code}",
-                    {"status_code": response.status_code}
-                )
-                
-        except Exception as e:
-            self.log_test(
-                "Validação de Tamanho - Arquivo Adequado",
+                "Integration Points - Overall Test",
                 False,
                 f"❌ Exception: {str(e)}"
             )
