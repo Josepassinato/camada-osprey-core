@@ -303,7 +303,7 @@ class DocumentValidationTester:
         try:
             # Simular arquivo grande (> 2.5MB) que seria típico de passaporte
             # quando o sistema espera diploma (ambos são requeridos para H-1B)
-            large_file_content = self.create_large_document_content("PASSPORT\nREPUBLIC OF BRAZIL\nMaria Santos\nPassport No: BR123456")
+            large_file_content = self.create_large_document_content("Maria Santos\nPassport No: BR123456")
             
             files = {
                 'file': ('passport_maria.pdf', large_file_content, 'application/pdf')
