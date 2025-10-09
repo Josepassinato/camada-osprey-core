@@ -9002,22 +9002,21 @@ MRZ extraction should work properly.
 
 
 def main():
-    """Execute Disclaimer System and SSN Validator Tests"""
-    print("🚀 TESTE ESPECÍFICO: Sistema de Disclaimer e Validador de Social Security Card")
-    print("🔧 FOCO: Testar a nova implementação do Sistema de Disclaimer e Validador de Social Security Card")
+    """Execute Disclaimer System Debug Tests"""
+    print("🔍 TESTE ESPECÍFICO DE DEBUG: Sistema de Disclaimer")
+    print("🎯 FOCO: Testar fluxo completo de disclaimer após correções de debug")
     print()
-    print("SISTEMAS TESTADOS:")
-    print("✅ Sistema de Disclaimer com aceites por etapa")
-    print("✅ Validação de compliance após cada aceite")
-    print("✅ Validador SSN com números válidos/inválidos")
-    print("✅ Requisitos SSN com estrutura completa")
-    print("✅ Status detalhado e relatórios de compliance")
+    print("TESTE ESPECÍFICO:")
+    print("📋 Case ID: OSP-DEBUG-TEST")
+    print("📋 Stage: documents")
+    print("📋 Objetivo: Validar se documento é salvo no MongoDB e encontrado na query")
+    print("📋 Verificar logs de debug para entender o fluxo de dados")
     print()
     
     tester = DisclaimerAndSSNValidatorTester()
     
-    # Execute disclaimer and SSN validation tests
-    test_results = tester.run_disclaimer_and_ssn_tests()
+    # Execute debug-specific tests
+    test_results = tester.run_disclaimer_debug_tests()
     
     # Calculate results
     total_tests = len(tester.test_results)
