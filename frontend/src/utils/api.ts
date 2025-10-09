@@ -10,17 +10,17 @@ export const getBackendUrl = (): string => {
     
     // Preview environment detection
     if (hostname.includes('preview.emergentagent.com')) {
-      return 'https://docuvalidate.preview.emergentagent.com';
+      return 'https://validai-imm.preview.emergentagent.com';
     }
     
     // Production environment detection  
     if (hostname.includes('emergentagent.com') && !hostname.includes('preview')) {
-      return 'https://docuvalidate.preview.emergentagent.com'; // Will be updated for production
+      return 'https://validai-imm.preview.emergentagent.com'; // Will be updated for production
     }
   }
   
   // Fallback to environment variable or preview URL
-  return import.meta.env.VITE_BACKEND_URL || 'https://docuvalidate.preview.emergentagent.com';
+  return import.meta.env.VITE_BACKEND_URL || 'https://validai-imm.preview.emergentagent.com';
 };
 
 export const getApiUrl = (endpoint: string): string => {
