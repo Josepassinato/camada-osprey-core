@@ -117,18 +117,24 @@ class NativeDocumentAnalyzer:
         """
         
         try:
-            # Import the LLM integration
-            from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
-            
-            # Convert bytes to base64 for LLM analysis
+            # Import OpenAI directly (NO EMERGENT DEPENDENCIES)
+            import openai
             import base64
+            
+            # Convert bytes to base64 for OpenAI Vision analysis
             file_base64 = base64.b64encode(file_content).decode('utf-8')
             
-            # Create LLM chat instance using user's OpenAI key
-            chat = LlmChat(
-                api_key=os.getenv('OPENAI_API_KEY'),
-                session_id=f"native_doc_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
-                system_message=f"""Você é um especialista em análise de documentos de imigração brasileiros e internacionais.
+            # Create OpenAI client using ONLY user's personal API key
+            openai_api_key = os.getenv('OPENAI_API_KEY')
+            if not openai_api_key:
+                raise ValueError("OPENAI_API_KEY is required for native analysis")
+            
+            client = openai.OpenAI(api_key=openai_api_key)
+            
+            logger.info(f"🤖 Executando análise OpenAI REAL nativa para {expected_type} usando sua chave pessoal")
+            
+            # Create system message
+            system_message = f"""Você é um especialista em análise de documentos de imigração brasileiros e internacionais.
                 
 TAREFA: Analise o documento enviado e extraia informações precisas.
 
@@ -136,23 +142,38 @@ TIPO ESPERADO: {expected_type}
 NOME DO APLICANTE: {applicant_name}
 
 Forneça análise detalhada em português brasileiro com dados REAIS extraídos do documento."""
-            ).with_model("openai", "gpt-4o")  # gpt-4o tem capacidade de visão
             
-            # Create image content for analysis
-            image_content = ImageContent(image_base64=file_base64)
-            
-            # Send message with image for REAL analysis
-            user_message = UserMessage(
-                text=analysis_prompt,
-                file_contents=[image_content]
+            # Send image to OpenAI Vision API directly
+            response = client.chat.completions.create(
+                model="gpt-4o",  # gpt-4o has vision capabilities
+                messages=[
+                    {
+                        "role": "system", 
+                        "content": system_message
+                    },
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": analysis_prompt
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{file_base64}"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                max_tokens=1000
             )
             
-            logger.info(f"🤖 Executando análise LLM REAL nativa para {expected_type}")
+            # Get LLM response
+            llm_response = response.choices[0].message.content
             
-            # Get REAL analysis from LLM
-            llm_response = await chat.send_message(user_message)
-            
-            logger.info(f"✅ Análise LLM nativa concluída - resposta: {len(llm_response)} chars")
+            logger.info(f"✅ Análise OpenAI nativa concluída - resposta: {len(llm_response)} chars")
             
             # Parse LLM response into structured result
             result = self._parse_llm_response(llm_response, expected_type, applicant_name, file_content)
