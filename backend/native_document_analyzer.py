@@ -264,10 +264,33 @@ async def analyze_document_native(
 def _generate_assessment(result: NativeAnalysisResult) -> str:
     """Gera avaliação da Dra. Paula baseada no resultado"""
     
-    if not result.is_valid:
-        return f"❌ DOCUMENTO COM PROBLEMAS: {len(result.validation_issues)} erro(s) detectado(s) - {'; '.join(result.validation_issues)}"
+    # Casos específicos de erro de tipo de documento
+    if result.type_match_status == "mismatch":
+        expected_name = NativeDocumentAnalyzer()._get_document_name(result.extracted_fields.get('expected_type', ''))
+        detected_name = NativeDocumentAnalyzer()._get_document_name(result.document_type)
+        return f"🚨 TIPO DE DOCUMENTO INCORRETO: Você enviou um(a) {detected_name}, mas é necessário um(a) {expected_name}. Por favor, carregue o documento correto."
     
+    # Outros problemas de validação
+    if not result.is_valid:
+        main_issues = []
+        for issue in result.validation_issues:
+            if "TIPO DE DOCUMENTO INCORRETO" in issue:
+                continue  # Já tratado acima
+            main_issues.append(issue)
+        
+        if main_issues:
+            return f"❌ DOCUMENTO COM PROBLEMAS: {'; '.join(main_issues)}. Verifique o arquivo e tente novamente."
+    
+    # Documento válido com boa confiança
     if result.confidence > 0.8:
-        return f"✅ DOCUMENTO APROVADO: Análise nativa confirma {result.document_type} válido (confiança: {result.confidence:.0%})"
+        doc_name = NativeDocumentAnalyzer()._get_document_name(result.document_type)
+        return f"✅ DOCUMENTO APROVADO: {doc_name} válido e em ordem (confiança: {result.confidence:.0%})"
+    
+    # Documento com ressalvas
+    elif result.confidence > 0.5:
+        doc_name = NativeDocumentAnalyzer()._get_document_name(result.document_type)
+        return f"⚠️ DOCUMENTO COM RESSALVAS: {doc_name} parcialmente válido (confiança: {result.confidence:.0%}). Recomendo verificar qualidade da imagem."
+    
+    # Baixa confiança
     else:
-        return f"⚠️ DOCUMENTO COM RESSALVAS: Análise parcial do {result.document_type} (confiança: {result.confidence:.0%})"
+        return f"❌ DOCUMENTO REJEITADO: Não foi possível validar adequadamente (confiança: {result.confidence:.0%}). Verifique se o arquivo está legível e no formato correto."
