@@ -130,8 +130,8 @@ class DisclaimerAndSSNValidatorTester:
         full_content = content + "\n" + "Test document content padding. " * 2000
         return full_content.encode('utf-8')
     
-    def create_test_case_with_documents(self) -> str:
-        """Cria um caso de teste com documentos validados"""
+    def create_test_case_for_disclaimer(self) -> str:
+        """Cria um caso de teste para disclaimer testing"""
         try:
             # Create a test case first
             case_data = {
@@ -165,31 +165,6 @@ class DisclaimerAndSSNValidatorTester:
                     json={
                         "basic_data": basic_data,
                         "current_step": "documents"
-                    }
-                )
-                
-                # Simulate document analysis results
-                document_analysis = [
-                    {
-                        "document_type": "passport",
-                        "valid": True,
-                        "extracted_data": {
-                            "full_name": "CARLOS EDUARDO SILVA",
-                            "document_number": "YC792396",
-                            "nationality": "BRASILEIRO",
-                            "place_of_birth": "CANOAS, RS",
-                            "issue_date": "2018-09-13",
-                            "expiry_date": "2028-09-13",
-                            "issuing_authority": "POLÍCIA FEDERAL"
-                        }
-                    }
-                ]
-                
-                # Add document analysis to case
-                self.session.patch(
-                    f"{API_BASE}/auto-application/case/{case_id}",
-                    json={
-                        "document_analysis_results": document_analysis
                     }
                 )
                 
