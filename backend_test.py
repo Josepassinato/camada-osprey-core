@@ -427,17 +427,16 @@ Data de Validade: 15/06/2024
         print("Cenário: Arquivo muito pequeno deve ser rejeitado")
         
         try:
-            # Simular arquivo muito grande (> 4MB) que seria típico de certidão
-            # quando o sistema espera passaporte
-            very_large_file_content = self.create_very_large_document_content("Carlos Eduardo Silva\nData: 15/03/1990")
+            # Teste 1: Arquivo muito pequeno (< 50KB) - deve ser rejeitado
+            tiny_content = "PASSPORT\nTiny file".encode('utf-8')  # Muito pequeno
             
             files = {
-                'file': ('certidao_carlos.pdf', very_large_file_content, 'application/pdf')
+                'file': ('tiny_passport.jpg', tiny_content, 'image/jpeg')
             }
             data = {
-                'document_type': 'passport',  # Sistema espera passaporte
-                'visa_type': 'F-1',
-                'case_id': 'TEST-PASSPORT-CERTIDAO'
+                'document_type': 'passport',
+                'visa_type': 'H-1B',
+                'case_id': 'TEST-ERROR-HANDLING'
             }
             
             headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
