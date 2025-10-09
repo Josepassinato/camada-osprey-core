@@ -7654,6 +7654,11 @@ async def startup_db_client():
         notification_system = NotificationSystem(db)
         logger.info("✅ Notification System initialized")
         
+        # Initialize Database Optimization System
+        global db_optimization_system
+        db_optimization_system = DatabaseOptimizationSystem(db)
+        logger.info("✅ Database Optimization System initialized")
+        
         # Initialize Advanced Analytics System
         if ANALYTICS_AVAILABLE:
             try:
