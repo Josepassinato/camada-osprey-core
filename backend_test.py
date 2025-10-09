@@ -176,69 +176,99 @@ class IntelligentTutorSystemTester:
             print(f"❌ Erro ao criar caso de teste: {str(e)}")
             return None
 
-    def test_disclaimer_text_endpoints(self):
-        """TESTE 1: Disclaimer Text Endpoints - Buscar textos de disclaimer"""
-        print("📝 TESTE 1: Disclaimer Text Endpoints - Buscar textos de disclaimer")
+    def test_tutor_guidance_endpoint(self):
+        """TESTE 1: Tutor Guidance - Orientação contextual inteligente"""
+        print("🎯 TESTE 1: Tutor Guidance - Orientação contextual inteligente")
         
-        # Test all disclaimer stages
-        stages = ["documents", "forms", "cover_letter", "review", "final"]
+        # Test data as specified in the review request
+        test_request = {
+            "current_step": "document_upload",
+            "visa_type": "h1b",
+            "personality": "friendly",
+            "action": "next_steps"
+        }
         
-        for stage in stages:
-            try:
-                response = self.session.get(f"{API_BASE}/disclaimer/text/{stage}")
-                
-                if response.status_code == 200:
-                    result = response.json()
-                    
-                    # Check if disclaimer text is returned
-                    has_success = result.get('success', False)
-                    disclaimer_text = result.get('disclaimer_text', '')
-                    has_text = len(disclaimer_text) > 100  # Should have substantial text
-                    
-                    self.log_test(
-                        f"Disclaimer Text - Stage {stage}",
-                        has_success and has_text,
-                        f"✅ Texto obtido para {stage}: {len(disclaimer_text)} caracteres",
-                        {
-                            "success": has_success,
-                            "stage": stage,
-                            "text_length": len(disclaimer_text),
-                            "has_responsibility_text": "responsabilidade" in disclaimer_text.lower(),
-                            "has_approval_text": "aprova" in disclaimer_text.lower()
-                        }
-                    )
-                else:
-                    self.log_test(
-                        f"Disclaimer Text - Stage {stage}",
-                        False,
-                        f"❌ HTTP {response.status_code}",
-                        {"status_code": response.status_code, "error": response.text[:200]}
-                    )
-                    
-            except Exception as e:
-                self.log_test(
-                    f"Disclaimer Text - Stage {stage}",
-                    False,
-                    f"❌ Exception: {str(e)}"
-                )
-        
-        # Test invalid stage
         try:
-            response = self.session.get(f"{API_BASE}/disclaimer/text/invalid_stage")
-            
-            self.log_test(
-                "Disclaimer Text - Invalid Stage",
-                response.status_code == 400,
-                f"✅ Etapa inválida rejeitada corretamente: HTTP {response.status_code}",
-                {"status_code": response.status_code}
+            response = self.session.post(
+                f"{API_BASE}/tutor/guidance",
+                json=test_request
             )
             
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check response structure
+                has_success = result.get('success', False)
+                guidance = result.get('guidance', {})
+                has_guidance_content = len(str(guidance)) > 50  # Should have substantial content
+                
+                # Check if guidance contains Brazilian-specific content
+                guidance_str = str(guidance).lower()
+                has_brazilian_context = any(word in guidance_str for word in ['brasil', 'brasileiro', 'brasileira', 'português'])
+                
+                self.log_test(
+                    "Tutor Guidance - Orientação Contextual",
+                    has_success and has_guidance_content,
+                    f"✅ Orientação gerada: {len(str(guidance))} caracteres, contexto brasileiro: {has_brazilian_context}",
+                    {
+                        "success": has_success,
+                        "guidance_length": len(str(guidance)),
+                        "has_brazilian_context": has_brazilian_context,
+                        "current_step": test_request["current_step"],
+                        "visa_type": test_request["visa_type"],
+                        "personality": test_request.get("personality"),
+                        "guidance_preview": str(guidance)[:200] if guidance else ""
+                    }
+                )
+            else:
+                self.log_test(
+                    "Tutor Guidance - Orientação Contextual",
+                    False,
+                    f"❌ HTTP {response.status_code}",
+                    {"status_code": response.status_code, "error": response.text[:200]}
+                )
+                
         except Exception as e:
             self.log_test(
-                "Disclaimer Text - Invalid Stage",
+                "Tutor Guidance - Orientação Contextual",
                 False,
                 f"❌ Exception: {str(e)}"
             )
+        
+        # Test with different parameters
+        test_variations = [
+            {"current_step": "form_filling", "visa_type": "h1b", "personality": "professional"},
+            {"current_step": "interview_prep", "visa_type": "h1b", "personality": "detailed"},
+        ]
+        
+        for i, variation in enumerate(test_variations):
+            try:
+                response = self.session.post(
+                    f"{API_BASE}/tutor/guidance",
+                    json=variation
+                )
+                
+                success = response.status_code == 200
+                result = response.json() if success else {}
+                
+                self.log_test(
+                    f"Tutor Guidance - Variação {i+1}",
+                    success,
+                    f"✅ Variação {variation['current_step']} processada: {success}",
+                    {
+                        "success": result.get('success', False) if success else False,
+                        "current_step": variation["current_step"],
+                        "personality": variation["personality"],
+                        "status_code": response.status_code
+                    }
+                )
+                
+            except Exception as e:
+                self.log_test(
+                    f"Tutor Guidance - Variação {i+1}",
+                    False,
+                    f"❌ Exception: {str(e)}"
+                )
     
     def test_disclaimer_debug_flow(self):
         """TESTE ESPECÍFICO: Fluxo Completo de Disclaimer com Debug - OSP-DEBUG-TEST"""
