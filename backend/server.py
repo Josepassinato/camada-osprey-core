@@ -7758,8 +7758,6 @@ async def generate_uscis_form_ai(case, friendly_form_data, basic_data):
                 temperature=0.3
             )
             response_text = response.choices[0].message.content
-        else:
-            response_text = llm.chat([{"role": "user", "content": generation_prompt}])
         
         # Update case with generated USCIS form flag
         await db.auto_cases.update_one(
