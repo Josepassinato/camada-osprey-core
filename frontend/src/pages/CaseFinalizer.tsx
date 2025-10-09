@@ -221,6 +221,45 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
     }
   };
 
+  const handleDisclaimerAccept = async (consentHash: string) => {
+    if (!caseId) return;
+    
+    try {
+      const response = await makeApiCall('/disclaimer/record', {
+        method: 'POST',
+        body: JSON.stringify({
+          case_id: caseId,
+          stage: disclaimerStage,
+          consent_hash: consentHash,
+          ip_address: '', // Could be populated from client-side detection
+          user_agent: navigator.userAgent,
+          stage_data: {
+            job_id: job?.job_id,
+            timestamp: new Date().toISOString()
+          }
+        })
+      });
+
+      if (response.ok) {
+        setShowDisclaimer(false);
+        
+        if (disclaimerStage === 'final') {
+          setConsentAccepted(true);
+          setCurrentStep(5); // Ir para downloads
+        } else if (disclaimerStage === 'review') {
+          setCurrentStep(4); // Ir para disclaimer final
+          setDisclaimerStage('final');
+          setShowDisclaimer(true);
+        }
+      } else {
+        throw new Error('Falha ao aceitar disclaimer');
+      }
+    } catch (error) {
+      console.error('Error accepting disclaimer:', error);
+      setError('Erro ao aceitar disclaimer. Tente novamente.');
+    }
+  };
+
   const downloadFile = (url: string, filename: string) => {
     // Placeholder para download
     alert(`Download ${filename}: ${url}\n\n(MVP - Em produção faria download real)`);
