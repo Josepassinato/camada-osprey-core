@@ -214,27 +214,31 @@ class DocumentAnalysisTester:
         print("Cenário: Upload de documento passport para visa H-1B")
         
         try:
-            # Criar arquivo de tamanho adequado (> 50KB mas < 10MB) com conteúdo de CNH
-            # mas esperando passaporte - isso deve passar as validações iniciais e chegar na análise de tipo
-            cnh_content = """CNH - CARTEIRA NACIONAL DE HABILITAÇÃO
-DETRAN - DEPARTAMENTO DE TRÂNSITO
-João Silva Santos
-Categoria: B
-Número: 12345678901
-Data de Nascimento: 15/03/1990
-CPF: 123.456.789-00
-RG: 1234567
-Data de Emissão: 10/01/2020
-Data de Validade: 10/01/2025
-""" + "Padding content to reach adequate size. " * 2000  # Make it > 50KB
+            # Criar arquivo de teste válido (> 50KB mas < 10MB) com conteúdo de passaporte
+            passport_content = """PASSPORT
+REPÚBLICA FEDERATIVA DO BRASIL
+PASSPORT
+Type: P
+Country Code: BRA
+Passport No: BR123456789
+Surname: SILVA
+Given Names: CARLOS EDUARDO
+Nationality: BRAZILIAN
+Date of Birth: 15/03/1990
+Sex: M
+Place of Birth: SAO PAULO, SP
+Date of Issue: 10/01/2020
+Date of Expiry: 10/01/2030
+Authority: DPF
+""" + "Padding content to reach adequate size for document analysis. " * 2000  # Make it > 50KB
             
             files = {
-                'file': ('documento_joao.pdf', cnh_content.encode('utf-8'), 'application/pdf')
+                'file': ('passport_carlos.pdf', passport_content.encode('utf-8'), 'application/pdf')
             }
             data = {
-                'document_type': 'passport',  # Sistema espera passaporte
+                'document_type': 'passport',  # Tipo correto
                 'visa_type': 'H-1B',  # H-1B requer passaporte
-                'case_id': 'TEST-PASSPORT-CNH'
+                'case_id': 'TEST-DOC-ANALYSIS'
             }
             
             # Remove content-type header to let requests set it for multipart
