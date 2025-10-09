@@ -477,126 +477,107 @@ class DisclaimerAndSSNValidatorTester:
         print("📋 TESTE 4: SSN Requirements Endpoint - Requisitos para cartão SSN")
         
         try:
-            # Test database performance statistics (deve estar corrigido)
-            performance_response = self.session.get(f"{API_BASE}/production/performance/database")
+            # Test SSN requirements endpoint
+            response = self.session.get(f"{API_BASE}/documents/ssn-requirements")
             
-            performance_success = performance_response.status_code == 200
-            performance_data = performance_response.json() if performance_success else {}
-            
-            db_performance = performance_data.get('database_performance', {})
-            has_performance_data = len(db_performance) > 0
-            
-            # Verificar se database optimization system está inicializado
-            has_collections = 'collections' in db_performance
-            has_cache_performance = 'cache_performance' in db_performance
-            has_query_performance = 'query_performance' in db_performance
-            
-            self.log_test(
-                "Database Performance Corrected - Performance do Banco",
-                performance_success and has_performance_data,
-                f"✅ Sistema corrigido: {len(db_performance)} seções, collections: {has_collections}",
-                {
-                    "success": performance_data.get('success', False),
-                    "has_collections": has_collections,
-                    "has_cache_performance": has_cache_performance,
-                    "has_query_performance": has_query_performance,
-                    "sections": list(db_performance.keys()) if db_performance else [],
-                    "database_optimization_initialized": has_collections and has_cache_performance
+            if response.status_code == 200:
+                result = response.json()
+                requirements = result.get('requirements', {})
+                
+                # Check if all expected requirement sections are present
+                expected_sections = [
+                    'document_type',
+                    'required_elements', 
+                    'format_requirements',
+                    'card_types_accepted',
+                    'common_issues',
+                    'tips'
+                ]
+                
+                sections_present = sum(1 for section in expected_sections if section in requirements)
+                
+                self.log_test(
+                    "SSN Requirements - Estrutura Completa",
+                    sections_present >= 5,  # At least 5 out of 6 sections should be present
+                    f"✅ Requisitos completos: {sections_present}/{len(expected_sections)} seções presentes",
+                    {
+                        "success": result.get('success', False),
+                        "sections_present": sections_present,
+                        "total_sections": len(expected_sections),
+                        "sections_found": [section for section in expected_sections if section in requirements]
+                    }
+                )
+                
+                # Check specific content
+                required_elements = requirements.get('required_elements', [])
+                format_requirements = requirements.get('format_requirements', [])
+                card_types = requirements.get('card_types_accepted', [])
+                
+                self.log_test(
+                    "SSN Requirements - Elementos Obrigatórios",
+                    len(required_elements) >= 3,
+                    f"✅ Elementos obrigatórios listados: {len(required_elements)} itens",
+                    {
+                        "required_elements_count": len(required_elements),
+                        "sample_elements": required_elements[:3] if required_elements else []
+                    }
+                )
+                
+                self.log_test(
+                    "SSN Requirements - Requisitos de Formato",
+                    len(format_requirements) >= 3,
+                    f"✅ Requisitos de formato: {len(format_requirements)} regras",
+                    {
+                        "format_requirements_count": len(format_requirements),
+                        "sample_requirements": format_requirements[:2] if format_requirements else []
+                    }
+                )
+                
+                self.log_test(
+                    "SSN Requirements - Tipos de Cartão Aceitos",
+                    len(card_types) >= 2,
+                    f"✅ Tipos de cartão aceitos: {len(card_types)} tipos",
+                    {
+                        "card_types_count": len(card_types),
+                        "card_types": card_types
+                    }
+                )
+                
+                # Check for common issues and tips
+                common_issues = requirements.get('common_issues', [])
+                tips = requirements.get('tips', [])
+                
+                self.log_test(
+                    "SSN Requirements - Problemas Comuns e Dicas",
+                    len(common_issues) >= 3 and len(tips) >= 3,
+                    f"✅ Orientações completas: {len(common_issues)} problemas, {len(tips)} dicas",
+                    {
+                        "common_issues_count": len(common_issues),
+                        "tips_count": len(tips),
+                        "sample_issue": common_issues[0] if common_issues else None,
+                        "sample_tip": tips[0] if tips else None
+                    }
+                )
+                
+                return {
+                    "requirements": requirements,
+                    "sections_present": sections_present,
+                    "content_complete": len(required_elements) >= 3 and len(format_requirements) >= 3
                 }
-            )
-            
-            # Test 2: Database optimization
-            optimize_response = self.session.post(f"{API_BASE}/production/database/optimize")
-            
-            optimize_success = optimize_response.status_code == 200
-            optimize_data = optimize_response.json() if optimize_success else {}
-            
-            optimization_results = optimize_data.get('optimization_results', [])
-            collections_optimized = optimize_data.get('collections_optimized', 0)
-            
-            self.log_test(
-                "Database Optimization - Otimização do Banco",
-                optimize_success and collections_optimized > 0,
-                f"Coleções otimizadas: {collections_optimized}",
-                {
-                    "success": optimize_data.get('success', False),
-                    "collections_optimized": collections_optimized,
-                    "optimization_results_count": len(optimization_results),
-                    "has_results": len(optimization_results) > 0
-                }
-            )
-            
-            # Test 3: Cache clearing
-            cache_request = {
-                "pattern": "test:*"  # Clear test cache pattern
-            }
-            
-            cache_response = self.session.post(
-                f"{API_BASE}/production/cache/clear",
-                json=cache_request
-            )
-            
-            cache_success = cache_response.status_code == 200
-            cache_data = cache_response.json() if cache_success else {}
-            
-            self.log_test(
-                "Database Optimization - Limpeza de Cache",
-                cache_success,
-                f"Cache limpo: {cache_data.get('success', False)}",
-                {
-                    "success": cache_data.get('success', False),
-                    "message": cache_data.get('message', ''),
-                    "pattern_used": "test:*"
-                }
-            )
-            
-            # Test 4: Cache clearing without pattern (full clear)
-            full_cache_response = self.session.post(
-                f"{API_BASE}/production/cache/clear",
-                json={}
-            )
-            
-            full_cache_success = full_cache_response.status_code == 200
-            full_cache_data = full_cache_response.json() if full_cache_success else {}
-            
-            self.log_test(
-                "Database Optimization - Limpeza Completa de Cache",
-                full_cache_success,
-                f"Cache completo limpo: {full_cache_data.get('success', False)}",
-                {
-                    "success": full_cache_data.get('success', False),
-                    "message": full_cache_data.get('message', ''),
-                    "full_clear": True
-                }
-            )
-            
-            # Overall database optimization assessment
-            db_tests_passed = sum([performance_success, optimize_success, cache_success, full_cache_success])
-            
-            self.log_test(
-                "Database Optimization System - Funcionalidade Geral",
-                db_tests_passed >= 3,  # At least 3 out of 4 should work
-                f"Testes de otimização aprovados: {db_tests_passed}/4",
-                {
-                    "performance_working": performance_success,
-                    "optimization_working": optimize_success,
-                    "cache_pattern_working": cache_success,
-                    "cache_full_working": full_cache_success,
-                    "success_rate": f"{(db_tests_passed/4)*100:.1f}%"
-                }
-            )
-            
-            return {
-                "performance_data": db_performance,
-                "optimization_results": optimization_results,
-                "tests_passed": db_tests_passed
-            }
+            else:
+                self.log_test(
+                    "SSN Requirements - Endpoint Disponível",
+                    False,
+                    f"❌ HTTP {response.status_code}",
+                    {"status_code": response.status_code, "error": response.text[:200]}
+                )
+                return None
                 
         except Exception as e:
             self.log_test(
-                "Database Optimization System - Exception Geral",
+                "SSN Requirements - Exception",
                 False,
-                f"Exception: {str(e)}"
+                f"❌ Exception: {str(e)}"
             )
             return None
     
