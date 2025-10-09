@@ -214,16 +214,26 @@ class DocumentValidationTester:
         print("Cenário: Usuário enviou CNH quando era esperado passaporte")
         
         try:
-            # Simular arquivo pequeno (< 200KB) que seria típico de CNH
-            # quando o sistema espera passaporte
-            small_file_content = self.create_small_document_content("João Silva\nCategoria: B")
+            # Criar arquivo de tamanho adequado (> 50KB mas < 10MB) com conteúdo de CNH
+            # mas esperando passaporte - isso deve passar as validações iniciais e chegar na análise de tipo
+            cnh_content = """CNH - CARTEIRA NACIONAL DE HABILITAÇÃO
+DETRAN - DEPARTAMENTO DE TRÂNSITO
+João Silva Santos
+Categoria: B
+Número: 12345678901
+Data de Nascimento: 15/03/1990
+CPF: 123.456.789-00
+RG: 1234567
+Data de Emissão: 10/01/2020
+Data de Validade: 10/01/2025
+""" + "Padding content to reach adequate size. " * 2000  # Make it > 50KB
             
             files = {
-                'file': ('cnh_joao.jpg', small_file_content, 'image/jpeg')
+                'file': ('documento_joao.pdf', cnh_content.encode('utf-8'), 'application/pdf')
             }
             data = {
                 'document_type': 'passport',  # Sistema espera passaporte
-                'visa_type': 'H-1B',
+                'visa_type': 'H-1B',  # H-1B requer passaporte
                 'case_id': 'TEST-PASSPORT-CNH'
             }
             
@@ -243,10 +253,14 @@ class DocumentValidationTester:
                 # Verificar se detectou erro de tipo de documento
                 issues = result.get('issues', [])
                 dra_paula_assessment = result.get('dra_paula_assessment', '')
+                extracted_data = result.get('extracted_data', {})
                 
                 # Procurar pela mensagem específica de tipo incorreto
                 type_error_detected = any('TIPO DE DOCUMENTO INCORRETO' in issue for issue in issues)
-                specific_message_found = 'Carteira de Motorista/CNH' in dra_paula_assessment and 'Passaporte' in dra_paula_assessment
+                specific_message_found = 'Carteira' in dra_paula_assessment and 'Passaporte' in dra_paula_assessment
+                
+                # Verificar se o sistema detectou CNH no conteúdo
+                detected_type = extracted_data.get('detected_type', '')
                 
                 # Verificar se documento foi rejeitado
                 is_valid = result.get('valid', True)
@@ -254,11 +268,12 @@ class DocumentValidationTester:
                 self.log_test(
                     "Passaporte vs CNH - Detecção de Tipo Incorreto",
                     type_error_detected and not is_valid,
-                    f"✅ Erro detectado: tipo_incorreto={type_error_detected}, rejeitado={not is_valid}, mensagem_específica={specific_message_found}",
+                    f"✅ Erro detectado: tipo_incorreto={type_error_detected}, rejeitado={not is_valid}, mensagem_específica={specific_message_found}, detected_type={detected_type}",
                     {
                         "valid": is_valid,
                         "type_error_detected": type_error_detected,
                         "specific_message_found": specific_message_found,
+                        "detected_type": detected_type,
                         "issues_count": len(issues),
                         "dra_paula_assessment": dra_paula_assessment[:200],
                         "issues_sample": issues[:2] if issues else []
