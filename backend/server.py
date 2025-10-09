@@ -3720,12 +3720,121 @@ async def start_case_finalization(case_id: str, request: dict):
             "timestamp": datetime.utcnow().isoformat()
         }
 
+@api_router.get("/cases/finalize/{job_id}/preview")
+async def get_packet_preview(job_id: str):
+    """Obtém preview detalhado do pacote para aprovação"""
+    try:
+        result = case_finalizer_complete.get_job_status(job_id)
+        
+        if result["success"]:
+            job = result["job"]
+            
+            if job["status"] != "completed":
+                return {
+                    "error": "Pacote ainda não está pronto para preview",
+                    "current_status": job["status"]
+                }
+            
+            # Retornar dados detalhados para preview
+            return {
+                "success": True,
+                "metadata": job.get("audit_result", {}).get("packet_metadata", {}),
+                "document_summary": job.get("master_packet", {}).get("document_summary", []),
+                "quality_assessment": {
+                    "overall_score": job.get("audit_result", {}).get("quality_score", 0) * 100,
+                    "recommendation": job.get("audit_result", {}).get("packet_metadata", {}).get("quality_assessment", {}).get("recommendation", "NEEDS_REVIEW"),
+                    "issues": job.get("issues", []),
+                    "warnings": job.get("audit_result", {}).get("warnings", [])
+                },
+                "job_info": {
+                    "job_id": job_id,
+                    "case_id": job.get("case_id"),
+                    "created_at": job.get("created_at"),
+                    "scenario": job.get("scenario_key")
+                }
+            }
+        else:
+            return {"error": result["error"]}
+            
+    except Exception as e:
+        logger.error(f"Error getting packet preview: {e}")
+        return {
+            "error": "Erro interno do servidor",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.post("/cases/finalize/{job_id}/approve")
+async def approve_packet(job_id: str, request: dict):
+    """Aprova o pacote final"""
+    try:
+        comments = request.get("comments", "")
+        approval_data = request.get("approval_data", {})
+        
+        # Atualizar job com aprovação
+        result = case_finalizer_complete.get_job_status(job_id)
+        
+        if result["success"]:
+            job = result["job"]
+            job["approval_status"] = "approved"
+            job["approval_comments"] = comments
+            job["approval_data"] = approval_data
+            job["approved_at"] = datetime.utcnow().isoformat()
+            
+            return {
+                "success": True,
+                "message": "Pacote aprovado com sucesso",
+                "job_id": job_id
+            }
+        else:
+            return {"error": result["error"]}
+            
+    except Exception as e:
+        logger.error(f"Error approving packet: {e}")
+        return {
+            "error": "Erro ao aprovar pacote",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.post("/cases/finalize/{job_id}/reject")
+async def reject_packet(job_id: str, request: dict):
+    """Rejeita o pacote final"""
+    try:
+        reason = request.get("reason", "")
+        rejection_data = request.get("rejection_data", {})
+        
+        if not reason:
+            return {"error": "Motivo da rejeição é obrigatório"}
+        
+        # Atualizar job com rejeição
+        result = case_finalizer_complete.get_job_status(job_id)
+        
+        if result["success"]:
+            job = result["job"]
+            job["approval_status"] = "rejected"
+            job["rejection_reason"] = reason
+            job["rejection_data"] = rejection_data
+            job["rejected_at"] = datetime.utcnow().isoformat()
+            
+            return {
+                "success": True,
+                "message": "Pacote rejeitado",
+                "job_id": job_id,
+                "reason": reason
+            }
+        else:
+            return {"error": result["error"]}
+            
+    except Exception as e:
+        logger.error(f"Error rejecting packet: {e}")
+        return {
+            "error": "Erro ao rejeitar pacote",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
 @api_router.get("/cases/finalize/{job_id}/status")
 async def get_finalization_status(job_id: str):
     """Obtém status da finalização"""
     try:
-        # Importação movida para o topo
-        
         result = case_finalizer_complete.get_job_status(job_id)
         
         if result["success"]:
