@@ -179,6 +179,15 @@ const USCISFormFilling = () => {
     }
   }, [caseId]);
 
+  // Clean up auto-save timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const fetchCase = async () => {
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}`);
