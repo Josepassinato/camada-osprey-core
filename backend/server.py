@@ -8168,18 +8168,25 @@ async def analyze_document_with_real_ai(
             from dateutil import parser as date_parser
             import unicodedata
             
-            # Get applicant name from case
+            # Get applicant name from case (FIXED: prevent None object error)
             applicant_name = "Usuário"  # Default
             if case_id:
-                case_doc = await db.auto_cases.find_one({"case_id": case_id})
-                if case_doc and case_doc.get('form_data', {}).get('basic_info'):
-                    basic_info = case_doc['form_data']['basic_info']
-                    first_name = basic_info.get('firstName', '') or basic_info.get('full_name', '')
-                    last_name = basic_info.get('lastName', '')
-                    if first_name and last_name:
-                        applicant_name = f"{first_name} {last_name}"
-                    elif first_name:
-                        applicant_name = first_name
+                try:
+                    case_doc = await db.auto_cases.find_one({"case_id": case_id})
+                    if case_doc:
+                        form_data = case_doc.get('form_data', {})
+                        if form_data and isinstance(form_data, dict):
+                            basic_info = form_data.get('basic_info')
+                            if basic_info and isinstance(basic_info, dict):
+                                first_name = basic_info.get('firstName', '') or basic_info.get('full_name', '')
+                                last_name = basic_info.get('lastName', '')
+                                if first_name and last_name:
+                                    applicant_name = f"{first_name} {last_name}"
+                                elif first_name:
+                                    applicant_name = first_name
+                except Exception as e:
+                    logger.warning(f"⚠️ Error getting applicant name from case {case_id}: {e}")
+                    applicant_name = "Usuário"  # Fallback
             
             # Perform real vision analysis
             vision_result = await analyze_document_with_real_vision(
