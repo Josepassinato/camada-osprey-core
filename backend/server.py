@@ -7579,11 +7579,8 @@ async def check_data_consistency_ai(case, friendly_form_data, basic_data):
         if not openai_key:
             raise ValueError("OPENAI_API_KEY is required for AI validation")
         
-        if openai_key:
+        if True:  # Always use OpenAI now
             use_openai = True
-        else:
-            llm = EmergentLLM(api_key=emergent_key)
-            use_openai = False
         
         # Get Dra. Paula's enhanced knowledge for consistency checking
         visa_type = case.get('form_code', 'N/A')
@@ -7647,11 +7644,8 @@ async def translate_data_ai(case, friendly_form_data):
         if not openai_key:
             raise ValueError("OPENAI_API_KEY is required for AI validation")
         
-        if openai_key:
+        if True:  # Always use OpenAI now
             use_openai = True
-        else:
-            llm = EmergentLLM(api_key=emergent_key)
-            use_openai = False
         
         # Get Dra. Paula's enhanced knowledge for translation
         visa_type = case.get('form_code', 'N/A')
