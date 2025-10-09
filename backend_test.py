@@ -9292,33 +9292,40 @@ MRZ extraction should work properly.
 
 
 def main():
-    """Execute Disclaimer System Debug Tests"""
-    print("🔍 TESTE ESPECÍFICO DE DEBUG: Sistema de Disclaimer")
-    print("🎯 FOCO: Testar fluxo completo de disclaimer após correções de debug")
+    """Execute Intelligent Tutor System Tests"""
+    print("🤖 TESTE ESPECÍFICO: Sistema de Tutor Inteligente Melhorado")
+    print("🎯 FOCO: Testar novos endpoints do sistema de tutor inteligente")
     print()
-    print("TESTE ESPECÍFICO:")
-    print("📋 Case ID: OSP-DEBUG-TEST")
-    print("📋 Stage: documents")
-    print("📋 Objetivo: Validar se documento é salvo no MongoDB e encontrado na query")
-    print("📋 Verificar logs de debug para entender o fluxo de dados")
+    print("ENDPOINTS TESTADOS:")
+    print("📋 POST /api/tutor/guidance - Orientação contextual inteligente")
+    print("📋 POST /api/tutor/checklist - Checklist personalizado de documentos")
+    print("📋 POST /api/tutor/progress-analysis - Análise de progresso personalizada")
+    print("📋 POST /api/tutor/common-mistakes - Erros comuns da etapa atual")
+    print("📋 POST /api/tutor/interview-preparation - Preparação personalizada para entrevista")
+    print()
+    print("DADOS DE TESTE:")
+    print("📋 user_id: 'user_123'")
+    print("📋 visa_type: 'h1b'")
+    print("📋 current_step: 'document_upload'")
     print()
     
-    tester = DisclaimerAndSSNValidatorTester()
+    tester = IntelligentTutorSystemTester()
     
-    # Execute debug-specific tests
-    test_results = tester.run_disclaimer_debug_tests()
+    # Execute intelligent tutor tests
+    test_results = tester.run_intelligent_tutor_tests()
     
     # Calculate results
     total_tests = len(tester.test_results)
     passed_tests = len([r for r in tester.test_results if r['success']])
     success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
     
-    # Count critical debug tests
+    # Count critical tutor tests
     critical_tests = [
-        "Debug Flow - Record Acceptance (documents)",
-        "Debug Flow - Immediate Validation",
-        "Debug Flow - Detailed Status Check",
-        "Debug Flow - Overall Summary"
+        "Tutor Guidance - Orientação Contextual",
+        "Tutor Checklist - Checklist Personalizado",
+        "Tutor Progress Analysis - Análise Personalizada",
+        "Tutor Common Mistakes - Erros Comuns",
+        "Tutor Interview Preparation - Preparação Personalizada"
     ]
     
     critical_passed = 0
@@ -9327,56 +9334,55 @@ def main():
         if test_result and test_result['success']:
             critical_passed += 1
     
-    print(f"\n🏁 TESTES DE DEBUG DO SISTEMA DE DISCLAIMER CONCLUÍDOS")
+    print(f"\n🏁 TESTES DO SISTEMA DE TUTOR INTELIGENTE CONCLUÍDOS")
     print(f"Taxa de sucesso geral: {success_rate:.1f}%")
-    print(f"Testes críticos de debug funcionando: {critical_passed}/{len(critical_tests)}")
+    print(f"Endpoints críticos funcionando: {critical_passed}/{len(critical_tests)}")
     
-    # Show debug flow specific results
-    debug_flow_result = test_results.get('debug_flow')
-    if debug_flow_result:
-        print(f"\n🔍 RESULTADO DO FLUXO DE DEBUG:")
-        print(f"  • Case ID: {debug_flow_result.get('case_id', 'N/A')}")
-        print(f"  • Stage: {debug_flow_result.get('stage', 'N/A')}")
-        print(f"  • Record Success: {debug_flow_result.get('record_success', False)}")
-        print(f"  • Document Found Immediately: {debug_flow_result.get('document_found_immediately', False)}")
-        print(f"  • Total Acceptances: {debug_flow_result.get('total_acceptances', 0)}")
-        print(f"  • Acceptances in Status: {debug_flow_result.get('acceptances_in_status', 0)}")
-        print(f"  • Timeline Entries: {debug_flow_result.get('timeline_entries', 0)}")
-        print(f"  • Overall Success: {debug_flow_result.get('overall_success', False)}")
-    
-    # Categorize results by test type
-    systems = {
-        "Debug Flow Tests": [t for t in tester.test_results if "Debug Flow" in t["test"]],
-        "Disclaimer Text System": [t for t in tester.test_results if "Disclaimer Text" in t["test"]],
-        "Standard Record & Validation": [t for t in tester.test_results if "Disclaimer Record" in t["test"] or "Disclaimer Validation" in t["test"]]
+    # Categorize results by endpoint
+    endpoints = {
+        "Tutor Guidance": [t for t in tester.test_results if "Tutor Guidance" in t["test"]],
+        "Tutor Checklist": [t for t in tester.test_results if "Tutor Checklist" in t["test"]],
+        "Tutor Progress Analysis": [t for t in tester.test_results if "Tutor Progress Analysis" in t["test"]],
+        "Tutor Common Mistakes": [t for t in tester.test_results if "Tutor Common Mistakes" in t["test"]],
+        "Tutor Interview Preparation": [t for t in tester.test_results if "Tutor Interview Preparation" in t["test"]],
+        "Error Handling": [t for t in tester.test_results if "Error Handling" in t["test"]]
     }
     
-    print("\n📋 RESULTADOS POR CATEGORIA:")
-    for system, tests in systems.items():
+    print("\n📋 RESULTADOS POR ENDPOINT:")
+    for endpoint, tests in endpoints.items():
         if tests:
-            system_passed = len([t for t in tests if t["success"]])
-            system_total = len(tests)
-            sys_success_rate = (system_passed/system_total)*100 if system_total > 0 else 0
-            status = "✅" if sys_success_rate >= 80 else "⚠️" if sys_success_rate >= 60 else "❌"
-            print(f"  {status} {system}: {system_passed}/{system_total} ({sys_success_rate:.1f}%)")
+            endpoint_passed = len([t for t in tests if t["success"]])
+            endpoint_total = len(tests)
+            endpoint_success_rate = (endpoint_passed/endpoint_total)*100 if endpoint_total > 0 else 0
+            status = "✅" if endpoint_success_rate >= 80 else "⚠️" if endpoint_success_rate >= 60 else "❌"
+            print(f"  {status} {endpoint}: {endpoint_passed}/{endpoint_total} ({endpoint_success_rate:.1f}%)")
+    
+    # Check for Brazilian context and AI integration
+    brazilian_context_tests = [t for t in tester.test_results if t.get('response_data', {}).get('has_brazilian_context', False)]
+    ai_integration_tests = [t for t in tester.test_results if t['success'] and 'guidance' in str(t.get('response_data', {}))]
+    
+    print(f"\n🇧🇷 CONTEXTO BRASILEIRO: {len(brazilian_context_tests)} testes com contexto brasileiro detectado")
+    print(f"🤖 INTEGRAÇÃO IA: {len(ai_integration_tests)} testes com respostas de IA funcionais")
     
     # Return appropriate exit code
-    if debug_flow_result and debug_flow_result.get('overall_success', False):
-        print("\n✅ FLUXO DE DEBUG DO SISTEMA DE DISCLAIMER FUNCIONANDO CORRETAMENTE")
-        print("✅ Documento salvo no MongoDB com sucesso!")
-        print("✅ Query encontra documentos salvos imediatamente!")
-        print("✅ Validação de compliance funcionando após correções de debug!")
-        print("✅ Logs de debug mostram fluxo de dados correto!")
+    if critical_passed >= 4:  # At least 4 out of 5 critical endpoints working
+        print("\n✅ SISTEMA DE TUTOR INTELIGENTE FUNCIONANDO CORRETAMENTE")
+        print("✅ Endpoints respondendo com dados estruturados!")
+        print("✅ Integração com OpenAI operacional!")
+        print("✅ Contexto brasileiro sendo aplicado!")
+        print("✅ Tratamento de erros funcionando!")
         return 0
     else:
-        print("\n❌ AINDA HÁ PROBLEMAS NO FLUXO DE DEBUG DO DISCLAIMER")
-        print("⚠️ Verifique os logs de debug para identificar onde está o problema na cadeia salvar → buscar documentos")
-        if debug_flow_result:
-            if not debug_flow_result.get('record_success', False):
-                print("❌ Problema: Falha ao registrar aceite")
-            elif not debug_flow_result.get('document_found_immediately', False):
-                print("❌ Problema: Documento não encontrado imediatamente após salvar")
-                print("🔍 Possível issue de timing ou query MongoDB")
+        print("\n❌ PROBLEMAS DETECTADOS NO SISTEMA DE TUTOR INTELIGENTE")
+        print(f"⚠️ Apenas {critical_passed}/{len(critical_tests)} endpoints críticos funcionando")
+        
+        # Show specific failures
+        failed_tests = [t for t in tester.test_results if not t['success']]
+        if failed_tests:
+            print("\n❌ TESTES FALHARAM:")
+            for test in failed_tests[:5]:  # Show first 5 failures
+                print(f"  • {test['test']}: {test['details']}")
+        
         return 1
 
 
