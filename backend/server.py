@@ -4149,6 +4149,375 @@ async def start_h1b_complete_workflow(request: dict):
             "timestamp": datetime.utcnow().isoformat()
         }
 
+# ===========================================
+# PHASE 4B: PRODUCTION OPTIMIZATION ENDPOINTS
+# ===========================================
+
+@api_router.get("/production/performance/database")
+async def get_database_performance():
+    """Obtém estatísticas de performance do banco de dados"""
+    try:
+        if db_optimization_system:
+            stats = await db_optimization_system.get_database_performance_stats()
+            return {
+                "success": True,
+                "database_performance": stats
+            }
+        else:
+            return {"error": "Database optimization system not initialized"}
+            
+    except Exception as e:
+        logger.error(f"Error getting database performance: {e}")
+        return {
+            "error": "Erro ao obter performance do banco",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.get("/production/security/statistics")
+async def get_security_statistics():
+    """Obtém estatísticas de segurança"""
+    try:
+        stats = security_system.get_security_statistics()
+        return {
+            "success": True,
+            "security_statistics": stats
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting security statistics: {e}")
+        return {
+            "error": "Erro ao obter estatísticas de segurança",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.get("/production/security/events")
+async def get_recent_security_events(limit: int = 50):
+    """Obtém eventos de segurança recentes"""
+    try:
+        events = security_system.get_recent_security_events(limit)
+        return {
+            "success": True,
+            "security_events": events,
+            "count": len(events)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting security events: {e}")
+        return {
+            "error": "Erro ao obter eventos de segurança",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.post("/production/security/block-ip")
+async def manual_block_ip(request: dict):
+    """Bloqueia IP manualmente"""
+    try:
+        ip_address = request.get("ip_address")
+        duration_minutes = request.get("duration_minutes", 60)
+        reason = request.get("reason", "Manual administrative block")
+        
+        if not ip_address:
+            return {"error": "ip_address é obrigatório"}
+        
+        security_system.manually_block_ip(ip_address, duration_minutes, reason)
+        
+        return {
+            "success": True,
+            "message": f"IP {ip_address} blocked for {duration_minutes} minutes",
+            "ip_address": ip_address,
+            "duration_minutes": duration_minutes,
+            "reason": reason
+        }
+        
+    except Exception as e:
+        logger.error(f"Error blocking IP: {e}")
+        return {
+            "error": "Erro ao bloquear IP",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.post("/production/security/unblock-ip")
+async def manual_unblock_ip(request: dict):
+    """Desbloqueia IP manualmente"""
+    try:
+        ip_address = request.get("ip_address")
+        reason = request.get("reason", "Manual administrative unblock")
+        
+        if not ip_address:
+            return {"error": "ip_address é obrigatório"}
+        
+        success = security_system.unblock_ip(ip_address, reason)
+        
+        if success:
+            return {
+                "success": True,
+                "message": f"IP {ip_address} unblocked successfully",
+                "ip_address": ip_address,
+                "reason": reason
+            }
+        else:
+            return {"error": f"IP {ip_address} was not blocked"}
+        
+    except Exception as e:
+        logger.error(f"Error unblocking IP: {e}")
+        return {
+            "error": "Erro ao desbloquear IP",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.post("/production/load-testing/start")
+async def start_load_test(request: dict):
+    """Inicia teste de carga automatizado"""
+    try:
+        test_type = request.get("test_type", "api_critical")
+        base_url = request.get("base_url", "http://localhost:8001")
+        
+        # Validate test type
+        if test_type not in load_testing_system.default_configs:
+            return {
+                "error": f"Invalid test type. Available: {list(load_testing_system.default_configs.keys())}"
+            }
+        
+        # Start load test
+        test_id = await load_testing_system.run_predefined_test(test_type, base_url)
+        
+        return {
+            "success": True,
+            "test_id": test_id,
+            "test_type": test_type,
+            "message": "Load test started successfully"
+        }
+        
+    except Exception as e:
+        logger.error(f"Error starting load test: {e}")
+        return {
+            "error": "Erro ao iniciar teste de carga",
+            "details": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.get("/production/load-testing/{test_id}/status")
+async def get_load_test_status(test_id: str):
+    """Obtém status de teste de carga"""
+    try:
+        # Check if test is still running
+        progress = load_testing_system.get_test_progress(test_id)
+        if progress.get("active"):
+            return {
+                "success": True,
+                "test_id": test_id,
+                "status": "running",
+                "progress": progress
+            }
+        
+        # Get final result if completed
+        result = load_testing_system.get_test_result(test_id)
+        if result:
+            return {
+                "success": True,
+                "test_id": test_id,
+                "status": "completed",
+                "result": {
+                    "test_name": result.test_name,
+                    "total_requests": result.total_requests,
+                    "successful_requests": result.successful_requests,
+                    "failed_requests": result.failed_requests,
+                    "success_rate": result.success_rate,
+                    "avg_response_time": result.avg_response_time,
+                    "percentile_95": result.percentile_95,
+                    "requests_per_second": result.requests_per_second,
+                    "performance_grade": result.performance_grade,
+                    "error_distribution": result.error_distribution,
+                    "start_time": result.start_time.isoformat(),
+                    "end_time": result.end_time.isoformat()
+                }
+            }
+        else:
+            return {"error": "Test not found"}
+            
+    except Exception as e:
+        logger.error(f"Error getting load test status: {e}")
+        return {
+            "error": "Erro ao obter status do teste",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.get("/production/load-testing/available-tests")
+async def get_available_load_tests():
+    """Lista testes de carga disponíveis"""
+    try:
+        configs = load_testing_system.default_configs
+        
+        test_info = []
+        for test_type, config in configs.items():
+            test_info.append({
+                "test_type": test_type,
+                "name": config.test_name,
+                "endpoint": config.target_endpoint,
+                "concurrent_users": config.concurrent_users,
+                "duration_seconds": config.duration_seconds,
+                "success_criteria": config.success_criteria
+            })
+        
+        return {
+            "success": True,
+            "available_tests": test_info,
+            "count": len(test_info)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error listing available tests: {e}")
+        return {
+            "error": "Erro ao listar testes disponíveis",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.post("/production/load-testing/{test_id}/stop")
+async def stop_load_test(test_id: str):
+    """Para teste de carga em execução"""
+    try:
+        success = load_testing_system.stop_test(test_id)
+        
+        if success:
+            return {
+                "success": True,
+                "test_id": test_id,
+                "message": "Load test stopped successfully"
+            }
+        else:
+            return {"error": "Test not found or already completed"}
+            
+    except Exception as e:
+        logger.error(f"Error stopping load test: {e}")
+        return {
+            "error": "Erro ao parar teste de carga",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.post("/production/database/optimize")
+async def optimize_database():
+    """Executa otimização do banco de dados"""
+    try:
+        if not db_optimization_system:
+            return {"error": "Database optimization system not available"}
+        
+        # Optimize main collections
+        collections_to_optimize = ["cases", "documents", "workflow_executions", "notifications", "analytics_events"]
+        
+        optimization_results = []
+        for collection in collections_to_optimize:
+            result = await db_optimization_system.optimize_collection(collection)
+            optimization_results.append(result)
+        
+        return {
+            "success": True,
+            "optimization_results": optimization_results,
+            "collections_optimized": len(collections_to_optimize),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error optimizing database: {e}")
+        return {
+            "error": "Erro ao otimizar banco de dados",
+            "details": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.post("/production/cache/clear")
+async def clear_cache(request: dict):
+    """Limpa cache do sistema"""
+    try:
+        if not db_optimization_system:
+            return {"error": "Database optimization system not available"}
+        
+        pattern = request.get("pattern")  # Optional pattern to clear specific cache
+        
+        await db_optimization_system.clear_cache(pattern)
+        
+        return {
+            "success": True,
+            "message": f"Cache cleared{' for pattern: ' + pattern if pattern else ' completely'}",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error clearing cache: {e}")
+        return {
+            "error": "Erro ao limpar cache",
+            "details": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.get("/production/system/health")
+async def get_system_health():
+    """Verifica saúde geral do sistema (Phase 4B)"""
+    try:
+        health_status = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "overall_status": "healthy",
+            "components": {}
+        }
+        
+        # Check database
+        try:
+            await db.admin.command('ping')
+            health_status["components"]["database"] = {"status": "healthy", "response_time_ms": 0}
+        except Exception as e:
+            health_status["components"]["database"] = {"status": "unhealthy", "error": str(e)}
+            health_status["overall_status"] = "degraded"
+        
+        # Check security system
+        try:
+            security_stats = security_system.get_security_statistics()
+            blocked_count = security_stats.get("blocked_ips", 0)
+            health_status["components"]["security"] = {
+                "status": "healthy" if blocked_count < 100 else "warning",
+                "blocked_ips": blocked_count,
+                "recent_events": security_stats.get("recent_events_last_hour", 0)
+            }
+        except Exception as e:
+            health_status["components"]["security"] = {"status": "unhealthy", "error": str(e)}
+            health_status["overall_status"] = "degraded"
+        
+        # Check load testing system
+        try:
+            active_tests = len(load_testing_system.list_active_tests())
+            health_status["components"]["load_testing"] = {
+                "status": "healthy",
+                "active_tests": active_tests
+            }
+        except Exception as e:
+            health_status["components"]["load_testing"] = {"status": "unhealthy", "error": str(e)}
+            health_status["overall_status"] = "degraded"
+        
+        # Check database optimization
+        try:
+            if db_optimization_system:
+                perf_stats = await db_optimization_system.get_database_performance_stats()
+                cache_hit_rate = perf_stats.get("cache_performance", {}).get("overall_hit_rate", 0)
+                health_status["components"]["database_optimization"] = {
+                    "status": "healthy",
+                    "cache_hit_rate": cache_hit_rate,
+                    "redis_connected": perf_stats.get("cache_performance", {}).get("redis_connected", False)
+                }
+            else:
+                health_status["components"]["database_optimization"] = {"status": "not_available"}
+        except Exception as e:
+            health_status["components"]["database_optimization"] = {"status": "unhealthy", "error": str(e)}
+        
+        return {
+            "success": True,
+            "health": health_status
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting system health: {e}")
+        return {
+            "error": "Erro ao verificar saúde do sistema",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
 @api_router.get("/cases/finalize/{job_id}/status")
 async def get_finalization_status(job_id: str):
     """Obtém status da finalização"""
