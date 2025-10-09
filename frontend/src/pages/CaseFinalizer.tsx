@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { makeApiCall } from "@/utils/api";
+import PacketPreview from "@/components/PacketPreview";
 import { 
   CheckCircle2, 
   AlertCircle, 
@@ -13,7 +14,8 @@ import {
   Package,
   ClipboardList,
   Shield,
-  ExternalLink
+  ExternalLink,
+  Eye
 } from "lucide-react";
 
 interface FinalizationJob {
