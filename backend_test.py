@@ -473,8 +473,8 @@ class DisclaimerAndSSNValidatorTester:
             return None
     
     def test_ssn_requirements_endpoint(self):
-        """TESTE 3: Database Performance Corrected - Sistema de otimização corrigido"""
-        print("🗄️ TESTE 3: Database Performance Corrected - Sistema de otimização corrigido")
+        """TESTE 4: SSN Requirements Endpoint - Requisitos para cartão SSN"""
+        print("📋 TESTE 4: SSN Requirements Endpoint - Requisitos para cartão SSN")
         
         try:
             # Test database performance statistics (deve estar corrigido)
