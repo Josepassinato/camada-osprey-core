@@ -183,11 +183,15 @@ class DatabaseOptimizationSystem:
                 IndexModel([("case_id", ASCENDING), ("status", ASCENDING)])
             ]
             
-            await self.db.workflow_executions.create_indexes(workflow_indexes)
+            try:
+                await self.db.workflow_executions.create_indexes(workflow_indexes)
+                logger.info("✅ Workflow indexes created")
+            except Exception as e:
+                logger.warning(f"⚠️ Workflow indexes error (may already exist): {e}")
             
             # Índices para notifications
             notification_indexes = [
-                IndexModel([("notification_id", ASCENDING)], unique=True),
+                IndexModel([("notification_id", ASCENDING)]),
                 IndexModel([("recipient.user_id", ASCENDING)]),
                 IndexModel([("status", ASCENDING)]),
                 IndexModel([("created_at", DESCENDING)]),
