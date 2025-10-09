@@ -8904,7 +8904,8 @@ def main():
         "Security Hardening": [t for t in tester.test_results if "Security" in t["test"]],
         "Load Testing": [t for t in tester.test_results if "Load Testing" in t["test"]],
         "Database Optimization": [t for t in tester.test_results if "Database Optimization" in t["test"]],
-        "System Health": [t for t in tester.test_results if "System Health" in t["test"]]
+        "System Health": [t for t in tester.test_results if "System Health" in t["test"]],
+        "Rate Limiting": [t for t in tester.test_results if "Rate Limiting" in t["test"]]
     }
     
     print("\n📋 RESULTADOS POR COMPONENTE:")
