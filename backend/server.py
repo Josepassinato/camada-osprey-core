@@ -6412,9 +6412,11 @@ async def analyze_document_with_real_ai(
             return analysis_result
             
         except Exception as validation_error:
-            logger.error(f"❌ Erro na validação Google AI: {str(validation_error)}")
+            logger.error(f"❌❌❌ ERRO NA VALIDAÇÃO GOOGLE AI: {str(validation_error)}")
             import traceback
+            logger.error(f"TRACEBACK COMPLETO:")
             logger.error(traceback.format_exc())
+            logger.error(f"Returning Policy Engine result with {len(analysis_result.get('issues', []))} issues")
             
             # Return Policy Engine results even if Google AI fails
             analysis_result["google_ai_error"] = str(validation_error)
