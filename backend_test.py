@@ -8906,61 +8906,35 @@ MRZ extraction should work properly.
 
 
 def main():
-    """Execute Phase 4B Production Optimization tests"""
-    print("🚀 INICIANDO TESTE COMPLETO DO SISTEMA PHASE 4B PRODUCTION OPTIMIZATION")
-    print("🔒 Security Hardening + Load Testing + Database Optimization + System Health")
-    print("🎯 OBJETIVO: Testar sistema completo de otimização de produção")
+    """Execute Phase 4B Production Optimization Corrections Tests"""
+    print("🚀 TESTE ESPECÍFICO: Validar Correções dos Sistemas Phase 4B")
+    print("🔧 FOCO: Testar as correções implementadas para Phase 4B Production Optimization")
+    print()
+    print("CORREÇÕES TESTADAS:")
+    print("✅ Security patterns mais específicos (evitam false positives)")
+    print("✅ Malicious content scanning desabilitado temporariamente")
+    print("✅ Database indexes com error handling melhorado")
+    print("✅ Sistemas inicializando sem falhas críticas")
     print()
     
     tester = Phase4BProductionOptimizationTester()
     
-    # Execute Phase 4B Production Optimization tests
-    print("📋 Executando testes dos componentes Phase 4B Production Optimization...")
-    print()
-    
-    # Test 1: Security Hardening System
-    print("🔒 TESTE 1: Security Hardening System")
-    tester.test_security_hardening_statistics()
-    print()
-    
-    # Test 2: Security Events and IP Blocking
-    print("🚫 TESTE 2: Security Events and IP Blocking")
-    tester.test_security_events_and_ip_blocking()
-    print()
-    
-    # Test 3: Load Testing System
-    print("⚡ TESTE 3: Load Testing System")
-    tester.test_load_testing_system()
-    print()
-    
-    # Test 4: Database Optimization System
-    print("🗄️ TESTE 4: Database Optimization System")
-    tester.test_database_optimization_system()
-    print()
-    
-    # Test 5: System Health Monitoring
-    print("🏥 TESTE 5: System Health Monitoring")
-    tester.test_system_health_monitoring()
-    print()
-    
-    # Test 6: Rate Limiting Functionality
-    print("🚦 TESTE 6: Rate Limiting Functionality")
-    tester.test_rate_limiting_functionality()
-    print()
+    # Execute Phase 4B Corrections tests
+    test_results = tester.run_phase_4b_corrections_tests()
     
     # Calculate results
     total_tests = len(tester.test_results)
     passed_tests = len([r for r in tester.test_results if r['success']])
     success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
     
-    # Count critical tests for Phase 4B
+    # Count critical Phase 4B correction tests
     critical_tests = [
-        "Security Hardening - Estatísticas de Segurança",
-        "Security System - Funcionalidade Geral", 
-        "Load Testing System - Funcionalidade Geral",
-        "Database Optimization System - Funcionalidade Geral",
-        "System Health - Avaliação Geral",
-        "Rate Limiting - Funcionalidade Geral"
+        "Security System Fixed - Estatísticas Funcionando",
+        "Security System Fixed - Eventos de Segurança",
+        "System Health Corrected - Status Geral",
+        "Database Performance Corrected - Performance do Banco",
+        "Load Testing Availability Corrected - 4 Testes Disponíveis",
+        "Security Middleware Corrected - Requests Legítimos"
     ]
     
     critical_passed = 0
@@ -8969,40 +8943,40 @@ def main():
         if test_result and test_result['success']:
             critical_passed += 1
     
-    print(f"\n🏁 TESTES PHASE 4B PRODUCTION OPTIMIZATION CONCLUÍDOS")
+    print(f"\n🏁 TESTES DAS CORREÇÕES PHASE 4B CONCLUÍDOS")
     print(f"Taxa de sucesso geral: {success_rate:.1f}%")
-    print(f"Verificações críticas: {critical_passed}/{len(critical_tests)}")
+    print(f"Correções críticas funcionando: {critical_passed}/{len(critical_tests)}")
     
-    # Categorize results by component
-    components = {
-        "Security Hardening": [t for t in tester.test_results if "Security" in t["test"]],
-        "Load Testing": [t for t in tester.test_results if "Load Testing" in t["test"]],
-        "Database Optimization": [t for t in tester.test_results if "Database Optimization" in t["test"]],
-        "System Health": [t for t in tester.test_results if "System Health" in t["test"]],
-        "Rate Limiting": [t for t in tester.test_results if "Rate Limiting" in t["test"]]
+    # Categorize results by correction type
+    corrections = {
+        "Security System Fixed": [t for t in tester.test_results if "Security System Fixed" in t["test"]],
+        "System Health Corrected": [t for t in tester.test_results if "System Health Corrected" in t["test"]],
+        "Database Performance Corrected": [t for t in tester.test_results if "Database Performance Corrected" in t["test"]],
+        "Load Testing Availability Corrected": [t for t in tester.test_results if "Load Testing Availability Corrected" in t["test"]],
+        "Security Middleware Corrected": [t for t in tester.test_results if "Security Middleware Corrected" in t["test"]]
     }
     
-    print("\n📋 RESULTADOS POR COMPONENTE:")
-    for component, tests in components.items():
+    print("\n📋 RESULTADOS DAS CORREÇÕES:")
+    for correction, tests in corrections.items():
         if tests:
-            component_passed = len([t for t in tests if t["success"]])
-            component_total = len(tests)
-            comp_success_rate = (component_passed/component_total)*100 if component_total > 0 else 0
-            status = "✅" if comp_success_rate >= 80 else "⚠️" if comp_success_rate >= 60 else "❌"
-            print(f"  {status} {component}: {component_passed}/{component_total} ({comp_success_rate:.1f}%)")
+            correction_passed = len([t for t in tests if t["success"]])
+            correction_total = len(tests)
+            corr_success_rate = (correction_passed/correction_total)*100 if correction_total > 0 else 0
+            status = "✅" if corr_success_rate >= 80 else "⚠️" if corr_success_rate >= 60 else "❌"
+            print(f"  {status} {correction}: {correction_passed}/{correction_total} ({corr_success_rate:.1f}%)")
     
     # Return appropriate exit code
-    if critical_passed >= len(critical_tests) * 0.75 and success_rate >= 70:
-        print("\n✅ SISTEMA PHASE 4B PRODUCTION OPTIMIZATION FUNCIONANDO ADEQUADAMENTE")
-        print("✅ Security Hardening System operacional!")
-        print("✅ Load Testing System funcionando!")
-        print("✅ Database Optimization System ativo!")
-        print("✅ System Health Monitoring completo!")
-        print("✅ Rate Limiting Middleware aplicado!")
+    if critical_passed >= len(critical_tests) * 0.8 and success_rate >= 75:
+        print("\n✅ CORREÇÕES PHASE 4B FUNCIONANDO CORRETAMENTE")
+        print("✅ Security system sem false positives!")
+        print("✅ System health reportando componentes corretos!")
+        print("✅ Database optimization inicializado!")
+        print("✅ Load testing com 4 testes disponíveis!")
+        print("✅ Rate limiting sem bloquear requests legítimos!")
         return 0
     else:
-        print("\n❌ SISTEMA PHASE 4B PRODUCTION OPTIMIZATION PRECISA DE CORREÇÕES")
-        print("⚠️ Verifique os componentes que falharam acima")
+        print("\n❌ ALGUMAS CORREÇÕES PHASE 4B AINDA PRECISAM DE AJUSTES")
+        print("⚠️ Verifique as correções que falharam acima")
         return 1
 
 
