@@ -51,7 +51,7 @@ class DatabaseOptimizationSystem:
     
     def __init__(self, db: AsyncIOMotorDatabase):
         self.db = db
-        self.redis_client: Optional[aioredis.Redis] = None
+        self.redis_client: Optional[Any] = None
         
         # Performance tracking
         self.query_metrics: List[QueryPerformanceMetric] = []
