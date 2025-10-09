@@ -307,46 +307,6 @@ Forneça análise detalhada em português brasileiro com dados REAIS extraídos 
             name_match_status="error",
             type_match_status="error"
         )
-        file_size = len(file_content)
-        if file_size < 50000:  # 50KB
-            validation_issues.append("❌ ARQUIVO MUITO PEQUENO: Pode estar corrompido ou de baixa qualidade")
-        
-        # Simulação de detecção inteligente de tipo de documento
-        # Baseado em características do arquivo (tamanho, formato, etc.)
-        detected_type = self._detect_document_type(file_content, expected_type)
-        type_confidence = 0.75 if detected_type == expected_type else 0.45
-        
-        # Verificação crítica de tipo de documento
-        if detected_type != expected_type:
-            validation_issues.append(f"❌ TIPO DE DOCUMENTO INCORRETO: Esperado '{self._get_document_name(expected_type)}' mas foi detectado '{self._get_document_name(detected_type)}'")
-            type_confidence = 0.30
-        
-        # Validações específicas por tipo esperado
-        if expected_type == 'passport':
-            if file_size > 5000000:  # 5MB
-                validation_issues.append("❌ ARQUIVO MUITO GRANDE: Passaportes geralmente têm arquivos menores")
-            if file_size < 100000:  # 100KB
-                validation_issues.append("❌ ARQUIVO MUITO PEQUENO: Passaporte deve ter resolução adequada para leitura")
-                
-        elif expected_type == 'driver_license':
-            if file_size > 3000000:  # 3MB
-                validation_issues.append("❌ ARQUIVO MUITO GRANDE: CNH deve ser um arquivo mais compacto")
-                
-        elif expected_type == 'birth_certificate':
-            if file_size > 8000000:  # 8MB
-                validation_issues.append("❌ ARQUIVO MUITO GRANDE: Certidão de nascimento deve ter tamanho moderado")
-        
-        # Simulação de verificação de nome
-        name_match_status = "match"
-        if applicant_name and len(applicant_name) < 5:
-            name_match_status = "insufficient_data"
-        elif detected_type != expected_type:
-            name_match_status = "cannot_verify"  # Não pode verificar se o tipo está errado
-            
-        # Simulação de verificação de validade
-        expiry_status = "valid"
-        if detected_type != expected_type:
-            expiry_status = "cannot_verify"  # Não pode verificar se o tipo está errado
         
         # Criar resultado
         is_valid = len(validation_issues) == 0
