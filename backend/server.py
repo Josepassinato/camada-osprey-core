@@ -6316,15 +6316,23 @@ async def analyze_document_with_real_ai(
                 import re
                 # Look for names after "NOME" keyword (common in Brazilian documents)
                 name_patterns = [
-                    r'NOME[:\s]+([A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ\s]+)',
-                    r'Nome[:\s]+([A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ][a-záàâãéèêíïóôõöúçñ\s]+)',
+                    r'NOME[:\s]*\n*([A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ][A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ\s]{5,50})',  # All caps with line breaks
+                    r'Nome[:\s]*\n*([A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ][a-záàâãéèêíïóôõöúçñ\s]{5,50})',  # Mixed case
+                    r'(?:NOME|Name)[:\s]*\n*([A-Z][A-Z\s]{10,})',  # Flexible caps
                 ]
                 for pattern in name_patterns:
-                    match = re.search(pattern, extracted_text)
+                    match = re.search(pattern, extracted_text, re.MULTILINE | re.IGNORECASE)
                     if match:
-                        doc_name = match.group(1).strip()
-                        logger.info(f"🔍 Name extracted from text: {doc_name}")
-                        break
+                        raw_name = match.group(1).strip()
+                        # Clean up: remove extra spaces and newlines
+                        doc_name = ' '.join(raw_name.split())
+                        # Limit to reasonable length (remove numbers/dates that might follow)
+                        doc_name = re.sub(r'\d.*$', '', doc_name).strip()
+                        if len(doc_name) > 5:  # Valid name must have at least 5 chars
+                            logger.info(f"🔍 Name extracted from text: '{doc_name}'")
+                            break
+                        else:
+                            doc_name = None  # Invalid, try next pattern
             
             if doc_name and applicant_name and applicant_name != "Carlos Eduardo Silva":
                 # Normalize names for comparison (remove accents, lowercase)
