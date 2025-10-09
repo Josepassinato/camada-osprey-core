@@ -23,6 +23,9 @@ from real_data_integrator import RealDataIntegrator
 from retry_system import retry_system, retry_operation
 from workflow_engine import WorkflowEngine
 from notification_system import NotificationSystem, NotificationRecipient
+from load_testing_system import load_testing_system
+from security_hardening import security_system, SecurityMiddleware
+from database_optimization import DatabaseOptimizationSystem
 from visa_specifications import get_visa_specifications, get_required_documents, get_key_questions, get_common_issues
 from visa_document_mapping import get_visa_document_requirements
 from emergentintegrations.llm.chat import LlmChat, UserMessage
