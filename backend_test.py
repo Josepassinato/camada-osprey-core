@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-TESTE DO SISTEMA DE VISÃO REAL - REAL VISION ANALYZER
-Testa o novo sistema de visão computacional nativa que usa real_vision_analyzer.py
-Foco específico: análise visual direta de documentos com capacidade nativa
+TESTE DO SISTEMA INTELIGENTE DE PREENCHIMENTO DE FORMULÁRIOS
+Testa o novo sistema de preenchimento inteligente que integra dados dos documentos
+validados com formulários oficiais usando Dra. Ana para validação em tempo real.
+FOCO ESPECÍFICO: Endpoints de preenchimento inteligente e integração com Dra. Ana
 """
 
 import requests
