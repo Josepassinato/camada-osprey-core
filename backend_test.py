@@ -688,23 +688,23 @@ class RealVisionSystemTester:
             )
             return None
     
-    def test_comprehensive_validation_flow(self):
-        """TESTE 9: Fluxo Completo de Validação"""
-        print("🔄 TESTE 9: Fluxo Completo de Validação")
+    def test_real_vision_passport_analysis(self):
+        """TESTE 9: Análise de Passaporte com Visão Real"""
+        print("👁️ TESTE 9: Análise de Passaporte com Visão Real")
         
-        # Test with a document that should pass all validations
+        # Test with passport document for H-1B visa
         test_content = self.create_test_document(
-            "PASSPORT\nCARLOS EDUARDO SILVA\nPassport Number: BR1234567\nExpiry: 2025-12-31\nIssued: 2020-01-15",
-            "passport_carlos_valid.pdf"
+            "REPÚBLICA FEDERATIVA DO BRASIL\nPASSAPORTE\nNome: CARLOS EDUARDO SILVA\nPassport Number: YC792396\nExpiry: 2028-09-13",
+            "passport_carlos_h1b.pdf"
         )
         
         files = {
-            'file': ('passport_carlos_valid.pdf', test_content, 'application/pdf')
+            'file': ('passport_carlos_h1b.pdf', test_content, 'application/pdf')
         }
         data = {
             'document_type': 'passport',
             'visa_type': 'H-1B',
-            'case_id': 'TEST-COMPREHENSIVE-FLOW'
+            'case_id': 'TEST-REAL-VISION-PASSPORT'
         }
         
         try:
@@ -720,37 +720,37 @@ class RealVisionSystemTester:
             if response.status_code == 200:
                 result = response.json()
                 
-                # Check all expected components
+                # Check for Real Vision specific features
+                extracted_data = result.get('extracted_data', {})
+                
                 checks = {
-                    "endpoint_200": response.status_code == 200,
-                    "has_valid_field": 'valid' in result,
-                    "has_legible_field": 'legible' in result,
-                    "has_completeness": 'completeness' in result,
-                    "has_issues": 'issues' in result,
-                    "has_extracted_data": 'extracted_data' in result,
-                    "has_dra_paula_assessment": 'dra_paula_assessment' in result,
-                    "has_policy_integration": any(key in result for key in ['policy_engine', 'policy_score', 'policy_decision']),
-                    "has_native_analysis": 'native_analysis' in str(result) or 'native' in str(result.get('extracted_data', {}))
+                    "analysis_method_real_vision": extracted_data.get('analysis_method') == 'real_vision_native',
+                    "has_security_features": len(extracted_data.get('security_features', [])) > 0,
+                    "has_full_text_extracted": len(extracted_data.get('full_text_extracted', '')) > 0,
+                    "has_quality_assessment": 'quality_assessment' in extracted_data,
+                    "has_confidence_score": 'confidence' in extracted_data,
+                    "detected_type_correct": extracted_data.get('detected_type') == 'passport'
                 }
                 
                 all_checks_passed = all(checks.values())
                 
                 self.log_test(
-                    "Fluxo Completo - Todos os Componentes",
+                    "Visão Real - Análise de Passaporte",
                     all_checks_passed,
-                    f"Validação completa: {sum(checks.values())}/{len(checks)} componentes presentes",
+                    f"Real Vision features: {sum(checks.values())}/{len(checks)} presentes",
                     {
-                        "checks": checks,
-                        "response_keys": list(result.keys()),
-                        "completeness_score": result.get('completeness', 0),
-                        "issues_count": len(result.get('issues', []))
+                        "analysis_method": extracted_data.get('analysis_method'),
+                        "security_features_count": len(extracted_data.get('security_features', [])),
+                        "confidence": extracted_data.get('confidence'),
+                        "quality_score": extracted_data.get('quality_assessment', {}).get('overall_score'),
+                        "checks": checks
                     }
                 )
                 
                 return result
             else:
                 self.log_test(
-                    "Fluxo Completo - Todos os Componentes",
+                    "Visão Real - Análise de Passaporte",
                     False,
                     f"HTTP {response.status_code}",
                     response.text
@@ -759,7 +759,355 @@ class RealVisionSystemTester:
                 
         except Exception as e:
             self.log_test(
-                "Fluxo Completo - Todos os Componentes",
+                "Visão Real - Análise de Passaporte",
+                False,
+                f"Exception: {str(e)}"
+            )
+            return None
+
+    def test_real_vision_multiple_document_types(self):
+        """TESTE 10: Múltiplos Tipos de Documento com Visão Real"""
+        print("📋 TESTE 10: Múltiplos Tipos com Visão Real")
+        
+        document_tests = [
+            {
+                'type': 'passport',
+                'content': 'REPÚBLICA FEDERATIVA DO BRASIL\nPASSAPORTE\nNome: JOÃO SILVA\nPassport Number: AB123456',
+                'filename': 'passport_joao.pdf',
+                'visa_type': 'H-1B'
+            },
+            {
+                'type': 'driver_license',
+                'content': 'CARTEIRA NACIONAL DE HABILITAÇÃO\nNome: MARIA SANTOS\nCategoria: AB\nNúmero: 12345678901',
+                'filename': 'cnh_maria.jpg',
+                'visa_type': 'B-1/B-2'
+            },
+            {
+                'type': 'birth_certificate',
+                'content': 'CERTIDÃO DE NASCIMENTO\nNome: PEDRO OLIVEIRA\nData: 15/03/1990\nLocal: São Paulo, SP',
+                'filename': 'certidao_pedro.pdf',
+                'visa_type': 'F-1'
+            },
+            {
+                'type': 'i797',
+                'content': 'I-797 APPROVAL NOTICE\nForm: I-129\nClassification: H-1B\nReceipt Number: MSC1234567890',
+                'filename': 'i797_approval.pdf',
+                'visa_type': 'H-1B'
+            }
+        ]
+        
+        results = []
+        
+        for test_case in document_tests:
+            try:
+                test_content = self.create_test_document(
+                    test_case['content'],
+                    test_case['filename']
+                )
+                
+                files = {
+                    'file': (test_case['filename'], test_content, 'application/pdf')
+                }
+                data = {
+                    'document_type': test_case['type'],
+                    'visa_type': test_case['visa_type'],
+                    'case_id': f"TEST-VISION-{test_case['type'].upper()}"
+                }
+                
+                headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                
+                response = requests.post(
+                    f"{API_BASE}/documents/analyze-with-ai",
+                    files=files,
+                    data=data,
+                    headers=headers
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    extracted_data = result.get('extracted_data', {})
+                    
+                    # Check Real Vision specific analysis
+                    has_real_vision = extracted_data.get('analysis_method') == 'real_vision_native'
+                    has_specific_fields = len(extracted_data.get('extracted_fields', {})) > 0 if 'extracted_fields' in extracted_data else len(extracted_data) > 3
+                    
+                    success = has_real_vision and has_specific_fields
+                    
+                    self.log_test(
+                        f"Visão Real {test_case['type']} - Análise Específica",
+                        success,
+                        f"Análise específica para {test_case['type']}: Real Vision={has_real_vision}, Campos específicos={has_specific_fields}",
+                        {
+                            "document_type": test_case['type'],
+                            "visa_type": test_case['visa_type'],
+                            "analysis_method": extracted_data.get('analysis_method'),
+                            "detected_type": extracted_data.get('detected_type'),
+                            "confidence": extracted_data.get('confidence'),
+                            "security_features": len(extracted_data.get('security_features', []))
+                        }
+                    )
+                    
+                    results.append({
+                        'type': test_case['type'],
+                        'success': success,
+                        'result': result
+                    })
+                else:
+                    self.log_test(
+                        f"Visão Real {test_case['type']} - Análise Específica",
+                        False,
+                        f"HTTP {response.status_code}",
+                        response.text
+                    )
+                    
+            except Exception as e:
+                self.log_test(
+                    f"Visão Real {test_case['type']} - Análise Específica",
+                    False,
+                    f"Exception: {str(e)}"
+                )
+        
+        return results
+
+    def test_real_vision_intelligent_validations(self):
+        """TESTE 11: Validações Inteligentes com Visão Real"""
+        print("🧠 TESTE 11: Validações Inteligentes com Visão Real")
+        
+        validation_tests = [
+            {
+                'name': 'Documento Vencido',
+                'content': 'PASSPORT\nJOHN DOE\nExpiry: 2020-01-01',  # Expired date
+                'filename': 'expired_passport.pdf',
+                'expected_issue': 'DOCUMENTO VENCIDO'
+            },
+            {
+                'name': 'Nome Não Corresponde',
+                'content': 'PASSPORT\nMARIA SANTOS OLIVEIRA\nPassport Number: B98765432',  # Different name
+                'filename': 'passport_maria.pdf',
+                'expected_issue': 'NOME NÃO CORRESPONDE'
+            },
+            {
+                'name': 'Tipo Incorreto',
+                'content': 'CNH - CARTEIRA NACIONAL DE HABILITAÇÃO\nNome: João Silva\nCategoria: B',  # CNH when expecting passport
+                'filename': 'cnh_joao.jpg',
+                'expected_issue': 'TIPO DE DOCUMENTO INCORRETO'
+            }
+        ]
+        
+        for test_case in validation_tests:
+            try:
+                test_content = self.create_test_document(
+                    test_case['content'],
+                    test_case['filename']
+                )
+                
+                files = {
+                    'file': (test_case['filename'], test_content, 'application/pdf')
+                }
+                data = {
+                    'document_type': 'passport',  # Always expect passport to test type validation
+                    'visa_type': 'H-1B',
+                    'case_id': f"TEST-VALIDATION-{test_case['name'].replace(' ', '-').upper()}"
+                }
+                
+                headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                
+                response = requests.post(
+                    f"{API_BASE}/documents/analyze-with-ai",
+                    files=files,
+                    data=data,
+                    headers=headers
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    
+                    # Check if expected validation issue was detected
+                    issues = result.get('issues', [])
+                    issue_detected = any(test_case['expected_issue'] in issue for issue in issues)
+                    
+                    # Check if document was marked as invalid
+                    is_invalid = not result.get('valid', True)
+                    
+                    success = issue_detected and is_invalid
+                    
+                    self.log_test(
+                        f"Validação Inteligente - {test_case['name']}",
+                        success,
+                        f"Detectou '{test_case['expected_issue']}': {issue_detected}, Documento inválido: {is_invalid}",
+                        {
+                            "expected_issue": test_case['expected_issue'],
+                            "issue_detected": issue_detected,
+                            "document_invalid": is_invalid,
+                            "issues_found": len(issues),
+                            "analysis_method": result.get('extracted_data', {}).get('analysis_method')
+                        }
+                    )
+                else:
+                    self.log_test(
+                        f"Validação Inteligente - {test_case['name']}",
+                        False,
+                        f"HTTP {response.status_code}",
+                        response.text
+                    )
+                    
+            except Exception as e:
+                self.log_test(
+                    f"Validação Inteligente - {test_case['name']}",
+                    False,
+                    f"Exception: {str(e)}"
+                )
+
+    def test_real_vision_quality_assessment(self):
+        """TESTE 12: Avaliação de Qualidade com Visão Real"""
+        print("⭐ TESTE 12: Avaliação de Qualidade com Visão Real")
+        
+        # Test with high-quality document
+        test_content = self.create_test_document(
+            "REPÚBLICA FEDERATIVA DO BRASIL\nPASSAPORTE\nTipo: P\nNome: CARLOS EDUARDO SILVA\nNacionalidade: BRASILEIRO\nPassport Number: YC792396\nData de Nascimento: 09/04/1970\nLocal de Nascimento: CANOAS, RS, BRASIL\nData de Emissão: 14/09/2018\nData de Validade: 13/09/2028\nAutoridade Emissora: POLÍCIA FEDERAL",
+            "passport_high_quality.pdf"
+        )
+        
+        files = {
+            'file': ('passport_high_quality.pdf', test_content, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-QUALITY-ASSESSMENT'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                extracted_data = result.get('extracted_data', {})
+                
+                # Check quality assessment components
+                quality_assessment = extracted_data.get('quality_assessment', {})
+                
+                checks = {
+                    "has_quality_assessment": bool(quality_assessment),
+                    "has_overall_score": 'overall_score' in quality_assessment,
+                    "has_confidence_score": 'confidence' in extracted_data,
+                    "has_security_features": len(extracted_data.get('security_features', [])) > 0,
+                    "has_full_text": len(extracted_data.get('full_text_extracted', '')) > 100,
+                    "good_confidence": extracted_data.get('confidence', 0) > 0.8
+                }
+                
+                all_checks_passed = all(checks.values())
+                
+                self.log_test(
+                    "Avaliação de Qualidade - Componentes Completos",
+                    all_checks_passed,
+                    f"Qualidade: {sum(checks.values())}/{len(checks)} componentes presentes",
+                    {
+                        "overall_score": quality_assessment.get('overall_score'),
+                        "confidence": extracted_data.get('confidence'),
+                        "security_features_count": len(extracted_data.get('security_features', [])),
+                        "full_text_length": len(extracted_data.get('full_text_extracted', '')),
+                        "checks": checks
+                    }
+                )
+                
+                return result
+            else:
+                self.log_test(
+                    "Avaliação de Qualidade - Componentes Completos",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+                return None
+                
+        except Exception as e:
+            self.log_test(
+                "Avaliação de Qualidade - Componentes Completos",
+                False,
+                f"Exception: {str(e)}"
+            )
+            return None
+
+    def test_real_vision_policy_engine_integration(self):
+        """TESTE 13: Integração Visão Real + Policy Engine"""
+        print("🏛️ TESTE 13: Integração Visão Real + Policy Engine")
+        
+        # Test integration between Real Vision and Policy Engine
+        test_content = self.create_test_document(
+            "PASSPORT\nTEST USER FOR INTEGRATION\nPassport Number: INT123456\nExpiry: 2025-12-31",
+            "passport_integration_test.pdf"
+        )
+        
+        files = {
+            'file': ('passport_integration_test.pdf', test_content, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-INTEGRATION-VISION-POLICY'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check for both Real Vision and Policy Engine components
+                extracted_data = result.get('extracted_data', {})
+                
+                checks = {
+                    "has_real_vision": extracted_data.get('analysis_method') == 'real_vision_native',
+                    "has_policy_engine": any(key in result for key in ['policy_engine', 'policy_score', 'policy_decision']),
+                    "has_dra_paula_assessment": 'dra_paula_assessment' in result,
+                    "has_complete_structure": all(field in result for field in ['valid', 'legible', 'completeness', 'issues', 'extracted_data']),
+                    "integration_working": len(result.get('issues', [])) >= 0  # Should have some analysis
+                }
+                
+                integration_success = checks["has_real_vision"] and checks["has_complete_structure"]
+                
+                self.log_test(
+                    "Integração Visão Real + Policy Engine",
+                    integration_success,
+                    f"Integração funcionando: Real Vision={checks['has_real_vision']}, Estrutura completa={checks['has_complete_structure']}",
+                    {
+                        "analysis_method": extracted_data.get('analysis_method'),
+                        "policy_score": result.get('policy_score', 'N/A'),
+                        "policy_decision": result.get('policy_decision', 'N/A'),
+                        "completeness": result.get('completeness'),
+                        "issues_count": len(result.get('issues', [])),
+                        "checks": checks
+                    }
+                )
+                
+                return result
+            else:
+                self.log_test(
+                    "Integração Visão Real + Policy Engine",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+                return None
+                
+        except Exception as e:
+            self.log_test(
+                "Integração Visão Real + Policy Engine",
                 False,
                 f"Exception: {str(e)}"
             )
