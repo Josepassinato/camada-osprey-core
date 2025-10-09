@@ -10841,6 +10841,295 @@ def main():
         return 1
 
 
+    def test_full_analysis_pipeline_integration(self):
+        """SCENARIO 4: Full Analysis Pipeline - Test complete flow Policy Engine + Real Vision"""
+        print("🎯 SCENARIO 4: Full Analysis Pipeline Integration")
+        print("Cenário: Testar fluxo completo Policy Engine + Real Vision Analysis")
+        
+        try:
+            # Create comprehensive case with all data
+            case_data = {
+                "form_code": "H-1B",
+                "session_token": f"pipeline_test_{uuid.uuid4().hex[:8]}"
+            }
+            
+            case_response = self.session.post(
+                f"{API_BASE}/auto-application/start",
+                json=case_data
+            )
+            
+            case_id = None
+            if case_response.status_code == 200:
+                case_result = case_response.json()
+                case_id = case_result.get('case', {}).get('case_id')
+                
+                # Add comprehensive form data
+                comprehensive_data = {
+                    "basic_info": {
+                        "firstName": "Ana",
+                        "lastName": "Costa",
+                        "email": "ana.costa@test.com",
+                        "phone": "+55 11 98765-4321",
+                        "dateOfBirth": "1988-08-20",
+                        "placeOfBirth": "Brasília, DF, Brasil",
+                        "nationality": "Brazilian",
+                        "passportNumber": "BR987654321"
+                    },
+                    "professional_info": {
+                        "current_job": "Software Engineer",
+                        "company": "Tech Solutions Ltd",
+                        "salary": "95000",
+                        "education": "Computer Science Degree"
+                    }
+                }
+                
+                update_response = self.session.patch(
+                    f"{API_BASE}/auto-application/case/{case_id}",
+                    json={
+                        "form_data": comprehensive_data,
+                        "current_step": "documents"
+                    }
+                )
+            
+            # Test with comprehensive passport document
+            comprehensive_passport = """PASSPORT
+REPÚBLICA FEDERATIVA DO BRASIL
+PASSPORT
+Type: P
+Country Code: BRA
+Passport No: BR987654321
+Surname: COSTA
+Given Names: ANA MARIA
+Nationality: BRAZILIAN
+Date of Birth: 20/08/1988
+Sex: F
+Place of Birth: BRASILIA, DF
+Date of Issue: 01/03/2021
+Date of Expiry: 01/03/2031
+Authority: DPF
+Issuing Office: DPF/DF
+Security Features: Biometric chip, Holographic elements, Watermarks
+MRZ Line 1: P<BRAANA<MARIA<COSTA<<<<<<<<<<<<<<<<<<<<<<<<<
+MRZ Line 2: BR9876543210BRA8808201F3103015<<<<<<<<<<<<<<08
+""" + "Comprehensive passport with all security features and data. " * 3000
+            
+            files = {
+                'file': ('comprehensive_passport.pdf', comprehensive_passport.encode('utf-8'), 'application/pdf')
+            }
+            data = {
+                'document_type': 'passport',
+                'visa_type': 'H-1B',
+                'case_id': case_id or 'PIPELINE-TEST'
+            }
+            
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check Policy Engine integration
+                policy_engine = result.get('policy_engine', {})
+                policy_score = result.get('policy_score', 0)
+                policy_decision = result.get('policy_decision', '')
+                
+                policy_engine_working = policy_score > 0 or policy_decision != '' or policy_engine
+                
+                self.log_test(
+                    "Full Pipeline - Policy Engine Integration",
+                    policy_engine_working,
+                    f"✅ Policy Engine active: score={policy_score}, decision='{policy_decision}'",
+                    {
+                        "policy_engine_working": policy_engine_working,
+                        "policy_score": policy_score,
+                        "policy_decision": policy_decision,
+                        "policy_engine_data": policy_engine
+                    }
+                )
+                
+                # Check Real Vision Analysis integration
+                extracted_data = result.get('extracted_data', {})
+                analysis_method = extracted_data.get('analysis_method', '')
+                confidence = extracted_data.get('confidence', 0)
+                
+                real_vision_integrated = 'real_vision' in analysis_method.lower() if analysis_method else False
+                
+                self.log_test(
+                    "Full Pipeline - Real Vision Integration",
+                    real_vision_integrated,
+                    f"✅ Real Vision integrated: method='{analysis_method}', confidence={confidence}",
+                    {
+                        "real_vision_integrated": real_vision_integrated,
+                        "analysis_method": analysis_method,
+                        "confidence": confidence
+                    }
+                )
+                
+                # Check complete pipeline results
+                completeness = result.get('completeness', 0)
+                is_valid = result.get('valid', False)
+                dra_paula_assessment = result.get('dra_paula_assessment', '')
+                
+                pipeline_success = completeness >= 80 and is_valid and len(dra_paula_assessment) > 100
+                
+                self.log_test(
+                    "Full Pipeline - Complete Integration",
+                    pipeline_success,
+                    f"✅ Pipeline complete: completeness={completeness}%, valid={is_valid}, assessment={len(dra_paula_assessment)} chars",
+                    {
+                        "pipeline_success": pipeline_success,
+                        "completeness": completeness,
+                        "valid": is_valid,
+                        "assessment_length": len(dra_paula_assessment),
+                        "case_id": case_id or 'PIPELINE-TEST'
+                    }
+                )
+                
+                # Check that applicant name from case was used correctly
+                name_used_correctly = 'ana' in dra_paula_assessment.lower() or 'costa' in dra_paula_assessment.lower()
+                
+                self.log_test(
+                    "Full Pipeline - Applicant Name Usage",
+                    name_used_correctly,
+                    f"✅ Applicant name used: found_in_assessment={name_used_correctly}",
+                    {
+                        "name_used_correctly": name_used_correctly,
+                        "expected_name": "Ana Costa",
+                        "assessment_contains_name": name_used_correctly
+                    }
+                )
+                
+            else:
+                self.log_test(
+                    "Full Pipeline - Document Processing",
+                    False,
+                    f"❌ HTTP {response.status_code}",
+                    {"status_code": response.status_code, "error": response.text[:200]}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "Full Pipeline - Exception",
+                False,
+                f"❌ Exception: {str(e)}"
+            )
+
+    def run_critical_bug_fix_tests(self):
+        """Run critical tests for document analysis bug fix"""
+        print("🚀 INICIANDO TESTES CRÍTICOS - DOCUMENT ANALYSIS BUG FIX")
+        print("=" * 80)
+        print("🔧 BUG CORRIGIDO: NoneType error em case_doc.get('form_data', {}).get('basic_info')")
+        print("🎯 FOCO: Real Vision Analysis + Precision Improvement + Error Prevention")
+        print("=" * 80)
+        print()
+        
+        # Run critical test scenarios from review request
+        critical_test_methods = [
+            self.test_real_vision_analysis_with_case_data,
+            self.test_document_analysis_without_case_data,
+            self.test_precision_verification_comparison,
+            self.test_full_analysis_pipeline_integration
+        ]
+        
+        for test_method in critical_test_methods:
+            try:
+                test_method()
+            except Exception as e:
+                print(f"❌ ERRO CRÍTICO em {test_method.__name__}: {str(e)}")
+                self.log_test(
+                    f"CRITICAL ERROR - {test_method.__name__}",
+                    False,
+                    f"❌ Exception: {str(e)}"
+                )
+            print()
+        
+        # Generate critical test summary
+        self.generate_critical_test_summary()
+
+    def generate_critical_test_summary(self):
+        """Generate summary focused on critical bug fix results"""
+        print("=" * 80)
+        print("📊 RESUMO DOS TESTES CRÍTICOS - DOCUMENT ANALYSIS BUG FIX")
+        print("=" * 80)
+        
+        # Count results by category
+        total_tests = len(self.test_results)
+        passed_tests = sum(1 for result in self.test_results if result['success'])
+        failed_tests = total_tests - passed_tests
+        
+        # Categorize by test type
+        real_vision_tests = [r for r in self.test_results if 'real vision' in r['test'].lower()]
+        precision_tests = [r for r in self.test_results if 'precision' in r['test'].lower()]
+        error_prevention_tests = [r for r in self.test_results if 'error' in r['test'].lower() or 'minimal' in r['test'].lower()]
+        pipeline_tests = [r for r in self.test_results if 'pipeline' in r['test'].lower() or 'integration' in r['test'].lower()]
+        
+        print(f"📈 RESULTADOS GERAIS:")
+        print(f"   Total de testes: {total_tests}")
+        print(f"   ✅ Passou: {passed_tests}")
+        print(f"   ❌ Falhou: {failed_tests}")
+        print(f"   📊 Taxa de sucesso: {(passed_tests/total_tests*100):.1f}%")
+        print()
+        
+        print(f"🎯 RESULTADOS POR CATEGORIA:")
+        
+        def print_category_results(category_name, tests):
+            if tests:
+                passed = sum(1 for t in tests if t['success'])
+                total = len(tests)
+                print(f"   {category_name}: {passed}/{total} ({'✅' if passed == total else '⚠️' if passed > 0 else '❌'})")
+        
+        print_category_results("Real Vision Analysis", real_vision_tests)
+        print_category_results("Precision Improvement", precision_tests)
+        print_category_results("Error Prevention", error_prevention_tests)
+        print_category_results("Pipeline Integration", pipeline_tests)
+        print()
+        
+        # Critical issues
+        critical_failures = [r for r in self.test_results if not r['success'] and any(keyword in r['test'].lower() for keyword in ['real vision', 'precision', 'pipeline'])]
+        
+        if critical_failures:
+            print("🚨 FALHAS CRÍTICAS:")
+            for failure in critical_failures:
+                print(f"   ❌ {failure['test']}: {failure['details']}")
+            print()
+        
+        # Success indicators
+        success_indicators = [r for r in self.test_results if r['success'] and any(keyword in r['test'].lower() for keyword in ['real vision', 'precision', 'pipeline'])]
+        
+        if success_indicators:
+            print("✅ SUCESSOS CRÍTICOS:")
+            for success in success_indicators[:5]:  # Show top 5
+                print(f"   ✅ {success['test']}: {success['details']}")
+            print()
+        
+        # Final assessment
+        critical_tests = [r for r in self.test_results if any(keyword in r['test'].lower() for keyword in ['real vision', 'precision', 'pipeline'])]
+        critical_passed = [r for r in critical_tests if r['success']]
+        critical_success_rate = len(critical_passed) / max(1, len(critical_tests))
+        
+        print("🎯 AVALIAÇÃO FINAL DO BUG FIX:")
+        if critical_success_rate >= 0.8:
+            print("   ✅ BUG FIX FUNCIONANDO CORRETAMENTE")
+            print("   ✅ Real Vision Analysis operacional")
+            print("   ✅ Precisão melhorada")
+            print("   ✅ Erros NoneType prevenidos")
+        elif critical_success_rate >= 0.5:
+            print("   ⚠️ BUG FIX PARCIALMENTE FUNCIONANDO")
+            print("   ⚠️ Alguns componentes ainda com problemas")
+        else:
+            print("   ❌ BUG FIX NÃO RESOLVEU COMPLETAMENTE")
+            print("   ❌ Problemas críticos persistem")
+        
+        print(f"   📊 Taxa de sucesso crítico: {(critical_success_rate*100):.1f}%")
+        print("=" * 80)
+
+
 if __name__ == "__main__":
     import sys
     sys.exit(main())
