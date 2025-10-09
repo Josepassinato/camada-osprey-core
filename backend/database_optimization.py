@@ -106,6 +106,11 @@ class DatabaseOptimizationSystem:
         """
         Inicializa conexão Redis para cache
         """
+        if not REDIS_AVAILABLE:
+            logger.warning("⚠️ Redis library not available, using in-memory cache")
+            self.redis_client = None
+            return
+            
         try:
             # Try to connect to Redis (optional)
             self.redis_client = await aioredis.from_url(
