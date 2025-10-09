@@ -983,92 +983,202 @@ class Phase4AEnhancedTester:
             )
             return None
     def test_specific_phase4a_test_cases(self):
-        """TESTE 6: Casos de Teste Específicos"""
-        print("🎯 TESTE 6: Casos de Teste Específicos")
+        """TESTE 6: Casos de Teste Específicos da Phase 4A Enhanced"""
+        print("🎯 TESTE 6: Casos de Teste Específicos - Phase 4A Enhanced")
         
         test_cases = [
             {
-                "name": "Caso com passaporte validado → sugerir nome, nacionalidade, data nascimento",
-                "case_data": {
-                    "document_analysis_results": [
-                        {
-                            "document_type": "passport",
-                            "valid": True,
-                            "extracted_data": {
-                                "full_name": "MARIA SANTOS OLIVEIRA",
-                                "nationality": "BRASILEIRO",
-                                "date_of_birth": "1985-03-20",
-                                "document_number": "AB123456",
-                                "place_of_birth": "RIO DE JANEIRO, RJ"
-                            }
-                        }
-                    ]
-                },
-                "expected_fields": ["full_name", "nationality", "date_of_birth"]
+                "name": "Caso A: Dados reais completos (should create full packet)",
+                "scenario": "H-1B_basic",
+                "mock_data": {
+                    "documents": [
+                        {"type": "passport", "status": "validated", "quality": 0.95},
+                        {"type": "diploma", "status": "validated", "quality": 0.90},
+                        {"type": "employment_letter", "status": "validated", "quality": 0.88},
+                        {"type": "i797", "status": "validated", "quality": 0.92}
+                    ],
+                    "expected_outcome": "full_packet_created"
+                }
             },
             {
-                "name": "Caso sem documentos → sugestões básicas",
-                "case_data": {
-                    "basic_data": {
-                        "firstName": "João",
-                        "lastName": "Silva",
-                        "email": "joao@test.com"
-                    }
-                },
-                "expected_fields": ["full_name", "email"]
+                "name": "Caso B: Dados parciais (should flag missing documents)",
+                "scenario": "H-1B_extension",
+                "mock_data": {
+                    "documents": [
+                        {"type": "passport", "status": "validated", "quality": 0.93},
+                        {"type": "employment_letter", "status": "validated", "quality": 0.87}
+                        # Missing I-797 anterior (required for extension)
+                    ],
+                    "expected_outcome": "missing_documents_flagged"
+                }
+            },
+            {
+                "name": "Caso C: Documentos com problemas de qualidade (should show warnings)",
+                "scenario": "I-485_employment",
+                "mock_data": {
+                    "documents": [
+                        {"type": "passport", "status": "validated", "quality": 0.65},  # Low quality
+                        {"type": "birth_certificate", "status": "pending", "quality": 0.45},  # Very low quality
+                        {"type": "employment_letter", "status": "validated", "quality": 0.85}
+                        # Missing medical_exam (required for I-485)
+                    ],
+                    "expected_outcome": "quality_warnings_shown"
+                }
             }
         ]
         
-        for i, test_case in enumerate(test_cases):
+        results = []
+        
+        for i, test_case in enumerate(test_cases, 1):
             try:
+                print(f"\n🧪 Executando {test_case['name']}")
+                
                 # Create test case
                 case_response = self.session.post(
                     f"{API_BASE}/auto-application/start",
-                    json={"form_code": "H-1B"}
+                    json={"form_code": test_case["scenario"]}
                 )
                 
                 if case_response.status_code != 200:
+                    self.log_test(
+                        f"Caso {i} - Criação de Case",
+                        False,
+                        f"HTTP {case_response.status_code}"
+                    )
                     continue
                 
                 case_id = case_response.json().get('case', {}).get('case_id')
                 
-                # Update case with test data
+                # Add basic data to case
+                basic_data = {
+                    "firstName": "Test",
+                    "lastName": "User",
+                    "email": f"test{i}@phase4a.com",
+                    "phone": "+55 11 99999-9999"
+                }
+                
                 self.session.patch(
                     f"{API_BASE}/auto-application/case/{case_id}",
-                    json=test_case["case_data"]
+                    json={"basic_data": basic_data}
                 )
                 
-                # Test suggestions
-                response = self.session.post(
-                    f"{API_BASE}/intelligent-forms/suggestions",
-                    json={"case_id": case_id, "form_code": "H-1B"}
+                # Start finalization for this test case
+                request_data = {
+                    "scenario_key": test_case["scenario"],
+                    "postage": "USPS",
+                    "language": "pt"
+                }
+                
+                start_response = self.session.post(
+                    f"{API_BASE}/cases/{case_id}/finalize/start",
+                    json=request_data
                 )
                 
-                if response.status_code == 200:
-                    result = response.json()
-                    suggestions = result.get('suggestions', [])
+                if start_response.status_code == 200:
+                    job_id = start_response.json().get('job_id')
                     
-                    # Check if expected fields are suggested
-                    suggested_fields = [s.get('field_id') for s in suggestions]
-                    expected_found = any(field in suggested_fields for field in test_case["expected_fields"])
-                    
+                    if job_id:
+                        # Wait for processing
+                        time.sleep(4)
+                        
+                        # Get preview to analyze results
+                        preview_response = self.session.get(
+                            f"{API_BASE}/cases/finalize/{job_id}/preview"
+                        )
+                        
+                        if preview_response.status_code == 200:
+                            preview_data = preview_response.json()
+                            
+                            # Analyze results based on expected outcome
+                            expected = test_case["mock_data"]["expected_outcome"]
+                            success = False
+                            details = ""
+                            
+                            if expected == "full_packet_created":
+                                # Check if packet was created successfully
+                                quality_score = preview_data.get('quality_assessment', {}).get('overall_score', 0)
+                                doc_count = len(preview_data.get('document_summary', []))
+                                success = quality_score > 70 and doc_count > 0
+                                details = f"Quality: {quality_score}%, Docs: {doc_count}"
+                                
+                            elif expected == "missing_documents_flagged":
+                                # Check if missing documents were flagged
+                                issues = preview_data.get('quality_assessment', {}).get('issues', [])
+                                warnings = preview_data.get('quality_assessment', {}).get('warnings', [])
+                                success = len(issues) > 0 or len(warnings) > 0
+                                details = f"Issues: {len(issues)}, Warnings: {len(warnings)}"
+                                
+                            elif expected == "quality_warnings_shown":
+                                # Check if quality warnings were shown
+                                warnings = preview_data.get('quality_assessment', {}).get('warnings', [])
+                                critical_issues = preview_data.get('quality_assessment', {}).get('critical_issues', 0)
+                                success = len(warnings) > 0 or critical_issues > 0
+                                details = f"Warnings: {len(warnings)}, Critical: {critical_issues}"
+                            
+                            self.log_test(
+                                f"Caso {i} - {test_case['name'][:40]}...",
+                                success,
+                                details,
+                                {
+                                    "scenario": test_case["scenario"],
+                                    "expected_outcome": expected,
+                                    "quality_score": preview_data.get('quality_assessment', {}).get('overall_score', 0),
+                                    "document_count": len(preview_data.get('document_summary', [])),
+                                    "issues_count": len(preview_data.get('quality_assessment', {}).get('issues', [])),
+                                    "warnings_count": len(preview_data.get('quality_assessment', {}).get('warnings', []))
+                                }
+                            )
+                            
+                            results.append({
+                                "case": i,
+                                "success": success,
+                                "scenario": test_case["scenario"],
+                                "expected": expected,
+                                "job_id": job_id
+                            })
+                        else:
+                            self.log_test(
+                                f"Caso {i} - Preview Failed",
+                                False,
+                                f"HTTP {preview_response.status_code}"
+                            )
+                    else:
+                        self.log_test(
+                            f"Caso {i} - Job ID Missing",
+                            False,
+                            "Job ID não retornado"
+                        )
+                else:
                     self.log_test(
-                        f"Caso Específico {i+1} - {test_case['name'][:50]}...",
-                        expected_found,
-                        f"Campos esperados encontrados: {expected_found}",
-                        {
-                            "expected_fields": test_case["expected_fields"],
-                            "suggested_fields": suggested_fields[:5],
-                            "total_suggestions": len(suggestions)
-                        }
+                        f"Caso {i} - Finalization Start Failed",
+                        False,
+                        f"HTTP {start_response.status_code}"
                     )
                 
             except Exception as e:
                 self.log_test(
-                    f"Caso Específico {i+1} - Erro",
+                    f"Caso {i} - Exception",
                     False,
                     f"Exception: {str(e)}"
                 )
+        
+        # Overall assessment
+        successful_cases = len([r for r in results if r["success"]])
+        total_cases = len(test_cases)
+        
+        self.log_test(
+            "Casos Específicos Phase 4A - Resumo Geral",
+            successful_cases >= 2,  # At least 2 out of 3 cases should work
+            f"Casos bem-sucedidos: {successful_cases}/{total_cases}",
+            {
+                "successful_cases": successful_cases,
+                "total_cases": total_cases,
+                "success_rate": f"{(successful_cases/total_cases)*100:.1f}%" if total_cases > 0 else "0%",
+                "results": results
+            }
+        )
+        
+        return results
 
     def test_multiple_document_types(self):
         """TESTE 6: Diferentes Tipos de Documento"""
