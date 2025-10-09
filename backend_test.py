@@ -7463,22 +7463,6 @@ if __name__ == "__main__":
     import sys
     sys.exit(main())
         
-        # PRIORITY: DOCUMENT UPLOAD FUNCTIONALITY TESTING (as requested in review)
-        print("📄 PRIORITY: DOCUMENT UPLOAD FUNCTIONALITY COMPREHENSIVE TESTING")
-        print("-" * 60)
-        self.test_document_upload_functionality()
-        print()
-        
-        # PRIORITY: ADVANCED ANALYTICS SYSTEM TESTING (as requested in review)
-        print("📊 PRIORITY: ADVANCED ANALYTICS SYSTEM COMPREHENSIVE TESTING")
-        print("-" * 60)
-        self.test_advanced_analytics_system()
-        
-        # SECOND: NEW DOCUMENT VALIDATORS TESTING
-        print("\n🆕 NEW DOCUMENT VALIDATORS COMPREHENSIVE TESTING")
-        print("-" * 60)
-        self.test_new_document_validators()
-        
         # THIRD: OCR Real Engine Testing
         print("\n🔍 OCR REAL ENGINE COMPREHENSIVE TESTING")
         print("-" * 60)
