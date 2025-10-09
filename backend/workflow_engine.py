@@ -382,7 +382,7 @@ class WorkflowEngine:
                 execution.progress = len(completed_steps) / len(execution.steps) * 100
                 
                 # Salvar estado
-                if self.db:
+                if self.db is not None:
                     await self._save_execution_to_db(execution)
             
             execution.completed_at = datetime.now(timezone.utc)
