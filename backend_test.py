@@ -431,7 +431,7 @@ class Phase4AEnhancedTester:
             )
             return None
     
-    def test_intelligent_forms_auto_fill_endpoint(self):
+    def test_preview_system_endpoints(self):
         """TESTE 3: POST /api/intelligent-forms/auto-fill"""
         print("🚀 TESTE 3: Endpoint de Preenchimento Automático")
         
