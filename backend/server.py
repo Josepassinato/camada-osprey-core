@@ -7213,6 +7213,11 @@ async def startup_db_client():
         
         logger.info("Successfully connected to MongoDB!")
         
+        # Initialize Case Finalizer with Real Data Integration
+        global case_finalizer_complete
+        case_finalizer_complete = CaseFinalizerComplete(db)
+        logger.info("✅ Case Finalizer with Real Data Integration initialized")
+        
         # Initialize Advanced Analytics System
         if ANALYTICS_AVAILABLE:
             try:
