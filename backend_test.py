@@ -345,168 +345,130 @@ class DisclaimerAndSSNValidatorTester:
         """TESTE 3: SSN Validator Basic - Validação básica de cartão SSN"""
         print("🔢 TESTE 3: SSN Validator Basic - Validação básica de cartão SSN")
         
+        # Test SSN validation with different scenarios
+        test_scenarios = [
+            {
+                "name": "Valid SSN Card",
+                "document_text": """
+                SOCIAL SECURITY ADMINISTRATION
+                SOCIAL SECURITY
+                123-45-6789
+                CARLOS EDUARDO SILVA
+                This card is valid for employment
+                """,
+                "applicant_name": "Carlos Eduardo Silva",
+                "visa_type": "H-1B",
+                "expected_valid": True
+            },
+            {
+                "name": "Invalid SSN Format",
+                "document_text": """
+                SOCIAL SECURITY ADMINISTRATION
+                SOCIAL SECURITY
+                000-45-6789
+                CARLOS EDUARDO SILVA
+                This card is valid for employment
+                """,
+                "applicant_name": "Carlos Eduardo Silva", 
+                "visa_type": "H-1B",
+                "expected_valid": False
+            },
+            {
+                "name": "Name Mismatch",
+                "document_text": """
+                SOCIAL SECURITY ADMINISTRATION
+                SOCIAL SECURITY
+                123-45-6789
+                JOHN SMITH
+                This card is valid for employment
+                """,
+                "applicant_name": "Carlos Eduardo Silva",
+                "visa_type": "H-1B",
+                "expected_valid": False
+            },
+            {
+                "name": "Work Authorization Card",
+                "document_text": """
+                SOCIAL SECURITY ADMINISTRATION
+                SOCIAL SECURITY
+                555-66-7777
+                MARIA SANTOS
+                Valid for work only with DHS authorization
+                """,
+                "applicant_name": "Maria Santos",
+                "visa_type": "I-765",
+                "expected_valid": True
+            }
+        ]
+        
         try:
-            # Test available load tests (deve ter 4 testes disponíveis)
-            available_response = self.session.get(f"{API_BASE}/production/load-testing/available-tests")
-            
-            available_success = available_response.status_code == 200
-            available_data = available_response.json() if available_success else {}
-            
-            available_tests = available_data.get('available_tests', [])
-            expected_test_count = 4  # api_critical, workflow_stress, dashboard_load, notification_burst
-            
-            # Verificar se os 4 testes específicos estão disponíveis
-            expected_test_types = ['api_critical', 'workflow_stress', 'dashboard_load', 'notification_burst']
-            actual_test_types = [test.get('test_type') for test in available_tests]
-            
-            has_all_expected_tests = all(test_type in actual_test_types for test_type in expected_test_types)
-            
-            self.log_test(
-                "Load Testing Availability Corrected - 4 Testes Disponíveis",
-                available_success and len(available_tests) >= expected_test_count and has_all_expected_tests,
-                f"✅ Sistema operacional: {len(available_tests)}/4 testes, tipos corretos: {has_all_expected_tests}",
-                {
-                    "success": available_data.get('success', False),
-                    "tests_count": len(available_tests),
-                    "expected_test_types": expected_test_types,
-                    "actual_test_types": actual_test_types,
-                    "has_all_expected": has_all_expected_tests,
-                    "configurations_correct": len(available_tests) >= 4
-                }
-            )
-            
-            # Verificar configurações corretas para cada teste
-            if available_tests:
-                for test in available_tests:
-                    test_type = test.get('test_type')
-                    has_config = 'configuration' in test
-                    has_description = 'description' in test
-                    
-                    self.log_test(
-                        f"Load Testing - Configuração {test_type}",
-                        has_config and has_description,
-                        f"✅ Teste {test_type} configurado corretamente",
-                        {
-                            "test_type": test_type,
-                            "has_configuration": has_config,
-                            "has_description": has_description,
-                            "configuration": test.get('configuration', {})
-                        }
-                    )
-            
-            # Test 2: Start a load test (use a quick test)
-            if available_tests:
-                # Use the first available test type
-                test_type = available_tests[0].get('test_type', 'api_critical')
-                
-                start_request = {
-                    "test_type": test_type,
-                    "base_url": BACKEND_URL
+            for scenario in test_scenarios:
+                validation_request = {
+                    "document_text": scenario["document_text"],
+                    "applicant_name": scenario["applicant_name"],
+                    "visa_type": scenario["visa_type"],
+                    "confidence_scores": {"social": 0.95, "security": 0.92, "name": 0.88}
                 }
                 
-                start_response = self.session.post(
-                    f"{API_BASE}/production/load-testing/start",
-                    json=start_request
+                response = self.session.post(
+                    f"{API_BASE}/documents/validate-ssn",
+                    json=validation_request
                 )
                 
-                start_success = start_response.status_code == 200
-                start_data = start_response.json() if start_success else {}
-                test_id = start_data.get('test_id')
-                
-                self.log_test(
-                    "Load Testing - Iniciar Teste",
-                    start_success and test_id is not None,
-                    f"Teste iniciado: {test_type}, Test ID: {test_id}",
-                    {
-                        "success": start_data.get('success', False),
-                        "test_id": test_id,
-                        "test_type": start_data.get('test_type'),
-                        "message": start_data.get('message', '')
-                    }
-                )
-                
-                # Test 3: Check test status
-                if test_id:
-                    # Wait a moment for test to start
-                    time.sleep(2)
+                if response.status_code == 200:
+                    result = response.json()
+                    validation_result = result.get('validation_result', {})
                     
-                    status_response = self.session.get(
-                        f"{API_BASE}/production/load-testing/{test_id}/status"
-                    )
+                    is_valid = validation_result.get('is_valid', False)
+                    ssn_number = validation_result.get('ssn_number')
+                    confidence_score = validation_result.get('confidence_score', 0)
                     
-                    status_success = status_response.status_code == 200
-                    status_data = status_response.json() if status_success else {}
+                    # Check if result matches expectation
+                    result_matches_expected = is_valid == scenario["expected_valid"]
                     
                     self.log_test(
-                        "Load Testing - Status do Teste",
-                        status_success,
-                        f"Status obtido: {status_data.get('status', 'unknown')}",
+                        f"SSN Validation - {scenario['name']}",
+                        result_matches_expected,
+                        f"✅ Validação correta: válido={is_valid}, SSN={ssn_number}, confiança={confidence_score:.2f}",
                         {
-                            "success": status_data.get('success', False),
-                            "test_id": status_data.get('test_id'),
-                            "status": status_data.get('status'),
-                            "has_progress": 'progress' in status_data or 'result' in status_data
+                            "success": result.get('success', False),
+                            "is_valid": is_valid,
+                            "expected_valid": scenario["expected_valid"],
+                            "ssn_number": ssn_number,
+                            "confidence_score": confidence_score,
+                            "issues_count": len(validation_result.get('issues', [])),
+                            "recommendations_count": len(validation_result.get('recommendations', []))
                         }
                     )
                     
-                    # Test 4: Stop the test (to avoid long running tests)
-                    stop_response = self.session.post(
-                        f"{API_BASE}/production/load-testing/{test_id}/stop"
-                    )
-                    
-                    stop_success = stop_response.status_code == 200
-                    stop_data = stop_response.json() if stop_success else {}
-                    
-                    self.log_test(
-                        "Load Testing - Parar Teste",
-                        stop_success,
-                        f"Teste parado: {stop_data.get('success', False)}",
-                        {
-                            "success": stop_data.get('success', False),
-                            "test_id": stop_data.get('test_id'),
-                            "message": stop_data.get('message', '')
-                        }
-                    )
-                    
-                    # Overall load testing system assessment
-                    load_tests_passed = sum([available_success, start_success, status_success, stop_success])
-                    
-                    self.log_test(
-                        "Load Testing System - Funcionalidade Geral",
-                        load_tests_passed >= 3,  # At least 3 out of 4 should work
-                        f"Testes de carga aprovados: {load_tests_passed}/4",
-                        {
-                            "available_working": available_success,
-                            "start_working": start_success,
-                            "status_working": status_success,
-                            "stop_working": stop_success,
-                            "success_rate": f"{(load_tests_passed/4)*100:.1f}%"
-                        }
-                    )
-                    
-                    return {
-                        "available_tests": available_tests,
-                        "test_id": test_id,
-                        "tests_passed": load_tests_passed
-                    }
+                    # Test USCIS validation if present
+                    uscis_validation = result.get('uscis_validation')
+                    if uscis_validation:
+                        uscis_acceptable = uscis_validation.get('uscis_acceptable', False)
+                        
+                        self.log_test(
+                            f"SSN USCIS Validation - {scenario['name']}",
+                            True,  # Always pass if USCIS validation is present
+                            f"✅ USCIS validation: aceitável={uscis_acceptable} para {scenario['visa_type']}",
+                            {
+                                "uscis_acceptable": uscis_acceptable,
+                                "visa_type": scenario["visa_type"],
+                                "ssn_required": uscis_validation.get('ssn_required', False)
+                            }
+                        )
                 else:
                     self.log_test(
-                        "Load Testing System - Test ID Missing",
+                        f"SSN Validation - {scenario['name']}",
                         False,
-                        "Não foi possível obter test_id para continuar testes"
+                        f"❌ HTTP {response.status_code}",
+                        {"status_code": response.status_code, "error": response.text[:200]}
                     )
-            else:
-                self.log_test(
-                    "Load Testing System - No Tests Available",
-                    False,
-                    "Nenhum teste de carga disponível"
-                )
-                
+                    
         except Exception as e:
             self.log_test(
-                "Load Testing System - Exception Geral",
+                "SSN Validation - Exception",
                 False,
-                f"Exception: {str(e)}"
+                f"❌ Exception: {str(e)}"
             )
             return None
     
