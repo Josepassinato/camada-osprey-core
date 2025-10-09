@@ -102,7 +102,7 @@ class ImmigrationExpert:
                 """
                 
                 response = await client.chat.completions.create(
-                    model="gpt-4",
+                    model="gpt-5",
                     messages=[
                         {"role": "system", "content": self.system_prompt},
                         {"role": "user", "content": enhanced_prompt}
