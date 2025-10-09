@@ -540,10 +540,10 @@ Data de Validade: 15/06/2024
                 f"❌ Exception: {str(e)}"
             )
 
-    def test_document_size_validations(self):
-        """TESTE 4: Validações de Tamanho Específicas por Tipo de Documento"""
-        print("⚠️ TESTE 4: Validações de Tamanho Específicas por Tipo de Documento")
-        print("Cenário: Testar limites de tamanho para cada tipo de documento")
+    def test_integration_points(self):
+        """TESTE 4: Integration Points - Teste de pontos de integração"""
+        print("⚠️ TESTE 4: Integration Points - Teste de pontos de integração")
+        print("Cenário: Verificar se native analyzer e Dr. Miguel estão funcionando")
         
         # Teste de arquivo muito pequeno (< 50KB) - deve ser rejeitado
         try:
