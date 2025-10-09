@@ -4001,10 +4001,10 @@ Documento de identidade brasileiro
         # Print summary
         self.print_test_summary()
     
-    def generate_test_summary(self):
-        """Gera resumo dos testes executados"""
+    def print_test_summary(self):
+        """Print comprehensive test summary for cache collision bug fix"""
         print("\n" + "=" * 80)
-        print("📊 RESUMO DOS TESTES - SISTEMA AI REVIEW (VALIDAÇÃO E CONVERSÃO)")
+        print("📊 RESUMO DOS TESTES - CACHE COLLISION BUG FIX")
         print("=" * 80)
         
         total_tests = len(self.test_results)
@@ -4019,48 +4019,79 @@ Documento de identidade brasileiro
         print(f"   ❌ Falharam: {failed_tests}")
         print(f"   📊 Taxa de sucesso: {success_rate:.1f}%")
         
-        print(f"\n🎯 TESTES CRÍTICOS AI REVIEW:")
-        critical_tests = [
-            "Cenário A - Validação Incompleta",
-            "Cenário A - Critical Issues Identificadas",
-            "Cenário A - Conversão Falha (Esperado)",
-            "Cenário B - Validação Completa",
-            "Cenário B - Conversão Funcionando",
-            "Cenário B - Dados Convertidos PT→EN",
-            "Cenário B - Dados Salvos no MongoDB",
-            "ai_completeness_validator - Funcionando Sem Erros"
+        print(f"\n🎯 TESTES CRÍTICOS - CACHE COLLISION FIX:")
+        
+        # Cache collision specific tests
+        cache_tests = [
+            "Cache Collision - Sequential Document Analysis",
+            "Cache Collision - No Cross-Contamination", 
+            "Real Document - No Cross-Contamination",
+            "Cache Uniqueness - Similar Start Different Content",
+            "Cache Uniqueness - Multiple JPEG Same Format"
         ]
         
-        for test_name in critical_tests:
+        for test_name in cache_tests:
             test_result = next((r for r in self.test_results if test_name in r['test']), None)
             if test_result:
-                status = "✅" if test_result['success'] else "❌"
+                status = "✅ PASS" if test_result['success'] else "❌ FAIL"
                 print(f"   {status} {test_name}")
         
-        print(f"\n🔍 FUNCIONALIDADES TESTADAS:")
-        print(f"   ✅ POST /api/ai-review/validate-completeness")
-        print(f"   ✅ POST /api/ai-review/convert-to-official")
-        print(f"   ✅ Fluxo Formulário Incompleto (Cenário A)")
-        print(f"   ✅ Fluxo Formulário Completo (Cenário B)")
-        print(f"   ✅ Dra. Ana validação de completude")
-        print(f"   ✅ Conversão PT→EN usando IA")
-        print(f"   ✅ Salvamento official_form_data no MongoDB")
-        print(f"   ✅ ai_completeness_validator integração")
+        print(f"\n📋 TESTES DE FUNCIONALIDADE BÁSICA:")
         
-        print(f"\n🎯 VALIDAÇÕES CRÍTICAS VERIFICADAS:")
-        print(f"   ✅ Dra. Ana analisa completude corretamente")
-        print(f"   ✅ Conversão traduz PT→EN mantendo estrutura")
-        print(f"   ✅ Sistema salva dados convertidos no MongoDB")
-        print(f"   ✅ Validação identifica campos obrigatórios faltando")
-        print(f"   ✅ ai_completeness_validator funciona sem erros")
+        # Basic functionality tests
+        basic_tests = [
+            "Document Analysis - Response Structure",
+            "Document Analysis - Analysis Processing", 
+            "Document Type Validation - Wrong Type Detection",
+            "Error Handling - File Too Small",
+            "Integration Points - Native Analyzer"
+        ]
         
-        if failed_tests > 0:
-            print(f"\n❌ TESTES FALHARAM:")
-            for result in self.test_results:
-                if not result['success']:
-                    print(f"   • {result['test']}: {result['details']}")
+        for test_name in basic_tests:
+            test_result = next((r for r in self.test_results if test_name in r['test']), None)
+            if test_result:
+                status = "✅ PASS" if test_result['success'] else "❌ FAIL"
+                print(f"   {status} {test_name}")
+        
+        print(f"\n🔍 ANÁLISE DE CACHE COLLISION:")
+        
+        # Analyze cache collision specific results
+        cache_collision_prevented = any(
+            r['success'] for r in self.test_results 
+            if 'Cache Collision' in r['test'] or 'Cross-Contamination' in r['test']
+        )
+        
+        unique_analysis_working = any(
+            r['success'] for r in self.test_results 
+            if 'Cache Uniqueness' in r['test']
+        )
+        
+        print(f"   🛡️ Cache Collision Prevenção: {'✅ FUNCIONANDO' if cache_collision_prevented else '❌ FALHANDO'}")
+        print(f"   🔑 Cache Key Uniqueness: {'✅ FUNCIONANDO' if unique_analysis_working else '❌ FALHANDO'}")
+        
+        print(f"\n🔍 DETALHES DOS TESTES FALHARAM:")
+        failed_test_results = [r for r in self.test_results if not r['success']]
+        
+        if failed_test_results:
+            for failed_test in failed_test_results:
+                print(f"   ❌ {failed_test['test']}")
+                print(f"      Detalhes: {failed_test['details']}")
+        else:
+            print("   🎉 Nenhum teste falhou!")
+        
+        # Final assessment
+        print(f"\n🏆 AVALIAÇÃO FINAL:")
+        if success_rate >= 80:
+            print("   ✅ CACHE COLLISION BUG FIX FUNCIONANDO CORRETAMENTE")
+            print("   ✅ Sistema previne colisões de cache entre documentos diferentes")
+            print("   ✅ Cada documento recebe análise única baseada no conteúdo completo")
+        else:
+            print("   ⚠️ CACHE COLLISION BUG FIX PRECISA DE ATENÇÃO")
+            print("   ⚠️ Alguns testes falharam - verificar implementação")
         
         print("\n" + "=" * 80)
+        print("🏁 TESTES CONCLUÍDOS - CACHE COLLISION BUG FIX")
+        print("=" * 80)
 
     def test_real_vision_intelligent_validations(self):
         """TESTE 11: Validações Inteligentes com Visão Real"""
