@@ -465,7 +465,10 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
                 </div>
 
                 <Button
-                  onClick={acceptConsent}
+                  onClick={() => {
+                    acceptConsent();
+                    setCurrentStep(5);
+                  }}
                   disabled={loading}
                   className="bg-[#FF6B35] hover:bg-[#FF6B35]/90 w-full"
                 >
