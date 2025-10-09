@@ -107,6 +107,16 @@ class SecurityHardeningSystem:
                 block_duration_minutes=5
             ),
             
+            # Production monitoring endpoints (very permissive)
+            "production_monitoring": RateLimitRule(
+                name="Production Monitoring",
+                endpoint_pattern=r"/api/production/.*",
+                requests_per_minute=200,  # High limit for monitoring
+                requests_per_hour=2000,
+                burst_limit=50,  # Allow burst requests for monitoring
+                block_duration_minutes=2  # Short block time
+            ),
+            
             # Default para outros endpoints
             "default": RateLimitRule(
                 name="Default API",
