@@ -6226,23 +6226,35 @@ async def analyze_document_with_real_ai(
             logger.error(f"❌ Policy Engine FASE 1 error: {e}")
             analysis_result["policy_engine_error"] = str(e)
         
-        # FASE 2: GOOGLE DOCUMENT AI + LOGICAL VALIDATIONS (NO OpenAI!)
+        # FASE 2: NATIVE LLM DOCUMENT ANALYSIS (DIRECT INTEGRATION)
         try:
-            logger.warning(f"🔬🔬🔬 STARTING GOOGLE AI VALIDATION for {document_type}")
-            logger.warning(f"Policy Engine result before Google AI: issues={len(analysis_result.get('issues', []))}")
+            logger.info(f"🔬 STARTING NATIVE LLM ANALYSIS for {document_type}")
+            logger.info(f"Policy Engine result before native analysis: issues={len(analysis_result.get('issues', []))}")
             
-            # Import Google Document AI
-            from pipeline.google_document_ai import GoogleDocumentAI
+            # Import native analyzer
+            from native_document_analyzer import analyze_document_native
             from dateutil import parser as date_parser
             import unicodedata
             
-            google_ai = GoogleDocumentAI()
+            # Get applicant name from case
+            applicant_name = "Usuário"  # Default
+            if case_id:
+                case_doc = await db.auto_cases.find_one({"case_id": case_id})
+                if case_doc and case_doc.get('form_data', {}).get('basic_info'):
+                    basic_info = case_doc['form_data']['basic_info']
+                    first_name = basic_info.get('firstName', '') or basic_info.get('full_name', '')
+                    last_name = basic_info.get('lastName', '')
+                    if first_name and last_name:
+                        applicant_name = f"{first_name} {last_name}"
+                    elif first_name:
+                        applicant_name = first_name
             
-            # Extract data with Google Document AI
-            ocr_result = await google_ai.process_document(
-                image_data=file_content,
+            # Perform native analysis
+            native_result = await analyze_document_native(
+                file_content=file_content,
                 document_type=document_type,
-                language='pt'  # Portuguese for Brazilian documents
+                applicant_name=applicant_name,
+                case_id=case_id
             )
             
             # Get extracted data (DocumentAIResult is a dataclass)
