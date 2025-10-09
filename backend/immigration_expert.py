@@ -374,7 +374,7 @@ class ImmigrationExpert:
 
 # Factory function to create Dra. Paula B2C expert
 def create_immigration_expert(provider: str = "openai", 
-                            model: str = "gpt-4o",
+                            model: str = "gpt-5",
                             assistant_id: str = "asst_kkyn65SQFfkloH4SalOZfwwh",  # Dra. Paula Official Assistant ID
                             custom_prompt: str = None) -> ImmigrationExpert:
     """
