@@ -584,7 +584,7 @@ class Phase4AEnhancedTester:
             )
             return None
     
-    def test_document_integration_with_forms(self):
+    def test_multi_stage_workflow_system(self):
         """TESTE 4: Integração com Sistema de Documentos"""
         print("📋 TESTE 4: Integração Documentos → Formulários")
         
