@@ -79,13 +79,18 @@ class IntelligentFormFiller:
         suggestions = []
         
         try:
+            # Verificar se case_data é válido
+            if not case_data or not isinstance(case_data, dict):
+                logger.error(f"❌ case_data inválido: {type(case_data)}")
+                return []
+            
             # Extrair dados de múltiplas fontes
             basic_data = case_data.get('basic_data', {})
             ai_extracted_facts = case_data.get('ai_extracted_facts', {})
             
             # Buscar documentos validados para este caso
             document_analysis = []
-            if db_connection and case_data.get('case_id'):
+            if db_connection is not None and case_data.get('case_id'):
                 case_id = case_data['case_id']
                 documents_cursor = db_connection.documents.find({"case_id": case_id})
                 case_documents = await documents_cursor.to_list(length=None)
