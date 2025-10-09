@@ -8410,6 +8410,11 @@ async def startup_db_client():
         ssn_validator = SocialSecurityValidator()
         logger.info("✅ Social Security Validator initialized")
         
+        # Initialize Intelligent Tutor System
+        global intelligent_tutor
+        intelligent_tutor = IntelligentTutorSystem(db)
+        logger.info("✅ Intelligent Tutor System initialized")
+        
         # Initialize Advanced Analytics System
         if ANALYTICS_AVAILABLE:
             try:
