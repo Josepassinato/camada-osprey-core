@@ -748,7 +748,7 @@ class IntelligentFormsTester:
                 if case_response.status_code != 200:
                     continue
                 
-                case_id = case_response.json().get('case_id')
+                case_id = case_response.json().get('case', {}).get('case_id')
                 
                 # Update case with test data
                 self.session.patch(
@@ -1225,7 +1225,7 @@ class IntelligentFormsTester:
                 if case_response.status_code != 200:
                     continue
                 
-                case_id = case_response.json().get('case_id')
+                case_id = case_response.json().get('case', {}).get('case_id')
                 
                 # Add basic data
                 self.session.patch(
