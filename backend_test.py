@@ -293,7 +293,7 @@ class Phase4AEnhancedTester:
             )
             return None
     
-    def test_intelligent_forms_validate_endpoint(self):
+    def test_case_finalizer_enhanced_audit_system(self):
         """TESTE 2: POST /api/intelligent-forms/validate"""
         print("🔍 TESTE 2: Endpoint de Validação com Dra. Ana")
         
