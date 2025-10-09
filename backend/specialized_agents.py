@@ -805,12 +805,13 @@ class DocumentValidationAgent(BaseSpecializedAgent):
     async def validate_document_legacy(self, document_data: Dict[str, Any], document_type: str, case_context: Dict[str, Any] = None) -> Dict[str, Any]:
         """Valida documento usando expertise da Dra. Paula B2C e mapeamento inteligente por visto"""
         try:
-            from emergentintegrations import EmergentLLM
             from visa_document_mapping import get_smart_extraction_prompt, get_visa_document_requirements
             
-            # Use OpenAI directly or fallback to EmergentLLM
+            # Use ONLY user's personal OpenAI API key
             openai_key = os.environ.get('OPENAI_API_KEY')
-            emergent_key = os.environ.get('EMERGENT_LLM_KEY')
+            
+            if not openai_key:
+                raise ValueError("OPENAI_API_KEY is required for document validation")
             
             if openai_key:
                 # Use OpenAI directly
