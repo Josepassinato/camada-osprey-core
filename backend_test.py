@@ -700,6 +700,94 @@ class IntelligentFormsTester:
                 f"Exception: {str(e)}"
             )
             return None
+    def test_specific_test_cases(self):
+        """TESTE 6: Casos de Teste Específicos"""
+        print("🎯 TESTE 6: Casos de Teste Específicos")
+        
+        test_cases = [
+            {
+                "name": "Caso com passaporte validado → sugerir nome, nacionalidade, data nascimento",
+                "case_data": {
+                    "document_analysis_results": [
+                        {
+                            "document_type": "passport",
+                            "valid": True,
+                            "extracted_data": {
+                                "full_name": "MARIA SANTOS OLIVEIRA",
+                                "nationality": "BRASILEIRO",
+                                "date_of_birth": "1985-03-20",
+                                "document_number": "AB123456",
+                                "place_of_birth": "RIO DE JANEIRO, RJ"
+                            }
+                        }
+                    ]
+                },
+                "expected_fields": ["full_name", "nationality", "date_of_birth"]
+            },
+            {
+                "name": "Caso sem documentos → sugestões básicas",
+                "case_data": {
+                    "basic_data": {
+                        "firstName": "João",
+                        "lastName": "Silva",
+                        "email": "joao@test.com"
+                    }
+                },
+                "expected_fields": ["full_name", "email"]
+            }
+        ]
+        
+        for i, test_case in enumerate(test_cases):
+            try:
+                # Create test case
+                case_response = self.session.post(
+                    f"{API_BASE}/auto-application/start",
+                    json={"form_code": "H-1B"}
+                )
+                
+                if case_response.status_code != 200:
+                    continue
+                
+                case_id = case_response.json().get('case_id')
+                
+                # Update case with test data
+                self.session.patch(
+                    f"{API_BASE}/auto-application/case/{case_id}",
+                    json=test_case["case_data"]
+                )
+                
+                # Test suggestions
+                response = self.session.post(
+                    f"{API_BASE}/intelligent-forms/suggestions",
+                    json={"case_id": case_id, "form_code": "H-1B"}
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    suggestions = result.get('suggestions', [])
+                    
+                    # Check if expected fields are suggested
+                    suggested_fields = [s.get('field_id') for s in suggestions]
+                    expected_found = any(field in suggested_fields for field in test_case["expected_fields"])
+                    
+                    self.log_test(
+                        f"Caso Específico {i+1} - {test_case['name'][:50]}...",
+                        expected_found,
+                        f"Campos esperados encontrados: {expected_found}",
+                        {
+                            "expected_fields": test_case["expected_fields"],
+                            "suggested_fields": suggested_fields[:5],
+                            "total_suggestions": len(suggestions)
+                        }
+                    )
+                
+            except Exception as e:
+                self.log_test(
+                    f"Caso Específico {i+1} - Erro",
+                    False,
+                    f"Exception: {str(e)}"
+                )
+
     def test_multiple_document_types(self):
         """TESTE 6: Diferentes Tipos de Documento"""
         print("📋 TESTE 6: Múltiplos Tipos de Documento")
