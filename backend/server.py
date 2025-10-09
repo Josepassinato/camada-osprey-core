@@ -3836,6 +3836,315 @@ async def reject_packet(job_id: str, request: dict):
             "timestamp": datetime.utcnow().isoformat()
         }
 
+# ===========================================
+# PHASE 4D: WORKFLOW AUTOMATION ENDPOINTS
+# ===========================================
+
+@api_router.post("/automation/workflows/start")
+async def start_workflow(request: dict):
+    """Inicia execução de workflow automatizado"""
+    try:
+        workflow_name = request.get("workflow_name")
+        case_id = request.get("case_id")
+        context = request.get("context", {})
+        
+        if not workflow_name or not case_id:
+            return {"error": "workflow_name e case_id são obrigatórios"}
+        
+        execution_id = await workflow_engine.start_workflow(
+            workflow_name=workflow_name,
+            case_id=case_id, 
+            context=context
+        )
+        
+        return {
+            "success": True,
+            "execution_id": execution_id,
+            "workflow_name": workflow_name,
+            "case_id": case_id,
+            "status": "started"
+        }
+        
+    except Exception as e:
+        logger.error(f"Error starting workflow: {e}")
+        return {
+            "error": "Erro ao iniciar workflow",
+            "details": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.get("/automation/workflows/{execution_id}/status")
+async def get_workflow_status(execution_id: str):
+    """Obtém status de execução do workflow"""
+    try:
+        execution = workflow_engine.get_execution_status(execution_id)
+        
+        if not execution:
+            return {"error": "Workflow execution não encontrada"}
+        
+        return {
+            "success": True,
+            "execution_id": execution_id,
+            "workflow_name": execution.workflow_name,
+            "case_id": execution.case_id,
+            "status": execution.status.value,
+            "progress": execution.progress,
+            "created_at": execution.created_at.isoformat(),
+            "started_at": execution.started_at.isoformat() if execution.started_at else None,
+            "completed_at": execution.completed_at.isoformat() if execution.completed_at else None,
+            "error": execution.error,
+            "steps": [
+                {
+                    "step_id": step.step_id,
+                    "name": step.name,
+                    "status": step.status.value,
+                    "attempts": step.attempts,
+                    "error": step.error
+                }
+                for step in execution.steps
+            ]
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting workflow status: {e}")
+        return {
+            "error": "Erro ao obter status do workflow",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.get("/automation/workflows/available")
+async def list_available_workflows():
+    """Lista workflows disponíveis"""
+    try:
+        workflows = workflow_engine.list_available_workflows()
+        
+        return {
+            "success": True,
+            "workflows": workflows,
+            "count": len(workflows)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error listing workflows: {e}")
+        return {
+            "error": "Erro ao listar workflows",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.post("/automation/workflows/{execution_id}/cancel")
+async def cancel_workflow(execution_id: str):
+    """Cancela execução de workflow"""
+    try:
+        success = await workflow_engine.cancel_execution(execution_id)
+        
+        if success:
+            return {
+                "success": True,
+                "message": "Workflow cancelado com sucesso",
+                "execution_id": execution_id
+            }
+        else:
+            return {"error": "Workflow não encontrado ou já finalizado"}
+            
+    except Exception as e:
+        logger.error(f"Error canceling workflow: {e}")
+        return {
+            "error": "Erro ao cancelar workflow",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.post("/automation/notifications/send")
+async def send_notification(request: dict):
+    """Envia notificação individual"""
+    try:
+        template_id = request.get("template_id")
+        recipient_data = request.get("recipient", {})
+        variables = request.get("variables", {})
+        priority = request.get("priority", "medium")
+        case_id = request.get("case_id")
+        
+        if not template_id or not recipient_data:
+            return {"error": "template_id e recipient são obrigatórios"}
+        
+        recipient = NotificationRecipient(
+            user_id=recipient_data.get("user_id", ""),
+            name=recipient_data.get("name", ""),
+            email=recipient_data.get("email"),
+            phone=recipient_data.get("phone"),
+            language=recipient_data.get("language", "pt")
+        )
+        
+        from notification_system import NotificationPriority
+        priority_enum = NotificationPriority(priority.lower())
+        
+        notification_id = await notification_system.send_notification(
+            template_id=template_id,
+            recipient=recipient,
+            variables=variables,
+            priority=priority_enum,
+            case_id=case_id
+        )
+        
+        return {
+            "success": True,
+            "notification_id": notification_id,
+            "template_id": template_id,
+            "recipient": recipient_data.get("name", "")
+        }
+        
+    except Exception as e:
+        logger.error(f"Error sending notification: {e}")
+        return {
+            "error": "Erro ao enviar notificação",
+            "details": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.get("/automation/notifications/templates")
+async def list_notification_templates():
+    """Lista templates de notificação disponíveis"""
+    try:
+        templates = notification_system.list_templates()
+        
+        return {
+            "success": True,
+            "templates": [
+                {
+                    "template_id": t.template_id,
+                    "name": t.name,
+                    "channel": t.channel.value,
+                    "language": t.language,
+                    "variables": t.variables
+                }
+                for t in templates
+            ],
+            "count": len(templates)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error listing templates: {e}")
+        return {
+            "error": "Erro ao listar templates",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.get("/automation/notifications/{notification_id}/status")
+async def get_notification_status(notification_id: str):
+    """Obtém status de uma notificação"""
+    try:
+        notification = notification_system.get_notification_status(notification_id)
+        
+        if not notification:
+            return {"error": "Notificação não encontrada"}
+        
+        return {
+            "success": True,
+            "notification_id": notification_id,
+            "template_id": notification.template_id,
+            "recipient": notification.recipient.name,
+            "channel": notification.channel.value,
+            "priority": notification.priority.value,
+            "status": notification.status.value,
+            "created_at": notification.created_at.isoformat(),
+            "sent_at": notification.sent_at.isoformat() if notification.sent_at else None,
+            "attempts": notification.attempts,
+            "error": notification.error,
+            "case_id": notification.case_id
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting notification status: {e}")
+        return {
+            "error": "Erro ao obter status da notificação",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.get("/automation/retry/statistics")
+async def get_retry_statistics():
+    """Obtém estatísticas do sistema de retry"""
+    try:
+        stats = retry_system.get_retry_statistics()
+        return {
+            "success": True,
+            "retry_statistics": stats,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting retry statistics: {e}")
+        return {
+            "error": "Erro ao obter estatísticas de retry",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.get("/automation/notifications/statistics")
+async def get_notification_statistics():
+    """Obtém estatísticas do sistema de notificações"""
+    try:
+        stats = notification_system.get_notification_stats()
+        return {
+            "success": True,
+            "notification_statistics": stats,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting notification statistics: {e}")
+        return {
+            "error": "Erro ao obter estatísticas de notificação",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@api_router.post("/automation/workflows/h1b/complete") 
+async def start_h1b_complete_workflow(request: dict):
+    """Inicia workflow completo H-1B com notificações automáticas"""
+    try:
+        case_id = request.get("case_id")
+        user_data = request.get("user_data", {})
+        
+        if not case_id:
+            return {"error": "case_id é obrigatório"}
+        
+        # Start H-1B complete workflow
+        execution_id = await workflow_engine.start_workflow(
+            workflow_name="h1b_complete_process",
+            case_id=case_id,
+            context={"user_data": user_data}
+        )
+        
+        # Send workflow started notification
+        if user_data.get("email"):
+            recipient = NotificationRecipient(
+                user_id=user_data.get("user_id", case_id),
+                name=user_data.get("name", "Usuário"),
+                email=user_data.get("email"),
+                language=user_data.get("language", "pt")
+            )
+            
+            await notification_system.send_workflow_notification(
+                workflow_name="h1b_complete_process",
+                event="workflow_started",
+                recipient=recipient,
+                case_id=case_id,
+                context={"execution_id": execution_id}
+            )
+        
+        return {
+            "success": True,
+            "execution_id": execution_id,
+            "workflow_name": "h1b_complete_process",
+            "case_id": case_id,
+            "message": "Workflow H-1B completo iniciado com sucesso"
+        }
+        
+    except Exception as e:
+        logger.error(f"Error starting H-1B workflow: {e}")
+        return {
+            "error": "Erro ao iniciar workflow H-1B",
+            "details": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
 @api_router.get("/cases/finalize/{job_id}/status")
 async def get_finalization_status(job_id: str):
     """Obtém status da finalização"""
