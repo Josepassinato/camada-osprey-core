@@ -892,6 +892,20 @@ const USCISFormFilling = () => {
                   Salvar e Continuar Depois
                 </Button>
 
+                <Button
+                  variant="outline"
+                  onClick={validateFormWithAI}
+                  disabled={isValidating}
+                  className="flex items-center gap-2 border-purple-500 text-purple-600 hover:bg-purple-50"
+                >
+                  {isValidating ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
+                  ) : (
+                    <CheckCircle className="h-4 w-4" />
+                  )}
+                  {isValidating ? 'Validando com Dra. Ana...' : 'Validar com Dra. Ana'}
+                </Button>
+
                 <Button 
                   onClick={authorizeAndSaveForm}
                   disabled={!isFormAuthorized() || isSaving}
