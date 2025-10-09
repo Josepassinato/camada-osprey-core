@@ -97,55 +97,84 @@ class NativeDocumentValidationTester:
         except Exception as e:
             print(f"⚠️ Authentication setup error: {e}")
     
-    def test_start_finalization_h1b_basic(self):
-        """Test H-1B basic finalization start"""
-        test_case_id = "TEST-CASE-H1B"
+    def create_test_document(self, content: str, filename: str, file_type: str = "application/pdf") -> bytes:
+        """Create a test document with specified content"""
+        # Create a larger document to pass size validation (>50KB)
+        full_content = content + "\n" + "Test document content padding. " * 2000
+        return full_content.encode('utf-8')
+    
+    def test_basic_upload_endpoint(self):
+        """TESTE 1: Upload básico para /api/documents/analyze-with-ai"""
+        print("📄 TESTE 1: Upload Básico do Endpoint")
         
-        payload = {
-            "scenario_key": "H-1B_basic",
-            "postage": "USPS",
-            "language": "pt"
+        # Create test document
+        test_content = self.create_test_document(
+            "PASSPORT\nJOHN SMITH\nPassport Number: A12345678\nExpiry: 2025-12-31",
+            "passport_test.pdf"
+        )
+        
+        files = {
+            'file': ('passport_test.pdf', test_content, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-BASIC-UPLOAD'
         }
         
         try:
-            response = self.session.post(
-                f"{API_BASE}/cases/{test_case_id}/finalize/start",
-                json=payload
+            # Remove Content-Type header for multipart form data
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
             )
             
             if response.status_code == 200:
-                data = response.json()
-                if "job_id" in data and "status" in data:
-                    self.job_id_h1b = data["job_id"]  # Store for status polling
-                    self.log_test(
-                        "Start H-1B Finalization",
-                        True,
-                        f"Job ID: {data['job_id']}, Status: {data['status']}",
-                        data
-                    )
-                    return data
-                else:
-                    self.log_test(
-                        "Start H-1B Finalization",
-                        False,
-                        "Missing job_id or status in response",
-                        data
-                    )
+                result = response.json()
+                
+                # Check required response structure
+                required_fields = ['valid', 'legible', 'completeness', 'issues', 'extracted_data', 'dra_paula_assessment']
+                has_all_fields = all(field in result for field in required_fields)
+                
+                self.log_test(
+                    "Upload Básico - Estrutura de Resposta",
+                    has_all_fields,
+                    f"Campos presentes: {list(result.keys())}",
+                    {
+                        "status_code": response.status_code,
+                        "response_structure": {field: field in result for field in required_fields}
+                    }
+                )
+                
+                # Check if endpoint returns 200 OK
+                self.log_test(
+                    "Upload Básico - Status 200 OK",
+                    True,
+                    f"Endpoint retornou status 200 com análise completa",
+                    {"status_code": response.status_code}
+                )
+                
+                return result
             else:
                 self.log_test(
-                    "Start H-1B Finalization",
+                    "Upload Básico - Status 200 OK",
                     False,
-                    f"HTTP {response.status_code}",
-                    response.text
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    {"status_code": response.status_code, "error": response.text}
                 )
+                return None
+                
         except Exception as e:
             self.log_test(
-                "Start H-1B Finalization",
+                "Upload Básico - Status 200 OK",
                 False,
                 f"Exception: {str(e)}"
             )
-        
-        return None
+            return None
     
     def test_start_finalization_f1_basic(self):
         """Test F-1 basic finalization start"""
