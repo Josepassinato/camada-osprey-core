@@ -329,7 +329,7 @@ class CaseFinalizerComplete:
         
         # Real data integration
         self.db = db
-        self.data_integrator = RealDataIntegrator(db) if db else None
+        self.data_integrator = RealDataIntegrator(db) if db is not None else None
     
     async def start_finalization(self, case_id: str, scenario_key: str, postage: str, language: str) -> Dict[str, Any]:
         """
