@@ -1306,54 +1306,36 @@ class IntelligentTutorSystemTester:
             )
             return None
 
-    def run_disclaimer_debug_tests(self):
-        """Executar testes específicos de debug do Sistema de Disclaimer"""
-        print("🔍 INICIANDO TESTES DE DEBUG DO SISTEMA DE DISCLAIMER")
+    def run_intelligent_tutor_tests(self):
+        """Executar todos os testes do Sistema de Tutor Inteligente"""
+        print("🚀 INICIANDO TESTES DO SISTEMA DE TUTOR INTELIGENTE MELHORADO")
         print("=" * 80)
-        print("FOCO ESPECÍFICO: Testar fluxo completo de disclaimer após correções de debug")
-        print("CASE ID: OSP-DEBUG-TEST | STAGE: documents")
-        print("OBJETIVO: Validar se documento é salvo no MongoDB e encontrado na query")
+        print("FOCO: Testar novos endpoints do sistema de tutor inteligente melhorado")
+        print("ENDPOINTS: guidance, checklist, progress-analysis, common-mistakes, interview-preparation")
+        print("DADOS DE TESTE: user_id='user_123', visa_type='h1b', current_step='document_upload'")
+        print("RESULTADO ESPERADO: Todos os endpoints funcionando com respostas estruturadas e contexto brasileiro")
         print("=" * 80)
         
-        # Execute debug-specific tests
+        # Execute intelligent tutor tests
         test_results = {}
         
-        # Test 1: Debug Flow - Record and Immediate Validation
-        test_results['debug_flow'] = self.test_disclaimer_debug_flow()
+        # Test 1: Tutor Guidance Endpoint
+        test_results['tutor_guidance'] = self.test_tutor_guidance_endpoint()
         
-        # Test 2: Disclaimer Text Endpoints (to ensure they work)
-        test_results['disclaimer_texts'] = self.test_disclaimer_text_endpoints()
+        # Test 2: Tutor Checklist Endpoint
+        test_results['tutor_checklist'] = self.test_tutor_checklist_endpoint()
         
-        # Test 3: Standard Record and Validation (for comparison)
-        test_results['standard_record_validation'] = self.test_disclaimer_record_and_validation()
+        # Test 3: Tutor Progress Analysis Endpoint
+        test_results['tutor_progress_analysis'] = self.test_tutor_progress_analysis_endpoint()
         
-        return test_results
-
-    def run_disclaimer_and_ssn_tests(self):
-        """Executar todos os testes do Sistema de Disclaimer e Validador SSN"""
-        print("🚀 INICIANDO TESTES DO SISTEMA DE DISCLAIMER E VALIDADOR SSN")
-        print("=" * 80)
-        print("FOCO: Testar implementação completa do sistema de disclaimer e validador de Social Security Card")
-        print("RESULTADO ESPERADO: Todos os endpoints funcionando com aceites por etapa e validação SSN")
-        print("=" * 80)
+        # Test 4: Tutor Common Mistakes Endpoint
+        test_results['tutor_common_mistakes'] = self.test_tutor_common_mistakes_endpoint()
         
-        # Execute disclaimer and SSN validation tests
-        test_results = {}
+        # Test 5: Tutor Interview Preparation Endpoint
+        test_results['tutor_interview_preparation'] = self.test_tutor_interview_preparation_endpoint()
         
-        # Test 1: Disclaimer Text Endpoints
-        test_results['disclaimer_texts'] = self.test_disclaimer_text_endpoints()
-        
-        # Test 2: Disclaimer Record and Validation
-        test_results['disclaimer_record_validation'] = self.test_disclaimer_record_and_validation()
-        
-        # Test 3: SSN Validator Basic
-        test_results['ssn_validator'] = self.test_ssn_validator_basic()
-        
-        # Test 4: SSN Requirements Endpoint
-        test_results['ssn_requirements'] = self.test_ssn_requirements_endpoint()
-        
-        # Test 5: Disclaimer Status and Reports
-        test_results['disclaimer_status_reports'] = self.test_disclaimer_status_and_reports()
+        # Test 6: Error Handling
+        test_results['tutor_error_handling'] = self.test_tutor_error_handling()
         
         return test_results
 
