@@ -624,7 +624,7 @@ class Phase4BProductionOptimizationTester:
             )
             return None
     
-    def test_pdf_generation_with_real_data(self):
+    def test_system_health_monitoring(self):
         """TESTE 5: PDF Generation with Real Data - _generate_real_index_pdf() e _create_master_packet_with_real_data()"""
         print("📄 TESTE 5: Geração de PDF com Dados Reais")
         
