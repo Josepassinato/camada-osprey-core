@@ -135,6 +135,9 @@ const USCISFormFilling = () => {
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  
+  // Auto-save functionality
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get current user for tutor
   useEffect(() => {
