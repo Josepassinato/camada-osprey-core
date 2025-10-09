@@ -94,8 +94,8 @@ notification_system = None
 db_optimization_system = None
 intelligent_tutor = None
 
-# LLM configuration via emergentintegrations
-# API key handled directly in LlmChat calls
+# LLM configuration using ONLY user's OpenAI API key
+# NO emergent integrations used
 
 # JWT configuration
 JWT_SECRET = os.environ.get('JWT_SECRET', 'osprey-secret-key-change-in-production')
