@@ -4534,22 +4534,27 @@ Documento de identidade brasileiro
             return None
 
     def run_all_tests(self):
-        """Run all document analysis cache collision tests"""
-        print("🚀 INICIANDO TESTES DO SISTEMA DE CACHE COLLISION BUG FIX")
+        """Run all real document analysis system tests"""
+        print("🚀 INICIANDO TESTES DO NOVO SISTEMA REAL DE ANÁLISE DE DOCUMENTOS")
         print("=" * 80)
-        print("🎯 FOCO: Verificar que o bug de colisão de cache OCR foi corrigido")
-        print("🔧 BUG CORRIGIDO: Cache key generation mudou de primeiros 100 bytes para hash completo")
+        print("🎯 FOCO: Verificar que o sistema REAL de análise de documentos está funcionando")
+        print("🔧 IMPLEMENTAÇÃO: Sistema usa OpenAI Vision API para análise real, não simulação")
+        print("📄 ARQUIVO: /app/backend/real_document_vision_analyzer.py")
+        print("🔑 API: EMERGENT_LLM_KEY para análise com gpt-4o model")
         print("=" * 80)
         
-        # Run the critical IMG_7602.png specific test first
+        # PRIORITY 1: Test the NEW REAL document vision analysis system
+        self.test_real_document_vision_system()
+        
+        # PRIORITY 2: Test the critical IMG_7602.png specific document
         self.test_img_7602_specific_document_analysis()
         
-        # Run the cache collision prevention tests
+        # PRIORITY 3: Test cache collision prevention (legacy but important)
         self.test_cache_collision_prevention_sequential_uploads()
         self.test_real_document_processing_no_contamination()
         self.test_cache_key_uniqueness_similar_sizes()
         
-        # Run basic functionality tests to ensure system still works
+        # PRIORITY 4: Basic functionality tests to ensure system still works
         self.test_document_upload_and_analysis()
         self.test_document_type_validation()
         self.test_error_handling()
