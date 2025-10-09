@@ -143,6 +143,24 @@ class DocumentValidationTester:
         full_content = content + "\n" + "Test document content padding. " * 2000
         return full_content.encode('utf-8')
     
+    def create_small_document_content(self, content: str) -> bytes:
+        """Create a small document (< 200KB) to simulate CNH"""
+        # Small content to trigger CNH detection
+        full_content = content + "\n" + "Small document content. " * 100
+        return full_content.encode('utf-8')
+    
+    def create_large_document_content(self, content: str) -> bytes:
+        """Create a large document (> 2.5MB) to simulate passport or certificate"""
+        # Large content to trigger passport/certificate detection
+        full_content = content + "\n" + "Large document content padding. " * 10000
+        return full_content.encode('utf-8')
+    
+    def create_very_large_document_content(self, content: str) -> bytes:
+        """Create a very large document (> 4MB) to simulate birth certificate"""
+        # Very large content to trigger birth certificate detection
+        full_content = content + "\n" + "Very large document content padding. " * 15000
+        return full_content.encode('utf-8')
+    
     def create_test_case_for_disclaimer(self) -> str:
         """Cria um caso de teste para disclaimer testing"""
         try:
