@@ -65,6 +65,9 @@ const FriendlyForm = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
   const [cepLoading, setCepLoading] = useState(false);
+  const [validationResult, setValidationResult] = useState<any>(null);
+  const [isValidating, setIsValidating] = useState(false);
+  const [showValidationModal, setShowValidationModal] = useState(false);
 
   // Form snapshot for OspreyOwlTutor integration
   const { snapshot } = useFormSnapshot({
