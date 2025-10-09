@@ -447,35 +447,44 @@ class DocumentAnalysisTester:
             # STEP 4: Verify OpenAI API Key Usage Only
             print("🔑 STEP 4: Verifying OpenAI API Key Usage Only")
             
-            # Check backend logs for OpenAI Vision API usage (if accessible)
-            # For now, verify through response characteristics
+            # Verify that system uses only user's OpenAI API key
+            # Check response characteristics for OpenAI direct usage
             
             if analysis_results:
                 sample_result = analysis_results[0]['result']
                 extracted_data = sample_result.get('extracted_data', {})
                 
-                # Real OpenAI Vision should provide:
+                # OpenAI direct integration should provide:
                 has_confidence_score = extracted_data.get('confidence', 0) > 0
-                has_security_features = len(extracted_data.get('security_features', [])) > 0
-                has_quality_assessment = 'quality_assessment' in extracted_data or 'quality_score' in extracted_data
+                has_analysis_method = 'analysis_method' in extracted_data
+                method_indicates_openai = any(term in extracted_data.get('analysis_method', '').lower() 
+                                            for term in ['native', 'openai', 'llm'])
                 has_full_text = len(extracted_data.get('full_text_extracted', '')) > 50
                 
-                openai_integration_working = (
+                # Check that no emergent-specific fields are present
+                no_emergent_fields = not any(field.lower().startswith('emergent') 
+                                           for field in extracted_data.keys())
+                
+                openai_direct_working = (
                     has_confidence_score and 
-                    (has_security_features or has_quality_assessment) and
-                    has_full_text
+                    has_analysis_method and
+                    method_indicates_openai and
+                    has_full_text and
+                    no_emergent_fields
                 )
                 
                 self.log_test(
-                    "Real Vision - OpenAI Integration",
-                    openai_integration_working,
-                    f"✅ OpenAI Vision integration: confidence={has_confidence_score}, features={has_security_features}",
+                    "OpenAI Direct - API Key Usage Only",
+                    openai_direct_working,
+                    f"✅ OpenAI direct integration: method={extracted_data.get('analysis_method', '')}, no_emergent={no_emergent_fields}",
                     {
                         "has_confidence_score": has_confidence_score,
-                        "has_security_features": has_security_features,
-                        "has_quality_assessment": has_quality_assessment,
+                        "has_analysis_method": has_analysis_method,
+                        "method_indicates_openai": method_indicates_openai,
                         "has_full_text": has_full_text,
-                        "openai_integration_working": openai_integration_working,
+                        "no_emergent_fields": no_emergent_fields,
+                        "openai_direct_working": openai_direct_working,
+                        "analysis_method": extracted_data.get('analysis_method', ''),
                         "confidence_value": extracted_data.get('confidence', 0),
                         "text_length": len(extracted_data.get('full_text_extracted', ''))
                     }
