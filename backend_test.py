@@ -323,10 +323,10 @@ Authority: DPF
                 f"❌ Exception: {str(e)}"
             )
     
-    def test_diploma_vs_passport_case(self):
-        """TESTE 2: Diploma vs Passaporte - Arquivo grande enviado como diploma"""
-        print("📋 TESTE 2: Diploma vs Passaporte - Arquivo grande enviado como diploma")
-        print("Cenário: Usuário enviou passaporte quando era esperado diploma (ambos requeridos para H-1B)")
+    def test_document_type_validation(self):
+        """TESTE 2: Document Type Validation - Teste com tipo incorreto"""
+        print("📋 TESTE 2: Document Type Validation - Teste com tipo incorreto")
+        print("Cenário: Usuário enviou CNH quando era esperado passaporte")
         
         try:
             # Simular arquivo grande (> 2.5MB) que seria típico de passaporte
