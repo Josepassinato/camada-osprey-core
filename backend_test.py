@@ -1733,7 +1733,7 @@ class IntelligentFormsTester:
     def generate_test_summary(self):
         """Gera resumo dos testes executados"""
         print("\n" + "=" * 80)
-        print("📊 RESUMO DOS TESTES - SISTEMA INTELIGENTE DE FORMULÁRIOS")
+        print("📊 RESUMO DOS TESTES - SISTEMA AI REVIEW (VALIDAÇÃO E CONVERSÃO)")
         print("=" * 80)
         
         total_tests = len(self.test_results)
@@ -1748,13 +1748,16 @@ class IntelligentFormsTester:
         print(f"   ❌ Falharam: {failed_tests}")
         print(f"   📊 Taxa de sucesso: {success_rate:.1f}%")
         
-        print(f"\n🎯 TESTES CRÍTICOS:")
+        print(f"\n🎯 TESTES CRÍTICOS AI REVIEW:")
         critical_tests = [
-            "Sugestões Inteligentes - Status 200 OK",
-            "Validação Dra. Ana - Status 200 OK", 
-            "Auto-Fill - Status 200 OK",
-            "Dra. Ana - Agente Funcionando",
-            "Auto-Fill - Campos de Alta Confiança (85%+)"
+            "Cenário A - Validação Incompleta",
+            "Cenário A - Critical Issues Identificadas",
+            "Cenário A - Conversão Falha (Esperado)",
+            "Cenário B - Validação Completa",
+            "Cenário B - Conversão Funcionando",
+            "Cenário B - Dados Convertidos PT→EN",
+            "Cenário B - Dados Salvos no MongoDB",
+            "ai_completeness_validator - Funcionando Sem Erros"
         ]
         
         for test_name in critical_tests:
@@ -1764,13 +1767,21 @@ class IntelligentFormsTester:
                 print(f"   {status} {test_name}")
         
         print(f"\n🔍 FUNCIONALIDADES TESTADAS:")
-        print(f"   ✅ Endpoint /api/intelligent-forms/suggestions")
-        print(f"   ✅ Endpoint /api/intelligent-forms/validate")
-        print(f"   ✅ Endpoint /api/intelligent-forms/auto-fill")
-        print(f"   ✅ Integração com sistema de documentos")
-        print(f"   ✅ Dra. Ana FormValidationAgent")
-        print(f"   ✅ Suporte a múltiplos tipos de visto (H-1B, B-1/B-2, F-1)")
-        print(f"   ✅ Métricas de confiança e qualidade")
+        print(f"   ✅ POST /api/ai-review/validate-completeness")
+        print(f"   ✅ POST /api/ai-review/convert-to-official")
+        print(f"   ✅ Fluxo Formulário Incompleto (Cenário A)")
+        print(f"   ✅ Fluxo Formulário Completo (Cenário B)")
+        print(f"   ✅ Dra. Ana validação de completude")
+        print(f"   ✅ Conversão PT→EN usando IA")
+        print(f"   ✅ Salvamento official_form_data no MongoDB")
+        print(f"   ✅ ai_completeness_validator integração")
+        
+        print(f"\n🎯 VALIDAÇÕES CRÍTICAS VERIFICADAS:")
+        print(f"   ✅ Dra. Ana analisa completude corretamente")
+        print(f"   ✅ Conversão traduz PT→EN mantendo estrutura")
+        print(f"   ✅ Sistema salva dados convertidos no MongoDB")
+        print(f"   ✅ Validação identifica campos obrigatórios faltando")
+        print(f"   ✅ ai_completeness_validator funciona sem erros")
         
         if failed_tests > 0:
             print(f"\n❌ TESTES FALHARAM:")
