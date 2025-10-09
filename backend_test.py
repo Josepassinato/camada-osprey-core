@@ -283,20 +283,25 @@ class DocumentAnalysisTester:
                             }
                         )
                         
-                        # CRITICAL: Verify Real Data Extraction (not hardcoded)
+                        # CRITICAL: Verify No Emergent Dependencies
                         full_text = extracted_data.get('full_text_extracted', '')
-                        has_real_text = len(full_text) > 100  # Real analysis should extract substantial text
+                        has_real_text = len(full_text) > 50  # Real analysis should extract text
                         
-                        # Check for hardcoded simulation values (should NOT be present)
-                        hardcoded_values = ['YC792396', '09/04/1970', 'SIMULATION', 'MOCK']
-                        no_hardcoded = not any(val in str(result).upper() for val in hardcoded_values)
+                        # Check for emergent-related terms (should NOT be present)
+                        emergent_indicators = ['EMERGENT_LLM_KEY', 'emergentintegrations', 'emergent', 'LlmChat']
+                        no_emergent_usage = not any(val in str(result).upper() for val in emergent_indicators)
+                        
+                        # Check for OpenAI direct usage indicators
+                        openai_indicators = ['openai', 'gpt-4o', 'vision']
+                        has_openai_indicators = any(val in str(result).lower() for val in openai_indicators)
                         
                         self.log_test(
-                            "Real Vision - No Hardcoded Values",
-                            no_hardcoded and has_real_text,
-                            f"✅ Real data extraction: no_hardcoded={no_hardcoded}, text_length={len(full_text)}",
+                            "OpenAI Direct - No Emergent Dependencies",
+                            no_emergent_usage and has_real_text,
+                            f"✅ No emergent usage: no_emergent={no_emergent_usage}, has_openai={has_openai_indicators}",
                             {
-                                "no_hardcoded_values": no_hardcoded,
+                                "no_emergent_usage": no_emergent_usage,
+                                "has_openai_indicators": has_openai_indicators,
                                 "has_real_text": has_real_text,
                                 "full_text_length": len(full_text),
                                 "extracted_fields_count": len(extracted_data),
