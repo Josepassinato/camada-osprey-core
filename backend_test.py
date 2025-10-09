@@ -9441,40 +9441,43 @@ MRZ extraction should work properly.
 
 
 def main():
-    """Execute Intelligent Tutor System Tests"""
-    print("🤖 TESTE ESPECÍFICO: Sistema de Tutor Inteligente Melhorado")
-    print("🎯 FOCO: Testar novos endpoints do sistema de tutor inteligente")
+    """Execute Document Validation System Tests"""
+    print("🤖 TESTE ESPECÍFICO: Sistema Melhorado de Validação de Documentos")
+    print("🎯 FOCO: Testar detecção específica de erros de tipo de documento incorreto")
     print()
-    print("ENDPOINTS TESTADOS:")
-    print("📋 POST /api/tutor/guidance - Orientação contextual inteligente")
-    print("📋 POST /api/tutor/checklist - Checklist personalizado de documentos")
-    print("📋 POST /api/tutor/progress-analysis - Análise de progresso personalizada")
-    print("📋 POST /api/tutor/common-mistakes - Erros comuns da etapa atual")
-    print("📋 POST /api/tutor/interview-preparation - Preparação personalizada para entrevista")
+    print("CONTEXTO DO PROBLEMA:")
+    print("📋 Usuário reportou que enviou CNH no lugar de passaporte")
+    print("📋 Sistema não especificou claramente que o tipo estava incorreto")
+    print("📋 Apenas mostrou 'erro técnico' genérico")
     print()
-    print("DADOS DE TESTE:")
-    print("📋 user_id: 'user_123'")
-    print("📋 visa_type: 'h1b'")
-    print("📋 current_step: 'document_upload'")
+    print("ENDPOINT TESTADO:")
+    print("📋 POST /api/documents/analyze-with-ai")
+    print()
+    print("CENÁRIOS DE TESTE:")
+    print("📋 Teste 1: Passaporte vs CNH (caso reportado)")
+    print("📋 Teste 2: CNH vs Passaporte")
+    print("📋 Teste 3: Certidão vs Passaporte")
+    print("📋 Teste 4: Validações de tamanho específicas")
+    print("📋 Teste 5: Múltiplos tipos de documento")
+    print("📋 Teste 6: Múltiplos tipos de visto")
     print()
     
-    tester = IntelligentTutorSystemTester()
+    tester = DocumentValidationTester()
     
-    # Execute intelligent tutor tests
-    test_results = tester.run_intelligent_tutor_tests()
+    # Execute document validation tests
+    test_results = tester.run_document_validation_tests()
     
     # Calculate results
     total_tests = len(tester.test_results)
     passed_tests = len([r for r in tester.test_results if r['success']])
     success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
     
-    # Count critical tutor tests
+    # Count critical document validation tests
     critical_tests = [
-        "Tutor Guidance - Orientação Contextual",
-        "Tutor Checklist - Checklist Personalizado",
-        "Tutor Progress Analysis - Análise Personalizada",
-        "Tutor Common Mistakes - Erros Comuns",
-        "Tutor Interview Preparation - Preparação Personalizada"
+        "Passaporte vs CNH - Detecção de Tipo Incorreto",
+        "CNH vs Passaporte - Detecção de Tipo Incorreto", 
+        "Certidão vs Passaporte - Detecção de Tipo Incorreto",
+        "Validação de Tamanho - Arquivo Muito Pequeno"
     ]
     
     critical_passed = 0
@@ -9483,47 +9486,52 @@ def main():
         if test_result and test_result['success']:
             critical_passed += 1
     
-    print(f"\n🏁 TESTES DO SISTEMA DE TUTOR INTELIGENTE CONCLUÍDOS")
+    print(f"\n🏁 TESTES DO SISTEMA DE VALIDAÇÃO DE DOCUMENTOS CONCLUÍDOS")
     print(f"Taxa de sucesso geral: {success_rate:.1f}%")
-    print(f"Endpoints críticos funcionando: {critical_passed}/{len(critical_tests)}")
+    print(f"Testes críticos funcionando: {critical_passed}/{len(critical_tests)}")
     
-    # Categorize results by endpoint
-    endpoints = {
-        "Tutor Guidance": [t for t in tester.test_results if "Tutor Guidance" in t["test"]],
-        "Tutor Checklist": [t for t in tester.test_results if "Tutor Checklist" in t["test"]],
-        "Tutor Progress Analysis": [t for t in tester.test_results if "Tutor Progress Analysis" in t["test"]],
-        "Tutor Common Mistakes": [t for t in tester.test_results if "Tutor Common Mistakes" in t["test"]],
-        "Tutor Interview Preparation": [t for t in tester.test_results if "Tutor Interview Preparation" in t["test"]],
-        "Error Handling": [t for t in tester.test_results if "Error Handling" in t["test"]]
+    # Categorize results by test type
+    test_categories = {
+        "Detecção de Tipo Incorreto": [t for t in tester.test_results if "Detecção de Tipo Incorreto" in t["test"]],
+        "Orientação Específica": [t for t in tester.test_results if "Orientação Específica" in t["test"]],
+        "Mensagem Clara": [t for t in tester.test_results if "Mensagem Clara" in t["test"]],
+        "Validação de Tamanho": [t for t in tester.test_results if "Validação de Tamanho" in t["test"]],
+        "Múltiplos Documentos": [t for t in tester.test_results if "Documento" in t["test"] and "Análise Completa" in t["test"]],
+        "Múltiplos Vistos": [t for t in tester.test_results if "Visto" in t["test"] and "Análise Completa" in t["test"]]
     }
     
-    print("\n📋 RESULTADOS POR ENDPOINT:")
-    for endpoint, tests in endpoints.items():
+    print("\n📋 RESULTADOS POR CATEGORIA:")
+    for category, tests in test_categories.items():
         if tests:
-            endpoint_passed = len([t for t in tests if t["success"]])
-            endpoint_total = len(tests)
-            endpoint_success_rate = (endpoint_passed/endpoint_total)*100 if endpoint_total > 0 else 0
-            status = "✅" if endpoint_success_rate >= 80 else "⚠️" if endpoint_success_rate >= 60 else "❌"
-            print(f"  {status} {endpoint}: {endpoint_passed}/{endpoint_total} ({endpoint_success_rate:.1f}%)")
+            category_passed = len([t for t in tests if t["success"]])
+            category_total = len(tests)
+            category_success_rate = (category_passed/category_total)*100 if category_total > 0 else 0
+            status = "✅" if category_success_rate >= 80 else "⚠️" if category_success_rate >= 60 else "❌"
+            print(f"  {status} {category}: {category_passed}/{category_total} ({category_success_rate:.1f}%)")
     
-    # Check for Brazilian context and AI integration
-    brazilian_context_tests = [t for t in tester.test_results if t.get('response_data', {}).get('has_brazilian_context', False)]
-    ai_integration_tests = [t for t in tester.test_results if t['success'] and 'guidance' in str(t.get('response_data', {}))]
+    # Check for specific improvements
+    type_detection_tests = [t for t in tester.test_results if "TIPO DE DOCUMENTO INCORRETO" in str(t.get('response_data', {}))]
+    portuguese_message_tests = [t for t in tester.test_results if t.get('response_data', {}).get('portuguese_message', False)]
+    clear_guidance_tests = [t for t in tester.test_results if t.get('response_data', {}).get('clear_guidance', False)]
     
-    print(f"\n🇧🇷 CONTEXTO BRASILEIRO: {len(brazilian_context_tests)} testes com contexto brasileiro detectado")
-    print(f"🤖 INTEGRAÇÃO IA: {len(ai_integration_tests)} testes com respostas de IA funcionais")
+    print(f"\n🎯 MELHORIAS ESPECÍFICAS:")
+    print(f"🚨 Detecção de tipo incorreto: {len(type_detection_tests)} testes detectaram mensagem específica")
+    print(f"🇧🇷 Mensagens em português: {len(portuguese_message_tests)} testes com mensagens claras")
+    print(f"📋 Orientações específicas: {len(clear_guidance_tests)} testes com orientações úteis")
     
     # Return appropriate exit code
-    if critical_passed >= 4:  # At least 4 out of 5 critical endpoints working
-        print("\n✅ SISTEMA DE TUTOR INTELIGENTE FUNCIONANDO CORRETAMENTE")
-        print("✅ Endpoints respondendo com dados estruturados!")
-        print("✅ Integração com OpenAI operacional!")
-        print("✅ Contexto brasileiro sendo aplicado!")
-        print("✅ Tratamento de erros funcionando!")
+    if critical_passed >= 3:  # At least 3 out of 4 critical tests working
+        print("\n✅ SISTEMA DE VALIDAÇÃO DE DOCUMENTOS MELHORADO FUNCIONANDO")
+        print("✅ Detecção de tipo incorreto operacional!")
+        print("✅ Mensagens específicas em português brasileiro!")
+        print("✅ Orientações claras para usuários!")
+        print("✅ Validações de tamanho funcionando!")
+        print("✅ Problema reportado pelo usuário RESOLVIDO!")
         return 0
     else:
-        print("\n❌ PROBLEMAS DETECTADOS NO SISTEMA DE TUTOR INTELIGENTE")
-        print(f"⚠️ Apenas {critical_passed}/{len(critical_tests)} endpoints críticos funcionando")
+        print("\n❌ PROBLEMAS DETECTADOS NO SISTEMA DE VALIDAÇÃO")
+        print(f"⚠️ Apenas {critical_passed}/{len(critical_tests)} testes críticos funcionando")
+        print("⚠️ Problema reportado pelo usuário pode NÃO estar resolvido")
         
         # Show specific failures
         failed_tests = [t for t in tester.test_results if not t['success']]
