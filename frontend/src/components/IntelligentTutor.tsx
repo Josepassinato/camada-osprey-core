@@ -446,7 +446,7 @@ const IntelligentTutor: React.FC<IntelligentTutorProps> = ({
                 )}
 
                 {/* Progress Tab */}
-                {activeTab === 'progress' && progressAnalysis && (
+                {activeTab === 'progress' && (progressAnalysis || (!loading && !error)) && (
                   <div className="bg-white rounded-lg p-4 border">
                     <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
                       <span className="mr-2">📊</span>
