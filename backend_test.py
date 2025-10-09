@@ -205,42 +205,42 @@ class Phase4BProductionOptimizationTester:
             print(f"❌ Erro ao criar caso de teste: {str(e)}")
             return None
 
-    def test_workflow_engine_available_workflows(self):
-        """TESTE 1: Workflow Engine - GET /api/automation/workflows/available"""
-        print("🔄 TESTE 1: Workflow Engine - Workflows Disponíveis")
+    def test_security_hardening_statistics(self):
+        """TESTE 1: Security Hardening System - GET /api/production/security/statistics"""
+        print("🔒 TESTE 1: Security Hardening - Estatísticas de Segurança")
         
         try:
-            response = self.session.get(f"{API_BASE}/automation/workflows/available")
+            response = self.session.get(f"{API_BASE}/production/security/statistics")
             
             if response.status_code == 200:
                 result = response.json()
                 
-                # Check if workflows are available
-                workflows = result.get('workflows', [])
-                has_workflows = len(workflows) > 0
+                # Check if security statistics are available
+                has_success = result.get('success', False)
+                security_stats = result.get('security_statistics', {})
                 
-                # Check for expected workflows
-                expected_workflows = ['h1b_complete_process', 'f1_student_process', 'i485_adjustment_process']
-                found_workflows = [w.get('id') for w in workflows]
-                
-                has_expected = any(expected in found_workflows for expected in expected_workflows)
+                # Check for expected statistics fields
+                expected_fields = ['blocked_ips', 'suspicious_ips', 'total_security_events', 'rate_limit_rules']
+                has_expected_fields = all(field in security_stats for field in expected_fields)
                 
                 self.log_test(
-                    "Workflow Engine - Workflows Disponíveis",
-                    has_workflows and has_expected,
-                    f"Workflows encontrados: {len(workflows)}, Esperados presentes: {has_expected}",
+                    "Security Hardening - Estatísticas de Segurança",
+                    has_success and has_expected_fields,
+                    f"Estatísticas disponíveis: {len(security_stats)} campos, Campos esperados: {has_expected_fields}",
                     {
-                        "total_workflows": len(workflows),
-                        "workflow_ids": found_workflows[:5],
-                        "expected_found": [w for w in expected_workflows if w in found_workflows],
-                        "success": result.get('success', False)
+                        "success": has_success,
+                        "blocked_ips": security_stats.get('blocked_ips', 0),
+                        "suspicious_ips": security_stats.get('suspicious_ips', 0),
+                        "total_security_events": security_stats.get('total_security_events', 0),
+                        "rate_limit_rules": security_stats.get('rate_limit_rules', 0),
+                        "fields_present": list(security_stats.keys())
                     }
                 )
                 
-                return workflows
+                return security_stats
             else:
                 self.log_test(
-                    "Workflow Engine - Workflows Disponíveis",
+                    "Security Hardening - Estatísticas de Segurança",
                     False,
                     f"HTTP {response.status_code}: {response.text[:200]}",
                     {"status_code": response.status_code, "error": response.text}
@@ -249,7 +249,7 @@ class Phase4BProductionOptimizationTester:
                 
         except Exception as e:
             self.log_test(
-                "Workflow Engine - Workflows Disponíveis",
+                "Security Hardening - Estatísticas de Segurança",
                 False,
                 f"Exception: {str(e)}"
             )
