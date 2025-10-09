@@ -3218,9 +3218,90 @@ async def specialized_document_validation(request: dict):
             "error": str(e)
         }
 
+@api_router.post("/intelligent-forms/suggestions")
+async def get_intelligent_form_suggestions_endpoint(request: dict):
+    """Obter sugestões inteligentes de preenchimento baseadas em documentos validados"""
+    try:
+        from intelligent_form_filler import get_intelligent_form_suggestions
+        
+        case_id = request.get("case_id")
+        form_code = request.get("form_code", "H-1B")
+        current_form_data = request.get("current_form_data", {})
+        
+        if not case_id:
+            raise HTTPException(status_code=400, detail="case_id é obrigatório")
+        
+        # Buscar dados do caso
+        case = await db.auto_cases.find_one({"case_id": case_id})
+        if not case:
+            raise HTTPException(status_code=404, detail="Caso não encontrado")
+        
+        logger.info(f"🤖 Gerando sugestões inteligentes para {form_code} - caso {case_id}")
+        
+        # Gerar sugestões baseadas nos dados do caso
+        suggestions = await get_intelligent_form_suggestions(case, form_code)
+        
+        return {
+            "success": True,
+            "case_id": case_id,
+            "form_code": form_code,
+            "suggestions": suggestions,
+            "total_suggestions": len(suggestions),
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Erro ao gerar sugestões inteligentes: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "suggestions": []
+        }
+
+@api_router.post("/intelligent-forms/validate")
+async def validate_form_with_ai_endpoint(request: dict):
+    """Validação inteligente de formulário usando Dra. Ana"""
+    try:
+        from intelligent_form_filler import validate_form_with_ai
+        
+        form_data = request.get("form_data", {})
+        visa_type = request.get("visa_type", "H-1B")
+        step_id = request.get("step_id", "form_review")
+        
+        if not form_data:
+            raise HTTPException(status_code=400, detail="form_data é obrigatório")
+        
+        logger.info(f"🔍 Validando formulário {visa_type} com Dra. Ana")
+        
+        # Executar validação inteligente
+        validation_result = await validate_form_with_ai(form_data, visa_type)
+        
+        return {
+            "success": True,
+            "agent": "Dra. Ana - Validadora de Formulários",
+            "visa_type": visa_type,
+            "validation_result": validation_result,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Erro na validação inteligente: {str(e)}")
+        return {
+            "success": False,
+            "agent": "Dra. Ana - Validadora de Formulários",
+            "error": str(e),
+            "validation_result": {
+                "is_valid": False,
+                "errors": [{"message": f"Erro na validação: {str(e)}", "severity": "high"}],
+                "warnings": [],
+                "completeness_score": 0.0,
+                "suggestions": []
+            }
+        }
+
 @api_router.post("/specialized-agents/form-validation")
 async def specialized_form_validation(request: dict):
-    """Ultra-specialized form validation using Dra. Ana"""
+    """Ultra-specialized form validation using Dra. Ana (Legacy endpoint)"""
     try:
         validator = create_form_validator()
         
