@@ -5620,7 +5620,9 @@ async def check_stage_required(request: dict):
         logger.error(f"Error checking stage requirement: {e}")
         raise HTTPException(status_code=500, detail=f"Erro ao verificar requisito: {str(e)}")
 
-@api_router.post("/documents/validate-ssn")
+@api_router.post("/documents/validate-ssn", tags=["Documents"],
+                 summary="Validar cartão Social Security",
+                 description="Valida cartão de Social Security com análise USCIS específica por tipo de visto")
 async def validate_social_security_card(request: dict):
     """Valida cartão de Social Security"""
     try:
