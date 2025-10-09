@@ -155,6 +155,7 @@ const USCISFormFilling = () => {
     if (caseId) {
       fetchCase();
       fetchVisaSpecs();
+      loadIntelligentSuggestions();
     }
   }, [caseId]);
 
