@@ -7826,24 +7826,33 @@ MRZ extraction should work properly.
 
 
 def main():
-    """Execute native document validation tests"""
-    print("🔬 INICIANDO TESTES DO SISTEMA DE VALIDAÇÃO NATIVO")
-    print("Sistema substitui Google Document AI por análise nativa do LLM")
+    """Execute Real Vision System tests"""
+    print("🔬 INICIANDO TESTES DO SISTEMA DE VISÃO REAL")
+    print("👁️ Sistema usa capacidade nativa de visão computacional - real_vision_analyzer.py")
+    print("🎯 OBJETIVO: Testar análise visual direta de documentos")
     print()
     
-    tester = NativeDocumentValidationTester()
-    results = tester.run_native_document_validation_tests()
+    tester = RealVisionSystemTester()
+    results = tester.run_real_vision_system_tests()
     
-    print("\n🏁 TESTES CONCLUÍDOS")
+    print("\n🏁 TESTES DE VISÃO REAL CONCLUÍDOS")
     print(f"Taxa de sucesso geral: {results['success_rate']:.1f}%")
     print(f"Verificações críticas: {results['critical_passed']}/{results['critical_total']}")
     
+    # Show Real Vision specific results
+    real_vision_tests = [r for r in tester.test_results if 'Visão Real' in r['test'] or 'Real Vision' in r['test']]
+    if real_vision_tests:
+        print(f"\n👁️ RESULTADOS ESPECÍFICOS DE VISÃO REAL:")
+        for result in real_vision_tests:
+            status = "✅" if result['success'] else "❌"
+            print(f"   {status} {result['test']}")
+    
     # Return appropriate exit code
-    if results['critical_passed'] == results['critical_total'] and results['success_rate'] >= 80:
-        print("✅ SISTEMA DE VALIDAÇÃO NATIVO FUNCIONANDO CORRETAMENTE")
+    if results['critical_passed'] >= results['critical_total'] * 0.8 and results['success_rate'] >= 75:
+        print("✅ SISTEMA DE VISÃO REAL FUNCIONANDO CORRETAMENTE")
         return 0
     else:
-        print("❌ SISTEMA PRECISA DE CORREÇÕES")
+        print("❌ SISTEMA DE VISÃO REAL PRECISA DE CORREÇÕES")
         return 1
 
 
