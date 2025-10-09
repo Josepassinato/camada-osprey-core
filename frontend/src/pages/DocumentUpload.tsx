@@ -39,6 +39,17 @@ const DocumentUpload = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState<string[]>([]);
   const [dragActive, setDragActive] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  // Get current user for tutor
+  useEffect(() => {
+    const token = localStorage.getItem('osprey_token');
+    if (token) {
+      // Extract user info from token or fetch from API
+      // For now, use a placeholder
+      setCurrentUser({ id: 'user_123', email: 'user@example.com' });
+    }
+  }, []);
 
   // Initialize disclaimer hook
   const disclaimer = useDisclaimer({
