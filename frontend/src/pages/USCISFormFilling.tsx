@@ -971,7 +971,38 @@ const USCISFormFilling = () => {
         </div>
       </div>
 
-      {/* Osprey Owl Tutor */}
+      {/* Enhanced Intelligent Tutor */}
+      {currentUser && (
+        <IntelligentTutor
+          userId={currentUser.id}
+          visaType={case_?.form_code?.toLowerCase() || "h1b"}
+          currentStep="uscis_form_filling"
+          context={{
+            case_id: caseId,
+            form_code: case_?.form_code,
+            active_section: activeSection,
+            form_progress: getCompletedSections().length,
+            validation_status: validationResult?.is_valid,
+            page: "uscis_form_filling"
+          }}
+          onTutorAction={(action, data) => {
+            console.log("Tutor action:", action, data);
+            // Handle specific actions for USCIS form
+            if (action === 'validate_form') {
+              validateFormWithAI();
+            } else if (action === 'explain_section') {
+              // Could show explanation for current section
+            } else if (action === 'go_to_section') {
+              setActiveSection(data?.section || 'personal');
+            } else if (action === 'request_help') {
+              // Could show help modal
+            }
+          }}
+          position="bottom-right"
+        />
+      )}
+
+      {/* Osprey Owl Tutor (Legacy - keeping both for comparison) */}
       <OspreyOwlTutor
         currentStage="uscis-form"
         formData={formData}
@@ -979,7 +1010,7 @@ const USCISFormFilling = () => {
           console.log('🦉 USCIS Form validation requested:', validationData);
         }}
         isEnabled={!!case_?.case_id}
-        position="bottom-right"
+        position="bottom-left"
       />
 
       {/* Save and Continue Later Modal */}
