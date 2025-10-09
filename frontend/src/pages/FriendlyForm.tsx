@@ -937,19 +937,36 @@ const FriendlyForm = () => {
                       <p className="text-xs text-muted-foreground mb-2">
                         Suas respostas serão automaticamente convertidas para o formato oficial do USCIS em inglês.
                       </p>
-                      <Button
-                        onClick={generateOfficialForms}
-                        disabled={isGenerating || !canContinue()}
-                        size="sm"
-                        className="bg-black text-white hover:bg-gray-800"
-                      >
-                        {isGenerating ? (
-                          <RefreshCw className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Languages className="h-4 w-4" />
-                        )}
-                        Gerar Formulários Oficiais
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={validateCompletenessWithDraAna}
+                          disabled={isValidating || !canContinue()}
+                          size="sm"
+                          variant="outline"
+                          className="border-purple-500 text-purple-600 hover:bg-purple-50"
+                        >
+                          {isValidating ? (
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <CheckCircle className="h-4 w-4" />
+                          )}
+                          Validar com Dra. Ana
+                        </Button>
+                        
+                        <Button
+                          onClick={generateOfficialForms}
+                          disabled={isGenerating || !canContinue()}
+                          size="sm"
+                          className="bg-black text-white hover:bg-gray-800"
+                        >
+                          {isGenerating ? (
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Languages className="h-4 w-4" />
+                          )}
+                          Gerar Formulários Oficiais
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
