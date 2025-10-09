@@ -320,7 +320,6 @@ Pedimos desculpas pelo inconveniente.
 Equipe OSPREY Immigration
             """,
             channel=NotificationChannel.EMAIL,
-            priority=NotificationPriority.HIGH,
             variables=["user_name", "workflow_name", "error_message", "error_time", "support_contact"]
         )
         
