@@ -53,8 +53,8 @@ class RealDocumentVisionAnalyzer:
             'police_clearance', 'bank_statement', 'pay_stub'
         ]
         
-        # Get API key - prefer EMERGENT_LLM_KEY, fallback to OPENAI_API_KEY
-        self.api_key = os.getenv('EMERGENT_LLM_KEY') or os.getenv('OPENAI_API_KEY')
+        # Get API key - use user's OPENAI_API_KEY directly (has no budget limits)
+        self.api_key = os.getenv('OPENAI_API_KEY')
         
         if not self.api_key:
             logger.error("No API key found for document analysis")
