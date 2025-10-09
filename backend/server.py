@@ -5949,6 +5949,135 @@ async def explain_concept(request: dict):
         logger.error(f"Error explaining concept: {e}")
         raise HTTPException(status_code=500, detail=f"Erro ao explicar conceito: {str(e)}")
 
+# Enhanced Intelligent Tutor System Endpoints (NEW)
+@api_router.post("/tutor/guidance", tags=["AI Agents"],
+                 summary="Orientação contextual inteligente",
+                 description="Fornece orientação personalizada baseada na etapa atual do usuário")
+async def get_tutor_guidance(request: TutorGuidanceRequest, current_user = Depends(get_current_user)):
+    """Obter orientação contextual do tutor inteligente"""
+    try:
+        if not intelligent_tutor:
+            raise HTTPException(status_code=503, detail="Tutor service not available")
+        
+        guidance = await intelligent_tutor.get_contextual_guidance(
+            user_id=current_user["id"],
+            current_step=request.current_step,
+            visa_type=request.visa_type,
+            personality=request.personality,
+            action=request.action
+        )
+        
+        return {
+            "success": True,
+            "guidance": guidance
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting tutor guidance: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao obter orientação: {str(e)}")
+
+@api_router.post("/tutor/checklist", tags=["AI Agents"],
+                 summary="Checklist personalizado de documentos",
+                 description="Gera checklist inteligente baseado no progresso do usuário")
+async def get_document_checklist(request: TutorChecklistRequest, current_user = Depends(get_current_user)):
+    """Obter checklist personalizado de documentos"""
+    try:
+        if not intelligent_tutor:
+            raise HTTPException(status_code=503, detail="Tutor service not available")
+        
+        checklist = await intelligent_tutor.get_document_checklist(
+            user_id=current_user["id"],
+            visa_type=request.visa_type
+        )
+        
+        return {
+            "success": True,
+            "checklist": checklist
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting document checklist: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao obter checklist: {str(e)}")
+
+@api_router.post("/tutor/progress-analysis", tags=["AI Agents"],
+                 summary="Análise de progresso personalizada",
+                 description="Analisa o progresso do usuário e oferece insights personalizados")
+async def analyze_user_progress(request: TutorProgressAnalysisRequest, current_user = Depends(get_current_user)):
+    """Analisar progresso do usuário"""
+    try:
+        if not intelligent_tutor:
+            raise HTTPException(status_code=503, detail="Tutor service not available")
+        
+        analysis = await intelligent_tutor.analyze_progress(
+            user_id=current_user["id"],
+            visa_type=request.visa_type
+        )
+        
+        return {
+            "success": True,
+            "analysis": analysis
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error analyzing user progress: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao analisar progresso: {str(e)}")
+
+@api_router.post("/tutor/common-mistakes", tags=["AI Agents"],
+                 summary="Erros comuns da etapa atual",
+                 description="Identifica e previne erros comuns específicos da etapa atual")
+async def get_common_mistakes(request: TutorMistakesRequest, current_user = Depends(get_current_user)):
+    """Obter erros comuns para a etapa atual"""
+    try:
+        if not intelligent_tutor:
+            raise HTTPException(status_code=503, detail="Tutor service not available")
+        
+        mistakes = await intelligent_tutor.get_common_mistakes_for_step(
+            current_step=request.current_step,
+            visa_type=request.visa_type
+        )
+        
+        return {
+            "success": True,
+            "mistakes": mistakes
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting common mistakes: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao obter erros comuns: {str(e)}")
+
+@api_router.post("/tutor/interview-preparation", tags=["AI Agents"],
+                 summary="Preparação personalizada para entrevista",
+                 description="Fornece plano completo de preparação para entrevista consular")
+async def get_interview_preparation(request: TutorInterviewPrepRequest, current_user = Depends(get_current_user)):
+    """Obter preparação personalizada para entrevista"""
+    try:
+        if not intelligent_tutor:
+            raise HTTPException(status_code=503, detail="Tutor service not available")
+        
+        preparation = await intelligent_tutor.get_interview_preparation(
+            user_id=current_user["id"],
+            visa_type=request.visa_type
+        )
+        
+        return {
+            "success": True,
+            "preparation": preparation
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting interview preparation: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao obter preparação de entrevista: {str(e)}")
+
 # Existing Applications endpoints continue here...
 @api_router.post("/applications")
 async def create_application(app_data: ApplicationCreate, current_user = Depends(get_current_user)):
