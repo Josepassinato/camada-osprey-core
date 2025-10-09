@@ -451,45 +451,79 @@ Data de Validade: 15/06/2024
             if response.status_code == 200:
                 result = response.json()
                 
-                # Verificar se detectou erro de tipo de documento
+                # Arquivo muito pequeno deve ser rejeitado
+                is_valid = result.get('valid', True)
                 issues = result.get('issues', [])
                 dra_paula_assessment = result.get('dra_paula_assessment', '')
                 
-                # Procurar pela mensagem específica de tipo incorreto
-                type_error_detected = any('TIPO DE DOCUMENTO INCORRETO' in issue for issue in issues)
-                specific_message_found = 'Certidão' in dra_paula_assessment and 'Passaporte' in dra_paula_assessment
-                
-                # Verificar se documento foi rejeitado
-                is_valid = result.get('valid', True)
+                # Procurar por mensagem de arquivo muito pequeno
+                size_error_detected = any('muito pequeno' in issue.lower() for issue in issues) or 'muito pequeno' in dra_paula_assessment.lower()
                 
                 self.log_test(
-                    "Certidão vs Passaporte - Detecção de Tipo Incorreto",
-                    type_error_detected and not is_valid,
-                    f"✅ Erro detectado: tipo_incorreto={type_error_detected}, rejeitado={not is_valid}, mensagem_específica={specific_message_found}",
+                    "Error Handling - File Too Small",
+                    not is_valid and size_error_detected,
+                    f"✅ Arquivo pequeno rejeitado: válido={is_valid}, erro_tamanho={size_error_detected}",
                     {
                         "valid": is_valid,
-                        "type_error_detected": type_error_detected,
-                        "specific_message_found": specific_message_found,
-                        "issues_count": len(issues),
-                        "dra_paula_assessment": dra_paula_assessment[:200],
-                        "issues_sample": issues[:2] if issues else []
+                        "size_error_detected": size_error_detected,
+                        "file_size": len(tiny_content),
+                        "issues": issues,
+                        "assessment": dra_paula_assessment[:100]
                     }
                 )
                 
-                # Verificar orientação específica para certidão
-                certificate_guidance = 'Certidão' in dra_paula_assessment or 'nascimento' in dra_paula_assessment.lower()
-                helpful_message = 'documento correto' in dra_paula_assessment.lower() or 'passaporte' in dra_paula_assessment.lower()
-                
-                self.log_test(
-                    "Certidão vs Passaporte - Orientação Específica",
-                    certificate_guidance and helpful_message,
-                    f"✅ Orientação clara: certidão_mencionada={certificate_guidance}, mensagem_útil={helpful_message}",
-                    {
-                        "certificate_guidance": certificate_guidance,
-                        "helpful_message": helpful_message,
-                        "full_assessment": dra_paula_assessment
+                # Teste 2: Tipo de arquivo inválido
+                try:
+                    invalid_files = {
+                        'file': ('document.txt', b'Invalid file type content', 'text/plain')
                     }
-                )
+                    invalid_data = {
+                        'document_type': 'passport',
+                        'visa_type': 'H-1B',
+                        'case_id': 'TEST-INVALID-TYPE'
+                    }
+                    
+                    headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                    
+                    invalid_response = requests.post(
+                        f"{API_BASE}/documents/analyze-with-ai",
+                        files=invalid_files,
+                        data=invalid_data,
+                        headers=headers
+                    )
+                    
+                    if invalid_response.status_code == 200:
+                        invalid_result = invalid_response.json()
+                        invalid_valid = invalid_result.get('valid', True)
+                        invalid_issues = invalid_result.get('issues', [])
+                        
+                        # Deve rejeitar tipo de arquivo inválido
+                        type_error = any('tipo de arquivo' in issue.lower() or 'file type' in issue.lower() for issue in invalid_issues)
+                        
+                        self.log_test(
+                            "Error Handling - Invalid File Type",
+                            not invalid_valid and type_error,
+                            f"✅ Tipo inválido rejeitado: válido={invalid_valid}, erro_tipo={type_error}",
+                            {
+                                "valid": invalid_valid,
+                                "type_error": type_error,
+                                "issues": invalid_issues[:2]
+                            }
+                        )
+                    else:
+                        self.log_test(
+                            "Error Handling - Invalid File Type",
+                            False,
+                            f"❌ HTTP {invalid_response.status_code}",
+                            {"status_code": invalid_response.status_code}
+                        )
+                        
+                except Exception as e:
+                    self.log_test(
+                        "Error Handling - Invalid File Type",
+                        False,
+                        f"❌ Exception: {str(e)}"
+                    )
                 
             else:
                 self.log_test(
