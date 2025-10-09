@@ -528,11 +528,17 @@ const FriendlyForm = () => {
     }
   };
 
-  const generateOfficialForms = async () => {
-    setIsGenerating(true);
+  const [validationResult, setValidationResult] = useState<any>(null);
+  const [isValidating, setIsValidating] = useState(false);
+  const [showValidationModal, setShowValidationModal] = useState(false);
+
+  const validateCompletenessWithDraAna = async () => {
+    setIsValidating(true);
     
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auto-application/generate-forms`, {
+      console.log('🔍 Validando completude com Dra. Ana...');
+      
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/ai-review/validate-completeness`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -540,17 +546,84 @@ const FriendlyForm = () => {
         body: JSON.stringify({
           case_id: caseId,
           form_responses: responses,
-          form_code: case_.form_code
+          visa_type: case_.form_code
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setValidationResult(data.validation_result);
+        setShowValidationModal(true);
+        
+        if (data.validation_result?.ready_for_conversion) {
+          toast({
+            title: "✅ Formulário Aprovado pela Dra. Ana",
+            description: `Completude: ${data.validation_result.completeness_score}% - Pronto para conversão oficial`,
+          });
+        } else {
+          toast({
+            title: "⚠️ Formulário Precisa de Ajustes", 
+            description: `Completude: ${data.validation_result.completeness_score}% - ${data.validation_result.critical_issues?.length || 0} problema(s) encontrado(s)`,
+            variant: "destructive",
+          });
+        }
+      } else {
+        setError('Erro na validação com Dra. Ana');
+      }
+      
+    } catch (error) {
+      console.error('Validation error:', error);
+      setError('Erro de conexão na validação');
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  const generateOfficialForms = async () => {
+    setIsGenerating(true);
+    
+    try {
+      console.log('🔄 Convertendo para formulário oficial...');
+      
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/ai-review/convert-to-official`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          case_id: caseId,
+          form_responses: responses,
+          visa_type: case_.form_code,
+          force_conversion: false
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
         
-        // Update case with official form data
-        await saveFormData();
-        
-        setError('');
+        if (data.success) {
+          // Update case with official form data
+          await saveFormData();
+          
+          toast({
+            title: "✅ Formulários Oficiais Gerados",
+            description: `${data.conversion_stats?.fields_converted || 'Múltiplos'} campos convertidos para formato USCIS`,
+          });
+          
+          setError('');
+          
+          // Navigate to next step
+          setTimeout(() => {
+            navigate(`/auto-application/case/${caseId}/uscis-form`);
+          }, 2000);
+        } else {
+          setError(data.error || 'Erro na conversão');
+          
+          if (data.validation_result) {
+            setValidationResult(data.validation_result);
+            setShowValidationModal(true);
+          }
+        }
       } else {
         setError('Erro ao gerar formulários oficiais');
       }
