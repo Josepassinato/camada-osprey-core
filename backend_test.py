@@ -581,7 +581,7 @@ class DisclaimerAndSSNValidatorTester:
             )
             return None
     
-    def test_system_health_corrected(self):
+    def test_disclaimer_status_and_reports(self):
         """TESTE 2: System Health Corrected - Health check corrigido"""
         print("🏥 TESTE 2: System Health Corrected - Health check corrigido")
         
