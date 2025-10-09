@@ -20,13 +20,14 @@ import {
 
 interface FinalizationJob {
   job_id: string;
-  status: 'running' | 'needs_correction' | 'ready' | 'error';
+  status: 'running' | 'needs_correction' | 'completed' | 'ready' | 'error';
   issues: string[];
   links: {
     master_packet?: string;
     instructions?: string;
     checklist?: string;
   };
+  approval_status?: 'pending' | 'approved' | 'rejected';
   created_at?: string;
   completed_at?: string;
 }
