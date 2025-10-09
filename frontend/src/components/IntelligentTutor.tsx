@@ -387,8 +387,19 @@ const IntelligentTutor: React.FC<IntelligentTutorProps> = ({
                       </div>
                     </div>
                     
-                    <div className="space-y-3">
-                      {checklist.required_documents?.map((doc: any, index: number) => (
+                    {!checklist ? (
+                      <div className="text-center py-8">
+                        <p className="text-gray-600 mb-4">Clique para carregar seu checklist personalizado</p>
+                        <button 
+                          onClick={fetchChecklist}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                        >
+                          Carregar Checklist
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {checklist.required_documents?.map((doc: any, index: number) => (
                         <div key={index} className="border border-gray-200 rounded-lg p-3">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
