@@ -6231,8 +6231,8 @@ async def analyze_document_with_real_ai(
             logger.info(f"🔬 STARTING NATIVE LLM ANALYSIS for {document_type}")
             logger.info(f"Policy Engine result before native analysis: issues={len(analysis_result.get('issues', []))}")
             
-            # Import native analyzer
-            from native_document_analyzer import analyze_document_native
+            # Import real vision analyzer
+            from real_vision_analyzer import analyze_document_with_real_vision
             from dateutil import parser as date_parser
             import unicodedata
             
