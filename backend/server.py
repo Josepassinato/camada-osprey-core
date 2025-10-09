@@ -6249,11 +6249,12 @@ async def analyze_document_with_real_ai(
                     elif first_name:
                         applicant_name = first_name
             
-            # Perform native analysis
-            native_result = await analyze_document_native(
-                file_content=file_content,
+            # Perform real vision analysis
+            vision_result = await analyze_document_with_real_vision(
+                image_data=file_content,
                 document_type=document_type,
                 applicant_name=applicant_name,
+                visa_type=visa_type,
                 case_id=case_id
             )
             
