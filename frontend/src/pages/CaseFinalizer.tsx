@@ -456,54 +456,7 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
           </div>
         )}
 
-        {/* Step 4: Consent */}
-        {currentStep === 4 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Shield className="h-5 w-5 text-[#FF6B35]" />
-                <span>Consentimento e Responsabilidade</span>
-              </CardTitle>
-              <CardDescription>
-                Leia atentamente antes de prosseguir com os downloads
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="bg-gray-50 p-4 rounded-lg max-h-60 overflow-y-auto">
-                  <pre className="whitespace-pre-wrap text-sm text-gray-700">
-                    {consentText}
-                  </pre>
-                </div>
-
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-blue-800 text-sm">
-                    <strong>Importante:</strong> Este sistema gera documentos informativos baseados em requisitos públicos.
-                    Sempre consulte um advogado de imigração para orientação específica do seu caso.
-                  </p>
-                </div>
-
-                <Button
-                  onClick={() => {
-                    acceptConsent();
-                    setCurrentStep(5);
-                  }}
-                  disabled={loading}
-                  className="bg-[#FF6B35] hover:bg-[#FF6B35]/90 w-full"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Processando...
-                    </>
-                  ) : (
-                    'Aceito os Termos e Prosseguir'
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {/* Step 4: Disclaimer Final será exibido via modal */}
 
         {/* Step 5: Downloads */}
         {currentStep === 5 && consentAccepted && (
