@@ -521,7 +521,7 @@ const IntelligentTutor: React.FC<IntelligentTutorProps> = ({
                 )}
 
                 {/* Common Mistakes Tab */}
-                {activeTab === 'mistakes' && commonMistakes && (
+                {activeTab === 'mistakes' && (commonMistakes || (!loading && !error)) && (
                   <div className="bg-white rounded-lg p-4 border">
                     <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
                       <span className="mr-2">⚠️</span>
