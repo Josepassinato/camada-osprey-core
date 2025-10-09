@@ -44,6 +44,7 @@ const CaseFinalizer: React.FC = () => {
   const [postage, setPostage] = useState('USPS');
   const [language, setLanguage] = useState('pt');
   const [consentAccepted, setConsentAccepted] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   const consentText = `
 CONSENTIMENTO PARA FINALIZAÇÃO DO PROCESSO
