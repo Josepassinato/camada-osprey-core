@@ -467,64 +467,115 @@ class IntelligentFormsTester:
             )
             return None
     
-    def test_document_expiration_validation(self):
-        """TESTE 4: Validação de Documento Vencido"""
-        print("📅 TESTE 4: Validação de Documento Vencido")
+    def test_document_integration_with_forms(self):
+        """TESTE 4: Integração com Sistema de Documentos"""
+        print("📋 TESTE 4: Integração Documentos → Formulários")
         
-        # Test case: Small file size to trigger expiration simulation
-        small_content = "PASSPORT\nJOHN DOE\nExpired document content"
-        test_content = small_content.encode('utf-8') + b"X" * 60000  # Just over 50KB but under 100KB
-        
-        files = {
-            'file': ('old_passport.pdf', test_content, 'application/pdf')
-        }
-        data = {
-            'document_type': 'passport',
-            'visa_type': 'H-1B',
-            'case_id': 'TEST-EXPIRY-VALIDATION'
-        }
+        # Create test case with multiple document types
+        case_id = self.create_test_case_with_documents()
+        if not case_id:
+            self.log_test(
+                "Integração Documentos - Criação de Caso",
+                False,
+                "Falha ao criar caso de teste"
+            )
+            return None
         
         try:
-            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            # Add additional document analysis (CNH for address data)
+            additional_docs = [
+                {
+                    "document_type": "driver_license",
+                    "valid": True,
+                    "extracted_data": {
+                        "full_name": "CARLOS EDUARDO SILVA",
+                        "license_number": "12345678901",
+                        "current_address": "RUA DAS FLORES, 123, SÃO PAULO, SP",
+                        "issue_date": "2020-03-15",
+                        "expiry_date": "2025-03-15"
+                    }
+                }
+            ]
             
-            response = requests.post(
-                f"{API_BASE}/documents/analyze-with-ai",
-                files=files,
-                data=data,
-                headers=headers
+            # Update case with additional documents
+            self.session.patch(
+                f"{API_BASE}/auto-application/case/{case_id}",
+                json={
+                    "document_analysis_results": additional_docs
+                }
+            )
+            
+            # Test suggestions with multiple document types
+            request_data = {
+                "case_id": case_id,
+                "form_code": "H-1B"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/intelligent-forms/suggestions",
+                json=request_data
             )
             
             if response.status_code == 200:
                 result = response.json()
+                suggestions = result.get('suggestions', [])
                 
-                # Check if validation detected expiration
-                issues = result.get('issues', [])
-                expiry_error_found = any("DOCUMENTO VENCIDO" in issue for issue in issues)
+                # Check if passport data appears in suggestions
+                passport_suggestions = [s for s in suggestions if 'passport' in s.get('source', '').lower() or 'document' in s.get('source', '').lower()]
+                has_passport_data = len(passport_suggestions) > 0
                 
                 self.log_test(
-                    "Validação Expiração - Detecção de Erro",
-                    expiry_error_found,
-                    f"Mensagem '❌ DOCUMENTO VENCIDO' encontrada: {expiry_error_found}",
+                    "Integração Documentos - Dados de Passaporte",
+                    has_passport_data,
+                    f"Sugestões baseadas em passaporte: {len(passport_suggestions)}",
                     {
-                        "issues_found": len(issues),
-                        "expiry_error_detected": expiry_error_found,
-                        "issues": issues[:3]
+                        "passport_suggestions": len(passport_suggestions),
+                        "sample_passport_data": passport_suggestions[:2] if passport_suggestions else []
+                    }
+                )
+                
+                # Check if CNH data appears for address
+                address_suggestions = [s for s in suggestions if 'address' in s.get('field_id', '').lower()]
+                has_address_data = len(address_suggestions) > 0
+                
+                self.log_test(
+                    "Integração Documentos - Dados de Endereço (CNH)",
+                    has_address_data,
+                    f"Sugestões de endereço baseadas em CNH: {len(address_suggestions)}",
+                    {
+                        "address_suggestions": len(address_suggestions),
+                        "sample_address_data": address_suggestions[:2] if address_suggestions else []
+                    }
+                )
+                
+                # Check mapping: passaporte → dados pessoais
+                personal_data_fields = ['full_name', 'date_of_birth', 'place_of_birth', 'passport_number', 'nationality']
+                personal_suggestions = [s for s in suggestions if any(field in s.get('field_id', '') for field in personal_data_fields)]
+                has_personal_mapping = len(personal_suggestions) > 0
+                
+                self.log_test(
+                    "Integração Documentos - Mapeamento Passaporte → Dados Pessoais",
+                    has_personal_mapping,
+                    f"Mapeamento de dados pessoais: {len(personal_suggestions)} campos",
+                    {
+                        "personal_suggestions": len(personal_suggestions),
+                        "mapped_fields": [s.get('field_id') for s in personal_suggestions]
                     }
                 )
                 
                 return result
             else:
                 self.log_test(
-                    "Validação Expiração - Detecção de Erro",
+                    "Integração Documentos - Status 200 OK",
                     False,
-                    f"HTTP {response.status_code}",
-                    response.text
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    {"status_code": response.status_code, "error": response.text}
                 )
                 return None
                 
         except Exception as e:
             self.log_test(
-                "Validação Expiração - Detecção de Erro",
+                "Integração Documentos - Status 200 OK",
                 False,
                 f"Exception: {str(e)}"
             )
