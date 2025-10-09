@@ -81,7 +81,7 @@ const FriendlyForm = () => {
         filled: !!(responses[section.id]?.[field.id] || field.value)
       }))
     })),
-    visa_type: caseData?.form_code,
+    visa_type: case_?.form_code,
     step: 'friendly_form',
     completion_percentage: Math.round((formSections.filter(s => s.completed).length / formSections.length) * 100)
   }, {
