@@ -575,7 +575,7 @@ Equipe OSPREY Immigration
         """
         Envia notificação in-app
         """
-        if not self.db:
+        if self.db is None:
             raise ValueError("Database not available for in-app notifications")
         
         in_app_notification = {
