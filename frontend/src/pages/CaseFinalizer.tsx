@@ -138,34 +138,9 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
   };
 
   const acceptConsent = async () => {
-    if (!caseId) return;
-    
-    try {
-      setLoading(true);
-      const consentHash = generateConsentHash(consentText);
-      
-      const response = await makeApiCall(`/cases/${caseId}/finalize/accept`, {
-        method: 'POST',
-        body: JSON.stringify({
-          consent_hash: consentHash
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.accepted) {
-          setConsentAccepted(true);
-          setCurrentStep(4);
-        }
-      } else {
-        throw new Error('Falha ao aceitar consentimento');
-      }
-    } catch (error) {
-      console.error('Error accepting consent:', error);
-      setError('Erro ao aceitar consentimento. Tente novamente.');
-    } finally {
-      setLoading(false);
-    }
+    // Usar o novo sistema de disclaimer
+    setDisclaimerStage('review');
+    setShowDisclaimer(true);
   };
 
   const handlePacketApproval = async () => {
