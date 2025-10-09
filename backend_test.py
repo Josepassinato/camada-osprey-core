@@ -145,8 +145,8 @@ class DocumentValidationTester:
     
     def create_small_document_content(self, content: str) -> bytes:
         """Create a small document (< 200KB) to simulate CNH"""
-        # Small content to trigger CNH detection
-        full_content = content + "\n" + "Small document content. " * 100
+        # Small content to trigger CNH detection - include keywords that the analyzer looks for
+        full_content = content + "\nCNH - CARTEIRA NACIONAL DE HABILITAÇÃO\nDETRAN\nCategoria: B\n" + "Small document content. " * 100
         return full_content.encode('utf-8')
     
     def create_large_document_content(self, content: str) -> bytes:
