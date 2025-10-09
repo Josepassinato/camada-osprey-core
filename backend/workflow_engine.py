@@ -393,7 +393,7 @@ class WorkflowEngine:
                 logger.error(f"❌ Workflow {execution.workflow_name} failed: {execution.error}")
             
             # Salvar estado final
-            if self.db:
+            if self.db is not None:
                 await self._save_execution_to_db(execution)
                 
         except Exception as e:
