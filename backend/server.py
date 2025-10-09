@@ -8264,8 +8264,8 @@ async def analyze_document_with_real_ai(
             logger.info(f"   → Expected Type: {document_type}")
             logger.info(f"   → Confidence: {confidence}")
             logger.info(f"   → Issues Found: {len(vision_issues)}")
-            logger.info(f"   → Security Features: {len(extracted_data.get('security_features', []))}")
-            logger.info(f"   → Full Text Extracted: {len(extracted_data.get('full_text_extracted', ''))}")
+            logger.info(f"   → Security Features: {len(vision_result.get('security_features', []))}")
+            logger.info(f"   → Full Text Extracted: {len(vision_result.get('text_content', ''))}")
             
             # **ANÁLISE VISUAL REAL CONCLUÍDA**
             # Dados já processados pela análise de visão real
