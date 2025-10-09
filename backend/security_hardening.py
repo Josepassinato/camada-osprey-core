@@ -128,9 +128,9 @@ class SecurityHardeningSystem:
         
         # Suspicious patterns
         self.suspicious_patterns = {
-            # SQL injection attempts
+            # SQL injection attempts (more specific patterns to avoid false positives)
             "sql_injection": [
-                r"(?i)(union|select|insert|update|delete|drop|exec|script)",
+                r"(?i)\b(union\s+select|select\s+\*|insert\s+into|update\s+set|delete\s+from|drop\s+table)\b",
                 r"(?i)(\-\-|\#|\/\*|\*\/)",
                 r"(?i)(or\s+1\s*=\s*1|and\s+1\s*=\s*1)"
             ],
