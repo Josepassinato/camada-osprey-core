@@ -32,9 +32,26 @@ const DocumentUpload = () => {
   const [expirationDate, setExpirationDate] = useState("");
   const [issueDate, setIssueDate] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [validationResults, setValidationResults] = useState<any>(null);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [caseId, setCaseId] = useState<string>("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState<string[]>([]);
   const [dragActive, setDragActive] = useState(false);
+
+  // Initialize disclaimer hook
+  const disclaimer = useDisclaimer({
+    caseId: caseId || "OSP-DOC-UPLOAD", 
+    onSuccess: (stage) => {
+      console.log(`Disclaimer accepted for stage: ${stage}`);
+      setShowDisclaimer(false);
+      // Continue with document upload process
+      navigate("/documents"); 
+    },
+    onError: (error) => {
+      console.error("Disclaimer error:", error);
+    }
+  });
 
   const documentTypes = [
     { value: "passport", label: "Passaporte" },
