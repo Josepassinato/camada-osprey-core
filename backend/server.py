@@ -153,7 +153,7 @@ app = FastAPI(
     ### Tecnologias Utilizadas:
     - **Backend**: FastAPI, Python 3.11+
     - **Banco de Dados**: MongoDB com Motor (async)
-    - **IA/LLM**: OpenAI GPT-4o, Emergent Integrations
+    - **IA/LLM**: OpenAI GPT-4o (user's personal API key only)
     - **OCR**: Vision AI nativa
     - **Frontend**: React, TypeScript, Vite
     - **Infraestrutura**: Docker, Kubernetes
