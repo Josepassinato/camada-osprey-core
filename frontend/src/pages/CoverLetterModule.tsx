@@ -149,6 +149,10 @@ const CoverLetterModule: React.FC = () => {
   const generateDirectives = async () => {
     try {
       setLoading(true);
+      setError(''); // Clear any previous errors
+      
+      console.log('🔄 Generating directives for visa type:', visaType);
+      
       const response = await makeApiCall('/llm/dr-paula/generate-directives', {
         method: 'POST',
         body: JSON.stringify({
@@ -160,14 +164,21 @@ const CoverLetterModule: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setDirectivesText(data.directives_text);
-        setDirectives(data.directives_data);
+        console.log('✅ Directives generated successfully:', data.directives_text?.length, 'characters');
+        
+        if (data.success && data.directives_text) {
+          setDirectivesText(data.directives_text);
+          setDirectives(data.directives_data);
+        } else {
+          throw new Error(data.error || 'Resposta inválida do servidor');
+        }
       } else {
-        throw new Error('Falha ao gerar diretivas');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}: Falha ao gerar diretivas`);
       }
     } catch (error) {
-      console.error('Error generating directives:', error);
-      setError('Erro ao gerar roteiro informativo');
+      console.error('❌ Error generating directives:', error);
+      setError(`Erro ao gerar roteiro informativo: ${error.message}`);
     } finally {
       setLoading(false);
     }
