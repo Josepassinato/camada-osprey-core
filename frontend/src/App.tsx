@@ -80,6 +80,7 @@ const App = () => (
           <Route path="/consistency" element={<ConsistencyDashboard />} />
           <Route path="/advanced-analytics" element={<AdvancedAnalytics />} />
           <Route path="/automation" element={<AutomationDashboard />} />
+          <Route path="/production" element={<ProductionDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
