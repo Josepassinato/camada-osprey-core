@@ -167,7 +167,11 @@ class DatabaseOptimizationSystem:
                 IndexModel([("filename", TEXT)])  # Text search
             ]
             
-            await self.db.documents.create_indexes(documents_indexes)
+            try:
+                await self.db.documents.create_indexes(documents_indexes)
+                logger.info("✅ Documents indexes created")
+            except Exception as e:
+                logger.warning(f"⚠️ Documents indexes error (may already exist): {e}")
             
             # Índices para workflow executions
             workflow_indexes = [
