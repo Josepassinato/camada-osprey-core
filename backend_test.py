@@ -10022,6 +10022,9 @@ def main():
     tester.test_error_handling()
     tester.test_integration_points()
     
+    # Execute specific Brazilian ID card mismatch test (as requested)
+    tester.test_brazilian_id_card_mismatch_scenario()
+    
     # Calculate results
     total_tests = len(tester.test_results)
     passed_tests = len([r for r in tester.test_results if r['success']])
