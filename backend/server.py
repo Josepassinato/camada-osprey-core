@@ -5311,6 +5311,185 @@ async def get_responsibility_status(case_id: str):
             "success": False,
             "error": str(e)
         }
+
+# =====================================
+# SISTEMA DE DISCLAIMER E ACEITE
+# =====================================
+
+@api_router.post("/disclaimer/record")
+async def record_disclaimer_acceptance(request: dict):
+    """Registra aceite de disclaimer por etapa"""
+    try:
+        case_id = request.get("case_id")
+        stage = request.get("stage")
+        consent_hash = request.get("consent_hash")
+        user_id = request.get("user_id")
+        ip_address = request.get("ip_address")
+        user_agent = request.get("user_agent")
+        stage_data = request.get("stage_data", {})
+        
+        if not case_id or not stage or not consent_hash:
+            raise HTTPException(status_code=400, detail="Campos obrigatórios: case_id, stage, consent_hash")
+        
+        try:
+            disclaimer_stage = DisclaimerStage(stage)
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"Etapa inválida: {stage}")
+        
+        # Registrar aceite
+        acceptance = await disclaimer_system.record_acceptance(
+            case_id=case_id,
+            stage=disclaimer_stage,
+            consent_hash=consent_hash,
+            user_id=user_id,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            stage_data=stage_data
+        )
+        
+        return {
+            "success": True,
+            "acceptance_id": acceptance.id,
+            "stage": stage,
+            "recorded_at": acceptance.timestamp.isoformat(),
+            "message": f"Aceite de responsabilidade registrado para etapa: {stage}"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error recording disclaimer: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao registrar aceite: {str(e)}")
+
+@api_router.get("/disclaimer/validate/{case_id}")
+async def validate_case_disclaimers(case_id: str):
+    """Valida se caso tem todos os aceites obrigatórios"""
+    try:
+        validation = await disclaimer_system.validate_case_compliance(case_id)
+        
+        return {
+            "success": True,
+            "case_id": case_id,
+            "compliance": {
+                "all_required_accepted": validation.all_required_accepted,
+                "missing_stages": [stage.value for stage in validation.missing_stages],
+                "accepted_stages": [stage.value for stage in validation.accepted_stages],
+                "total_acceptances": validation.total_acceptances,
+                "latest_acceptance": validation.latest_acceptance.isoformat() if validation.latest_acceptance else None
+            },
+            "ready_for_final": await disclaimer_system.check_final_disclaimer_ready(case_id)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error validating disclaimers: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao validar aceites: {str(e)}")
+
+@api_router.get("/disclaimer/text/{stage}")
+async def get_disclaimer_text(stage: str):
+    """Retorna texto do disclaimer para uma etapa específica"""
+    try:
+        try:
+            disclaimer_stage = DisclaimerStage(stage)
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"Etapa inválida: {stage}")
+        
+        text = disclaimer_system.get_disclaimer_text(disclaimer_stage)
+        
+        return {
+            "success": True,
+            "stage": stage,
+            "disclaimer_text": text,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting disclaimer text: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar texto do disclaimer: {str(e)}")
+
+@api_router.get("/disclaimer/status/{case_id}")
+async def get_disclaimer_status(case_id: str):
+    """Retorna status detalhado dos disclaimers de um caso"""
+    try:
+        acceptances = await disclaimer_system.get_case_acceptances(case_id)
+        validation = await disclaimer_system.validate_case_compliance(case_id)
+        
+        # Formatar aceites para resposta
+        formatted_acceptances = []
+        for acceptance in acceptances:
+            formatted_acceptances.append({
+                "id": acceptance.id,
+                "stage": acceptance.stage.value,
+                "consent_hash": acceptance.consent_hash,
+                "timestamp": acceptance.timestamp.isoformat(),
+                "ip_address": acceptance.ip_address,
+                "user_id": acceptance.user_id
+            })
+        
+        return {
+            "success": True,
+            "case_id": case_id,
+            "acceptances": formatted_acceptances,
+            "validation": {
+                "all_required_accepted": validation.all_required_accepted,
+                "missing_stages": [stage.value for stage in validation.missing_stages],
+                "accepted_stages": [stage.value for stage in validation.accepted_stages],
+                "total_acceptances": validation.total_acceptances
+            },
+            "ready_for_final": await disclaimer_system.check_final_disclaimer_ready(case_id)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting disclaimer status: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar status dos aceites: {str(e)}")
+
+@api_router.get("/disclaimer/compliance-report/{case_id}")
+async def get_compliance_report(case_id: str):
+    """Gera relatório de compliance para auditoria"""
+    try:
+        report = await disclaimer_system.generate_compliance_report(case_id)
+        
+        return {
+            "success": True,
+            "report": report
+        }
+        
+    except Exception as e:
+        logger.error(f"Error generating compliance report: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao gerar relatório de compliance: {str(e)}")
+
+@api_router.post("/disclaimer/check-required")
+async def check_stage_required(request: dict):
+    """Verifica se aceite é obrigatório para um estágio específico"""
+    try:
+        case_id = request.get("case_id")
+        stage = request.get("stage")
+        
+        if not case_id or not stage:
+            raise HTTPException(status_code=400, detail="Campos obrigatórios: case_id, stage")
+        
+        try:
+            disclaimer_stage = DisclaimerStage(stage)
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"Etapa inválida: {stage}")
+        
+        required = await disclaimer_system.check_stage_required(case_id, disclaimer_stage)
+        
+        return {
+            "success": True,
+            "case_id": case_id,
+            "stage": stage,
+            "required": required,
+            "message": "Aceite obrigatório" if required else "Aceite já realizado"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error checking stage requirement: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao verificar requisito: {str(e)}")
+
 # Existing Applications endpoints continue here...
 @api_router.post("/applications")
 async def create_application(app_data: ApplicationCreate, current_user = Depends(get_current_user)):
