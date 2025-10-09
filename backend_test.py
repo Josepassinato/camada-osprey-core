@@ -432,102 +432,153 @@ class Phase4AEnhancedTester:
             return None
     
     def test_preview_system_endpoints(self):
-        """TESTE 3: POST /api/intelligent-forms/auto-fill"""
-        print("🚀 TESTE 3: Endpoint de Preenchimento Automático")
+        """TESTE 3: Preview System - GET /api/cases/finalize/{job_id}/preview"""
+        print("👁️ TESTE 3: Sistema de Preview Interativo")
         
-        # Create test case with documents
+        # First create a finalization job
         case_id = self.create_test_case_with_documents()
         if not case_id:
             self.log_test(
-                "Auto-Fill - Criação de Caso",
+                "Preview System - Criação de Caso",
                 False,
                 "Falha ao criar caso de teste"
             )
             return None
         
         try:
+            # Start finalization to get a job_id
             request_data = {
-                "case_id": case_id,
-                "form_code": "H-1B"
+                "scenario_key": "H-1B_basic",
+                "postage": "USPS", 
+                "language": "pt"
             }
             
-            response = self.session.post(
-                f"{API_BASE}/intelligent-forms/auto-fill",
+            start_response = self.session.post(
+                f"{API_BASE}/cases/{case_id}/finalize/start",
                 json=request_data
             )
             
-            if response.status_code == 200:
-                result = response.json()
+            if start_response.status_code != 200:
+                self.log_test(
+                    "Preview System - Job Creation",
+                    False,
+                    f"Falha ao criar job: HTTP {start_response.status_code}",
+                    start_response.text
+                )
+                return None
+            
+            start_result = start_response.json()
+            job_id = start_result.get('job_id')
+            
+            if not job_id:
+                self.log_test(
+                    "Preview System - Job ID",
+                    False,
+                    "Job ID não retornado",
+                    start_result
+                )
+                return None
+            
+            # Wait for job to complete
+            print(f"⏳ Aguardando processamento do job {job_id}...")
+            time.sleep(5)
+            
+            # Test preview endpoint
+            preview_response = self.session.get(
+                f"{API_BASE}/cases/finalize/{job_id}/preview"
+            )
+            
+            if preview_response.status_code == 200:
+                preview_result = preview_response.json()
                 
-                # Check required response structure
-                required_fields = ['success', 'case_id', 'form_code', 'auto_filled_data', 'high_confidence_fields', 'confidence_stats']
-                has_all_fields = all(field in result for field in required_fields)
+                # Check preview structure
+                required_fields = ['success', 'metadata', 'document_summary', 'quality_assessment', 'job_info']
+                has_all_fields = all(field in preview_result for field in required_fields)
                 
                 self.log_test(
-                    "Auto-Fill - Estrutura de Resposta",
+                    "Preview System - Estrutura de Resposta",
                     has_all_fields,
-                    f"Campos presentes: {list(result.keys())}",
+                    f"Campos presentes: {list(preview_result.keys())}",
                     {
-                        "status_code": response.status_code,
-                        "response_structure": {field: field in result for field in required_fields}
+                        "status_code": preview_response.status_code,
+                        "response_structure": {field: field in preview_result for field in required_fields}
                     }
                 )
                 
-                # Check if auto-fill populated fields
-                auto_filled_data = result.get('auto_filled_data', {})
-                has_auto_filled = len(auto_filled_data) > 0
+                # Check metadata completeness
+                metadata = preview_result.get('metadata', {})
+                has_metadata = len(metadata) > 0
                 
                 self.log_test(
-                    "Auto-Fill - Campos Preenchidos Automaticamente",
-                    has_auto_filled,
-                    f"Preenchidos {len(auto_filled_data)} campos automaticamente",
+                    "Preview System - Metadados Completos",
+                    has_metadata,
+                    f"Metadados disponíveis: {len(metadata)} campos",
                     {
-                        "auto_filled_fields": len(auto_filled_data),
-                        "sample_fields": list(auto_filled_data.keys())[:5] if auto_filled_data else []
+                        "metadata_fields": list(metadata.keys())[:5] if metadata else [],
+                        "metadata_count": len(metadata)
                     }
                 )
                 
-                # Check confidence statistics
-                confidence_stats = result.get('confidence_stats', {})
-                has_confidence_stats = 'high_confidence' in confidence_stats
+                # Check document summary
+                document_summary = preview_result.get('document_summary', [])
+                has_documents = len(document_summary) > 0
                 
                 self.log_test(
-                    "Auto-Fill - Estatísticas de Confiança",
-                    has_confidence_stats,
-                    f"Estatísticas de confiança disponíveis: {confidence_stats}",
+                    "Preview System - Resumo de Documentos",
+                    has_documents,
+                    f"Documentos no resumo: {len(document_summary)}",
                     {
-                        "confidence_stats": confidence_stats,
-                        "high_confidence_count": confidence_stats.get('high_confidence', 0)
+                        "documents_count": len(document_summary),
+                        "sample_documents": [d.get('name', 'unknown') for d in document_summary[:3]] if document_summary else []
                     }
                 )
                 
-                # Check high confidence fields (85%+)
-                high_confidence_fields = result.get('high_confidence_fields', [])
-                has_high_confidence = len(high_confidence_fields) > 0
+                # Check quality assessment
+                quality_assessment = preview_result.get('quality_assessment', {})
+                has_quality_data = 'overall_score' in quality_assessment and 'recommendation' in quality_assessment
                 
                 self.log_test(
-                    "Auto-Fill - Campos de Alta Confiança (85%+)",
-                    has_high_confidence,
-                    f"Campos com alta confiança: {len(high_confidence_fields)}",
+                    "Preview System - Avaliação de Qualidade",
+                    has_quality_data,
+                    f"Score: {quality_assessment.get('overall_score', 0)}, Recomendação: {quality_assessment.get('recommendation', 'N/A')}",
                     {
-                        "high_confidence_fields": high_confidence_fields,
-                        "high_confidence_count": len(high_confidence_fields)
+                        "overall_score": quality_assessment.get('overall_score', 0),
+                        "recommendation": quality_assessment.get('recommendation'),
+                        "issues_count": len(quality_assessment.get('issues', [])),
+                        "warnings_count": len(quality_assessment.get('warnings', []))
                     }
                 )
                 
-                return result
+                # Check job info
+                job_info = preview_result.get('job_info', {})
+                has_job_info = 'job_id' in job_info and 'case_id' in job_info
+                
+                self.log_test(
+                    "Preview System - Informações do Job",
+                    has_job_info,
+                    f"Job ID: {job_info.get('job_id')}, Case ID: {job_info.get('case_id')}",
+                    {
+                        "job_id": job_info.get('job_id'),
+                        "case_id": job_info.get('case_id'),
+                        "scenario": job_info.get('scenario'),
+                        "created_at": job_info.get('created_at')
+                    }
+                )
+                
+                return {"job_id": job_id, "preview_data": preview_result}
+                
             else:
                 self.log_test(
-                    "Auto-Fill - Status 200 OK",
+                    "Preview System - Endpoint Funcionando",
                     False,
-                    f"HTTP {response.status_code}: {response.text[:200]}",
-                    {"status_code": response.status_code, "error": response.text}
+                    f"HTTP {preview_response.status_code}: {preview_response.text[:200]}",
+                    {"status_code": preview_response.status_code, "error": preview_response.text}
                 )
                 return None
                 
         except Exception as e:
             self.log_test(
-                "Auto-Fill - Status 200 OK",
+                "Preview System - Exception",
                 False,
                 f"Exception: {str(e)}"
             )
