@@ -379,8 +379,8 @@ class CaseFinalizerComplete:
             instructions_result = self._generate_instructions_complete(scenario_key, postage, language)
             checklist_result = self._generate_checklist_advanced(audit_result, language)
             
-            # Executar PDF merge real dos documentos
-            master_packet_result = self._create_master_packet_real(case_id, audit_result)
+            # Executar PDF merge real dos documentos com dados reais
+            master_packet_result = await self._create_master_packet_with_real_data(case_id, audit_result)
             
             job_data.update({
                 "status": "completed",
