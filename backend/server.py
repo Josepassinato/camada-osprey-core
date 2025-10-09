@@ -3239,7 +3239,7 @@ async def get_intelligent_form_suggestions_endpoint(request: dict):
         logger.info(f"🤖 Gerando sugestões inteligentes para {form_code} - caso {case_id}")
         
         # Gerar sugestões baseadas nos dados do caso
-        suggestions = await get_intelligent_form_suggestions(case, form_code)
+        suggestions = await get_intelligent_form_suggestions(case, form_code, db)
         
         return {
             "success": True,
