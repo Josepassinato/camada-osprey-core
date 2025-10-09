@@ -372,7 +372,7 @@ const IntelligentTutor: React.FC<IntelligentTutorProps> = ({
                 )}
 
                 {/* Checklist Tab */}
-                {activeTab === 'checklist' && checklist && (
+                {activeTab === 'checklist' && (checklist || (!loading && !error)) && (
                   <div className="bg-white rounded-lg p-4 border">
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="font-semibold text-gray-900 flex items-center">
