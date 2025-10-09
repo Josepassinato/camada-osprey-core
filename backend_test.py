@@ -361,8 +361,8 @@ class Phase4BProductionOptimizationTester:
             return None
     
     def test_load_testing_system(self):
-        """TESTE 3: Preview System - GET /api/cases/finalize/{job_id}/preview"""
-        print("👁️ TESTE 3: Sistema de Preview Interativo")
+        """TESTE 3: Load Testing System - Sistema de Teste de Carga"""
+        print("⚡ TESTE 3: Load Testing System - Testes de Carga Automatizados")
         
         # First create a finalization job
         case_id = self.create_test_case_with_documents()
