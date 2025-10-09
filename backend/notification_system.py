@@ -397,7 +397,7 @@ Equipe OSPREY Immigration
         self.pending_notifications[notification.notification_id] = notification
         
         # Save to database if available
-        if self.db:
+        if self.db is not None:
             await self._save_notification_to_db(notification)
         
         logger.info(f"📬 Queued notification {notification.notification_id} for {recipient.name}")
