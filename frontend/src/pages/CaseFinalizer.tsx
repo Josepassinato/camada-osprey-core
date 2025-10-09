@@ -157,7 +157,9 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
       });
 
       if (response.ok) {
-        setCurrentStep(4);
+        // Mostrar disclaimer de revisão antes de prosseguir
+        setDisclaimerStage('review');
+        setShowDisclaimer(true);
       } else {
         throw new Error('Falha ao aprovar pacote');
       }
