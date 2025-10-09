@@ -6,7 +6,7 @@ Debug specific failing tests
 import requests
 import json
 
-API_BASE = "https://visabot-1.preview.emergentagent.com/api"
+API_BASE = "https://formfill-aid.preview.emergentagent.com/api"
 
 def test_request_complement():
     """Test request complement endpoint"""
