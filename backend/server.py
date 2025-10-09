@@ -5491,6 +5491,60 @@ async def check_stage_required(request: dict):
         logger.error(f"Error checking stage requirement: {e}")
         raise HTTPException(status_code=500, detail=f"Erro ao verificar requisito: {str(e)}")
 
+@api_router.post("/documents/validate-ssn")
+async def validate_social_security_card(request: dict):
+    """Valida cartão de Social Security"""
+    try:
+        document_text = request.get("document_text", "")
+        applicant_name = request.get("applicant_name", "")
+        visa_type = request.get("visa_type", "")
+        confidence_scores = request.get("confidence_scores", {})
+        
+        if not document_text:
+            raise HTTPException(status_code=400, detail="Texto do documento é obrigatório")
+            
+        # Validar cartão de Social Security
+        validation_result = ssn_validator.validate_social_security_card(
+            document_text=document_text,
+            applicant_name=applicant_name,
+            confidence_scores=confidence_scores
+        )
+        
+        # Validação específica para USCIS se tipo de visto fornecido
+        uscis_validation = None
+        if visa_type:
+            uscis_validation = ssn_validator.validate_for_uscis_purposes(validation_result, visa_type)
+        
+        return {
+            "success": True,
+            "validation_result": validation_result.dict(),
+            "uscis_validation": uscis_validation,
+            "requirements": ssn_validator.get_ssn_requirements(),
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error validating SSN card: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro na validação de SSN: {str(e)}")
+
+@api_router.get("/documents/ssn-requirements")
+async def get_ssn_requirements():
+    """Retorna requisitos para cartão de Social Security"""
+    try:
+        requirements = ssn_validator.get_ssn_requirements()
+        
+        return {
+            "success": True,
+            "requirements": requirements,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting SSN requirements: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar requisitos: {str(e)}")
+
 # Existing Applications endpoints continue here...
 @api_router.post("/applications")
 async def create_application(app_data: ApplicationCreate, current_user = Depends(get_current_user)):
