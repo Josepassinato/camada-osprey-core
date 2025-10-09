@@ -133,38 +133,73 @@ class IntelligentFormFiller:
         
         extracted_data = {}
         
+        logger.info(f"🔍 Processando {len(document_analysis)} análises de documentos")
+        
         for doc_analysis in document_analysis:
             if not isinstance(doc_analysis, dict):
                 continue
+            
+            logger.info(f"📄 Analisando documento: {list(doc_analysis.keys())}")
                 
             # Extrair dados do sistema de visão real
             extracted_doc_data = doc_analysis.get('extracted_data', {})
             
+            # Também tentar extrair de outros campos comuns
+            if not extracted_doc_data:
+                # Tentar outros formatos de armazenamento
+                extracted_doc_data = doc_analysis.get('analysis_result', {}).get('extracted_data', {})
+            
             if extracted_doc_data:
-                # Dados de passaporte
-                if 'full_name' in extracted_doc_data:
-                    extracted_data['full_name'] = extracted_doc_data['full_name']
-                    extracted_data['passport_name'] = extracted_doc_data['full_name']
+                logger.info(f"✅ Encontrados dados extraídos: {list(extracted_doc_data.keys())}")
                 
-                if 'nationality' in extracted_doc_data:
-                    extracted_data['nationality'] = extracted_doc_data['nationality']
-                    extracted_data['passport_country'] = extracted_doc_data['nationality']
+                # Dados de passaporte - múltiplas variações de campo
+                name_fields = ['full_name', 'name', 'holder_name', 'applicant_name']
+                for field in name_fields:
+                    if field in extracted_doc_data and extracted_doc_data[field]:
+                        extracted_data['full_name'] = extracted_doc_data[field]
+                        extracted_data['passport_name'] = extracted_doc_data[field]
+                        logger.info(f"📝 Nome extraído: {extracted_doc_data[field]}")
+                        break
                 
-                if 'document_number' in extracted_doc_data:
-                    extracted_data['passport_number'] = extracted_doc_data['document_number']
+                # Nacionalidade
+                nationality_fields = ['nationality', 'country', 'passport_country']
+                for field in nationality_fields:
+                    if field in extracted_doc_data and extracted_doc_data[field]:
+                        extracted_data['nationality'] = extracted_doc_data[field]
+                        extracted_data['passport_country'] = extracted_doc_data[field]
+                        logger.info(f"🌍 Nacionalidade extraída: {extracted_doc_data[field]}")
+                        break
                 
-                if 'place_of_birth' in extracted_doc_data:
-                    extracted_data['place_of_birth'] = extracted_doc_data['place_of_birth']
+                # Número do documento
+                doc_number_fields = ['document_number', 'passport_number', 'number', 'license_number']
+                for field in doc_number_fields:
+                    if field in extracted_doc_data and extracted_doc_data[field]:
+                        extracted_data['passport_number'] = extracted_doc_data[field]
+                        logger.info(f"📄 Número do documento: {extracted_doc_data[field]}")
+                        break
                 
-                # Dados de CNH
-                if 'license_number' in extracted_doc_data:
-                    extracted_data['license_number'] = extracted_doc_data['license_number']
+                # Local de nascimento
+                birth_fields = ['place_of_birth', 'birth_place', 'country_of_birth']
+                for field in birth_fields:
+                    if field in extracted_doc_data and extracted_doc_data[field]:
+                        extracted_data['place_of_birth'] = extracted_doc_data[field]
+                        logger.info(f"📍 Local de nascimento: {extracted_doc_data[field]}")
+                        break
                 
-                # Dados gerais
-                for field in ['issue_date', 'expiry_date', 'issuing_authority']:
-                    if field in extracted_doc_data:
-                        extracted_data[field] = extracted_doc_data[field]
+                # Dados gerais - copiar todos os campos disponíveis
+                for field, value in extracted_doc_data.items():
+                    if value and isinstance(value, str) and len(value.strip()) > 0:
+                        extracted_data[field] = value
+            
+            # Extrair também de campos de texto livre se disponível
+            dra_paula_assessment = doc_analysis.get('dra_paula_assessment', '')
+            if dra_paula_assessment and isinstance(dra_paula_assessment, str):
+                # Tentar extrair informações do assessment
+                if 'BRASILEIRO' in dra_paula_assessment.upper():
+                    extracted_data['nationality'] = 'BRASILEIRO'
+                    extracted_data['passport_country'] = 'Brasil'
         
+        logger.info(f"🎯 Dados finais extraídos: {list(extracted_data.keys())}")
         return extracted_data
     
     def _find_best_suggestion(
