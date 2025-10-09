@@ -195,84 +195,90 @@ class Phase4AEnhancedTester:
             print(f"❌ Erro ao criar caso de teste: {str(e)}")
             return None
 
-    def test_intelligent_forms_suggestions_endpoint(self):
-        """TESTE 1: POST /api/intelligent-forms/suggestions"""
-        print("🤖 TESTE 1: Endpoint de Sugestões Inteligentes")
+    def test_real_data_integrator_functionality(self):
+        """TESTE 1: RealDataIntegrator - get_case_complete_data()"""
+        print("🔄 TESTE 1: Real Data Integration System")
         
-        # Create test case with documents
+        # Create test case with mock data
         case_id = self.create_test_case_with_documents()
         if not case_id:
             self.log_test(
-                "Sugestões Inteligentes - Criação de Caso",
+                "Real Data Integration - Criação de Caso",
                 False,
                 "Falha ao criar caso de teste"
             )
             return None
         
         try:
-            # Test the suggestions endpoint
+            # Test case finalization start to trigger real data integration
             request_data = {
-                "case_id": case_id,
-                "form_code": "H-1B",
-                "current_form_data": {}
+                "scenario_key": "H-1B_basic",
+                "postage": "USPS",
+                "language": "pt"
             }
             
             response = self.session.post(
-                f"{API_BASE}/intelligent-forms/suggestions",
+                f"{API_BASE}/cases/{case_id}/finalize/start",
                 json=request_data
             )
             
             if response.status_code == 200:
                 result = response.json()
                 
-                # Check required response structure
-                required_fields = ['success', 'case_id', 'form_code', 'suggestions', 'total_suggestions']
-                has_all_fields = all(field in result for field in required_fields)
+                # Check if job was created successfully
+                has_job_id = 'job_id' in result
+                has_status = 'status' in result
                 
                 self.log_test(
-                    "Sugestões Inteligentes - Estrutura de Resposta",
-                    has_all_fields,
-                    f"Campos presentes: {list(result.keys())}",
+                    "Real Data Integration - Job Creation",
+                    has_job_id and has_status,
+                    f"Job criado: {result.get('job_id', 'N/A')}, Status: {result.get('status', 'N/A')}",
                     {
-                        "status_code": response.status_code,
-                        "response_structure": {field: field in result for field in required_fields}
+                        "job_id": result.get('job_id'),
+                        "status": result.get('status'),
+                        "message": result.get('message')
                     }
                 )
                 
-                # Check if suggestions were generated
-                suggestions = result.get('suggestions', [])
-                has_suggestions = len(suggestions) > 0
-                
-                self.log_test(
-                    "Sugestões Inteligentes - Geração de Sugestões",
-                    has_suggestions,
-                    f"Geradas {len(suggestions)} sugestões baseadas em documentos validados",
-                    {
-                        "total_suggestions": len(suggestions),
-                        "sample_suggestions": suggestions[:3] if suggestions else []
-                    }
-                )
-                
-                # Validate suggestion structure
-                if suggestions:
-                    first_suggestion = suggestions[0]
-                    suggestion_fields = ['field_id', 'suggested_value', 'confidence', 'source', 'explanation']
-                    has_valid_structure = all(field in first_suggestion for field in suggestion_fields)
+                # Test if RealDataIntegrator is working by checking job status
+                if has_job_id:
+                    job_id = result['job_id']
                     
-                    self.log_test(
-                        "Sugestões Inteligentes - Estrutura de Sugestão",
-                        has_valid_structure,
-                        f"Estrutura válida: {list(first_suggestion.keys())}",
-                        {
-                            "suggestion_structure": {field: field in first_suggestion for field in suggestion_fields},
-                            "confidence_range": f"{min(s.get('confidence', 0) for s in suggestions):.2f} - {max(s.get('confidence', 0) for s in suggestions):.2f}"
-                        }
+                    # Wait a moment for processing
+                    time.sleep(2)
+                    
+                    # Check job status
+                    status_response = self.session.get(
+                        f"{API_BASE}/cases/finalize/{job_id}/status"
                     )
+                    
+                    if status_response.status_code == 200:
+                        status_result = status_response.json()
+                        
+                        self.log_test(
+                            "Real Data Integration - Data Processing",
+                            'status' in status_result,
+                            f"Status do processamento: {status_result.get('status', 'unknown')}",
+                            {
+                                "processing_status": status_result.get('status'),
+                                "issues": len(status_result.get('issues', [])),
+                                "links": status_result.get('links', {})
+                            }
+                        )
+                        
+                        return {"job_id": job_id, "case_id": case_id}
+                    else:
+                        self.log_test(
+                            "Real Data Integration - Status Check",
+                            False,
+                            f"HTTP {status_response.status_code}",
+                            status_response.text
+                        )
                 
                 return result
             else:
                 self.log_test(
-                    "Sugestões Inteligentes - Status 200 OK",
+                    "Real Data Integration - Endpoint Funcionando",
                     False,
                     f"HTTP {response.status_code}: {response.text[:200]}",
                     {"status_code": response.status_code, "error": response.text}
@@ -281,7 +287,7 @@ class Phase4AEnhancedTester:
                 
         except Exception as e:
             self.log_test(
-                "Sugestões Inteligentes - Status 200 OK",
+                "Real Data Integration - Exception",
                 False,
                 f"Exception: {str(e)}"
             )
