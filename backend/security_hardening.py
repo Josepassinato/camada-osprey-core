@@ -592,7 +592,8 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         if size_error:
             raise size_error
         
-        # Scan for malicious content (temporarily disabled for testing)
+        # Scan for malicious content (temporarily disabled to prevent false positives)
+        # TODO: Re-enable after thorough testing
         # threats = self.security_system.scan_for_malicious_content(request)
         # if threats:
         #     ip_address = self.security_system.get_client_ip(request)
