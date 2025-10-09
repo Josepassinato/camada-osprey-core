@@ -11228,20 +11228,19 @@ MRZ Line 2: BR9876543210BRA8808201F3103015<<<<<<<<<<<<<<08
             )
 
     def run_critical_bug_fix_tests(self):
-        """Run critical tests for document analysis bug fix"""
-        print("🚀 INICIANDO TESTES CRÍTICOS - DOCUMENT ANALYSIS BUG FIX")
+        """Run critical tests for cache collision bug fix"""
+        print("🚀 INICIANDO TESTES CRÍTICOS - CACHE COLLISION BUG FIX")
         print("=" * 80)
-        print("🔧 BUG CORRIGIDO: NoneType error em case_doc.get('form_data', {}).get('basic_info')")
-        print("🎯 FOCO: Real Vision Analysis + Precision Improvement + Error Prevention")
+        print("🔧 BUG CORRIGIDO: OCR Cache collision em /app/backend/cache/ocr_cache.py linha 68")
+        print("🎯 FOCO: Cache Key Uniqueness + Sequential Analysis + Cross-Contamination Prevention")
         print("=" * 80)
         print()
         
         # Run critical test scenarios from review request
         critical_test_methods = [
-            self.test_real_vision_analysis_with_case_data,
-            self.test_document_analysis_without_case_data,
-            self.test_precision_verification_comparison,
-            self.test_full_analysis_pipeline_integration
+            self.test_cache_collision_prevention_sequential_uploads,
+            self.test_real_document_processing_no_contamination,
+            self.test_cache_key_uniqueness_similar_sizes
         ]
         
         for test_method in critical_test_methods:
