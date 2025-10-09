@@ -190,53 +190,81 @@ class DocumentValidationTester:
             print(f"❌ Erro ao criar caso de teste: {str(e)}")
             return None
 
-    def test_tutor_guidance_endpoint(self):
-        """TESTE 1: Tutor Guidance - Orientação contextual inteligente"""
-        print("🎯 TESTE 1: Tutor Guidance - Orientação contextual inteligente")
-        
-        # Test data as specified in the review request
-        test_request = {
-            "current_step": "document_upload",
-            "visa_type": "h1b",
-            "personality": "friendly",
-            "action": "next_steps"
-        }
+    def test_passport_vs_cnh_case(self):
+        """TESTE 1: Passaporte vs CNH (Caso reportado pelo usuário)"""
+        print("🎯 TESTE 1: Passaporte vs CNH - Caso reportado pelo usuário")
+        print("Cenário: Usuário enviou CNH quando era esperado passaporte")
         
         try:
-            response = self.session.post(
-                f"{API_BASE}/tutor/guidance",
-                json=test_request
+            # Simular arquivo pequeno (< 200KB) que seria típico de CNH
+            # quando o sistema espera passaporte
+            small_file_content = self.create_small_document_content("CNH - CARTEIRA NACIONAL DE HABILITAÇÃO\nJoão Silva\nCategoria: B")
+            
+            files = {
+                'file': ('cnh_joao.jpg', small_file_content, 'image/jpeg')
+            }
+            data = {
+                'document_type': 'passport',  # Sistema espera passaporte
+                'visa_type': 'H-1B',
+                'case_id': 'TEST-PASSPORT-CNH'
+            }
+            
+            # Remove content-type header to let requests set it for multipart
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
             )
             
             if response.status_code == 200:
                 result = response.json()
                 
-                # Check response structure
-                has_success = result.get('success', False)
-                guidance = result.get('guidance', {})
-                has_guidance_content = len(str(guidance)) > 50  # Should have substantial content
+                # Verificar se detectou erro de tipo de documento
+                issues = result.get('issues', [])
+                dra_paula_assessment = result.get('dra_paula_assessment', '')
                 
-                # Check if guidance contains Brazilian-specific content
-                guidance_str = str(guidance).lower()
-                has_brazilian_context = any(word in guidance_str for word in ['brasil', 'brasileiro', 'brasileira', 'português'])
+                # Procurar pela mensagem específica de tipo incorreto
+                type_error_detected = any('TIPO DE DOCUMENTO INCORRETO' in issue for issue in issues)
+                specific_message_found = 'Carteira de Motorista/CNH' in dra_paula_assessment and 'Passaporte' in dra_paula_assessment
+                
+                # Verificar se documento foi rejeitado
+                is_valid = result.get('valid', True)
                 
                 self.log_test(
-                    "Tutor Guidance - Orientação Contextual",
-                    has_success and has_guidance_content,
-                    f"✅ Orientação gerada: {len(str(guidance))} caracteres, contexto brasileiro: {has_brazilian_context}",
+                    "Passaporte vs CNH - Detecção de Tipo Incorreto",
+                    type_error_detected and not is_valid,
+                    f"✅ Erro detectado: tipo_incorreto={type_error_detected}, rejeitado={not is_valid}, mensagem_específica={specific_message_found}",
                     {
-                        "success": has_success,
-                        "guidance_length": len(str(guidance)),
-                        "has_brazilian_context": has_brazilian_context,
-                        "current_step": test_request["current_step"],
-                        "visa_type": test_request["visa_type"],
-                        "personality": test_request.get("personality"),
-                        "guidance_preview": str(guidance)[:200] if guidance else ""
+                        "valid": is_valid,
+                        "type_error_detected": type_error_detected,
+                        "specific_message_found": specific_message_found,
+                        "issues_count": len(issues),
+                        "dra_paula_assessment": dra_paula_assessment[:200],
+                        "issues_sample": issues[:2] if issues else []
                     }
                 )
+                
+                # Verificar se a mensagem é clara e em português
+                portuguese_message = any(word in dra_paula_assessment.lower() for word in ['você enviou', 'necessário', 'carregue'])
+                clear_guidance = 'documento correto' in dra_paula_assessment.lower() or 'passaporte' in dra_paula_assessment.lower()
+                
+                self.log_test(
+                    "Passaporte vs CNH - Mensagem Clara em Português",
+                    portuguese_message and clear_guidance,
+                    f"✅ Mensagem clara: português={portuguese_message}, orientação={clear_guidance}",
+                    {
+                        "portuguese_message": portuguese_message,
+                        "clear_guidance": clear_guidance,
+                        "full_assessment": dra_paula_assessment
+                    }
+                )
+                
             else:
                 self.log_test(
-                    "Tutor Guidance - Orientação Contextual",
+                    "Passaporte vs CNH - Detecção de Tipo Incorreto",
                     False,
                     f"❌ HTTP {response.status_code}",
                     {"status_code": response.status_code, "error": response.text[:200]}
@@ -244,45 +272,10 @@ class DocumentValidationTester:
                 
         except Exception as e:
             self.log_test(
-                "Tutor Guidance - Orientação Contextual",
+                "Passaporte vs CNH - Detecção de Tipo Incorreto",
                 False,
                 f"❌ Exception: {str(e)}"
             )
-        
-        # Test with different parameters
-        test_variations = [
-            {"current_step": "form_filling", "visa_type": "h1b", "personality": "professional"},
-            {"current_step": "interview_prep", "visa_type": "h1b", "personality": "detailed"},
-        ]
-        
-        for i, variation in enumerate(test_variations):
-            try:
-                response = self.session.post(
-                    f"{API_BASE}/tutor/guidance",
-                    json=variation
-                )
-                
-                success = response.status_code == 200
-                result = response.json() if success else {}
-                
-                self.log_test(
-                    f"Tutor Guidance - Variação {i+1}",
-                    success,
-                    f"✅ Variação {variation['current_step']} processada: {success}",
-                    {
-                        "success": result.get('success', False) if success else False,
-                        "current_step": variation["current_step"],
-                        "personality": variation["personality"],
-                        "status_code": response.status_code
-                    }
-                )
-                
-            except Exception as e:
-                self.log_test(
-                    f"Tutor Guidance - Variação {i+1}",
-                    False,
-                    f"❌ Exception: {str(e)}"
-                )
     
     def test_tutor_checklist_endpoint(self):
         """TESTE 2: Tutor Checklist - Checklist personalizado de documentos"""
