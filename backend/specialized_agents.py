@@ -813,14 +813,9 @@ class DocumentValidationAgent(BaseSpecializedAgent):
             if not openai_key:
                 raise ValueError("OPENAI_API_KEY is required for document validation")
             
-            if openai_key:
-                # Use OpenAI directly
-                use_openai = True
-                api_key = openai_key
-            else:
-                # Fallback to EmergentLLM
-                llm = EmergentLLM(api_key=emergent_key)
-                use_openai = False
+            # Use only user's OpenAI API key
+            use_openai = True
+            api_key = openai_key
             
             # Obter tipo de visto do contexto do caso
             visa_type = case_context.get('form_code', 'H-1B') if case_context else 'H-1B'
