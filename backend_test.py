@@ -3980,27 +3980,26 @@ Documento de identidade brasileiro
             return None
 
     def run_all_tests(self):
-        """Executa todos os testes do sistema AI Review"""
-        print("🚀 INICIANDO TESTES DO SISTEMA AI REVIEW - VALIDAÇÃO E CONVERSÃO")
+        """Run all document analysis cache collision tests"""
+        print("🚀 INICIANDO TESTES DO SISTEMA DE CACHE COLLISION BUG FIX")
+        print("=" * 80)
+        print("🎯 FOCO: Verificar que o bug de colisão de cache OCR foi corrigido")
+        print("🔧 BUG CORRIGIDO: Cache key generation mudou de primeiros 100 bytes para hash completo")
         print("=" * 80)
         
-        # Execute USCIS Form Progress Saving tests (NEW - as requested)
-        self.test_uscis_form_progress_saving()
+        # Run the cache collision prevention tests
+        self.test_cache_collision_prevention_sequential_uploads()
+        self.test_real_document_processing_no_contamination()
+        self.test_cache_key_uniqueness_similar_sizes()
         
-        # Execute AI Review specific tests
-        self.test_ai_review_validate_completeness_incomplete()
-        self.test_ai_review_validate_completeness_complete()
-        self.test_ai_completeness_validator_integration()
+        # Run basic functionality tests to ensure system still works
+        self.test_document_upload_and_analysis()
+        self.test_document_type_validation()
+        self.test_error_handling()
+        self.test_integration_points()
         
-        # Execute legacy tests for context
-        self.test_intelligent_forms_suggestions_endpoint()
-        self.test_intelligent_forms_validate_endpoint()
-        self.test_intelligent_forms_auto_fill_endpoint()
-        self.test_document_integration_with_forms()
-        self.test_dra_ana_form_validation_agent()
-        
-        # Generate summary
-        self.generate_test_summary()
+        # Print summary
+        self.print_test_summary()
     
     def generate_test_summary(self):
         """Gera resumo dos testes executados"""
