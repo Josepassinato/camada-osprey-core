@@ -216,7 +216,7 @@ class DocumentValidationTester:
         try:
             # Simular arquivo pequeno (< 200KB) que seria típico de CNH
             # quando o sistema espera passaporte
-            small_file_content = self.create_small_document_content("CNH - CARTEIRA NACIONAL DE HABILITAÇÃO\nJoão Silva\nCategoria: B")
+            small_file_content = self.create_small_document_content("João Silva\nCategoria: B")
             
             files = {
                 'file': ('cnh_joao.jpg', small_file_content, 'image/jpeg')
