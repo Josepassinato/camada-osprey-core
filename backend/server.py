@@ -5402,6 +5402,84 @@ async def get_visa_document_requirements_endpoint(visa_type: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 # USCIS Form Data Endpoint
+@api_router.post("/intelligent-forms/auto-fill")
+async def auto_fill_form_from_documents(request: dict):
+    """Preenchimento automático de formulário baseado em documentos validados"""
+    try:
+        from intelligent_form_filler import IntelligentFormFiller
+        
+        case_id = request.get("case_id")
+        form_code = request.get("form_code", "H-1B")
+        
+        if not case_id:
+            raise HTTPException(status_code=400, detail="case_id é obrigatório")
+        
+        # Buscar dados do caso
+        case = await db.auto_cases.find_one({"case_id": case_id})
+        if not case:
+            raise HTTPException(status_code=404, detail="Caso não encontrado")
+        
+        logger.info(f"🚀 Preenchimento automático iniciado para {form_code} - caso {case_id}")
+        
+        # Inicializar preenchedor inteligente
+        filler = IntelligentFormFiller()
+        
+        # Gerar sugestões
+        suggestions = await filler.generate_intelligent_suggestions(case, form_code)
+        
+        # Converter sugestões em dados de formulário preenchido
+        auto_filled_data = {}
+        high_confidence_fields = []
+        
+        for suggestion in suggestions:
+            if suggestion.confidence > 0.85:  # Alta confiança
+                auto_filled_data[suggestion.field_id] = suggestion.suggested_value
+                high_confidence_fields.append(suggestion.field_id)
+        
+        # Salvar dados preenchidos automaticamente no caso
+        await db.auto_cases.update_one(
+            {"case_id": case_id},
+            {
+                "$set": {
+                    "auto_filled_form_data": auto_filled_data,
+                    "form_suggestions": [
+                        {
+                            "field_id": s.field_id,
+                            "suggested_value": s.suggested_value,
+                            "confidence": s.confidence,
+                            "source": s.source,
+                            "explanation": s.explanation
+                        }
+                        for s in suggestions
+                    ],
+                    "auto_fill_timestamp": datetime.now(timezone.utc).isoformat()
+                }
+            }
+        )
+        
+        return {
+            "success": True,
+            "case_id": case_id,
+            "form_code": form_code,
+            "auto_filled_data": auto_filled_data,
+            "high_confidence_fields": high_confidence_fields,
+            "total_suggestions": len(suggestions),
+            "auto_filled_fields": len(auto_filled_data),
+            "confidence_stats": {
+                "high_confidence": len([s for s in suggestions if s.confidence > 0.85]),
+                "medium_confidence": len([s for s in suggestions if 0.70 <= s.confidence <= 0.85]),
+                "low_confidence": len([s for s in suggestions if s.confidence < 0.70])
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Erro no preenchimento automático: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "auto_filled_data": {}
+        }
+
 @api_router.post("/auto-application/case/{case_id}/uscis-form")
 async def save_uscis_form_data(case_id: str, request: dict):
     """Save USCIS form data for a case"""
