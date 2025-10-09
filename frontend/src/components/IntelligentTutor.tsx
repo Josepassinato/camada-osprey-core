@@ -382,7 +382,7 @@ const IntelligentTutor: React.FC<IntelligentTutorProps> = ({
                       <div className="text-right">
                         <div className="text-sm text-gray-600">Progresso</div>
                         <div className="text-lg font-bold text-blue-600">
-                          {checklist.completion_percentage}%
+                          {checklist?.completion_percentage || 0}%
                         </div>
                       </div>
                     </div>
