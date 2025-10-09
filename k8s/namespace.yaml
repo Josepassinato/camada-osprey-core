@@ -1,0 +1,9 @@
+# Kubernetes namespace for OSPREY
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: osprey-production
+  labels:
+    name: osprey-production
+    app: osprey
+    environment: production
