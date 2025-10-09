@@ -1021,8 +1021,16 @@ const USCISFormFilling = () => {
         onClose={() => setShowSaveModal(false)}
         caseId={caseId || ''}
         currentStage="Formulário USCIS"
-        onSuccess={(userData) => {
+        onSuccess={async (userData) => {
           console.log('User authenticated:', userData);
+          // Save USCIS form data before navigating to dashboard
+          const saveSuccess = await saveUSCISFormData();
+          if (saveSuccess) {
+            toast({
+              title: "Progresso Salvo!",
+              description: "Seu progresso do formulário USCIS foi salvo com sucesso.",
+            });
+          }
           navigate('/dashboard');
         }}
       />
