@@ -241,7 +241,7 @@ class DisclaimerAndSSNValidatorTester:
                 f"❌ Exception: {str(e)}"
             )
     
-    def test_security_events_and_ip_blocking(self):
+    def test_disclaimer_record_and_validation(self):
         """TESTE 2: Security System - Eventos de Segurança e Bloqueio de IP"""
         print("🚫 TESTE 2: Security System - Eventos e Bloqueio de IP")
         
