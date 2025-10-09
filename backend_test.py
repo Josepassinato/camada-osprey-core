@@ -360,7 +360,7 @@ class Phase4BProductionOptimizationTester:
             )
             return None
     
-    def test_preview_system_endpoints(self):
+    def test_load_testing_system(self):
         """TESTE 3: Preview System - GET /api/cases/finalize/{job_id}/preview"""
         print("👁️ TESTE 3: Sistema de Preview Interativo")
         
