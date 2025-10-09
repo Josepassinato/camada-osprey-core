@@ -737,7 +737,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "FriendlyForm Frontend Interface Testing"
+    - "Dr. Paula Cover Letter Module - Generate Directives"
+    - "Dr. Paula Cover Letter Module - Review Letter"
+    - "Dr. Paula Cover Letter Module - Format Official Letter"
+    - "Dr. Paula Cover Letter Module - Generate Final Letter"
+    - "Dr. Paula Cover Letter Module - Request Complement"
+    - "Dr. Paula Cover Letter Module - OpenAI Key Integration"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
