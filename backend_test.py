@@ -7785,13 +7785,17 @@ MRZ extraction should work properly.
                     print(f"  • {result['test']}: {result['details']}")
             print()
         
-        # Verificações críticas
+        # Verificações críticas para Real Vision System
         critical_checks = [
             "Upload Básico - Status 200 OK",
             "Validação Tipo - Detecção de Erro", 
             "Validação Nome - Detecção de Erro",
             "Validação Expiração - Detecção de Erro",
-            "Policy Engine - Integração Ativa"
+            "Policy Engine - Integração Ativa",
+            "Visão Real - Análise de Passaporte",
+            "Validação Inteligente - Tipo Incorreto",
+            "Avaliação de Qualidade - Componentes Completos",
+            "Integração Visão Real + Policy Engine"
         ]
         
         critical_results = []
