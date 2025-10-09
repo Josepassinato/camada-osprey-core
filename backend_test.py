@@ -342,8 +342,8 @@ class DisclaimerAndSSNValidatorTester:
             return None
     
     def test_ssn_validator_basic(self):
-        """TESTE 4: Load Testing Availability Corrected - Sistema de testes disponível"""
-        print("⚡ TESTE 4: Load Testing Availability Corrected - Sistema de testes disponível")
+        """TESTE 3: SSN Validator Basic - Validação básica de cartão SSN"""
+        print("🔢 TESTE 3: SSN Validator Basic - Validação básica de cartão SSN")
         
         try:
             # Test available load tests (deve ter 4 testes disponíveis)
