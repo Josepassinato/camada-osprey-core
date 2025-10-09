@@ -65,7 +65,7 @@ class ImmigrationExpert:
         Não constitui consultoria jurídica. Sempre recomende consultar um advogado para casos complexos.
         """
         
-        # Try EMERGENT_LLM_KEY first, fallback to OpenAI
+        # Prefer EMERGENT_LLM_KEY, fallback to OpenAI
         self.emergent_key = os.environ.get('EMERGENT_LLM_KEY')
         self.openai_key = os.environ.get('OPENAI_API_KEY')
         self.use_openai_direct = False
@@ -73,12 +73,13 @@ class ImmigrationExpert:
         if not self.emergent_key and not self.openai_key:
             raise ValueError("Neither EMERGENT_LLM_KEY nor OPENAI_API_KEY found in environment variables")
         
-        # Use OpenAI directly if EMERGENT_LLM_KEY is not available or budget exceeded
-        if not self.emergent_key or self.openai_key:
-            self.use_openai_direct = True
-            self.api_key = self.openai_key
-        else:
+        # Use EMERGENT_LLM_KEY if available, otherwise fallback to OpenAI
+        if self.emergent_key:
             self.api_key = self.emergent_key
+            self.use_openai_direct = False
+        else:
+            self.api_key = self.openai_key
+            self.use_openai_direct = True
     
     async def _call_dra_paula(self, prompt: str, session_id: str = None) -> str:
         """
