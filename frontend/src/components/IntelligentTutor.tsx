@@ -349,7 +349,7 @@ const IntelligentTutor: React.FC<IntelligentTutorProps> = ({
             {!loading && !error && (
               <div>
                 {/* Guidance Tab */}
-                {activeTab === 'guidance' && guidance && (
+                {activeTab === 'guidance' && (guidance || (!loading && !error)) && (
                   <div className="bg-white rounded-lg p-4 border">
                     <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
                       <span className="mr-2">🎯</span>
