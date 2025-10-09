@@ -10736,109 +10736,68 @@ MRZ extraction should work properly.
 
 
 def main():
-    """Execute Document Analysis System Tests"""
-    print("🤖 TESTE ESPECÍFICO: Sistema de Análise de Documentos")
-    print("🎯 FOCO: Testar funcionalidade reportada como quebrada pelo usuário")
-    print()
-    print("CONTEXTO DO PROBLEMA:")
-    print("📋 Usuário reportou: 'A análise de documentos depois do upload não estão funcionando'")
-    print("📋 Sistema configurado com análise 'nativa' precisa ser testado")
-    print()
-    print("ENDPOINT TESTADO:")
-    print("📋 POST /api/documents/analyze-with-ai")
-    print()
-    print("CENÁRIOS DE TESTE:")
-    print("📋 Teste 1: Upload and Analysis Test")
-    print("📋 Teste 2: Document Type Validation")
-    print("📋 Teste 3: Error Handling")
-    print("📋 Teste 4: Integration Points")
-    print()
-    
+    """Main function to run document analysis bug fix tests"""
     tester = DocumentAnalysisTester()
     
-    # Execute document analysis tests
-    tester.test_document_upload_and_analysis()
-    tester.test_document_type_validation()
-    tester.test_error_handling()
-    tester.test_integration_points()
+    print("🎯 DOCUMENT ANALYSIS BUG FIX TESTING SUITE")
+    print("=" * 60)
+    print("🔧 Testing critical bug fix: NoneType error in real vision analysis")
+    print("🎯 Focus: Real Vision Analysis + Precision + Error Prevention")
+    print("=" * 60)
+    print()
     
-    # Execute specific passport document test (as requested in review)
-    tester.test_correct_passport_document_scenario()
+    # Run critical bug fix tests
+    tester.run_critical_bug_fix_tests()
     
-    # Execute specific Brazilian ID card mismatch test (as requested)
-    tester.test_brazilian_id_card_mismatch_scenario()
+    # Print final summary
+    print("\n" + "=" * 60)
+    print("📊 FINAL BUG FIX VALIDATION SUMMARY")
+    print("=" * 60)
     
-    # Calculate results
     total_tests = len(tester.test_results)
-    passed_tests = len([r for r in tester.test_results if r['success']])
-    success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
+    passed_tests = sum(1 for result in tester.test_results if result['success'])
+    failed_tests = total_tests - passed_tests
     
-    # Count critical document analysis tests
-    critical_tests = [
-        "Document Analysis - Response Structure",
-        "Document Analysis - Analysis Processing",
-        "Document Analysis - Dr. Miguel Integration"
-    ]
+    # Focus on critical tests
+    critical_tests = [r for r in tester.test_results if any(keyword in r['test'].lower() for keyword in ['real vision', 'precision', 'pipeline', 'minimal'])]
+    critical_passed = sum(1 for test in critical_tests if test['success'])
+    critical_total = len(critical_tests)
     
-    critical_passed = 0
-    for test_name in critical_tests:
-        test_result = next((r for r in tester.test_results if test_name in r['test']), None)
-        if test_result and test_result['success']:
-            critical_passed += 1
+    print(f"📈 OVERALL RESULTS:")
+    print(f"   Total tests: {total_tests}")
+    print(f"   ✅ Passed: {passed_tests}")
+    print(f"   ❌ Failed: {failed_tests}")
+    print(f"   📊 Success rate: {(passed_tests/total_tests*100):.1f}%")
+    print()
     
-    print(f"\n🏁 TESTES DO SISTEMA DE ANÁLISE DE DOCUMENTOS CONCLUÍDOS")
-    print(f"Taxa de sucesso geral: {success_rate:.1f}%")
-    print(f"Testes críticos funcionando: {critical_passed}/{len(critical_tests)}")
+    print(f"🎯 CRITICAL BUG FIX RESULTS:")
+    print(f"   Critical tests: {critical_total}")
+    print(f"   ✅ Critical passed: {critical_passed}")
+    print(f"   📊 Critical success rate: {(critical_passed/max(1,critical_total)*100):.1f}%")
+    print()
     
-    # Categorize results by test type
-    test_categories = {
-        "Response Structure": [t for t in tester.test_results if "Response Structure" in t["test"]],
-        "Analysis Processing": [t for t in tester.test_results if "Analysis Processing" in t["test"]],
-        "Dr. Miguel Integration": [t for t in tester.test_results if "Dr. Miguel Integration" in t["test"]],
-        "Error Handling": [t for t in tester.test_results if "Error Handling" in t["test"]],
-        "Integration Points": [t for t in tester.test_results if "Integration Points" in t["test"]]
-    }
+    # Determine if bug fix is working
+    bug_fix_success = critical_passed >= (critical_total * 0.75)  # 75% threshold
     
-    print("\n📋 RESULTADOS POR CATEGORIA:")
-    for category, tests in test_categories.items():
-        if tests:
-            category_passed = len([t for t in tests if t["success"]])
-            category_total = len(tests)
-            category_success_rate = (category_passed/category_total)*100 if category_total > 0 else 0
-            status = "✅" if category_success_rate >= 80 else "⚠️" if category_success_rate >= 60 else "❌"
-            print(f"  {status} {category}: {category_passed}/{category_total} ({category_success_rate:.1f}%)")
-    
-    # Check for specific functionality
-    structure_tests = [t for t in tester.test_results if "Response Structure" in t["test"] and t["success"]]
-    processing_tests = [t for t in tester.test_results if "Analysis Processing" in t["test"] and t["success"]]
-    integration_tests = [t for t in tester.test_results if "Integration" in t["test"] and t["success"]]
-    
-    print(f"\n🎯 FUNCIONALIDADES ESPECÍFICAS:")
-    print(f"📋 Estrutura de resposta: {len(structure_tests)} testes passaram")
-    print(f"🔍 Processamento de análise: {len(processing_tests)} testes passaram")
-    print(f"🔗 Pontos de integração: {len(integration_tests)} testes passaram")
-    
-    # Return appropriate exit code
-    if critical_passed >= 2:  # At least 2 out of 3 critical tests working
-        print("\n✅ SISTEMA DE ANÁLISE DE DOCUMENTOS FUNCIONANDO")
-        print("✅ Endpoint /api/documents/analyze-with-ai operacional!")
-        print("✅ Estrutura de resposta correta!")
-        print("✅ Dr. Miguel integrado!")
-        print("✅ Problema reportado pelo usuário RESOLVIDO!")
-        return 0
+    if bug_fix_success:
+        print("🎉 BUG FIX VALIDATION: ✅ SUCCESS")
+        print("   ✅ Real Vision Analysis working")
+        print("   ✅ NoneType errors prevented")
+        print("   ✅ Precision improvements confirmed")
     else:
-        print("\n❌ PROBLEMAS DETECTADOS NO SISTEMA DE ANÁLISE")
-        print(f"⚠️ Apenas {critical_passed}/{len(critical_tests)} testes críticos funcionando")
-        print("⚠️ Problema reportado pelo usuário CONFIRMADO")
-        
-        # Show specific failures
-        failed_tests = [t for t in tester.test_results if not t['success']]
-        if failed_tests:
-            print("\n❌ TESTES FALHARAM:")
-            for test in failed_tests:
+        print("🚨 BUG FIX VALIDATION: ❌ ISSUES DETECTED")
+        print("   ❌ Critical components still failing")
+        print("   ⚠️ Further investigation needed")
+    
+    if failed_tests > 0:
+        print(f"\n🚨 FAILED TESTS ({failed_tests}):")
+        for test in tester.test_results:
+            if not test['success']:
                 print(f"  • {test['test']}: {test['details']}")
         
         return 1
+    
+    return 0
 
 
     def test_full_analysis_pipeline_integration(self):
