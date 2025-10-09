@@ -2689,6 +2689,9 @@ Data de Validade: 10/01/2025
         print("🚀 INICIANDO TESTES DO SISTEMA AI REVIEW - VALIDAÇÃO E CONVERSÃO")
         print("=" * 80)
         
+        # Execute USCIS Form Progress Saving tests (NEW - as requested)
+        self.test_uscis_form_progress_saving()
+        
         # Execute AI Review specific tests
         self.test_ai_review_validate_completeness_incomplete()
         self.test_ai_review_validate_completeness_complete()
