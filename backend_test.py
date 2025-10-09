@@ -7462,20 +7462,6 @@ def main():
 if __name__ == "__main__":
     import sys
     sys.exit(main())
-        self.test_multiple_document_types()
-        print()
-        
-        # TESTE 7: Múltiplos tipos de visto
-        self.test_multiple_visa_types()
-        print()
-        
-        # TESTE 8: Validação de tamanho
-        self.test_file_size_validation()
-        print()
-        
-        # TESTE 9: Fluxo completo
-        self.test_comprehensive_validation_flow()
-        print()
         
         # PRIORITY: DOCUMENT UPLOAD FUNCTIONALITY TESTING (as requested in review)
         print("📄 PRIORITY: DOCUMENT UPLOAD FUNCTIONALITY COMPREHENSIVE TESTING")
