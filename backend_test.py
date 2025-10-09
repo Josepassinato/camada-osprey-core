@@ -373,31 +373,58 @@ class Phase4BProductionOptimizationTester:
             )
             return None
     
-    def test_load_testing_system(self):
-        """TESTE 3: Load Testing System - Sistema de Teste de Carga"""
-        print("⚡ TESTE 3: Load Testing System - Testes de Carga Automatizados")
+    def test_load_testing_availability_corrected(self):
+        """TESTE 4: Load Testing Availability Corrected - Sistema de testes disponível"""
+        print("⚡ TESTE 4: Load Testing Availability Corrected - Sistema de testes disponível")
         
         try:
-            # Test 1: Get available load tests
+            # Test available load tests (deve ter 4 testes disponíveis)
             available_response = self.session.get(f"{API_BASE}/production/load-testing/available-tests")
             
             available_success = available_response.status_code == 200
             available_data = available_response.json() if available_success else {}
             
             available_tests = available_data.get('available_tests', [])
-            expected_test_count = 4  # Based on the implementation
+            expected_test_count = 4  # api_critical, workflow_stress, dashboard_load, notification_burst
+            
+            # Verificar se os 4 testes específicos estão disponíveis
+            expected_test_types = ['api_critical', 'workflow_stress', 'dashboard_load', 'notification_burst']
+            actual_test_types = [test.get('test_type') for test in available_tests]
+            
+            has_all_expected_tests = all(test_type in actual_test_types for test_type in expected_test_types)
             
             self.log_test(
-                "Load Testing - Testes Disponíveis",
-                available_success and len(available_tests) >= expected_test_count,
-                f"Testes disponíveis: {len(available_tests)}/{expected_test_count} esperados",
+                "Load Testing Availability Corrected - 4 Testes Disponíveis",
+                available_success and len(available_tests) >= expected_test_count and has_all_expected_tests,
+                f"✅ Sistema operacional: {len(available_tests)}/4 testes, tipos corretos: {has_all_expected_tests}",
                 {
                     "success": available_data.get('success', False),
                     "tests_count": len(available_tests),
-                    "test_types": [test.get('test_type') for test in available_tests],
-                    "expected_count": expected_test_count
+                    "expected_test_types": expected_test_types,
+                    "actual_test_types": actual_test_types,
+                    "has_all_expected": has_all_expected_tests,
+                    "configurations_correct": len(available_tests) >= 4
                 }
             )
+            
+            # Verificar configurações corretas para cada teste
+            if available_tests:
+                for test in available_tests:
+                    test_type = test.get('test_type')
+                    has_config = 'configuration' in test
+                    has_description = 'description' in test
+                    
+                    self.log_test(
+                        f"Load Testing - Configuração {test_type}",
+                        has_config and has_description,
+                        f"✅ Teste {test_type} configurado corretamente",
+                        {
+                            "test_type": test_type,
+                            "has_configuration": has_config,
+                            "has_description": has_description,
+                            "configuration": test.get('configuration', {})
+                        }
+                    )
             
             # Test 2: Start a load test (use a quick test)
             if available_tests:
