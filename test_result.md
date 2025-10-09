@@ -788,6 +788,18 @@ backend:
         agent: "testing"
         comment: "✅ TUTOR INTERVIEW PREPARATION ENDPOINT FUNCIONANDO EXCELENTEMENTE: Preparação personalizada para entrevista operacional. RESULTADOS: 1) ✅ Endpoint Funcional - POST /api/tutor/interview-preparation retorna 200 OK com preparação de 2716 caracteres, 2) ✅ Perguntas de Entrevista - Sistema gera perguntas típicas de entrevista consular para H-1B, 3) ✅ Dicas Personalizadas - IA fornece dicas específicas para preparação de entrevista, 4) ✅ Contexto Brasileiro - Preparação específica para brasileiros aplicando nos consulados americanos no Brasil, 5) ✅ Conteúdo Abrangente - Preparação inclui perguntas, dicas, e contexto cultural. Sistema de preparação para entrevista pronto para usuários brasileiros."
 
+  - task: "Sistema de Tutor Inteligente - Frontend Integration"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/components/IntelligentTutor.tsx"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ FRONTEND INTEGRATION COM PROBLEMAS CRÍTICOS: Comprehensive testing revealed significant gaps between backend implementation and frontend integration. PROBLEMAS IDENTIFICADOS: 1) ❌ 5-Tab Interface Missing - Current IntelligentTutor component does not implement the required 5-tab interface (🎯 Orientações, 📋 Checklist, 📊 Progresso, ⚠️ Evitar Erros, 🎤 Entrevista), 2) ❌ Page Integration Issues - DocumentUpload page (/documents/upload) does not show tutor component, CaseFinalizer and USCISFormFilling pages show basic tutor but not enhanced version, 3) ❌ API Integration Missing - Frontend component does not call the 5 new backend endpoints (/api/tutor/guidance, /api/tutor/checklist, /api/tutor/progress-analysis, /api/tutor/common-mistakes, /api/tutor/interview-preparation), 4) ✅ Backend Endpoints Working - All 5 backend endpoints functional and returning proper responses (confirmed via test_result.md), 5) ❌ Context-Specific Implementation Missing - Pages do not pass correct context (document_upload, case_finalizer, uscis_form_filling) to tutor. ROOT CAUSE: Frontend implementation is outdated and does not match the enhanced backend system. SOLUTION NEEDED: Update IntelligentTutor component to implement 5-tab interface and integrate with new backend endpoints."
+
   - task: "Sistema de Tutor Inteligente - Tratamento de Erros"
     implemented: true
     working: true
