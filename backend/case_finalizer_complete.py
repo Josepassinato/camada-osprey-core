@@ -326,6 +326,10 @@ class CaseFinalizerComplete:
         # Diretório para arquivos temporários
         self.temp_dir = Path("/tmp/case_finalizer")
         self.temp_dir.mkdir(exist_ok=True)
+        
+        # Real data integration
+        self.db = db
+        self.data_integrator = RealDataIntegrator(db) if db else None
     
     def start_finalization(self, case_id: str, scenario_key: str, postage: str, language: str) -> Dict[str, Any]:
         """
