@@ -15,6 +15,8 @@ import {
   Sparkles
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import DisclaimerModal from "@/components/DisclaimerModal";
+import { useDisclaimer } from "@/hooks/useDisclaimer";
 
 interface UploadedFile {
   file: File;
