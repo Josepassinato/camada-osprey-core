@@ -47,17 +47,17 @@ class GoogleDocumentAI:
             logger.error("❌ GOOGLE_API_KEY not found in environment")
             raise ValueError("GOOGLE_API_KEY is required for Document AI")
         
-        # Document AI pode usar diferentes processadores por tipo de documento
-        self.processors = {
-            'passport': 'passport_processor',
-            'driver_license': 'id_processor',
-            'birth_certificate': 'form_processor',
-            'i797': 'form_processor',
-            'tax_return': 'form_processor',
-            'generic': 'form_processor'  # Processador genérico
+        # ENHANCED: Document type keywords for high-accuracy classification
+        self.document_keywords = {
+            'driver_license': ['carteira nacional de habilitação', 'cnh', 'detran', 'categoria', 'permissão para dirigir', 'driver license', 'driver\'s license', 'dl', 'license number'],
+            'passport': ['república federativa do brasil', 'passaporte', 'passport', 'tipo/type', 'nationality/nacionalidade', 'mrz', 'p<bra', 'date of issue', 'date of expiry'],
+            'birth_certificate': ['certidão de nascimento', 'birth certificate', 'nascido', 'data de nascimento', 'cartório', 'registro civil'],
+            'marriage_certificate': ['certidão de casamento', 'marriage certificate', 'cônjuge', 'casamento', 'matrimônio'],
+            'i797': ['i-797', 'notice of action', 'uscis', 'receipt number', 'beneficiary', 'petitioner'],
+            'tax_return': ['receita federal', 'irpf', 'tax return', 'w-2', '1040', 'adjusted gross income']
         }
         
-        logger.info("✅ Google Document AI initialized")
+        logger.info("✅ Google Document AI initialized with enhanced classification")
     
     async def process_document(
         self,
