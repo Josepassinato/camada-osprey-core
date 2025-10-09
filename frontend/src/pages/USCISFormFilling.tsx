@@ -396,6 +396,33 @@ const USCISFormFilling = () => {
     }
   };
 
+  // Silent auto-save function (no toast notifications)
+  const saveUSCISFormDataSilently = async () => {
+    if (!caseId) return;
+    
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}/uscis-form`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uscis_form_data: formData,
+          completed_sections: getCompletedSections()
+        }),
+      });
+
+      if (response.ok) {
+        console.log('🔄 Auto-save successful - USCIS form data saved silently');
+        setCurrentStep("uscis-form");
+      } else {
+        console.error('Auto-save failed:', response.status);
+      }
+    } catch (error) {
+      console.error('Auto-save error:', error);
+    }
+  };
+
   const getCompletedSections = () => {
     const sections = [];
     if (formData.firstName && formData.lastName && formData.dateOfBirth) {
