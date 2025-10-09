@@ -108,7 +108,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "TESTE COMPLETO - SISTEMA DE SALVAMENTO DE APLICAÇÃO: Testar fluxo completo de salvar aplicação e verificar se aparece no dashboard. Cenário: Criar conta nova → Iniciar aplicação H-1B → Preencher dados básicos → Salvar progresso (auto-save) → Verificar no dashboard se aparece → Continuar aplicação → Atualizar mais dados → Verificar se dashboard mostra progresso atualizado."
+user_problem_statement: "TESTE DO SISTEMA DE VALIDAÇÃO DE DOCUMENTOS NATIVO: Testar o novo sistema de validação que substitui Google Document AI por análise nativa do LLM. Cenário: Fazer upload de documento → Verificar se mensagens de validação aparecem (Tipo de documento incorreto, Nome não corresponde, Documento vencido) → Confirmar que frontend exibe as mensagens corretamente."
 
 backend:
   - task: "Complete Application Save System - User Account Creation"
