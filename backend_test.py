@@ -8885,7 +8885,8 @@ def main():
         "Security System - Funcionalidade Geral", 
         "Load Testing System - Funcionalidade Geral",
         "Database Optimization System - Funcionalidade Geral",
-        "System Health - Avaliação Geral"
+        "System Health - Avaliação Geral",
+        "Rate Limiting - Funcionalidade Geral"
     ]
     
     critical_passed = 0
