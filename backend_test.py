@@ -461,10 +461,10 @@ Data de Emissão: 01/02/2020
                 f"❌ Exception: {str(e)}"
             )
 
-    def test_document_analysis_without_case_data(self):
-        """SCENARIO 2: Document Analysis without Case Data - Test graceful handling"""
-        print("🎯 SCENARIO 2: Document Analysis without Case Data")
-        print("Cenário: Testar com caso mínimo ou basic_info ausente")
+    def test_real_document_processing_no_contamination(self):
+        """SCENARIO 2: Real Document Processing - Test with actual user images"""
+        print("🎯 SCENARIO 2: Real Document Processing - No Cross-Contamination")
+        print("Cenário: Testar com imagens reais mencionadas na conversa")
         
         try:
             # Test with minimal case (no basic_info)
