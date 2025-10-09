@@ -199,90 +199,42 @@ class Phase4DWorkflowAutomationTester:
             print(f"❌ Erro ao criar caso de teste: {str(e)}")
             return None
 
-    def test_real_data_integrator_functionality(self):
-        """TESTE 1: RealDataIntegrator - get_case_complete_data()"""
-        print("🔄 TESTE 1: Real Data Integration System")
-        
-        # Create test case with mock data
-        case_id = self.create_test_case_with_documents()
-        if not case_id:
-            self.log_test(
-                "Real Data Integration - Criação de Caso",
-                False,
-                "Falha ao criar caso de teste"
-            )
-            return None
+    def test_workflow_engine_available_workflows(self):
+        """TESTE 1: Workflow Engine - GET /api/automation/workflows/available"""
+        print("🔄 TESTE 1: Workflow Engine - Workflows Disponíveis")
         
         try:
-            # Test case finalization start to trigger real data integration
-            request_data = {
-                "scenario_key": "H-1B_basic",
-                "postage": "USPS",
-                "language": "pt"
-            }
-            
-            response = self.session.post(
-                f"{API_BASE}/cases/{case_id}/finalize/start",
-                json=request_data
-            )
+            response = self.session.get(f"{API_BASE}/automation/workflows/available")
             
             if response.status_code == 200:
                 result = response.json()
                 
-                # Check if job was created successfully
-                has_job_id = 'job_id' in result
-                has_status = 'status' in result
+                # Check if workflows are available
+                workflows = result.get('workflows', [])
+                has_workflows = len(workflows) > 0
+                
+                # Check for expected workflows
+                expected_workflows = ['h1b_complete_process', 'f1_student_process', 'i485_adjustment_process']
+                found_workflows = [w.get('id') for w in workflows]
+                
+                has_expected = any(expected in found_workflows for expected in expected_workflows)
                 
                 self.log_test(
-                    "Real Data Integration - Job Creation",
-                    has_job_id and has_status,
-                    f"Job criado: {result.get('job_id', 'N/A')}, Status: {result.get('status', 'N/A')}",
+                    "Workflow Engine - Workflows Disponíveis",
+                    has_workflows and has_expected,
+                    f"Workflows encontrados: {len(workflows)}, Esperados presentes: {has_expected}",
                     {
-                        "job_id": result.get('job_id'),
-                        "status": result.get('status'),
-                        "message": result.get('message')
+                        "total_workflows": len(workflows),
+                        "workflow_ids": found_workflows[:5],
+                        "expected_found": [w for w in expected_workflows if w in found_workflows],
+                        "success": result.get('success', False)
                     }
                 )
                 
-                # Test if RealDataIntegrator is working by checking job status
-                if has_job_id:
-                    job_id = result['job_id']
-                    
-                    # Wait a moment for processing
-                    time.sleep(2)
-                    
-                    # Check job status
-                    status_response = self.session.get(
-                        f"{API_BASE}/cases/finalize/{job_id}/status"
-                    )
-                    
-                    if status_response.status_code == 200:
-                        status_result = status_response.json()
-                        
-                        self.log_test(
-                            "Real Data Integration - Data Processing",
-                            'status' in status_result,
-                            f"Status do processamento: {status_result.get('status', 'unknown')}",
-                            {
-                                "processing_status": status_result.get('status'),
-                                "issues": len(status_result.get('issues', [])),
-                                "links": status_result.get('links', {})
-                            }
-                        )
-                        
-                        return {"job_id": job_id, "case_id": case_id}
-                    else:
-                        self.log_test(
-                            "Real Data Integration - Status Check",
-                            False,
-                            f"HTTP {status_response.status_code}",
-                            status_response.text
-                        )
-                
-                return result
+                return workflows
             else:
                 self.log_test(
-                    "Real Data Integration - Endpoint Funcionando",
+                    "Workflow Engine - Workflows Disponíveis",
                     False,
                     f"HTTP {response.status_code}: {response.text[:200]}",
                     {"status_code": response.status_code, "error": response.text}
@@ -291,7 +243,7 @@ class Phase4DWorkflowAutomationTester:
                 
         except Exception as e:
             self.log_test(
-                "Real Data Integration - Exception",
+                "Workflow Engine - Workflows Disponíveis",
                 False,
                 f"Exception: {str(e)}"
             )
