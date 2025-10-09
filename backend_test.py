@@ -503,217 +503,122 @@ class Phase4BProductionOptimizationTester:
             return None
     
     def test_database_optimization_system(self):
-        """TESTE 4: Multi-Stage Workflow - 5 Etapas (Configuração → Auditoria → Preview → Consentimento → Downloads)"""
-        print("🔄 TESTE 4: Sistema Multi-Etapas - Workflow Completo")
-        
-        # Create test case
-        case_id = self.create_test_case_with_documents()
-        if not case_id:
-            self.log_test(
-                "Multi-Stage Workflow - Criação de Caso",
-                False,
-                "Falha ao criar caso de teste"
-            )
-            return None
+        """TESTE 4: Database Optimization System - Sistema de Otimização de Banco"""
+        print("🗄️ TESTE 4: Database Optimization - Sistema de Otimização de Banco")
         
         try:
-            # ETAPA 1: Configuração - Start finalization
-            print("📋 ETAPA 1: Configuração")
-            config_data = {
-                "scenario_key": "H-1B_basic",
-                "postage": "USPS",
-                "language": "pt"
+            # Test 1: Get database performance statistics
+            performance_response = self.session.get(f"{API_BASE}/production/performance/database")
+            
+            performance_success = performance_response.status_code == 200
+            performance_data = performance_response.json() if performance_success else {}
+            
+            db_performance = performance_data.get('database_performance', {})
+            has_performance_data = len(db_performance) > 0
+            
+            self.log_test(
+                "Database Optimization - Performance do Banco",
+                performance_success and has_performance_data,
+                f"Estatísticas de performance obtidas: {len(db_performance)} seções",
+                {
+                    "success": performance_data.get('success', False),
+                    "has_database_stats": 'database' in db_performance,
+                    "has_query_performance": 'query_performance' in db_performance,
+                    "has_cache_performance": 'cache_performance' in db_performance,
+                    "sections": list(db_performance.keys()) if db_performance else []
+                }
+            )
+            
+            # Test 2: Database optimization
+            optimize_response = self.session.post(f"{API_BASE}/production/database/optimize")
+            
+            optimize_success = optimize_response.status_code == 200
+            optimize_data = optimize_response.json() if optimize_success else {}
+            
+            optimization_results = optimize_data.get('optimization_results', [])
+            collections_optimized = optimize_data.get('collections_optimized', 0)
+            
+            self.log_test(
+                "Database Optimization - Otimização do Banco",
+                optimize_success and collections_optimized > 0,
+                f"Coleções otimizadas: {collections_optimized}",
+                {
+                    "success": optimize_data.get('success', False),
+                    "collections_optimized": collections_optimized,
+                    "optimization_results_count": len(optimization_results),
+                    "has_results": len(optimization_results) > 0
+                }
+            )
+            
+            # Test 3: Cache clearing
+            cache_request = {
+                "pattern": "test:*"  # Clear test cache pattern
             }
             
-            start_response = self.session.post(
-                f"{API_BASE}/cases/{case_id}/finalize/start",
-                json=config_data
+            cache_response = self.session.post(
+                f"{API_BASE}/production/cache/clear",
+                json=cache_request
             )
             
-            stage1_success = start_response.status_code == 200 and 'job_id' in start_response.json()
-            job_id = start_response.json().get('job_id') if stage1_success else None
+            cache_success = cache_response.status_code == 200
+            cache_data = cache_response.json() if cache_success else {}
             
             self.log_test(
-                "Multi-Stage - Etapa 1 (Configuração)",
-                stage1_success,
-                f"Configuração iniciada: Job ID = {job_id}",
+                "Database Optimization - Limpeza de Cache",
+                cache_success,
+                f"Cache limpo: {cache_data.get('success', False)}",
                 {
-                    "stage": "configuration",
-                    "job_id": job_id,
-                    "status_code": start_response.status_code
+                    "success": cache_data.get('success', False),
+                    "message": cache_data.get('message', ''),
+                    "pattern_used": "test:*"
                 }
             )
             
-            if not stage1_success or not job_id:
-                return None
-            
-            # ETAPA 2: Auditoria - Wait for processing
-            print("🔍 ETAPA 2: Auditoria")
-            time.sleep(3)  # Wait for audit processing
-            
-            status_response = self.session.get(
-                f"{API_BASE}/cases/finalize/{job_id}/status"
+            # Test 4: Cache clearing without pattern (full clear)
+            full_cache_response = self.session.post(
+                f"{API_BASE}/production/cache/clear",
+                json={}
             )
             
-            stage2_success = status_response.status_code == 200
-            status_data = status_response.json() if stage2_success else {}
+            full_cache_success = full_cache_response.status_code == 200
+            full_cache_data = full_cache_response.json() if full_cache_success else {}
             
             self.log_test(
-                "Multi-Stage - Etapa 2 (Auditoria)",
-                stage2_success,
-                f"Auditoria concluída: Status = {status_data.get('status', 'unknown')}",
+                "Database Optimization - Limpeza Completa de Cache",
+                full_cache_success,
+                f"Cache completo limpo: {full_cache_data.get('success', False)}",
                 {
-                    "stage": "audit",
-                    "audit_status": status_data.get('status'),
-                    "issues_count": len(status_data.get('issues', [])),
-                    "has_links": bool(status_data.get('links', {}))
+                    "success": full_cache_data.get('success', False),
+                    "message": full_cache_data.get('message', ''),
+                    "full_clear": True
                 }
             )
             
-            # ETAPA 3: Preview - Get detailed preview
-            print("👁️ ETAPA 3: Preview")
-            time.sleep(2)  # Additional wait for completion
-            
-            preview_response = self.session.get(
-                f"{API_BASE}/cases/finalize/{job_id}/preview"
-            )
-            
-            stage3_success = preview_response.status_code == 200
-            preview_data = preview_response.json() if stage3_success else {}
+            # Overall database optimization assessment
+            db_tests_passed = sum([performance_success, optimize_success, cache_success, full_cache_success])
             
             self.log_test(
-                "Multi-Stage - Etapa 3 (Preview)",
-                stage3_success,
-                f"Preview gerado: Documentos = {len(preview_data.get('document_summary', []))}",
+                "Database Optimization System - Funcionalidade Geral",
+                db_tests_passed >= 3,  # At least 3 out of 4 should work
+                f"Testes de otimização aprovados: {db_tests_passed}/4",
                 {
-                    "stage": "preview",
-                    "documents_count": len(preview_data.get('document_summary', [])),
-                    "quality_score": preview_data.get('quality_assessment', {}).get('overall_score', 0),
-                    "recommendation": preview_data.get('quality_assessment', {}).get('recommendation')
-                }
-            )
-            
-            # ETAPA 4: Consentimento - Test approval/rejection
-            print("✅ ETAPA 4: Consentimento (Aprovação)")
-            
-            approval_data = {
-                "comments": "Pacote aprovado após revisão completa",
-                "approval_data": {
-                    "reviewer": "Test System",
-                    "review_date": datetime.now().isoformat()
-                }
-            }
-            
-            approve_response = self.session.post(
-                f"{API_BASE}/cases/finalize/{job_id}/approve",
-                json=approval_data
-            )
-            
-            stage4_success = approve_response.status_code == 200
-            approval_result = approve_response.json() if stage4_success else {}
-            
-            self.log_test(
-                "Multi-Stage - Etapa 4 (Consentimento/Aprovação)",
-                stage4_success,
-                f"Aprovação processada: {approval_result.get('message', 'N/A')}",
-                {
-                    "stage": "consent_approval",
-                    "approval_success": approval_result.get('success', False),
-                    "message": approval_result.get('message')
-                }
-            )
-            
-            # ETAPA 5: Downloads - Verify final status
-            print("📥 ETAPA 5: Downloads")
-            
-            final_status_response = self.session.get(
-                f"{API_BASE}/cases/finalize/{job_id}/status"
-            )
-            
-            stage5_success = final_status_response.status_code == 200
-            final_status = final_status_response.json() if stage5_success else {}
-            
-            self.log_test(
-                "Multi-Stage - Etapa 5 (Downloads)",
-                stage5_success,
-                f"Status final: {final_status.get('status', 'unknown')}",
-                {
-                    "stage": "downloads",
-                    "final_status": final_status.get('status'),
-                    "download_links": final_status.get('links', {}),
-                    "completed_at": final_status.get('completed_at')
-                }
-            )
-            
-            # Test rejection workflow as well
-            print("❌ TESTE ADICIONAL: Rejeição")
-            
-            # Create another job for rejection test
-            reject_response = self.session.post(
-                f"{API_BASE}/cases/{case_id}/finalize/start",
-                json=config_data
-            )
-            
-            if reject_response.status_code == 200:
-                reject_job_id = reject_response.json().get('job_id')
-                
-                if reject_job_id:
-                    time.sleep(3)  # Wait for processing
-                    
-                    rejection_data = {
-                        "reason": "Documentos incompletos - faltando I-797 anterior",
-                        "rejection_data": {
-                            "reviewer": "Test System",
-                            "missing_documents": ["i797_previous"],
-                            "review_date": datetime.now().isoformat()
-                        }
-                    }
-                    
-                    reject_request = self.session.post(
-                        f"{API_BASE}/cases/finalize/{reject_job_id}/reject",
-                        json=rejection_data
-                    )
-                    
-                    rejection_success = reject_request.status_code == 200
-                    rejection_result = reject_request.json() if rejection_success else {}
-                    
-                    self.log_test(
-                        "Multi-Stage - Workflow de Rejeição",
-                        rejection_success,
-                        f"Rejeição processada: {rejection_result.get('reason', 'N/A')}",
-                        {
-                            "rejection_success": rejection_result.get('success', False),
-                            "reason": rejection_result.get('reason'),
-                            "message": rejection_result.get('message')
-                        }
-                    )
-            
-            # Overall workflow assessment
-            stages_completed = sum([stage1_success, stage2_success, stage3_success, stage4_success, stage5_success])
-            workflow_success = stages_completed >= 4  # At least 4 out of 5 stages working
-            
-            self.log_test(
-                "Multi-Stage - Workflow Completo",
-                workflow_success,
-                f"Etapas concluídas: {stages_completed}/5",
-                {
-                    "stages_completed": stages_completed,
-                    "total_stages": 5,
-                    "success_rate": f"{(stages_completed/5)*100:.1f}%",
-                    "workflow_complete": workflow_success
+                    "performance_working": performance_success,
+                    "optimization_working": optimize_success,
+                    "cache_pattern_working": cache_success,
+                    "cache_full_working": full_cache_success,
+                    "success_rate": f"{(db_tests_passed/4)*100:.1f}%"
                 }
             )
             
             return {
-                "job_id": job_id,
-                "stages_completed": stages_completed,
-                "workflow_success": workflow_success,
-                "final_status": final_status
+                "performance_data": db_performance,
+                "optimization_results": optimization_results,
+                "tests_passed": db_tests_passed
             }
                 
         except Exception as e:
             self.log_test(
-                "Multi-Stage - Exception Geral",
+                "Database Optimization System - Exception Geral",
                 False,
                 f"Exception: {str(e)}"
             )
