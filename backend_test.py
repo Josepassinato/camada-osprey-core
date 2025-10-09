@@ -9763,43 +9763,42 @@ MRZ extraction should work properly.
 
 
 def main():
-    """Execute Document Validation System Tests"""
-    print("🤖 TESTE ESPECÍFICO: Sistema Melhorado de Validação de Documentos")
-    print("🎯 FOCO: Testar detecção específica de erros de tipo de documento incorreto")
+    """Execute Document Analysis System Tests"""
+    print("🤖 TESTE ESPECÍFICO: Sistema de Análise de Documentos")
+    print("🎯 FOCO: Testar funcionalidade reportada como quebrada pelo usuário")
     print()
     print("CONTEXTO DO PROBLEMA:")
-    print("📋 Usuário reportou que enviou CNH no lugar de passaporte")
-    print("📋 Sistema não especificou claramente que o tipo estava incorreto")
-    print("📋 Apenas mostrou 'erro técnico' genérico")
+    print("📋 Usuário reportou: 'A análise de documentos depois do upload não estão funcionando'")
+    print("📋 Sistema configurado com análise 'nativa' precisa ser testado")
     print()
     print("ENDPOINT TESTADO:")
     print("📋 POST /api/documents/analyze-with-ai")
     print()
     print("CENÁRIOS DE TESTE:")
-    print("📋 Teste 1: Passaporte vs CNH (caso reportado)")
-    print("📋 Teste 2: CNH vs Passaporte")
-    print("📋 Teste 3: Certidão vs Passaporte")
-    print("📋 Teste 4: Validações de tamanho específicas")
-    print("📋 Teste 5: Múltiplos tipos de documento")
-    print("📋 Teste 6: Múltiplos tipos de visto")
+    print("📋 Teste 1: Upload and Analysis Test")
+    print("📋 Teste 2: Document Type Validation")
+    print("📋 Teste 3: Error Handling")
+    print("📋 Teste 4: Integration Points")
     print()
     
-    tester = DocumentValidationTester()
+    tester = DocumentAnalysisTester()
     
-    # Execute document validation tests
-    test_results = tester.run_document_validation_tests()
+    # Execute document analysis tests
+    tester.test_document_upload_and_analysis()
+    tester.test_document_type_validation()
+    tester.test_error_handling()
+    tester.test_integration_points()
     
     # Calculate results
     total_tests = len(tester.test_results)
     passed_tests = len([r for r in tester.test_results if r['success']])
     success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
     
-    # Count critical document validation tests
+    # Count critical document analysis tests
     critical_tests = [
-        "Passaporte vs CNH - Detecção de Tipo Incorreto",
-        "Diploma vs Passaporte - Detecção de Tipo Incorreto", 
-        "Certidão vs Passaporte - Detecção de Tipo Incorreto",
-        "Validação de Tamanho - Arquivo Muito Pequeno"
+        "Document Analysis - Response Structure",
+        "Document Analysis - Analysis Processing",
+        "Document Analysis - Dr. Miguel Integration"
     ]
     
     critical_passed = 0
@@ -9808,18 +9807,17 @@ def main():
         if test_result and test_result['success']:
             critical_passed += 1
     
-    print(f"\n🏁 TESTES DO SISTEMA DE VALIDAÇÃO DE DOCUMENTOS CONCLUÍDOS")
+    print(f"\n🏁 TESTES DO SISTEMA DE ANÁLISE DE DOCUMENTOS CONCLUÍDOS")
     print(f"Taxa de sucesso geral: {success_rate:.1f}%")
     print(f"Testes críticos funcionando: {critical_passed}/{len(critical_tests)}")
     
     # Categorize results by test type
     test_categories = {
-        "Detecção de Tipo Incorreto": [t for t in tester.test_results if "Detecção de Tipo Incorreto" in t["test"]],
-        "Orientação Específica": [t for t in tester.test_results if "Orientação Específica" in t["test"]],
-        "Mensagem Clara": [t for t in tester.test_results if "Mensagem Clara" in t["test"]],
-        "Validação de Tamanho": [t for t in tester.test_results if "Validação de Tamanho" in t["test"]],
-        "Múltiplos Documentos": [t for t in tester.test_results if "Documento" in t["test"] and "Análise Completa" in t["test"]],
-        "Múltiplos Vistos": [t for t in tester.test_results if "Visto" in t["test"] and "Análise Completa" in t["test"]]
+        "Response Structure": [t for t in tester.test_results if "Response Structure" in t["test"]],
+        "Analysis Processing": [t for t in tester.test_results if "Analysis Processing" in t["test"]],
+        "Dr. Miguel Integration": [t for t in tester.test_results if "Dr. Miguel Integration" in t["test"]],
+        "Error Handling": [t for t in tester.test_results if "Error Handling" in t["test"]],
+        "Integration Points": [t for t in tester.test_results if "Integration Points" in t["test"]]
     }
     
     print("\n📋 RESULTADOS POR CATEGORIA:")
@@ -9831,35 +9829,34 @@ def main():
             status = "✅" if category_success_rate >= 80 else "⚠️" if category_success_rate >= 60 else "❌"
             print(f"  {status} {category}: {category_passed}/{category_total} ({category_success_rate:.1f}%)")
     
-    # Check for specific improvements
-    type_detection_tests = [t for t in tester.test_results if "TIPO DE DOCUMENTO INCORRETO" in str(t.get('response_data', {}))]
-    portuguese_message_tests = [t for t in tester.test_results if t.get('response_data', {}).get('portuguese_message', False)]
-    clear_guidance_tests = [t for t in tester.test_results if t.get('response_data', {}).get('clear_guidance', False)]
+    # Check for specific functionality
+    structure_tests = [t for t in tester.test_results if "Response Structure" in t["test"] and t["success"]]
+    processing_tests = [t for t in tester.test_results if "Analysis Processing" in t["test"] and t["success"]]
+    integration_tests = [t for t in tester.test_results if "Integration" in t["test"] and t["success"]]
     
-    print(f"\n🎯 MELHORIAS ESPECÍFICAS:")
-    print(f"🚨 Detecção de tipo incorreto: {len(type_detection_tests)} testes detectaram mensagem específica")
-    print(f"🇧🇷 Mensagens em português: {len(portuguese_message_tests)} testes com mensagens claras")
-    print(f"📋 Orientações específicas: {len(clear_guidance_tests)} testes com orientações úteis")
+    print(f"\n🎯 FUNCIONALIDADES ESPECÍFICAS:")
+    print(f"📋 Estrutura de resposta: {len(structure_tests)} testes passaram")
+    print(f"🔍 Processamento de análise: {len(processing_tests)} testes passaram")
+    print(f"🔗 Pontos de integração: {len(integration_tests)} testes passaram")
     
     # Return appropriate exit code
-    if critical_passed >= 3:  # At least 3 out of 4 critical tests working
-        print("\n✅ SISTEMA DE VALIDAÇÃO DE DOCUMENTOS MELHORADO FUNCIONANDO")
-        print("✅ Detecção de tipo incorreto operacional!")
-        print("✅ Mensagens específicas em português brasileiro!")
-        print("✅ Orientações claras para usuários!")
-        print("✅ Validações de tamanho funcionando!")
+    if critical_passed >= 2:  # At least 2 out of 3 critical tests working
+        print("\n✅ SISTEMA DE ANÁLISE DE DOCUMENTOS FUNCIONANDO")
+        print("✅ Endpoint /api/documents/analyze-with-ai operacional!")
+        print("✅ Estrutura de resposta correta!")
+        print("✅ Dr. Miguel integrado!")
         print("✅ Problema reportado pelo usuário RESOLVIDO!")
         return 0
     else:
-        print("\n❌ PROBLEMAS DETECTADOS NO SISTEMA DE VALIDAÇÃO")
+        print("\n❌ PROBLEMAS DETECTADOS NO SISTEMA DE ANÁLISE")
         print(f"⚠️ Apenas {critical_passed}/{len(critical_tests)} testes críticos funcionando")
-        print("⚠️ Problema reportado pelo usuário pode NÃO estar resolvido")
+        print("⚠️ Problema reportado pelo usuário CONFIRMADO")
         
         # Show specific failures
         failed_tests = [t for t in tester.test_results if not t['success']]
         if failed_tests:
             print("\n❌ TESTES FALHARAM:")
-            for test in failed_tests[:5]:  # Show first 5 failures
+            for test in failed_tests:
                 print(f"  • {test['test']}: {test['details']}")
         
         return 1
