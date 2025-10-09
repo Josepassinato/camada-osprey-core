@@ -215,10 +215,10 @@ class DocumentAnalysisTester:
             print(f"❌ Erro ao criar caso de teste: {str(e)}")
             return None
 
-    def test_real_vision_analysis_with_case_data(self):
-        """SCENARIO 1: Document Analysis with Real Case Data - Test real vision path"""
-        print("🎯 SCENARIO 1: Document Analysis with Real Case Data")
-        print("Cenário: Criar caso H-1B com basic_info e testar real vision analysis")
+    def test_cache_collision_prevention_sequential_uploads(self):
+        """SCENARIO 1: Sequential Document Analysis - Test cache collision prevention"""
+        print("🎯 SCENARIO 1: Sequential Document Analysis - Cache Collision Prevention")
+        print("Cenário: Upload sequencial de documentos diferentes para verificar análises únicas")
         
         try:
             # Create H-1B case with proper basic_info data
