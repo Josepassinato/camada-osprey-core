@@ -1,47 +1,47 @@
 #!/usr/bin/env python3
 """
-TESTE ESPECÍFICO: Sistema Melhorado de Validação de Documentos
+TESTE ESPECÍFICO: Document Analysis Functionality Testing
 
-FOCO ESPECÍFICO: Testar o sistema melhorado de validação de documentos que detecta especificamente erros de tipo de documento incorreto
+FOCO: Testar a funcionalidade de análise de documentos reportada como quebrada pelo usuário
 
 CONTEXTO DO PROBLEMA:
-O usuário reportou que enviou uma carteira de identidade no lugar de um passaporte, mas o sistema não especificou claramente que o tipo de documento estava incorreto - apenas mostrou "erro técnico".
+Usuário reportou: "A análise de documentos depois do upload não estão funcionando"
+Sistema configurado com análise "nativa" precisa ser testado
 
-MELHORIAS IMPLEMENTADAS:
-1. Detecção inteligente de tipo de documento baseada em características do arquivo
-2. Mensagens de erro específicas para "TIPO DE DOCUMENTO INCORRETO"
-3. Avaliação melhorada da Dra. Paula com orientações claras
-4. Diferenciação entre documentos brasileiros (CNH, Certidões, etc.)
+ENDPOINT PRINCIPAL A TESTAR:
+POST /api/documents/analyze-with-ai - Endpoint crítico de análise de documentos
 
-TESTES ESPECÍFICOS A REALIZAR:
+CENÁRIOS DE TESTE:
 
-Teste 1: Passaporte vs CNH (Caso reportado)
-- Endpoint: POST /api/documents/analyze-with-ai
-- Simular arquivo pequeno (< 200KB) quando esperado é passport
-- Verificar se detecta como driver_license
-- Validar mensagem: "🚨 TIPO DE DOCUMENTO INCORRETO: Você enviou um(a) Carteira de Motorista/CNH, mas é necessário um(a) Passaporte"
+1. Upload and Analysis Test:
+   - Upload de documento de teste (PDF/image)
+   - document_type: "passport"
+   - visa_type: "H-1B" 
+   - case_id válido
+   - Verificar estrutura de resposta
 
-Teste 2: CNH vs Passaporte
-- Simular arquivo grande (> 2.5MB) quando esperado é driver_license
-- Verificar se detecta como passport
-- Validar mensagem específica de erro de tipo
+2. Response Structure Validation:
+   - Campos obrigatórios: valid, legible, completeness, issues, extracted_data, dra_paula_assessment
+   - Validação do Dr. Miguel funcionando
+   - Native document analyzer operacional
 
-Teste 3: Certidão vs Passaporte
-- Simular arquivo muito grande (> 4MB) quando esperado é passport
-- Verificar se detecta como birth_certificate
-- Validar mensagem de orientação
+3. Error Handling:
+   - Tipos de arquivo inválidos
+   - Arquivos muito grandes/pequenos
+   - Parâmetros ausentes
 
-Teste 4: Validações de Tamanho Específicas
-- Testar limites para cada tipo de documento
-- Verificar mensagens específicas por tipo
+4. Integration Points:
+   - native_document_analyzer.py funcionando
+   - Dr. Miguel specialized agent respondendo
+   - Database de validação de documentos
 
-CRITÉRIOS DE SUCESSO:
-- Sistema deve detectar tipo incorreto de documento
-- Mensagens devem ser específicas e em português brasileiro
-- Usuário deve entender exatamente qual documento carregar
-- Orientações claras sobre o que fazer para corrigir
+PROBLEMAS ESPERADOS:
+- Sistema de análise nativo pode estar quebrado
+- Integração Dr. Miguel com problemas
+- Problemas de upload/processamento de arquivos
+- Conectividade com database de validação
 
-Foque nos cenários práticos que usuários brasileiros enfrentam!
+AUTENTICAÇÃO: Usar conta de teste com JWT token válido
 """
 
 import requests
