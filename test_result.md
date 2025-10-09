@@ -111,7 +111,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "TESTE DO SISTEMA DE VALIDAÇÃO DE DOCUMENTOS NATIVO: Testar o novo sistema de validação que substitui Google Document AI por análise nativa do LLM. Cenário: Fazer upload de documento → Verificar se mensagens de validação aparecem (Tipo de documento incorreto, Nome não corresponde, Documento vencido) → Confirmar que frontend exibe as mensagens corretamente."
+user_problem_statement: "TESTE DO SISTEMA INTELIGENTE DE PREENCHIMENTO DE FORMULÁRIOS: Testar o novo sistema inteligente de preenchimento de formulários que implementei. FOCO ESPECÍFICO: Testar os novos endpoints de preenchimento inteligente e integração com Dra. Ana. NOVOS ENDPOINTS PARA TESTAR: 1) POST /api/intelligent-forms/suggestions, 2) POST /api/intelligent-forms/validate, 3) POST /api/intelligent-forms/auto-fill. INTEGRAÇÃO COM SISTEMA DE DOCUMENTOS: Usar case_id que já tem documentos validados, verificar se dados extraídos dos documentos aparecem nas sugestões, testar mapeamento: passaporte → dados pessoais, CNH → dados de endereço. FUNCIONALIDADE DA DRA. ANA: Testar se specialized_agents.py FormValidationAgent funciona, verificar resposta estruturada da validação, confirmar que erros e sugestões são retornados adequadamente."
 
 backend:
   - task: "Complete Application Save System - User Account Creation"
