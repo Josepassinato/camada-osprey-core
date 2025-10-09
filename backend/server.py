@@ -1273,7 +1273,9 @@ async def signup(user_data: UserCreate):
         logger.error(f"Error in signup: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error creating user: {str(e)}")
 
-@api_router.post("/auth/login")
+@api_router.post("/auth/login", tags=["Authentication"],
+                 summary="Login do usuário",
+                 description="Autentica usuário e retorna token JWT para acesso aos endpoints protegidos")
 async def login(login_data: UserLogin):
     """Login user"""
     try:
