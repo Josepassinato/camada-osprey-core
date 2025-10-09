@@ -208,10 +208,10 @@ class DocumentAnalysisTester:
             print(f"❌ Erro ao criar caso de teste: {str(e)}")
             return None
 
-    def test_passport_vs_cnh_case(self):
-        """TESTE 1: Passaporte vs CNH (Caso reportado pelo usuário)"""
-        print("🎯 TESTE 1: Passaporte vs CNH - Caso reportado pelo usuário")
-        print("Cenário: Usuário enviou CNH quando era esperado passaporte")
+    def test_document_upload_and_analysis(self):
+        """TESTE 1: Upload and Analysis Test - Funcionalidade básica de análise"""
+        print("🎯 TESTE 1: Upload and Analysis Test - Funcionalidade básica de análise")
+        print("Cenário: Upload de documento passport para visa H-1B")
         
         try:
             # Criar arquivo de tamanho adequado (> 50KB mas < 10MB) com conteúdo de CNH
