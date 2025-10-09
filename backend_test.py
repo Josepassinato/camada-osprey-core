@@ -8869,6 +8869,11 @@ def main():
     tester.test_system_health_monitoring()
     print()
     
+    # Test 6: Rate Limiting Functionality
+    print("🚦 TESTE 6: Rate Limiting Functionality")
+    tester.test_rate_limiting_functionality()
+    print()
+    
     # Calculate results
     total_tests = len(tester.test_results)
     passed_tests = len([r for r in tester.test_results if r['success']])
