@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 """
-TESTE DO SISTEMA INTELIGENTE DE PREENCHIMENTO DE FORMULÁRIOS
-Testa o novo sistema de preenchimento inteligente que integra dados dos documentos
-validados com formulários oficiais usando Dra. Ana para validação em tempo real.
-FOCO ESPECÍFICO: Endpoints de preenchimento inteligente e integração com Dra. Ana
+TESTE DO SISTEMA DE FORMULÁRIOS AI REVIEW - VALIDAÇÃO E CONVERSÃO
+Testa o fluxo completo do sistema de formulários que implementei - validação de completude e conversão.
+FOCO ESPECÍFICO: Testar o fluxo completo FriendlyForm → Validação IA → Conversão Oficial
+
+NOVOS ENDPOINTS IMPLEMENTADOS:
+1. POST /api/ai-review/validate-completeness - Validação de completude usando Dra. Ana
+2. POST /api/ai-review/convert-to-official - Conversão PT→EN usando IA
+
+FLUXO DE TESTE COMPLETO:
+- Cenário A: Formulário Incompleto (ready_for_conversion = false)
+- Cenário B: Formulário Completo (ready_for_conversion = true, conversão funciona)
 """
 
 import requests
