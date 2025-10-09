@@ -837,31 +837,31 @@ class DisclaimerAndSSNValidatorTester:
             )
             return None
 
-    def run_phase_4b_corrections_tests(self):
-        """Executar todos os testes das correções Phase 4B"""
-        print("🚀 INICIANDO TESTES DAS CORREÇÕES PHASE 4B PRODUCTION OPTIMIZATION")
+    def run_disclaimer_and_ssn_tests(self):
+        """Executar todos os testes do Sistema de Disclaimer e Validador SSN"""
+        print("🚀 INICIANDO TESTES DO SISTEMA DE DISCLAIMER E VALIDADOR SSN")
         print("=" * 80)
-        print("FOCO: Confirmar que as correções de rate limiting resolveram os problemas de acesso")
-        print("RESULTADO ESPERADO: Endpoints retornando dados (200 OK) ao invés de 500 errors")
+        print("FOCO: Testar implementação completa do sistema de disclaimer e validador de Social Security Card")
+        print("RESULTADO ESPERADO: Todos os endpoints funcionando com aceites por etapa e validação SSN")
         print("=" * 80)
         
-        # Execute specific Phase 4B correction tests
+        # Execute disclaimer and SSN validation tests
         test_results = {}
         
-        # Test 1: Security System Fixed
-        test_results['security_fixed'] = self.test_security_system_fixed()
+        # Test 1: Disclaimer Text Endpoints
+        test_results['disclaimer_texts'] = self.test_disclaimer_text_endpoints()
         
-        # Test 2: System Health Corrected  
-        test_results['health_corrected'] = self.test_system_health_corrected()
+        # Test 2: Disclaimer Record and Validation
+        test_results['disclaimer_record_validation'] = self.test_disclaimer_record_and_validation()
         
-        # Test 3: Database Performance Corrected
-        test_results['database_corrected'] = self.test_database_performance_corrected()
+        # Test 3: SSN Validator Basic
+        test_results['ssn_validator'] = self.test_ssn_validator_basic()
         
-        # Test 4: Load Testing Availability Corrected
-        test_results['load_testing_corrected'] = self.test_load_testing_availability_corrected()
+        # Test 4: SSN Requirements Endpoint
+        test_results['ssn_requirements'] = self.test_ssn_requirements_endpoint()
         
-        # Test 5: Security Middleware Corrected
-        test_results['middleware_corrected'] = self.test_security_middleware_corrected()
+        # Test 5: Disclaimer Status and Reports
+        test_results['disclaimer_status_reports'] = self.test_disclaimer_status_and_reports()
         
         return test_results
 
