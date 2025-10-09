@@ -5679,6 +5679,255 @@ async def get_ssn_requirements():
         logger.error(f"Error getting SSN requirements: {e}")
         raise HTTPException(status_code=500, detail=f"Erro ao buscar requisitos: {str(e)}")
 
+# =====================================
+# SISTEMA DE TUTOR INTELIGENTE
+# =====================================
+
+@api_router.post("/tutor/message", tags=["AI Agents"],
+                 summary="Gerar mensagem do tutor inteligente",
+                 description="Gera mensagem personalizada do tutor baseada no contexto e progresso do usuário")
+async def generate_tutor_message(request: dict):
+    """Gera mensagem personalizada do tutor"""
+    try:
+        user_id = request.get("user_id", "anonymous")
+        visa_type = request.get("visa_type", "H-1B")
+        action_type = request.get("action_type", "guide")
+        context = request.get("context", {})
+        
+        # Validar action_type
+        try:
+            tutor_action = TutorAction(action_type)
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"Tipo de ação inválido: {action_type}")
+        
+        # Buscar progresso do usuário
+        progress = await intelligent_tutor.get_user_progress(user_id, visa_type)
+        
+        # Gerar mensagem inteligente
+        message = intelligent_tutor.generate_smart_message(context, progress, tutor_action)
+        
+        return {
+            "success": True,
+            "message": message.dict(),
+            "user_level": intelligent_tutor.assess_user_level(progress),
+            "suggestions": await intelligent_tutor.get_proactive_suggestions(user_id, visa_type, context)
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error generating tutor message: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao gerar mensagem do tutor: {str(e)}")
+
+@api_router.get("/tutor/progress/{user_id}/{visa_type}", tags=["AI Agents"],
+                summary="Buscar progresso do usuário",
+                description="Retorna progresso detalhado do usuário no sistema de tutoria")
+async def get_user_tutor_progress(user_id: str, visa_type: str):
+    """Busca progresso do usuário no sistema de tutoria"""
+    try:
+        progress = await intelligent_tutor.get_user_progress(user_id, visa_type)
+        
+        return {
+            "success": True,
+            "progress": progress.dict(),
+            "user_level": intelligent_tutor.assess_user_level(progress),
+            "analytics": await intelligent_tutor.get_learning_analytics(user_id, visa_type)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting tutor progress: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar progresso: {str(e)}")
+
+@api_router.post("/tutor/interaction", tags=["AI Agents"],
+                 summary="Registrar interação com tutor",
+                 description="Registra ação do usuário em resposta a mensagem do tutor")
+async def record_tutor_interaction(request: dict):
+    """Registra interação do usuário com o tutor"""
+    try:
+        user_id = request.get("user_id")
+        message_data = request.get("message")
+        user_action = request.get("user_action")
+        
+        if not all([user_id, message_data, user_action]):
+            raise HTTPException(status_code=400, detail="Campos obrigatórios: user_id, message, user_action")
+        
+        # Reconstruir objeto TutorMessage
+        from intelligent_tutor_system import TutorMessage
+        message = TutorMessage(**message_data)
+        
+        # Registrar interação
+        await intelligent_tutor.record_interaction(user_id, message, user_action)
+        
+        return {
+            "success": True,
+            "message": "Interação registrada com sucesso"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error recording tutor interaction: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao registrar interação: {str(e)}")
+
+@api_router.get("/tutor/suggestions/{user_id}/{visa_type}", tags=["AI Agents"],
+                summary="Obter sugestões proativas do tutor",
+                description="Retorna sugestões proativas baseadas no contexto atual do usuário")
+async def get_tutor_suggestions(user_id: str, visa_type: str, current_step: str = "documents"):
+    """Obter sugestões proativas do tutor"""
+    try:
+        context = {
+            "current_step": current_step,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+        suggestions = await intelligent_tutor.get_proactive_suggestions(user_id, visa_type, context)
+        
+        return {
+            "success": True,
+            "suggestions": [suggestion.dict() for suggestion in suggestions],
+            "count": len(suggestions)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting tutor suggestions: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar sugestões: {str(e)}")
+
+@api_router.post("/tutor/update-preferences", tags=["AI Agents"],
+                 summary="Atualizar preferências do tutor",
+                 description="Atualiza personalidade e preferências do tutor para o usuário")
+async def update_tutor_preferences(request: dict):
+    """Atualiza preferências do tutor"""
+    try:
+        user_id = request.get("user_id")
+        visa_type = request.get("visa_type")
+        preferences = request.get("preferences", {})
+        
+        if not user_id or not visa_type:
+            raise HTTPException(status_code=400, detail="Campos obrigatórios: user_id, visa_type")
+        
+        # Buscar progresso atual
+        progress = await intelligent_tutor.get_user_progress(user_id, visa_type)
+        
+        # Atualizar preferências
+        if "personality" in preferences:
+            try:
+                progress.preferred_personality = TutorPersonality(preferences["personality"])
+            except ValueError:
+                raise HTTPException(status_code=400, detail=f"Personalidade inválida: {preferences['personality']}")
+        
+        if "detail_level" in preferences:
+            if preferences["detail_level"] in ["low", "medium", "high"]:
+                progress.detail_level = preferences["detail_level"]
+            else:
+                raise HTTPException(status_code=400, detail="detail_level deve ser: low, medium ou high")
+        
+        if "language_preference" in preferences:
+            progress.language_preference = preferences["language_preference"]
+        
+        # Salvar alterações
+        await intelligent_tutor.update_user_progress(progress)
+        
+        return {
+            "success": True,
+            "updated_preferences": {
+                "personality": progress.preferred_personality.value,
+                "detail_level": progress.detail_level,
+                "language_preference": progress.language_preference
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating tutor preferences: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao atualizar preferências: {str(e)}")
+
+@api_router.get("/tutor/knowledge-base/{visa_type}", tags=["AI Agents"],
+                summary="Obter base de conhecimento do tutor",
+                description="Retorna informações da base de conhecimento para um tipo específico de visto")
+async def get_tutor_knowledge_base(visa_type: str, topic: str = None):
+    """Busca informações da base de conhecimento"""
+    try:
+        knowledge = intelligent_tutor.knowledge_base.get(visa_type, {})
+        
+        if topic:
+            # Buscar tópico específico
+            topic_info = None
+            for category, items in knowledge.items():
+                if topic in items:
+                    topic_info = items[topic]
+                    break
+            
+            if not topic_info:
+                raise HTTPException(status_code=404, detail=f"Tópico '{topic}' não encontrado para {visa_type}")
+            
+            return {
+                "success": True,
+                "visa_type": visa_type,
+                "topic": topic,
+                "information": topic_info
+            }
+        else:
+            # Retornar toda base de conhecimento
+            return {
+                "success": True,
+                "visa_type": visa_type,
+                "knowledge_base": knowledge,
+                "available_topics": [
+                    topic for category in knowledge.values() 
+                    for topic in (category.keys() if isinstance(category, dict) else [])
+                ]
+            }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting knowledge base: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar base de conhecimento: {str(e)}")
+
+@api_router.post("/tutor/explain", tags=["AI Agents"],
+                 summary="Explicar conceito específico",
+                 description="Gera explicação personalizada para um conceito ou documento específico")
+async def explain_concept(request: dict):
+    """Explica conceito específico de forma personalizada"""
+    try:
+        user_id = request.get("user_id", "anonymous")
+        visa_type = request.get("visa_type", "H-1B")
+        concept = request.get("concept")  # Ex: "passport", "diploma", "h1b_process"
+        context = request.get("context", {})
+        
+        if not concept:
+            raise HTTPException(status_code=400, detail="Campo 'concept' é obrigatório")
+        
+        # Buscar progresso do usuário
+        progress = await intelligent_tutor.get_user_progress(user_id, visa_type)
+        user_level = intelligent_tutor.assess_user_level(progress)
+        
+        # Buscar explicação contextual
+        explanation_data = intelligent_tutor.get_contextual_explanation(visa_type, concept, user_level)
+        
+        # Gerar mensagem explicativa
+        context.update({
+            "document_type": concept,
+            "current_step": context.get("current_step", "explanation")
+        })
+        
+        message = intelligent_tutor.generate_smart_message(context, progress, TutorAction.EXPLAIN)
+        
+        return {
+            "success": True,
+            "explanation": explanation_data,
+            "tutor_message": message.dict(),
+            "user_level": user_level,
+            "personalized_tips": explanation_data.get("tips", [])[:3]
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error explaining concept: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao explicar conceito: {str(e)}")
+
 # Existing Applications endpoints continue here...
 @api_router.post("/applications")
 async def create_application(app_data: ApplicationCreate, current_user = Depends(get_current_user)):
