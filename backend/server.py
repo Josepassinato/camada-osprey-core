@@ -33,6 +33,7 @@ import openai
 import yaml
 from immigration_expert import ImmigrationExpert, create_immigration_expert
 from disclaimer_system import DisclaimerSystem, DisclaimerStage
+from social_security_validator import SocialSecurityValidator
 
 # Load environment variables FIRST before importing modules that need them
 ROOT_DIR = Path(__file__).parent
