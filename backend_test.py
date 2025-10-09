@@ -176,7 +176,278 @@ class NativeDocumentValidationTester:
             )
             return None
     
-    def test_start_finalization_f1_basic(self):
+    def test_document_type_validation(self):
+        """TESTE 2: Validação de Tipo de Documento Incorreto"""
+        print("🔍 TESTE 2: Validação de Tipo de Documento")
+        
+        # Test case: Upload CNH file when expecting passport
+        test_content = self.create_test_document(
+            "CNH - CARTEIRA NACIONAL DE HABILITAÇÃO\nNome: João Silva\nCategoria: B",
+            "cnh_joao.jpg"  # Filename suggests CNH
+        )
+        
+        files = {
+            'file': ('cnh_joao.jpg', test_content, 'image/jpeg')
+        }
+        data = {
+            'document_type': 'passport',  # Expecting passport
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-TYPE-VALIDATION'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check if validation detected type mismatch
+                issues = result.get('issues', [])
+                type_error_found = any("TIPO DE DOCUMENTO INCORRETO" in issue for issue in issues)
+                
+                self.log_test(
+                    "Validação Tipo - Detecção de Erro",
+                    type_error_found,
+                    f"Mensagem '❌ TIPO DE DOCUMENTO INCORRETO' encontrada: {type_error_found}",
+                    {
+                        "issues_found": len(issues),
+                        "type_error_detected": type_error_found,
+                        "issues": issues[:3]  # First 3 issues
+                    }
+                )
+                
+                # Check if document was marked as invalid
+                is_invalid = not result.get('valid', True)
+                
+                self.log_test(
+                    "Validação Tipo - Documento Rejeitado",
+                    is_invalid,
+                    f"Documento marcado como inválido: {is_invalid}",
+                    {"valid": result.get('valid'), "completeness": result.get('completeness')}
+                )
+                
+                return result
+            else:
+                self.log_test(
+                    "Validação Tipo - Detecção de Erro",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+                return None
+                
+        except Exception as e:
+            self.log_test(
+                "Validação Tipo - Detecção de Erro",
+                False,
+                f"Exception: {str(e)}"
+            )
+            return None
+    
+    def test_name_validation(self):
+        """TESTE 3: Validação de Nome Não Corresponde"""
+        print("👤 TESTE 3: Validação de Nome")
+        
+        # Test case: Document with different name than applicant
+        test_content = self.create_test_document(
+            "PASSPORT\nMARIA SANTOS OLIVEIRA\nPassport Number: B98765432\nExpiry: 2026-06-15",
+            "passport_maria.pdf"
+        )
+        
+        files = {
+            'file': ('passport_maria.pdf', test_content, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-NAME-VALIDATION'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check if validation detected name mismatch
+                issues = result.get('issues', [])
+                name_error_found = any("NOME NÃO CORRESPONDE" in issue for issue in issues)
+                
+                self.log_test(
+                    "Validação Nome - Detecção de Erro",
+                    name_error_found,
+                    f"Mensagem '❌ NOME NÃO CORRESPONDE' encontrada: {name_error_found}",
+                    {
+                        "issues_found": len(issues),
+                        "name_error_detected": name_error_found,
+                        "issues": issues[:3]
+                    }
+                )
+                
+                return result
+            else:
+                self.log_test(
+                    "Validação Nome - Detecção de Erro",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+                return None
+                
+        except Exception as e:
+            self.log_test(
+                "Validação Nome - Detecção de Erro",
+                False,
+                f"Exception: {str(e)}"
+            )
+            return None
+    
+    def test_document_expiration_validation(self):
+        """TESTE 4: Validação de Documento Vencido"""
+        print("📅 TESTE 4: Validação de Documento Vencido")
+        
+        # Test case: Small file size to trigger expiration simulation
+        small_content = "PASSPORT\nJOHN DOE\nExpired document content"
+        test_content = small_content.encode('utf-8') + b"X" * 60000  # Just over 50KB but under 100KB
+        
+        files = {
+            'file': ('old_passport.pdf', test_content, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-EXPIRY-VALIDATION'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check if validation detected expiration
+                issues = result.get('issues', [])
+                expiry_error_found = any("DOCUMENTO VENCIDO" in issue for issue in issues)
+                
+                self.log_test(
+                    "Validação Expiração - Detecção de Erro",
+                    expiry_error_found,
+                    f"Mensagem '❌ DOCUMENTO VENCIDO' encontrada: {expiry_error_found}",
+                    {
+                        "issues_found": len(issues),
+                        "expiry_error_detected": expiry_error_found,
+                        "issues": issues[:3]
+                    }
+                )
+                
+                return result
+            else:
+                self.log_test(
+                    "Validação Expiração - Detecção de Erro",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+                return None
+                
+        except Exception as e:
+            self.log_test(
+                "Validação Expiração - Detecção de Erro",
+                False,
+                f"Exception: {str(e)}"
+            )
+            return None
+    
+    def test_policy_engine_integration(self):
+        """TESTE 5: Integração com Policy Engine"""
+        print("🏛️ TESTE 5: Integração Policy Engine")
+        
+        # Test with valid document to check Policy Engine integration
+        test_content = self.create_test_document(
+            "PASSPORT\nCARLOS EDUARDO SILVA\nPassport Number: C12345678\nExpiry: 2025-12-31",
+            "passport_carlos.pdf"
+        )
+        
+        files = {
+            'file': ('passport_carlos.pdf', test_content, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-POLICY-ENGINE'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check for Policy Engine fields
+                has_policy_engine = 'policy_engine' in result
+                has_policy_score = 'policy_score' in result
+                has_policy_decision = 'policy_decision' in result
+                
+                policy_integration_working = has_policy_engine or has_policy_score or has_policy_decision
+                
+                self.log_test(
+                    "Policy Engine - Integração Ativa",
+                    policy_integration_working,
+                    f"Policy Engine integrado: {policy_integration_working}",
+                    {
+                        "policy_engine_present": has_policy_engine,
+                        "policy_score_present": has_policy_score,
+                        "policy_decision_present": has_policy_decision,
+                        "policy_score": result.get('policy_score', 'N/A'),
+                        "policy_decision": result.get('policy_decision', 'N/A')
+                    }
+                )
+                
+                return result
+            else:
+                self.log_test(
+                    "Policy Engine - Integração Ativa",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+                return None
+                
+        except Exception as e:
+            self.log_test(
+                "Policy Engine - Integração Ativa",
+                False,
+                f"Exception: {str(e)}"
+            )
+            return None
         """Test F-1 basic finalization start"""
         test_case_id = "TEST-CASE-F1"
         
