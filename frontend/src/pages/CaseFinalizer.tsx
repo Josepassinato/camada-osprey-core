@@ -54,9 +54,11 @@ const CaseFinalizer: React.FC = () => {
   // Get current user for tutor
   useEffect(() => {
     const token = localStorage.getItem('osprey_token');
-    if (token) {
-      setCurrentUser({ id: 'user_123', email: 'user@example.com' });
-    }
+    // Always set a user for the tutor demo
+    setCurrentUser({ 
+      id: token ? 'authenticated_user' : 'demo_user_123', 
+      email: token ? 'user@example.com' : 'demo@example.com' 
+    });
   }, []);
 
   const consentText = `
