@@ -295,23 +295,23 @@ class DocumentValidationTester:
                 f"❌ Exception: {str(e)}"
             )
     
-    def test_cnh_vs_passport_case(self):
-        """TESTE 2: CNH vs Passaporte - Arquivo grande enviado como CNH"""
-        print("📋 TESTE 2: CNH vs Passaporte - Arquivo grande enviado como CNH")
-        print("Cenário: Usuário enviou passaporte quando era esperado CNH")
+    def test_diploma_vs_passport_case(self):
+        """TESTE 2: Diploma vs Passaporte - Arquivo grande enviado como diploma"""
+        print("📋 TESTE 2: Diploma vs Passaporte - Arquivo grande enviado como diploma")
+        print("Cenário: Usuário enviou passaporte quando era esperado diploma (ambos requeridos para H-1B)")
         
         try:
             # Simular arquivo grande (> 2.5MB) que seria típico de passaporte
-            # quando o sistema espera CNH
+            # quando o sistema espera diploma (ambos são requeridos para H-1B)
             large_file_content = self.create_large_document_content("PASSPORT\nREPUBLIC OF BRAZIL\nMaria Santos\nPassport No: BR123456")
             
             files = {
                 'file': ('passport_maria.pdf', large_file_content, 'application/pdf')
             }
             data = {
-                'document_type': 'passport',  # Sistema espera passaporte
-                'visa_type': 'H-1B',  # H-1B requer passaporte
-                'case_id': 'TEST-CNH-PASSPORT'
+                'document_type': 'diploma',  # Sistema espera diploma
+                'visa_type': 'H-1B',  # H-1B requer tanto diploma quanto passaporte
+                'case_id': 'TEST-DIPLOMA-PASSPORT'
             }
             
             headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
@@ -332,13 +332,13 @@ class DocumentValidationTester:
                 
                 # Procurar pela mensagem específica de tipo incorreto
                 type_error_detected = any('TIPO DE DOCUMENTO INCORRETO' in issue for issue in issues)
-                specific_message_found = 'Passaporte' in dra_paula_assessment and 'Carteira de Motorista' in dra_paula_assessment
+                specific_message_found = 'Passaporte' in dra_paula_assessment and 'Diploma' in dra_paula_assessment
                 
                 # Verificar se documento foi rejeitado
                 is_valid = result.get('valid', True)
                 
                 self.log_test(
-                    "CNH vs Passaporte - Detecção de Tipo Incorreto",
+                    "Diploma vs Passaporte - Detecção de Tipo Incorreto",
                     type_error_detected and not is_valid,
                     f"✅ Erro detectado: tipo_incorreto={type_error_detected}, rejeitado={not is_valid}, mensagem_específica={specific_message_found}",
                     {
@@ -351,16 +351,16 @@ class DocumentValidationTester:
                     }
                 )
                 
-                # Verificar orientação específica para passaporte (arquivo grande detectado como passaporte quando esperado passaporte)
-                passport_guidance = 'Passaporte' in dra_paula_assessment or 'passport' in dra_paula_assessment.lower()
+                # Verificar orientação específica para diploma
+                diploma_guidance = 'Diploma' in dra_paula_assessment or 'diploma' in dra_paula_assessment.lower()
                 clear_instruction = 'necessário' in dra_paula_assessment.lower() or 'carregue' in dra_paula_assessment.lower()
                 
                 self.log_test(
-                    "CNH vs Passaporte - Orientação Específica", 
-                    passport_guidance and clear_instruction,
-                    f"✅ Orientação clara: passaporte_mencionado={passport_guidance}, instrução_clara={clear_instruction}",
+                    "Diploma vs Passaporte - Orientação Específica", 
+                    diploma_guidance and clear_instruction,
+                    f"✅ Orientação clara: diploma_mencionado={diploma_guidance}, instrução_clara={clear_instruction}",
                     {
-                        "passport_guidance": passport_guidance,
+                        "diploma_guidance": diploma_guidance,
                         "clear_instruction": clear_instruction,
                         "full_assessment": dra_paula_assessment
                     }
@@ -368,7 +368,7 @@ class DocumentValidationTester:
                 
             else:
                 self.log_test(
-                    "CNH vs Passaporte - Detecção de Tipo Incorreto",
+                    "Diploma vs Passaporte - Detecção de Tipo Incorreto",
                     False,
                     f"❌ HTTP {response.status_code}",
                     {"status_code": response.status_code, "error": response.text[:200]}
@@ -376,7 +376,7 @@ class DocumentValidationTester:
                 
         except Exception as e:
             self.log_test(
-                "CNH vs Passaporte - Detecção de Tipo Incorreto",
+                "Diploma vs Passaporte - Detecção de Tipo Incorreto",
                 False,
                 f"❌ Exception: {str(e)}"
             )
