@@ -7686,8 +7686,6 @@ async def translate_data_ai(case, friendly_form_data):
                 temperature=0.3
             )
             response_text = response.choices[0].message.content
-        else:
-            response_text = llm.chat([{"role": "user", "content": translation_prompt}])
         
         return {"details": "Tradução para inglês jurídico concluída com sucesso"}
         
