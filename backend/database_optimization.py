@@ -14,7 +14,12 @@ import time
 import hashlib
 import json
 import pickle
-import redis.asyncio as aioredis
+try:
+    import redis.asyncio as aioredis
+    REDIS_AVAILABLE = True
+except ImportError:
+    aioredis = None
+    REDIS_AVAILABLE = False
 from contextlib import asynccontextmanager
 
 logger = logging.getLogger(__name__)
