@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
 """
-TESTE DO SISTEMA DE FORMULÁRIOS AI REVIEW - VALIDAÇÃO E CONVERSÃO
-Testa o fluxo completo do sistema de formulários que implementei - validação de completude e conversão.
-FOCO ESPECÍFICO: Testar o fluxo completo FriendlyForm → Validação IA → Conversão Oficial
+TESTE COMPLETO DO SISTEMA DE CARTAS DE APRESENTAÇÃO - DR. PAULA
+Testa o sistema completo de geração de cartas de apresentação (Phase 3: Cover Letter Generation)
+FOCO ESPECÍFICO: Sistema de Cartas com Dra. Paula usando chave OpenAI do usuário
 
-NOVOS ENDPOINTS IMPLEMENTADOS:
-1. POST /api/ai-review/validate-completeness - Validação de completude usando Dra. Ana
-2. POST /api/ai-review/convert-to-official - Conversão PT→EN usando IA
+ENDPOINTS TESTADOS:
+1. POST /api/llm/dr-paula/generate-directives - Gerar roteiro informativo
+2. POST /api/llm/dr-paula/review-letter - Revisar carta do aplicante
+3. POST /api/llm/dr-paula/format-official-letter - Formatar carta oficial
+4. POST /api/llm/dr-paula/generate-final-letter - Gerar carta final
+5. POST /api/llm/dr-paula/request-complement - Solicitar complementação
 
-FLUXO DE TESTE COMPLETO:
-- Cenário A: Formulário Incompleto (ready_for_conversion = false)
-- Cenário B: Formulário Completo (ready_for_conversion = true, conversão funciona)
+INTEGRAÇÃO CRÍTICA: Confirmar que está usando OPENAI_API_KEY (chave do usuário) e não EMERGENT_LLM_KEY
+
+CASOS DE TESTE:
+- Carta completa (should trigger ready_for_formatting)
+- Carta incompleta (should trigger needs_questions)
+- Carta com erros (should trigger complementation)
 """
 
 import requests
