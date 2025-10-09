@@ -4703,25 +4703,24 @@ Documento de identidade brasileiro
             return None
 
     def run_all_tests(self):
-        """Run all real document analysis system tests"""
-        print("🚀 INICIANDO TESTES DO NOVO SISTEMA REAL DE ANÁLISE DE DOCUMENTOS")
+        """Run all OpenAI direct integration tests"""
+        print("🚀 INICIANDO TESTES DE INTEGRAÇÃO DIRETA COM OPENAI")
         print("=" * 80)
-        print("🎯 FOCO: Verificar que o sistema REAL de análise de documentos está funcionando")
-        print("🔧 IMPLEMENTAÇÃO: Sistema usa OpenAI Vision API para análise real, não simulação")
-        print("📄 ARQUIVO: /app/backend/real_document_vision_analyzer.py")
-        print("🔑 API: EMERGENT_LLM_KEY para análise com gpt-4o model")
+        print("🎯 FOCO: Verificar que o sistema usa APENAS chave pessoal OPENAI_API_KEY")
+        print("🔧 IMPLEMENTAÇÃO: Sistema usa openai.OpenAI() diretamente, sem emergent")
+        print("📄 ARQUIVO: /app/backend/native_document_analyzer.py")
+        print("🔑 API: OPENAI_API_KEY (chave pessoal do usuário)")
+        print("❌ ELIMINADO: EMERGENT_LLM_KEY e emergentintegrations")
         print("=" * 80)
         
-        # PRIORITY 1: Test the NEW REAL document vision analysis system
-        self.test_real_document_vision_system()
+        # PRIORITY 1: Test OpenAI direct integration (no emergent)
+        self.test_openai_direct_integration_only()
         
-        # PRIORITY 2: Test the critical IMG_7602.png specific document
+        # PRIORITY 2: Verify complete elimination of emergent dependencies
+        self.test_no_emergent_dependencies_validation()
+        
+        # PRIORITY 3: Test specific user document with OpenAI direct
         self.test_img_7602_specific_document_analysis()
-        
-        # PRIORITY 3: Test cache collision prevention (legacy but important)
-        self.test_cache_collision_prevention_sequential_uploads()
-        self.test_real_document_processing_no_contamination()
-        self.test_cache_key_uniqueness_similar_sizes()
         
         # PRIORITY 4: Basic functionality tests to ensure system still works
         self.test_document_upload_and_analysis()
