@@ -532,10 +532,6 @@ const FriendlyForm = () => {
     }
   };
 
-  const [validationResult, setValidationResult] = useState<any>(null);
-  const [isValidating, setIsValidating] = useState(false);
-  const [showValidationModal, setShowValidationModal] = useState(false);
-
   const validateCompletenessWithDraAna = async () => {
     setIsValidating(true);
     
