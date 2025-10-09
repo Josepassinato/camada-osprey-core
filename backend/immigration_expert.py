@@ -65,19 +65,19 @@ class ImmigrationExpert:
         Não constitui consultoria jurídica. Sempre recomende consultar um advogado para casos complexos.
         """
         
-        # Prefer EMERGENT_LLM_KEY, fallback to OpenAI
+        # Use user's OpenAI key as requested
         self.emergent_key = os.environ.get('EMERGENT_LLM_KEY')
         self.openai_key = os.environ.get('OPENAI_API_KEY')
-        self.use_openai_direct = False
+        self.use_openai_direct = True  # User requested to use their OpenAI key
         
-        if not self.emergent_key and not self.openai_key:
-            raise ValueError("Neither EMERGENT_LLM_KEY nor OPENAI_API_KEY found in environment variables")
-        
-        # Use EMERGENT_LLM_KEY if available, otherwise fallback to OpenAI
-        if self.emergent_key:
+        if not self.openai_key:
+            if not self.emergent_key:
+                raise ValueError("Neither EMERGENT_LLM_KEY nor OPENAI_API_KEY found in environment variables")
+            # Fallback to emergent if no OpenAI key
             self.api_key = self.emergent_key
             self.use_openai_direct = False
         else:
+            # Use user's OpenAI key as requested
             self.api_key = self.openai_key
             self.use_openai_direct = True
     
