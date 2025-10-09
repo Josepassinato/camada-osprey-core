@@ -105,45 +105,114 @@ class IntelligentFormsTester:
         full_content = content + "\n" + "Test document content padding. " * 2000
         return full_content.encode('utf-8')
     
-    def test_basic_upload_endpoint(self):
-        """TESTE 1: Upload básico para /api/documents/analyze-with-ai"""
-        print("📄 TESTE 1: Upload Básico do Endpoint")
+    def create_test_case_with_documents(self) -> str:
+        """Cria um caso de teste com documentos validados"""
+        try:
+            # Create a test case first
+            case_data = {
+                "form_code": "H-1B",
+                "session_token": f"test_session_{uuid.uuid4().hex[:8]}"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/auto-application/start",
+                json=case_data
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                case_id = result.get('case_id')
+                
+                # Add some basic data to the case
+                basic_data = {
+                    "firstName": "Carlos",
+                    "lastName": "Silva",
+                    "email": "carlos.silva@test.com",
+                    "phone": "+55 11 99999-9999",
+                    "dateOfBirth": "1990-05-15",
+                    "placeOfBirth": "São Paulo, SP, Brasil",
+                    "nationality": "Brazilian"
+                }
+                
+                # Update case with basic data
+                update_response = self.session.patch(
+                    f"{API_BASE}/auto-application/case/{case_id}",
+                    json={
+                        "basic_data": basic_data,
+                        "current_step": "documents"
+                    }
+                )
+                
+                # Simulate document analysis results
+                document_analysis = [
+                    {
+                        "document_type": "passport",
+                        "valid": True,
+                        "extracted_data": {
+                            "full_name": "CARLOS EDUARDO SILVA",
+                            "document_number": "YC792396",
+                            "nationality": "BRASILEIRO",
+                            "place_of_birth": "CANOAS, RS",
+                            "issue_date": "2018-09-13",
+                            "expiry_date": "2028-09-13",
+                            "issuing_authority": "POLÍCIA FEDERAL"
+                        }
+                    }
+                ]
+                
+                # Add document analysis to case
+                self.session.patch(
+                    f"{API_BASE}/auto-application/case/{case_id}",
+                    json={
+                        "document_analysis_results": document_analysis
+                    }
+                )
+                
+                return case_id
+            else:
+                print(f"❌ Erro ao criar caso de teste: {response.status_code}")
+                return None
+                
+        except Exception as e:
+            print(f"❌ Erro ao criar caso de teste: {str(e)}")
+            return None
+
+    def test_intelligent_forms_suggestions_endpoint(self):
+        """TESTE 1: POST /api/intelligent-forms/suggestions"""
+        print("🤖 TESTE 1: Endpoint de Sugestões Inteligentes")
         
-        # Create test document
-        test_content = self.create_test_document(
-            "PASSPORT\nJOHN SMITH\nPassport Number: A12345678\nExpiry: 2025-12-31",
-            "passport_test.pdf"
-        )
-        
-        files = {
-            'file': ('passport_test.pdf', test_content, 'application/pdf')
-        }
-        data = {
-            'document_type': 'passport',
-            'visa_type': 'H-1B',
-            'case_id': 'TEST-BASIC-UPLOAD'
-        }
+        # Create test case with documents
+        case_id = self.create_test_case_with_documents()
+        if not case_id:
+            self.log_test(
+                "Sugestões Inteligentes - Criação de Caso",
+                False,
+                "Falha ao criar caso de teste"
+            )
+            return None
         
         try:
-            # Remove Content-Type header for multipart form data
-            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            # Test the suggestions endpoint
+            request_data = {
+                "case_id": case_id,
+                "form_code": "H-1B",
+                "current_form_data": {}
+            }
             
-            response = requests.post(
-                f"{API_BASE}/documents/analyze-with-ai",
-                files=files,
-                data=data,
-                headers=headers
+            response = self.session.post(
+                f"{API_BASE}/intelligent-forms/suggestions",
+                json=request_data
             )
             
             if response.status_code == 200:
                 result = response.json()
                 
                 # Check required response structure
-                required_fields = ['valid', 'legible', 'completeness', 'issues', 'extracted_data', 'dra_paula_assessment']
+                required_fields = ['success', 'case_id', 'form_code', 'suggestions', 'total_suggestions']
                 has_all_fields = all(field in result for field in required_fields)
                 
                 self.log_test(
-                    "Upload Básico - Estrutura de Resposta",
+                    "Sugestões Inteligentes - Estrutura de Resposta",
                     has_all_fields,
                     f"Campos presentes: {list(result.keys())}",
                     {
@@ -152,18 +221,40 @@ class IntelligentFormsTester:
                     }
                 )
                 
-                # Check if endpoint returns 200 OK
+                # Check if suggestions were generated
+                suggestions = result.get('suggestions', [])
+                has_suggestions = len(suggestions) > 0
+                
                 self.log_test(
-                    "Upload Básico - Status 200 OK",
-                    True,
-                    f"Endpoint retornou status 200 com análise completa",
-                    {"status_code": response.status_code}
+                    "Sugestões Inteligentes - Geração de Sugestões",
+                    has_suggestions,
+                    f"Geradas {len(suggestions)} sugestões baseadas em documentos validados",
+                    {
+                        "total_suggestions": len(suggestions),
+                        "sample_suggestions": suggestions[:3] if suggestions else []
+                    }
                 )
+                
+                # Validate suggestion structure
+                if suggestions:
+                    first_suggestion = suggestions[0]
+                    suggestion_fields = ['field_id', 'suggested_value', 'confidence', 'source', 'explanation']
+                    has_valid_structure = all(field in first_suggestion for field in suggestion_fields)
+                    
+                    self.log_test(
+                        "Sugestões Inteligentes - Estrutura de Sugestão",
+                        has_valid_structure,
+                        f"Estrutura válida: {list(first_suggestion.keys())}",
+                        {
+                            "suggestion_structure": {field: field in first_suggestion for field in suggestion_fields},
+                            "confidence_range": f"{min(s.get('confidence', 0) for s in suggestions):.2f} - {max(s.get('confidence', 0) for s in suggestions):.2f}"
+                        }
+                    )
                 
                 return result
             else:
                 self.log_test(
-                    "Upload Básico - Status 200 OK",
+                    "Sugestões Inteligentes - Status 200 OK",
                     False,
                     f"HTTP {response.status_code}: {response.text[:200]}",
                     {"status_code": response.status_code, "error": response.text}
@@ -172,7 +263,7 @@ class IntelligentFormsTester:
                 
         except Exception as e:
             self.log_test(
-                "Upload Básico - Status 200 OK",
+                "Sugestões Inteligentes - Status 200 OK",
                 False,
                 f"Exception: {str(e)}"
             )
