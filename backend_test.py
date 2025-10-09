@@ -341,7 +341,7 @@ class DisclaimerAndSSNValidatorTester:
             )
             return None
     
-    def test_load_testing_availability_corrected(self):
+    def test_ssn_validator_basic(self):
         """TESTE 4: Load Testing Availability Corrected - Sistema de testes disponível"""
         print("⚡ TESTE 4: Load Testing Availability Corrected - Sistema de testes disponível")
         
