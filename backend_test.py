@@ -527,7 +527,7 @@ Data de Validade: 15/06/2024
                 
             else:
                 self.log_test(
-                    "Certidão vs Passaporte - Detecção de Tipo Incorreto",
+                    "Error Handling - File Too Small",
                     False,
                     f"❌ HTTP {response.status_code}",
                     {"status_code": response.status_code, "error": response.text[:200]}
@@ -535,7 +535,7 @@ Data de Validade: 15/06/2024
                 
         except Exception as e:
             self.log_test(
-                "Certidão vs Passaporte - Detecção de Tipo Incorreto",
+                "Error Handling - File Too Small",
                 False,
                 f"❌ Exception: {str(e)}"
             )
