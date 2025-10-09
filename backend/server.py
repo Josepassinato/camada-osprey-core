@@ -7570,7 +7570,7 @@ async def validate_form_data_ai(case, friendly_form_data, basic_data):
 async def check_data_consistency_ai(case, friendly_form_data, basic_data):
     """AI check for data consistency across different form sections"""
     try:
-        from emergentintegrations import EmergentLLM
+        # Removed emergent integrations - using only user's OpenAI API key
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt
         
         # Use OpenAI directly or fallback to EmergentLLM
@@ -7636,7 +7636,7 @@ async def check_data_consistency_ai(case, friendly_form_data, basic_data):
 async def translate_data_ai(case, friendly_form_data):
     """AI translation from Portuguese to English for USCIS forms"""
     try:
-        from emergentintegrations import EmergentLLM
+        # Removed emergent integrations - using only user's OpenAI API key
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt
         
         # Use OpenAI directly or fallback to EmergentLLM
