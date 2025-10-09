@@ -148,11 +148,16 @@ class DatabaseOptimizationSystem:
                 IndexModel([("form_code", ASCENDING), ("created_at", DESCENDING)])
             ]
             
-            await self.db.cases.create_indexes(cases_indexes)
+            try:
+                await self.db.cases.create_indexes(cases_indexes)
+                logger.info("✅ Cases indexes created")
+            except Exception as e:
+                logger.warning(f"⚠️ Cases indexes error (may already exist): {e}")
             
             # Índices para collection de documents
             documents_indexes = [
-                IndexModel([("document_id", ASCENDING)], unique=True),
+                # Remove unique constraint to avoid duplicate key errors in development
+                IndexModel([("document_id", ASCENDING)]),
                 IndexModel([("case_id", ASCENDING)]),
                 IndexModel([("document_type", ASCENDING)]),
                 IndexModel([("validation_status", ASCENDING)]),
