@@ -1,41 +1,54 @@
 #!/usr/bin/env python3
 """
-TESTE CRÍTICO: Document Analysis System After Bug Fix
+TESTE CRÍTICO: Document Analysis Cache Collision Bug Fix
 
 CONTEXTO DO BUG CORRIGIDO:
-- Linha 8175 em server.py: case_doc.get('form_data', {}).get('basic_info') causava NoneType error
-- Real vision analysis falhava e sistema usava fallback menos preciso
-- Fix adicionou null checks e error handling apropriado
+- OCR Cache em /app/backend/cache/ocr_cache.py linha 68 tinha geração de cache key falha
+- Bug: Usava apenas primeiros 100 bytes + tamanho do arquivo (collision-prone)
+- Fix: Mudou para hash completo do conteúdo para prevenir colisões
+- Cache foi limpo via POST /api/production/cache/clear
+- Backend reiniciado para garantir estado limpo
+
+PROBLEMA ORIGINAL:
+- Usuário fazia upload de CNH (Carteira de Motorista) 
+- Sistema retornava análise de passaporte de upload anterior
+- Cache collision causava documentos diferentes compartilharem mesma cache key
+- Usuários recebiam resultados incorretos de documentos previamente carregados
 
 FOCO DOS TESTES:
-1. Real Vision Analysis Path - verificar que funciona sem erros
-2. Precision Improvement - verificar se resultados são mais precisos  
-3. Error Prevention - garantir que NoneType error foi resolvido
-4. Full Analysis Pipeline - testar fluxo completo Policy Engine + Real Vision
+1. Sequential Document Analysis - Upload Doc A, depois Doc B, verificar análises únicas
+2. Cache Key Uniqueness - Testar documentos com tamanhos similares
+3. Real Document Processing - Usar imagens específicas mencionadas
+4. Cross-Contamination Prevention - Garantir que não há contaminação entre resultados
 
 CENÁRIOS DE TESTE ESPECÍFICOS:
 
-Scenario 1: Document Analysis with Real Case Data
-- Criar caso H-1B com basic_info data (firstName, lastName)
-- Upload documento e verificar real vision analysis completa sem erros
-- Verificar logs "✅ Real Vision analysis complete"
+Scenario 1: Sequential Document Analysis
+- Upload Document A (passport) e registrar resultados de análise
+- Upload Document B (driver's license) imediatamente após
+- Verificar que Document B recebe análise única, NÃO resultados do Document A
+- Cada documento deve ter detected_type, extracted_data, completeness scores diferentes
 
-Scenario 2: Document Analysis without Case Data  
-- Testar com caso mínimo ou basic_info ausente
-- Verificar sistema usa "Usuário" padrão e continua análise
+Scenario 2: Cache Key Uniqueness  
+- Testar com documentos de tamanhos similares
+- Testar com documentos do mesmo formato (múltiplos JPEGs)
+- Verificar que cada um recebe análise única baseada no conteúdo real
+- Verificar logs de OCR cache para cache keys únicos sendo gerados
 
-Scenario 3: Precision Verification
-- Comparar resultados antes/depois do fix
-- Verificar completeness scores são maiores (85%+)
-- Verificar detected_type mais preciso
-- Verificar security_features e full_text_extracted populados
+Scenario 3: Real Document Processing
+- Usar imagens previamente carregadas da conversa:
+  - Brazilian ID card: s2ay4b42_IMG_7531.png
+  - Driver's license/passport: kxf1p849_IMG_5082.jpeg
+- Verificar que cada retorna detecção correta de tipo de documento
+- Garantir NENHUMA contaminação cruzada entre resultados
 
 RESULTADOS ESPERADOS APÓS FIX:
-- Real vision analysis completa com sucesso
-- Maior precisão na detecção de tipo de documento
-- Completeness scores 85%+ para documentos válidos
-- extracted_data rico com security_features, full_text_extracted
-- Sem fallback para native analysis devido a erros
+- Cada upload de documento gera cache key única baseada no conteúdo completo
+- Não mais resultados incorretos de uploads anteriores
+- Detecção de tipo de documento deve corresponder ao documento carregado atual
+- Completeness de análise deve refletir qualidade real do documento
+- Resultados OCR específicos para o arquivo carregado
+- Cache collision eliminada completamente
 """
 
 import requests
