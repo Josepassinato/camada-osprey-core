@@ -42,8 +42,8 @@ export const VoiceMic: React.FC<VoiceMicProps> = ({
   // Robust backend URL detection for preview environment
   const isPreview = typeof window !== 'undefined' && window.location.hostname.includes('preview.emergentagent.com');
   const backendUrl = isPreview 
-    ? 'https://vistaprep.preview.emergentagent.com'
-    : (import.meta.env.VITE_BACKEND_URL || 'https://vistaprep.preview.emergentagent.com');
+    ? 'https://visabot-1.preview.emergentagent.com'
+    : (import.meta.env.VITE_BACKEND_URL || 'https://visabot-1.preview.emergentagent.com');
   const wsUrl = `${backendUrl.replace('http', 'ws')}/ws/voice/${sessionId || 'default'}`;
 
   // Initialize WebSocket connection

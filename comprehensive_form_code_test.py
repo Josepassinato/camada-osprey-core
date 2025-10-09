@@ -10,7 +10,7 @@ import time
 import concurrent.futures
 
 # Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://vistaprep.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://visabot-1.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_scenario(scenario_name, steps):
