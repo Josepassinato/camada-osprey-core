@@ -53,16 +53,14 @@ class BaseSpecializedAgent:
         self.use_dra_paula_knowledge = use_dra_paula_knowledge
         self.dra_paula_assistant_id = "asst_kkyn65SQFfkloH4SalOZfwwh"  # Dra. Paula Official Assistant ID
         
-        # Use OpenAI directly instead of EMERGENT_LLM_KEY
+        # Use ONLY user's personal OpenAI API key (NO EMERGENT DEPENDENCIES)
         self.openai_key = os.environ.get('OPENAI_API_KEY')
-        self.emergent_key = os.environ.get('EMERGENT_LLM_KEY')
         
-        if not self.openai_key and not self.emergent_key:
-            raise ValueError("Neither OPENAI_API_KEY nor EMERGENT_LLM_KEY found in environment variables")
+        if not self.openai_key:
+            raise ValueError("OPENAI_API_KEY is required - user's personal OpenAI key only")
         
-        # Prefer OpenAI direct connection
-        self.use_openai_direct = bool(self.openai_key)
-        self.api_key = self.openai_key or self.emergent_key
+        # Use only user's OpenAI key
+        self.api_key = self.openai_key
     
     async def _call_agent(self, prompt: str, session_id: str) -> str:
         """Base method to call the specialized agent with Dra. Paula's knowledge"""
