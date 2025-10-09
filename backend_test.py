@@ -1,33 +1,47 @@
 #!/usr/bin/env python3
 """
-TESTE ESPECÍFICO: Sistema de Tutor Inteligente Melhorado
+TESTE ESPECÍFICO: Sistema Melhorado de Validação de Documentos
 
-FOCO ESPECÍFICO: Testar os novos endpoints do sistema de tutor inteligente melhorado
+FOCO ESPECÍFICO: Testar o sistema melhorado de validação de documentos que detecta especificamente erros de tipo de documento incorreto
 
-ENDPOINTS TESTADOS:
-1. POST /api/tutor/guidance - Orientação contextual inteligente
-2. POST /api/tutor/checklist - Checklist personalizado de documentos  
-3. POST /api/tutor/progress-analysis - Análise de progresso personalizada
-4. POST /api/tutor/common-mistakes - Erros comuns da etapa atual
-5. POST /api/tutor/interview-preparation - Preparação personalizada para entrevista
+CONTEXTO DO PROBLEMA:
+O usuário reportou que enviou uma carteira de identidade no lugar de um passaporte, mas o sistema não especificou claramente que o tipo de documento estava incorreto - apenas mostrou "erro técnico".
 
-DADOS DE TESTE:
-- user_id: "user_123"  
-- visa_type: "h1b"
-- current_step: "document_upload"
+MELHORIAS IMPLEMENTADAS:
+1. Detecção inteligente de tipo de documento baseada em características do arquivo
+2. Mensagens de erro específicas para "TIPO DE DOCUMENTO INCORRETO"
+3. Avaliação melhorada da Dra. Paula com orientações claras
+4. Diferenciação entre documentos brasileiros (CNH, Certidões, etc.)
 
-FLUXO DE TESTE:
-- Testar cada endpoint com dados válidos de entrada
-- Verificar resposta JSON estruturada
-- Testar tratamento de erros
-- Verificar se retorna dados específicos e úteis para usuários brasileiros
-- Confirmar integração com OpenAI (usando a chave já configurada no sistema)
+TESTES ESPECÍFICOS A REALIZAR:
 
-RESULTADO ESPERADO:
-- Todos os endpoints respondendo corretamente
-- Respostas estruturadas em JSON
-- Dados específicos para usuários brasileiros
-- Integração com IA funcionando
+Teste 1: Passaporte vs CNH (Caso reportado)
+- Endpoint: POST /api/documents/analyze-with-ai
+- Simular arquivo pequeno (< 200KB) quando esperado é passport
+- Verificar se detecta como driver_license
+- Validar mensagem: "🚨 TIPO DE DOCUMENTO INCORRETO: Você enviou um(a) Carteira de Motorista/CNH, mas é necessário um(a) Passaporte"
+
+Teste 2: CNH vs Passaporte
+- Simular arquivo grande (> 2.5MB) quando esperado é driver_license
+- Verificar se detecta como passport
+- Validar mensagem específica de erro de tipo
+
+Teste 3: Certidão vs Passaporte
+- Simular arquivo muito grande (> 4MB) quando esperado é passport
+- Verificar se detecta como birth_certificate
+- Validar mensagem de orientação
+
+Teste 4: Validações de Tamanho Específicas
+- Testar limites para cada tipo de documento
+- Verificar mensagens específicas por tipo
+
+CRITÉRIOS DE SUCESSO:
+- Sistema deve detectar tipo incorreto de documento
+- Mensagens devem ser específicas e em português brasileiro
+- Usuário deve entender exatamente qual documento carregar
+- Orientações claras sobre o que fazer para corrigir
+
+Foque nos cenários práticos que usuários brasileiros enfrentam!
 """
 
 import requests
