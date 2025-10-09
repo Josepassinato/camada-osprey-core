@@ -843,8 +843,8 @@ class DocumentValidationAgent(BaseSpecializedAgent):
                 
                 response = openai_response.choices[0].message.content
             else:
-                # Use EmergentLLM fallback
-                response = llm.generate_response(system_prompt, validation_prompt)
+                # This should never happen - only OpenAI is used
+                raise ValueError("Only OpenAI API is supported")
             
             return {
                 "agent": "Dr. Miguel - Validador",
