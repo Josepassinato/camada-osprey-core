@@ -7346,16 +7346,51 @@ MRZ extraction should work properly.
                 f"Exception: {str(e)}"
             )
 
-    def run_all_tests(self):
-        """Run all comprehensive tests"""
-        print("🚀 STARTING COMPREHENSIVE ECOSYSTEM VALIDATION")
+    def run_native_document_validation_tests(self):
+        """Run native document validation tests as requested"""
+        print("🚀 TESTE DO SISTEMA DE VALIDAÇÃO DE DOCUMENTOS NATIVO")
         print("=" * 80)
+        print("Testando o novo sistema que substitui Google Document AI")
         print()
         
-        # NEW PRIORITY: COMPREHENSIVE DOCUMENT VALIDATION SYSTEM (as requested in review)
-        print("📋 NEW PRIORITY: COMPREHENSIVE DOCUMENT VALIDATION SYSTEM")
+        # TESTES ESSENCIAIS conforme solicitado
+        print("📋 EXECUTANDO TESTES ESSENCIAIS")
         print("-" * 60)
-        self.test_comprehensive_document_validation_system()
+        
+        # TESTE 1: Upload básico
+        self.test_basic_upload_endpoint()
+        print()
+        
+        # TESTE 2: Validação de tipo de documento
+        self.test_document_type_validation()
+        print()
+        
+        # TESTE 3: Validação de nome
+        self.test_name_validation()
+        print()
+        
+        # TESTE 4: Validação de documento vencido
+        self.test_document_expiration_validation()
+        print()
+        
+        # TESTE 5: Integração com Policy Engine
+        self.test_policy_engine_integration()
+        print()
+        
+        # TESTE 6: Múltiplos tipos de documento
+        self.test_multiple_document_types()
+        print()
+        
+        # TESTE 7: Múltiplos tipos de visto
+        self.test_multiple_visa_types()
+        print()
+        
+        # TESTE 8: Validação de tamanho
+        self.test_file_size_validation()
+        print()
+        
+        # TESTE 9: Fluxo completo
+        self.test_comprehensive_validation_flow()
         print()
         
         # PRIORITY: DOCUMENT UPLOAD FUNCTIONALITY TESTING (as requested in review)
