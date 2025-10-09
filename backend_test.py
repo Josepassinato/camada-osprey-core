@@ -381,50 +381,80 @@ class DocumentValidationTester:
                 f"❌ Exception: {str(e)}"
             )
 
-    def test_tutor_progress_analysis_endpoint(self):
-        """TESTE 3: Tutor Progress Analysis - Análise de progresso personalizada"""
-        print("📊 TESTE 3: Tutor Progress Analysis - Análise de progresso personalizada")
-        
-        # Test data as specified in the review request
-        test_request = {
-            "visa_type": "h1b"
-        }
+    def test_birth_certificate_vs_passport_case(self):
+        """TESTE 3: Certidão vs Passaporte - Arquivo muito grande enviado como passaporte"""
+        print("📊 TESTE 3: Certidão vs Passaporte - Arquivo muito grande enviado como passaporte")
+        print("Cenário: Usuário enviou certidão de nascimento quando era esperado passaporte")
         
         try:
-            response = self.session.post(
-                f"{API_BASE}/tutor/progress-analysis",
-                json=test_request
+            # Simular arquivo muito grande (> 4MB) que seria típico de certidão
+            # quando o sistema espera passaporte
+            very_large_file_content = self.create_very_large_document_content("CERTIDÃO DE NASCIMENTO\nCartório Civil\nCarlos Eduardo Silva\nData: 15/03/1990")
+            
+            files = {
+                'file': ('certidao_carlos.pdf', very_large_file_content, 'application/pdf')
+            }
+            data = {
+                'document_type': 'passport',  # Sistema espera passaporte
+                'visa_type': 'F-1',
+                'case_id': 'TEST-PASSPORT-CERTIDAO'
+            }
+            
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
             )
             
             if response.status_code == 200:
                 result = response.json()
                 
-                # Check response structure
-                has_success = result.get('success', False)
-                analysis = result.get('analysis', {})
-                has_analysis_content = len(str(analysis)) > 50
+                # Verificar se detectou erro de tipo de documento
+                issues = result.get('issues', [])
+                dra_paula_assessment = result.get('dra_paula_assessment', '')
                 
-                # Check for expected analysis components
-                analysis_str = str(analysis).lower()
-                has_progress_info = any(word in analysis_str for word in ['progresso', 'progress', 'completado', 'completed', 'etapa', 'step'])
-                has_recommendations = any(word in analysis_str for word in ['recomendação', 'recommendation', 'sugestão', 'suggestion', 'próximo', 'next'])
+                # Procurar pela mensagem específica de tipo incorreto
+                type_error_detected = any('TIPO DE DOCUMENTO INCORRETO' in issue for issue in issues)
+                specific_message_found = 'Certidão' in dra_paula_assessment and 'Passaporte' in dra_paula_assessment
+                
+                # Verificar se documento foi rejeitado
+                is_valid = result.get('valid', True)
                 
                 self.log_test(
-                    "Tutor Progress Analysis - Análise Personalizada",
-                    has_success and has_analysis_content,
-                    f"✅ Análise gerada: {len(str(analysis))} caracteres, progresso={has_progress_info}, recomendações={has_recommendations}",
+                    "Certidão vs Passaporte - Detecção de Tipo Incorreto",
+                    type_error_detected and not is_valid,
+                    f"✅ Erro detectado: tipo_incorreto={type_error_detected}, rejeitado={not is_valid}, mensagem_específica={specific_message_found}",
                     {
-                        "success": has_success,
-                        "analysis_length": len(str(analysis)),
-                        "has_progress_info": has_progress_info,
-                        "has_recommendations": has_recommendations,
-                        "visa_type": test_request["visa_type"],
-                        "analysis_preview": str(analysis)[:300] if analysis else ""
+                        "valid": is_valid,
+                        "type_error_detected": type_error_detected,
+                        "specific_message_found": specific_message_found,
+                        "issues_count": len(issues),
+                        "dra_paula_assessment": dra_paula_assessment[:200],
+                        "issues_sample": issues[:2] if issues else []
                     }
                 )
+                
+                # Verificar orientação específica para certidão
+                certificate_guidance = 'Certidão' in dra_paula_assessment or 'nascimento' in dra_paula_assessment.lower()
+                helpful_message = 'documento correto' in dra_paula_assessment.lower() or 'passaporte' in dra_paula_assessment.lower()
+                
+                self.log_test(
+                    "Certidão vs Passaporte - Orientação Específica",
+                    certificate_guidance and helpful_message,
+                    f"✅ Orientação clara: certidão_mencionada={certificate_guidance}, mensagem_útil={helpful_message}",
+                    {
+                        "certificate_guidance": certificate_guidance,
+                        "helpful_message": helpful_message,
+                        "full_assessment": dra_paula_assessment
+                    }
+                )
+                
             else:
                 self.log_test(
-                    "Tutor Progress Analysis - Análise Personalizada",
+                    "Certidão vs Passaporte - Detecção de Tipo Incorreto",
                     False,
                     f"❌ HTTP {response.status_code}",
                     {"status_code": response.status_code, "error": response.text[:200]}
@@ -432,7 +462,7 @@ class DocumentValidationTester:
                 
         except Exception as e:
             self.log_test(
-                "Tutor Progress Analysis - Análise Personalizada",
+                "Certidão vs Passaporte - Detecção de Tipo Incorreto",
                 False,
                 f"❌ Exception: {str(e)}"
             )
