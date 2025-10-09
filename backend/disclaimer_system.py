@@ -262,8 +262,16 @@ PARA CASOS COMPLEXOS, SEMPRE CONSULTE UM ADVOGADO ESPECIALIZADO EM IMIGRAÇÃO.
             # Buscar último aceite
             latest_acceptance = None
             if acceptances:
-                latest_timestamp = max(acc["timestamp"] for acc in acceptances)
-                latest_acceptance = datetime.fromisoformat(latest_timestamp.replace('Z', '+00:00'))
+                # Converter timestamp corretamente se necessário
+                timestamps = []
+                for acc in acceptances:
+                    if isinstance(acc["timestamp"], str):
+                        timestamps.append(datetime.fromisoformat(acc["timestamp"].replace('Z', '+00:00')))
+                    elif isinstance(acc["timestamp"], datetime):
+                        timestamps.append(acc["timestamp"])
+                
+                if timestamps:
+                    latest_acceptance = max(timestamps)
             
             validation = DisclaimerValidation(
                 case_id=case_id,
