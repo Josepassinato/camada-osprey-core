@@ -291,7 +291,6 @@ Entre em contato IMEDIATAMENTE: {contact_number}
 Equipe OSPREY Immigration
             """,
             channel=NotificationChannel.EMAIL,
-            priority=NotificationPriority.URGENT,
             variables=["user_name", "contact_number"]
         )
         
