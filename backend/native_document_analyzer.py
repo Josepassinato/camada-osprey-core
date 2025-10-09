@@ -65,12 +65,11 @@ class NativeDocumentAnalyzer:
             # Converter arquivo para base64 para análise
             file_base64 = base64.b64encode(file_content).decode('utf-8')
             
-            # Análise do documento usando capacidade nativa
+            # Análise do documento usando capacidade nativa REAL do LLM
             analysis_prompt = self._create_analysis_prompt(expected_type, applicant_name)
             
-            # Simular análise nativa (aqui seria feita a chamada real para o modelo)
-            # Por enquanto, vou implementar validações baseadas em padrões conhecidos
-            result = self._perform_native_analysis(file_content, expected_type, applicant_name)
+            # RESTORED: Chamada real para o modelo LLM nativo (não simulação)
+            result = await self._perform_real_llm_analysis(file_content, expected_type, applicant_name, analysis_prompt)
             
             logger.info(f"✅ Análise nativa concluída: {result.document_type} (confiança: {result.confidence})")
             
