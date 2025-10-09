@@ -563,6 +563,16 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
           </Card>
         )}
       </div>
+
+      {/* Disclaimer Modal */}
+      <DisclaimerModal
+        isOpen={showDisclaimer}
+        onClose={() => setShowDisclaimer(false)}
+        onAccept={handleDisclaimerAccept}
+        stage={disclaimerStage}
+        caseId={caseId}
+        loading={loading}
+      />
     </div>
   );
 };
