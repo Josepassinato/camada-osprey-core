@@ -55,11 +55,15 @@
 ##
 ## test_plan:
 ##   current_focus:
-##     - "/api/documents/analyze-with-ai Endpoint (Native LLM Analysis)"
-##     - "Document Upload and Validation Message Display"
-##   stuck_tasks: []
+##     - "Intelligent Forms System - POST /api/intelligent-forms/suggestions"
+##     - "Intelligent Forms System - POST /api/intelligent-forms/auto-fill"
+##     - "Intelligent Forms System - Document Integration"
+##   stuck_tasks:
+##     - "Intelligent Forms System - POST /api/intelligent-forms/suggestions"
+##     - "Intelligent Forms System - POST /api/intelligent-forms/auto-fill"
+##     - "Intelligent Forms System - Document Integration"
 ##   test_all: false
-##   test_priority: "high_first"
+##   test_priority: "stuck_first"
 ##
 ## agent_communication:
 ##     -agent: "main"
