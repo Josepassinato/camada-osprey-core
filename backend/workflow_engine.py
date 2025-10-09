@@ -474,7 +474,7 @@ class WorkflowEngine:
         try:
             # Condições simples baseadas em resultados
             if condition == "recovery_failed":
-                return execution.results.get("attempt_recovery", {}).get("success", True) == False
+                return not execution.results.get("attempt_recovery", {}).get("success", True)
             
             # Adicionar mais condições conforme necessário
             return True
