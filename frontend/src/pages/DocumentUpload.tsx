@@ -546,6 +546,25 @@ const DocumentUpload = () => {
         </div>
       </div>
 
+      {/* Intelligent Tutor */}
+      {currentUser && (
+        <IntelligentTutor
+          userId={currentUser.id}
+          visaType="h1b"
+          currentStep="document_upload"
+          context={{
+            document_type: documentType,
+            files_count: files.length,
+            page: "document_upload"
+          }}
+          onTutorAction={(action, data) => {
+            console.log("Tutor action:", action, data);
+            // Handle tutor actions like navigation, help, etc.
+          }}
+          position="bottom-right"
+        />
+      )}
+
       {/* Disclaimer Modal */}
       <DisclaimerModal
         isOpen={showDisclaimer}
