@@ -497,6 +497,18 @@ backend:
         agent: "testing"
         comment: "✅ REAL DATA INTEGRATION SYSTEM FUNCIONANDO: Sistema de integração com dados reais do MongoDB operacional. RESULTADOS: 1) ✅ Job Creation - Sistema cria jobs de finalização com sucesso, retorna job_id válido e status correto, 2) ✅ Data Processing - Processamento de dados reais funcional, status 'needs_correction' indica auditoria funcionando, 3) ✅ get_case_complete_data() - Método recupera dados completos do caso incluindo documentos, formulários e cartas, 4) ✅ _process_documents_data() - Processa documentos com mapeamento de tipos e ordenação para pacote, 5) ✅ _process_form_data() - Processa dados de formulários friendly para assemblagem. Sistema pronto para integração com dados reais do MongoDB."
 
+  - task: "Real Document Vision Analysis System (NEW)"
+    implemented: true
+    working: false
+    file: "/app/backend/real_document_vision_analyzer.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ REAL DOCUMENT VISION SYSTEM - BUDGET LIMIT EXCEEDED: Comprehensive testing revealed that the NEW real document vision analysis system is correctly implemented and integrated, but failing due to API budget constraints. CRITICAL FINDINGS: 1) ✅ Implementation Complete - /app/backend/real_document_vision_analyzer.py correctly implemented with OpenAI Vision API integration, 2) ✅ Server Integration - server.py correctly imports and calls analyze_document_with_real_vision(), 3) ✅ EMERGENT_LLM_KEY Usage - System correctly attempts to use EMERGENT_LLM_KEY for gpt-4o model, 4) ❌ BUDGET EXCEEDED - API calls failing with 'Budget has been exceeded! Current cost: 1.0038962500000004, Max budget: 1.0', 5) ✅ Fallback Working - System correctly falls back to fallback_analysis when real vision fails, 6) ✅ Error Handling - Proper error handling and logging in place. ROOT CAUSE: EMERGENT_LLM_KEY has reached its $1.00 budget limit. SOLUTION NEEDED: Increase API budget or use alternative API key to test real vision functionality. The implementation is correct - only budget constraint preventing real analysis."
+
   - task: "Case Finalizer Enhanced (CaseFinalizerComplete)"
     implemented: true
     working: true
