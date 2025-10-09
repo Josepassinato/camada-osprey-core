@@ -2674,112 +2674,188 @@ Responda apenas com o JSON estruturado, sem explicações adicionais.
         logger.error(f"Error extracting facts: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error extracting facts: {str(e)}")
 
-@api_router.post("/auto-application/generate-forms")
-async def generate_official_forms(request: dict):
-    """Generate official USCIS forms from simplified responses using AI"""
+@api_router.post("/ai-review/validate-completeness")
+async def validate_form_completeness_endpoint(request: dict):
+    """Validar completude do formulário amigável com Dra. Ana"""
+    try:
+        from ai_completeness_validator import validate_form_completeness
+        
+        case_id = request.get("case_id")
+        form_responses = request.get("form_responses", {})
+        visa_type = request.get("visa_type", "H-1B")
+        
+        if not case_id or not form_responses:
+            raise HTTPException(status_code=400, detail="case_id e form_responses são obrigatórios")
+        
+        # Buscar dados do caso para contexto
+        case_data = await db.auto_cases.find_one({"case_id": case_id})
+        
+        logger.info(f"🔍 Validando completude do formulário para caso {case_id} - {visa_type}")
+        
+        # Executar validação com Dra. Ana
+        validation_result = await validate_form_completeness(
+            form_responses=form_responses,
+            visa_type=visa_type,
+            case_data=case_data
+        )
+        
+        # Salvar resultado da validação no caso
+        await db.auto_cases.update_one(
+            {"case_id": case_id},
+            {
+                "$set": {
+                    "completeness_validation": validation_result,
+                    "validation_timestamp": datetime.now(timezone.utc).isoformat()
+                }
+            }
+        )
+        
+        return {
+            "success": True,
+            "case_id": case_id,
+            "validation_result": validation_result,
+            "agent": "Dra. Ana - Validadora de Completude",
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Erro na validação de completude: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "validation_result": {
+                "is_complete": False,
+                "completeness_score": 0.0,
+                "ready_for_conversion": False,
+                "critical_issues": [{"message": f"Erro na validação: {str(e)}"}],
+                "dra_ana_assessment": "Erro na análise automática - revisão manual necessária"
+            }
+        }
+
+@api_router.post("/ai-review/convert-to-official")
+async def convert_friendly_to_official_forms(request: dict):
+    """Converter formulário amigável para oficial após validação"""
     try:
         case_id = request.get("case_id")
         form_responses = request.get("form_responses", {})
-        form_code = request.get("form_code")
+        visa_type = request.get("visa_type", "H-1B")
+        force_conversion = request.get("force_conversion", False)
         
         if not case_id or not form_responses:
-            raise HTTPException(status_code=400, detail="Case ID and form responses are required")
+            raise HTTPException(status_code=400, detail="case_id e form_responses são obrigatórios")
         
-        # Get visa specifications for context
-        visa_specs = get_visa_specifications(form_code) if form_code else {}
+        logger.info(f"🔄 Iniciando conversão PT→EN para caso {case_id} - {visa_type}")
         
-        # Create AI prompt for form conversion
-        conversion_prompt = f"""
-Você é um especialista em formulários do USCIS. Converta as respostas simplificadas em português para o formato oficial do formulário {form_code}.
-
-FORMULÁRIO: {form_code}
-CATEGORIA: {visa_specs.get('category', 'Não especificada')}
-TÍTULO: {visa_specs.get('title', 'Não especificado')}
-
-RESPOSTAS DO USUÁRIO (em português):
-{json.dumps(form_responses, indent=2, ensure_ascii=False)}
-
-INSTRUÇÕES:
-1. Converta todas as respostas para inglês profissional
-2. Formate conforme os padrões do USCIS para {form_code}
-3. Complete campos obrigatórios baseados nas informações fornecidas
-4. Mantenha consistência de datas (MM/DD/YYYY)
-5. Use formatação oficial de nomes e endereços
-6. Adicione códigos de país padrão (BR para Brasil, US para EUA)
-7. Converta valores monetários para USD se necessário
-
-FORMATO DE SAÍDA:
-Retorne um JSON estruturado com os campos do formulário oficial {form_code}, usando os nomes de campos exatos do USCIS.
-
-Para campos não preenchidos pelo usuário, use:
-- "N/A" para não aplicável
-- "None" para informações não fornecidas
-- Mantenha campos obrigatórios em branco se não houver informação
-
-Responda apenas com o JSON estruturado, sem explicações adicionais.
-"""
-
-        # Call OpenAI for form conversion
-        response = openai.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {
-                    "role": "system", 
-                    "content": "Você é um especialista em formulários do USCIS. Converta respostas em português para formato oficial em inglês com precisão total."
-                },
-                {"role": "user", "content": conversion_prompt}
-            ],
-            temperature=0.1,
-            max_tokens=3000
+        # Verificar completude primeiro (se não for forçado)
+        if not force_conversion:
+            from ai_completeness_validator import validate_form_completeness
+            
+            case_data = await db.auto_cases.find_one({"case_id": case_id})
+            validation_result = await validate_form_completeness(
+                form_responses=form_responses,
+                visa_type=visa_type,
+                case_data=case_data
+            )
+            
+            if not validation_result.get("ready_for_conversion"):
+                return {
+                    "success": False,
+                    "error": "Formulário não está completo para conversão",
+                    "validation_result": validation_result,
+                    "message": "Complete os campos obrigatórios antes da conversão"
+                }
+        
+        # Executar conversão usando sistema inteligente
+        converted_data = await convert_to_official_format(form_responses, visa_type)
+        
+        # Salvar dados convertidos
+        await db.auto_cases.update_one(
+            {"case_id": case_id},
+            {
+                "$set": {
+                    "official_form_data": converted_data,
+                    "form_generated_at": datetime.now(timezone.utc).isoformat(),
+                    "status": "forms_generated",
+                    "conversion_method": "ai_enhanced"
+                }
+            }
         )
         
-        # Parse AI response
-        ai_response = response.choices[0].message.content.strip()
-        
-        # Try to extract JSON from the response
-        try:
-            # Remove any markdown formatting
-            if "```json" in ai_response:
-                ai_response = ai_response.split("```json")[1].split("```")[0].strip()
-            elif "```" in ai_response:
-                ai_response = ai_response.split("```")[1].split("```")[0].strip()
-            
-            official_form_data = json.loads(ai_response)
-        except json.JSONDecodeError:
-            # Fallback: create basic structure
-            official_form_data = {
-                "form_number": form_code,
-                "generated_date": datetime.utcnow().isoformat(),
-                "user_responses": form_responses,
-                "conversion_status": "partial",
-                "notes": "Manual review recommended"
+        return {
+            "success": True,
+            "message": "Formulário convertido com sucesso",
+            "case_id": case_id,
+            "converted_data": converted_data,
+            "conversion_stats": {
+                "fields_converted": len(str(converted_data).split(',')),
+                "conversion_method": "ai_enhanced"
             }
+        }
         
-        # Update case with official form data
-        if case_id:
-            await db.auto_cases.update_one(
-                {"case_id": case_id},
-                {
-                    "$set": {
-                        "official_form_data": official_form_data,
-                        "status": "form_filled",
-                        "updated_at": datetime.utcnow()
-                    }
+    except Exception as e:
+        logger.error(f"❌ Erro na conversão: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Erro na conversão do formulário"
+        }
+
+@api_router.post("/auto-application/generate-forms")
+async def generate_official_forms(request: dict):
+    """Generate official USCIS forms from simplified responses (Legacy)"""
+    try:
+        case_id = request.get("case_id")
+        form_responses = request.get("form_responses", {})
+        form_code = request.get("form_code", "H-1B")
+        
+        if not case_id or not form_responses:
+            raise HTTPException(status_code=400, detail="Missing required data")
+        
+        # Get case data
+        case = await db.auto_cases.find_one({"case_id": case_id})
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        logger.info(f"🔄 Generating official forms for case {case_id}")
+        
+        # Process each section
+        official_form_data = {}
+        
+        for section_id, section_data in form_responses.items():
+            logger.info(f"Processing section: {section_id}")
+            
+            # Convert to official format based on form type
+            if form_code == "H-1B":
+                converted_section = await convert_h1b_section(section_id, section_data)
+            elif form_code == "B-1/B-2":
+                converted_section = await convert_b1b2_section(section_id, section_data)
+            else:
+                # Generic conversion
+                converted_section = section_data
+            
+            official_form_data[section_id] = converted_section
+        
+        # Save official form data to case
+        await db.auto_cases.update_one(
+            {"case_id": case_id},
+            {
+                "$set": {
+                    "official_form_data": official_form_data,
+                    "form_generated_at": datetime.now(timezone.utc).isoformat(),
+                    "status": "forms_generated"
                 }
-            )
+            }
+        )
         
         return {
+            "success": True,
             "message": "Official forms generated successfully",
-            "form_code": form_code,
-            "official_form_data": official_form_data,
-            "fields_converted": len(official_form_data.keys())
+            "form_data": official_form_data
         }
-    
-    except HTTPException:
-        raise
+        
     except Exception as e:
-        logger.error(f"Error generating forms: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error generating forms: {str(e)}")
+        logger.error(f"Error generating forms: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/auto-application/validate-forms")
 async def validate_forms(request: dict):
