@@ -56,7 +56,7 @@ const IntelligentTutor: React.FC<IntelligentTutorProps> = ({
     setLoading(true);
     setError('');
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('osprey_token');
       const response = await fetch(`${backendUrl}/api/tutor/guidance`, {
         method: 'POST',
         headers: {
@@ -90,7 +90,7 @@ const IntelligentTutor: React.FC<IntelligentTutorProps> = ({
     setLoading(true);
     setError('');
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('osprey_token');
       const response = await fetch(`${backendUrl}/api/tutor/checklist`, {
         method: 'POST',
         headers: {
@@ -121,7 +121,7 @@ const IntelligentTutor: React.FC<IntelligentTutorProps> = ({
     setLoading(true);
     setError('');
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('osprey_token');
       const response = await fetch(`${backendUrl}/api/tutor/progress-analysis`, {
         method: 'POST',
         headers: {
@@ -152,7 +152,7 @@ const IntelligentTutor: React.FC<IntelligentTutorProps> = ({
     setLoading(true);
     setError('');
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('osprey_token');
       const response = await fetch(`${backendUrl}/api/tutor/common-mistakes`, {
         method: 'POST',
         headers: {
@@ -184,7 +184,7 @@ const IntelligentTutor: React.FC<IntelligentTutorProps> = ({
     setLoading(true);
     setError('');
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('osprey_token');
       const response = await fetch(`${backendUrl}/api/tutor/interview-preparation`, {
         method: 'POST',
         headers: {
