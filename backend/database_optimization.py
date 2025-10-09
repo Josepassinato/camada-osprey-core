@@ -199,7 +199,11 @@ class DatabaseOptimizationSystem:
                 IndexModel([("template_id", ASCENDING)])
             ]
             
-            await self.db.notifications.create_indexes(notification_indexes)
+            try:
+                await self.db.notifications.create_indexes(notification_indexes)
+                logger.info("✅ Notifications indexes created")  
+            except Exception as e:
+                logger.warning(f"⚠️ Notifications indexes error (may already exist): {e}")
             
             # Índices para analytics
             analytics_indexes = [
