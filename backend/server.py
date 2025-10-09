@@ -6228,7 +6228,8 @@ async def analyze_document_with_real_ai(
         
         # FASE 2: GOOGLE DOCUMENT AI + LOGICAL VALIDATIONS (NO OpenAI!)
         try:
-            logger.info(f"🔬 Iniciando validação com Google Document AI + lógica para {document_type}")
+            logger.warning(f"🔬🔬🔬 STARTING GOOGLE AI VALIDATION for {document_type}")
+            logger.warning(f"Policy Engine result before Google AI: issues={len(analysis_result.get('issues', []))}")
             
             # Import Google Document AI
             from pipeline.google_document_ai import GoogleDocumentAI
