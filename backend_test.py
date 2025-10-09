@@ -756,8 +756,8 @@ class Phase4BProductionOptimizationTester:
             )
             return None
     def test_rate_limiting_functionality(self):
-        """TESTE 6: Casos de Teste Específicos da Phase 4A Enhanced"""
-        print("🎯 TESTE 6: Casos de Teste Específicos - Phase 4A Enhanced")
+        """TESTE 6: Rate Limiting - Middleware de Segurança"""
+        print("🚦 TESTE 6: Rate Limiting - Middleware de Segurança")
         
         test_cases = [
             {
