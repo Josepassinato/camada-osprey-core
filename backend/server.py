@@ -7523,6 +7523,9 @@ if ANALYTICS_AVAILABLE:
 
 app.include_router(api_router)
 
+# Add Security Middleware (Phase 4B)
+app.add_middleware(SecurityMiddleware, security_system=security_system)
+
 # Pipeline control endpoints (if available)
 if PIPELINE_AVAILABLE:
     @api_router.get("/pipeline/status")
