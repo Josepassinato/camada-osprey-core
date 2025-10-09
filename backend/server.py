@@ -522,6 +522,26 @@ class UserProgress(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
+# New Enhanced Tutor Models
+class TutorGuidanceRequest(BaseModel):
+    current_step: str
+    visa_type: str
+    personality: Optional[TutorPersonality] = TutorPersonality.FRIENDLY
+    action: Optional[TutorAction] = TutorAction.NEXT_STEPS
+
+class TutorChecklistRequest(BaseModel):
+    visa_type: str
+
+class TutorProgressAnalysisRequest(BaseModel):
+    visa_type: str
+
+class TutorMistakesRequest(BaseModel):
+    current_step: str
+    visa_type: str
+
+class TutorInterviewPrepRequest(BaseModel):
+    visa_type: str
+
 # Existing models (keeping them)
 class StatusCheck(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
