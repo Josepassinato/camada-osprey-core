@@ -394,8 +394,51 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
           </Card>
         )}
 
-        {/* Step 3: Consent */}
-        {currentStep === 3 && job?.status === 'ready' && (
+        {/* Step 3: Preview & Aprovação */}
+        {currentStep === 3 && job?.status === 'completed' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Eye className="h-5 w-5 text-[#FF6B35]" />
+                  <span>Preview e Aprovação do Pacote</span>
+                </CardTitle>
+                <CardDescription>
+                  Revise o pacote final antes de prosseguir com o consentimento e download
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {!showPreview ? (
+                  <div className="text-center py-8">
+                    <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Pacote Finalizado</h3>
+                    <p className="text-gray-600 mb-4">
+                      Seu pacote foi processado e está pronto para revisão final.
+                    </p>
+                    <Button
+                      onClick={() => setShowPreview(true)}
+                      className="bg-[#FF6B35] hover:bg-[#FF6B35]/90"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      Iniciar Preview Interativo
+                    </Button>
+                  </div>
+                ) : (
+                  <PacketPreview
+                    caseId={caseId || ''}
+                    jobId={job.job_id}
+                    onApprove={handlePacketApproval}
+                    onReject={handlePacketRejection}
+                    onDownload={() => downloadFile(job?.links?.master_packet || '', 'preview.pdf')}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Step 4: Consent */}
+        {currentStep === 4 && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
