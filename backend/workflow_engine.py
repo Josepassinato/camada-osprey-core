@@ -676,7 +676,7 @@ class WorkflowEngine:
         if execution:
             execution.status = WorkflowStatus.CANCELLED
             execution.completed_at = datetime.now(timezone.utc)
-            if self.db:
+            if self.db is not None:
                 await self._save_execution_to_db(execution)
             return True
         return False
