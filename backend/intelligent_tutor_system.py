@@ -317,33 +317,229 @@ class IntelligentTutorSystem:
         except Exception as e:
             logger.error(f"Erro ao gerar preparação de entrevista: {str(e)}")
             return await self._get_fallback_interview_prep(visa_type)
-        
-        # Templates de mensagens por personalidade
-        self.personality_templates = {
-            TutorPersonality.FRIENDLY: {
-                "greeting": "Olá! 😊 Estou aqui para ajudar você com seu processo de imigração.",
-                "encouragement": "Você está indo muito bem! Continue assim! 🌟",
-                "error": "Ops! Vamos corrigir isso juntos. Não se preocupe, é normal! 💪",
-                "completion": "Parabéns! Você concluiu mais uma etapa! 🎉"
-            },
-            TutorPersonality.PROFESSIONAL: {
-                "greeting": "Bem-vindo ao sistema de orientação para imigração.",
-                "encouragement": "Progresso satisfatório. Continue seguindo as instruções.",
-                "error": "Identificamos um erro. Por favor, revise as informações abaixo:",
-                "completion": "Etapa concluída com sucesso. Prossiga para a próxima fase."
-            },
-            TutorPersonality.MENTOR: {
-                "greeting": "Como seu mentor em imigração, vou guiá-lo por todo o processo.",
-                "encouragement": "Excelente trabalho! Sua dedicação fará a diferença no resultado.",
-                "error": "Vamos ver isso como uma oportunidade de aprendizado. Vou explicar o que precisa ser ajustado.",
-                "completion": "Mais uma conquista importante! Você está se tornando um expert no processo."
-            },
-            TutorPersonality.PATIENT: {
-                "greeting": "Não tenha pressa. Vamos fazer isso passo a passo, no seu ritmo.",
-                "encouragement": "Cada pequeno progresso conta. Você está no caminho certo.",
-                "error": "Tudo bem, vamos revisar isso com calma. Não há problema em errar.",
-                "completion": "Perfeito! Vamos celebrar essa conquista antes de continuar."
+    
+    async def _get_user_context(self, user_id: str, visa_type: str) -> Dict[str, Any]:
+        """Coleta contexto completo do usuário"""
+        try:
+            # Buscar dados do usuário
+            user = await self.db.users.find_one({"id": user_id}) or {}
+            
+            # Buscar documentos do usuário
+            documents = await self.db.documents.find(
+                {"user_id": user_id}, 
+                {"_id": 0, "content_base64": 0}
+            ).to_list(100)
+            
+            # Buscar casos do usuário
+            cases = await self.db.auto_cases.find(
+                {"user_id": user_id}, 
+                {"_id": 0}
+            ).to_list(100)
+            
+            # Buscar interações anteriores
+            previous_interactions = await self.db.tutor_interactions.find(
+                {"user_id": user_id}, 
+                {"_id": 0}
+            ).sort("created_at", -1).limit(5).to_list(5)
+            
+            return {
+                "user_profile": {
+                    "name": f"{user.get('first_name', '')} {user.get('last_name', '')}".strip(),
+                    "country_of_birth": user.get('country_of_birth'),
+                    "current_country": user.get('current_country')
+                },
+                "documents": documents,
+                "cases": cases,
+                "previous_interactions": previous_interactions,
+                "visa_type": visa_type
             }
+            
+        except Exception as e:
+            logger.error(f"Erro ao coletar contexto do usuário: {str(e)}")
+            return {}
+    
+    def _create_guidance_prompt(
+        self, 
+        context: Dict[str, Any], 
+        current_step: str, 
+        visa_type: str, 
+        personality: TutorPersonality,
+        action: TutorAction
+    ) -> str:
+        """Cria prompt personalizado baseado no contexto"""
+        
+        personality_traits = {
+            TutorPersonality.FRIENDLY: "Seja amigável, encorajador e use linguagem calorosa. Use emojis quando apropriado.",
+            TutorPersonality.PROFESSIONAL: "Seja profissional, direto e conciso. Use linguagem formal.",
+            TutorPersonality.DETAILED: "Forneça explicações detalhadas e passo-a-passo. Seja minucioso.",
+            TutorPersonality.SIMPLIFIED: "Use linguagem simples e fácil de entender. Evite jargões técnicos."
+        }
+        
+        action_instructions = {
+            TutorAction.DOCUMENT_GUIDANCE: "Foque em orientações sobre documentos necessários, como prepará-los e organizá-los.",
+            TutorAction.FORM_ASSISTANCE: "Ajude com preenchimento de formulários e campos específicos.",
+            TutorAction.TIMELINE_ESTIMATION: "Forneça estimativas realistas de tempo para cada etapa do processo.",
+            TutorAction.REQUIREMENT_CHECK: "Verifique se o usuário atende aos requisitos necessários.",
+            TutorAction.NEXT_STEPS: "Indique claramente quais são os próximos passos a seguir.",
+            TutorAction.TROUBLESHOOTING: "Ajude a resolver problemas ou dificuldades específicas.",
+            TutorAction.DOCUMENT_CHECKLIST: "Forneça uma lista organizada de documentos com status.",
+            TutorAction.PROGRESS_ANALYSIS: "Analise o progresso e forneça insights sobre melhorias.",
+            TutorAction.COMMON_MISTAKES: "Identifique e previna erros comuns nesta etapa.",
+            TutorAction.INTERVIEW_PREP: "Prepare o usuário para a entrevista consular."
+        }
+        
+        return f"""
+        Você é um tutor especialista em imigração americana, especialmente experiente em ajudar brasileiros.
+        Você entende as dificuldades específicas, documentos brasileiros, e os consulados americanos no Brasil.
+        
+        PERSONALIDADE: {personality_traits[personality]}
+        FOCO DA ORIENTAÇÃO: {action_instructions[action]}
+        
+        CONTEXTO DO USUÁRIO:
+        - Nome: {context.get('user_profile', {}).get('name', 'Usuário')}
+        - Tipo de visto: {visa_type}
+        - Etapa atual: {current_step}
+        - Documentos carregados: {len(context.get('documents', []))}
+        - Casos ativos: {len(context.get('cases', []))}
+        
+        INSTRUÇÕES ESPECÍFICAS:
+        1. Forneça orientação específica para a etapa atual ({current_step})
+        2. Seja extremamente prático e acionável
+        3. Mencione documentos brasileiros específicos e onde obtê-los
+        4. Inclua prazos reais e custos aproximados quando relevante
+        5. Antecipe problemas comuns que brasileiros enfrentam
+        6. Sempre termine com próximos passos claros e priorizados
+        7. Use linguagem que um leigo entenderia facilmente
+        8. Seja encorajador mas realista sobre desafios
+        
+        Responda em português brasileiro de forma clara, útil e específica para brasileiros.
+        """
+    
+    async def _generate_ai_response(self, prompt: str) -> str:
+        """Gera resposta usando OpenAI"""
+        try:
+            response = openai.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Você é um tutor especialista em imigração americana para brasileiros. Forneça orientações claras, práticas e específicas para a realidade brasileira."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                max_tokens=1200,
+                temperature=0.7
+            )
+            
+            return response.choices[0].message.content.strip()
+            
+        except Exception as e:
+            logger.error(f"Erro ao gerar resposta da IA: {str(e)}")
+            raise e
+    
+    async def _save_interaction(self, user_id: str, current_step: str, response: str, action: TutorAction):
+        """Salva interação para aprendizado futuro"""
+        try:
+            interaction = {
+                "id": str(uuid.uuid4()),
+                "user_id": user_id,
+                "current_step": current_step,
+                "action": action.value,
+                "response": response,
+                "created_at": datetime.now(timezone.utc)
+            }
+            
+            await self.db.tutor_interactions.insert_one(interaction)
+            
+        except Exception as e:
+            logger.error(f"Erro ao salvar interação: {str(e)}")
+    
+    async def _get_fallback_guidance(self, current_step: str, visa_type: str) -> Dict[str, Any]:
+        """Orientação de fallback quando a IA não está disponível"""
+        
+        fallback_guidance = {
+            "document_upload": f"📄 Nesta etapa, você precisa carregar os documentos necessários para o visto {visa_type}. Certifique-se de que todos os documentos estejam em boa qualidade, legíveis e dentro da validade. Escaneie em alta resolução (300 DPI) e em formato PDF.",
+            "form_filling": f"📝 Agora é hora de preencher o formulário oficial para o visto {visa_type}. Tenha em mãos todos os seus documentos e responda todas as perguntas com precisão e honestidade. Não deixe campos em branco.",
+            "review": f"🔍 Revise cuidadosamente todas as informações antes de finalizar. Verifique se todos os documentos estão corretos, completos e correspondem às informações do formulário.",
+            "payment": f"💳 Chegou a hora do pagamento das taxas consulares. Acesse o site oficial do consulado americano, tenha seu cartão de crédito internacional em mãos e guarde o comprovante de pagamento.",
+            "interview_prep": f"🗣️ Prepare-se para a entrevista consular. Revise suas respostas do formulário, pratique com perguntas comuns em inglês e separe todos os documentos originais.",
+            "default": f"ℹ️ Continue seguindo as etapas do processo para o visto {visa_type}. Mantenha todos os documentos organizados e acompanhe os prazos. Em caso de dúvidas, consulte nossa documentação."
+        }
+        
+        guidance = fallback_guidance.get(current_step, fallback_guidance["default"])
+        
+        return {
+            "guidance": guidance,
+            "personality": TutorPersonality.FRIENDLY,
+            "action": TutorAction.NEXT_STEPS,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "fallback": True
+        }
+
+    async def _get_fallback_checklist(self, visa_type: str) -> Dict[str, Any]:
+        """Checklist básico quando IA não está disponível"""
+        basic_docs = {
+            "h1b": ["passport", "photos", "education_diploma", "employment_letter"],
+            "f1": ["passport", "photos", "education_transcript", "bank_statement"],
+            "b1b2": ["passport", "photos", "bank_statement", "employment_letter"]
+        }
+        
+        docs = basic_docs.get(visa_type, ["passport", "photos"])
+        
+        return {
+            "checklist": {
+                "required_documents": [{"document": doc, "status": "pending"} for doc in docs],
+                "completion_percentage": 0
+            },
+            "fallback": True
+        }
+
+    async def _get_fallback_progress_analysis(self, visa_type: str) -> Dict[str, Any]:
+        """Análise básica de progresso quando IA não está disponível"""
+        return {
+            "analysis": {
+                "progress_percentage": 25,
+                "current_phase": "Início do Processo",
+                "next_milestones": ["Carregar documentos", "Preencher formulários"],
+                "encouragement": f"Você está no caminho certo para o visto {visa_type}!"
+            },
+            "fallback": True
+        }
+
+    async def _get_fallback_mistakes_analysis(self, current_step: str, visa_type: str) -> Dict[str, Any]:
+        """Análise básica de erros quando IA não está disponível"""
+        return {
+            "mistakes_analysis": {
+                "step": current_step,
+                "common_mistakes": [
+                    {"mistake": "Não verificar todos os documentos", "severity": "high"}
+                ],
+                "prevention_tips": ["Revisar tudo com cuidado"]
+            },
+            "fallback": True
+        }
+
+    async def _get_fallback_interview_prep(self, visa_type: str) -> Dict[str, Any]:
+        """Preparação básica de entrevista quando IA não está disponível"""
+        return {
+            "interview_prep": {
+                "day_of_interview": {
+                    "what_to_bring": ["Passaporte", "Todos os documentos originais"],
+                    "what_to_wear": "Roupa formal e conservadora",
+                    "arrival_time": "Chegue 15 minutos antes"
+                },
+                "practice_questions": [
+                    {
+                        "question": "What is the purpose of your trip?",
+                        "portuguese_translation": "Qual é o propósito da sua viagem?",
+                        "difficulty": "easy"
+                    }
+                ]
+            },
+            "fallback": True
         }
 
     async def get_user_progress(self, user_id: str, visa_type: str) -> UserProgress:
