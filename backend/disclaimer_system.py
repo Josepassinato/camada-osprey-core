@@ -84,29 +84,29 @@ IMPORTANTE: Este sistema é informativo. Para orientação específica, consulte
             """,
             
             DisclaimerStage.FORMS: """
-ACEITE DE RESPONSABILIDADE - FORMULÁRIOS USCIS
+CONFIRMAÇÃO DE RESPONSABILIDADE - ETAPA DE FORMULÁRIOS
 
-Ao prosseguir com o preenchimento de formulários, você confirma que:
+Ao concluir o preenchimento dos formulários, você declara que:
 
-1. VERACIDADE DAS INFORMAÇÕES
-   • Todas as informações fornecidas são VERDADEIRAS e COMPLETAS
-   • Não omitiu nenhuma informação relevante solicitada
-   • Entende que informações falsas podem resultar em consequências legais
+1. ORIGEM DAS INFORMAÇÕES
+   • TODAS as informações dos formulários foram fornecidas por VOCÊ
+   • São VERDADEIRAS, COMPLETAS e de sua total responsabilidade
+   • Você revisou cada campo antes de confirmar as respostas
+   • Não omitiu informações importantes ou relevantes
 
-2. FORMULÁRIOS OFICIAIS
-   • Os formulários gerados seguem padrões públicos do USCIS
-   • Você deve revisar TODA informação antes de submeter ao USCIS
-   • Este sistema facilita o preenchimento mas NÃO garante aprovação
+2. CONFIRMAÇÃO DE DADOS
+   • Verificou a precisão de datas, nomes e informações pessoais
+   • Confirma que os dados correspondem aos seus documentos oficiais
+   • Assume responsabilidade por qualquer erro ou inconsistência
+   • Entende que informações falsas podem comprometer o processo
 
-3. RESPONSABILIDADE FINAL
-   • Você é RESPONSÁVEL por revisar e validar todos os dados
-   • Deve verificar requisitos atuais no site oficial do USCIS
-   • Recomendamos revisão por advogado especializado
+3. APROVAÇÃO DA ETAPA
+   • Aprova os formulários como CORRETOS e COMPLETOS
+   • Confirma que está satisfeito com as informações fornecidas
+   • Autoriza a conversão para o formato oficial USCIS
+   • Entende que ajustes podem ser necessários posteriormente
 
-4. LIMITAÇÕES DO SISTEMA
-   • Este é um sistema de apoio informativo
-   • Não substitui consultoria jurídica profissional
-   • Para casos complexos, consulte sempre um advogado de imigração
+IMPORTANTE: Revise cuidadosamente antes de submeter ao USCIS. Consulte um advogado para casos complexos.
             """,
             
             DisclaimerStage.COVER_LETTER: """
