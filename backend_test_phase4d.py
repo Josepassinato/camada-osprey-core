@@ -313,7 +313,11 @@ class Phase4DWorkflowAutomationTester:
                 # Check for different channels
                 channels = set()
                 for template in templates:
-                    channels.update(template.get('channels', []))
+                    # Handle both 'channels' list and 'channel' string formats
+                    if 'channels' in template:
+                        channels.update(template.get('channels', []))
+                    elif 'channel' in template:
+                        channels.add(template.get('channel'))
                 
                 has_multiple_channels = len(channels) > 1
                 
