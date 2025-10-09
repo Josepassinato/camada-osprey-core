@@ -6311,6 +6311,21 @@ async def analyze_document_with_real_ai(
                     if doc_name:
                         break
             
+            # ENHANCED: Try to extract name from text using regex (for CNH/Brazilian documents)
+            if not doc_name and extracted_text:
+                import re
+                # Look for names after "NOME" keyword (common in Brazilian documents)
+                name_patterns = [
+                    r'NOME[:\s]+([A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ\s]+)',
+                    r'Nome[:\s]+([A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ][a-záàâãéèêíïóôõöúçñ\s]+)',
+                ]
+                for pattern in name_patterns:
+                    match = re.search(pattern, extracted_text)
+                    if match:
+                        doc_name = match.group(1).strip()
+                        logger.info(f"🔍 Name extracted from text: {doc_name}")
+                        break
+            
             if doc_name and applicant_name and applicant_name != "Carlos Eduardo Silva":
                 # Normalize names for comparison (remove accents, lowercase)
                 def normalize_name(name):
