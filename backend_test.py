@@ -1,47 +1,41 @@
 #!/usr/bin/env python3
 """
-TESTE ESPECÍFICO: Document Analysis Functionality Testing
+TESTE CRÍTICO: Document Analysis System After Bug Fix
 
-FOCO: Testar a funcionalidade de análise de documentos reportada como quebrada pelo usuário
+CONTEXTO DO BUG CORRIGIDO:
+- Linha 8175 em server.py: case_doc.get('form_data', {}).get('basic_info') causava NoneType error
+- Real vision analysis falhava e sistema usava fallback menos preciso
+- Fix adicionou null checks e error handling apropriado
 
-CONTEXTO DO PROBLEMA:
-Usuário reportou: "A análise de documentos depois do upload não estão funcionando"
-Sistema configurado com análise "nativa" precisa ser testado
+FOCO DOS TESTES:
+1. Real Vision Analysis Path - verificar que funciona sem erros
+2. Precision Improvement - verificar se resultados são mais precisos  
+3. Error Prevention - garantir que NoneType error foi resolvido
+4. Full Analysis Pipeline - testar fluxo completo Policy Engine + Real Vision
 
-ENDPOINT PRINCIPAL A TESTAR:
-POST /api/documents/analyze-with-ai - Endpoint crítico de análise de documentos
+CENÁRIOS DE TESTE ESPECÍFICOS:
 
-CENÁRIOS DE TESTE:
+Scenario 1: Document Analysis with Real Case Data
+- Criar caso H-1B com basic_info data (firstName, lastName)
+- Upload documento e verificar real vision analysis completa sem erros
+- Verificar logs "✅ Real Vision analysis complete"
 
-1. Upload and Analysis Test:
-   - Upload de documento de teste (PDF/image)
-   - document_type: "passport"
-   - visa_type: "H-1B" 
-   - case_id válido
-   - Verificar estrutura de resposta
+Scenario 2: Document Analysis without Case Data  
+- Testar com caso mínimo ou basic_info ausente
+- Verificar sistema usa "Usuário" padrão e continua análise
 
-2. Response Structure Validation:
-   - Campos obrigatórios: valid, legible, completeness, issues, extracted_data, dra_paula_assessment
-   - Validação do Dr. Miguel funcionando
-   - Native document analyzer operacional
+Scenario 3: Precision Verification
+- Comparar resultados antes/depois do fix
+- Verificar completeness scores são maiores (85%+)
+- Verificar detected_type mais preciso
+- Verificar security_features e full_text_extracted populados
 
-3. Error Handling:
-   - Tipos de arquivo inválidos
-   - Arquivos muito grandes/pequenos
-   - Parâmetros ausentes
-
-4. Integration Points:
-   - native_document_analyzer.py funcionando
-   - Dr. Miguel specialized agent respondendo
-   - Database de validação de documentos
-
-PROBLEMAS ESPERADOS:
-- Sistema de análise nativo pode estar quebrado
-- Integração Dr. Miguel com problemas
-- Problemas de upload/processamento de arquivos
-- Conectividade com database de validação
-
-AUTENTICAÇÃO: Usar conta de teste com JWT token válido
+RESULTADOS ESPERADOS APÓS FIX:
+- Real vision analysis completa com sucesso
+- Maior precisão na detecção de tipo de documento
+- Completeness scores 85%+ para documentos válidos
+- extracted_data rico com security_features, full_text_extracted
+- Sem fallback para native analysis devido a erros
 """
 
 import requests
