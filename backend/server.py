@@ -7575,7 +7575,9 @@ async def check_data_consistency_ai(case, friendly_form_data, basic_data):
         
         # Use ONLY user's personal OpenAI API key
         openai_key = os.environ.get('OPENAI_API_KEY')
-        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
+        
+        if not openai_key:
+            raise ValueError("OPENAI_API_KEY is required for AI validation")
         
         if openai_key:
             use_openai = True
@@ -7641,7 +7643,9 @@ async def translate_data_ai(case, friendly_form_data):
         
         # Use ONLY user's personal OpenAI API key
         openai_key = os.environ.get('OPENAI_API_KEY')
-        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
+        
+        if not openai_key:
+            raise ValueError("OPENAI_API_KEY is required for AI validation")
         
         if openai_key:
             use_openai = True
