@@ -6258,37 +6258,43 @@ async def analyze_document_with_real_ai(
                 case_id=case_id
             )
             
-            logger.info(f"✅ Native LLM analysis complete")
-            logger.info(f"   → Result: {native_result}")
+            logger.info(f"✅ Real Vision analysis complete")
+            logger.info(f"   → Result keys: {list(vision_result.keys())}")
             
-            # Extract data from native result
-            extracted_data = native_result.get('extracted_data', {})
+            # Extract data from vision result
+            extracted_data = vision_result.get('extracted_data', {})
             detected_type = extracted_data.get('detected_type', document_type)
             confidence = extracted_data.get('confidence', 0.85)
             
-            # Update analysis result with native analysis
+            # Update analysis result with vision analysis
             analysis_result.update({
-                "valid": native_result.get('valid', True),
-                "legible": native_result.get('legible', True),
-                "completeness": native_result.get('completeness', 85),
+                "valid": vision_result.get('valid', True),
+                "legible": vision_result.get('legible', True),
+                "completeness": vision_result.get('completeness', 85),
                 "extracted_data": {
                     **analysis_result.get('extracted_data', {}),
                     **extracted_data
                 }
             })
             
-            # Get any issues from native analysis
-            native_issues = native_result.get('issues', [])
-            if native_issues:
-                analysis_result["issues"].extend(native_issues)
+            # Get any issues from vision analysis
+            vision_issues = vision_result.get('issues', [])
+            if vision_issues:
+                analysis_result["issues"].extend(vision_issues)
                 analysis_result["valid"] = False
-                analysis_result["completeness"] = 30
+                analysis_result["completeness"] = max(30, vision_result.get('completeness', 30))
             
-            logger.info(f"✅ Native analysis integration complete")
+            # Update assessment with vision analysis
+            analysis_result["dra_paula_assessment"] = vision_result.get('dra_paula_assessment', 
+                f"✅ DOCUMENTO ANALISADO: {document_type} processado com visão real")
+            
+            logger.info(f"✅ Real Vision analysis integration complete")
             logger.info(f"   → Detected Type: {detected_type}")
             logger.info(f"   → Expected Type: {document_type}")
             logger.info(f"   → Confidence: {confidence}")
-            logger.info(f"   → Issues Found: {len(native_issues)}")
+            logger.info(f"   → Issues Found: {len(vision_issues)}")
+            logger.info(f"   → Security Features: {len(extracted_data.get('security_features', []))}")
+            logger.info(f"   → Full Text Extracted: {len(extracted_data.get('full_text_extracted', ''))}")
             
             # **DEMONSTRAÇÃO PRÁTICA DAS VALIDAÇÕES**
             # Para testar as validações, vou simular cenários específicos
