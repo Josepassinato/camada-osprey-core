@@ -234,10 +234,14 @@ const DocumentUpload = () => {
         setError(`Falhas: ${failures.map(f => `${f.filename}: ${f.error}`).join(', ')}`);
       }
 
-      // If all succeeded, redirect after a delay
+      // If all succeeded, show disclaimer
       if (failures.length === 0) {
+        // Generate case ID based on uploaded documents
+        const newCaseId = `OSP-DOCS-${Date.now()}`;
+        setCaseId(newCaseId);
+        
         setTimeout(() => {
-          navigate('/documents');
+          setShowDisclaimer(true);
         }, 2000);
       }
 
