@@ -8818,35 +8818,37 @@ MRZ extraction should work properly.
 
 
 def main():
-    """Execute Phase 4B Production Optimization Corrections Tests"""
-    print("🚀 TESTE ESPECÍFICO: Validar Correções dos Sistemas Phase 4B")
-    print("🔧 FOCO: Testar as correções implementadas para Phase 4B Production Optimization")
+    """Execute Disclaimer System and SSN Validator Tests"""
+    print("🚀 TESTE ESPECÍFICO: Sistema de Disclaimer e Validador de Social Security Card")
+    print("🔧 FOCO: Testar a nova implementação do Sistema de Disclaimer e Validador de Social Security Card")
     print()
-    print("CORREÇÕES TESTADAS:")
-    print("✅ Security patterns mais específicos (evitam false positives)")
-    print("✅ Malicious content scanning desabilitado temporariamente")
-    print("✅ Database indexes com error handling melhorado")
-    print("✅ Sistemas inicializando sem falhas críticas")
+    print("SISTEMAS TESTADOS:")
+    print("✅ Sistema de Disclaimer com aceites por etapa")
+    print("✅ Validação de compliance após cada aceite")
+    print("✅ Validador SSN com números válidos/inválidos")
+    print("✅ Requisitos SSN com estrutura completa")
+    print("✅ Status detalhado e relatórios de compliance")
     print()
     
-    tester = Phase4BProductionOptimizationTester()
+    tester = DisclaimerAndSSNValidatorTester()
     
-    # Execute Phase 4B Corrections tests
-    test_results = tester.run_phase_4b_corrections_tests()
+    # Execute disclaimer and SSN validation tests
+    test_results = tester.run_disclaimer_and_ssn_tests()
     
     # Calculate results
     total_tests = len(tester.test_results)
     passed_tests = len([r for r in tester.test_results if r['success']])
     success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
     
-    # Count critical Phase 4B correction tests
+    # Count critical disclaimer and SSN tests
     critical_tests = [
-        "Security System Fixed - Estatísticas Funcionando",
-        "Security System Fixed - Eventos de Segurança",
-        "System Health Corrected - Status Geral",
-        "Database Performance Corrected - Performance do Banco",
-        "Load Testing Availability Corrected - 4 Testes Disponíveis",
-        "Security Middleware Corrected - Requests Legítimos"
+        "Disclaimer Text - Stage documents",
+        "Disclaimer Record - Stage documents",
+        "Disclaimer Validation - Final Compliance",
+        "SSN Validation - Valid SSN Card",
+        "SSN Requirements - Estrutura Completa",
+        "Disclaimer Status - Status Detalhado",
+        "Disclaimer Reports - Relatório de Compliance"
     ]
     
     critical_passed = 0
@@ -8855,40 +8857,40 @@ def main():
         if test_result and test_result['success']:
             critical_passed += 1
     
-    print(f"\n🏁 TESTES DAS CORREÇÕES PHASE 4B CONCLUÍDOS")
+    print(f"\n🏁 TESTES DO SISTEMA DE DISCLAIMER E SSN VALIDATOR CONCLUÍDOS")
     print(f"Taxa de sucesso geral: {success_rate:.1f}%")
-    print(f"Correções críticas funcionando: {critical_passed}/{len(critical_tests)}")
+    print(f"Testes críticos funcionando: {critical_passed}/{len(critical_tests)}")
     
-    # Categorize results by correction type
-    corrections = {
-        "Security System Fixed": [t for t in tester.test_results if "Security System Fixed" in t["test"]],
-        "System Health Corrected": [t for t in tester.test_results if "System Health Corrected" in t["test"]],
-        "Database Performance Corrected": [t for t in tester.test_results if "Database Performance Corrected" in t["test"]],
-        "Load Testing Availability Corrected": [t for t in tester.test_results if "Load Testing Availability Corrected" in t["test"]],
-        "Security Middleware Corrected": [t for t in tester.test_results if "Security Middleware Corrected" in t["test"]]
+    # Categorize results by system type
+    systems = {
+        "Disclaimer Text System": [t for t in tester.test_results if "Disclaimer Text" in t["test"]],
+        "Disclaimer Record & Validation": [t for t in tester.test_results if "Disclaimer Record" in t["test"] or "Disclaimer Validation" in t["test"]],
+        "SSN Validation System": [t for t in tester.test_results if "SSN Validation" in t["test"] or "SSN USCIS" in t["test"]],
+        "SSN Requirements": [t for t in tester.test_results if "SSN Requirements" in t["test"]],
+        "Disclaimer Status & Reports": [t for t in tester.test_results if "Disclaimer Status" in t["test"] or "Disclaimer Reports" in t["test"] or "Disclaimer Check" in t["test"]]
     }
     
-    print("\n📋 RESULTADOS DAS CORREÇÕES:")
-    for correction, tests in corrections.items():
+    print("\n📋 RESULTADOS POR SISTEMA:")
+    for system, tests in systems.items():
         if tests:
-            correction_passed = len([t for t in tests if t["success"]])
-            correction_total = len(tests)
-            corr_success_rate = (correction_passed/correction_total)*100 if correction_total > 0 else 0
-            status = "✅" if corr_success_rate >= 80 else "⚠️" if corr_success_rate >= 60 else "❌"
-            print(f"  {status} {correction}: {correction_passed}/{correction_total} ({corr_success_rate:.1f}%)")
+            system_passed = len([t for t in tests if t["success"]])
+            system_total = len(tests)
+            sys_success_rate = (system_passed/system_total)*100 if system_total > 0 else 0
+            status = "✅" if sys_success_rate >= 80 else "⚠️" if sys_success_rate >= 60 else "❌"
+            print(f"  {status} {system}: {system_passed}/{system_total} ({sys_success_rate:.1f}%)")
     
     # Return appropriate exit code
     if critical_passed >= len(critical_tests) * 0.8 and success_rate >= 75:
-        print("\n✅ CORREÇÕES PHASE 4B FUNCIONANDO CORRETAMENTE")
-        print("✅ Security system sem false positives!")
-        print("✅ System health reportando componentes corretos!")
-        print("✅ Database optimization inicializado!")
-        print("✅ Load testing com 4 testes disponíveis!")
-        print("✅ Rate limiting sem bloquear requests legítimos!")
+        print("\n✅ SISTEMA DE DISCLAIMER E SSN VALIDATOR FUNCIONANDO CORRETAMENTE")
+        print("✅ Textos de disclaimer retornados para todas as etapas!")
+        print("✅ Aceites registrados e validação de compliance funcionando!")
+        print("✅ Validador SSN identificando cartões válidos e inválidos!")
+        print("✅ Requisitos SSN disponíveis com estrutura completa!")
+        print("✅ Status detalhado e relatórios de compliance operacionais!")
         return 0
     else:
-        print("\n❌ ALGUMAS CORREÇÕES PHASE 4B AINDA PRECISAM DE AJUSTES")
-        print("⚠️ Verifique as correções que falharam acima")
+        print("\n❌ ALGUNS COMPONENTES DO SISTEMA AINDA PRECISAM DE AJUSTES")
+        print("⚠️ Verifique os testes que falharam acima")
         return 1
 
 
