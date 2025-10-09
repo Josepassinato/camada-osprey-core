@@ -1,34 +1,33 @@
 #!/usr/bin/env python3
 """
-TESTE ESPECÍFICO: Sistema de Disclaimer e Validador de Social Security Card
+TESTE ESPECÍFICO: Sistema de Tutor Inteligente Melhorado
 
-FOCO ESPECÍFICO: Testar a nova implementação do Sistema de Disclaimer e Validador de Social Security Card
+FOCO ESPECÍFICO: Testar os novos endpoints do sistema de tutor inteligente melhorado
 
 ENDPOINTS TESTADOS:
-1. Sistema de Disclaimer:
-   - POST /api/disclaimer/record (registrar aceite)
-   - GET /api/disclaimer/validate/{case_id} (validar compliance)
-   - GET /api/disclaimer/text/{stage} (buscar texto)
-   - GET /api/disclaimer/status/{case_id} (status detalhado)
-   - GET /api/disclaimer/compliance-report/{case_id} (relatório)
-   - POST /api/disclaimer/check-required (verificar requisito)
+1. POST /api/tutor/guidance - Orientação contextual inteligente
+2. POST /api/tutor/checklist - Checklist personalizado de documentos  
+3. POST /api/tutor/progress-analysis - Análise de progresso personalizada
+4. POST /api/tutor/common-mistakes - Erros comuns da etapa atual
+5. POST /api/tutor/interview-preparation - Preparação personalizada para entrevista
 
-2. Social Security Card Validator:
-   - POST /api/documents/validate-ssn (validar cartão SSN)
-   - GET /api/documents/ssn-requirements (requisitos)
+DADOS DE TESTE:
+- user_id: "user_123"  
+- visa_type: "h1b"
+- current_step: "document_upload"
 
 FLUXO DE TESTE:
-- Criar um case_id de teste
-- Registrar aceites para diferentes stages (documents, forms, cover_letter, review, final)
-- Validar compliance após cada aceite
-- Testar validador SSN com texto simulado
-- Verificar se textos de disclaimer são retornados corretamente
+- Testar cada endpoint com dados válidos de entrada
+- Verificar resposta JSON estruturada
+- Testar tratamento de erros
+- Verificar se retorna dados específicos e úteis para usuários brasileiros
+- Confirmar integração com OpenAI (usando a chave já configurada no sistema)
 
 RESULTADO ESPERADO:
-- Sistema de disclaimer funcionando com aceites por etapa
-- Validação de compliance correta
-- Validador SSN identificando números válidos/inválidos
-- Estrutura JSON das respostas correta
+- Todos os endpoints respondendo corretamente
+- Respostas estruturadas em JSON
+- Dados específicos para usuários brasileiros
+- Integração com IA funcionando
 """
 
 import requests
