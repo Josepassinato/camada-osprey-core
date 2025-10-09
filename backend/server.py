@@ -8223,20 +8223,29 @@ async def analyze_document_with_real_ai(
             
             logger.info(f"   → Result keys: {list(vision_result.keys())}")
             
-            # Extract data from vision result
-            extracted_data = vision_result.get('extracted_data', {})
-            detected_type = extracted_data.get('detected_type', document_type)
-            confidence = extracted_data.get('confidence', 0.85)
+            # Extract data from vision result (FIXED: use correct field names)
+            detected_type = vision_result.get('detected_type', document_type)
+            confidence = vision_result.get('confidence', 0.85)
+            extracted_fields = vision_result.get('extracted_fields', {})
+            
+            # Create proper extracted_data structure
+            extracted_data = {
+                **analysis_result.get('extracted_data', {}),
+                **extracted_fields,
+                "detected_type": detected_type,
+                "confidence": confidence,
+                "analysis_method": "native_llm_restored",
+                "full_text_extracted": vision_result.get('text_content', ''),
+                "security_features": vision_result.get('security_features', []),
+                "quality_score": vision_result.get('quality_score', confidence)
+            }
             
             # Update analysis result with vision analysis
             analysis_result.update({
                 "valid": vision_result.get('valid', True),
                 "legible": vision_result.get('legible', True),
                 "completeness": vision_result.get('completeness', 85),
-                "extracted_data": {
-                    **analysis_result.get('extracted_data', {}),
-                    **extracted_data
-                }
+                "extracted_data": extracted_data
             })
             
             # Get any issues from vision analysis
