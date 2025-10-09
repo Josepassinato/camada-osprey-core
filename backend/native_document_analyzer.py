@@ -103,20 +103,193 @@ class NativeDocumentAnalyzer:
         Responda em português brasileiro com foco em documentos de imigração.
         """
     
-    def _perform_native_analysis(
+    async def _perform_real_llm_analysis(
         self, 
         file_content: bytes, 
         expected_type: str, 
-        applicant_name: str
+        applicant_name: str,
+        analysis_prompt: str
     ) -> NativeAnalysisResult:
         """
-        Realiza análise nativa usando padrões e heurísticas
-        Aqui é onde integrariamos a capacidade real do modelo
+        RESTORED: Análise REAL usando LLM nativo (não simulação)
+        Sistema original que funcionava com precisão
         """
         
+        try:
+            # Import the LLM integration
+            from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
+            
+            # Convert bytes to base64 for LLM analysis
+            import base64
+            file_base64 = base64.b64encode(file_content).decode('utf-8')
+            
+            # Create LLM chat instance using user's OpenAI key
+            chat = LlmChat(
+                api_key=os.getenv('OPENAI_API_KEY'),
+                session_id=f"native_doc_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                system_message=f"""Você é um especialista em análise de documentos de imigração brasileiros e internacionais.
+                
+TAREFA: Analise o documento enviado e extraia informações precisas.
+
+TIPO ESPERADO: {expected_type}
+NOME DO APLICANTE: {applicant_name}
+
+Forneça análise detalhada em português brasileiro com dados REAIS extraídos do documento."""
+            ).with_model("openai", "gpt-4o")  # gpt-4o tem capacidade de visão
+            
+            # Create image content for analysis
+            image_content = ImageContent(image_base64=file_base64)
+            
+            # Send message with image for REAL analysis
+            user_message = UserMessage(
+                text=analysis_prompt,
+                file_contents=[image_content]
+            )
+            
+            logger.info(f"🤖 Executando análise LLM REAL nativa para {expected_type}")
+            
+            # Get REAL analysis from LLM
+            llm_response = await chat.send_message(user_message)
+            
+            logger.info(f"✅ Análise LLM nativa concluída - resposta: {len(llm_response)} chars")
+            
+            # Parse LLM response into structured result
+            result = self._parse_llm_response(llm_response, expected_type, applicant_name, file_content)
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ Erro na análise LLM nativa: {str(e)}")
+            # Fallback to basic analysis if LLM fails
+            return self._create_fallback_analysis(file_content, expected_type, applicant_name, str(e))
+    
+    def _parse_llm_response(
+        self,
+        llm_response: str,
+        expected_type: str,
+        applicant_name: str,
+        file_content: bytes
+    ) -> NativeAnalysisResult:
+        """
+        Parse da resposta do LLM em resultado estruturado
+        """
         validation_issues = []
         
-        # Análise do tamanho do arquivo
+        # Extract information from LLM response
+        detected_type = self._extract_document_type_from_llm(llm_response)
+        confidence = self._extract_confidence_from_llm(llm_response)
+        extracted_fields = self._extract_fields_from_llm(llm_response)
+        
+        # Check type match
+        if detected_type != expected_type:
+            validation_issues.append(f"❌ TIPO DE DOCUMENTO INCORRETO: Detectado '{self._get_document_name(detected_type)}' mas esperado '{self._get_document_name(expected_type)}'")
+        
+        # Check for issues mentioned in LLM response
+        if any(word in llm_response.lower() for word in ['vencido', 'expirado', 'expired']):
+            validation_issues.append("❌ DOCUMENTO VENCIDO: Documento fora da validade")
+        
+        if any(word in llm_response.lower() for word in ['ilegível', 'borrado', 'danificado']):
+            validation_issues.append("❌ QUALIDADE COMPROMETIDA: Documento com problemas de legibilidade")
+        
+        # Determine validity
+        is_valid = len(validation_issues) == 0 and detected_type == expected_type
+        
+        # Create structured result
+        return NativeAnalysisResult(
+            document_type=detected_type,
+            confidence=confidence,
+            extracted_fields=extracted_fields,
+            full_text=llm_response,
+            validation_issues=validation_issues,
+            is_valid=is_valid,
+            expiry_status="valid" if is_valid else "invalid",
+            name_match_status=self._check_name_match_from_llm(llm_response, applicant_name),
+            type_match_status="match" if detected_type == expected_type else "mismatch"
+        )
+    
+    def _extract_document_type_from_llm(self, response: str) -> str:
+        """Extrai tipo de documento da resposta do LLM"""
+        response_lower = response.lower()
+        
+        if any(word in response_lower for word in ['passaporte', 'passport']):
+            return 'passport'
+        elif any(word in response_lower for word in ['cnh', 'carteira nacional', 'habilitação', 'motorista']):
+            return 'driver_license'
+        elif any(word in response_lower for word in ['certidão de nascimento', 'birth certificate']):
+            return 'birth_certificate'
+        elif any(word in response_lower for word in ['casamento', 'marriage']):
+            return 'marriage_certificate'
+        else:
+            return 'unknown'
+    
+    def _extract_confidence_from_llm(self, response: str) -> float:
+        """Extrai nível de confiança da resposta do LLM"""
+        response_lower = response.lower()
+        
+        if any(word in response_lower for word in ['muito claro', 'excelente', 'perfeito']):
+            return 0.95
+        elif any(word in response_lower for word in ['claro', 'boa qualidade', 'legível']):
+            return 0.85
+        elif any(word in response_lower for word in ['aceitável', 'regular']):
+            return 0.75
+        else:
+            return 0.80
+    
+    def _extract_fields_from_llm(self, response: str) -> Dict[str, str]:
+        """Extrai campos estruturados da resposta do LLM"""
+        fields = {}
+        
+        # Use regex to extract common fields
+        import re
+        
+        patterns = {
+            'full_name': [r'nome[:\s]*([^\n,]+)', r'name[:\s]*([^\n,]+)'],
+            'document_number': [r'número[:\s]*([A-Z0-9\-\s]+)', r'number[:\s]*([A-Z0-9\-\s]+)'],
+            'date_of_birth': [r'nascimento[:\s]*([0-9\/\-\.]+)', r'birth[:\s]*([0-9\/\-\.]+)'],
+            'issue_date': [r'emissão[:\s]*([0-9\/\-\.]+)', r'issue[:\s]*([0-9\/\-\.]+)'],
+            'expiry_date': [r'validade[:\s]*([0-9\/\-\.]+)', r'expir[:\s]*([0-9\/\-\.]+)'],
+        }
+        
+        for field, regex_list in patterns.items():
+            for pattern in regex_list:
+                match = re.search(pattern, response, re.IGNORECASE)
+                if match:
+                    fields[field] = match.group(1).strip()
+                    break
+        
+        return fields
+    
+    def _check_name_match_from_llm(self, response: str, applicant_name: str) -> str:
+        """Verifica correspondência de nome baseado na resposta do LLM"""
+        if not applicant_name:
+            return "no_applicant_name"
+        
+        response_lower = response.lower()
+        applicant_lower = applicant_name.lower()
+        
+        # Check if LLM mentions name match/mismatch
+        if 'corresponde' in response_lower or 'match' in response_lower:
+            return "match"
+        elif 'não corresponde' in response_lower or 'não match' in response_lower:
+            return "mismatch"
+        elif applicant_lower in response_lower:
+            return "likely_match"
+        else:
+            return "cannot_verify"
+    
+    def _create_fallback_analysis(
+        self, 
+        file_content: bytes, 
+        expected_type: str, 
+        applicant_name: str,
+        error_message: str
+    ) -> NativeAnalysisResult:
+        """
+        Análise de fallback quando LLM real falha
+        """
+        validation_issues = [f"⚠️ ANÁLISE LIMITADA: {error_message}"]
+        
+        # Basic file size analysis
         file_size = len(file_content)
         if file_size < 50000:  # 50KB
             validation_issues.append("❌ ARQUIVO MUITO PEQUENO: Pode estar corrompido ou de baixa qualidade")
