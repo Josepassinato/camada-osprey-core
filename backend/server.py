@@ -28,7 +28,7 @@ from security_hardening import security_system, SecurityMiddleware
 from database_optimization import DatabaseOptimizationSystem
 from visa_specifications import get_visa_specifications, get_required_documents, get_key_questions, get_common_issues
 from visa_document_mapping import get_visa_document_requirements
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+# Removed emergent integrations - using only user's OpenAI API key
 import openai
 import yaml
 from immigration_expert import ImmigrationExpert, create_immigration_expert
