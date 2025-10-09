@@ -438,7 +438,7 @@ const USCISFormFilling = () => {
   const renderPersonalSection = () => (
     <div className="space-y-6">
       <div className="grid md:grid-cols-2 gap-4">
-        <div>
+        <div className="relative">
           <Label htmlFor="firstName">Nome *</Label>
           <Input
             id="firstName"
@@ -446,9 +446,15 @@ const USCISFormFilling = () => {
             onChange={(e) => handleInputChange('firstName', e.target.value)}
             placeholder="Primeiro nome"
             required
+            className={autoFilledData.firstName ? 'border-blue-500 bg-blue-50' : ''}
           />
+          {autoFilledData.firstName && (
+            <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center">
+              <span className="text-white text-xs">IA</span>
+            </div>
+          )}
         </div>
-        <div>
+        <div className="relative">
           <Label htmlFor="lastName">Sobrenome *</Label>
           <Input
             id="lastName"
@@ -456,7 +462,13 @@ const USCISFormFilling = () => {
             onChange={(e) => handleInputChange('lastName', e.target.value)}
             placeholder="Último nome"
             required
+            className={autoFilledData.lastName ? 'border-blue-500 bg-blue-50' : ''}
           />
+          {autoFilledData.lastName && (
+            <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center">
+              <span className="text-white text-xs">IA</span>
+            </div>
+          )}
         </div>
       </div>
 
