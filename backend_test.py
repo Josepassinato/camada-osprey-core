@@ -177,77 +177,69 @@ class DisclaimerAndSSNValidatorTester:
             print(f"❌ Erro ao criar caso de teste: {str(e)}")
             return None
 
-    def test_security_system_fixed(self):
-        """TESTE 1: Security System Fixed - Sistema de segurança corrigido"""
-        print("🔒 TESTE 1: Security System Fixed - Sistema de segurança corrigido")
+    def test_disclaimer_text_endpoints(self):
+        """TESTE 1: Disclaimer Text Endpoints - Buscar textos de disclaimer"""
+        print("📝 TESTE 1: Disclaimer Text Endpoints - Buscar textos de disclaimer")
         
-        try:
-            # Test 1: Security Statistics (deve funcionar agora sem false positives)
-            response = self.session.get(f"{API_BASE}/production/security/statistics")
-            
-            if response.status_code == 200:
-                result = response.json()
+        # Test all disclaimer stages
+        stages = ["documents", "forms", "cover_letter", "review", "final"]
+        
+        for stage in stages:
+            try:
+                response = self.session.get(f"{API_BASE}/disclaimer/text/{stage}")
                 
-                # Check if security statistics are available
-                has_success = result.get('success', False)
-                security_stats = result.get('security_statistics', {})
-                
-                # Check for expected statistics fields
-                expected_fields = ['blocked_ips', 'suspicious_ips', 'total_security_events', 'rate_limit_rules']
-                has_expected_fields = all(field in security_stats for field in expected_fields)
-                
+                if response.status_code == 200:
+                    result = response.json()
+                    
+                    # Check if disclaimer text is returned
+                    has_success = result.get('success', False)
+                    disclaimer_text = result.get('disclaimer_text', '')
+                    has_text = len(disclaimer_text) > 100  # Should have substantial text
+                    
+                    self.log_test(
+                        f"Disclaimer Text - Stage {stage}",
+                        has_success and has_text,
+                        f"✅ Texto obtido para {stage}: {len(disclaimer_text)} caracteres",
+                        {
+                            "success": has_success,
+                            "stage": stage,
+                            "text_length": len(disclaimer_text),
+                            "has_responsibility_text": "responsabilidade" in disclaimer_text.lower(),
+                            "has_approval_text": "aprova" in disclaimer_text.lower()
+                        }
+                    )
+                else:
+                    self.log_test(
+                        f"Disclaimer Text - Stage {stage}",
+                        False,
+                        f"❌ HTTP {response.status_code}",
+                        {"status_code": response.status_code, "error": response.text[:200]}
+                    )
+                    
+            except Exception as e:
                 self.log_test(
-                    "Security System Fixed - Estatísticas Funcionando",
-                    has_success and has_expected_fields,
-                    f"✅ Sistema corrigido: {len(security_stats)} campos, sem false positives",
-                    {
-                        "success": has_success,
-                        "blocked_ips": security_stats.get('blocked_ips', 0),
-                        "suspicious_ips": security_stats.get('suspicious_ips', 0),
-                        "total_security_events": security_stats.get('total_security_events', 0),
-                        "rate_limit_rules": security_stats.get('rate_limit_rules', 0),
-                        "fields_present": list(security_stats.keys())
-                    }
-                )
-                
-                # Test 2: Security Events (deve retornar eventos sem bloquear requests legítimos)
-                events_response = self.session.get(f"{API_BASE}/production/security/events")
-                
-                events_success = events_response.status_code == 200
-                events_data = events_response.json() if events_success else {}
-                
-                self.log_test(
-                    "Security System Fixed - Eventos de Segurança",
-                    events_success,
-                    f"✅ Eventos obtidos sem bloqueio: {events_data.get('count', 0)} eventos",
-                    {
-                        "success": events_data.get('success', False),
-                        "events_count": events_data.get('count', 0),
-                        "no_false_positives": events_success  # Se chegou aqui, não foi bloqueado
-                    }
-                )
-                
-                return {
-                    "security_stats": security_stats,
-                    "events_data": events_data,
-                    "system_working": has_success and events_success
-                }
-            else:
-                self.log_test(
-                    "Security System Fixed - Estatísticas Funcionando",
+                    f"Disclaimer Text - Stage {stage}",
                     False,
-                    f"❌ HTTP {response.status_code}: Sistema ainda com problemas",
-                    {"status_code": response.status_code, "error": response.text[:200]}
+                    f"❌ Exception: {str(e)}"
                 )
-                return None
-                
+        
+        # Test invalid stage
+        try:
+            response = self.session.get(f"{API_BASE}/disclaimer/text/invalid_stage")
+            
+            self.log_test(
+                "Disclaimer Text - Invalid Stage",
+                response.status_code == 400,
+                f"✅ Etapa inválida rejeitada corretamente: HTTP {response.status_code}",
+                {"status_code": response.status_code}
+            )
+            
         except Exception as e:
             self.log_test(
-                "Security System Fixed - Exception",
+                "Disclaimer Text - Invalid Stage",
                 False,
                 f"❌ Exception: {str(e)}"
             )
-            return None
     
     def test_security_events_and_ip_blocking(self):
         """TESTE 2: Security System - Eventos de Segurança e Bloqueio de IP"""
