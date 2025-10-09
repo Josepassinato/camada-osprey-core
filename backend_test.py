@@ -1,53 +1,57 @@
 #!/usr/bin/env python3
 """
-TESTE CRÍTICO: NEW REAL Document Analysis System
+TESTE CRÍTICO: OPENAI DIRECT INTEGRATION - NO EMERGENT DEPENDENCIES
 
 CONTEXTO DA IMPLEMENTAÇÃO:
-- Implementado sistema REAL de análise de documentos usando OpenAI Vision API
-- Criado /app/backend/real_document_vision_analyzer.py com integração OpenAI Vision
-- Substituído sistema de simulação que retornava dados hardcoded
-- Sistema agora usa EMERGENT_LLM_KEY para analisar imagens reais carregadas
-- Updated server.py para usar o novo real vision analyzer
+- REMOVIDAS TODAS as dependências de emergent integrations
+- Sistema agora usa APENAS a chave pessoal OPENAI_API_KEY do usuário
+- Eliminado uso de EMERGENT_LLM_KEY completamente
+- Integração direta com OpenAI usando openai.OpenAI() client
+- Modelo gpt-4o para análise de documentos
 
-PROBLEMA ORIGINAL RESOLVIDO:
-- Sistema anterior retornava dados simulados (document_number: "YC792396", etc.)
-- Usuário reportou: "sistema continua não lendo o documento que eu envio por upload"
-- Sistema não analisava conteúdo real das imagens carregadas
-- Análise era baseada em simulação, não no documento real
+MUDANÇAS CRÍTICAS IMPLEMENTADAS:
+- native_document_analyzer.py: Usa APENAS openai.OpenAI(api_key=user_openai_key)
+- specialized_agents.py: Removidas todas as referências a emergent
+- Eliminado fallback para EMERGENT_LLM_KEY
+- Sistema falha graciosamente se OPENAI_API_KEY não estiver disponível
 
-FOCO DOS TESTES - REAL DOCUMENT ANALYSIS:
-1. Real Document Analysis - Verificar análise de documentos reais vs simulação
-2. OpenAI Vision Integration - Testar integração com OpenAI Vision API
-3. Specific Document Test - Testar IMG_7602.png específico do usuário
-4. Analysis Method Verification - Confirmar analysis_method="real_vision_openai"
-5. Extracted Data Validation - Verificar dados extraídos do documento real
+FOCO DOS TESTES - OPENAI DIRECT ONLY:
+1. OpenAI Direct Integration - Verificar uso exclusivo da chave pessoal do usuário
+2. No Emergent Dependencies - Confirmar que não há uso de EMERGENT_LLM_KEY
+3. Document Analysis - Testar análise real usando gpt-4o vision
+4. API Key Validation - Verificar que sistema requer OPENAI_API_KEY
+5. Real Analysis Method - Confirmar analysis_method indica uso direto do OpenAI
 
 CENÁRIOS DE TESTE ESPECÍFICOS:
 
-Scenario 1: Real Document Analysis
-- Upload IMG_7602.png (documento específico do usuário)
-- Verificar que sistema usa OpenAI Vision API para análise real
-- Confirmar analysis_method="real_vision_openai" (não simulation)
-- Verificar que dados extraídos vêm do documento real, não valores hardcoded
+Scenario 1: OpenAI Direct Integration
+- Upload IMG_7602.png para análise
+- Verificar que sistema usa openai.OpenAI(api_key=user_openai_key) diretamente
+- Confirmar logs mostram "Executando análise OpenAI REAL nativa" (não emergent)
+- Verificar que não há importações ou uso de emergent integrations
 
-Scenario 2: Verification of Real Analysis
-- Testar com diferentes tipos de documento
-- Verificar que cada documento recebe análise única
-- Confirmar que system extrai texto real visível nas imagens
-- Garantir que não há mais valores hardcoded como "YC792396" ou "09/04/1970"
+Scenario 2: API Key Validation
+- Verificar que sistema procura apenas OPENAI_API_KEY
+- Confirmar que sistema falha graciosamente se OPENAI_API_KEY estiver ausente
+- Garantir que não há fallback para EMERGENT_LLM_KEY
 
-Scenario 3: OpenAI Vision Integration
-- Verificar logs mostram "Sending image to OpenAI Vision API for real analysis"
-- Confirmar que EMERGENT_LLM_KEY está sendo usado corretamente
-- Verificar que sistema cria LlmChat instance com gpt-4o model
-- Confirmar que ImageContent é criado corretamente da imagem carregada
+Scenario 3: Real Document Analysis
+- Testar com documento do usuário para verificar OpenAI Vision API funciona diretamente
+- Verificar que resultados contêm dados reais extraídos
+- Confirmar que analysis_method indica uso direto do OpenAI
+- Garantir que não há integração emergent envolvida no processo
 
 RESULTADOS ESPERADOS:
-- analysis_method deve ser "real_vision_openai" (não simulation)
-- extracted_fields deve conter dados do documento real carregado
-- Não mais valores hardcoded de simulação (YC792396, 09/04/1970, etc.)
-- Sistema deve analisar o que está realmente visível na imagem carregada
-- Documentos diferentes devem produzir resultados de análise diferentes
+- ✅ Usa APENAS OPENAI_API_KEY pessoal do usuário
+- ✅ Integração direta com OpenAI (sem wrapper emergent)
+- ✅ Análise real de documentos usando gpt-4o vision
+- ❌ SEM dependências de emergent integrations
+- ❌ SEM uso de EMERGENT_LLM_KEY em lugar algum
+- ❌ SEM fallback para sistemas emergent
+
+VALIDAÇÃO CRÍTICA:
+Este teste deve confirmar que o requisito do usuário "Não use a LLM da emergent em lugar algum, 
+somente use a minha chave pessoal da api da OpenAI" foi completamente implementado.
 """
 
 import requests
