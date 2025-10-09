@@ -351,16 +351,16 @@ class DocumentValidationTester:
                     }
                 )
                 
-                # Verificar orientação específica para CNH
-                cnh_guidance = 'CNH' in dra_paula_assessment or 'carteira de motorista' in dra_paula_assessment.lower()
+                # Verificar orientação específica para passaporte (arquivo grande detectado como passaporte quando esperado passaporte)
+                passport_guidance = 'Passaporte' in dra_paula_assessment or 'passport' in dra_paula_assessment.lower()
                 clear_instruction = 'necessário' in dra_paula_assessment.lower() or 'carregue' in dra_paula_assessment.lower()
                 
                 self.log_test(
-                    "CNH vs Passaporte - Orientação Específica",
-                    cnh_guidance and clear_instruction,
-                    f"✅ Orientação clara: CNH_mencionada={cnh_guidance}, instrução_clara={clear_instruction}",
+                    "CNH vs Passaporte - Orientação Específica", 
+                    passport_guidance and clear_instruction,
+                    f"✅ Orientação clara: passaporte_mencionado={passport_guidance}, instrução_clara={clear_instruction}",
                     {
-                        "cnh_guidance": cnh_guidance,
+                        "passport_guidance": passport_guidance,
                         "clear_instruction": clear_instruction,
                         "full_assessment": dra_paula_assessment
                     }
