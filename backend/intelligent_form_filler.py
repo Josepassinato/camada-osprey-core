@@ -81,8 +81,21 @@ class IntelligentFormFiller:
         try:
             # Extrair dados de múltiplas fontes
             basic_data = case_data.get('basic_data', {})
-            document_analysis = case_data.get('document_analysis_results', [])
             ai_extracted_facts = case_data.get('ai_extracted_facts', {})
+            
+            # Buscar documentos validados para este caso
+            document_analysis = []
+            if db_connection and case_data.get('case_id'):
+                case_id = case_data['case_id']
+                documents_cursor = db_connection.documents.find({"case_id": case_id})
+                case_documents = await documents_cursor.to_list(length=None)
+                
+                logger.info(f"🔍 Encontrados {len(case_documents)} documentos para caso {case_id}")
+                
+                # Extrair análises dos documentos
+                for doc in case_documents:
+                    if doc.get('ai_analysis'):
+                        document_analysis.append(doc['ai_analysis'])
             
             logger.info(f"🤖 Gerando sugestões para {form_code} com {len(document_analysis)} documentos analisados")
             
