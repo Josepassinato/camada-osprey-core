@@ -240,8 +240,8 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
         {/* Progress indicator */}
         <div className="mb-8">
           <div className="flex items-center space-x-4">
-            {[1, 2, 3, 4].map((step) => (
-              <div key={step} className={`flex items-center ${step < 4 ? 'flex-1' : ''}`}>
+            {[1, 2, 3, 4, 5].map((step) => (
+              <div key={step} className={`flex items-center ${step < 5 ? 'flex-1' : ''}`}>
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                     currentStep >= step
@@ -254,10 +254,11 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
                 <div className="ml-2 text-sm">
                   {step === 1 && 'Configuração'}
                   {step === 2 && 'Auditoria'}
-                  {step === 3 && 'Consentimento'}
-                  {step === 4 && 'Downloads'}
+                  {step === 3 && 'Preview & Aprovação'}
+                  {step === 4 && 'Consentimento'}
+                  {step === 5 && 'Downloads'}
                 </div>
-                {step < 4 && (
+                {step < 5 && (
                   <div
                     className={`flex-1 h-0.5 ml-4 ${
                       currentStep > step ? 'bg-[#FF6B35]' : 'bg-gray-200'
