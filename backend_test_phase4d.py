@@ -534,11 +534,10 @@ class Phase4DWorkflowAutomationTester:
                 result = response.json()
                 
                 # Check if retry statistics are available
-                stats = result.get('statistics', {})
-                has_stats = len(stats) > 0
+                retry_stats = result.get('retry_statistics', {})
+                has_stats = len(retry_stats) > 0
                 
                 # Check for different operation types (should have 6+ types)
-                retry_stats = stats.get('retry_statistics', {})
                 operation_types = retry_stats.get('operation_types', [])
                 has_multiple_types = len(operation_types) >= 6
                 
