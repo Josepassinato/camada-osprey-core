@@ -6367,15 +6367,20 @@ async def analyze_document_with_real_ai(
             return analysis_result
             
         except Exception as validation_error:
-            logger.error(f"❌❌❌ ERRO NA VALIDAÇÃO GOOGLE AI: {str(validation_error)}")
+            logger.error(f"❌❌❌ ERRO NA VALIDAÇÃO NATIVA: {str(validation_error)}")
             import traceback
             logger.error(f"TRACEBACK COMPLETO:")
             logger.error(traceback.format_exc())
             logger.error(f"Returning Policy Engine result with {len(analysis_result.get('issues', []))} issues")
             
-            # Return Policy Engine results even if Google AI fails
-            analysis_result["google_ai_error"] = str(validation_error)
-            analysis_result["dra_paula_assessment"] += " | Google AI: Erro na análise"
+            # Return Policy Engine results even if native analysis fails
+            analysis_result["native_analysis_error"] = str(validation_error)
+            analysis_result["dra_paula_assessment"] += " | Análise Nativa: Erro na validação"
+            
+            # Add fallback validation for demonstration
+            fallback_issues = ["⚠️ ANÁLISE PARCIAL: Sistema de validação encontrou erro técnico, revisão manual recomendada"]
+            analysis_result["issues"].extend(fallback_issues)
+            analysis_result["completeness"] = 60  # Partial analysis
             
             return analysis_result
         
