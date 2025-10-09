@@ -46,7 +46,7 @@ import io
 BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://vistaprep.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
-class Phase4BProductionOptimizationTester:
+class DisclaimerAndSSNValidatorTester:
     def __init__(self):
         self.test_results = []
         self.session = requests.Session()
