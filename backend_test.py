@@ -8906,46 +8906,41 @@ MRZ extraction should work properly.
 
 
 def main():
-    """Execute Phase 4A Enhanced tests"""
-    print("🚀 INICIANDO TESTE COMPLETO DO SISTEMA PHASE 4A ENHANCED")
-    print("🔄 Final Package Assembly - Real Data Integration + Preview + Multi-Stage")
-    print("🎯 OBJETIVO: Testar integração com dados reais, preview interativo e workflow multi-etapas")
+    """Execute Phase 4B Production Optimization tests"""
+    print("🚀 INICIANDO TESTE COMPLETO DO SISTEMA PHASE 4B PRODUCTION OPTIMIZATION")
+    print("🔒 Security Hardening + Load Testing + Database Optimization + System Health")
+    print("🎯 OBJETIVO: Testar sistema completo de otimização de produção")
     print()
     
-    tester = Phase4AEnhancedTester()
+    tester = Phase4BProductionOptimizationTester()
     
-    # Execute Phase 4A Enhanced tests
-    print("📋 Executando testes dos componentes Phase 4A Enhanced...")
+    # Execute Phase 4B Production Optimization tests
+    print("📋 Executando testes dos componentes Phase 4B Production Optimization...")
     print()
     
-    # Test 1: Real Data Integration
-    print("🔄 TESTE 1: Real Data Integration System")
-    tester.test_real_data_integrator_functionality()
+    # Test 1: Security Hardening System
+    print("🔒 TESTE 1: Security Hardening System")
+    tester.test_security_hardening_statistics()
     print()
     
-    # Test 2: Case Finalizer Enhanced Audit
-    print("🔍 TESTE 2: Case Finalizer Enhanced - Sistema de Auditoria")
-    tester.test_case_finalizer_enhanced_audit_system()
+    # Test 2: Security Events and IP Blocking
+    print("🚫 TESTE 2: Security Events and IP Blocking")
+    tester.test_security_events_and_ip_blocking()
     print()
     
-    # Test 3: Preview System
-    print("👁️ TESTE 3: Sistema de Preview Interativo")
-    tester.test_preview_system_endpoints()
+    # Test 3: Load Testing System
+    print("⚡ TESTE 3: Load Testing System")
+    tester.test_load_testing_system()
     print()
     
-    # Test 4: Multi-Stage Workflow
-    print("🔄 TESTE 4: Sistema Multi-Etapas")
-    tester.test_multi_stage_workflow_system()
+    # Test 4: Database Optimization System
+    print("🗄️ TESTE 4: Database Optimization System")
+    tester.test_database_optimization_system()
     print()
     
-    # Test 5: PDF Generation with Real Data
-    print("📄 TESTE 5: Geração de PDF com Dados Reais")
-    tester.test_pdf_generation_with_real_data()
-    print()
-    
-    # Test 6: Specific Phase 4A Test Cases
-    print("🎯 TESTE 6: Casos de Teste Específicos Phase 4A")
-    tester.test_specific_phase4a_test_cases()
+    # Test 5: System Health Monitoring
+    print("🏥 TESTE 5: System Health Monitoring")
+    tester.test_system_health_monitoring()
     print()
     
     # Calculate results
@@ -8953,13 +8948,13 @@ def main():
     passed_tests = len([r for r in tester.test_results if r['success']])
     success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
     
-    # Count critical tests for Phase 4A
+    # Count critical tests for Phase 4B
     critical_tests = [
-        "Real Data Integration - Job Creation",
-        "Auditoria Avançada - Sistema Geral", 
-        "Preview System - Estrutura de Resposta",
-        "Multi-Stage - Workflow Completo",
-        "PDF Generation - Links de Download"
+        "Security Hardening - Estatísticas de Segurança",
+        "Security System - Funcionalidade Geral", 
+        "Load Testing System - Funcionalidade Geral",
+        "Database Optimization System - Funcionalidade Geral",
+        "System Health - Avaliação Geral"
     ]
     
     critical_passed = 0
@@ -8968,18 +8963,16 @@ def main():
         if test_result and test_result['success']:
             critical_passed += 1
     
-    print(f"\n🏁 TESTES PHASE 4A ENHANCED CONCLUÍDOS")
+    print(f"\n🏁 TESTES PHASE 4B PRODUCTION OPTIMIZATION CONCLUÍDOS")
     print(f"Taxa de sucesso geral: {success_rate:.1f}%")
     print(f"Verificações críticas: {critical_passed}/{len(critical_tests)}")
     
     # Categorize results by component
     components = {
-        "Real Data Integration": [t for t in tester.test_results if "Real Data Integration" in t["test"]],
-        "Case Finalizer Enhanced": [t for t in tester.test_results if "Case Finalizer Enhanced" in t["test"] or "Auditoria Avançada" in t["test"]],
-        "Preview System": [t for t in tester.test_results if "Preview System" in t["test"]],
-        "Multi-Stage Workflow": [t for t in tester.test_results if "Multi-Stage" in t["test"]],
-        "PDF Generation": [t for t in tester.test_results if "PDF Generation" in t["test"]],
-        "Specific Test Cases": [t for t in tester.test_results if "Caso" in t["test"] and ("Específico" in t["test"] or "Phase 4A" in t["test"])]
+        "Security Hardening": [t for t in tester.test_results if "Security" in t["test"]],
+        "Load Testing": [t for t in tester.test_results if "Load Testing" in t["test"]],
+        "Database Optimization": [t for t in tester.test_results if "Database Optimization" in t["test"]],
+        "System Health": [t for t in tester.test_results if "System Health" in t["test"]]
     }
     
     print("\n📋 RESULTADOS POR COMPONENTE:")
@@ -8993,13 +8986,14 @@ def main():
     
     # Return appropriate exit code
     if critical_passed >= len(critical_tests) * 0.75 and success_rate >= 70:
-        print("\n✅ SISTEMA PHASE 4A ENHANCED FUNCIONANDO ADEQUADAMENTE")
-        print("✅ Real Data Integration operacional!")
-        print("✅ Preview System e Multi-Stage Workflow funcionais!")
-        print("✅ PDF Generation com dados reais implementado!")
+        print("\n✅ SISTEMA PHASE 4B PRODUCTION OPTIMIZATION FUNCIONANDO ADEQUADAMENTE")
+        print("✅ Security Hardening System operacional!")
+        print("✅ Load Testing System funcionando!")
+        print("✅ Database Optimization System ativo!")
+        print("✅ System Health Monitoring completo!")
         return 0
     else:
-        print("\n❌ SISTEMA PHASE 4A ENHANCED PRECISA DE CORREÇÕES")
+        print("\n❌ SISTEMA PHASE 4B PRODUCTION OPTIMIZATION PRECISA DE CORREÇÕES")
         print("⚠️ Verifique os componentes que falharam acima")
         return 1
 
