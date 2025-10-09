@@ -110,29 +110,29 @@ IMPORTANTE: Revise cuidadosamente antes de submeter ao USCIS. Consulte um advoga
             """,
             
             DisclaimerStage.COVER_LETTER: """
-ACEITE DE RESPONSABILIDADE - CARTA DE APRESENTAÇÃO
+CONFIRMAÇÃO DE RESPONSABILIDADE - ETAPA DE CARTA DE APRESENTAÇÃO
 
-Ao prosseguir com a geração da carta de apresentação, você confirma que:
+Ao finalizar a geração da carta de apresentação, você declara que:
 
-1. CONTEÚDO BASEADO EM FATOS
-   • A carta será baseada nas informações que VOCÊ forneceu
-   • Você garante que todos os fatos mencionados são VERDADEIROS
-   • Não há invenção ou exagero de qualificações ou experiências
+1. BASE FACTUAL DA CARTA
+   • A carta foi baseada EXCLUSIVAMENTE em informações fornecidas por VOCÊ
+   • TODOS os fatos, experiências e qualificações mencionados são VERDADEIROS
+   • Você é responsável pela veracidade de cada informação incluída
+   • Não há invenção, exagero ou distorção de qualquer dado
 
-2. REVISÃO OBRIGATÓRIA
-   • Você DEVE revisar completamente a carta antes de usar
-   • É sua responsabilidade corrigir qualquer erro ou imprecisão
-   • O sistema gera sugestões baseadas em suas informações
+2. REVISÃO E APROVAÇÃO
+   • Revisou COMPLETAMENTE o conteúdo da carta gerada
+   • Confirma que todas as informações estão corretas e atualizadas
+   • Aprova o conteúdo como fiel aos fatos fornecidos
+   • Assume responsabilidade por qualquer imprecisão
 
-3. USO APROPRIADO
-   • A carta é um apoio ao seu processo de aplicação
-   • Não garante aprovação pelo USCIS
-   • Deve ser usada como base, podendo ser personalizada
+3. APROVAÇÃO DA ETAPA
+   • Confirma que a carta representa adequadamente seu perfil
+   • Aprova esta etapa como CORRETA e FINALIZADA
+   • Autoriza o uso da carta em seu processo de aplicação
+   • Entende que é sua responsabilidade final revisar antes do envio ao USCIS
 
-4. CONSULTORIA JURÍDICA
-   • Para casos complexos, consulte um advogado especializado
-   • Este sistema não oferece aconselhamento jurídico
-   • Recomendamos revisão profissional antes da submissão final
+IMPORTANTE: Esta carta é baseada em suas informações. Sempre revise profissionalmente antes da submissão oficial.
             """,
             
             DisclaimerStage.REVIEW: """
