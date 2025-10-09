@@ -408,7 +408,7 @@ Data de Validade: 15/06/2024
                 
             else:
                 self.log_test(
-                    "Diploma vs Passaporte - Detecção de Tipo Incorreto",
+                    "Document Type Validation - Wrong Type Detection",
                     False,
                     f"❌ HTTP {response.status_code}",
                     {"status_code": response.status_code, "error": response.text[:200]}
@@ -416,7 +416,7 @@ Data de Validade: 15/06/2024
                 
         except Exception as e:
             self.log_test(
-                "Diploma vs Passaporte - Detecção de Tipo Incorreto",
+                "Document Type Validation - Wrong Type Detection",
                 False,
                 f"❌ Exception: {str(e)}"
             )
