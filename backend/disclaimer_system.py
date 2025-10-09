@@ -251,9 +251,14 @@ PARA CASOS COMPLEXOS, SEMPRE CONSULTE UM ADVOGADO ESPECIALIZADO EM IMIGRAÇÃO.
         """Valida se caso tem todos os aceites obrigatórios"""
         try:
             # Buscar todos os aceites do caso
+            logger.info(f"Searching for acceptances with case_id: {case_id}")
+            
             acceptances = await self.collection.find(
                 {"case_id": case_id}
             ).to_list(length=None)
+            
+            logger.info(f"Found {len(acceptances)} acceptances for case {case_id}")
+            logger.info(f"Acceptances data: {acceptances}")
             
             accepted_stages = [DisclaimerStage(acc["stage"]) for acc in acceptances]
             
