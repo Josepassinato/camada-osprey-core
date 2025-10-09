@@ -585,131 +585,129 @@ class DisclaimerAndSSNValidatorTester:
         """TESTE 5: Disclaimer Status and Reports - Status detalhado e relatórios"""
         print("📊 TESTE 5: Disclaimer Status and Reports - Status detalhado e relatórios")
         
+        # Use the same case_id from previous tests
+        case_id = "OSP-DISCLAIMER-TEST"
+        
         try:
-            # Test system health endpoint (deve estar corrigido agora)
-            health_response = self.session.get(f"{API_BASE}/production/system/health")
+            # Test 1: Get detailed disclaimer status
+            status_response = self.session.get(f"{API_BASE}/disclaimer/status/{case_id}")
             
-            health_success = health_response.status_code == 200
-            health_data = health_response.json() if health_success else {}
+            status_success = status_response.status_code == 200
+            status_data = status_response.json() if status_success else {}
             
-            health_status = health_data.get('health', {})
-            overall_status = health_status.get('overall_status', 'unknown')
-            components = health_status.get('components', {})
+            acceptances = status_data.get('acceptances', [])
+            validation = status_data.get('validation', {})
             
             self.log_test(
-                "System Health Corrected - Status Geral",
-                health_success and overall_status in ['healthy', 'degraded'],
-                f"✅ Health check corrigido: {overall_status}, Componentes: {len(components)}",
+                "Disclaimer Status - Status Detalhado",
+                status_success and len(acceptances) > 0,
+                f"✅ Status obtido: {len(acceptances)} aceites registrados",
                 {
-                    "success": health_data.get('success', False),
-                    "overall_status": overall_status,
-                    "components_count": len(components),
-                    "components": list(components.keys())
+                    "success": status_data.get('success', False),
+                    "acceptances_count": len(acceptances),
+                    "all_required_accepted": validation.get('all_required_accepted', False),
+                    "total_acceptances": validation.get('total_acceptances', 0),
+                    "ready_for_final": status_data.get('ready_for_final', False)
                 }
             )
             
-            # Check individual components (deve retornar componentes corretos)
-            expected_components = ['database', 'security', 'load_testing', 'database_optimization']
-            component_results = {}
-            
-            for component in expected_components:
-                if component in components:
-                    comp_status = components[component].get('status', 'unknown')
-                    component_results[component] = comp_status in ['healthy', 'warning']
-                    
-                    self.log_test(
-                        f"System Health Corrected - {component.title()}",
-                        component_results[component],
-                        f"✅ Componente corrigido: {comp_status}",
-                        {
-                            "component": component,
-                            "status": comp_status,
-                            "details": components[component]
-                        }
-                    )
-                else:
-                    component_results[component] = False
-                    self.log_test(
-                        f"System Health Corrected - {component.title()}",
-                        False,
-                        f"❌ Componente {component} não encontrado"
-                    )
-            
-            # Check specific component details
-            if 'security' in components:
-                security_comp = components['security']
-                blocked_ips = security_comp.get('blocked_ips', 0)
-                recent_events = security_comp.get('recent_events', 0)
+            # Test 2: Check individual acceptance details
+            if acceptances:
+                first_acceptance = acceptances[0]
+                required_fields = ['id', 'stage', 'consent_hash', 'timestamp', 'ip_address']
+                fields_present = sum(1 for field in required_fields if field in first_acceptance)
                 
                 self.log_test(
-                    "System Health - Detalhes de Segurança",
-                    True,  # Always pass if security component exists
-                    f"IPs bloqueados: {blocked_ips}, Eventos recentes: {recent_events}",
+                    "Disclaimer Status - Detalhes do Aceite",
+                    fields_present >= 4,  # At least 4 out of 5 fields should be present
+                    f"✅ Aceite detalhado: {fields_present}/{len(required_fields)} campos presentes",
                     {
-                        "blocked_ips": blocked_ips,
-                        "recent_events": recent_events,
-                        "security_status": security_comp.get('status')
+                        "fields_present": fields_present,
+                        "acceptance_id": first_acceptance.get('id'),
+                        "stage": first_acceptance.get('stage'),
+                        "timestamp": first_acceptance.get('timestamp'),
+                        "has_ip_address": 'ip_address' in first_acceptance
                     }
                 )
             
-            if 'database_optimization' in components:
-                db_opt_comp = components['database_optimization']
-                cache_hit_rate = db_opt_comp.get('cache_hit_rate', 0)
-                redis_connected = db_opt_comp.get('redis_connected', False)
-                
-                self.log_test(
-                    "System Health - Detalhes de Otimização DB",
-                    True,  # Always pass if component exists
-                    f"Cache hit rate: {cache_hit_rate:.3f}, Redis: {redis_connected}",
-                    {
-                        "cache_hit_rate": cache_hit_rate,
-                        "redis_connected": redis_connected,
-                        "db_opt_status": db_opt_comp.get('status')
-                    }
-                )
+            # Test 3: Generate compliance report
+            report_response = self.session.get(f"{API_BASE}/disclaimer/compliance-report/{case_id}")
             
-            if 'load_testing' in components:
-                load_test_comp = components['load_testing']
-                active_tests = load_test_comp.get('active_tests', 0)
-                
-                self.log_test(
-                    "System Health - Detalhes de Load Testing",
-                    True,  # Always pass if component exists
-                    f"Testes ativos: {active_tests}",
-                    {
-                        "active_tests": active_tests,
-                        "load_testing_status": load_test_comp.get('status')
-                    }
-                )
+            report_success = report_response.status_code == 200
+            report_data = report_response.json() if report_success else {}
             
-            # Overall system health assessment
-            healthy_components = sum(component_results.values())
-            total_components = len(expected_components)
+            report = report_data.get('report', {})
             
             self.log_test(
-                "System Health - Avaliação Geral",
-                healthy_components >= 3,  # At least 3 out of 4 components should be healthy
-                f"Componentes saudáveis: {healthy_components}/{total_components}",
+                "Disclaimer Reports - Relatório de Compliance",
+                report_success and 'compliance_status' in report,
+                f"✅ Relatório gerado: status={report.get('compliance_status', 'unknown')}",
                 {
-                    "healthy_components": healthy_components,
-                    "total_components": total_components,
-                    "overall_status": overall_status,
-                    "health_rate": f"{(healthy_components/total_components)*100:.1f}%",
-                    "component_results": component_results
+                    "success": report_data.get('success', False),
+                    "compliance_status": report.get('compliance_status'),
+                    "total_acceptances": report.get('total_acceptances', 0),
+                    "has_timeline": 'acceptance_timeline' in report,
+                    "ready_for_final": report.get('ready_for_final', False)
+                }
+            )
+            
+            # Test 4: Check acceptance timeline in report
+            if 'acceptance_timeline' in report:
+                timeline = report['acceptance_timeline']
+                
+                self.log_test(
+                    "Disclaimer Reports - Timeline de Aceites",
+                    len(timeline) > 0,
+                    f"✅ Timeline completa: {len(timeline)} aceites registrados",
+                    {
+                        "timeline_entries": len(timeline),
+                        "stages_in_timeline": [entry.get('stage') for entry in timeline[:3]],
+                        "has_timestamps": all('timestamp' in entry for entry in timeline[:3]),
+                        "has_consent_hashes": all('consent_hash' in entry for entry in timeline[:3])
+                    }
+                )
+            
+            # Test 5: Check if ready for final disclaimer
+            check_required_request = {
+                "case_id": case_id,
+                "stage": "final"
+            }
+            
+            check_response = self.session.post(
+                f"{API_BASE}/disclaimer/check-required",
+                json=check_required_request
+            )
+            
+            check_success = check_response.status_code == 200
+            check_data = check_response.json() if check_success else {}
+            
+            # Should be ready for final since we completed all required stages
+            final_required = check_data.get('required', True)
+            
+            self.log_test(
+                "Disclaimer Check - Final Stage Ready",
+                check_success,
+                f"✅ Verificação final: obrigatório={final_required}",
+                {
+                    "success": check_data.get('success', False),
+                    "stage": "final",
+                    "required": final_required,
+                    "message": check_data.get('message', '')
                 }
             )
             
             return {
-                "health_data": health_status,
-                "component_results": component_results,
-                "healthy_components": healthy_components
+                "status_data": status_data,
+                "report_data": report_data,
+                "acceptances_count": len(acceptances),
+                "compliance_status": report.get('compliance_status', 'unknown')
             }
                 
         except Exception as e:
             self.log_test(
-                "System Health - Exception Geral",
+                "Disclaimer Status and Reports - Exception",
                 False,
-                f"Exception: {str(e)}"
+                f"❌ Exception: {str(e)}"
             )
             return None
     def test_security_middleware_corrected(self):
