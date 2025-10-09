@@ -802,120 +802,182 @@ class Phase4AEnhancedTester:
             return None
     
     def test_pdf_generation_with_real_data(self):
-        """TESTE 5: Funcionalidade da Dra. Ana (FormValidationAgent)"""
-        print("👩‍⚕️ TESTE 5: Dra. Ana - FormValidationAgent")
+        """TESTE 5: PDF Generation with Real Data - _generate_real_index_pdf() e _create_master_packet_with_real_data()"""
+        print("📄 TESTE 5: Geração de PDF com Dados Reais")
+        
+        # Create test case with documents
+        case_id = self.create_test_case_with_documents()
+        if not case_id:
+            self.log_test(
+                "PDF Generation - Criação de Caso",
+                False,
+                "Falha ao criar caso de teste"
+            )
+            return None
         
         try:
-            # Test with incomplete form data to trigger validation errors
-            incomplete_form_data = {
-                "full_name": "Carlos Silva",
-                "date_of_birth": "05/15/1990",
-                # Missing required fields like passport_number, employer_name, etc.
-            }
-            
+            # Start finalization to trigger PDF generation
             request_data = {
-                "form_data": incomplete_form_data,
-                "visa_type": "H-1B",
-                "step_id": "form_review"
+                "scenario_key": "H-1B_basic",
+                "postage": "USPS",
+                "language": "pt"
             }
             
-            response = self.session.post(
-                f"{API_BASE}/intelligent-forms/validate",
+            start_response = self.session.post(
+                f"{API_BASE}/cases/{case_id}/finalize/start",
                 json=request_data
             )
             
-            if response.status_code == 200:
-                result = response.json()
-                validation_result = result.get('validation_result', {})
+            if start_response.status_code != 200:
+                self.log_test(
+                    "PDF Generation - Job Creation",
+                    False,
+                    f"Falha ao criar job: HTTP {start_response.status_code}",
+                    start_response.text
+                )
+                return None
+            
+            job_id = start_response.json().get('job_id')
+            if not job_id:
+                self.log_test(
+                    "PDF Generation - Job ID",
+                    False,
+                    "Job ID não retornado"
+                )
+                return None
+            
+            # Wait for PDF generation
+            print(f"⏳ Aguardando geração de PDF para job {job_id}...")
+            time.sleep(6)  # Extra time for PDF processing
+            
+            # Check job status for PDF generation results
+            status_response = self.session.get(
+                f"{API_BASE}/cases/finalize/{job_id}/status"
+            )
+            
+            if status_response.status_code == 200:
+                status_data = status_response.json()
                 
-                # Check if Dra. Ana detected missing fields
-                errors = validation_result.get('errors', [])
-                has_errors = len(errors) > 0
+                # Check if PDF links are available
+                links = status_data.get('links', {})
+                has_pdf_links = len(links) > 0
                 
                 self.log_test(
-                    "Dra. Ana - Detecção de Campos Faltando",
-                    has_errors,
-                    f"Detectados {len(errors)} erros em formulário incompleto",
+                    "PDF Generation - Links de Download",
+                    has_pdf_links,
+                    f"Links disponíveis: {list(links.keys())}",
                     {
-                        "errors_count": len(errors),
-                        "sample_errors": errors[:3] if errors else []
+                        "links_count": len(links),
+                        "available_links": list(links.keys()),
+                        "master_packet_link": links.get('master_packet')
                     }
                 )
                 
-                # Check completeness score
-                completeness_score = validation_result.get('completeness_score', 0)
-                has_completeness = completeness_score > 0
-                
-                self.log_test(
-                    "Dra. Ana - Score de Completude",
-                    has_completeness,
-                    f"Score de completude: {completeness_score}%",
-                    {
-                        "completeness_score": completeness_score,
-                        "is_valid": validation_result.get('is_valid', False)
-                    }
+                # Get preview to check PDF generation details
+                preview_response = self.session.get(
+                    f"{API_BASE}/cases/finalize/{job_id}/preview"
                 )
                 
-                # Test with complete form data
-                complete_form_data = {
-                    "full_name": "Carlos Eduardo Silva",
-                    "date_of_birth": "05/15/1990",
-                    "place_of_birth": "São Paulo, SP, Brasil",
-                    "passport_number": "YC792396",
-                    "passport_country": "Brazil",
-                    "current_address": "Rua das Flores, 123, São Paulo, SP",
-                    "phone": "+55 11 99999-9999",
-                    "email": "carlos.silva@test.com",
-                    "employer_name": "TechCorp Inc.",
-                    "job_title": "Software Engineer",
-                    "specialty_occupation": "Computer Systems Analyst",
-                    "salary": "85000",
-                    "start_date": "01/15/2025"
-                }
-                
-                complete_request = {
-                    "form_data": complete_form_data,
-                    "visa_type": "H-1B",
-                    "step_id": "form_review"
-                }
-                
-                complete_response = self.session.post(
-                    f"{API_BASE}/intelligent-forms/validate",
-                    json=complete_request
-                )
-                
-                if complete_response.status_code == 200:
-                    complete_result = complete_response.json()
-                    complete_validation = complete_result.get('validation_result', {})
+                if preview_response.status_code == 200:
+                    preview_data = preview_response.json()
+                    document_summary = preview_data.get('document_summary', [])
                     
-                    # Check if complete form has higher completeness
-                    complete_score = complete_validation.get('completeness_score', 0)
-                    score_improved = complete_score > completeness_score
+                    # Check if documents were processed for PDF
+                    processed_docs = len(document_summary)
+                    has_processed_docs = processed_docs > 0
                     
                     self.log_test(
-                        "Dra. Ana - Formulário Completo vs Incompleto",
-                        score_improved,
-                        f"Score melhorou: {completeness_score}% → {complete_score}%",
+                        "PDF Generation - Documentos Processados",
+                        has_processed_docs,
+                        f"Documentos processados para PDF: {processed_docs}",
                         {
-                            "incomplete_score": completeness_score,
-                            "complete_score": complete_score,
-                            "improvement": complete_score - completeness_score
+                            "processed_documents": processed_docs,
+                            "sample_documents": [d.get('name', 'unknown') for d in document_summary[:3]] if document_summary else []
                         }
                     )
-                
-                return result
+                    
+                    # Check document processing details
+                    if document_summary:
+                        doc_statuses = {}
+                        total_pages = 0
+                        
+                        for doc in document_summary:
+                            status = doc.get('status', 'unknown')
+                            doc_statuses[status] = doc_statuses.get(status, 0) + 1
+                            total_pages += doc.get('pages', 0)
+                        
+                        self.log_test(
+                            "PDF Generation - Status dos Documentos",
+                            'included' in doc_statuses or 'referenced' in doc_statuses,
+                            f"Status: {doc_statuses}, Total páginas: {total_pages}",
+                            {
+                                "document_statuses": doc_statuses,
+                                "total_pages": total_pages,
+                                "included_docs": doc_statuses.get('included', 0),
+                                "referenced_docs": doc_statuses.get('referenced', 0)
+                            }
+                        )
+                    
+                    # Check metadata for PDF generation
+                    metadata = preview_data.get('metadata', {})
+                    packet_stats = metadata.get('packet_statistics', {}) if metadata else {}
+                    
+                    has_packet_stats = len(packet_stats) > 0
+                    
+                    self.log_test(
+                        "PDF Generation - Estatísticas do Pacote",
+                        has_packet_stats,
+                        f"Estatísticas disponíveis: {len(packet_stats)} métricas",
+                        {
+                            "total_documents": packet_stats.get('total_documents_uploaded', 0),
+                            "documents_included": packet_stats.get('documents_included', 0),
+                            "total_pages": packet_stats.get('total_pages', 0),
+                            "avg_quality_score": packet_stats.get('avg_quality_score', 0)
+                        }
+                    )
+                    
+                    # Check quality assessment for PDF
+                    quality_assessment = preview_data.get('quality_assessment', {})
+                    has_quality_assessment = 'overall_score' in quality_assessment
+                    
+                    self.log_test(
+                        "PDF Generation - Avaliação de Qualidade",
+                        has_quality_assessment,
+                        f"Score geral: {quality_assessment.get('overall_score', 0)}, Recomendação: {quality_assessment.get('recommendation', 'N/A')}",
+                        {
+                            "overall_score": quality_assessment.get('overall_score', 0),
+                            "recommendation": quality_assessment.get('recommendation'),
+                            "critical_issues": quality_assessment.get('critical_issues', 0),
+                            "total_issues": quality_assessment.get('total_issues', 0)
+                        }
+                    )
+                    
+                    return {
+                        "job_id": job_id,
+                        "pdf_links": links,
+                        "processed_documents": processed_docs,
+                        "document_summary": document_summary,
+                        "packet_statistics": packet_stats
+                    }
+                else:
+                    self.log_test(
+                        "PDF Generation - Preview Data",
+                        False,
+                        f"HTTP {preview_response.status_code}",
+                        preview_response.text
+                    )
             else:
                 self.log_test(
-                    "Dra. Ana - Status 200 OK",
+                    "PDF Generation - Status Check",
                     False,
-                    f"HTTP {response.status_code}: {response.text[:200]}",
-                    {"status_code": response.status_code, "error": response.text}
+                    f"HTTP {status_response.status_code}",
+                    status_response.text
                 )
                 return None
                 
         except Exception as e:
             self.log_test(
-                "Dra. Ana - Status 200 OK",
+                "PDF Generation - Exception",
                 False,
                 f"Exception: {str(e)}"
             )
