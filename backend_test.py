@@ -502,7 +502,7 @@ class Phase4BProductionOptimizationTester:
             )
             return None
     
-    def test_multi_stage_workflow_system(self):
+    def test_database_optimization_system(self):
         """TESTE 4: Multi-Stage Workflow - 5 Etapas (Configuração → Auditoria → Preview → Consentimento → Downloads)"""
         print("🔄 TESTE 4: Sistema Multi-Etapas - Workflow Completo")
         
