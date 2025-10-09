@@ -329,17 +329,26 @@ Authority: DPF
         print("Cenário: Usuário enviou CNH quando era esperado passaporte")
         
         try:
-            # Simular arquivo grande (> 2.5MB) que seria típico de passaporte
-            # quando o sistema espera diploma (ambos são requeridos para H-1B)
-            large_file_content = self.create_large_document_content("Maria Santos\nPassport No: BR123456")
+            # Simular arquivo pequeno com conteúdo de CNH quando esperado é passaporte
+            cnh_content = """CNH - CARTEIRA NACIONAL DE HABILITAÇÃO
+DETRAN - DEPARTAMENTO DE TRÂNSITO
+MARIA SANTOS
+Categoria: B
+Número: 98765432101
+Data de Nascimento: 20/08/1985
+CPF: 987.654.321-00
+RG: 9876543
+Data de Emissão: 15/06/2019
+Data de Validade: 15/06/2024
+""" + "Padding content to reach adequate size for analysis. " * 2000  # Make it > 50KB
             
             files = {
-                'file': ('passport_maria.pdf', large_file_content, 'application/pdf')
+                'file': ('cnh_maria.pdf', cnh_content.encode('utf-8'), 'application/pdf')
             }
             data = {
-                'document_type': 'diploma',  # Sistema espera diploma
-                'visa_type': 'H-1B',  # H-1B requer tanto diploma quanto passaporte
-                'case_id': 'TEST-DIPLOMA-PASSPORT'
+                'document_type': 'passport',  # Sistema espera passaporte
+                'visa_type': 'H-1B',  # H-1B requer passaporte
+                'case_id': 'TEST-TYPE-VALIDATION'
             }
             
             headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
