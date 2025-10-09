@@ -214,9 +214,13 @@ class DatabaseOptimizationSystem:
                 IndexModel([("timestamp", DESCENDING), ("metric_type", ASCENDING)])
             ]
             
-            await self.db.analytics_events.create_indexes(analytics_indexes)
+            try:
+                await self.db.analytics_events.create_indexes(analytics_indexes)
+                logger.info("✅ Analytics indexes created")
+            except Exception as e:
+                logger.warning(f"⚠️ Analytics indexes error (may already exist): {e}")
             
-            logger.info("✅ Performance indexes created successfully")
+            logger.info("✅ Performance indexes initialization completed")
             
         except Exception as e:
             logger.error(f"❌ Error creating indexes: {e}")
