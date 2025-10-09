@@ -60,7 +60,7 @@ class RealDocumentVisionAnalyzer:
             logger.error("No API key found for document analysis")
             raise ValueError("EMERGENT_LLM_KEY or OPENAI_API_KEY is required")
         
-        logger.info(f"🔧 Real Document Vision Analyzer initialized with {'EMERGENT_LLM_KEY' if os.getenv('EMERGENT_LLM_KEY') else 'OPENAI_API_KEY'}")
+        logger.info(f"🔧 Real Document Vision Analyzer initialized with user's OPENAI_API_KEY")
     
     async def analyze_document_with_real_vision(
         self,
