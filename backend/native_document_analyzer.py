@@ -298,8 +298,9 @@ Forneça análise detalhada em português brasileiro com dados REAIS extraídos 
             confidence=0.60,
             extracted_fields={
                 "file_size": file_size,
-                "analysis_method": "fallback",
-                "error": error_message
+                "analysis_method": "fallback_native",
+                "error": error_message,
+                "timestamp": datetime.now(timezone.utc).isoformat()
             },
             full_text=f"Análise de fallback devido a erro: {error_message}",
             validation_issues=validation_issues,
@@ -307,30 +308,6 @@ Forneça análise detalhada em português brasileiro com dados REAIS extraídos 
             expiry_status="unknown",
             name_match_status="error",
             type_match_status="error"
-        )
-        
-        # Criar resultado
-        is_valid = len(validation_issues) == 0
-        
-        extracted_fields = {
-            "document_type": detected_type,
-            "expected_type": expected_type,
-            "file_size": file_size,
-            "analysis_method": "native",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "type_mismatch": detected_type != expected_type
-        }
-        
-        return NativeAnalysisResult(
-            document_type=detected_type,
-            confidence=type_confidence,
-            extracted_fields=extracted_fields,
-            full_text=f"Documento {detected_type} analisado nativamente",
-            validation_issues=validation_issues,
-            is_valid=is_valid,
-            expiry_status=expiry_status,
-            name_match_status=name_match_status,
-            type_match_status="match" if detected_type == expected_type else "mismatch"
         )
     
     def _detect_document_type(self, file_content: bytes, expected_type: str) -> str:
