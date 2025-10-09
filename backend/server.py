@@ -8197,7 +8197,30 @@ async def analyze_document_with_real_ai(
                 case_id=case_id
             )
             
-            logger.info(f"✅ Real Vision analysis complete")
+            logger.info(f"✅ Native LLM analysis complete")
+            
+            # FASE 3: CONSOLIDATE NATIVE ANALYSIS WITH POLICY ENGINE
+            native_issues = native_result.validation_issues
+            
+            # Convert native result to expected format
+            vision_result = {
+                "detected_type": native_result.document_type,
+                "confidence": native_result.confidence,
+                "text_content": native_result.full_text,
+                "extracted_fields": native_result.extracted_fields,
+                "quality_score": native_result.confidence,
+                "security_features": [],  # Native analyzer doesn't extract security features
+                "issues_found": native_issues,
+                "valid": native_result.is_valid,
+                "legible": True,
+                "completeness": int(native_result.confidence * 100),
+                "analysis_method": "native_llm_restored",
+                "full_text_extracted": native_result.full_text,
+                "expiry_status": native_result.expiry_status,
+                "name_match_status": native_result.name_match_status,
+                "type_match_status": native_result.type_match_status
+            }
+            
             logger.info(f"   → Result keys: {list(vision_result.keys())}")
             
             # Extract data from vision result
