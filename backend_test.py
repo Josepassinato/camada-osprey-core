@@ -10297,6 +10297,9 @@ def main():
     tester.test_error_handling()
     tester.test_integration_points()
     
+    # Execute specific passport document test (as requested in review)
+    tester.test_correct_passport_document_scenario()
+    
     # Execute specific Brazilian ID card mismatch test (as requested)
     tester.test_brazilian_id_card_mismatch_scenario()
     
