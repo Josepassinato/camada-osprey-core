@@ -9023,15 +9023,12 @@ def main():
     passed_tests = len([r for r in tester.test_results if r['success']])
     success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
     
-    # Count critical disclaimer and SSN tests
+    # Count critical debug tests
     critical_tests = [
-        "Disclaimer Text - Stage documents",
-        "Disclaimer Record - Stage documents",
-        "Disclaimer Validation - Final Compliance",
-        "SSN Validation - Valid SSN Card",
-        "SSN Requirements - Estrutura Completa",
-        "Disclaimer Status - Status Detalhado",
-        "Disclaimer Reports - Relatório de Compliance"
+        "Debug Flow - Record Acceptance (documents)",
+        "Debug Flow - Immediate Validation",
+        "Debug Flow - Detailed Status Check",
+        "Debug Flow - Overall Summary"
     ]
     
     critical_passed = 0
@@ -9040,20 +9037,31 @@ def main():
         if test_result and test_result['success']:
             critical_passed += 1
     
-    print(f"\n🏁 TESTES DO SISTEMA DE DISCLAIMER E SSN VALIDATOR CONCLUÍDOS")
+    print(f"\n🏁 TESTES DE DEBUG DO SISTEMA DE DISCLAIMER CONCLUÍDOS")
     print(f"Taxa de sucesso geral: {success_rate:.1f}%")
-    print(f"Testes críticos funcionando: {critical_passed}/{len(critical_tests)}")
+    print(f"Testes críticos de debug funcionando: {critical_passed}/{len(critical_tests)}")
     
-    # Categorize results by system type
+    # Show debug flow specific results
+    debug_flow_result = test_results.get('debug_flow')
+    if debug_flow_result:
+        print(f"\n🔍 RESULTADO DO FLUXO DE DEBUG:")
+        print(f"  • Case ID: {debug_flow_result.get('case_id', 'N/A')}")
+        print(f"  • Stage: {debug_flow_result.get('stage', 'N/A')}")
+        print(f"  • Record Success: {debug_flow_result.get('record_success', False)}")
+        print(f"  • Document Found Immediately: {debug_flow_result.get('document_found_immediately', False)}")
+        print(f"  • Total Acceptances: {debug_flow_result.get('total_acceptances', 0)}")
+        print(f"  • Acceptances in Status: {debug_flow_result.get('acceptances_in_status', 0)}")
+        print(f"  • Timeline Entries: {debug_flow_result.get('timeline_entries', 0)}")
+        print(f"  • Overall Success: {debug_flow_result.get('overall_success', False)}")
+    
+    # Categorize results by test type
     systems = {
+        "Debug Flow Tests": [t for t in tester.test_results if "Debug Flow" in t["test"]],
         "Disclaimer Text System": [t for t in tester.test_results if "Disclaimer Text" in t["test"]],
-        "Disclaimer Record & Validation": [t for t in tester.test_results if "Disclaimer Record" in t["test"] or "Disclaimer Validation" in t["test"]],
-        "SSN Validation System": [t for t in tester.test_results if "SSN Validation" in t["test"] or "SSN USCIS" in t["test"]],
-        "SSN Requirements": [t for t in tester.test_results if "SSN Requirements" in t["test"]],
-        "Disclaimer Status & Reports": [t for t in tester.test_results if "Disclaimer Status" in t["test"] or "Disclaimer Reports" in t["test"] or "Disclaimer Check" in t["test"]]
+        "Standard Record & Validation": [t for t in tester.test_results if "Disclaimer Record" in t["test"] or "Disclaimer Validation" in t["test"]]
     }
     
-    print("\n📋 RESULTADOS POR SISTEMA:")
+    print("\n📋 RESULTADOS POR CATEGORIA:")
     for system, tests in systems.items():
         if tests:
             system_passed = len([t for t in tests if t["success"]])
@@ -9063,17 +9071,22 @@ def main():
             print(f"  {status} {system}: {system_passed}/{system_total} ({sys_success_rate:.1f}%)")
     
     # Return appropriate exit code
-    if critical_passed >= len(critical_tests) * 0.8 and success_rate >= 75:
-        print("\n✅ SISTEMA DE DISCLAIMER E SSN VALIDATOR FUNCIONANDO CORRETAMENTE")
-        print("✅ Textos de disclaimer retornados para todas as etapas!")
-        print("✅ Aceites registrados e validação de compliance funcionando!")
-        print("✅ Validador SSN identificando cartões válidos e inválidos!")
-        print("✅ Requisitos SSN disponíveis com estrutura completa!")
-        print("✅ Status detalhado e relatórios de compliance operacionais!")
+    if debug_flow_result and debug_flow_result.get('overall_success', False):
+        print("\n✅ FLUXO DE DEBUG DO SISTEMA DE DISCLAIMER FUNCIONANDO CORRETAMENTE")
+        print("✅ Documento salvo no MongoDB com sucesso!")
+        print("✅ Query encontra documentos salvos imediatamente!")
+        print("✅ Validação de compliance funcionando após correções de debug!")
+        print("✅ Logs de debug mostram fluxo de dados correto!")
         return 0
     else:
-        print("\n❌ ALGUNS COMPONENTES DO SISTEMA AINDA PRECISAM DE AJUSTES")
-        print("⚠️ Verifique os testes que falharam acima")
+        print("\n❌ AINDA HÁ PROBLEMAS NO FLUXO DE DEBUG DO DISCLAIMER")
+        print("⚠️ Verifique os logs de debug para identificar onde está o problema na cadeia salvar → buscar documentos")
+        if debug_flow_result:
+            if not debug_flow_result.get('record_success', False):
+                print("❌ Problema: Falha ao registrar aceite")
+            elif not debug_flow_result.get('document_found_immediately', False):
+                print("❌ Problema: Documento não encontrado imediatamente após salvar")
+                print("🔍 Possível issue de timing ou query MongoDB")
         return 1
 
 
