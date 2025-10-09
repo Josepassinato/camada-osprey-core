@@ -230,7 +230,15 @@ PARA CASOS COMPLEXOS, SEMPRE CONSULTE UM ADVOGADO ESPECIALIZADO EM IMIGRAÇÃO.
             )
             
             # Salvar no banco
-            await self.collection.insert_one(acceptance.dict())
+            acceptance_dict = acceptance.dict()
+            logger.info(f"Saving acceptance to MongoDB: {acceptance_dict}")
+            
+            result = await self.collection.insert_one(acceptance_dict)
+            logger.info(f"Insert result: {result.inserted_id}")
+            
+            # Verificar se foi salvo
+            saved_doc = await self.collection.find_one({"_id": result.inserted_id})
+            logger.info(f"Saved document verification: {saved_doc}")
             
             logger.info(f"Disclaimer acceptance recorded: {case_id} - {stage.value}")
             return acceptance
