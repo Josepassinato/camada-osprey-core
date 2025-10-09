@@ -165,6 +165,59 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
     }
   };
 
+  const handlePacketApproval = async () => {
+    if (!job?.job_id) return;
+    
+    try {
+      setLoading(true);
+      const response = await makeApiCall(`/cases/finalize/${job.job_id}/approve`, {
+        method: 'POST',
+        body: JSON.stringify({
+          comments: 'Aprovado via interface de finalização',
+          approval_data: { timestamp: new Date().toISOString() }
+        })
+      });
+
+      if (response.ok) {
+        setCurrentStep(4);
+      } else {
+        throw new Error('Falha ao aprovar pacote');
+      }
+    } catch (error) {
+      console.error('Error approving packet:', error);
+      setError('Erro ao aprovar pacote. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePacketRejection = async (reason: string) => {
+    if (!job?.job_id) return;
+    
+    try {
+      setLoading(true);
+      const response = await makeApiCall(`/cases/finalize/${job.job_id}/reject`, {
+        method: 'POST',
+        body: JSON.stringify({
+          reason: reason,
+          rejection_data: { timestamp: new Date().toISOString() }
+        })
+      });
+
+      if (response.ok) {
+        setCurrentStep(2); // Volta para correções
+        setError(`Pacote rejeitado: ${reason}`);
+      } else {
+        throw new Error('Falha ao rejeitar pacote');
+      }
+    } catch (error) {
+      console.error('Error rejecting packet:', error);
+      setError('Erro ao rejeitar pacote. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const downloadFile = (url: string, filename: string) => {
     // Placeholder para download
     alert(`Download ${filename}: ${url}\n\n(MVP - Em produção faria download real)`);
