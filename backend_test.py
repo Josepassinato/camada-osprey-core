@@ -225,8 +225,8 @@ class DocumentAnalysisTester:
         print("Objetivo: Confirmar eliminação completa de dependências emergent")
         
         try:
-            # STEP 1: Test Real Vision Analysis with IMG_7602.png
-            print("📄 STEP 1: Testing Real Vision Analysis with IMG_7602.png")
+            # STEP 1: Test OpenAI Direct Integration with IMG_7602.png
+            print("📄 STEP 1: Testing OpenAI Direct Integration with IMG_7602.png")
             
             img_url = "https://customer-assets.emergentagent.com/job_formfill-aid/artifacts/hka5y6g5_IMG_7602.png"
             
@@ -238,14 +238,14 @@ class DocumentAnalysisTester:
                     
                     print(f"✅ Downloaded IMG_7602.png: {img_size} bytes")
                     
-                    # Upload for real vision analysis
+                    # Upload for OpenAI direct analysis
                     files_img = {
                         'file': ('IMG_7602.png', img_content, 'image/png')
                     }
                     data_img = {
                         'document_type': 'passport',
                         'visa_type': 'H-1B',
-                        'case_id': 'REAL-VISION-TEST-IMG7602'
+                        'case_id': 'OPENAI-DIRECT-TEST-IMG7602'
                     }
                     
                     headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
@@ -264,19 +264,19 @@ class DocumentAnalysisTester:
                         detected_type = extracted_data.get('detected_type', '')
                         confidence = extracted_data.get('confidence', 0)
                         
-                        # CRITICAL: Verify Real Vision Analysis (not simulation)
-                        is_real_vision = analysis_method == 'real_vision_openai'
+                        # CRITICAL: Verify OpenAI Direct Integration (no emergent)
+                        is_openai_direct = analysis_method in ['native_llm_restored', 'native_llm', 'openai_direct']
                         has_real_confidence = confidence > 0.8  # Real analysis should have high confidence
-                        not_simulation = analysis_method != 'simulation' and analysis_method != 'fallback_simulation'
+                        no_emergent_method = 'emergent' not in analysis_method.lower()
                         
                         self.log_test(
-                            "Real Vision - IMG_7602 Analysis Method",
-                            is_real_vision and not_simulation,
-                            f"✅ Real vision analysis: method={analysis_method}, confidence={confidence}",
+                            "OpenAI Direct - IMG_7602 Analysis Method",
+                            is_openai_direct and no_emergent_method,
+                            f"✅ OpenAI direct analysis: method={analysis_method}, confidence={confidence}",
                             {
                                 "analysis_method": analysis_method,
-                                "is_real_vision": is_real_vision,
-                                "not_simulation": not_simulation,
+                                "is_openai_direct": is_openai_direct,
+                                "no_emergent_method": no_emergent_method,
                                 "confidence": confidence,
                                 "detected_type": detected_type,
                                 "has_real_confidence": has_real_confidence
