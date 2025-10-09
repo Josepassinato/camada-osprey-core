@@ -1178,12 +1178,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "USCIS Form Progress Saving System - Save Form Data"
-    - "USCIS Form Progress Saving System - Retrieve Form Data"
-    - "USCIS Form Progress Saving System - Progressive Saving"
-    - "USCIS Form Progress Saving System - Form Authorization"
-    - "USCIS Form Progress Saving System - Edge Cases"
-  stuck_tasks: []
+    - "Enhanced USCIS Form Progress Saving - SaveAndContinueModal Auto-Save"
+    - "Enhanced USCIS Form Progress Saving - Auto-Save Functionality"
+    - "Enhanced USCIS Form Progress Saving - Form Data Persistence"
+  stuck_tasks:
+    - "Sistema de Tutor Inteligente - Integração Frontend Completa"
   test_all: false
   test_priority: "high_first"
 
