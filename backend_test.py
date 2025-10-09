@@ -4316,6 +4316,8 @@ Documento de identidade brasileiro
         
         # Cache collision specific tests
         cache_tests = [
+            "IMG_7602 - Cache Collision Resolution",
+            "IMG_7602 - Fresh Analysis Verification",
             "Cache Collision - Sequential Document Analysis",
             "Cache Collision - No Cross-Contamination", 
             "Real Document - No Cross-Contamination",
