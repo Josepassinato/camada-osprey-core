@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-TESTE DO SISTEMA DE VALIDAÇÃO DE DOCUMENTOS NATIVO
-Testa o novo sistema de validação que substitui Google Document AI por análise nativa do LLM
+TESTE DO SISTEMA DE VISÃO REAL - REAL VISION ANALYZER
+Testa o novo sistema de visão computacional nativa que usa real_vision_analyzer.py
+Foco específico: análise visual direta de documentos com capacidade nativa
 """
 
 import requests
