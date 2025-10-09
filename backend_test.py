@@ -221,62 +221,10 @@ class DocumentAnalysisTester:
         print("Cenário: Upload sequencial de documentos diferentes para verificar análises únicas")
         
         try:
-            # Create H-1B case with proper basic_info data
-            case_data = {
-                "form_code": "H-1B",
-                "session_token": f"test_session_{uuid.uuid4().hex[:8]}"
-            }
+            # STEP 1: Upload Document A (Brazilian Passport)
+            print("📄 STEP 1: Uploading Document A (Brazilian Passport)")
             
-            case_response = self.session.post(
-                f"{API_BASE}/auto-application/start",
-                json=case_data
-            )
-            
-            if case_response.status_code != 200:
-                self.log_test(
-                    "Real Vision Analysis - Case Creation",
-                    False,
-                    f"❌ Failed to create case: {case_response.status_code}",
-                    {"error": case_response.text[:200]}
-                )
-                return
-            
-            case_result = case_response.json()
-            case_id = case_result.get('case', {}).get('case_id')
-            
-            # Add basic_info data to prevent NoneType error
-            basic_info_data = {
-                "firstName": "Carlos",
-                "lastName": "Silva",
-                "email": "carlos.silva@test.com",
-                "phone": "+55 11 99999-9999",
-                "dateOfBirth": "1990-05-15",
-                "placeOfBirth": "São Paulo, SP, Brasil",
-                "nationality": "Brazilian"
-            }
-            
-            # Update case with form_data containing basic_info
-            update_response = self.session.patch(
-                f"{API_BASE}/auto-application/case/{case_id}",
-                json={
-                    "form_data": {
-                        "basic_info": basic_info_data
-                    },
-                    "current_step": "documents"
-                }
-            )
-            
-            if update_response.status_code != 200:
-                self.log_test(
-                    "Real Vision Analysis - Case Update",
-                    False,
-                    f"❌ Failed to update case: {update_response.status_code}",
-                    {"case_id": case_id, "error": update_response.text[:200]}
-                )
-                return
-            
-            # Now test document analysis with real case data
-            passport_content = """PASSPORT
+            passport_content_a = """PASSPORT
 REPÚBLICA FEDERATIVA DO BRASIL
 PASSPORT
 Type: P
@@ -291,101 +239,224 @@ Place of Birth: SAO PAULO, SP
 Date of Issue: 10/01/2020
 Date of Expiry: 10/01/2030
 Authority: DPF
-""" + "Padding content to reach adequate size for real vision analysis. " * 2000
+MRZ Line 1: P<BRASILVA<<CARLOS<EDUARDO<<<<<<<<<<<<<<<<<<<
+MRZ Line 2: BR1234567890BRA9003151M3001105<<<<<<<<<<<<<<04
+""" + "Brazilian passport content with unique identifiers. " * 2500
             
-            files = {
-                'file': ('passport_carlos.pdf', passport_content.encode('utf-8'), 'application/pdf')
+            files_a = {
+                'file': ('passport_carlos_silva.pdf', passport_content_a.encode('utf-8'), 'application/pdf')
             }
-            data = {
+            data_a = {
                 'document_type': 'passport',
                 'visa_type': 'H-1B',
-                'case_id': case_id  # Use real case with basic_info
+                'case_id': 'CACHE-TEST-DOC-A'
             }
             
             headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
             
-            response = requests.post(
+            response_a = requests.post(
                 f"{API_BASE}/documents/analyze-with-ai",
-                files=files,
-                data=data,
+                files=files_a,
+                data=data_a,
                 headers=headers
             )
             
-            if response.status_code == 200:
-                result = response.json()
-                
-                # Check if real vision analysis completed successfully
-                extracted_data = result.get('extracted_data', {})
-                analysis_method = extracted_data.get('analysis_method', '')
-                confidence = extracted_data.get('confidence', 0)
-                detected_type = extracted_data.get('detected_type', '')
-                
-                # Check for real vision indicators
-                real_vision_used = 'real_vision' in analysis_method.lower() if analysis_method else False
-                high_confidence = confidence >= 0.85 if confidence else False
-                
+            if response_a.status_code != 200:
                 self.log_test(
-                    "Real Vision Analysis - Method Used",
-                    real_vision_used,
-                    f"✅ Real vision analysis: method={analysis_method}, confidence={confidence}",
-                    {
-                        "case_id": case_id,
-                        "analysis_method": analysis_method,
-                        "confidence": confidence,
-                        "detected_type": detected_type,
-                        "real_vision_used": real_vision_used,
-                        "high_confidence": high_confidence
-                    }
-                )
-                
-                # Check for precision improvements
-                completeness = result.get('completeness', 0)
-                security_features = extracted_data.get('security_features', {})
-                full_text_extracted = extracted_data.get('full_text_extracted', '')
-                
-                precision_improved = completeness >= 85 and len(str(security_features)) > 10
-                
-                self.log_test(
-                    "Real Vision Analysis - Precision Improvement",
-                    precision_improved,
-                    f"✅ Precision improved: completeness={completeness}%, security_features={len(str(security_features))} chars",
-                    {
-                        "completeness": completeness,
-                        "security_features_length": len(str(security_features)),
-                        "full_text_length": len(full_text_extracted),
-                        "precision_improved": precision_improved,
-                        "has_security_features": bool(security_features),
-                        "has_full_text": bool(full_text_extracted)
-                    }
-                )
-                
-                # Check that no NoneType errors occurred
-                is_valid = result.get('valid', False)
-                no_errors = 'error' not in str(result).lower() and 'nonetype' not in str(result).lower()
-                
-                self.log_test(
-                    "Real Vision Analysis - Error Prevention",
-                    no_errors and is_valid,
-                    f"✅ No NoneType errors: valid={is_valid}, no_errors={no_errors}",
-                    {
-                        "valid": is_valid,
-                        "no_errors": no_errors,
-                        "case_id": case_id,
-                        "applicant_name_used": "Carlos Silva"  # Should use real name from basic_info
-                    }
-                )
-                
-            else:
-                self.log_test(
-                    "Real Vision Analysis - Document Processing",
+                    "Cache Collision - Document A Upload",
                     False,
-                    f"❌ HTTP {response.status_code}",
-                    {"status_code": response.status_code, "error": response.text[:200]}
+                    f"❌ Failed to upload Document A: {response_a.status_code}",
+                    {"error": response_a.text[:200]}
+                )
+                return
+            
+            result_a = response_a.json()
+            extracted_data_a = result_a.get('extracted_data', {})
+            detected_type_a = extracted_data_a.get('detected_type', '')
+            completeness_a = result_a.get('completeness', 0)
+            
+            self.log_test(
+                "Cache Collision - Document A Analysis",
+                True,
+                f"✅ Document A analyzed: type={detected_type_a}, completeness={completeness_a}%",
+                {
+                    "document": "A (Passport)",
+                    "detected_type": detected_type_a,
+                    "completeness": completeness_a,
+                    "valid": result_a.get('valid', False),
+                    "analysis_method": extracted_data_a.get('analysis_method', ''),
+                    "confidence": extracted_data_a.get('confidence', 0)
+                }
+            )
+            
+            # STEP 2: Upload Document B (Brazilian Driver's License) - Different content, similar size
+            print("📄 STEP 2: Uploading Document B (Brazilian Driver's License)")
+            time.sleep(1)  # Small delay to ensure different timestamp
+            
+            cnh_content_b = """CNH - CARTEIRA NACIONAL DE HABILITAÇÃO
+DETRAN - DEPARTAMENTO DE TRÂNSITO DO ESTADO DE SÃO PAULO
+MARIA SANTOS OLIVEIRA
+Categoria: AB
+Número: 98765432101
+Data de Nascimento: 20/08/1985
+CPF: 987.654.321-00
+RG: 9876543-2 SSP/SP
+Filiação: JOSÉ SANTOS / ANA OLIVEIRA
+Data de Emissão: 15/06/2019
+Data de Validade: 15/06/2029
+Local de Nascimento: RIO DE JANEIRO - RJ
+Observações: DOADOR DE ÓRGÃOS E TECIDOS
+""" + "Brazilian driver's license content with unique identifiers. " * 2500
+            
+            files_b = {
+                'file': ('cnh_maria_santos.pdf', cnh_content_b.encode('utf-8'), 'application/pdf')
+            }
+            data_b = {
+                'document_type': 'driver_license',
+                'visa_type': 'H-1B',
+                'case_id': 'CACHE-TEST-DOC-B'
+            }
+            
+            response_b = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files_b,
+                data=data_b,
+                headers=headers
+            )
+            
+            if response_b.status_code != 200:
+                self.log_test(
+                    "Cache Collision - Document B Upload",
+                    False,
+                    f"❌ Failed to upload Document B: {response_b.status_code}",
+                    {"error": response_b.text[:200]}
+                )
+                return
+            
+            result_b = response_b.json()
+            extracted_data_b = result_b.get('extracted_data', {})
+            detected_type_b = extracted_data_b.get('detected_type', '')
+            completeness_b = result_b.get('completeness', 0)
+            
+            self.log_test(
+                "Cache Collision - Document B Analysis",
+                True,
+                f"✅ Document B analyzed: type={detected_type_b}, completeness={completeness_b}%",
+                {
+                    "document": "B (Driver's License)",
+                    "detected_type": detected_type_b,
+                    "completeness": completeness_b,
+                    "valid": result_b.get('valid', False),
+                    "analysis_method": extracted_data_b.get('analysis_method', ''),
+                    "confidence": extracted_data_b.get('confidence', 0)
+                }
+            )
+            
+            # STEP 3: Verify No Cache Collision - Documents should have different results
+            print("🔍 STEP 3: Verifying No Cache Collision")
+            
+            # Check that detected types are different (passport vs driver_license)
+            types_are_different = detected_type_a.lower() != detected_type_b.lower()
+            
+            # Check that completeness scores are different (different document quality)
+            completeness_different = abs(completeness_a - completeness_b) > 5  # At least 5% difference
+            
+            # Check that extracted data is different
+            extracted_different = str(extracted_data_a) != str(extracted_data_b)
+            
+            # Check for passport-specific content in Document A
+            passport_indicators_a = any(word in str(result_a).lower() for word in ['passport', 'passaporte', 'carlos', 'silva'])
+            
+            # Check for CNH-specific content in Document B  
+            cnh_indicators_b = any(word in str(result_b).lower() for word in ['cnh', 'carteira', 'habilitação', 'maria', 'santos'])
+            
+            no_cache_collision = (
+                types_are_different and 
+                completeness_different and 
+                extracted_different and
+                passport_indicators_a and 
+                cnh_indicators_b
+            )
+            
+            self.log_test(
+                "Cache Collision - No Cross-Contamination",
+                no_cache_collision,
+                f"✅ No cache collision: types_diff={types_are_different}, completeness_diff={completeness_different}, data_diff={extracted_different}",
+                {
+                    "no_cache_collision": no_cache_collision,
+                    "types_different": types_are_different,
+                    "completeness_different": completeness_different,
+                    "extracted_data_different": extracted_different,
+                    "passport_indicators_in_a": passport_indicators_a,
+                    "cnh_indicators_in_b": cnh_indicators_b,
+                    "doc_a_type": detected_type_a,
+                    "doc_b_type": detected_type_b,
+                    "completeness_diff": abs(completeness_a - completeness_b)
+                }
+            )
+            
+            # STEP 4: Test with similar file sizes to ensure cache key uniqueness
+            print("📊 STEP 4: Testing Cache Key Uniqueness with Similar File Sizes")
+            
+            # Create Document C with similar size to Document A but different content
+            birth_cert_content_c = """CERTIDÃO DE NASCIMENTO
+BIRTH CERTIFICATE
+CARTÓRIO DO REGISTRO CIVIL
+Nome: JOÃO CARLOS PEREIRA
+Data de Nascimento: 12/12/1988
+Local: BRASÍLIA - DF
+Pai: ANTONIO PEREIRA
+Mãe: LUCIA PEREIRA
+Cartório: 1º OFÍCIO DE REGISTRO CIVIL
+Livro: 123 Folha: 456 Termo: 789
+Data de Emissão: 01/02/2020
+""" + "Birth certificate content with unique identifiers. " * 2500  # Similar size to passport
+            
+            files_c = {
+                'file': ('birth_cert_joao.pdf', birth_cert_content_c.encode('utf-8'), 'application/pdf')
+            }
+            data_c = {
+                'document_type': 'birth_certificate',
+                'visa_type': 'H-1B',
+                'case_id': 'CACHE-TEST-DOC-C'
+            }
+            
+            response_c = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files_c,
+                data=data_c,
+                headers=headers
+            )
+            
+            if response_c.status_code == 200:
+                result_c = response_c.json()
+                extracted_data_c = result_c.get('extracted_data', {})
+                detected_type_c = extracted_data_c.get('detected_type', '')
+                
+                # Verify Document C gets unique analysis despite similar size
+                c_unique_from_a = (
+                    detected_type_c.lower() != detected_type_a.lower() and
+                    str(extracted_data_c) != str(extracted_data_a)
                 )
                 
+                birth_cert_indicators_c = any(word in str(result_c).lower() for word in ['birth', 'nascimento', 'certidão', 'joão', 'pereira'])
+                
+                self.log_test(
+                    "Cache Collision - Similar Size Uniqueness",
+                    c_unique_from_a and birth_cert_indicators_c,
+                    f"✅ Similar size documents unique: C_type={detected_type_c}, unique_from_A={c_unique_from_a}",
+                    {
+                        "doc_c_type": detected_type_c,
+                        "unique_from_doc_a": c_unique_from_a,
+                        "birth_cert_indicators": birth_cert_indicators_c,
+                        "file_sizes_similar": True,  # Both padded to similar sizes
+                        "content_different": True
+                    }
+                )
+            
         except Exception as e:
             self.log_test(
-                "Real Vision Analysis - Exception",
+                "Cache Collision - Sequential Upload Test",
                 False,
                 f"❌ Exception: {str(e)}"
             )
