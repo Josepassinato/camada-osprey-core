@@ -202,9 +202,480 @@ class DocumentAnalysisTester:
             print(f"❌ Erro ao criar caso de teste: {str(e)}")
             return None
 
+    def test_real_vision_analysis_with_case_data(self):
+        """SCENARIO 1: Document Analysis with Real Case Data - Test real vision path"""
+        print("🎯 SCENARIO 1: Document Analysis with Real Case Data")
+        print("Cenário: Criar caso H-1B com basic_info e testar real vision analysis")
+        
+        try:
+            # Create H-1B case with proper basic_info data
+            case_data = {
+                "form_code": "H-1B",
+                "session_token": f"test_session_{uuid.uuid4().hex[:8]}"
+            }
+            
+            case_response = self.session.post(
+                f"{API_BASE}/auto-application/start",
+                json=case_data
+            )
+            
+            if case_response.status_code != 200:
+                self.log_test(
+                    "Real Vision Analysis - Case Creation",
+                    False,
+                    f"❌ Failed to create case: {case_response.status_code}",
+                    {"error": case_response.text[:200]}
+                )
+                return
+            
+            case_result = case_response.json()
+            case_id = case_result.get('case', {}).get('case_id')
+            
+            # Add basic_info data to prevent NoneType error
+            basic_info_data = {
+                "firstName": "Carlos",
+                "lastName": "Silva",
+                "email": "carlos.silva@test.com",
+                "phone": "+55 11 99999-9999",
+                "dateOfBirth": "1990-05-15",
+                "placeOfBirth": "São Paulo, SP, Brasil",
+                "nationality": "Brazilian"
+            }
+            
+            # Update case with form_data containing basic_info
+            update_response = self.session.patch(
+                f"{API_BASE}/auto-application/case/{case_id}",
+                json={
+                    "form_data": {
+                        "basic_info": basic_info_data
+                    },
+                    "current_step": "documents"
+                }
+            )
+            
+            if update_response.status_code != 200:
+                self.log_test(
+                    "Real Vision Analysis - Case Update",
+                    False,
+                    f"❌ Failed to update case: {update_response.status_code}",
+                    {"case_id": case_id, "error": update_response.text[:200]}
+                )
+                return
+            
+            # Now test document analysis with real case data
+            passport_content = """PASSPORT
+REPÚBLICA FEDERATIVA DO BRASIL
+PASSPORT
+Type: P
+Country Code: BRA
+Passport No: BR123456789
+Surname: SILVA
+Given Names: CARLOS EDUARDO
+Nationality: BRAZILIAN
+Date of Birth: 15/03/1990
+Sex: M
+Place of Birth: SAO PAULO, SP
+Date of Issue: 10/01/2020
+Date of Expiry: 10/01/2030
+Authority: DPF
+""" + "Padding content to reach adequate size for real vision analysis. " * 2000
+            
+            files = {
+                'file': ('passport_carlos.pdf', passport_content.encode('utf-8'), 'application/pdf')
+            }
+            data = {
+                'document_type': 'passport',
+                'visa_type': 'H-1B',
+                'case_id': case_id  # Use real case with basic_info
+            }
+            
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check if real vision analysis completed successfully
+                extracted_data = result.get('extracted_data', {})
+                analysis_method = extracted_data.get('analysis_method', '')
+                confidence = extracted_data.get('confidence', 0)
+                detected_type = extracted_data.get('detected_type', '')
+                
+                # Check for real vision indicators
+                real_vision_used = 'real_vision' in analysis_method.lower() if analysis_method else False
+                high_confidence = confidence >= 0.85 if confidence else False
+                
+                self.log_test(
+                    "Real Vision Analysis - Method Used",
+                    real_vision_used,
+                    f"✅ Real vision analysis: method={analysis_method}, confidence={confidence}",
+                    {
+                        "case_id": case_id,
+                        "analysis_method": analysis_method,
+                        "confidence": confidence,
+                        "detected_type": detected_type,
+                        "real_vision_used": real_vision_used,
+                        "high_confidence": high_confidence
+                    }
+                )
+                
+                # Check for precision improvements
+                completeness = result.get('completeness', 0)
+                security_features = extracted_data.get('security_features', {})
+                full_text_extracted = extracted_data.get('full_text_extracted', '')
+                
+                precision_improved = completeness >= 85 and len(str(security_features)) > 10
+                
+                self.log_test(
+                    "Real Vision Analysis - Precision Improvement",
+                    precision_improved,
+                    f"✅ Precision improved: completeness={completeness}%, security_features={len(str(security_features))} chars",
+                    {
+                        "completeness": completeness,
+                        "security_features_length": len(str(security_features)),
+                        "full_text_length": len(full_text_extracted),
+                        "precision_improved": precision_improved,
+                        "has_security_features": bool(security_features),
+                        "has_full_text": bool(full_text_extracted)
+                    }
+                )
+                
+                # Check that no NoneType errors occurred
+                is_valid = result.get('valid', False)
+                no_errors = 'error' not in str(result).lower() and 'nonetype' not in str(result).lower()
+                
+                self.log_test(
+                    "Real Vision Analysis - Error Prevention",
+                    no_errors and is_valid,
+                    f"✅ No NoneType errors: valid={is_valid}, no_errors={no_errors}",
+                    {
+                        "valid": is_valid,
+                        "no_errors": no_errors,
+                        "case_id": case_id,
+                        "applicant_name_used": "Carlos Silva"  # Should use real name from basic_info
+                    }
+                )
+                
+            else:
+                self.log_test(
+                    "Real Vision Analysis - Document Processing",
+                    False,
+                    f"❌ HTTP {response.status_code}",
+                    {"status_code": response.status_code, "error": response.text[:200]}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "Real Vision Analysis - Exception",
+                False,
+                f"❌ Exception: {str(e)}"
+            )
+
+    def test_document_analysis_without_case_data(self):
+        """SCENARIO 2: Document Analysis without Case Data - Test graceful handling"""
+        print("🎯 SCENARIO 2: Document Analysis without Case Data")
+        print("Cenário: Testar com caso mínimo ou basic_info ausente")
+        
+        try:
+            # Test with minimal case (no basic_info)
+            minimal_case_data = {
+                "form_code": "H-1B"
+                # No session_token, minimal data
+            }
+            
+            case_response = self.session.post(
+                f"{API_BASE}/auto-application/start",
+                json=minimal_case_data
+            )
+            
+            minimal_case_id = None
+            if case_response.status_code == 200:
+                case_result = case_response.json()
+                minimal_case_id = case_result.get('case', {}).get('case_id')
+            
+            # Test document analysis with minimal case
+            passport_content = """PASSPORT
+REPÚBLICA FEDERATIVA DO BRASIL
+PASSPORT
+Type: P
+Country Code: BRA
+Passport No: BR987654321
+Surname: SANTOS
+Given Names: MARIA
+""" + "Minimal passport content for testing. " * 2000
+            
+            files = {
+                'file': ('passport_minimal.pdf', passport_content.encode('utf-8'), 'application/pdf')
+            }
+            data = {
+                'document_type': 'passport',
+                'visa_type': 'H-1B',
+                'case_id': minimal_case_id or 'TEST-MINIMAL-CASE'
+            }
+            
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Should handle gracefully without NoneType errors
+                is_valid = result.get('valid')
+                completeness = result.get('completeness', 0)
+                extracted_data = result.get('extracted_data', {})
+                
+                # Should use default "Usuário" name and continue analysis
+                graceful_handling = completeness > 0 and extracted_data
+                no_none_errors = 'nonetype' not in str(result).lower() and 'error' not in str(result).lower()
+                
+                self.log_test(
+                    "Minimal Case - Graceful Handling",
+                    graceful_handling and no_none_errors,
+                    f"✅ Graceful handling: completeness={completeness}%, no_errors={no_none_errors}",
+                    {
+                        "valid": is_valid,
+                        "completeness": completeness,
+                        "graceful_handling": graceful_handling,
+                        "no_none_errors": no_none_errors,
+                        "extracted_data_keys": list(extracted_data.keys()) if extracted_data else [],
+                        "case_id": minimal_case_id or 'TEST-MINIMAL-CASE'
+                    }
+                )
+                
+                # Test with completely invalid case_id
+                invalid_files = {
+                    'file': ('passport_invalid.pdf', passport_content.encode('utf-8'), 'application/pdf')
+                }
+                invalid_data = {
+                    'document_type': 'passport',
+                    'visa_type': 'H-1B',
+                    'case_id': 'INVALID-CASE-ID-DOES-NOT-EXIST'
+                }
+                
+                invalid_response = requests.post(
+                    f"{API_BASE}/documents/analyze-with-ai",
+                    files=invalid_files,
+                    data=invalid_data,
+                    headers=headers
+                )
+                
+                if invalid_response.status_code == 200:
+                    invalid_result = invalid_response.json()
+                    invalid_completeness = invalid_result.get('completeness', 0)
+                    
+                    # Should still work with default "Usuário" name
+                    works_with_invalid_case = invalid_completeness > 0
+                    
+                    self.log_test(
+                        "Invalid Case - Default Handling",
+                        works_with_invalid_case,
+                        f"✅ Works with invalid case: completeness={invalid_completeness}%",
+                        {
+                            "works_with_invalid_case": works_with_invalid_case,
+                            "completeness": invalid_completeness,
+                            "uses_default_name": True  # Should use "Usuário"
+                        }
+                    )
+                
+            else:
+                self.log_test(
+                    "Minimal Case - Document Processing",
+                    False,
+                    f"❌ HTTP {response.status_code}",
+                    {"status_code": response.status_code, "error": response.text[:200]}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "Minimal Case - Exception",
+                False,
+                f"❌ Exception: {str(e)}"
+            )
+
+    def test_precision_verification_comparison(self):
+        """SCENARIO 3: Precision Verification - Compare analysis quality"""
+        print("🎯 SCENARIO 3: Precision Verification")
+        print("Cenário: Verificar melhoria na precisão após fix")
+        
+        try:
+            # Test with high-quality document that should get 85%+ completeness
+            high_quality_passport = """PASSPORT
+REPÚBLICA FEDERATIVA DO BRASIL
+PASSPORT
+Type: P
+Country Code: BRA
+Passport No: BR123456789
+Surname: OLIVEIRA
+Given Names: JOÃO CARLOS
+Nationality: BRAZILIAN
+Date of Birth: 25/12/1985
+Sex: M
+Place of Birth: RIO DE JANEIRO, RJ
+Date of Issue: 15/06/2020
+Date of Expiry: 15/06/2030
+Authority: DPF
+Issuing Office: DPF/RJ
+MRZ Line 1: P<BRAJOAO<CARLOS<OLIVEIRA<<<<<<<<<<<<<<<<<<<<
+MRZ Line 2: BR1234567890BRA8512251M3006155<<<<<<<<<<<<<<04
+""" + "High quality passport content with all required fields. " * 3000
+            
+            # Create case with complete basic_info
+            case_data = {
+                "form_code": "H-1B",
+                "session_token": f"precision_test_{uuid.uuid4().hex[:8]}"
+            }
+            
+            case_response = self.session.post(
+                f"{API_BASE}/auto-application/start",
+                json=case_data
+            )
+            
+            case_id = None
+            if case_response.status_code == 200:
+                case_result = case_response.json()
+                case_id = case_result.get('case', {}).get('case_id')
+                
+                # Add complete basic_info
+                complete_basic_info = {
+                    "firstName": "João Carlos",
+                    "lastName": "Oliveira",
+                    "email": "joao.oliveira@test.com",
+                    "phone": "+55 21 99999-9999",
+                    "dateOfBirth": "1985-12-25",
+                    "placeOfBirth": "Rio de Janeiro, RJ, Brasil",
+                    "nationality": "Brazilian",
+                    "passportNumber": "BR123456789"
+                }
+                
+                update_response = self.session.patch(
+                    f"{API_BASE}/auto-application/case/{case_id}",
+                    json={
+                        "form_data": {
+                            "basic_info": complete_basic_info
+                        },
+                        "current_step": "documents"
+                    }
+                )
+            
+            files = {
+                'file': ('high_quality_passport.pdf', high_quality_passport.encode('utf-8'), 'application/pdf')
+            }
+            data = {
+                'document_type': 'passport',
+                'visa_type': 'H-1B',
+                'case_id': case_id or 'PRECISION-TEST'
+            }
+            
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check precision metrics
+                completeness = result.get('completeness', 0)
+                extracted_data = result.get('extracted_data', {})
+                detected_type = extracted_data.get('detected_type', '')
+                confidence = extracted_data.get('confidence', 0)
+                analysis_method = extracted_data.get('analysis_method', '')
+                
+                # Check for rich extracted data
+                security_features = extracted_data.get('security_features', {})
+                full_text_extracted = extracted_data.get('full_text_extracted', '')
+                quality_assessment = extracted_data.get('quality_assessment', {})
+                
+                # Precision indicators
+                high_completeness = completeness >= 85
+                accurate_type_detection = 'passport' in detected_type.lower() if detected_type else False
+                rich_extraction = len(str(security_features)) > 50 and len(full_text_extracted) > 100
+                
+                self.log_test(
+                    "Precision Verification - High Completeness Score",
+                    high_completeness,
+                    f"✅ High precision: completeness={completeness}% (target: 85%+)",
+                    {
+                        "completeness": completeness,
+                        "high_completeness": high_completeness,
+                        "target_met": completeness >= 85
+                    }
+                )
+                
+                self.log_test(
+                    "Precision Verification - Accurate Type Detection",
+                    accurate_type_detection,
+                    f"✅ Accurate detection: detected_type='{detected_type}', confidence={confidence}",
+                    {
+                        "detected_type": detected_type,
+                        "confidence": confidence,
+                        "accurate_type_detection": accurate_type_detection,
+                        "analysis_method": analysis_method
+                    }
+                )
+                
+                self.log_test(
+                    "Precision Verification - Rich Data Extraction",
+                    rich_extraction,
+                    f"✅ Rich extraction: security_features={len(str(security_features))} chars, full_text={len(full_text_extracted)} chars",
+                    {
+                        "security_features_length": len(str(security_features)),
+                        "full_text_length": len(full_text_extracted),
+                        "quality_assessment_present": bool(quality_assessment),
+                        "rich_extraction": rich_extraction,
+                        "security_features_sample": str(security_features)[:100] if security_features else "",
+                        "full_text_sample": full_text_extracted[:100] if full_text_extracted else ""
+                    }
+                )
+                
+                # Check that we're not falling back to native analysis due to errors
+                no_fallback_due_to_errors = 'real_vision' in analysis_method.lower() if analysis_method else False
+                
+                self.log_test(
+                    "Precision Verification - No Error Fallback",
+                    no_fallback_due_to_errors,
+                    f"✅ No error fallback: analysis_method='{analysis_method}'",
+                    {
+                        "analysis_method": analysis_method,
+                        "no_fallback_due_to_errors": no_fallback_due_to_errors,
+                        "using_real_vision": 'real_vision' in analysis_method.lower() if analysis_method else False
+                    }
+                )
+                
+            else:
+                self.log_test(
+                    "Precision Verification - Document Processing",
+                    False,
+                    f"❌ HTTP {response.status_code}",
+                    {"status_code": response.status_code, "error": response.text[:200]}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "Precision Verification - Exception",
+                False,
+                f"❌ Exception: {str(e)}"
+            )
+
     def test_document_upload_and_analysis(self):
-        """TESTE 1: Upload and Analysis Test - Funcionalidade básica de análise"""
-        print("🎯 TESTE 1: Upload and Analysis Test - Funcionalidade básica de análise")
+        """TESTE 4: Upload and Analysis Test - Funcionalidade básica de análise"""
+        print("🎯 TESTE 4: Upload and Analysis Test - Funcionalidade básica de análise")
         print("Cenário: Upload de documento passport para visa H-1B")
         
         try:
