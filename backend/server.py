@@ -79,6 +79,7 @@ from specialized_agents import (
 # Environment already loaded above - MongoDB connection - initialized in startup event
 client = None
 db = None
+case_finalizer_complete = None
 
 # LLM configuration via emergentintegrations
 # API key handled directly in LlmChat calls
