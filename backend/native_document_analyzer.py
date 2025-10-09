@@ -115,45 +115,60 @@ class NativeDocumentAnalyzer:
         Aqui é onde integrariamos a capacidade real do modelo
         """
         
-        # Por enquanto, implementar análise básica
         validation_issues = []
         
         # Análise do tamanho do arquivo
         file_size = len(file_content)
         if file_size < 50000:  # 50KB
-            validation_issues.append("❌ ARQUIVO MUITO PEQUENO: Pode estar corrompido")
+            validation_issues.append("❌ ARQUIVO MUITO PEQUENO: Pode estar corrompido ou de baixa qualidade")
         
-        # Simulação de análise de tipo de documento
-        # Em implementação real, usaria visão computacional nativa
-        detected_type = expected_type  # Por enquanto assume correto
-        type_confidence = 0.85
+        # Simulação de detecção inteligente de tipo de documento
+        # Baseado em características do arquivo (tamanho, formato, etc.)
+        detected_type = self._detect_document_type(file_content, expected_type)
+        type_confidence = 0.75 if detected_type == expected_type else 0.45
         
-        # Simulação de verificação de nome
-        name_match_status = "match"  # Por enquanto assume match
-        if applicant_name and len(applicant_name) < 5:
-            name_match_status = "insufficient_data"
+        # Verificação crítica de tipo de documento
+        if detected_type != expected_type:
+            validation_issues.append(f"❌ TIPO DE DOCUMENTO INCORRETO: Esperado '{self._get_document_name(expected_type)}' mas foi detectado '{self._get_document_name(detected_type)}'")
+            type_confidence = 0.30
         
-        # Simulação de verificação de validade
-        expiry_status = "valid"  # Por enquanto assume válido
-        
-        # Para demonstração, vou criar algumas validações baseadas no tipo
+        # Validações específicas por tipo esperado
         if expected_type == 'passport':
-            # Validação específica para passaporte
-            if file_size > 5000000:  # 5MB - muito grande para passport
-                validation_issues.append("❌ ARQUIVO MUITO GRANDE para passaporte")
+            if file_size > 5000000:  # 5MB
+                validation_issues.append("❌ ARQUIVO MUITO GRANDE: Passaportes geralmente têm arquivos menores")
+            if file_size < 100000:  # 100KB
+                validation_issues.append("❌ ARQUIVO MUITO PEQUENO: Passaporte deve ter resolução adequada para leitura")
                 
         elif expected_type == 'driver_license':
-            # Validação específica para CNH
-            detected_type = 'driver_license'
+            if file_size > 3000000:  # 3MB
+                validation_issues.append("❌ ARQUIVO MUITO GRANDE: CNH deve ser um arquivo mais compacto")
+                
+        elif expected_type == 'birth_certificate':
+            if file_size > 8000000:  # 8MB
+                validation_issues.append("❌ ARQUIVO MUITO GRANDE: Certidão de nascimento deve ter tamanho moderado")
+        
+        # Simulação de verificação de nome
+        name_match_status = "match"
+        if applicant_name and len(applicant_name) < 5:
+            name_match_status = "insufficient_data"
+        elif detected_type != expected_type:
+            name_match_status = "cannot_verify"  # Não pode verificar se o tipo está errado
             
+        # Simulação de verificação de validade
+        expiry_status = "valid"
+        if detected_type != expected_type:
+            expiry_status = "cannot_verify"  # Não pode verificar se o tipo está errado
+        
         # Criar resultado
         is_valid = len(validation_issues) == 0
         
         extracted_fields = {
             "document_type": detected_type,
+            "expected_type": expected_type,
             "file_size": file_size,
             "analysis_method": "native",
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "type_mismatch": detected_type != expected_type
         }
         
         return NativeAnalysisResult(
@@ -167,6 +182,47 @@ class NativeDocumentAnalyzer:
             name_match_status=name_match_status,
             type_match_status="match" if detected_type == expected_type else "mismatch"
         )
+    
+    def _detect_document_type(self, file_content: bytes, expected_type: str) -> str:
+        """
+        Detecta o tipo de documento baseado em características do arquivo
+        Em produção, usaria análise de imagem real
+        """
+        file_size = len(file_content)
+        
+        # Simulação de detecção baseada em tamanho e padrões
+        # Em produção, usaria análise de imagem com AI
+        
+        if expected_type == 'passport':
+            # Se o arquivo for muito diferente do esperado para passaporte,
+            # simula detecção de outros tipos comuns
+            if file_size < 200000:  # Muito pequeno para passaporte
+                return 'driver_license'  # Provavelmente CNH
+            elif file_size > 4000000:  # Muito grande
+                return 'birth_certificate'  # Provavelmente certidão
+                
+        elif expected_type == 'driver_license':
+            if file_size > 2500000:  # Muito grande para CNH
+                return 'passport'  # Provavelmente passaporte
+                
+        # Por padrão, retorna o tipo esperado se não detectar problema óbvio
+        return expected_type
+    
+    def _get_document_name(self, doc_type: str) -> str:
+        """Converte código do documento para nome em português"""
+        names = {
+            'passport': 'Passaporte',
+            'driver_license': 'Carteira de Motorista/CNH', 
+            'birth_certificate': 'Certidão de Nascimento',
+            'marriage_certificate': 'Certidão de Casamento',
+            'diploma': 'Diploma',
+            'transcript': 'Histórico Escolar',
+            'employment_letter': 'Carta de Trabalho',
+            'tax_return': 'Declaração de Imposto de Renda',
+            'i94': 'Formulário I-94',
+            'i797': 'Formulário I-797'
+        }
+        return names.get(doc_type, doc_type.title())
 
 
 # Função helper para integração fácil
