@@ -357,8 +357,16 @@ const IntelligentTutor: React.FC<IntelligentTutorProps> = ({
                     </h4>
                     <div className="prose prose-blue max-w-none">
                       <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                        {guidance}
+                        {guidance || 'Clique para carregar orientações personalizadas...'}
                       </p>
+                      {!guidance && (
+                        <button 
+                          onClick={fetchGuidance}
+                          className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                        >
+                          Carregar Orientações
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}
