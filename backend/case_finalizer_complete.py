@@ -19,7 +19,7 @@ from reportlab.lib.units import inch
 import tempfile
 import base64
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from .real_data_integrator import RealDataIntegrator
+from real_data_integrator import RealDataIntegrator
 
 logger = logging.getLogger(__name__)
 
