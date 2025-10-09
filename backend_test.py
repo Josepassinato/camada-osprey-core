@@ -310,7 +310,7 @@ Authority: DPF
                 
             else:
                 self.log_test(
-                    "Passaporte vs CNH - Detecção de Tipo Incorreto",
+                    "Document Analysis - Basic Upload",
                     False,
                     f"❌ HTTP {response.status_code}",
                     {"status_code": response.status_code, "error": response.text[:200]}
@@ -318,7 +318,7 @@ Authority: DPF
                 
         except Exception as e:
             self.log_test(
-                "Passaporte vs CNH - Detecção de Tipo Incorreto",
+                "Document Analysis - Basic Upload",
                 False,
                 f"❌ Exception: {str(e)}"
             )
