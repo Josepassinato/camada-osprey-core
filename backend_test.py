@@ -294,96 +294,138 @@ class Phase4AEnhancedTester:
             return None
     
     def test_case_finalizer_enhanced_audit_system(self):
-        """TESTE 2: POST /api/intelligent-forms/validate"""
-        print("🔍 TESTE 2: Endpoint de Validação com Dra. Ana")
+        """TESTE 2: CaseFinalizerComplete - _audit_case_advanced_real()"""
+        print("🔍 TESTE 2: Case Finalizer Enhanced - Sistema de Auditoria Avançada")
+        
+        # Create test case first
+        case_id = self.create_test_case_with_documents()
+        if not case_id:
+            self.log_test(
+                "Case Finalizer Enhanced - Criação de Caso",
+                False,
+                "Falha ao criar caso de teste"
+            )
+            return None
         
         try:
-            # Test with complete form data
-            complete_form_data = {
-                "full_name": "Carlos Eduardo Silva",
-                "date_of_birth": "05/15/1990",
-                "place_of_birth": "São Paulo, SP, Brasil",
-                "passport_number": "YC792396",
-                "passport_country": "Brazil",
-                "current_address": "Rua das Flores, 123, São Paulo, SP",
-                "phone": "+55 11 99999-9999",
-                "email": "carlos.silva@test.com",
-                "employer_name": "TechCorp Inc.",
-                "job_title": "Software Engineer",
-                "specialty_occupation": "Computer Systems Analyst"
-            }
+            # Test different scenarios for enhanced audit
+            test_scenarios = [
+                {
+                    "scenario_key": "H-1B_basic",
+                    "description": "H-1B básico com documentos completos"
+                },
+                {
+                    "scenario_key": "H-1B_extension", 
+                    "description": "H-1B extensão (requer I-797 anterior)"
+                },
+                {
+                    "scenario_key": "I-485_employment",
+                    "description": "I-485 baseado em emprego (requer exame médico)"
+                }
+            ]
             
-            request_data = {
-                "form_data": complete_form_data,
-                "visa_type": "H-1B",
-                "step_id": "form_review"
-            }
+            results = []
             
-            response = self.session.post(
-                f"{API_BASE}/intelligent-forms/validate",
-                json=request_data
+            for scenario in test_scenarios:
+                try:
+                    request_data = {
+                        "scenario_key": scenario["scenario_key"],
+                        "postage": "USPS",
+                        "language": "pt"
+                    }
+                    
+                    response = self.session.post(
+                        f"{API_BASE}/cases/{case_id}/finalize/start",
+                        json=request_data
+                    )
+                    
+                    if response.status_code == 200:
+                        result = response.json()
+                        job_id = result.get('job_id')
+                        
+                        if job_id:
+                            # Wait for processing
+                            time.sleep(3)
+                            
+                            # Check job status to see audit results
+                            status_response = self.session.get(
+                                f"{API_BASE}/cases/finalize/{job_id}/status"
+                            )
+                            
+                            if status_response.status_code == 200:
+                                status_data = status_response.json()
+                                
+                                # Check if audit was performed
+                                has_status = 'status' in status_data
+                                has_issues = 'issues' in status_data
+                                
+                                self.log_test(
+                                    f"Auditoria Avançada - {scenario['scenario_key']}",
+                                    has_status and has_issues,
+                                    f"Auditoria para {scenario['description']}: Status={status_data.get('status')}, Issues={len(status_data.get('issues', []))}",
+                                    {
+                                        "scenario": scenario["scenario_key"],
+                                        "audit_status": status_data.get('status'),
+                                        "issues_count": len(status_data.get('issues', [])),
+                                        "has_links": bool(status_data.get('links', {}))
+                                    }
+                                )
+                                
+                                results.append({
+                                    "scenario": scenario["scenario_key"],
+                                    "success": has_status and has_issues,
+                                    "job_id": job_id,
+                                    "audit_data": status_data
+                                })
+                            else:
+                                self.log_test(
+                                    f"Auditoria Avançada - {scenario['scenario_key']} Status",
+                                    False,
+                                    f"HTTP {status_response.status_code}",
+                                    status_response.text
+                                )
+                        else:
+                            self.log_test(
+                                f"Auditoria Avançada - {scenario['scenario_key']} Job Creation",
+                                False,
+                                "Job ID não retornado",
+                                result
+                            )
+                    else:
+                        self.log_test(
+                            f"Auditoria Avançada - {scenario['scenario_key']} Endpoint",
+                            False,
+                            f"HTTP {response.status_code}",
+                            response.text
+                        )
+                        
+                except Exception as scenario_error:
+                    self.log_test(
+                        f"Auditoria Avançada - {scenario['scenario_key']} Exception",
+                        False,
+                        f"Exception: {str(scenario_error)}"
+                    )
+            
+            # Test overall audit system functionality
+            successful_audits = len([r for r in results if r["success"]])
+            total_scenarios = len(test_scenarios)
+            
+            self.log_test(
+                "Auditoria Avançada - Sistema Geral",
+                successful_audits > 0,
+                f"Auditorias bem-sucedidas: {successful_audits}/{total_scenarios}",
+                {
+                    "successful_audits": successful_audits,
+                    "total_scenarios": total_scenarios,
+                    "success_rate": f"{(successful_audits/total_scenarios)*100:.1f}%" if total_scenarios > 0 else "0%"
+                }
             )
             
-            if response.status_code == 200:
-                result = response.json()
-                
-                # Check required response structure
-                required_fields = ['success', 'agent', 'visa_type', 'validation_result']
-                has_all_fields = all(field in result for field in required_fields)
-                
-                self.log_test(
-                    "Validação Dra. Ana - Estrutura de Resposta",
-                    has_all_fields,
-                    f"Campos presentes: {list(result.keys())}",
-                    {
-                        "status_code": response.status_code,
-                        "response_structure": {field: field in result for field in required_fields}
-                    }
-                )
-                
-                # Check validation result structure
-                validation_result = result.get('validation_result', {})
-                validation_fields = ['is_valid', 'errors', 'warnings', 'completeness_score']
-                has_validation_structure = all(field in validation_result for field in validation_fields)
-                
-                self.log_test(
-                    "Validação Dra. Ana - Estrutura de Validação",
-                    has_validation_structure,
-                    f"Campos de validação: {list(validation_result.keys())}",
-                    {
-                        "validation_structure": {field: field in validation_result for field in validation_fields},
-                        "completeness_score": validation_result.get('completeness_score', 0),
-                        "is_valid": validation_result.get('is_valid', False)
-                    }
-                )
-                
-                # Check if Dra. Ana agent is working
-                agent_name = result.get('agent', '')
-                is_dra_ana = 'Dra. Ana' in agent_name
-                
-                self.log_test(
-                    "Validação Dra. Ana - Agente Funcionando",
-                    is_dra_ana,
-                    f"Agente identificado: {agent_name}",
-                    {
-                        "agent": agent_name,
-                        "is_dra_ana": is_dra_ana
-                    }
-                )
-                
-                return result
-            else:
-                self.log_test(
-                    "Validação Dra. Ana - Status 200 OK",
-                    False,
-                    f"HTTP {response.status_code}: {response.text[:200]}",
-                    {"status_code": response.status_code, "error": response.text}
-                )
-                return None
+            return results
                 
         except Exception as e:
             self.log_test(
-                "Validação Dra. Ana - Status 200 OK",
+                "Auditoria Avançada - Exception Geral",
                 False,
                 f"Exception: {str(e)}"
             )
