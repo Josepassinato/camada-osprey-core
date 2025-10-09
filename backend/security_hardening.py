@@ -230,12 +230,26 @@ class SecurityHardeningSystem:
         if self.is_trusted_ip(ip_address):
             return None
         
-        # Find matching rule
+        # Find matching rule (check specific rules first, then default)
         matching_rule = None
-        for rule in self.rate_limit_rules.values():
-            if re.match(rule.endpoint_pattern, endpoint):
-                matching_rule = rule
-                break
+        
+        # Check specific rules first (production monitoring has priority)
+        rule_priority = [
+            "production_monitoring",
+            "auth_endpoints", 
+            "document_analysis",
+            "workflow_automation",
+            "notifications",
+            "analytics_read",
+            "default"
+        ]
+        
+        for rule_key in rule_priority:
+            if rule_key in self.rate_limit_rules:
+                rule = self.rate_limit_rules[rule_key]
+                if re.match(rule.endpoint_pattern, endpoint):
+                    matching_rule = rule
+                    break
         
         if not matching_rule:
             matching_rule = self.rate_limit_rules["default"]
