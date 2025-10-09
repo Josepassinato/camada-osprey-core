@@ -5446,7 +5446,9 @@ async def get_responsibility_status(case_id: str):
 # SISTEMA DE DISCLAIMER E ACEITE
 # =====================================
 
-@api_router.post("/disclaimer/record")
+@api_router.post("/disclaimer/record", tags=["Disclaimer"],
+                 summary="Registrar aceite de disclaimer",
+                 description="Registra aceite de responsabilidade por etapa do processo de imigração")
 async def record_disclaimer_acceptance(request: dict):
     """Registra aceite de disclaimer por etapa"""
     try:
