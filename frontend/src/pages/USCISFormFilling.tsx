@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import OspreyOwlTutor from "@/components/OspreyOwlTutor";
 import SaveAndContinueModal from "@/components/SaveAndContinueModal";
+import IntelligentTutor from "@/components/IntelligentTutor";
 import { useFormSnapshot } from "@/hooks/useFormSnapshot";
 import { useSessionManager } from "@/hooks/useSessionManager";
 import { useToast } from "@/components/ui/use-toast";
