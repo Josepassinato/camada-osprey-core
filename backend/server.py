@@ -951,6 +951,50 @@ async def search_knowledge_base(query: str, visa_type: Optional[VisaType] = None
             "confidence": "baixo"
         }
 
+async def convert_h1b_section(section_id: str, section_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert H-1B section data to official format"""
+    try:
+        # Basic conversion for H-1B sections
+        converted = {}
+        for key, value in section_data.items():
+            # Convert common fields
+            if 'name' in key.lower():
+                converted[key] = str(value).title() if value else ""
+            elif 'date' in key.lower():
+                # Convert date format if needed
+                converted[key] = value
+            elif 'address' in key.lower():
+                converted[key] = str(value).title() if value else ""
+            else:
+                converted[key] = value
+        
+        return converted
+    except Exception as e:
+        logger.error(f"Error converting H-1B section {section_id}: {str(e)}")
+        return section_data
+
+async def convert_b1b2_section(section_id: str, section_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert B-1/B-2 section data to official format"""
+    try:
+        # Basic conversion for B-1/B-2 sections
+        converted = {}
+        for key, value in section_data.items():
+            # Convert common fields
+            if 'name' in key.lower():
+                converted[key] = str(value).title() if value else ""
+            elif 'date' in key.lower():
+                # Convert date format if needed
+                converted[key] = value
+            elif 'purpose' in key.lower():
+                converted[key] = str(value) if value else ""
+            else:
+                converted[key] = value
+        
+        return converted
+    except Exception as e:
+        logger.error(f"Error converting B-1/B-2 section {section_id}: {str(e)}")
+        return section_data
+
 async def convert_to_official_format(form_responses: Dict[str, Any], visa_type: str) -> Dict[str, Any]:
     """Convert friendly form responses to official USCIS format"""
     try:
