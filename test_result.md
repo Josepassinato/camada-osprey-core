@@ -821,10 +821,13 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Cover Letter Module Frontend Interface Testing - Phase 3"
-  stuck_tasks: []
+    - "Preview System Endpoints"
+    - "PDF Generation with Real Data"
+  stuck_tasks:
+    - "Preview System Endpoints"
+    - "PDF Generation with Real Data"
   test_all: false
-  test_priority: "high_first"
+  test_priority: "stuck_first"
 
 agent_communication:
     -agent: "main"
