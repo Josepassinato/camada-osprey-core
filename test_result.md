@@ -1076,16 +1076,14 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Sistema de Disclaimer - Validação de Compliance"
-    - "Sistema de Disclaimer - Status e Relatórios"
-    - "Validador de Social Security Card - Integração USCIS"
-  stuck_tasks:
-    - "Sistema de Disclaimer - Validação de Compliance"
-    - "Sistema de Disclaimer - Status e Relatórios"
-    - "Phase 4B Production Optimization - Load Testing Availability"
-    - "Phase 4B Production Optimization - Security Middleware Corrections"
+    - "Sistema de Tutor Inteligente - POST /api/tutor/guidance"
+    - "Sistema de Tutor Inteligente - POST /api/tutor/checklist"
+    - "Sistema de Tutor Inteligente - POST /api/tutor/progress-analysis"
+    - "Sistema de Tutor Inteligente - POST /api/tutor/common-mistakes"
+    - "Sistema de Tutor Inteligente - POST /api/tutor/interview-preparation"
+  stuck_tasks: []
   test_all: false
-  test_priority: "stuck_first"
+  test_priority: "high_first"
 
 agent_communication:
     -agent: "main"
