@@ -515,12 +515,12 @@ class Phase4BProductionOptimizationTester:
             )
             return None
     
-    def test_database_optimization_system(self):
-        """TESTE 4: Database Optimization System - Sistema de Otimização de Banco"""
-        print("🗄️ TESTE 4: Database Optimization - Sistema de Otimização de Banco")
+    def test_database_performance_corrected(self):
+        """TESTE 3: Database Performance Corrected - Sistema de otimização corrigido"""
+        print("🗄️ TESTE 3: Database Performance Corrected - Sistema de otimização corrigido")
         
         try:
-            # Test 1: Get database performance statistics
+            # Test database performance statistics (deve estar corrigido)
             performance_response = self.session.get(f"{API_BASE}/production/performance/database")
             
             performance_success = performance_response.status_code == 200
@@ -529,16 +529,22 @@ class Phase4BProductionOptimizationTester:
             db_performance = performance_data.get('database_performance', {})
             has_performance_data = len(db_performance) > 0
             
+            # Verificar se database optimization system está inicializado
+            has_collections = 'collections' in db_performance
+            has_cache_performance = 'cache_performance' in db_performance
+            has_query_performance = 'query_performance' in db_performance
+            
             self.log_test(
-                "Database Optimization - Performance do Banco",
+                "Database Performance Corrected - Performance do Banco",
                 performance_success and has_performance_data,
-                f"Estatísticas de performance obtidas: {len(db_performance)} seções",
+                f"✅ Sistema corrigido: {len(db_performance)} seções, collections: {has_collections}",
                 {
                     "success": performance_data.get('success', False),
-                    "has_database_stats": 'database' in db_performance,
-                    "has_query_performance": 'query_performance' in db_performance,
-                    "has_cache_performance": 'cache_performance' in db_performance,
-                    "sections": list(db_performance.keys()) if db_performance else []
+                    "has_collections": has_collections,
+                    "has_cache_performance": has_cache_performance,
+                    "has_query_performance": has_query_performance,
+                    "sections": list(db_performance.keys()) if db_performance else [],
+                    "database_optimization_initialized": has_collections and has_cache_performance
                 }
             )
             
