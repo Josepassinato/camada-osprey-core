@@ -134,7 +134,11 @@ class Phase4DWorkflowAutomationTester:
                 
                 # Check for expected workflows
                 expected_workflows = ['h1b_complete_process', 'f1_student_process', 'i485_adjustment_process']
-                found_workflows = [w.get('id') for w in workflows]
+                # Handle both string list and object list formats
+                if workflows and isinstance(workflows[0], str):
+                    found_workflows = workflows
+                else:
+                    found_workflows = [w.get('id') for w in workflows]
                 
                 has_expected = any(expected in found_workflows for expected in expected_workflows)
                 
