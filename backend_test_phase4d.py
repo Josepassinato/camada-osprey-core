@@ -585,19 +585,20 @@ class Phase4DWorkflowAutomationTester:
             # Test H-1B complete workflow with notifications
             request_data = {
                 "case_id": "TEST-H1B-COMPLETE-001",
-                "applicant_data": {
-                    "name": "Carlos Eduardo Silva",
+                "workflow_name": "h1b_complete_process",
+                "context": {
+                    "applicant_name": "Carlos Eduardo Silva",
                     "email": "carlos.silva@test.com",
                     "visa_type": "H-1B",
-                    "priority": "high"
-                },
-                "workflow_steps": [
-                    "validate_documents",
-                    "fill_forms", 
-                    "generate_cover_letter",
-                    "finalize_package"
-                ],
-                "notifications_enabled": True
+                    "priority": "high",
+                    "workflow_steps": [
+                        "validate_documents",
+                        "fill_forms", 
+                        "generate_cover_letter",
+                        "finalize_package"
+                    ],
+                    "notifications_enabled": True
+                }
             }
             
             response = self.session.post(
