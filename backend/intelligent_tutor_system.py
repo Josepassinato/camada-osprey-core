@@ -96,87 +96,227 @@ class IntelligentTutorSystem:
         self.db = db
         self.openai_key = os.environ.get('OPENAI_API_KEY')
         
-        # Base de conhecimento estruturada por visa
-        self.knowledge_base = {
-            "H-1B": {
-                "documents": {
-                    "passport": {
-                        "explanation": "Seu passaporte é o documento mais importante. Deve ter pelo menos 6 meses de validade.",
-                        "tips": [
-                            "Verifique a data de expiração antes de começar o processo",
-                            "Se expira em menos de 6 meses, renove antes de aplicar",
-                            "Faça cópias coloridas de todas as páginas com carimbos"
-                        ],
-                        "common_errors": [
-                            "Passaporte vencido ou próximo do vencimento",
-                            "Foto borrada ou páginas danificadas",
-                            "Nome no passaporte diferente de outros documentos"
-                        ]
-                    },
-                    "diploma": {
-                        "explanation": "Para H-1B, precisa de diploma de nível superior (bacharel ou mais alto) em área relacionada ao trabalho.",
-                        "tips": [
-                            "Diploma deve ser de universidade reconhecida",
-                            "Se estudou no exterior, pode precisar de avaliação de credenciais",
-                            "Área de estudo deve estar relacionada ao cargo H-1B"
-                        ],
-                        "validation_rules": [
-                            "Verificar se é bacharel ou superior",
-                            "Confirmar se área está relacionada ao cargo",
-                            "Validar se universidade é reconhecida"
-                        ]
-                    }
-                },
-                "forms": {
-                    "i129": {
-                        "explanation": "Formulário I-129 é preenchido pelo seu empregador, não por você diretamente.",
-                        "your_role": "Você fornece informações pessoais precisas para o empregador preencher",
-                        "key_fields": [
-                            "Informações pessoais (nome, endereço, etc.)",
-                            "Histórico educacional",
-                            "Experiência profissional",
-                            "Detalhes do cargo nos EUA"
-                        ]
-                    }
-                },
-                "process": {
-                    "timeline": "Processo H-1B demora 3-8 meses dependendo do premium processing",
-                    "key_dates": [
-                        "1° de abril: Abertura das inscrições",
-                        "Primeiros 5 dias: Período de submissão",
-                        "Maio-Outubro: Processamento",
-                        "1° de outubro: Início do trabalho"
-                    ]
-                }
-            },
-            "B-1/B-2": {
-                "documents": {
-                    "financial_proof": {
-                        "explanation": "Comprovante financeiro é crucial para mostrar que você pode se manter nos EUA sem trabalhar.",
-                        "requirements": [
-                            "Extratos bancários dos últimos 3 meses",
-                            "Carta do empregador confirmando salário",
-                            "Declaração de Imposto de Renda",
-                            "Comprovante de outros investimentos"
-                        ],
-                        "minimum_amounts": {
-                            "tourist_month": "USD 2,000-5,000 por mês de viagem",
-                            "business": "Depende da duração e propósito"
-                        }
-                    },
-                    "ties_to_brazil": {
-                        "explanation": "Vínculos com o Brasil são essenciais para provar que você vai retornar.",
-                        "strong_ties": [
-                            "Emprego estável no Brasil",
-                            "Família (cônjuge, filhos)",
-                            "Propriedades (imóveis, investimentos)",
-                            "Estudos em andamento",
-                            "Negócios próprios"
-                        ]
-                    }
-                }
+    async def get_contextual_guidance(
+        self, 
+        user_id: str, 
+        current_step: str, 
+        visa_type: str,
+        personality: TutorPersonality = TutorPersonality.FRIENDLY,
+        action: TutorAction = TutorAction.NEXT_STEPS
+    ) -> Dict[str, Any]:
+        """
+        Fornece orientação contextual baseada no estado atual do usuário
+        """
+        try:
+            # Obter contexto do usuário
+            user_context = await self._get_user_context(user_id, visa_type)
+            
+            # Criar prompt personalizado
+            guidance_prompt = self._create_guidance_prompt(
+                user_context, current_step, visa_type, personality, action
+            )
+            
+            # Chamar OpenAI para gerar orientação
+            response = await self._generate_ai_response(guidance_prompt)
+            
+            # Salvar interação para aprendizado
+            await self._save_interaction(user_id, current_step, response, action)
+            
+            return {
+                "guidance": response,
+                "personality": personality,
+                "action": action,
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
-        }
+            
+        except Exception as e:
+            logger.error(f"Erro ao gerar orientação contextual: {str(e)}")
+            return await self._get_fallback_guidance(current_step, visa_type)
+
+    async def get_document_checklist(self, user_id: str, visa_type: str) -> Dict[str, Any]:
+        """Gera checklist personalizado de documentos com base no progresso do usuário"""
+        try:
+            user_context = await self._get_user_context(user_id, visa_type)
+            
+            # Documentos já carregados pelo usuário
+            uploaded_docs = [doc.get('document_type') for doc in user_context.get('documents', [])]
+            
+            prompt = f"""
+            Crie um checklist de documentos personalizado para um brasileiro aplicando para visto {visa_type}.
+            
+            DOCUMENTOS JÁ CARREGADOS: {uploaded_docs}
+            
+            Responda em JSON com esta estrutura:
+            {{
+                "required_documents": [
+                    {{
+                        "document": "nome_do_documento",
+                        "status": "uploaded|pending|optional",
+                        "description": "descrição clara do documento",
+                        "tips": ["dica prática 1", "dica prática 2"],
+                        "where_to_get": "onde obter este documento",
+                        "validity_period": "período de validade",
+                        "priority": "high|medium|low"
+                    }}
+                ],
+                "next_priority": "próximo documento mais importante a carregar",
+                "completion_percentage": 85
+            }}
+            
+            Seja específico sobre onde obter cada documento no Brasil e inclua dicas práticas.
+            """
+            
+            response = await self._generate_ai_response(prompt)
+            parsed_response = json.loads(response.strip().replace('```json', '').replace('```', ''))
+            
+            return {
+                "checklist": parsed_response,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"Erro ao gerar checklist de documentos: {str(e)}")
+            return await self._get_fallback_checklist(visa_type)
+
+    async def analyze_progress(self, user_id: str, visa_type: str) -> Dict[str, Any]:
+        """Analisa o progresso do usuário e oferece insights personalizados"""
+        try:
+            user_context = await self._get_user_context(user_id, visa_type)
+            
+            # Calcular estatísticas de progresso
+            docs_uploaded = len(user_context.get('documents', []))
+            cases_active = len([case for case in user_context.get('cases', []) 
+                             if case.get('status') in ['created', 'form_selected', 'basic_data', 'documents_uploaded']])
+            
+            prompt = f"""
+            Analise o progresso deste usuário brasileiro no processo de visto {visa_type}:
+            
+            DADOS DO USUÁRIO:
+            - Documentos carregados: {docs_uploaded}
+            - Casos ativos: {cases_active}
+            - País atual: {user_context.get('user_profile', {}).get('current_country', 'Brasil')}
+            
+            Forneça uma análise em JSON:
+            {{
+                "progress_percentage": 45,
+                "current_phase": "Preparação de Documentos",
+                "strengths": ["o que está indo bem"],
+                "areas_for_improvement": ["o que precisa de atenção"],
+                "estimated_time_to_completion": "2-3 semanas",
+                "next_milestones": ["próximo marco importante"],
+                "personalized_advice": "conselho específico para este usuário",
+                "risk_factors": ["possíveis problemas a evitar"],
+                "encouragement": "mensagem encorajadora personalizada"
+            }}
+            
+            Seja realista mas encorajador, e específico para a situação atual.
+            """
+            
+            response = await self._generate_ai_response(prompt)
+            parsed_response = json.loads(response.strip().replace('```json', '').replace('```', ''))
+            
+            return {
+                "analysis": parsed_response,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"Erro ao analisar progresso: {str(e)}")
+            return await self._get_fallback_progress_analysis(visa_type)
+
+    async def get_common_mistakes_for_step(self, current_step: str, visa_type: str) -> Dict[str, Any]:
+        """Identifica erros comuns específicos da etapa atual"""
+        try:
+            prompt = f"""
+            Liste os erros mais comuns que brasileiros cometem na etapa "{current_step}" 
+            do processo de visto {visa_type}.
+            
+            Responda em JSON:
+            {{
+                "step": "{current_step}",
+                "common_mistakes": [
+                    {{
+                        "mistake": "descrição do erro",
+                        "why_it_happens": "por que as pessoas cometem esse erro",
+                        "how_to_avoid": "como evitar",
+                        "consequence": "o que pode acontecer se cometer esse erro",
+                        "severity": "high|medium|low"
+                    }}
+                ],
+                "prevention_tips": ["dica geral de prevenção"],
+                "success_strategies": ["estratégia para ter sucesso nesta etapa"]
+            }}
+            
+            Foque em erros práticos e específicos que afetam brasileiros.
+            """
+            
+            response = await self._generate_ai_response(prompt)
+            parsed_response = json.loads(response.strip().replace('```json', '').replace('```', ''))
+            
+            return {
+                "mistakes_analysis": parsed_response,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"Erro ao analisar erros comuns: {str(e)}")
+            return await self._get_fallback_mistakes_analysis(current_step, visa_type)
+
+    async def get_interview_preparation(self, user_id: str, visa_type: str) -> Dict[str, Any]:
+        """Preparação personalizada para entrevista consular"""
+        try:
+            user_context = await self._get_user_context(user_id, visa_type)
+            
+            prompt = f"""
+            Crie um plano de preparação para entrevista consular de visto {visa_type} 
+            para este brasileiro:
+            
+            PERFIL: {user_context.get('user_profile', {})}
+            
+            Responda em JSON:
+            {{
+                "preparation_plan": {{
+                    "weeks_before": [
+                        {{
+                            "week": 4,
+                            "tasks": ["tarefa específica"],
+                            "focus": "área de foco principal"
+                        }}
+                    ],
+                    "day_of_interview": {{
+                        "what_to_bring": ["documento obrigatório"],
+                        "what_to_wear": "orientação sobre vestimenta",
+                        "arrival_time": "quando chegar",
+                        "mindset_tips": ["dica psicológica"]
+                    }}
+                }},
+                "practice_questions": [
+                    {{
+                        "question": "pergunta em inglês",
+                        "portuguese_translation": "tradução em português",
+                        "good_answer_example": "exemplo de boa resposta",
+                        "what_not_to_say": ["o que evitar dizer"],
+                        "difficulty": "easy|medium|hard"
+                    }}
+                ],
+                "red_flags_to_avoid": ["comportamento que pode prejudicar"],
+                "confidence_boosters": ["forma de aumentar confiança"]
+            }}
+            
+            Seja específico para a realidade de brasileiros aplicando nos consulados americanos.
+            """
+            
+            response = await self._generate_ai_response(prompt)
+            parsed_response = json.loads(response.strip().replace('```json', '').replace('```', ''))
+            
+            return {
+                "interview_prep": parsed_response,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"Erro ao gerar preparação de entrevista: {str(e)}")
+            return await self._get_fallback_interview_prep(visa_type)
         
         # Templates de mensagens por personalidade
         self.personality_templates = {
