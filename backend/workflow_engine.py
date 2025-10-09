@@ -402,7 +402,7 @@ class WorkflowEngine:
             execution.error = str(e)
             execution.completed_at = datetime.now(timezone.utc)
             
-            if self.db:
+            if self.db is not None:
                 await self._save_execution_to_db(execution)
         
         finally:
