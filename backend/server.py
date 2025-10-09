@@ -8032,6 +8032,11 @@ async def startup_db_client():
         db_optimization_system = DatabaseOptimizationSystem(db)
         logger.info("✅ Database Optimization System initialized")
         
+        # Initialize Disclaimer System
+        global disclaimer_system
+        disclaimer_system = DisclaimerSystem(db)
+        logger.info("✅ Disclaimer System initialized")
+        
         # Initialize Advanced Analytics System
         if ANALYTICS_AVAILABLE:
             try:
