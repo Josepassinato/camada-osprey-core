@@ -421,10 +421,10 @@ Data de Validade: 15/06/2024
                 f"❌ Exception: {str(e)}"
             )
 
-    def test_birth_certificate_vs_passport_case(self):
-        """TESTE 3: Certidão vs Passaporte - Arquivo muito grande enviado como passaporte"""
-        print("📊 TESTE 3: Certidão vs Passaporte - Arquivo muito grande enviado como passaporte")
-        print("Cenário: Usuário enviou certidão de nascimento quando era esperado passaporte")
+    def test_error_handling(self):
+        """TESTE 3: Error Handling - Teste de tratamento de erros"""
+        print("📊 TESTE 3: Error Handling - Teste de tratamento de erros")
+        print("Cenário: Arquivo muito pequeno deve ser rejeitado")
         
         try:
             # Simular arquivo muito grande (> 4MB) que seria típico de certidão
