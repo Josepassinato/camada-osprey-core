@@ -1195,10 +1195,7 @@ metadata:
   run_ui: true
 
 test_plan:
-  current_focus:
-    - "Enhanced USCIS Form Progress Saving - SaveAndContinueModal Auto-Save"
-    - "Enhanced USCIS Form Progress Saving - Auto-Save Functionality"
-    - "Enhanced USCIS Form Progress Saving - Form Data Persistence"
+  current_focus: []
   stuck_tasks:
     - "Sistema de Tutor Inteligente - Integração Frontend Completa"
   test_all: false
