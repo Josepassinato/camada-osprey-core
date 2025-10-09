@@ -433,9 +433,10 @@ const IntelligentTutor: React.FC<IntelligentTutorProps> = ({
                           </div>
                         </div>
                       ))}
-                    </div>
+                      </div>
+                    )}
 
-                    {checklist.next_priority && (
+                    {checklist?.next_priority && (
                       <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
                         <h5 className="font-medium text-blue-900 mb-1">🎯 Próximo Passo Prioritário</h5>
                         <p className="text-blue-800 text-sm">{checklist.next_priority}</p>
