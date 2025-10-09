@@ -99,17 +99,8 @@ class BaseSpecializedAgent:
                 
                 return response.choices[0].message.content
             else:
-                # Fallback to emergent integrations
-                chat = LlmChat(
-                    api_key=self.api_key,
-                    session_id=session_id,
-                    system_message=system_message
-                ).with_model(self.provider, self.model)
-                
-                # Send the actual task as user message
-                user_message = UserMessage(text=prompt)
-                response = await chat.send_message(user_message)
-                return response
+                # This should never happen since we only use OpenAI now
+                raise ValueError("Only OpenAI is supported - no fallback integrations")
             
         except Exception as e:
             logger.error(f"Error calling {self.agent_name} with Dra. Paula's knowledge: {e}")
