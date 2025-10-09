@@ -18,6 +18,8 @@ from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 from reportlab.lib.units import inch
 import tempfile
 import base64
+from motor.motor_asyncio import AsyncIOMotorDatabase
+from .real_data_integrator import RealDataIntegrator
 
 logger = logging.getLogger(__name__)
 
