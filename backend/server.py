@@ -8188,12 +8188,12 @@ async def analyze_document_with_real_ai(
                     logger.warning(f"⚠️ Error getting applicant name from case {case_id}: {e}")
                     applicant_name = "Usuário"  # Fallback
             
-            # Perform real vision analysis
-            vision_result = await analyze_document_with_real_vision(
-                image_data=file_content,
-                document_type=document_type,
+            # Perform NATIVE LLM analysis (restored original system)
+            native_analyzer = NativeDocumentAnalyzer()
+            native_result = await native_analyzer.analyze_document(
+                file_content=file_content,
+                expected_type=document_type,
                 applicant_name=applicant_name,
-                visa_type=visa_type,
                 case_id=case_id
             )
             
