@@ -486,8 +486,8 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
           </Card>
         )}
 
-        {/* Step 4: Downloads */}
-        {currentStep === 4 && consentAccepted && (
+        {/* Step 5: Downloads */}
+        {currentStep === 5 && consentAccepted && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
