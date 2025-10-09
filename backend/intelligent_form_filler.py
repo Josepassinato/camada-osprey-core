@@ -70,7 +70,8 @@ class IntelligentFormFiller:
         self, 
         case_data: Dict[str, Any], 
         form_code: str,
-        current_form_data: Dict[str, Any] = None
+        current_form_data: Dict[str, Any] = None,
+        db_connection = None
     ) -> List[FormSuggestion]:
         """
         Gera sugestões inteligentes baseadas em dados dos documentos
