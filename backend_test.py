@@ -585,114 +585,217 @@ class Phase4AEnhancedTester:
             return None
     
     def test_multi_stage_workflow_system(self):
-        """TESTE 4: Integração com Sistema de Documentos"""
-        print("📋 TESTE 4: Integração Documentos → Formulários")
+        """TESTE 4: Multi-Stage Workflow - 5 Etapas (Configuração → Auditoria → Preview → Consentimento → Downloads)"""
+        print("🔄 TESTE 4: Sistema Multi-Etapas - Workflow Completo")
         
-        # Create test case with multiple document types
+        # Create test case
         case_id = self.create_test_case_with_documents()
         if not case_id:
             self.log_test(
-                "Integração Documentos - Criação de Caso",
+                "Multi-Stage Workflow - Criação de Caso",
                 False,
                 "Falha ao criar caso de teste"
             )
             return None
         
         try:
-            # Add additional document analysis (CNH for address data)
-            additional_docs = [
-                {
-                    "document_type": "driver_license",
-                    "valid": True,
-                    "extracted_data": {
-                        "full_name": "CARLOS EDUARDO SILVA",
-                        "license_number": "12345678901",
-                        "current_address": "RUA DAS FLORES, 123, SÃO PAULO, SP",
-                        "issue_date": "2020-03-15",
-                        "expiry_date": "2025-03-15"
-                    }
-                }
-            ]
-            
-            # Update case with additional documents
-            self.session.patch(
-                f"{API_BASE}/auto-application/case/{case_id}",
-                json={
-                    "document_analysis_results": additional_docs
-                }
-            )
-            
-            # Test suggestions with multiple document types
-            request_data = {
-                "case_id": case_id,
-                "form_code": "H-1B"
+            # ETAPA 1: Configuração - Start finalization
+            print("📋 ETAPA 1: Configuração")
+            config_data = {
+                "scenario_key": "H-1B_basic",
+                "postage": "USPS",
+                "language": "pt"
             }
             
-            response = self.session.post(
-                f"{API_BASE}/intelligent-forms/suggestions",
-                json=request_data
+            start_response = self.session.post(
+                f"{API_BASE}/cases/{case_id}/finalize/start",
+                json=config_data
             )
             
-            if response.status_code == 200:
-                result = response.json()
-                suggestions = result.get('suggestions', [])
-                
-                # Check if passport data appears in suggestions
-                passport_suggestions = [s for s in suggestions if 'passport' in s.get('source', '').lower() or 'document' in s.get('source', '').lower()]
-                has_passport_data = len(passport_suggestions) > 0
-                
-                self.log_test(
-                    "Integração Documentos - Dados de Passaporte",
-                    has_passport_data,
-                    f"Sugestões baseadas em passaporte: {len(passport_suggestions)}",
-                    {
-                        "passport_suggestions": len(passport_suggestions),
-                        "sample_passport_data": passport_suggestions[:2] if passport_suggestions else []
-                    }
-                )
-                
-                # Check if CNH data appears for address
-                address_suggestions = [s for s in suggestions if 'address' in s.get('field_id', '').lower()]
-                has_address_data = len(address_suggestions) > 0
-                
-                self.log_test(
-                    "Integração Documentos - Dados de Endereço (CNH)",
-                    has_address_data,
-                    f"Sugestões de endereço baseadas em CNH: {len(address_suggestions)}",
-                    {
-                        "address_suggestions": len(address_suggestions),
-                        "sample_address_data": address_suggestions[:2] if address_suggestions else []
-                    }
-                )
-                
-                # Check mapping: passaporte → dados pessoais
-                personal_data_fields = ['full_name', 'date_of_birth', 'place_of_birth', 'passport_number', 'nationality']
-                personal_suggestions = [s for s in suggestions if any(field in s.get('field_id', '') for field in personal_data_fields)]
-                has_personal_mapping = len(personal_suggestions) > 0
-                
-                self.log_test(
-                    "Integração Documentos - Mapeamento Passaporte → Dados Pessoais",
-                    has_personal_mapping,
-                    f"Mapeamento de dados pessoais: {len(personal_suggestions)} campos",
-                    {
-                        "personal_suggestions": len(personal_suggestions),
-                        "mapped_fields": [s.get('field_id') for s in personal_suggestions]
-                    }
-                )
-                
-                return result
-            else:
-                self.log_test(
-                    "Integração Documentos - Status 200 OK",
-                    False,
-                    f"HTTP {response.status_code}: {response.text[:200]}",
-                    {"status_code": response.status_code, "error": response.text}
-                )
+            stage1_success = start_response.status_code == 200 and 'job_id' in start_response.json()
+            job_id = start_response.json().get('job_id') if stage1_success else None
+            
+            self.log_test(
+                "Multi-Stage - Etapa 1 (Configuração)",
+                stage1_success,
+                f"Configuração iniciada: Job ID = {job_id}",
+                {
+                    "stage": "configuration",
+                    "job_id": job_id,
+                    "status_code": start_response.status_code
+                }
+            )
+            
+            if not stage1_success or not job_id:
                 return None
+            
+            # ETAPA 2: Auditoria - Wait for processing
+            print("🔍 ETAPA 2: Auditoria")
+            time.sleep(3)  # Wait for audit processing
+            
+            status_response = self.session.get(
+                f"{API_BASE}/cases/finalize/{job_id}/status"
+            )
+            
+            stage2_success = status_response.status_code == 200
+            status_data = status_response.json() if stage2_success else {}
+            
+            self.log_test(
+                "Multi-Stage - Etapa 2 (Auditoria)",
+                stage2_success,
+                f"Auditoria concluída: Status = {status_data.get('status', 'unknown')}",
+                {
+                    "stage": "audit",
+                    "audit_status": status_data.get('status'),
+                    "issues_count": len(status_data.get('issues', [])),
+                    "has_links": bool(status_data.get('links', {}))
+                }
+            )
+            
+            # ETAPA 3: Preview - Get detailed preview
+            print("👁️ ETAPA 3: Preview")
+            time.sleep(2)  # Additional wait for completion
+            
+            preview_response = self.session.get(
+                f"{API_BASE}/cases/finalize/{job_id}/preview"
+            )
+            
+            stage3_success = preview_response.status_code == 200
+            preview_data = preview_response.json() if stage3_success else {}
+            
+            self.log_test(
+                "Multi-Stage - Etapa 3 (Preview)",
+                stage3_success,
+                f"Preview gerado: Documentos = {len(preview_data.get('document_summary', []))}",
+                {
+                    "stage": "preview",
+                    "documents_count": len(preview_data.get('document_summary', [])),
+                    "quality_score": preview_data.get('quality_assessment', {}).get('overall_score', 0),
+                    "recommendation": preview_data.get('quality_assessment', {}).get('recommendation')
+                }
+            )
+            
+            # ETAPA 4: Consentimento - Test approval/rejection
+            print("✅ ETAPA 4: Consentimento (Aprovação)")
+            
+            approval_data = {
+                "comments": "Pacote aprovado após revisão completa",
+                "approval_data": {
+                    "reviewer": "Test System",
+                    "review_date": datetime.now().isoformat()
+                }
+            }
+            
+            approve_response = self.session.post(
+                f"{API_BASE}/cases/finalize/{job_id}/approve",
+                json=approval_data
+            )
+            
+            stage4_success = approve_response.status_code == 200
+            approval_result = approve_response.json() if stage4_success else {}
+            
+            self.log_test(
+                "Multi-Stage - Etapa 4 (Consentimento/Aprovação)",
+                stage4_success,
+                f"Aprovação processada: {approval_result.get('message', 'N/A')}",
+                {
+                    "stage": "consent_approval",
+                    "approval_success": approval_result.get('success', False),
+                    "message": approval_result.get('message')
+                }
+            )
+            
+            # ETAPA 5: Downloads - Verify final status
+            print("📥 ETAPA 5: Downloads")
+            
+            final_status_response = self.session.get(
+                f"{API_BASE}/cases/finalize/{job_id}/status"
+            )
+            
+            stage5_success = final_status_response.status_code == 200
+            final_status = final_status_response.json() if stage5_success else {}
+            
+            self.log_test(
+                "Multi-Stage - Etapa 5 (Downloads)",
+                stage5_success,
+                f"Status final: {final_status.get('status', 'unknown')}",
+                {
+                    "stage": "downloads",
+                    "final_status": final_status.get('status'),
+                    "download_links": final_status.get('links', {}),
+                    "completed_at": final_status.get('completed_at')
+                }
+            )
+            
+            # Test rejection workflow as well
+            print("❌ TESTE ADICIONAL: Rejeição")
+            
+            # Create another job for rejection test
+            reject_response = self.session.post(
+                f"{API_BASE}/cases/{case_id}/finalize/start",
+                json=config_data
+            )
+            
+            if reject_response.status_code == 200:
+                reject_job_id = reject_response.json().get('job_id')
+                
+                if reject_job_id:
+                    time.sleep(3)  # Wait for processing
+                    
+                    rejection_data = {
+                        "reason": "Documentos incompletos - faltando I-797 anterior",
+                        "rejection_data": {
+                            "reviewer": "Test System",
+                            "missing_documents": ["i797_previous"],
+                            "review_date": datetime.now().isoformat()
+                        }
+                    }
+                    
+                    reject_request = self.session.post(
+                        f"{API_BASE}/cases/finalize/{reject_job_id}/reject",
+                        json=rejection_data
+                    )
+                    
+                    rejection_success = reject_request.status_code == 200
+                    rejection_result = reject_request.json() if rejection_success else {}
+                    
+                    self.log_test(
+                        "Multi-Stage - Workflow de Rejeição",
+                        rejection_success,
+                        f"Rejeição processada: {rejection_result.get('reason', 'N/A')}",
+                        {
+                            "rejection_success": rejection_result.get('success', False),
+                            "reason": rejection_result.get('reason'),
+                            "message": rejection_result.get('message')
+                        }
+                    )
+            
+            # Overall workflow assessment
+            stages_completed = sum([stage1_success, stage2_success, stage3_success, stage4_success, stage5_success])
+            workflow_success = stages_completed >= 4  # At least 4 out of 5 stages working
+            
+            self.log_test(
+                "Multi-Stage - Workflow Completo",
+                workflow_success,
+                f"Etapas concluídas: {stages_completed}/5",
+                {
+                    "stages_completed": stages_completed,
+                    "total_stages": 5,
+                    "success_rate": f"{(stages_completed/5)*100:.1f}%",
+                    "workflow_complete": workflow_success
+                }
+            )
+            
+            return {
+                "job_id": job_id,
+                "stages_completed": stages_completed,
+                "workflow_success": workflow_success,
+                "final_status": final_status
+            }
                 
         except Exception as e:
             self.log_test(
-                "Integração Documentos - Status 200 OK",
+                "Multi-Stage - Exception Geral",
                 False,
                 f"Exception: {str(e)}"
             )
