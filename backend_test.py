@@ -467,60 +467,123 @@ class DocumentValidationTester:
                 f"❌ Exception: {str(e)}"
             )
 
-    def test_tutor_common_mistakes_endpoint(self):
-        """TESTE 4: Tutor Common Mistakes - Erros comuns da etapa atual"""
-        print("⚠️ TESTE 4: Tutor Common Mistakes - Erros comuns da etapa atual")
+    def test_document_size_validations(self):
+        """TESTE 4: Validações de Tamanho Específicas por Tipo de Documento"""
+        print("⚠️ TESTE 4: Validações de Tamanho Específicas por Tipo de Documento")
+        print("Cenário: Testar limites de tamanho para cada tipo de documento")
         
-        # Test data as specified in the review request
-        test_request = {
-            "current_step": "document_upload",
-            "visa_type": "h1b"
-        }
-        
+        # Teste de arquivo muito pequeno (< 50KB) - deve ser rejeitado
         try:
-            response = self.session.post(
-                f"{API_BASE}/tutor/common-mistakes",
-                json=test_request
+            tiny_content = "PASSPORT\nTiny file".encode('utf-8')  # Muito pequeno
+            
+            files = {
+                'file': ('tiny_passport.jpg', tiny_content, 'image/jpeg')
+            }
+            data = {
+                'document_type': 'passport',
+                'visa_type': 'H-1B',
+                'case_id': 'TEST-SIZE-TINY'
+            }
+            
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
             )
             
             if response.status_code == 200:
                 result = response.json()
                 
-                # Check response structure
-                has_success = result.get('success', False)
-                mistakes = result.get('mistakes', {})
-                has_mistakes_content = len(str(mistakes)) > 50
+                # Arquivo muito pequeno deve ser rejeitado
+                is_valid = result.get('valid', True)
+                issues = result.get('issues', [])
                 
-                # Check for expected mistakes structure
-                mistakes_str = str(mistakes).lower()
-                has_error_info = any(word in mistakes_str for word in ['erro', 'error', 'mistake', 'problema', 'issue'])
-                has_prevention_tips = any(word in mistakes_str for word in ['evitar', 'avoid', 'prevenção', 'prevention', 'dica', 'tip'])
+                # Procurar por mensagem de arquivo muito pequeno
+                size_error_detected = any('muito pequeno' in issue.lower() for issue in issues)
                 
                 self.log_test(
-                    "Tutor Common Mistakes - Erros Comuns",
-                    has_success and has_mistakes_content,
-                    f"✅ Erros comuns identificados: {len(str(mistakes))} caracteres, erros={has_error_info}, prevenção={has_prevention_tips}",
+                    "Validação de Tamanho - Arquivo Muito Pequeno",
+                    not is_valid and size_error_detected,
+                    f"✅ Arquivo pequeno rejeitado: válido={is_valid}, erro_tamanho={size_error_detected}",
                     {
-                        "success": has_success,
-                        "mistakes_length": len(str(mistakes)),
-                        "has_error_info": has_error_info,
-                        "has_prevention_tips": has_prevention_tips,
-                        "current_step": test_request["current_step"],
-                        "visa_type": test_request["visa_type"],
-                        "mistakes_preview": str(mistakes)[:300] if mistakes else ""
+                        "valid": is_valid,
+                        "size_error_detected": size_error_detected,
+                        "file_size": len(tiny_content),
+                        "issues": issues
                     }
                 )
             else:
                 self.log_test(
-                    "Tutor Common Mistakes - Erros Comuns",
+                    "Validação de Tamanho - Arquivo Muito Pequeno",
                     False,
                     f"❌ HTTP {response.status_code}",
-                    {"status_code": response.status_code, "error": response.text[:200]}
+                    {"status_code": response.status_code}
                 )
                 
         except Exception as e:
             self.log_test(
-                "Tutor Common Mistakes - Erros Comuns",
+                "Validação de Tamanho - Arquivo Muito Pequeno",
+                False,
+                f"❌ Exception: {str(e)}"
+            )
+        
+        # Teste de arquivo de tamanho adequado para passaporte
+        try:
+            good_passport_content = self.create_test_document("PASSPORT\nBRAZIL\nJoão Silva\nPassport No: BR987654", "passport.pdf")
+            
+            files = {
+                'file': ('good_passport.pdf', good_passport_content, 'application/pdf')
+            }
+            data = {
+                'document_type': 'passport',
+                'visa_type': 'H-1B',
+                'case_id': 'TEST-SIZE-GOOD'
+            }
+            
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Arquivo de tamanho adequado deve passar na validação de tamanho
+                is_valid = result.get('valid', False)
+                issues = result.get('issues', [])
+                
+                # Não deve ter erro de tamanho
+                no_size_error = not any('muito pequeno' in issue.lower() or 'muito grande' in issue.lower() for issue in issues)
+                
+                self.log_test(
+                    "Validação de Tamanho - Arquivo Adequado",
+                    no_size_error,  # Não deve ter erro de tamanho
+                    f"✅ Arquivo adequado processado: sem_erro_tamanho={no_size_error}, válido={is_valid}",
+                    {
+                        "valid": is_valid,
+                        "no_size_error": no_size_error,
+                        "file_size": len(good_passport_content),
+                        "issues_count": len(issues)
+                    }
+                )
+            else:
+                self.log_test(
+                    "Validação de Tamanho - Arquivo Adequado",
+                    False,
+                    f"❌ HTTP {response.status_code}",
+                    {"status_code": response.status_code}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "Validação de Tamanho - Arquivo Adequado",
                 False,
                 f"❌ Exception: {str(e)}"
             )
