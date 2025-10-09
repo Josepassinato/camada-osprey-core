@@ -8217,6 +8217,11 @@ async def startup_db_client():
         disclaimer_system = DisclaimerSystem(db)
         logger.info("✅ Disclaimer System initialized")
         
+        # Initialize Social Security Validator
+        global ssn_validator
+        ssn_validator = SocialSecurityValidator()
+        logger.info("✅ Social Security Validator initialized")
+        
         # Initialize Advanced Analytics System
         if ANALYTICS_AVAILABLE:
             try:
