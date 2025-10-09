@@ -136,6 +136,33 @@ class IntelligentFormFiller:
         
         return suggestions
     
+    def _get_demo_data_for_form(self, form_code: str) -> Dict[str, Any]:
+        """Gera dados de demonstração baseados no tipo de formulário"""
+        
+        if form_code == 'H-1B':
+            return {
+                'full_name': 'José da Silva Santos',
+                'nationality': 'BRASILEIRO',
+                'passport_country': 'Brasil', 
+                'place_of_birth': 'São Paulo, SP, Brasil',
+                'passport_number': 'YC123456',
+                'demo_suggestion': True
+            }
+        elif form_code == 'B-1/B-2':
+            return {
+                'full_name': 'Maria Costa Oliveira',
+                'nationality': 'BRASILEIRO', 
+                'passport_country': 'Brasil',
+                'purpose_of_visit': 'Turismo',
+                'demo_suggestion': True
+            }
+        else:
+            return {
+                'full_name': 'Usuário Exemplo',
+                'nationality': 'BRASILEIRO',
+                'demo_suggestion': True
+            }
+    
     def _extract_data_from_documents(self, document_analysis: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Extrai dados úteis das análises de documentos"""
         
