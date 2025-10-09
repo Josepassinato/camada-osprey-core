@@ -6300,77 +6300,12 @@ async def analyze_document_with_real_ai(
             # Dados já processados pela análise de visão real
             logger.info(f"✅ Real Vision processing completed successfully")
             
-            # DEMONSTRAÇÃO 1: Tipo de documento incorreto
-            # Se o filename sugere outro tipo de documento
-            filename_lower = file.filename.lower() if file.filename else ""
+            # A análise visual real já foi concluída e integrada no resultado
+            # O sistema agora usa capacidade nativa real de visão computacional
             
-            if document_type == 'passport':
-                if any(word in filename_lower for word in ['cnh', 'carteira', 'habilitacao', 'driver']):
-                    additional_issues.append("❌ TIPO DE DOCUMENTO INCORRETO: Arquivo parece ser CNH, mas esperado Passaporte")
-                elif any(word in filename_lower for word in ['certidao', 'nascimento', 'birth']):
-                    additional_issues.append("❌ TIPO DE DOCUMENTO INCORRETO: Arquivo parece ser Certidão de Nascimento, mas esperado Passaporte")
-                elif any(word in filename_lower for word in ['diploma', 'certificate', 'degree']):
-                    additional_issues.append("❌ TIPO DE DOCUMENTO INCORRETO: Arquivo parece ser Diploma, mas esperado Passaporte")
-            elif document_type == 'driver_license':
-                if any(word in filename_lower for word in ['passaporte', 'passport']):
-                    additional_issues.append("❌ TIPO DE DOCUMENTO INCORRETO: Arquivo parece ser Passaporte, mas esperado CNH")
-                elif any(word in filename_lower for word in ['certidao', 'nascimento', 'birth']):
-                    additional_issues.append("❌ TIPO DE DOCUMENTO INCORRETO: Arquivo parece ser Certidão de Nascimento, mas esperado CNH")
+            logger.info(f"✅ Real Vision validation complete - Total Issues: {len(analysis_result.get('issues', []))}")
             
-            # DEMONSTRAÇÃO 2: Nome não corresponde
-            # Para fins de demonstração, simular verificação de nome
-            if applicant_name and applicant_name not in ["Carlos Eduardo Silva", "Usuário"]:
-                # Simular que encontramos um nome diferente no documento
-                if "Silva" in applicant_name and file_size > 100000:
-                    # Simulação: documento grande com nome diferente
-                    additional_issues.append(f"❌ NOME NÃO CORRESPONDE: Documento em nome de 'João Santos', mas aplicante é '{applicant_name}'")
-                elif "Carlos" in applicant_name and "passport" in filename_lower:
-                    # Simulação: passaporte com nome parcialmente diferente
-                    additional_issues.append(f"❌ NOME NÃO CORRESPONDE: Documento em nome de 'Carlos Eduardo Oliveira', mas aplicante é '{applicant_name}'")
-            
-            # DEMONSTRAÇÃO 3: Documento vencido
-            # Para fins de demonstração, simular documento vencido baseado em características do arquivo
-            from datetime import datetime, timezone
-            current_date = datetime.now(timezone.utc)
-            
-            if document_type == 'passport' and file_size < 100000:
-                # Simulação: passaporte pequeno = documento antigo/vencido
-                additional_issues.append("❌ DOCUMENTO VENCIDO: Passaporte expirou em 15/08/2024 (45 dias atrás)")
-            elif document_type == 'driver_license' and 'old' in filename_lower:
-                # Simulação: CNH com indicação de ser antiga
-                additional_issues.append("❌ DOCUMENTO VENCIDO: CNH expirou em 20/07/2024 (71 dias atrás)")
-            elif document_type in ['passport', 'driver_license'] and file_size > 3000000:
-                # Simulação: documento muito grande = escaneado em alta resolução = possível tentativa de ocultar data
-                additional_issues.append("⚠️ VERIFICAR VALIDADE: Documento com resolução muito alta, verificar data de validade manualmente")
-            
-            # Adicionar issues de demonstração ao resultado
-            if additional_issues:
-                logger.info(f"🎭 DEMONSTRAÇÃO: Adicionando {len(additional_issues)} issues simuladas")
-                for i, issue in enumerate(additional_issues):
-                    logger.info(f"   Demo Issue {i+1}: {issue}")
-                
-                analysis_result["issues"].extend(additional_issues)
-                analysis_result["valid"] = False
-                analysis_result["completeness"] = 30
-                analysis_result["dra_paula_assessment"] = f"❌ DOCUMENTO COM PROBLEMAS: {len(additional_issues)} erro(s) detectado(s) na validação"
-                
-                logger.info(f"✅ Updated analysis_result with {len(additional_issues)} demonstration issues")
-            else:
-                # Se não há issues de demonstração, mostrar validação bem-sucedida
-                analysis_result["dra_paula_assessment"] = f"✅ DOCUMENTO VALIDADO: {document_type} aprovado pela análise nativa"
-                logger.info("✅ No validation issues found - document approved")
-            
-            # Add native analysis metadata
-            analysis_result["extracted_data"].update({
-                "native_analysis_confidence": confidence,
-                "detected_document_type": detected_type,
-                "analysis_method": "native_llm",
-                "processing_timestamp": current_date.isoformat()
-            })
-            
-            logger.info(f"✅ Native validation complete - Total Issues: {len(analysis_result.get('issues', []))}")
-            
-            # Return combined analysis result (Policy Engine + Native Analysis + Logical Validations)
+            # Return combined analysis result (Policy Engine + Real Vision Analysis + Quality Assessment)
             return analysis_result
             
         except Exception as validation_error:
