@@ -459,12 +459,12 @@ class IntelligentFormFiller:
 
 
 # Função helper para uso fácil
-async def get_intelligent_form_suggestions(case_data: Dict[str, Any], form_code: str) -> List[Dict[str, Any]]:
+async def get_intelligent_form_suggestions(case_data: Dict[str, Any], form_code: str, db_connection = None) -> List[Dict[str, Any]]:
     """
     Função helper para obter sugestões inteligentes de preenchimento
     """
     filler = IntelligentFormFiller()
-    suggestions = await filler.generate_intelligent_suggestions(case_data, form_code)
+    suggestions = await filler.generate_intelligent_suggestions(case_data, form_code, db_connection=db_connection)
     
     # Converter para formato JSON serializável
     return [
