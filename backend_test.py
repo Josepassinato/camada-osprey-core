@@ -1455,36 +1455,36 @@ class DocumentValidationTester:
             )
             return None
 
-    def run_intelligent_tutor_tests(self):
-        """Executar todos os testes do Sistema de Tutor Inteligente"""
-        print("🚀 INICIANDO TESTES DO SISTEMA DE TUTOR INTELIGENTE MELHORADO")
+    def run_document_validation_tests(self):
+        """Executar todos os testes do Sistema Melhorado de Validação de Documentos"""
+        print("🚀 INICIANDO TESTES DO SISTEMA MELHORADO DE VALIDAÇÃO DE DOCUMENTOS")
         print("=" * 80)
-        print("FOCO: Testar novos endpoints do sistema de tutor inteligente melhorado")
-        print("ENDPOINTS: guidance, checklist, progress-analysis, common-mistakes, interview-preparation")
-        print("DADOS DE TESTE: user_id='user_123', visa_type='h1b', current_step='document_upload'")
-        print("RESULTADO ESPERADO: Todos os endpoints funcionando com respostas estruturadas e contexto brasileiro")
+        print("FOCO: Testar detecção específica de erros de tipo de documento incorreto")
+        print("ENDPOINT: POST /api/documents/analyze-with-ai")
+        print("CENÁRIOS: Passaporte vs CNH, CNH vs Passaporte, Certidão vs Passaporte, Validações de Tamanho")
+        print("RESULTADO ESPERADO: Mensagens específicas em português brasileiro com orientações claras")
         print("=" * 80)
         
-        # Execute intelligent tutor tests
+        # Execute document validation tests
         test_results = {}
         
-        # Test 1: Tutor Guidance Endpoint
-        test_results['tutor_guidance'] = self.test_tutor_guidance_endpoint()
+        # Test 1: Passaporte vs CNH (Caso reportado)
+        test_results['passport_vs_cnh'] = self.test_passport_vs_cnh_case()
         
-        # Test 2: Tutor Checklist Endpoint
-        test_results['tutor_checklist'] = self.test_tutor_checklist_endpoint()
+        # Test 2: CNH vs Passaporte
+        test_results['cnh_vs_passport'] = self.test_cnh_vs_passport_case()
         
-        # Test 3: Tutor Progress Analysis Endpoint
-        test_results['tutor_progress_analysis'] = self.test_tutor_progress_analysis_endpoint()
+        # Test 3: Certidão vs Passaporte
+        test_results['certificate_vs_passport'] = self.test_birth_certificate_vs_passport_case()
         
-        # Test 4: Tutor Common Mistakes Endpoint
-        test_results['tutor_common_mistakes'] = self.test_tutor_common_mistakes_endpoint()
+        # Test 4: Validações de Tamanho
+        test_results['size_validations'] = self.test_document_size_validations()
         
-        # Test 5: Tutor Interview Preparation Endpoint
-        test_results['tutor_interview_preparation'] = self.test_tutor_interview_preparation_endpoint()
+        # Test 5: Múltiplos Tipos de Documento
+        test_results['multiple_document_types'] = self.test_multiple_document_types()
         
-        # Test 6: Error Handling
-        test_results['tutor_error_handling'] = self.test_tutor_error_handling()
+        # Test 6: Múltiplos Tipos de Visto
+        test_results['multiple_visa_types'] = self.test_multiple_visa_types()
         
         return test_results
 
