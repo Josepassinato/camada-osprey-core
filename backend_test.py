@@ -448,6 +448,321 @@ class NativeDocumentValidationTester:
                 f"Exception: {str(e)}"
             )
             return None
+    def test_multiple_document_types(self):
+        """TESTE 6: Diferentes Tipos de Documento"""
+        print("📋 TESTE 6: Múltiplos Tipos de Documento")
+        
+        document_tests = [
+            {
+                'type': 'passport',
+                'content': 'PASSPORT\nJOHN SMITH\nPassport Number: A12345678',
+                'filename': 'passport.pdf',
+                'visa_type': 'H-1B'
+            },
+            {
+                'type': 'driver_license',
+                'content': 'CNH - CARTEIRA NACIONAL DE HABILITAÇÃO\nJoão Silva\nCategoria: B',
+                'filename': 'cnh.jpg',
+                'visa_type': 'B-1/B-2'
+            },
+            {
+                'type': 'birth_certificate',
+                'content': 'CERTIDÃO DE NASCIMENTO\nMaria Santos\nData: 15/03/1990',
+                'filename': 'certidao_nascimento.pdf',
+                'visa_type': 'F-1'
+            }
+        ]
+        
+        results = []
+        
+        for test_case in document_tests:
+            try:
+                test_content = self.create_test_document(
+                    test_case['content'],
+                    test_case['filename']
+                )
+                
+                files = {
+                    'file': (test_case['filename'], test_content, 'application/pdf')
+                }
+                data = {
+                    'document_type': test_case['type'],
+                    'visa_type': test_case['visa_type'],
+                    'case_id': f"TEST-{test_case['type'].upper()}"
+                }
+                
+                headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                
+                response = requests.post(
+                    f"{API_BASE}/documents/analyze-with-ai",
+                    files=files,
+                    data=data,
+                    headers=headers
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    
+                    # Check if analysis completed
+                    has_assessment = 'dra_paula_assessment' in result
+                    has_extracted_data = 'extracted_data' in result
+                    
+                    success = has_assessment and has_extracted_data
+                    
+                    self.log_test(
+                        f"Documento {test_case['type']} - Análise Completa",
+                        success,
+                        f"Análise para {test_case['type']} com {test_case['visa_type']}: {success}",
+                        {
+                            "document_type": test_case['type'],
+                            "visa_type": test_case['visa_type'],
+                            "valid": result.get('valid'),
+                            "completeness": result.get('completeness'),
+                            "issues_count": len(result.get('issues', []))
+                        }
+                    )
+                    
+                    results.append({
+                        'type': test_case['type'],
+                        'success': success,
+                        'result': result
+                    })
+                else:
+                    self.log_test(
+                        f"Documento {test_case['type']} - Análise Completa",
+                        False,
+                        f"HTTP {response.status_code}",
+                        response.text
+                    )
+                    
+            except Exception as e:
+                self.log_test(
+                    f"Documento {test_case['type']} - Análise Completa",
+                    False,
+                    f"Exception: {str(e)}"
+                )
+        
+        return results
+    
+    def test_multiple_visa_types(self):
+        """TESTE 7: Diferentes Tipos de Visto"""
+        print("🎯 TESTE 7: Múltiplos Tipos de Visto")
+        
+        visa_tests = [
+            {'visa_type': 'H-1B', 'description': 'Trabalho especializado'},
+            {'visa_type': 'B-1/B-2', 'description': 'Negócios/Turismo'},
+            {'visa_type': 'F-1', 'description': 'Estudante'}
+        ]
+        
+        results = []
+        
+        for test_case in visa_tests:
+            try:
+                test_content = self.create_test_document(
+                    f"PASSPORT\nTEST USER\nVisa Type: {test_case['visa_type']}",
+                    f"passport_{test_case['visa_type'].replace('-', '_').replace('/', '_').lower()}.pdf"
+                )
+                
+                files = {
+                    'file': (f"passport_{test_case['visa_type'].lower()}.pdf", test_content, 'application/pdf')
+                }
+                data = {
+                    'document_type': 'passport',
+                    'visa_type': test_case['visa_type'],
+                    'case_id': f"TEST-VISA-{test_case['visa_type'].replace('-', '').replace('/', '')}"
+                }
+                
+                headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                
+                response = requests.post(
+                    f"{API_BASE}/documents/analyze-with-ai",
+                    files=files,
+                    data=data,
+                    headers=headers
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    
+                    # Check if visa context is properly handled
+                    extracted_data = result.get('extracted_data', {})
+                    visa_context = extracted_data.get('visa_context')
+                    
+                    success = visa_context == test_case['visa_type']
+                    
+                    self.log_test(
+                        f"Visto {test_case['visa_type']} - Contexto Correto",
+                        success,
+                        f"Contexto de visto {test_case['visa_type']} processado: {success}",
+                        {
+                            "visa_type": test_case['visa_type'],
+                            "visa_context": visa_context,
+                            "description": test_case['description'],
+                            "valid": result.get('valid'),
+                            "completeness": result.get('completeness')
+                        }
+                    )
+                    
+                    results.append({
+                        'visa_type': test_case['visa_type'],
+                        'success': success,
+                        'result': result
+                    })
+                else:
+                    self.log_test(
+                        f"Visto {test_case['visa_type']} - Contexto Correto",
+                        False,
+                        f"HTTP {response.status_code}",
+                        response.text
+                    )
+                    
+            except Exception as e:
+                self.log_test(
+                    f"Visto {test_case['visa_type']} - Contexto Correto",
+                    False,
+                    f"Exception: {str(e)}"
+                )
+        
+        return results
+    
+    def test_file_size_validation(self):
+        """TESTE 8: Validação de Tamanho de Arquivo"""
+        print("📏 TESTE 8: Validação de Tamanho de Arquivo")
+        
+        # Test file too small (should trigger validation)
+        small_content = b"Small document content"  # Less than 50KB
+        
+        files = {
+            'file': ('small_document.pdf', small_content, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-SIZE-SMALL'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check if small file was rejected
+                issues = result.get('issues', [])
+                size_error_found = any("muito pequeno" in issue.lower() or "corrompido" in issue.lower() for issue in issues)
+                
+                self.log_test(
+                    "Validação Tamanho - Arquivo Pequeno Rejeitado",
+                    size_error_found,
+                    f"Arquivo pequeno rejeitado: {size_error_found}",
+                    {
+                        "file_size": len(small_content),
+                        "size_error_detected": size_error_found,
+                        "issues": issues[:2]
+                    }
+                )
+                
+                return result
+            else:
+                self.log_test(
+                    "Validação Tamanho - Arquivo Pequeno Rejeitado",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+                return None
+                
+        except Exception as e:
+            self.log_test(
+                "Validação Tamanho - Arquivo Pequeno Rejeitado",
+                False,
+                f"Exception: {str(e)}"
+            )
+            return None
+    
+    def test_comprehensive_validation_flow(self):
+        """TESTE 9: Fluxo Completo de Validação"""
+        print("🔄 TESTE 9: Fluxo Completo de Validação")
+        
+        # Test with a document that should pass all validations
+        test_content = self.create_test_document(
+            "PASSPORT\nCARLOS EDUARDO SILVA\nPassport Number: BR1234567\nExpiry: 2025-12-31\nIssued: 2020-01-15",
+            "passport_carlos_valid.pdf"
+        )
+        
+        files = {
+            'file': ('passport_carlos_valid.pdf', test_content, 'application/pdf')
+        }
+        data = {
+            'document_type': 'passport',
+            'visa_type': 'H-1B',
+            'case_id': 'TEST-COMPREHENSIVE-FLOW'
+        }
+        
+        try:
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check all expected components
+                checks = {
+                    "endpoint_200": response.status_code == 200,
+                    "has_valid_field": 'valid' in result,
+                    "has_legible_field": 'legible' in result,
+                    "has_completeness": 'completeness' in result,
+                    "has_issues": 'issues' in result,
+                    "has_extracted_data": 'extracted_data' in result,
+                    "has_dra_paula_assessment": 'dra_paula_assessment' in result,
+                    "has_policy_integration": any(key in result for key in ['policy_engine', 'policy_score', 'policy_decision']),
+                    "has_native_analysis": 'native_analysis' in str(result) or 'native' in str(result.get('extracted_data', {}))
+                }
+                
+                all_checks_passed = all(checks.values())
+                
+                self.log_test(
+                    "Fluxo Completo - Todos os Componentes",
+                    all_checks_passed,
+                    f"Validação completa: {sum(checks.values())}/{len(checks)} componentes presentes",
+                    {
+                        "checks": checks,
+                        "response_keys": list(result.keys()),
+                        "completeness_score": result.get('completeness', 0),
+                        "issues_count": len(result.get('issues', []))
+                    }
+                )
+                
+                return result
+            else:
+                self.log_test(
+                    "Fluxo Completo - Todos os Componentes",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text
+                )
+                return None
+                
+        except Exception as e:
+            self.log_test(
+                "Fluxo Completo - Todos os Componentes",
+                False,
+                f"Exception: {str(e)}"
+            )
+            return None
         """Test F-1 basic finalization start"""
         test_case_id = "TEST-CASE-F1"
         
