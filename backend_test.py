@@ -444,8 +444,8 @@ class DocumentAnalysisTester:
                     }
                 )
             
-            # STEP 4: Verify OpenAI Vision Integration
-            print("🤖 STEP 4: Verifying OpenAI Vision Integration")
+            # STEP 4: Verify OpenAI API Key Usage Only
+            print("🔑 STEP 4: Verifying OpenAI API Key Usage Only")
             
             # Check backend logs for OpenAI Vision API usage (if accessible)
             # For now, verify through response characteristics
