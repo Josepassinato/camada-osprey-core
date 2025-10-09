@@ -218,11 +218,11 @@ class DocumentAnalysisTester:
             print(f"❌ Erro ao criar caso de teste: {str(e)}")
             return None
 
-    def test_real_document_vision_system(self):
-        """CRITICAL TEST: NEW REAL Document Vision Analysis System"""
-        print("🎯 CRITICAL TEST: NEW REAL Document Vision Analysis System")
-        print("Cenário: Testar novo sistema REAL de análise de documentos com OpenAI Vision API")
-        print("Objetivo: Verificar que sistema analisa documentos reais, não simulação")
+    def test_openai_direct_integration_only(self):
+        """CRITICAL TEST: OpenAI Direct Integration - NO EMERGENT DEPENDENCIES"""
+        print("🎯 CRITICAL TEST: OpenAI Direct Integration - NO EMERGENT DEPENDENCIES")
+        print("Cenário: Verificar que sistema usa APENAS chave pessoal OPENAI_API_KEY do usuário")
+        print("Objetivo: Confirmar eliminação completa de dependências emergent")
         
         try:
             # STEP 1: Test Real Vision Analysis with IMG_7602.png
