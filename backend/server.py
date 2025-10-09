@@ -88,6 +88,7 @@ db = None
 case_finalizer_complete = None
 workflow_engine = None
 notification_system = None
+db_optimization_system = None
 
 # LLM configuration via emergentintegrations
 # API key handled directly in LlmChat calls
