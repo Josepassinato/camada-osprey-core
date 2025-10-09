@@ -7618,8 +7618,6 @@ async def check_data_consistency_ai(case, friendly_form_data, basic_data):
                 temperature=0.3
             )
             response_text = response.choices[0].message.content
-        else:
-            response_text = llm.chat([{"role": "user", "content": consistency_prompt}])
         
         if "DADOS_CONSISTENTES" in response_text:
             return {"details": "Dados verificados - Totalmente consistentes"}
