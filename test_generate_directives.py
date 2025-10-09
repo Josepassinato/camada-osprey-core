@@ -7,7 +7,7 @@ import requests
 import json
 import os
 
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://formfill-pro-2.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://vistaprep.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_generate_directives():

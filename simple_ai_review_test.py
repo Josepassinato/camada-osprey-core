@@ -10,7 +10,7 @@ import os
 from datetime import datetime
 
 # Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://formfill-pro-2.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://vistaprep.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_ai_review_endpoints():
