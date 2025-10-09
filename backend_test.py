@@ -214,6 +214,271 @@ class DocumentAnalysisTester:
             print(f"❌ Erro ao criar caso de teste: {str(e)}")
             return None
 
+    def test_real_document_vision_system(self):
+        """CRITICAL TEST: NEW REAL Document Vision Analysis System"""
+        print("🎯 CRITICAL TEST: NEW REAL Document Vision Analysis System")
+        print("Cenário: Testar novo sistema REAL de análise de documentos com OpenAI Vision API")
+        print("Objetivo: Verificar que sistema analisa documentos reais, não simulação")
+        
+        try:
+            # STEP 1: Test Real Vision Analysis with IMG_7602.png
+            print("📄 STEP 1: Testing Real Vision Analysis with IMG_7602.png")
+            
+            img_url = "https://customer-assets.emergentagent.com/job_formfill-aid/artifacts/hka5y6g5_IMG_7602.png"
+            
+            try:
+                img_response = requests.get(img_url, timeout=30)
+                if img_response.status_code == 200:
+                    img_content = img_response.content
+                    img_size = len(img_content)
+                    
+                    print(f"✅ Downloaded IMG_7602.png: {img_size} bytes")
+                    
+                    # Upload for real vision analysis
+                    files_img = {
+                        'file': ('IMG_7602.png', img_content, 'image/png')
+                    }
+                    data_img = {
+                        'document_type': 'passport',
+                        'visa_type': 'H-1B',
+                        'case_id': 'REAL-VISION-TEST-IMG7602'
+                    }
+                    
+                    headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                    
+                    response = requests.post(
+                        f"{API_BASE}/documents/analyze-with-ai",
+                        files=files_img,
+                        data=data_img,
+                        headers=headers
+                    )
+                    
+                    if response.status_code == 200:
+                        result = response.json()
+                        extracted_data = result.get('extracted_data', {})
+                        analysis_method = extracted_data.get('analysis_method', '')
+                        detected_type = extracted_data.get('detected_type', '')
+                        confidence = extracted_data.get('confidence', 0)
+                        
+                        # CRITICAL: Verify Real Vision Analysis (not simulation)
+                        is_real_vision = analysis_method == 'real_vision_openai'
+                        has_real_confidence = confidence > 0.8  # Real analysis should have high confidence
+                        not_simulation = analysis_method != 'simulation' and analysis_method != 'fallback_simulation'
+                        
+                        self.log_test(
+                            "Real Vision - IMG_7602 Analysis Method",
+                            is_real_vision and not_simulation,
+                            f"✅ Real vision analysis: method={analysis_method}, confidence={confidence}",
+                            {
+                                "analysis_method": analysis_method,
+                                "is_real_vision": is_real_vision,
+                                "not_simulation": not_simulation,
+                                "confidence": confidence,
+                                "detected_type": detected_type,
+                                "has_real_confidence": has_real_confidence
+                            }
+                        )
+                        
+                        # CRITICAL: Verify Real Data Extraction (not hardcoded)
+                        full_text = extracted_data.get('full_text_extracted', '')
+                        has_real_text = len(full_text) > 100  # Real analysis should extract substantial text
+                        
+                        # Check for hardcoded simulation values (should NOT be present)
+                        hardcoded_values = ['YC792396', '09/04/1970', 'SIMULATION', 'MOCK']
+                        no_hardcoded = not any(val in str(result).upper() for val in hardcoded_values)
+                        
+                        self.log_test(
+                            "Real Vision - No Hardcoded Values",
+                            no_hardcoded and has_real_text,
+                            f"✅ Real data extraction: no_hardcoded={no_hardcoded}, text_length={len(full_text)}",
+                            {
+                                "no_hardcoded_values": no_hardcoded,
+                                "has_real_text": has_real_text,
+                                "full_text_length": len(full_text),
+                                "extracted_fields_count": len(extracted_data),
+                                "completeness": result.get('completeness', 0)
+                            }
+                        )
+                        
+                    else:
+                        self.log_test(
+                            "Real Vision - IMG_7602 Upload",
+                            False,
+                            f"❌ Failed to upload IMG_7602: HTTP {response.status_code}",
+                            {"status_code": response.status_code, "error": response.text[:200]}
+                        )
+                        return
+                        
+                else:
+                    self.log_test(
+                        "Real Vision - IMG_7602 Download",
+                        False,
+                        f"❌ Failed to download IMG_7602: HTTP {img_response.status_code}",
+                        {"status_code": img_response.status_code}
+                    )
+                    return
+                    
+            except Exception as e:
+                self.log_test(
+                    "Real Vision - IMG_7602 Processing",
+                    False,
+                    f"❌ Exception processing IMG_7602: {str(e)}",
+                    {"error": str(e)}
+                )
+                return
+            
+            # STEP 2: Test Different Document Types for Unique Analysis
+            print("📋 STEP 2: Testing Different Document Types for Unique Analysis")
+            
+            # Create different document types to test real analysis
+            test_documents = [
+                {
+                    'name': 'passport_test.pdf',
+                    'content': 'PASSPORT\nREPÚBLICA FEDERATIVA DO BRASIL\nPassport No: BR987654321\nName: JOÃO SILVA\nDate of Birth: 12/03/1985\n' + 'Passport content. ' * 1000,
+                    'type': 'passport',
+                    'expected_keywords': ['passport', 'joão', 'silva']
+                },
+                {
+                    'name': 'cnh_test.pdf', 
+                    'content': 'CNH - CARTEIRA NACIONAL DE HABILITAÇÃO\nDETRAN\nNome: MARIA SANTOS\nCategoria: B\nNúmero: 12345678901\n' + 'CNH content. ' * 1000,
+                    'type': 'driver_license',
+                    'expected_keywords': ['cnh', 'maria', 'santos']
+                }
+            ]
+            
+            analysis_results = []
+            
+            for i, doc in enumerate(test_documents):
+                files = {
+                    'file': (doc['name'], doc['content'].encode('utf-8'), 'application/pdf')
+                }
+                data = {
+                    'document_type': doc['type'],
+                    'visa_type': 'H-1B',
+                    'case_id': f'REAL-VISION-TEST-{i+1}'
+                }
+                
+                response = requests.post(
+                    f"{API_BASE}/documents/analyze-with-ai",
+                    files=files,
+                    data=data,
+                    headers=headers
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    analysis_results.append({
+                        'doc_name': doc['name'],
+                        'doc_type': doc['type'],
+                        'result': result,
+                        'expected_keywords': doc['expected_keywords']
+                    })
+                    
+                    # Verify real analysis method
+                    extracted_data = result.get('extracted_data', {})
+                    analysis_method = extracted_data.get('analysis_method', '')
+                    
+                    is_real_analysis = analysis_method in ['real_vision_openai', 'real_vision_native']
+                    
+                    self.log_test(
+                        f"Real Vision - {doc['name']} Analysis",
+                        is_real_analysis,
+                        f"✅ Real analysis for {doc['type']}: method={analysis_method}",
+                        {
+                            "document": doc['name'],
+                            "analysis_method": analysis_method,
+                            "is_real_analysis": is_real_analysis,
+                            "detected_type": extracted_data.get('detected_type', ''),
+                            "confidence": extracted_data.get('confidence', 0)
+                        }
+                    )
+            
+            # STEP 3: Verify Unique Analysis Results
+            print("🔍 STEP 3: Verifying Unique Analysis Results")
+            
+            if len(analysis_results) >= 2:
+                result1 = analysis_results[0]['result']
+                result2 = analysis_results[1]['result']
+                
+                # Check that results are different (not same cached/hardcoded response)
+                results_different = str(result1) != str(result2)
+                
+                # Check that each document gets analysis specific to its content
+                doc1_keywords = analysis_results[0]['expected_keywords']
+                doc2_keywords = analysis_results[1]['expected_keywords']
+                
+                doc1_has_specific_content = any(keyword in str(result1).lower() for keyword in doc1_keywords)
+                doc2_has_specific_content = any(keyword in str(result2).lower() for keyword in doc2_keywords)
+                
+                # Check no cross-contamination
+                doc1_no_contamination = not any(keyword in str(result1).lower() for keyword in doc2_keywords)
+                doc2_no_contamination = not any(keyword in str(result2).lower() for keyword in doc1_keywords)
+                
+                unique_analysis = (
+                    results_different and 
+                    doc1_has_specific_content and 
+                    doc2_has_specific_content and
+                    doc1_no_contamination and 
+                    doc2_no_contamination
+                )
+                
+                self.log_test(
+                    "Real Vision - Unique Analysis Results",
+                    unique_analysis,
+                    f"✅ Unique analysis confirmed: different={results_different}, specific_content=True",
+                    {
+                        "results_different": results_different,
+                        "doc1_specific_content": doc1_has_specific_content,
+                        "doc2_specific_content": doc2_has_specific_content,
+                        "no_cross_contamination": doc1_no_contamination and doc2_no_contamination,
+                        "unique_analysis": unique_analysis
+                    }
+                )
+            
+            # STEP 4: Verify OpenAI Vision Integration
+            print("🤖 STEP 4: Verifying OpenAI Vision Integration")
+            
+            # Check backend logs for OpenAI Vision API usage (if accessible)
+            # For now, verify through response characteristics
+            
+            if analysis_results:
+                sample_result = analysis_results[0]['result']
+                extracted_data = sample_result.get('extracted_data', {})
+                
+                # Real OpenAI Vision should provide:
+                has_confidence_score = extracted_data.get('confidence', 0) > 0
+                has_security_features = len(extracted_data.get('security_features', [])) > 0
+                has_quality_assessment = 'quality_assessment' in extracted_data or 'quality_score' in extracted_data
+                has_full_text = len(extracted_data.get('full_text_extracted', '')) > 50
+                
+                openai_integration_working = (
+                    has_confidence_score and 
+                    (has_security_features or has_quality_assessment) and
+                    has_full_text
+                )
+                
+                self.log_test(
+                    "Real Vision - OpenAI Integration",
+                    openai_integration_working,
+                    f"✅ OpenAI Vision integration: confidence={has_confidence_score}, features={has_security_features}",
+                    {
+                        "has_confidence_score": has_confidence_score,
+                        "has_security_features": has_security_features,
+                        "has_quality_assessment": has_quality_assessment,
+                        "has_full_text": has_full_text,
+                        "openai_integration_working": openai_integration_working,
+                        "confidence_value": extracted_data.get('confidence', 0),
+                        "text_length": len(extracted_data.get('full_text_extracted', ''))
+                    }
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "Real Vision - System Test",
+                False,
+                f"❌ Exception in real vision system test: {str(e)}"
+            )
+
     def test_img_7602_specific_document_analysis(self):
         """CRITICAL TEST: IMG_7602.png Specific Document Analysis - User Reported Issue"""
         print("🎯 CRITICAL TEST: IMG_7602.png Specific Document Analysis")
