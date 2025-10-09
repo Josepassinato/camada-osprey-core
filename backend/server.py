@@ -7329,9 +7329,17 @@ async def startup_db_client():
         logger.info("Successfully connected to MongoDB!")
         
         # Initialize Case Finalizer with Real Data Integration
-        global case_finalizer_complete
+        global case_finalizer_complete, workflow_engine, notification_system
         case_finalizer_complete = CaseFinalizerComplete(db)
         logger.info("✅ Case Finalizer with Real Data Integration initialized")
+        
+        # Initialize Workflow Engine
+        workflow_engine = WorkflowEngine(db)
+        logger.info("✅ Workflow Engine initialized")
+        
+        # Initialize Notification System  
+        notification_system = NotificationSystem(db)
+        logger.info("✅ Notification System initialized")
         
         # Initialize Advanced Analytics System
         if ANALYTICS_AVAILABLE:
