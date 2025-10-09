@@ -46,6 +46,8 @@ const CaseFinalizer: React.FC = () => {
   const [language, setLanguage] = useState('pt');
   const [consentAccepted, setConsentAccepted] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [disclaimerStage, setDisclaimerStage] = useState<'documents' | 'forms' | 'cover_letter' | 'review' | 'final'>('review');
 
   const consentText = `
 CONSENTIMENTO PARA FINALIZAÇÃO DO PROCESSO
