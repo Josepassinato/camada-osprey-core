@@ -242,107 +242,102 @@ class DisclaimerAndSSNValidatorTester:
             )
     
     def test_disclaimer_record_and_validation(self):
-        """TESTE 2: Security System - Eventos de Segurança e Bloqueio de IP"""
-        print("🚫 TESTE 2: Security System - Eventos e Bloqueio de IP")
+        """TESTE 2: Disclaimer Record and Validation - Registrar aceites e validar compliance"""
+        print("✅ TESTE 2: Disclaimer Record and Validation - Registrar aceites e validar compliance")
+        
+        # Create test case
+        case_id = "OSP-DISCLAIMER-TEST"
+        
+        # Test stages in order
+        stages = ["documents", "forms", "cover_letter", "review"]
         
         try:
-            # Test 1: Get recent security events
-            events_response = self.session.get(f"{API_BASE}/production/security/events?limit=10")
-            
-            events_success = events_response.status_code == 200
-            events_data = events_response.json() if events_success else {}
-            
-            self.log_test(
-                "Security Events - Eventos Recentes",
-                events_success,
-                f"Eventos obtidos: {events_data.get('count', 0)} eventos",
-                {
-                    "success": events_data.get('success', False),
-                    "events_count": events_data.get('count', 0),
-                    "has_events": len(events_data.get('security_events', [])) >= 0
+            for i, stage in enumerate(stages):
+                # Record disclaimer acceptance
+                record_request = {
+                    "case_id": case_id,
+                    "stage": stage,
+                    "consent_hash": f"hash_{stage}_{uuid.uuid4().hex[:8]}",
+                    "user_id": "test_user_123",
+                    "ip_address": "192.168.1.100",
+                    "user_agent": "DisclaimerTester/1.0",
+                    "stage_data": {
+                        "stage_completed": True,
+                        "timestamp": datetime.now().isoformat()
+                    }
                 }
-            )
+                
+                record_response = self.session.post(
+                    f"{API_BASE}/disclaimer/record",
+                    json=record_request
+                )
+                
+                record_success = record_response.status_code == 200
+                record_data = record_response.json() if record_success else {}
+                
+                self.log_test(
+                    f"Disclaimer Record - Stage {stage}",
+                    record_success,
+                    f"✅ Aceite registrado para {stage}: {record_data.get('acceptance_id', 'N/A')}",
+                    {
+                        "success": record_data.get('success', False),
+                        "stage": stage,
+                        "acceptance_id": record_data.get('acceptance_id'),
+                        "recorded_at": record_data.get('recorded_at')
+                    }
+                )
+                
+                # Validate compliance after each acceptance
+                validation_response = self.session.get(f"{API_BASE}/disclaimer/validate/{case_id}")
+                
+                validation_success = validation_response.status_code == 200
+                validation_data = validation_response.json() if validation_success else {}
+                
+                compliance = validation_data.get('compliance', {})
+                expected_accepted = i + 1  # Number of stages accepted so far
+                expected_missing = len(stages) - expected_accepted  # Remaining stages
+                
+                self.log_test(
+                    f"Disclaimer Validation - After {stage}",
+                    validation_success and compliance.get('total_acceptances') == expected_accepted,
+                    f"✅ Compliance validada: {expected_accepted} aceites, {expected_missing} pendentes",
+                    {
+                        "success": validation_data.get('success', False),
+                        "total_acceptances": compliance.get('total_acceptances', 0),
+                        "accepted_stages": compliance.get('accepted_stages', []),
+                        "missing_stages": compliance.get('missing_stages', []),
+                        "all_required_accepted": compliance.get('all_required_accepted', False)
+                    }
+                )
             
-            # Test 2: Manual IP blocking
-            test_ip = "192.168.1.100"
-            block_request = {
-                "ip_address": test_ip,
-                "duration_minutes": 5,
-                "reason": "Test block for Phase 4B validation"
-            }
-            
-            block_response = self.session.post(
-                f"{API_BASE}/production/security/block-ip",
-                json=block_request
-            )
-            
-            block_success = block_response.status_code == 200
-            block_data = block_response.json() if block_success else {}
-            
-            self.log_test(
-                "Security IP Blocking - Bloqueio Manual",
-                block_success,
-                f"IP {test_ip} bloqueado: {block_data.get('success', False)}",
-                {
-                    "success": block_data.get('success', False),
-                    "ip_address": block_data.get('ip_address'),
-                    "duration_minutes": block_data.get('duration_minutes'),
-                    "message": block_data.get('message', '')
-                }
-            )
-            
-            # Test 3: IP unblocking
-            unblock_request = {
-                "ip_address": test_ip,
-                "reason": "Test unblock for Phase 4B validation"
-            }
-            
-            unblock_response = self.session.post(
-                f"{API_BASE}/production/security/unblock-ip",
-                json=unblock_request
-            )
-            
-            unblock_success = unblock_response.status_code == 200
-            unblock_data = unblock_response.json() if unblock_success else {}
-            
-            self.log_test(
-                "Security IP Unblocking - Desbloqueio Manual",
-                unblock_success,
-                f"IP {test_ip} desbloqueado: {unblock_data.get('success', False)}",
-                {
-                    "success": unblock_data.get('success', False),
-                    "ip_address": unblock_data.get('ip_address'),
-                    "message": unblock_data.get('message', '')
-                }
-            )
-            
-            # Overall security system test
-            security_tests_passed = sum([events_success, block_success, unblock_success])
+            # Final validation - should have all required stages
+            final_validation_response = self.session.get(f"{API_BASE}/disclaimer/validate/{case_id}")
+            final_validation_data = final_validation_response.json()
+            final_compliance = final_validation_data.get('compliance', {})
             
             self.log_test(
-                "Security System - Funcionalidade Geral",
-                security_tests_passed >= 2,  # At least 2 out of 3 should work
-                f"Testes de segurança aprovados: {security_tests_passed}/3",
+                "Disclaimer Validation - Final Compliance",
+                final_compliance.get('all_required_accepted', False),
+                f"✅ Compliance final: {final_compliance.get('total_acceptances', 0)} aceites completos",
                 {
-                    "events_working": events_success,
-                    "blocking_working": block_success,
-                    "unblocking_working": unblock_success,
-                    "success_rate": f"{(security_tests_passed/3)*100:.1f}%"
+                    "all_required_accepted": final_compliance.get('all_required_accepted', False),
+                    "ready_for_final": final_validation_data.get('ready_for_final', False),
+                    "total_acceptances": final_compliance.get('total_acceptances', 0),
+                    "missing_stages": final_compliance.get('missing_stages', [])
                 }
             )
             
             return {
-                "events_data": events_data,
-                "block_data": block_data,
-                "unblock_data": unblock_data,
-                "tests_passed": security_tests_passed
+                "case_id": case_id,
+                "stages_completed": len(stages),
+                "final_compliance": final_compliance
             }
                 
         except Exception as e:
             self.log_test(
-                "Security System - Exception Geral",
+                "Disclaimer Record and Validation - Exception",
                 False,
-                f"Exception: {str(e)}"
+                f"❌ Exception: {str(e)}"
             )
             return None
     
