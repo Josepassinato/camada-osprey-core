@@ -7841,8 +7841,6 @@ async def final_review_ai(case):
                 temperature=0.3
             )
             response_text = response.choices[0].message.content
-        else:
-            response_text = llm.chat([{"role": "user", "content": review_prompt}])
         
         return {"details": "Revisão final concluída - Formulário aprovado para submissão"}
         
