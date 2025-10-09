@@ -157,8 +157,8 @@ class DocumentValidationTester:
     
     def create_very_large_document_content(self, content: str) -> bytes:
         """Create a very large document (> 4MB) to simulate birth certificate"""
-        # Very large content to trigger birth certificate detection
-        full_content = content + "\n" + "Very large document content padding. " * 15000
+        # Very large content to trigger birth certificate detection - include keywords that the analyzer looks for
+        full_content = content + "\nCERTIDÃO DE NASCIMENTO\nBIRTH CERTIFICATE\nCartório Civil\n" + "Very large document content padding. " * 15000
         return full_content.encode('utf-8')
     
     def create_test_case_for_disclaimer(self) -> str:
