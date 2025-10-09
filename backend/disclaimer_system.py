@@ -136,29 +136,34 @@ IMPORTANTE: Esta carta é baseada em suas informações. Sempre revise profissio
             """,
             
             DisclaimerStage.REVIEW: """
-ACEITE DE RESPONSABILIDADE - REVISÃO FINAL
+CONFIRMAÇÃO DE RESPONSABILIDADE - ETAPA DE REVISÃO GERAL
 
-Ao prosseguir com a revisão final do seu processo, você confirma que:
+Ao concluir a revisão geral do seu processo, você declara que:
 
-1. REVISÃO COMPLETA
-   • Revisou TODOS os documentos, formulários e cartas gerados
-   • Verificou a precisão de todas as informações fornecidas
-   • Confirma que tudo está correto e atualizado
+1. REVISÃO INTEGRAL REALIZADA
+   • Revisou TODOS os documentos, formulários e cartas do processo
+   • Verificou a correção e consistência de todas as informações
+   • Confirmou que todos os dados foram fornecidos por VOCÊ
+   • Aprova o conjunto completo como correto e consistente
 
-2. RESPONSABILIDADE INTEGRAL
-   • Assume TOTAL responsabilidade por todo o conteúdo do processo
-   • Entende que você é o único responsável pela submissão ao USCIS
-   • Qualquer erro ou omissão é de sua responsabilidade
+2. CONFIRMAÇÃO DE RESPONSABILIDADE
+   • TODAS as informações do processo foram fornecidas por você
+   • Assume TOTAL responsabilidade por cada dado incluído
+   • Confirma a veracidade de todos os documentos e formulários
+   • Entende que é o único responsável pelo conteúdo apresentado
 
-3. NATUREZA INFORMATIVA
-   • Este sistema oferece orientação baseada em requisitos públicos
-   • NÃO constitui aconselhamento jurídico profissional
-   • Não garante aprovação ou sucesso no processo
+3. APROVAÇÃO DA ETAPA
+   • Aprova esta revisão como COMPLETA e CORRETA
+   • Confirma que o processo representa fielmente seu perfil
+   • Autoriza o avanço para a etapa de finalização
+   • Entende que esta é sua última oportunidade de revisão geral
 
-4. RECOMENDAÇÕES FINAIS
-   • Verifique requisitos atuais no site oficial do USCIS (uscis.gov)
-   • Consulte um advogado de imigração para casos complexos
-   • Mantenha cópias de todos os documentos enviados
+4. PREPARAÇÃO PARA FINALIZAÇÃO
+   • Está ciente que o próximo passo é a finalização oficial
+   • Compreende que terá disclaimer final antes do download
+   • Confirma estar preparado para assumir responsabilidade total
+
+IMPORTANTE: Esta é sua revisão final antes da etapa de disclaimers legais e download dos documentos.
             """,
             
             DisclaimerStage.FINAL: """
