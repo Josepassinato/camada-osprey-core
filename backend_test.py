@@ -755,7 +755,7 @@ class Phase4BProductionOptimizationTester:
                 f"Exception: {str(e)}"
             )
             return None
-    def test_specific_phase4a_test_cases(self):
+    def test_rate_limiting_functionality(self):
         """TESTE 6: Casos de Teste Específicos da Phase 4A Enhanced"""
         print("🎯 TESTE 6: Casos de Teste Específicos - Phase 4A Enhanced")
         
