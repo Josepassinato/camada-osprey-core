@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-VALIDAÇÃO FINAL COMPLETA DO ECOSSISTEMA - Comprehensive Testing Suite
-Tests all immigration system components for production certification
+TESTE DO SISTEMA DE VALIDAÇÃO DE DOCUMENTOS NATIVO
+Testa o novo sistema de validação que substitui Google Document AI por análise nativa do LLM
 """
 
 import requests
@@ -13,6 +13,7 @@ import os
 from typing import Dict, Any
 import base64
 import hashlib
+import io
 
 # Get backend URL from environment
 BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://validai-imm.preview.emergentagent.com')
