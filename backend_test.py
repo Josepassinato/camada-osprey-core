@@ -637,12 +637,12 @@ class Phase4BProductionOptimizationTester:
             )
             return None
     
-    def test_system_health_monitoring(self):
-        """TESTE 5: System Health Monitoring - Monitoramento Geral do Sistema"""
-        print("🏥 TESTE 5: System Health - Monitoramento Geral do Sistema")
+    def test_system_health_corrected(self):
+        """TESTE 2: System Health Corrected - Health check corrigido"""
+        print("🏥 TESTE 2: System Health Corrected - Health check corrigido")
         
         try:
-            # Test system health endpoint
+            # Test system health endpoint (deve estar corrigido agora)
             health_response = self.session.get(f"{API_BASE}/production/system/health")
             
             health_success = health_response.status_code == 200
@@ -653,9 +653,9 @@ class Phase4BProductionOptimizationTester:
             components = health_status.get('components', {})
             
             self.log_test(
-                "System Health - Status Geral",
+                "System Health Corrected - Status Geral",
                 health_success and overall_status in ['healthy', 'degraded'],
-                f"Status geral: {overall_status}, Componentes: {len(components)}",
+                f"✅ Health check corrigido: {overall_status}, Componentes: {len(components)}",
                 {
                     "success": health_data.get('success', False),
                     "overall_status": overall_status,
@@ -664,7 +664,7 @@ class Phase4BProductionOptimizationTester:
                 }
             )
             
-            # Check individual components
+            # Check individual components (deve retornar componentes corretos)
             expected_components = ['database', 'security', 'load_testing', 'database_optimization']
             component_results = {}
             
@@ -674,9 +674,9 @@ class Phase4BProductionOptimizationTester:
                     component_results[component] = comp_status in ['healthy', 'warning']
                     
                     self.log_test(
-                        f"System Health - Componente {component.title()}",
+                        f"System Health Corrected - {component.title()}",
                         component_results[component],
-                        f"Status: {comp_status}",
+                        f"✅ Componente corrigido: {comp_status}",
                         {
                             "component": component,
                             "status": comp_status,
@@ -686,9 +686,9 @@ class Phase4BProductionOptimizationTester:
                 else:
                     component_results[component] = False
                     self.log_test(
-                        f"System Health - Componente {component.title()}",
+                        f"System Health Corrected - {component.title()}",
                         False,
-                        "Componente não encontrado no health check"
+                        f"❌ Componente {component} não encontrado"
                     )
             
             # Check specific component details
