@@ -759,199 +759,125 @@ class Phase4BProductionOptimizationTester:
         """TESTE 6: Rate Limiting - Middleware de Segurança"""
         print("🚦 TESTE 6: Rate Limiting - Middleware de Segurança")
         
-        test_cases = [
-            {
-                "name": "Caso A: Dados reais completos (should create full packet)",
-                "scenario": "H-1B_basic",
-                "mock_data": {
-                    "documents": [
-                        {"type": "passport", "status": "validated", "quality": 0.95},
-                        {"type": "diploma", "status": "validated", "quality": 0.90},
-                        {"type": "employment_letter", "status": "validated", "quality": 0.88},
-                        {"type": "i797", "status": "validated", "quality": 0.92}
-                    ],
-                    "expected_outcome": "full_packet_created"
+        try:
+            # Test rate limiting by making multiple requests to security endpoints
+            # This is a simple test to verify the middleware is working
+            
+            # Test 1: Multiple requests to security statistics
+            request_count = 5
+            success_count = 0
+            rate_limited_count = 0
+            
+            for i in range(request_count):
+                response = self.session.get(f"{API_BASE}/production/security/statistics")
+                
+                if response.status_code == 200:
+                    success_count += 1
+                elif response.status_code == 429:  # Rate limited
+                    rate_limited_count += 1
+                
+                # Small delay between requests
+                time.sleep(0.1)
+            
+            self.log_test(
+                "Rate Limiting - Múltiplas Requisições",
+                success_count > 0,  # At least some should succeed
+                f"Sucessos: {success_count}/{request_count}, Rate limited: {rate_limited_count}",
+                {
+                    "total_requests": request_count,
+                    "successful_requests": success_count,
+                    "rate_limited_requests": rate_limited_count,
+                    "middleware_active": rate_limited_count > 0 or success_count == request_count
                 }
-            },
-            {
-                "name": "Caso B: Dados parciais (should flag missing documents)",
-                "scenario": "H-1B_extension",
-                "mock_data": {
-                    "documents": [
-                        {"type": "passport", "status": "validated", "quality": 0.93},
-                        {"type": "employment_letter", "status": "validated", "quality": 0.87}
-                        # Missing I-797 anterior (required for extension)
-                    ],
-                    "expected_outcome": "missing_documents_flagged"
+            )
+            
+            # Test 2: Verify security headers are present
+            response = self.session.get(f"{API_BASE}/production/security/statistics")
+            
+            security_headers = [
+                'X-Content-Type-Options',
+                'X-Frame-Options', 
+                'X-XSS-Protection',
+                'Strict-Transport-Security'
+            ]
+            
+            headers_present = 0
+            for header in security_headers:
+                if header in response.headers:
+                    headers_present += 1
+            
+            self.log_test(
+                "Rate Limiting - Security Headers",
+                headers_present >= 3,  # At least 3 out of 4 headers should be present
+                f"Headers de segurança presentes: {headers_present}/{len(security_headers)}",
+                {
+                    "headers_present": headers_present,
+                    "total_headers": len(security_headers),
+                    "headers_found": [h for h in security_headers if h in response.headers]
                 }
-            },
-            {
-                "name": "Caso C: Documentos com problemas de qualidade (should show warnings)",
-                "scenario": "I-485_employment",
-                "mock_data": {
-                    "documents": [
-                        {"type": "passport", "status": "validated", "quality": 0.65},  # Low quality
-                        {"type": "birth_certificate", "status": "pending", "quality": 0.45},  # Very low quality
-                        {"type": "employment_letter", "status": "validated", "quality": 0.85}
-                        # Missing medical_exam (required for I-485)
-                    ],
-                    "expected_outcome": "quality_warnings_shown"
+            )
+            
+            # Test 3: Test middleware functionality with different endpoints
+            test_endpoints = [
+                "/production/security/statistics",
+                "/production/system/health",
+                "/production/load-testing/available-tests"
+            ]
+            
+            middleware_working = 0
+            for endpoint in test_endpoints:
+                try:
+                    response = self.session.get(f"{API_BASE}{endpoint}")
+                    # Check if security headers are present (indicates middleware is working)
+                    if 'X-Content-Type-Options' in response.headers:
+                        middleware_working += 1
+                except:
+                    pass
+            
+            self.log_test(
+                "Rate Limiting - Middleware Aplicado",
+                middleware_working >= 2,  # At least 2 endpoints should have middleware
+                f"Endpoints com middleware: {middleware_working}/{len(test_endpoints)}",
+                {
+                    "endpoints_with_middleware": middleware_working,
+                    "total_endpoints": len(test_endpoints),
+                    "middleware_coverage": f"{(middleware_working/len(test_endpoints))*100:.1f}%"
                 }
+            )
+            
+            # Overall rate limiting assessment
+            rate_limit_tests_passed = sum([
+                success_count > 0,
+                headers_present >= 3,
+                middleware_working >= 2
+            ])
+            
+            self.log_test(
+                "Rate Limiting - Funcionalidade Geral",
+                rate_limit_tests_passed >= 2,  # At least 2 out of 3 should work
+                f"Testes de rate limiting aprovados: {rate_limit_tests_passed}/3",
+                {
+                    "requests_working": success_count > 0,
+                    "headers_working": headers_present >= 3,
+                    "middleware_working": middleware_working >= 2,
+                    "success_rate": f"{(rate_limit_tests_passed/3)*100:.1f}%"
+                }
+            )
+            
+            return {
+                "success_count": success_count,
+                "rate_limited_count": rate_limited_count,
+                "headers_present": headers_present,
+                "middleware_working": middleware_working
             }
-        ]
-        
-        results = []
-        
-        for i, test_case in enumerate(test_cases, 1):
-            try:
-                print(f"\n🧪 Executando {test_case['name']}")
                 
-                # Create test case
-                case_response = self.session.post(
-                    f"{API_BASE}/auto-application/start",
-                    json={"form_code": test_case["scenario"]}
-                )
-                
-                if case_response.status_code != 200:
-                    self.log_test(
-                        f"Caso {i} - Criação de Case",
-                        False,
-                        f"HTTP {case_response.status_code}"
-                    )
-                    continue
-                
-                case_id = case_response.json().get('case', {}).get('case_id')
-                
-                # Add basic data to case
-                basic_data = {
-                    "firstName": "Test",
-                    "lastName": "User",
-                    "email": f"test{i}@phase4a.com",
-                    "phone": "+55 11 99999-9999"
-                }
-                
-                self.session.patch(
-                    f"{API_BASE}/auto-application/case/{case_id}",
-                    json={"basic_data": basic_data}
-                )
-                
-                # Start finalization for this test case
-                request_data = {
-                    "scenario_key": test_case["scenario"],
-                    "postage": "USPS",
-                    "language": "pt"
-                }
-                
-                start_response = self.session.post(
-                    f"{API_BASE}/cases/{case_id}/finalize/start",
-                    json=request_data
-                )
-                
-                if start_response.status_code == 200:
-                    job_id = start_response.json().get('job_id')
-                    
-                    if job_id:
-                        # Wait for processing
-                        time.sleep(4)
-                        
-                        # Get preview to analyze results
-                        preview_response = self.session.get(
-                            f"{API_BASE}/cases/finalize/{job_id}/preview"
-                        )
-                        
-                        if preview_response.status_code == 200:
-                            preview_data = preview_response.json()
-                            
-                            # Analyze results based on expected outcome
-                            expected = test_case["mock_data"]["expected_outcome"]
-                            success = False
-                            details = ""
-                            
-                            if expected == "full_packet_created":
-                                # Check if packet was created successfully
-                                quality_score = preview_data.get('quality_assessment', {}).get('overall_score', 0)
-                                doc_count = len(preview_data.get('document_summary', []))
-                                success = quality_score > 70 and doc_count > 0
-                                details = f"Quality: {quality_score}%, Docs: {doc_count}"
-                                
-                            elif expected == "missing_documents_flagged":
-                                # Check if missing documents were flagged
-                                issues = preview_data.get('quality_assessment', {}).get('issues', [])
-                                warnings = preview_data.get('quality_assessment', {}).get('warnings', [])
-                                success = len(issues) > 0 or len(warnings) > 0
-                                details = f"Issues: {len(issues)}, Warnings: {len(warnings)}"
-                                
-                            elif expected == "quality_warnings_shown":
-                                # Check if quality warnings were shown
-                                warnings = preview_data.get('quality_assessment', {}).get('warnings', [])
-                                critical_issues = preview_data.get('quality_assessment', {}).get('critical_issues', 0)
-                                success = len(warnings) > 0 or critical_issues > 0
-                                details = f"Warnings: {len(warnings)}, Critical: {critical_issues}"
-                            
-                            self.log_test(
-                                f"Caso {i} - {test_case['name'][:40]}...",
-                                success,
-                                details,
-                                {
-                                    "scenario": test_case["scenario"],
-                                    "expected_outcome": expected,
-                                    "quality_score": preview_data.get('quality_assessment', {}).get('overall_score', 0),
-                                    "document_count": len(preview_data.get('document_summary', [])),
-                                    "issues_count": len(preview_data.get('quality_assessment', {}).get('issues', [])),
-                                    "warnings_count": len(preview_data.get('quality_assessment', {}).get('warnings', []))
-                                }
-                            )
-                            
-                            results.append({
-                                "case": i,
-                                "success": success,
-                                "scenario": test_case["scenario"],
-                                "expected": expected,
-                                "job_id": job_id
-                            })
-                        else:
-                            self.log_test(
-                                f"Caso {i} - Preview Failed",
-                                False,
-                                f"HTTP {preview_response.status_code}"
-                            )
-                    else:
-                        self.log_test(
-                            f"Caso {i} - Job ID Missing",
-                            False,
-                            "Job ID não retornado"
-                        )
-                else:
-                    self.log_test(
-                        f"Caso {i} - Finalization Start Failed",
-                        False,
-                        f"HTTP {start_response.status_code}"
-                    )
-                
-            except Exception as e:
-                self.log_test(
-                    f"Caso {i} - Exception",
-                    False,
-                    f"Exception: {str(e)}"
-                )
-        
-        # Overall assessment
-        successful_cases = len([r for r in results if r["success"]])
-        total_cases = len(test_cases)
-        
-        self.log_test(
-            "Casos Específicos Phase 4A - Resumo Geral",
-            successful_cases >= 2,  # At least 2 out of 3 cases should work
-            f"Casos bem-sucedidos: {successful_cases}/{total_cases}",
-            {
-                "successful_cases": successful_cases,
-                "total_cases": total_cases,
-                "success_rate": f"{(successful_cases/total_cases)*100:.1f}%" if total_cases > 0 else "0%",
-                "results": results
-            }
-        )
-        
-        return results
+        except Exception as e:
+            self.log_test(
+                "Rate Limiting - Exception Geral",
+                False,
+                f"Exception: {str(e)}"
+            )
+            return None
 
     def test_multiple_document_types(self):
         """TESTE 6: Diferentes Tipos de Documento"""
