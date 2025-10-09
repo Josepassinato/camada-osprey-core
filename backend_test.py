@@ -472,7 +472,7 @@ class DisclaimerAndSSNValidatorTester:
             )
             return None
     
-    def test_database_performance_corrected(self):
+    def test_ssn_requirements_endpoint(self):
         """TESTE 3: Database Performance Corrected - Sistema de otimização corrigido"""
         print("🗄️ TESTE 3: Database Performance Corrected - Sistema de otimização corrigido")
         
