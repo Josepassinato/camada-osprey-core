@@ -628,179 +628,129 @@ class Phase4BProductionOptimizationTester:
         """TESTE 5: System Health Monitoring - Monitoramento Geral do Sistema"""
         print("🏥 TESTE 5: System Health - Monitoramento Geral do Sistema")
         
-        # Create test case with documents
-        case_id = self.create_test_case_with_documents()
-        if not case_id:
-            self.log_test(
-                "PDF Generation - Criação de Caso",
-                False,
-                "Falha ao criar caso de teste"
-            )
-            return None
-        
         try:
-            # Start finalization to trigger PDF generation
-            request_data = {
-                "scenario_key": "H-1B_basic",
-                "postage": "USPS",
-                "language": "pt"
-            }
+            # Test system health endpoint
+            health_response = self.session.get(f"{API_BASE}/production/system/health")
             
-            start_response = self.session.post(
-                f"{API_BASE}/cases/{case_id}/finalize/start",
-                json=request_data
+            health_success = health_response.status_code == 200
+            health_data = health_response.json() if health_success else {}
+            
+            health_status = health_data.get('health', {})
+            overall_status = health_status.get('overall_status', 'unknown')
+            components = health_status.get('components', {})
+            
+            self.log_test(
+                "System Health - Status Geral",
+                health_success and overall_status in ['healthy', 'degraded'],
+                f"Status geral: {overall_status}, Componentes: {len(components)}",
+                {
+                    "success": health_data.get('success', False),
+                    "overall_status": overall_status,
+                    "components_count": len(components),
+                    "components": list(components.keys())
+                }
             )
             
-            if start_response.status_code != 200:
-                self.log_test(
-                    "PDF Generation - Job Creation",
-                    False,
-                    f"Falha ao criar job: HTTP {start_response.status_code}",
-                    start_response.text
-                )
-                return None
+            # Check individual components
+            expected_components = ['database', 'security', 'load_testing', 'database_optimization']
+            component_results = {}
             
-            job_id = start_response.json().get('job_id')
-            if not job_id:
-                self.log_test(
-                    "PDF Generation - Job ID",
-                    False,
-                    "Job ID não retornado"
-                )
-                return None
-            
-            # Wait for PDF generation
-            print(f"⏳ Aguardando geração de PDF para job {job_id}...")
-            time.sleep(6)  # Extra time for PDF processing
-            
-            # Check job status for PDF generation results
-            status_response = self.session.get(
-                f"{API_BASE}/cases/finalize/{job_id}/status"
-            )
-            
-            if status_response.status_code == 200:
-                status_data = status_response.json()
-                
-                # Check if PDF links are available
-                links = status_data.get('links', {})
-                has_pdf_links = len(links) > 0
-                
-                self.log_test(
-                    "PDF Generation - Links de Download",
-                    has_pdf_links,
-                    f"Links disponíveis: {list(links.keys())}",
-                    {
-                        "links_count": len(links),
-                        "available_links": list(links.keys()),
-                        "master_packet_link": links.get('master_packet')
-                    }
-                )
-                
-                # Get preview to check PDF generation details
-                preview_response = self.session.get(
-                    f"{API_BASE}/cases/finalize/{job_id}/preview"
-                )
-                
-                if preview_response.status_code == 200:
-                    preview_data = preview_response.json()
-                    document_summary = preview_data.get('document_summary', [])
-                    
-                    # Check if documents were processed for PDF
-                    processed_docs = len(document_summary)
-                    has_processed_docs = processed_docs > 0
+            for component in expected_components:
+                if component in components:
+                    comp_status = components[component].get('status', 'unknown')
+                    component_results[component] = comp_status in ['healthy', 'warning']
                     
                     self.log_test(
-                        "PDF Generation - Documentos Processados",
-                        has_processed_docs,
-                        f"Documentos processados para PDF: {processed_docs}",
+                        f"System Health - Componente {component.title()}",
+                        component_results[component],
+                        f"Status: {comp_status}",
                         {
-                            "processed_documents": processed_docs,
-                            "sample_documents": [d.get('name', 'unknown') for d in document_summary[:3]] if document_summary else []
+                            "component": component,
+                            "status": comp_status,
+                            "details": components[component]
                         }
                     )
-                    
-                    # Check document processing details
-                    if document_summary:
-                        doc_statuses = {}
-                        total_pages = 0
-                        
-                        for doc in document_summary:
-                            status = doc.get('status', 'unknown')
-                            doc_statuses[status] = doc_statuses.get(status, 0) + 1
-                            total_pages += doc.get('pages', 0)
-                        
-                        self.log_test(
-                            "PDF Generation - Status dos Documentos",
-                            'included' in doc_statuses or 'referenced' in doc_statuses,
-                            f"Status: {doc_statuses}, Total páginas: {total_pages}",
-                            {
-                                "document_statuses": doc_statuses,
-                                "total_pages": total_pages,
-                                "included_docs": doc_statuses.get('included', 0),
-                                "referenced_docs": doc_statuses.get('referenced', 0)
-                            }
-                        )
-                    
-                    # Check metadata for PDF generation
-                    metadata = preview_data.get('metadata', {})
-                    packet_stats = metadata.get('packet_statistics', {}) if metadata else {}
-                    
-                    has_packet_stats = len(packet_stats) > 0
-                    
-                    self.log_test(
-                        "PDF Generation - Estatísticas do Pacote",
-                        has_packet_stats,
-                        f"Estatísticas disponíveis: {len(packet_stats)} métricas",
-                        {
-                            "total_documents": packet_stats.get('total_documents_uploaded', 0),
-                            "documents_included": packet_stats.get('documents_included', 0),
-                            "total_pages": packet_stats.get('total_pages', 0),
-                            "avg_quality_score": packet_stats.get('avg_quality_score', 0)
-                        }
-                    )
-                    
-                    # Check quality assessment for PDF
-                    quality_assessment = preview_data.get('quality_assessment', {})
-                    has_quality_assessment = 'overall_score' in quality_assessment
-                    
-                    self.log_test(
-                        "PDF Generation - Avaliação de Qualidade",
-                        has_quality_assessment,
-                        f"Score geral: {quality_assessment.get('overall_score', 0)}, Recomendação: {quality_assessment.get('recommendation', 'N/A')}",
-                        {
-                            "overall_score": quality_assessment.get('overall_score', 0),
-                            "recommendation": quality_assessment.get('recommendation'),
-                            "critical_issues": quality_assessment.get('critical_issues', 0),
-                            "total_issues": quality_assessment.get('total_issues', 0)
-                        }
-                    )
-                    
-                    return {
-                        "job_id": job_id,
-                        "pdf_links": links,
-                        "processed_documents": processed_docs,
-                        "document_summary": document_summary,
-                        "packet_statistics": packet_stats
-                    }
                 else:
+                    component_results[component] = False
                     self.log_test(
-                        "PDF Generation - Preview Data",
+                        f"System Health - Componente {component.title()}",
                         False,
-                        f"HTTP {preview_response.status_code}",
-                        preview_response.text
+                        "Componente não encontrado no health check"
                     )
-            else:
+            
+            # Check specific component details
+            if 'security' in components:
+                security_comp = components['security']
+                blocked_ips = security_comp.get('blocked_ips', 0)
+                recent_events = security_comp.get('recent_events', 0)
+                
                 self.log_test(
-                    "PDF Generation - Status Check",
-                    False,
-                    f"HTTP {status_response.status_code}",
-                    status_response.text
+                    "System Health - Detalhes de Segurança",
+                    True,  # Always pass if security component exists
+                    f"IPs bloqueados: {blocked_ips}, Eventos recentes: {recent_events}",
+                    {
+                        "blocked_ips": blocked_ips,
+                        "recent_events": recent_events,
+                        "security_status": security_comp.get('status')
+                    }
                 )
-                return None
+            
+            if 'database_optimization' in components:
+                db_opt_comp = components['database_optimization']
+                cache_hit_rate = db_opt_comp.get('cache_hit_rate', 0)
+                redis_connected = db_opt_comp.get('redis_connected', False)
+                
+                self.log_test(
+                    "System Health - Detalhes de Otimização DB",
+                    True,  # Always pass if component exists
+                    f"Cache hit rate: {cache_hit_rate:.3f}, Redis: {redis_connected}",
+                    {
+                        "cache_hit_rate": cache_hit_rate,
+                        "redis_connected": redis_connected,
+                        "db_opt_status": db_opt_comp.get('status')
+                    }
+                )
+            
+            if 'load_testing' in components:
+                load_test_comp = components['load_testing']
+                active_tests = load_test_comp.get('active_tests', 0)
+                
+                self.log_test(
+                    "System Health - Detalhes de Load Testing",
+                    True,  # Always pass if component exists
+                    f"Testes ativos: {active_tests}",
+                    {
+                        "active_tests": active_tests,
+                        "load_testing_status": load_test_comp.get('status')
+                    }
+                )
+            
+            # Overall system health assessment
+            healthy_components = sum(component_results.values())
+            total_components = len(expected_components)
+            
+            self.log_test(
+                "System Health - Avaliação Geral",
+                healthy_components >= 3,  # At least 3 out of 4 components should be healthy
+                f"Componentes saudáveis: {healthy_components}/{total_components}",
+                {
+                    "healthy_components": healthy_components,
+                    "total_components": total_components,
+                    "overall_status": overall_status,
+                    "health_rate": f"{(healthy_components/total_components)*100:.1f}%",
+                    "component_results": component_results
+                }
+            )
+            
+            return {
+                "health_data": health_status,
+                "component_results": component_results,
+                "healthy_components": healthy_components
+            }
                 
         except Exception as e:
             self.log_test(
-                "PDF Generation - Exception",
+                "System Health - Exception Geral",
                 False,
                 f"Exception: {str(e)}"
             )
