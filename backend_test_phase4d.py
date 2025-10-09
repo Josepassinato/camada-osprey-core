@@ -179,9 +179,9 @@ class Phase4DWorkflowAutomationTester:
         try:
             # Test starting H-1B complete workflow
             request_data = {
-                "workflow_id": "h1b_complete_process",
+                "workflow_name": "h1b_complete_process",
                 "case_id": "TEST-H1B-WORKFLOW-001",
-                "parameters": {
+                "context": {
                     "applicant_name": "Carlos Silva",
                     "visa_type": "H-1B",
                     "priority": "normal"
