@@ -6250,6 +6250,15 @@ async def analyze_document_with_real_ai(
             detected_type = ocr_result.document_type if hasattr(ocr_result, 'document_type') else document_type
             confidence = ocr_result.confidence if hasattr(ocr_result, 'confidence') else 0.0
             
+            # ENHANCED: Text-based classification for Brazilian documents
+            text_lower = extracted_text.lower()
+            if any(keyword in text_lower for keyword in ['carteira nacional de habilitação', 'cnh', 'detran', 'categoria', 'permissão']):
+                detected_type = 'driver_license'
+                logger.info("🔍 Text classifier override: Detected as driver_license (CNH)")
+            elif any(keyword in text_lower for keyword in ['república federativa do brasil', 'passaporte', 'passport', 'mrz']):
+                detected_type = 'passport'
+                logger.info("🔍 Text classifier override: Detected as passport")
+            
             logger.info(f"✅ Google Document AI extraction complete")
             logger.info(f"   → Detected Type: {detected_type}")
             logger.info(f"   → Expected Type: {document_type}")
