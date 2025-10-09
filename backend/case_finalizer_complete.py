@@ -331,7 +331,7 @@ class CaseFinalizerComplete:
         self.db = db
         self.data_integrator = RealDataIntegrator(db) if db else None
     
-    def start_finalization(self, case_id: str, scenario_key: str, postage: str, language: str) -> Dict[str, Any]:
+    async def start_finalization(self, case_id: str, scenario_key: str, postage: str, language: str) -> Dict[str, Any]:
         """
         Inicia processo de finalização completo
         """
