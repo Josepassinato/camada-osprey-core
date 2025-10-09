@@ -389,7 +389,7 @@ class DocumentValidationTester:
         try:
             # Simular arquivo muito grande (> 4MB) que seria típico de certidão
             # quando o sistema espera passaporte
-            very_large_file_content = self.create_very_large_document_content("CERTIDÃO DE NASCIMENTO\nCartório Civil\nCarlos Eduardo Silva\nData: 15/03/1990")
+            very_large_file_content = self.create_very_large_document_content("Carlos Eduardo Silva\nData: 15/03/1990")
             
             files = {
                 'file': ('certidao_carlos.pdf', very_large_file_content, 'application/pdf')
