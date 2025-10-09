@@ -554,7 +554,8 @@ class Phase4DWorkflowAutomationTester:
                         "total_operation_types": len(operation_types),
                         "operation_types": found_types,
                         "expected_found": [t for t in expected_types if t in found_types],
-                        "success": result.get('success', False)
+                        "success": result.get('success', False),
+                        "configurations_count": len(retry_stats.get('configurations', {}))
                     }
                 )
                 
