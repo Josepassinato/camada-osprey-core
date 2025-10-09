@@ -35,6 +35,7 @@ import PerformanceDashboard from "./pages/PerformanceDashboard";
 import ConsistencyDashboard from "./pages/ConsistencyDashboard";
 import AdvancedAnalytics from "./pages/AdvancedAnalytics";
 import AutomationDashboard from "./pages/AutomationDashboard";
+import ProductionDashboard from "./pages/ProductionDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
