@@ -1471,8 +1471,8 @@ class DocumentValidationTester:
         # Test 1: Passaporte vs CNH (Caso reportado)
         test_results['passport_vs_cnh'] = self.test_passport_vs_cnh_case()
         
-        # Test 2: CNH vs Passaporte
-        test_results['cnh_vs_passport'] = self.test_cnh_vs_passport_case()
+        # Test 2: Diploma vs Passaporte
+        test_results['diploma_vs_passport'] = self.test_diploma_vs_passport_case()
         
         # Test 3: Certidão vs Passaporte
         test_results['certificate_vs_passport'] = self.test_birth_certificate_vs_passport_case()
