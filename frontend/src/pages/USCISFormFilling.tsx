@@ -128,6 +128,11 @@ const USCISFormFilling = () => {
   const [activeSection, setActiveSection] = useState("personal");
   const [formReviewed, setFormReviewed] = useState(false);
   const [formAuthorized, setFormAuthorized] = useState(false);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [autoFilledData, setAutoFilledData] = useState<any>({});
+  const [validationResult, setValidationResult] = useState<any>(null);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
 
   // Session management
   const { 
