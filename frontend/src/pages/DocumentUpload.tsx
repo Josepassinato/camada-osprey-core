@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -17,6 +17,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import DisclaimerModal from "@/components/DisclaimerModal";
 import { useDisclaimer } from "@/hooks/useDisclaimer";
+import IntelligentTutor from "@/components/IntelligentTutor";
 
 interface UploadedFile {
   file: File;
