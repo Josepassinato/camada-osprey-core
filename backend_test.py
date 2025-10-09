@@ -151,8 +151,8 @@ class DocumentValidationTester:
     
     def create_large_document_content(self, content: str) -> bytes:
         """Create a large document (> 2.5MB) to simulate passport or certificate"""
-        # Large content to trigger passport/certificate detection
-        full_content = content + "\n" + "Large document content padding. " * 10000
+        # Large content to trigger passport detection - include keywords that the analyzer looks for
+        full_content = content + "\nPASSAPORTE\nREPÚBLICA FEDERATIVA DO BRASIL\nPASSPORT\n" + "Large document content padding. " * 10000
         return full_content.encode('utf-8')
     
     def create_very_large_document_content(self, content: str) -> bytes:
