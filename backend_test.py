@@ -256,138 +256,105 @@ class Phase4BProductionOptimizationTester:
             return None
     
     def test_security_events_and_ip_blocking(self):
-        """TESTE 2: CaseFinalizerComplete - _audit_case_advanced_real()"""
-        print("🔍 TESTE 2: Case Finalizer Enhanced - Sistema de Auditoria Avançada")
-        
-        # Create test case first
-        case_id = self.create_test_case_with_documents()
-        if not case_id:
-            self.log_test(
-                "Case Finalizer Enhanced - Criação de Caso",
-                False,
-                "Falha ao criar caso de teste"
-            )
-            return None
+        """TESTE 2: Security System - Eventos de Segurança e Bloqueio de IP"""
+        print("🚫 TESTE 2: Security System - Eventos e Bloqueio de IP")
         
         try:
-            # Test different scenarios for enhanced audit
-            test_scenarios = [
-                {
-                    "scenario_key": "H-1B_basic",
-                    "description": "H-1B básico com documentos completos"
-                },
-                {
-                    "scenario_key": "H-1B_extension", 
-                    "description": "H-1B extensão (requer I-797 anterior)"
-                },
-                {
-                    "scenario_key": "I-485_employment",
-                    "description": "I-485 baseado em emprego (requer exame médico)"
-                }
-            ]
+            # Test 1: Get recent security events
+            events_response = self.session.get(f"{API_BASE}/production/security/events?limit=10")
             
-            results = []
-            
-            for scenario in test_scenarios:
-                try:
-                    request_data = {
-                        "scenario_key": scenario["scenario_key"],
-                        "postage": "USPS",
-                        "language": "pt"
-                    }
-                    
-                    response = self.session.post(
-                        f"{API_BASE}/cases/{case_id}/finalize/start",
-                        json=request_data
-                    )
-                    
-                    if response.status_code == 200:
-                        result = response.json()
-                        job_id = result.get('job_id')
-                        
-                        if job_id:
-                            # Wait for processing
-                            time.sleep(3)
-                            
-                            # Check job status to see audit results
-                            status_response = self.session.get(
-                                f"{API_BASE}/cases/finalize/{job_id}/status"
-                            )
-                            
-                            if status_response.status_code == 200:
-                                status_data = status_response.json()
-                                
-                                # Check if audit was performed
-                                has_status = 'status' in status_data
-                                has_issues = 'issues' in status_data
-                                
-                                self.log_test(
-                                    f"Auditoria Avançada - {scenario['scenario_key']}",
-                                    has_status and has_issues,
-                                    f"Auditoria para {scenario['description']}: Status={status_data.get('status')}, Issues={len(status_data.get('issues', []))}",
-                                    {
-                                        "scenario": scenario["scenario_key"],
-                                        "audit_status": status_data.get('status'),
-                                        "issues_count": len(status_data.get('issues', [])),
-                                        "has_links": bool(status_data.get('links', {}))
-                                    }
-                                )
-                                
-                                results.append({
-                                    "scenario": scenario["scenario_key"],
-                                    "success": has_status and has_issues,
-                                    "job_id": job_id,
-                                    "audit_data": status_data
-                                })
-                            else:
-                                self.log_test(
-                                    f"Auditoria Avançada - {scenario['scenario_key']} Status",
-                                    False,
-                                    f"HTTP {status_response.status_code}",
-                                    status_response.text
-                                )
-                        else:
-                            self.log_test(
-                                f"Auditoria Avançada - {scenario['scenario_key']} Job Creation",
-                                False,
-                                "Job ID não retornado",
-                                result
-                            )
-                    else:
-                        self.log_test(
-                            f"Auditoria Avançada - {scenario['scenario_key']} Endpoint",
-                            False,
-                            f"HTTP {response.status_code}",
-                            response.text
-                        )
-                        
-                except Exception as scenario_error:
-                    self.log_test(
-                        f"Auditoria Avançada - {scenario['scenario_key']} Exception",
-                        False,
-                        f"Exception: {str(scenario_error)}"
-                    )
-            
-            # Test overall audit system functionality
-            successful_audits = len([r for r in results if r["success"]])
-            total_scenarios = len(test_scenarios)
+            events_success = events_response.status_code == 200
+            events_data = events_response.json() if events_success else {}
             
             self.log_test(
-                "Auditoria Avançada - Sistema Geral",
-                successful_audits > 0,
-                f"Auditorias bem-sucedidas: {successful_audits}/{total_scenarios}",
+                "Security Events - Eventos Recentes",
+                events_success,
+                f"Eventos obtidos: {events_data.get('count', 0)} eventos",
                 {
-                    "successful_audits": successful_audits,
-                    "total_scenarios": total_scenarios,
-                    "success_rate": f"{(successful_audits/total_scenarios)*100:.1f}%" if total_scenarios > 0 else "0%"
+                    "success": events_data.get('success', False),
+                    "events_count": events_data.get('count', 0),
+                    "has_events": len(events_data.get('security_events', [])) >= 0
                 }
             )
             
-            return results
+            # Test 2: Manual IP blocking
+            test_ip = "192.168.1.100"
+            block_request = {
+                "ip_address": test_ip,
+                "duration_minutes": 5,
+                "reason": "Test block for Phase 4B validation"
+            }
+            
+            block_response = self.session.post(
+                f"{API_BASE}/production/security/block-ip",
+                json=block_request
+            )
+            
+            block_success = block_response.status_code == 200
+            block_data = block_response.json() if block_success else {}
+            
+            self.log_test(
+                "Security IP Blocking - Bloqueio Manual",
+                block_success,
+                f"IP {test_ip} bloqueado: {block_data.get('success', False)}",
+                {
+                    "success": block_data.get('success', False),
+                    "ip_address": block_data.get('ip_address'),
+                    "duration_minutes": block_data.get('duration_minutes'),
+                    "message": block_data.get('message', '')
+                }
+            )
+            
+            # Test 3: IP unblocking
+            unblock_request = {
+                "ip_address": test_ip,
+                "reason": "Test unblock for Phase 4B validation"
+            }
+            
+            unblock_response = self.session.post(
+                f"{API_BASE}/production/security/unblock-ip",
+                json=unblock_request
+            )
+            
+            unblock_success = unblock_response.status_code == 200
+            unblock_data = unblock_response.json() if unblock_success else {}
+            
+            self.log_test(
+                "Security IP Unblocking - Desbloqueio Manual",
+                unblock_success,
+                f"IP {test_ip} desbloqueado: {unblock_data.get('success', False)}",
+                {
+                    "success": unblock_data.get('success', False),
+                    "ip_address": unblock_data.get('ip_address'),
+                    "message": unblock_data.get('message', '')
+                }
+            )
+            
+            # Overall security system test
+            security_tests_passed = sum([events_success, block_success, unblock_success])
+            
+            self.log_test(
+                "Security System - Funcionalidade Geral",
+                security_tests_passed >= 2,  # At least 2 out of 3 should work
+                f"Testes de segurança aprovados: {security_tests_passed}/3",
+                {
+                    "events_working": events_success,
+                    "blocking_working": block_success,
+                    "unblocking_working": unblock_success,
+                    "success_rate": f"{(security_tests_passed/3)*100:.1f}%"
+                }
+            )
+            
+            return {
+                "events_data": events_data,
+                "block_data": block_data,
+                "unblock_data": unblock_data,
+                "tests_passed": security_tests_passed
+            }
                 
         except Exception as e:
             self.log_test(
-                "Auditoria Avançada - Exception Geral",
+                "Security System - Exception Geral",
                 False,
                 f"Exception: {str(e)}"
             )
