@@ -8381,33 +8381,45 @@ MRZ extraction should work properly.
 
 
 def main():
-    """Execute Real Vision System tests"""
-    print("🔬 INICIANDO TESTES DO SISTEMA DE VISÃO REAL")
-    print("👁️ Sistema usa capacidade nativa de visão computacional - real_vision_analyzer.py")
-    print("🎯 OBJETIVO: Testar análise visual direta de documentos")
+    """Execute Intelligent Forms System tests"""
+    print("🤖 INICIANDO TESTES DO SISTEMA INTELIGENTE DE PREENCHIMENTO DE FORMULÁRIOS")
+    print("📋 Sistema integra dados dos documentos validados com formulários oficiais")
+    print("🎯 OBJETIVO: Testar preenchimento inteligente e integração com Dra. Ana")
     print()
     
-    tester = RealVisionSystemTester()
-    results = tester.run_real_vision_system_tests()
+    tester = IntelligentFormsTester()
+    tester.run_all_tests()
     
-    print("\n🏁 TESTES DE VISÃO REAL CONCLUÍDOS")
-    print(f"Taxa de sucesso geral: {results['success_rate']:.1f}%")
-    print(f"Verificações críticas: {results['critical_passed']}/{results['critical_total']}")
+    # Calculate results
+    total_tests = len(tester.test_results)
+    passed_tests = len([r for r in tester.test_results if r['success']])
+    success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
     
-    # Show Real Vision specific results
-    real_vision_tests = [r for r in tester.test_results if 'Visão Real' in r['test'] or 'Real Vision' in r['test']]
-    if real_vision_tests:
-        print(f"\n👁️ RESULTADOS ESPECÍFICOS DE VISÃO REAL:")
-        for result in real_vision_tests:
-            status = "✅" if result['success'] else "❌"
-            print(f"   {status} {result['test']}")
+    # Count critical tests
+    critical_tests = [
+        "Sugestões Inteligentes - Status 200 OK",
+        "Validação Dra. Ana - Status 200 OK", 
+        "Auto-Fill - Status 200 OK",
+        "Dra. Ana - Agente Funcionando",
+        "Auto-Fill - Campos de Alta Confiança (85%+)"
+    ]
+    
+    critical_passed = 0
+    for test_name in critical_tests:
+        test_result = next((r for r in tester.test_results if test_name in r['test']), None)
+        if test_result and test_result['success']:
+            critical_passed += 1
+    
+    print(f"\n🏁 TESTES DE FORMULÁRIOS INTELIGENTES CONCLUÍDOS")
+    print(f"Taxa de sucesso geral: {success_rate:.1f}%")
+    print(f"Verificações críticas: {critical_passed}/{len(critical_tests)}")
     
     # Return appropriate exit code
-    if results['critical_passed'] >= results['critical_total'] * 0.8 and results['success_rate'] >= 75:
-        print("✅ SISTEMA DE VISÃO REAL FUNCIONANDO CORRETAMENTE")
+    if critical_passed >= len(critical_tests) * 0.8 and success_rate >= 75:
+        print("✅ SISTEMA INTELIGENTE DE FORMULÁRIOS FUNCIONANDO CORRETAMENTE")
         return 0
     else:
-        print("❌ SISTEMA DE VISÃO REAL PRECISA DE CORREÇÕES")
+        print("❌ SISTEMA INTELIGENTE DE FORMULÁRIOS PRECISA DE CORREÇÕES")
         return 1
 
 
