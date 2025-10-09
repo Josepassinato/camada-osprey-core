@@ -309,8 +309,8 @@ class DocumentValidationTester:
                 'file': ('passport_maria.pdf', large_file_content, 'application/pdf')
             }
             data = {
-                'document_type': 'driver_license',  # Sistema espera CNH
-                'visa_type': 'B-1/B-2',
+                'document_type': 'passport',  # Sistema espera passaporte
+                'visa_type': 'H-1B',  # H-1B requer passaporte
                 'case_id': 'TEST-CNH-PASSPORT'
             }
             
