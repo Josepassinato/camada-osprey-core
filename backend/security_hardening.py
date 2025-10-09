@@ -149,11 +149,12 @@ class SecurityHardeningSystem:
                 r"(?i)(boot\.ini|win\.ini)"
             ],
             
-            # Command injection
+            # Command injection (more specific patterns)
             "command_injection": [
-                r"(?i)(;|\||\&|\$\(|\`)",
-                r"(?i)(bash|sh|cmd|powershell)",
-                r"(?i)(wget|curl|nc|netcat)"
+                r"(?i)(;\s*(rm|cat|ls|pwd|whoami|id)\b)",
+                r"(?i)(\|\s*(bash|sh|cmd|powershell)\b)",
+                r"(?i)(\$\(.*\)|`.*`)",
+                r"(?i)(wget\s+http|curl\s+http|nc\s+-)"
             ]
         }
         
