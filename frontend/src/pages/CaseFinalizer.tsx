@@ -574,6 +574,31 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
         )}
       </div>
 
+      {/* Intelligent Tutor */}
+      {currentUser && (
+        <IntelligentTutor
+          userId={currentUser.id}
+          visaType="h1b"
+          currentStep={`finalizer_step_${currentStep}`}
+          context={{
+            case_id: caseId,
+            current_step: currentStep,
+            job_status: job?.status,
+            page: "case_finalizer"
+          }}
+          onTutorAction={(action, data) => {
+            console.log("Tutor action:", action, data);
+            // Handle specific tutor actions for case finalizer
+            if (action === 'explain_finalization') {
+              // Could show explanation modal
+            } else if (action === 'guide_approval') {
+              // Could show guidance for packet approval
+            }
+          }}
+          position="bottom-right"
+        />
+      )}
+
       {/* Disclaimer Modal */}
       <DisclaimerModal
         isOpen={showDisclaimer}
