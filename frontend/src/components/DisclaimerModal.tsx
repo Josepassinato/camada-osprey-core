@@ -284,9 +284,19 @@ PARA CASOS COMPLEXOS, SEMPRE CONSULTE UM ADVOGADO ESPECIALIZADO EM IMIGRAÇÃO.`
                 className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <span className="text-sm text-blue-800">
-                <strong>Li, entendi e ACEITO</strong> todos os termos de responsabilidade acima. 
-                Confirmo que sou responsável por todas as informações fornecidas e entendo 
-                que este sistema não constitui consultoria jurídica.
+                {stage === 'final' ? (
+                  <>
+                    <strong>Li, entendi e ACEITO</strong> todos os termos de responsabilidade acima. 
+                    Confirmo que sou responsável por todas as informações fornecidas e entendo 
+                    que este sistema não constitui consultoria jurídica.
+                  </>
+                ) : (
+                  <>
+                    <strong>RECONHEÇO</strong> que todas as informações acima foram fornecidas por mim 
+                    e são de minha <strong>responsabilidade</strong>. E <strong>APROVO</strong> esta etapa 
+                    de conclusão confirmando que estão corretas.
+                  </>
+                )}
               </span>
             </label>
           </div>
