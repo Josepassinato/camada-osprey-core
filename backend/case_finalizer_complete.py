@@ -25,10 +25,10 @@ logger = logging.getLogger(__name__)
 
 class CaseFinalizerComplete:
     """
-    Case Finalizer Completo - Versão Full com todas as funcionalidades
+    Case Finalizer Completo - Versão Full com todas as funcionalidades + Real Data Integration
     """
     
-    def __init__(self):
+    def __init__(self, db: AsyncIOMotorDatabase = None):
         # Knowledge Base Completo de Cenários (expandido significativamente)
         self.supported_scenarios = {
             "H-1B_basic": {
