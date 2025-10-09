@@ -998,6 +998,29 @@ class DisclaimerAndSSNValidatorTester:
             )
             return None
 
+    def run_disclaimer_debug_tests(self):
+        """Executar testes específicos de debug do Sistema de Disclaimer"""
+        print("🔍 INICIANDO TESTES DE DEBUG DO SISTEMA DE DISCLAIMER")
+        print("=" * 80)
+        print("FOCO ESPECÍFICO: Testar fluxo completo de disclaimer após correções de debug")
+        print("CASE ID: OSP-DEBUG-TEST | STAGE: documents")
+        print("OBJETIVO: Validar se documento é salvo no MongoDB e encontrado na query")
+        print("=" * 80)
+        
+        # Execute debug-specific tests
+        test_results = {}
+        
+        # Test 1: Debug Flow - Record and Immediate Validation
+        test_results['debug_flow'] = self.test_disclaimer_debug_flow()
+        
+        # Test 2: Disclaimer Text Endpoints (to ensure they work)
+        test_results['disclaimer_texts'] = self.test_disclaimer_text_endpoints()
+        
+        # Test 3: Standard Record and Validation (for comparison)
+        test_results['standard_record_validation'] = self.test_disclaimer_record_and_validation()
+        
+        return test_results
+
     def run_disclaimer_and_ssn_tests(self):
         """Executar todos os testes do Sistema de Disclaimer e Validador SSN"""
         print("🚀 INICIANDO TESTES DO SISTEMA DE DISCLAIMER E VALIDADOR SSN")
