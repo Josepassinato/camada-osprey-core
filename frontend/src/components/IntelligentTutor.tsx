@@ -40,6 +40,11 @@ const IntelligentTutor: React.FC<IntelligentTutorProps> = ({
   visaType = "h1b",
   userId 
 }) => {
+  // Don't render if no userId is available
+  if (!userId) {
+    console.log('IntelligentTutor: No userId provided, not rendering');
+    return null;
+  }
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<'guidance' | 'checklist' | 'progress' | 'mistakes' | 'interview'>('guidance');
   const [guidance, setGuidance] = useState<string>('');
