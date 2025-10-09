@@ -118,8 +118,8 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
         const jobData = await response.json();
         setJob({ ...jobData, job_id: jobId });
         
-        if (jobData.status === 'ready') {
-          setCurrentStep(3);
+        if (jobData.status === 'completed') {
+          setCurrentStep(3); // Vai para preview/aprovação
         } else if (jobData.status === 'needs_correction') {
           setCurrentStep(2);
           setError(`Correções necessárias: ${jobData.issues?.join(', ')}`);
