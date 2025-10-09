@@ -538,12 +538,13 @@ class Phase4DWorkflowAutomationTester:
                 has_stats = len(stats) > 0
                 
                 # Check for different operation types (should have 6+ types)
-                operation_types = stats.get('operation_types', {})
+                retry_stats = stats.get('retry_statistics', {})
+                operation_types = retry_stats.get('operation_types', [])
                 has_multiple_types = len(operation_types) >= 6
                 
                 # Expected operation types
                 expected_types = ['document_analysis', 'external_api', 'database', 'llm_operations', 'file_operations', 'critical']
-                found_types = list(operation_types.keys())
+                found_types = operation_types if isinstance(operation_types, list) else list(operation_types.keys())
                 has_expected_types = any(op_type in found_types for op_type in expected_types)
                 
                 self.log_test(
