@@ -7695,15 +7695,16 @@ MRZ extraction should work properly.
                 f"Exception: {str(e)}"
             )
 
-    def run_native_document_validation_tests(self):
-        """Run native document validation tests as requested"""
-        print("🚀 TESTE DO SISTEMA DE VALIDAÇÃO DE DOCUMENTOS NATIVO")
+    def run_real_vision_system_tests(self):
+        """Run Real Vision System tests as requested"""
+        print("🚀 TESTE DO SISTEMA DE VISÃO REAL - real_vision_analyzer.py")
         print("=" * 80)
-        print("Testando o novo sistema que substitui Google Document AI")
+        print("👁️ Testando capacidade nativa de visão computacional")
+        print("🎯 FOCO: Análise visual direta de documentos")
         print()
         
-        # TESTES ESSENCIAIS conforme solicitado
-        print("📋 EXECUTANDO TESTES ESSENCIAIS")
+        # TESTES BÁSICOS DE VALIDAÇÃO
+        print("📋 EXECUTANDO TESTES BÁSICOS DE VALIDAÇÃO")
         print("-" * 60)
         
         # TESTE 1: Upload básico
@@ -7727,6 +7728,40 @@ MRZ extraction should work properly.
         print()
         
         # TESTE 6: Múltiplos tipos de documento
+        self.test_multiple_document_types()
+        print()
+        
+        # TESTE 7: Múltiplos tipos de visto
+        self.test_multiple_visa_types()
+        print()
+        
+        # TESTE 8: Validação de tamanho
+        self.test_file_size_validation()
+        print()
+        
+        # TESTES ESPECÍFICOS DE VISÃO REAL
+        print("👁️ EXECUTANDO TESTES ESPECÍFICOS DE VISÃO REAL")
+        print("-" * 60)
+        
+        # TESTE 9: Análise de passaporte com visão real
+        self.test_real_vision_passport_analysis()
+        print()
+        
+        # TESTE 10: Múltiplos tipos com visão real
+        self.test_real_vision_multiple_document_types()
+        print()
+        
+        # TESTE 11: Validações inteligentes
+        self.test_real_vision_intelligent_validations()
+        print()
+        
+        # TESTE 12: Avaliação de qualidade
+        self.test_real_vision_quality_assessment()
+        print()
+        
+        # TESTE 13: Integração visão real + policy engine
+        self.test_real_vision_policy_engine_integration()
+        print()
         
         # RESUMO DOS RESULTADOS
         print("📊 RESUMO DOS RESULTADOS")
