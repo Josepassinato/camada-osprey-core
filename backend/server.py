@@ -7493,8 +7493,6 @@ async def validate_form_data_ai(case, friendly_form_data, basic_data):
         
         if True:  # Always use OpenAI now
             use_openai = True
-            llm = EmergentLLM(api_key=emergent_key)
-            use_openai = False
         
         # Get Dra. Paula's enhanced knowledge for validation
         visa_type = case.get('form_code', 'N/A')
@@ -7716,8 +7714,6 @@ async def generate_uscis_form_ai(case, friendly_form_data, basic_data):
         
         if True:  # Always use OpenAI now
             use_openai = True
-            llm = EmergentLLM(api_key=emergent_key)
-            use_openai = False
         
         form_code = case.get("form_code", "")
         
@@ -7801,8 +7797,6 @@ async def final_review_ai(case):
         
         if True:  # Always use OpenAI now
             use_openai = True
-            llm = EmergentLLM(api_key=emergent_key)
-            use_openai = False
         
         # Get Dra. Paula's enhanced knowledge for final review
         form_code = case.get('form_code', '')
