@@ -1708,7 +1708,9 @@ async def get_user_progress(current_user = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail=f"Error getting progress: {str(e)}")
 
 # Document routes (keeping existing ones with modifications for education integration)
-@api_router.post("/documents/upload")
+@api_router.post("/documents/upload", tags=["Documents"],
+                 summary="Upload de documento",
+                 description="Faz upload de documento com validação automática via IA e OCR inteligente")
 async def upload_document(
     file: UploadFile = File(...),
     document_type: DocumentType = Form(...),
