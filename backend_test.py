@@ -581,71 +581,121 @@ class IntelligentFormsTester:
             )
             return None
     
-    def test_policy_engine_integration(self):
-        """TESTE 5: Integração com Policy Engine"""
-        print("🏛️ TESTE 5: Integração Policy Engine")
-        
-        # Test with valid document to check Policy Engine integration
-        test_content = self.create_test_document(
-            "PASSPORT\nCARLOS EDUARDO SILVA\nPassport Number: C12345678\nExpiry: 2025-12-31",
-            "passport_carlos.pdf"
-        )
-        
-        files = {
-            'file': ('passport_carlos.pdf', test_content, 'application/pdf')
-        }
-        data = {
-            'document_type': 'passport',
-            'visa_type': 'H-1B',
-            'case_id': 'TEST-POLICY-ENGINE'
-        }
+    def test_dra_ana_form_validation_agent(self):
+        """TESTE 5: Funcionalidade da Dra. Ana (FormValidationAgent)"""
+        print("👩‍⚕️ TESTE 5: Dra. Ana - FormValidationAgent")
         
         try:
-            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            # Test with incomplete form data to trigger validation errors
+            incomplete_form_data = {
+                "full_name": "Carlos Silva",
+                "date_of_birth": "05/15/1990",
+                # Missing required fields like passport_number, employer_name, etc.
+            }
             
-            response = requests.post(
-                f"{API_BASE}/documents/analyze-with-ai",
-                files=files,
-                data=data,
-                headers=headers
+            request_data = {
+                "form_data": incomplete_form_data,
+                "visa_type": "H-1B",
+                "step_id": "form_review"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/intelligent-forms/validate",
+                json=request_data
             )
             
             if response.status_code == 200:
                 result = response.json()
+                validation_result = result.get('validation_result', {})
                 
-                # Check for Policy Engine fields
-                has_policy_engine = 'policy_engine' in result
-                has_policy_score = 'policy_score' in result
-                has_policy_decision = 'policy_decision' in result
-                
-                policy_integration_working = has_policy_engine or has_policy_score or has_policy_decision
+                # Check if Dra. Ana detected missing fields
+                errors = validation_result.get('errors', [])
+                has_errors = len(errors) > 0
                 
                 self.log_test(
-                    "Policy Engine - Integração Ativa",
-                    policy_integration_working,
-                    f"Policy Engine integrado: {policy_integration_working}",
+                    "Dra. Ana - Detecção de Campos Faltando",
+                    has_errors,
+                    f"Detectados {len(errors)} erros em formulário incompleto",
                     {
-                        "policy_engine_present": has_policy_engine,
-                        "policy_score_present": has_policy_score,
-                        "policy_decision_present": has_policy_decision,
-                        "policy_score": result.get('policy_score', 'N/A'),
-                        "policy_decision": result.get('policy_decision', 'N/A')
+                        "errors_count": len(errors),
+                        "sample_errors": errors[:3] if errors else []
                     }
                 )
+                
+                # Check completeness score
+                completeness_score = validation_result.get('completeness_score', 0)
+                has_completeness = completeness_score > 0
+                
+                self.log_test(
+                    "Dra. Ana - Score de Completude",
+                    has_completeness,
+                    f"Score de completude: {completeness_score}%",
+                    {
+                        "completeness_score": completeness_score,
+                        "is_valid": validation_result.get('is_valid', False)
+                    }
+                )
+                
+                # Test with complete form data
+                complete_form_data = {
+                    "full_name": "Carlos Eduardo Silva",
+                    "date_of_birth": "05/15/1990",
+                    "place_of_birth": "São Paulo, SP, Brasil",
+                    "passport_number": "YC792396",
+                    "passport_country": "Brazil",
+                    "current_address": "Rua das Flores, 123, São Paulo, SP",
+                    "phone": "+55 11 99999-9999",
+                    "email": "carlos.silva@test.com",
+                    "employer_name": "TechCorp Inc.",
+                    "job_title": "Software Engineer",
+                    "specialty_occupation": "Computer Systems Analyst",
+                    "salary": "85000",
+                    "start_date": "01/15/2025"
+                }
+                
+                complete_request = {
+                    "form_data": complete_form_data,
+                    "visa_type": "H-1B",
+                    "step_id": "form_review"
+                }
+                
+                complete_response = self.session.post(
+                    f"{API_BASE}/intelligent-forms/validate",
+                    json=complete_request
+                )
+                
+                if complete_response.status_code == 200:
+                    complete_result = complete_response.json()
+                    complete_validation = complete_result.get('validation_result', {})
+                    
+                    # Check if complete form has higher completeness
+                    complete_score = complete_validation.get('completeness_score', 0)
+                    score_improved = complete_score > completeness_score
+                    
+                    self.log_test(
+                        "Dra. Ana - Formulário Completo vs Incompleto",
+                        score_improved,
+                        f"Score melhorou: {completeness_score}% → {complete_score}%",
+                        {
+                            "incomplete_score": completeness_score,
+                            "complete_score": complete_score,
+                            "improvement": complete_score - completeness_score
+                        }
+                    )
                 
                 return result
             else:
                 self.log_test(
-                    "Policy Engine - Integração Ativa",
+                    "Dra. Ana - Status 200 OK",
                     False,
-                    f"HTTP {response.status_code}",
-                    response.text
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    {"status_code": response.status_code, "error": response.text}
                 )
                 return None
                 
         except Exception as e:
             self.log_test(
-                "Policy Engine - Integração Ativa",
+                "Dra. Ana - Status 200 OK",
                 False,
                 f"Exception: {str(e)}"
             )
