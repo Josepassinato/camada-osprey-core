@@ -255,7 +255,7 @@ class Phase4BProductionOptimizationTester:
             )
             return None
     
-    def test_case_finalizer_enhanced_audit_system(self):
+    def test_security_events_and_ip_blocking(self):
         """TESTE 2: CaseFinalizerComplete - _audit_case_advanced_real()"""
         print("🔍 TESTE 2: Case Finalizer Enhanced - Sistema de Auditoria Avançada")
         
