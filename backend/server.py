@@ -7573,7 +7573,7 @@ async def check_data_consistency_ai(case, friendly_form_data, basic_data):
         # Removed emergent integrations - using only user's OpenAI API key
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt
         
-        # Use OpenAI directly or fallback to EmergentLLM
+        # Use ONLY user's personal OpenAI API key
         openai_key = os.environ.get('OPENAI_API_KEY')
         emergent_key = os.environ.get('EMERGENT_LLM_KEY')
         
@@ -7639,7 +7639,7 @@ async def translate_data_ai(case, friendly_form_data):
         # Removed emergent integrations - using only user's OpenAI API key
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt
         
-        # Use OpenAI directly or fallback to EmergentLLM
+        # Use ONLY user's personal OpenAI API key
         openai_key = os.environ.get('OPENAI_API_KEY')
         emergent_key = os.environ.get('EMERGENT_LLM_KEY')
         
