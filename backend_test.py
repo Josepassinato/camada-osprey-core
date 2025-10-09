@@ -269,76 +269,97 @@ class IntelligentFormsTester:
             )
             return None
     
-    def test_document_type_validation(self):
-        """TESTE 2: Validação de Tipo de Documento Incorreto"""
-        print("🔍 TESTE 2: Validação de Tipo de Documento")
-        
-        # Test case: Upload CNH file when expecting passport
-        test_content = self.create_test_document(
-            "CNH - CARTEIRA NACIONAL DE HABILITAÇÃO\nNome: João Silva\nCategoria: B",
-            "cnh_joao.jpg"  # Filename suggests CNH
-        )
-        
-        files = {
-            'file': ('cnh_joao.jpg', test_content, 'image/jpeg')
-        }
-        data = {
-            'document_type': 'passport',  # Expecting passport
-            'visa_type': 'H-1B',
-            'case_id': 'TEST-TYPE-VALIDATION'
-        }
+    def test_intelligent_forms_validate_endpoint(self):
+        """TESTE 2: POST /api/intelligent-forms/validate"""
+        print("🔍 TESTE 2: Endpoint de Validação com Dra. Ana")
         
         try:
-            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            # Test with complete form data
+            complete_form_data = {
+                "full_name": "Carlos Eduardo Silva",
+                "date_of_birth": "05/15/1990",
+                "place_of_birth": "São Paulo, SP, Brasil",
+                "passport_number": "YC792396",
+                "passport_country": "Brazil",
+                "current_address": "Rua das Flores, 123, São Paulo, SP",
+                "phone": "+55 11 99999-9999",
+                "email": "carlos.silva@test.com",
+                "employer_name": "TechCorp Inc.",
+                "job_title": "Software Engineer",
+                "specialty_occupation": "Computer Systems Analyst"
+            }
             
-            response = requests.post(
-                f"{API_BASE}/documents/analyze-with-ai",
-                files=files,
-                data=data,
-                headers=headers
+            request_data = {
+                "form_data": complete_form_data,
+                "visa_type": "H-1B",
+                "step_id": "form_review"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/intelligent-forms/validate",
+                json=request_data
             )
             
             if response.status_code == 200:
                 result = response.json()
                 
-                # Check if validation detected type mismatch
-                issues = result.get('issues', [])
-                type_error_found = any("TIPO DE DOCUMENTO INCORRETO" in issue for issue in issues)
+                # Check required response structure
+                required_fields = ['success', 'agent', 'visa_type', 'validation_result']
+                has_all_fields = all(field in result for field in required_fields)
                 
                 self.log_test(
-                    "Validação Tipo - Detecção de Erro",
-                    type_error_found,
-                    f"Mensagem '❌ TIPO DE DOCUMENTO INCORRETO' encontrada: {type_error_found}",
+                    "Validação Dra. Ana - Estrutura de Resposta",
+                    has_all_fields,
+                    f"Campos presentes: {list(result.keys())}",
                     {
-                        "issues_found": len(issues),
-                        "type_error_detected": type_error_found,
-                        "issues": issues[:3]  # First 3 issues
+                        "status_code": response.status_code,
+                        "response_structure": {field: field in result for field in required_fields}
                     }
                 )
                 
-                # Check if document was marked as invalid
-                is_invalid = not result.get('valid', True)
+                # Check validation result structure
+                validation_result = result.get('validation_result', {})
+                validation_fields = ['is_valid', 'errors', 'warnings', 'completeness_score']
+                has_validation_structure = all(field in validation_result for field in validation_fields)
                 
                 self.log_test(
-                    "Validação Tipo - Documento Rejeitado",
-                    is_invalid,
-                    f"Documento marcado como inválido: {is_invalid}",
-                    {"valid": result.get('valid'), "completeness": result.get('completeness')}
+                    "Validação Dra. Ana - Estrutura de Validação",
+                    has_validation_structure,
+                    f"Campos de validação: {list(validation_result.keys())}",
+                    {
+                        "validation_structure": {field: field in validation_result for field in validation_fields},
+                        "completeness_score": validation_result.get('completeness_score', 0),
+                        "is_valid": validation_result.get('is_valid', False)
+                    }
+                )
+                
+                # Check if Dra. Ana agent is working
+                agent_name = result.get('agent', '')
+                is_dra_ana = 'Dra. Ana' in agent_name
+                
+                self.log_test(
+                    "Validação Dra. Ana - Agente Funcionando",
+                    is_dra_ana,
+                    f"Agente identificado: {agent_name}",
+                    {
+                        "agent": agent_name,
+                        "is_dra_ana": is_dra_ana
+                    }
                 )
                 
                 return result
             else:
                 self.log_test(
-                    "Validação Tipo - Detecção de Erro",
+                    "Validação Dra. Ana - Status 200 OK",
                     False,
-                    f"HTTP {response.status_code}",
-                    response.text
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    {"status_code": response.status_code, "error": response.text}
                 )
                 return None
                 
         except Exception as e:
             self.log_test(
-                "Validação Tipo - Detecção de Erro",
+                "Validação Dra. Ana - Status 200 OK",
                 False,
                 f"Exception: {str(e)}"
             )
