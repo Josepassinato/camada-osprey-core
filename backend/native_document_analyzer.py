@@ -291,6 +291,23 @@ Forneça análise detalhada em português brasileiro com dados REAIS extraídos 
         
         # Basic file size analysis
         file_size = len(file_content)
+        
+        return NativeAnalysisResult(
+            document_type=expected_type,
+            confidence=0.60,
+            extracted_fields={
+                "file_size": file_size,
+                "analysis_method": "fallback",
+                "error": error_message
+            },
+            full_text=f"Análise de fallback devido a erro: {error_message}",
+            validation_issues=validation_issues,
+            is_valid=False,
+            expiry_status="unknown",
+            name_match_status="error",
+            type_match_status="error"
+        )
+        file_size = len(file_content)
         if file_size < 50000:  # 50KB
             validation_issues.append("❌ ARQUIVO MUITO PEQUENO: Pode estar corrompido ou de baixa qualidade")
         
