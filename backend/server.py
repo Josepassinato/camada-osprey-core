@@ -100,8 +100,131 @@ JWT_SECRET = os.environ.get('JWT_SECRET', 'osprey-secret-key-change-in-productio
 JWT_ALGORITHM = "HS256"
 security = HTTPBearer()
 
-# Create the main app without a prefix
-app = FastAPI(title="OSPREY Immigration API - B2C", version="2.0.0")
+# Create FastAPI app with comprehensive documentation
+app = FastAPI(
+    title="OSPREY Immigration Platform API",
+    description="""
+    ## 🇺🇸 OSPREY - Plataforma de Auto Aplicação Imigratória
+    
+    Uma plataforma completa para automação de processos de imigração americana, com IA integrada 
+    para validação de documentos, preenchimento inteligente de formulários USCIS e montagem 
+    automatizada de pacotes de aplicação.
+    
+    ### Principais Funcionalidades:
+    
+    **📄 Sistema de Documentos**
+    - Upload e validação automática com IA
+    - OCR inteligente e extração de dados
+    - Validação específica por tipo de visto
+    - Sistema de disclaimer por etapa
+    
+    **📋 Formulários USCIS Inteligentes**
+    - Preenchimento automático baseado em documentos
+    - Formulário amigável em português
+    - Conversão automática para inglês oficial
+    - Validação com Dra. Ana (IA especializada)
+    
+    **✉️ Geração de Cartas**
+    - Cartas de apresentação personalizadas
+    - Revisão automática com Dr. Paula (IA especializada)
+    - Formatação oficial USCIS
+    - Sistema de Q&A inteligente
+    
+    **📦 Montagem Final**
+    - Auditoria avançada de completude
+    - Preview interativo do pacote
+    - Geração de PDFs organizados
+    - Sistema de aprovação por etapas
+    
+    **🔧 Sistemas de Produção**
+    - Monitoramento de performance
+    - Sistema de retry automático
+    - Workflow automation
+    - Analytics avançados
+    
+    **🛡️ Segurança e Compliance**
+    - Rate limiting inteligente
+    - Validação de entrada
+    - Sistema de disclaimer robusto
+    - Auditoria completa de aceites
+    
+    ### Tecnologias Utilizadas:
+    - **Backend**: FastAPI, Python 3.11+
+    - **Banco de Dados**: MongoDB com Motor (async)
+    - **IA/LLM**: OpenAI GPT-4o, Emergent Integrations
+    - **OCR**: Vision AI nativa
+    - **Frontend**: React, TypeScript, Vite
+    - **Infraestrutura**: Docker, Kubernetes
+    
+    ### Autenticação:
+    Esta API usa JWT Bearer tokens. Para acessar endpoints protegidos, inclua:
+    ```
+    Authorization: Bearer <seu_token_jwt>
+    ```
+    
+    ### Status Codes:
+    - `200` - Sucesso
+    - `400` - Erro de validação
+    - `401` - Não autorizado
+    - `403` - Sem permissão
+    - `404` - Não encontrado
+    - `429` - Rate limit excedido
+    - `500` - Erro interno do servidor
+    """,
+    version="2.0.0",
+    terms_of_service="https://osprey.com/terms/",
+    contact={
+        "name": "OSPREY Support Team",
+        "url": "https://osprey.com/support/",
+        "email": "support@osprey.com",
+    },
+    license_info={
+        "name": "Proprietary License",
+        "url": "https://osprey.com/license/",
+    },
+    openapi_tags=[
+        {
+            "name": "Authentication",
+            "description": "Operações de autenticação e gerenciamento de usuários"
+        },
+        {
+            "name": "Documents",
+            "description": "Upload, validação e análise de documentos com IA"
+        },
+        {
+            "name": "Forms",
+            "description": "Preenchimento inteligente de formulários USCIS"
+        },
+        {
+            "name": "AI Agents",
+            "description": "Interação com agentes de IA especializados (Dra. Ana, Dr. Paula)"
+        },
+        {
+            "name": "Case Management",
+            "description": "Gerenciamento de casos e finalização de pacotes"
+        },
+        {
+            "name": "Analytics",
+            "description": "Analytics avançados e business intelligence"
+        },
+        {
+            "name": "Production",
+            "description": "Monitoramento de produção e sistemas de saúde"
+        },
+        {
+            "name": "Automation",
+            "description": "Workflow automation e sistema de retry"
+        },
+        {
+            "name": "Disclaimer",
+            "description": "Sistema de aceite de responsabilidade por etapa"
+        },
+        {
+            "name": "Health",
+            "description": "Health checks e status do sistema"
+        }
+    ]
+)
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
