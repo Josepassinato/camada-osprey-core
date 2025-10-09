@@ -1154,11 +1154,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Sistema de Tutor Inteligente - POST /api/tutor/guidance"
-    - "Sistema de Tutor Inteligente - POST /api/tutor/checklist"
-    - "Sistema de Tutor Inteligente - POST /api/tutor/progress-analysis"
-    - "Sistema de Tutor Inteligente - POST /api/tutor/common-mistakes"
-    - "Sistema de Tutor Inteligente - POST /api/tutor/interview-preparation"
+    - "USCIS Form Progress Saving System - Save Form Data"
+    - "USCIS Form Progress Saving System - Retrieve Form Data"
+    - "USCIS Form Progress Saving System - Progressive Saving"
+    - "USCIS Form Progress Saving System - Form Authorization"
+    - "USCIS Form Progress Saving System - Edge Cases"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
