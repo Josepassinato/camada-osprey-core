@@ -3694,7 +3694,7 @@ async def start_case_finalization(case_id: str, request: dict):
         postage = request.get("postage", "USPS")
         language = request.get("language", "pt")
         
-        result = case_finalizer_complete.start_finalization(
+        result = await case_finalizer_complete.start_finalization(
             case_id=case_id,
             scenario_key=scenario_key,
             postage=postage,
