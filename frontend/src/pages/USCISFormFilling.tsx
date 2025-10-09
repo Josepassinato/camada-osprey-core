@@ -667,6 +667,91 @@ const USCISFormFilling = () => {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Intelligent Suggestions Banner */}
+            {suggestions.length > 0 && (
+              <Card className="border-blue-500 bg-blue-50">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                        <span className="text-white text-sm font-bold">IA</span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-blue-800">Preenchimento Inteligente</h4>
+                        <p className="text-sm text-blue-600">
+                          {suggestions.length} sugestões baseadas nos seus documentos validados
+                        </p>
+                      </div>
+                    </div>
+                    {isLoadingSuggestions && (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    )}
+                  </div>
+                  
+                  {Object.keys(autoFilledData).length > 0 && (
+                    <div className="mt-3 p-3 bg-white rounded-lg border border-blue-200">
+                      <p className="text-sm font-medium text-blue-800">
+                        ✅ {Object.keys(autoFilledData).length} campos preenchidos automaticamente
+                      </p>
+                      <p className="text-xs text-blue-600 mt-1">
+                        Baseado na análise dos seus documentos com alta confiança (85%+)
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* AI Validation Results */}
+            {validationResult && (
+              <Card className={`border-2 ${validationResult.is_valid ? 'border-green-500 bg-green-50' : 'border-orange-500 bg-orange-50'}`}>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${validationResult.is_valid ? 'bg-green-600' : 'bg-orange-600'}`}>
+                        {validationResult.is_valid ? (
+                          <CheckCircle className="h-4 w-4 text-white" />
+                        ) : (
+                          <AlertTriangle className="h-4 w-4 text-white" />
+                        )}
+                      </div>
+                      <div>
+                        <h4 className={`font-semibold ${validationResult.is_valid ? 'text-green-800' : 'text-orange-800'}`}>
+                          Dra. Ana - Validação
+                        </h4>
+                        <p className={`text-sm ${validationResult.is_valid ? 'text-green-600' : 'text-orange-600'}`}>
+                          Completude: {validationResult.completeness_score}% | {validationResult.errors?.length || 0} erro(s)
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={validateFormWithAI}
+                      disabled={isValidating}
+                      className="ml-auto"
+                    >
+                      {isValidating ? 'Validando...' : 'Revalidar'}
+                    </Button>
+                  </div>
+                  
+                  {validationResult.errors?.length > 0 && (
+                    <div className="mt-3">
+                      <h5 className="font-medium text-orange-800 mb-2">Problemas Encontrados:</h5>
+                      <ul className="space-y-1">
+                        {validationResult.errors.map((error: any, index: number) => (
+                          <li key={index} className="text-sm text-orange-700 flex items-start gap-2">
+                            <AlertTriangle className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                            {error.message || error}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Progress */}
             <Card className="border-black">
               <CardContent className="p-6">
