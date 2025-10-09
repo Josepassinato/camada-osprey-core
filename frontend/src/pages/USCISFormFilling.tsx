@@ -224,6 +224,109 @@ const USCISFormFilling = () => {
     }
   };
 
+  const loadIntelligentSuggestions = async () => {
+    if (!caseId || !case_?.form_code) return;
+    
+    setIsLoadingSuggestions(true);
+    try {
+      console.log('🤖 Carregando sugestões inteligentes...');
+      
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/intelligent-forms/suggestions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          case_id: caseId,
+          form_code: case_.form_code,
+          current_form_data: formData
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSuggestions(data.suggestions || []);
+        console.log(`✅ ${data.suggestions?.length || 0} sugestões carregadas`);
+        
+        // Auto-preencher campos com alta confiança
+        const highConfidenceSuggestions = data.suggestions?.filter((s: any) => s.confidence > 0.85) || [];
+        if (highConfidenceSuggestions.length > 0) {
+          autoFillFromSuggestions(highConfidenceSuggestions);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar sugestões:', error);
+    } finally {
+      setIsLoadingSuggestions(false);
+    }
+  };
+
+  const autoFillFromSuggestions = (suggestions: any[]) => {
+    const autoFillData: any = {};
+    
+    suggestions.forEach(suggestion => {
+      if (suggestion.confidence > 0.85 && suggestion.suggested_value) {
+        autoFillData[suggestion.field_id] = suggestion.suggested_value;
+      }
+    });
+    
+    if (Object.keys(autoFillData).length > 0) {
+      setFormData(prev => ({ ...prev, ...autoFillData }));
+      setAutoFilledData(autoFillData);
+      
+      toast({
+        title: "Preenchimento Automático",
+        description: `${Object.keys(autoFillData).length} campos preenchidos automaticamente com base nos seus documentos`,
+      });
+    }
+  };
+
+  const validateFormWithAI = async () => {
+    if (!case_?.form_code) return;
+    
+    setIsValidating(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/intelligent-forms/validate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          form_data: formData,
+          visa_type: case_.form_code,
+          step_id: "form_review"
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setValidationResult(data.validation_result);
+        
+        if (data.validation_result?.errors?.length > 0) {
+          toast({
+            title: "Problemas Encontrados",
+            description: `${data.validation_result.errors.length} erro(s) detectado(s) pela Dra. Ana`,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Formulário Validado",
+            description: "Dra. Ana aprovou o formulário!",
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Erro na validação:', error);
+      toast({
+        title: "Erro na Validação",
+        description: "Não foi possível validar o formulário",
+        variant: "destructive",
+      });
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
   const handleInputChange = (field: keyof USCISFormData, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
