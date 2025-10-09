@@ -49,6 +49,15 @@ const CaseFinalizer: React.FC = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [disclaimerStage, setDisclaimerStage] = useState<'documents' | 'forms' | 'cover_letter' | 'review' | 'final'>('review');
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  // Get current user for tutor
+  useEffect(() => {
+    const token = localStorage.getItem('osprey_token');
+    if (token) {
+      setCurrentUser({ id: 'user_123', email: 'user@example.com' });
+    }
+  }, []);
 
   const consentText = `
 CONSENTIMENTO PARA FINALIZAÇÃO DO PROCESSO
