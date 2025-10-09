@@ -602,8 +602,11 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         """
         Processa request através das verificações de segurança
         """
-        # Skip security checks for health checks and static files
-        if request.url.path in ["/health", "/", "/favicon.ico"] or request.url.path.startswith("/static"):
+        # Skip security checks for health checks, static files, and disclaimer endpoints
+        if (request.url.path in ["/health", "/", "/favicon.ico"] or 
+            request.url.path.startswith("/static") or 
+            request.url.path.startswith("/api/disclaimer") or
+            request.url.path.startswith("/api/documents")):
             return await call_next(request)
         
         # Check rate limits
