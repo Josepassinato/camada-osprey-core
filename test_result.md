@@ -992,15 +992,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Phase 4B Production Optimization - Security System Fixed"
-    - "Phase 4B Production Optimization - System Health Check"
-    - "Phase 4B Production Optimization - Database Performance"
-    - "Phase 4B Production Optimization - Load Testing Availability"
-    - "Phase 4B Production Optimization - Security Middleware Corrections"
+    - "Sistema de Disclaimer - Validação de Compliance"
+    - "Sistema de Disclaimer - Status e Relatórios"
+    - "Validador de Social Security Card - Integração USCIS"
   stuck_tasks:
-    - "Phase 4B Production Optimization - Security System Fixed"
-    - "Phase 4B Production Optimization - System Health Check"
-    - "Phase 4B Production Optimization - Database Performance"
+    - "Sistema de Disclaimer - Validação de Compliance"
+    - "Sistema de Disclaimer - Status e Relatórios"
     - "Phase 4B Production Optimization - Load Testing Availability"
     - "Phase 4B Production Optimization - Security Middleware Corrections"
   test_all: false
