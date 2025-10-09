@@ -241,6 +241,167 @@ class DisclaimerAndSSNValidatorTester:
                 f"❌ Exception: {str(e)}"
             )
     
+    def test_disclaimer_debug_flow(self):
+        """TESTE ESPECÍFICO: Fluxo Completo de Disclaimer com Debug - OSP-DEBUG-TEST"""
+        print("🔍 TESTE ESPECÍFICO: Fluxo Completo de Disclaimer com Debug - OSP-DEBUG-TEST")
+        
+        # Use the specific case_id from the review request
+        case_id = "OSP-DEBUG-TEST"
+        stage = "documents"
+        
+        print(f"📋 Testando fluxo completo para case_id: {case_id}, stage: {stage}")
+        
+        try:
+            # Step 1: Record acceptance for documents stage
+            record_request = {
+                "case_id": case_id,
+                "stage": stage,
+                "consent_hash": f"debug_hash_{uuid.uuid4().hex[:8]}",
+                "user_id": "debug_user_123",
+                "ip_address": "192.168.1.100",
+                "user_agent": "DebugTester/1.0",
+                "stage_data": {
+                    "stage_completed": True,
+                    "timestamp": datetime.now().isoformat(),
+                    "debug_test": True
+                }
+            }
+            
+            print(f"📝 Registrando aceite para {stage}...")
+            record_response = self.session.post(
+                f"{API_BASE}/disclaimer/record",
+                json=record_request
+            )
+            
+            record_success = record_response.status_code == 200
+            record_data = record_response.json() if record_success else {}
+            
+            self.log_test(
+                f"Debug Flow - Record Acceptance ({stage})",
+                record_success,
+                f"✅ Aceite registrado: {record_data.get('acceptance_id', 'N/A')}",
+                {
+                    "success": record_data.get('success', False),
+                    "stage": stage,
+                    "case_id": case_id,
+                    "acceptance_id": record_data.get('acceptance_id'),
+                    "recorded_at": record_data.get('recorded_at'),
+                    "message": record_data.get('message', '')
+                }
+            )
+            
+            if not record_success:
+                print(f"❌ Falha ao registrar aceite: {record_response.status_code} - {record_response.text}")
+                return None
+            
+            # Step 2: Immediately validate compliance (this is where the issue was)
+            print(f"🔍 Validando compliance imediatamente após registro...")
+            time.sleep(0.5)  # Small delay to ensure database consistency
+            
+            validation_response = self.session.get(f"{API_BASE}/disclaimer/validate/{case_id}")
+            
+            validation_success = validation_response.status_code == 200
+            validation_data = validation_response.json() if validation_success else {}
+            
+            compliance = validation_data.get('compliance', {})
+            total_acceptances = compliance.get('total_acceptances', 0)
+            accepted_stages = compliance.get('accepted_stages', [])
+            missing_stages = compliance.get('missing_stages', [])
+            
+            # This should find the document we just saved
+            found_document = total_acceptances > 0 and stage in accepted_stages
+            
+            self.log_test(
+                f"Debug Flow - Immediate Validation",
+                found_document,
+                f"✅ Documento encontrado: {found_document}, total: {total_acceptances}, stages: {accepted_stages}",
+                {
+                    "success": validation_data.get('success', False),
+                    "case_id": case_id,
+                    "total_acceptances": total_acceptances,
+                    "accepted_stages": accepted_stages,
+                    "missing_stages": missing_stages,
+                    "all_required_accepted": compliance.get('all_required_accepted', False),
+                    "document_found_immediately": found_document
+                }
+            )
+            
+            # Step 3: Check detailed status to see what's in the database
+            print(f"📊 Verificando status detalhado...")
+            status_response = self.session.get(f"{API_BASE}/disclaimer/status/{case_id}")
+            
+            status_success = status_response.status_code == 200
+            status_data = status_response.json() if status_success else {}
+            
+            acceptances = status_data.get('acceptances', [])
+            acceptances_count = len(acceptances)
+            
+            self.log_test(
+                f"Debug Flow - Detailed Status Check",
+                acceptances_count > 0,
+                f"✅ Status detalhado: {acceptances_count} aceites encontrados",
+                {
+                    "success": status_data.get('success', False),
+                    "acceptances_count": acceptances_count,
+                    "acceptances_data": acceptances[:2] if acceptances else [],  # First 2 for debugging
+                    "validation_data": status_data.get('validation', {}),
+                    "ready_for_final": status_data.get('ready_for_final', False)
+                }
+            )
+            
+            # Step 4: Generate compliance report for detailed analysis
+            print(f"📋 Gerando relatório de compliance...")
+            report_response = self.session.get(f"{API_BASE}/disclaimer/compliance-report/{case_id}")
+            
+            report_success = report_response.status_code == 200
+            report_data = report_response.json() if report_success else {}
+            
+            report = report_data.get('report', {})
+            timeline = report.get('acceptance_timeline', [])
+            
+            self.log_test(
+                f"Debug Flow - Compliance Report",
+                len(timeline) > 0,
+                f"✅ Relatório gerado: {len(timeline)} entradas na timeline",
+                {
+                    "success": report_data.get('success', False),
+                    "compliance_status": report.get('compliance_status', 'unknown'),
+                    "timeline_entries": len(timeline),
+                    "timeline_sample": timeline[:1] if timeline else [],  # First entry for debugging
+                    "total_acceptances_in_report": report.get('total_acceptances', 0)
+                }
+            )
+            
+            # Summary of debug flow
+            debug_summary = {
+                "case_id": case_id,
+                "stage": stage,
+                "record_success": record_success,
+                "validation_success": validation_success,
+                "document_found_immediately": found_document,
+                "total_acceptances": total_acceptances,
+                "acceptances_in_status": acceptances_count,
+                "timeline_entries": len(timeline),
+                "overall_success": record_success and found_document
+            }
+            
+            self.log_test(
+                f"Debug Flow - Overall Summary",
+                debug_summary["overall_success"],
+                f"✅ Fluxo completo: Record={record_success}, Found={found_document}, Total={total_acceptances}",
+                debug_summary
+            )
+            
+            return debug_summary
+                
+        except Exception as e:
+            self.log_test(
+                "Debug Flow - Exception",
+                False,
+                f"❌ Exception: {str(e)}"
+            )
+            return None
+
     def test_disclaimer_record_and_validation(self):
         """TESTE 2: Disclaimer Record and Validation - Registrar aceites e validar compliance"""
         print("✅ TESTE 2: Disclaimer Record and Validation - Registrar aceites e validar compliance")
