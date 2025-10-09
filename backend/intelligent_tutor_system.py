@@ -34,61 +34,6 @@ class TutorAction(str, Enum):
     COMMON_MISTAKES = "common_mistakes"
     INTERVIEW_PREP = "interview_prep"
 
-class TutorMessage(BaseModel):
-    """Mensagem do tutor personalizada"""
-    id: str
-    title: str
-    message: str
-    action_type: TutorAction
-    personality: TutorPersonality
-    
-    # Contexto
-    visa_type: str
-    current_step: str
-    user_level: str  # "beginner", "intermediate", "advanced"
-    
-    # Interatividade
-    quick_actions: List[Dict[str, str]] = []  # Botões de ação rápida
-    related_help: List[str] = []              # Tópicos relacionados
-    next_steps: List[str] = []                # Próximos passos sugeridos
-    
-    # Metadata
-    priority: int = 5                         # 1-10, 10 = mais importante
-    show_duration: int = 10                   # Segundos para mostrar
-    can_dismiss: bool = True
-    requires_action: bool = False
-    
-    timestamp: datetime = datetime.now(timezone.utc)
-
-class UserProgress(BaseModel):
-    """Progresso do usuário no sistema"""
-    user_id: str
-    visa_type: str
-    
-    # Níveis de conhecimento (0-100)
-    immigration_knowledge: int = 0
-    documents_knowledge: int = 0
-    forms_knowledge: int = 0
-    process_knowledge: int = 0
-    
-    # Histórico
-    completed_steps: List[str] = []
-    common_mistakes: List[str] = []
-    successful_actions: List[str] = []
-    
-    # Preferências de aprendizado
-    preferred_personality: TutorPersonality = TutorPersonality.FRIENDLY
-    detail_level: str = "medium"  # "low", "medium", "high"
-    language_preference: str = "pt"
-    
-    # Estatísticas
-    total_interactions: int = 0
-    help_requests: int = 0
-    errors_corrected: int = 0
-    achievements_earned: int = 0
-    
-    last_active: datetime = datetime.now(timezone.utc)
-
 class IntelligentTutorSystem:
     """Sistema de Tutor Inteligente com IA melhorado para usuários leigos"""
     
