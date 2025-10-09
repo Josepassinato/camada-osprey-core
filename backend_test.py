@@ -670,10 +670,10 @@ Observações: DOADOR DE ÓRGÃOS
                 f"❌ Exception: {str(e)}"
             )
 
-    def test_precision_verification_comparison(self):
-        """SCENARIO 3: Precision Verification - Compare analysis quality"""
-        print("🎯 SCENARIO 3: Precision Verification")
-        print("Cenário: Verificar melhoria na precisão após fix")
+    def test_cache_key_uniqueness_similar_sizes(self):
+        """SCENARIO 3: Cache Key Uniqueness - Test with similar file sizes and formats"""
+        print("🎯 SCENARIO 3: Cache Key Uniqueness - Similar Sizes and Formats")
+        print("Cenário: Testar documentos com tamanhos similares e mesmo formato")
         
         try:
             # Test with high-quality document that should get 85%+ completeness
