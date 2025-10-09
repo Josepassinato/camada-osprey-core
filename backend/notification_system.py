@@ -295,6 +295,38 @@ Equipe OSPREY Immigration
         )
         
         # Templates para notificações de sistema
+        self.templates["workflow_started"] = NotificationTemplate(
+            template_id="workflow_started",
+            name="Workflow Iniciado",
+            subject_template="🚀 Processo automatizado iniciado - {workflow_name}",
+            body_template="""
+Olá {user_name},
+
+Seu processo de imigração foi iniciado automaticamente!
+
+🔄 **Detalhes do Processo:**
+- Tipo: {workflow_name}
+- Caso: {case_id}
+- ID de Execução: {execution_id}
+- Iniciado em: {current_date} às {current_time}
+
+📋 **Próximos Passos:**
+O sistema processará automaticamente:
+1. Validação de documentos
+2. Preenchimento de formulários  
+3. Geração de carta de apresentação
+4. Finalização do pacote
+
+📱 **Acompanhe o Progresso:**
+Você receberá atualizações a cada etapa concluída.
+
+Atenciosamente,
+Equipe OSPREY Immigration
+            """,
+            channel=NotificationChannel.EMAIL,
+            variables=["user_name", "workflow_name", "case_id", "execution_id", "current_date", "current_time"]
+        )
+        
         self.templates["workflow_failed"] = NotificationTemplate(
             template_id="workflow_failed",
             name="Falha no Workflow",
