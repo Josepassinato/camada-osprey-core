@@ -1252,6 +1252,281 @@ Data de Validade: 15/06/2024
             )
             return None
     
+    def test_correct_passport_document_scenario(self):
+        """TESTE ESPECÍFICO: Correct Passport Document Analysis - Should Accept Valid Passport"""
+        print("🛂 TESTE ESPECÍFICO: Correct Passport Document Analysis - Should Accept Valid Passport")
+        print("Cenário: Usuário enviou passaporte correto quando era esperado passaporte (deve ser aceito)")
+        
+        try:
+            # Create test case for this scenario
+            case_id = "OSP-PASSPORT-CORRECT-TEST"
+            
+            # Create a test case first
+            case_data = {
+                "form_code": "H-1B",
+                "session_token": f"test_session_{uuid.uuid4().hex[:8]}"
+            }
+            
+            case_response = self.session.post(
+                f"{API_BASE}/auto-application/start",
+                json=case_data
+            )
+            
+            if case_response.status_code == 200:
+                case_result = case_response.json()
+                case_id = case_result.get('case', {}).get('case_id', case_id)
+                
+                # Add basic data to the case
+                basic_data = {
+                    "firstName": "Carlos",
+                    "lastName": "Silva", 
+                    "email": "carlos.silva@test.com",
+                    "phone": "+55 11 99999-9999",
+                    "dateOfBirth": "1990-05-15",
+                    "placeOfBirth": "São Paulo, SP, Brasil",
+                    "nationality": "Brazilian"
+                }
+                
+                # Update case with basic data
+                update_response = self.session.patch(
+                    f"{API_BASE}/auto-application/case/{case_id}",
+                    json={
+                        "basic_data": basic_data,
+                        "current_step": "documents"
+                    }
+                )
+            
+            # Test with the actual passport image from the review request
+            print("📥 Baixando imagem de passaporte do URL fornecido...")
+            passport_image_url = "https://customer-assets.emergentagent.com/job_formfill-aid/artifacts/kxf1p849_IMG_5082.jpeg"
+            
+            try:
+                import requests as req_lib
+                image_response = req_lib.get(passport_image_url, timeout=30)
+                
+                if image_response.status_code == 200:
+                    print(f"✅ Imagem de passaporte baixada com sucesso: {len(image_response.content)} bytes")
+                    
+                    # Use the actual downloaded passport image
+                    files = {
+                        'file': ('brazilian_passport.jpeg', image_response.content, 'image/jpeg')
+                    }
+                    data = {
+                        'document_type': 'passport',  # CORRETO - sistema espera passaporte e recebe passaporte
+                        'visa_type': 'H-1B',  # H-1B requer passaporte
+                        'case_id': case_id
+                    }
+                    
+                    headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                    
+                    response = requests.post(
+                        f"{API_BASE}/documents/analyze-with-ai",
+                        files=files,
+                        data=data,
+                        headers=headers
+                    )
+                    
+                    if response.status_code == 200:
+                        result = response.json()
+                        
+                        # Verificar se documento foi aceito apropriadamente
+                        is_valid = result.get('valid', False)
+                        is_legible = result.get('legible', False)
+                        completeness = result.get('completeness', 0)
+                        issues = result.get('issues', [])
+                        dra_paula_assessment = result.get('dra_paula_assessment', '')
+                        extracted_data = result.get('extracted_data', {})
+                        
+                        # Verificar se é um passaporte detectado corretamente
+                        detected_type = extracted_data.get('detected_type', '')
+                        passport_detected = 'passport' in detected_type.lower() if detected_type else False
+                        
+                        # Verificar se há mensagens de sucesso em português
+                        success_indicators = any(phrase in dra_paula_assessment for phrase in [
+                            'APROVADO',
+                            'documento válido',
+                            'passaporte brasileiro',
+                            'Dr. Miguel',
+                            'Dra. Paula'
+                        ])
+                        
+                        # Verificar se completeness score é alto (>= 70%)
+                        high_completeness = completeness >= 70
+                        
+                        # Verificar se não há issues críticos
+                        no_critical_issues = len([issue for issue in issues if 'INCORRETO' in issue or 'REJEITADO' in issue]) == 0
+                        
+                        self.log_test(
+                            "Correct Passport - Document Acceptance",
+                            is_valid and high_completeness and no_critical_issues,
+                            f"✅ Passaporte aceito: válido={is_valid}, completeness={completeness}%, issues_críticos={not no_critical_issues}",
+                            {
+                                "valid": is_valid,
+                                "legible": is_legible,
+                                "completeness": completeness,
+                                "passport_detected": passport_detected,
+                                "detected_type": detected_type,
+                                "success_indicators": success_indicators,
+                                "high_completeness": high_completeness,
+                                "no_critical_issues": no_critical_issues,
+                                "issues_count": len(issues),
+                                "dra_paula_assessment": dra_paula_assessment[:300],
+                                "image_size": len(image_response.content)
+                            }
+                        )
+                        
+                        # Verificar se Dr. Miguel/Dra. Paula deu avaliação positiva
+                        positive_assessment = any(phrase in dra_paula_assessment for phrase in [
+                            'aprovado',
+                            'válido',
+                            'aceito',
+                            'correto',
+                            'adequado'
+                        ])
+                        
+                        self.log_test(
+                            "Correct Passport - Positive AI Assessment",
+                            positive_assessment and len(dra_paula_assessment) > 50,
+                            f"✅ Avaliação positiva da IA: assessment_length={len(dra_paula_assessment)}, positivo={positive_assessment}",
+                            {
+                                "positive_assessment": positive_assessment,
+                                "assessment_length": len(dra_paula_assessment),
+                                "full_assessment": dra_paula_assessment
+                            }
+                        )
+                        
+                        # Verificar extração de dados do passaporte
+                        passport_fields_extracted = any(field in extracted_data for field in [
+                            'passport_number',
+                            'name',
+                            'nationality',
+                            'date_of_birth',
+                            'expiry_date',
+                            'mrz_data'
+                        ])
+                        
+                        self.log_test(
+                            "Correct Passport - Data Extraction",
+                            passport_fields_extracted,
+                            f"✅ Dados extraídos: campos_passaporte={passport_fields_extracted}",
+                            {
+                                "passport_fields_extracted": passport_fields_extracted,
+                                "extracted_data_keys": list(extracted_data.keys()) if extracted_data else [],
+                                "extracted_data_sample": {k: v for k, v in list(extracted_data.items())[:5]} if extracted_data else {}
+                            }
+                        )
+                        
+                        # Verificar se policy engine aprovou
+                        policy_score = result.get('policy_score', 0)
+                        policy_decision = result.get('policy_decision', '')
+                        policy_approved = policy_decision == 'PASS' or policy_score > 0.7
+                        
+                        self.log_test(
+                            "Correct Passport - Policy Engine Approval",
+                            policy_approved,
+                            f"✅ Policy engine: score={policy_score}, decision={policy_decision}",
+                            {
+                                "policy_score": policy_score,
+                                "policy_decision": policy_decision,
+                                "policy_approved": policy_approved
+                            }
+                        )
+                        
+                    else:
+                        self.log_test(
+                            "Correct Passport - Document Analysis",
+                            False,
+                            f"❌ HTTP {response.status_code}",
+                            {"status_code": response.status_code, "error": response.text[:200]}
+                        )
+                        
+                else:
+                    print(f"❌ Falha ao baixar imagem de passaporte: HTTP {image_response.status_code}")
+                    raise Exception(f"Failed to download passport image: {image_response.status_code}")
+                    
+            except Exception as download_error:
+                print(f"⚠️ Erro ao baixar imagem real de passaporte: {download_error}")
+                print("📝 Usando conteúdo simulado de passaporte...")
+                
+                # Fallback: Use simulated passport content
+                passport_content = """PASSPORT
+REPÚBLICA FEDERATIVA DO BRASIL
+PASSPORT
+Type: P
+Country Code: BRA
+Passport No: BR123456789
+Surname: SILVA
+Given Names: CARLOS EDUARDO
+Nationality: BRAZILIAN
+Date of Birth: 15/05/1990
+Sex: M
+Place of Birth: SAO PAULO, SP
+Date of Issue: 10/01/2020
+Date of Expiry: 10/01/2030
+Authority: DPF
+
+P<BRASILVA<<CARLOS<EDUARDO<<<<<<<<<<<<<<<<<<<
+BR1234567890BRA9005155M3001015<<<<<<<<<<<<<<06
+""" + "Padding content to reach adequate size for document analysis. " * 2000  # Make it > 50KB
+                
+                files = {
+                    'file': ('brazilian_passport_simulated.pdf', passport_content.encode('utf-8'), 'application/pdf')
+                }
+                data = {
+                    'document_type': 'passport',  # CORRETO - sistema espera passaporte e recebe passaporte
+                    'visa_type': 'H-1B',  # H-1B requer passaporte
+                    'case_id': case_id
+                }
+                
+                headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                
+                response = requests.post(
+                    f"{API_BASE}/documents/analyze-with-ai",
+                    files=files,
+                    data=data,
+                    headers=headers
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    
+                    # Same validation logic as above for simulated content
+                    is_valid = result.get('valid', False)
+                    completeness = result.get('completeness', 0)
+                    issues = result.get('issues', [])
+                    dra_paula_assessment = result.get('dra_paula_assessment', '')
+                    
+                    high_completeness = completeness >= 70
+                    no_critical_issues = len([issue for issue in issues if 'INCORRETO' in issue or 'REJEITADO' in issue]) == 0
+                    
+                    self.log_test(
+                        "Correct Passport - Simulated Content Analysis",
+                        is_valid and high_completeness and no_critical_issues,
+                        f"✅ Passaporte simulado aceito: válido={is_valid}, completeness={completeness}%",
+                        {
+                            "valid": is_valid,
+                            "completeness": completeness,
+                            "high_completeness": high_completeness,
+                            "no_critical_issues": no_critical_issues,
+                            "issues_count": len(issues),
+                            "dra_paula_assessment": dra_paula_assessment[:200]
+                        }
+                    )
+                else:
+                    self.log_test(
+                        "Correct Passport - Simulated Content Analysis",
+                        False,
+                        f"❌ HTTP {response.status_code}",
+                        {"status_code": response.status_code, "error": response.text[:200]}
+                    )
+                
+        except Exception as e:
+            self.log_test(
+                "Correct Passport - Exception",
+                False,
+                f"❌ Exception: {str(e)}"
+            )
+
     def test_brazilian_id_card_mismatch_scenario(self):
         """TESTE ESPECÍFICO: Brazilian ID Card (RG) vs Passport Mismatch Detection"""
         print("🆔 TESTE ESPECÍFICO: Brazilian ID Card (RG) vs Passport Mismatch Detection")
