@@ -1,31 +1,37 @@
 #!/usr/bin/env python3
 """
-TESTE COMPLETO DO SISTEMA DE WORKFLOW AUTOMATION - PHASE 4D IMPLEMENTATION
-Testa o sistema completo de Workflow Automation - Phase 4D Implementation
+TESTE COMPLETO DO SISTEMA DE PRODUCTION OPTIMIZATION - PHASE 4B IMPLEMENTATION
+Testa o sistema completo de Production Optimization - Phase 4B Implementation
 
-FOCO ESPECÍFICO: Sistema Completo de Workflow Automation + Retry System + Notification System
+FOCO ESPECÍFICO: Sistema Completo de Otimização de Produção
 
 ENDPOINTS TESTADOS:
-1. GET /api/automation/workflows/available - Listar workflows disponíveis
-2. POST /api/automation/workflows/start - Iniciar workflow H-1B completo
-3. GET /api/automation/workflows/{execution_id}/status - Status de execução
-4. GET /api/automation/notifications/templates - Templates disponíveis
-5. POST /api/automation/notifications/send - Enviar notificação de teste
-6. GET /api/automation/notifications/{notification_id}/status - Status de entrega
-7. GET /api/automation/notifications/statistics - Estatísticas do sistema
-8. GET /api/automation/retry/statistics - Estatísticas de retry
-9. POST /api/automation/workflows/h1b/complete - Workflow end-to-end com notificações
+1. GET /api/production/security/statistics - Estatísticas de segurança
+2. GET /api/production/security/events - Eventos recentes de segurança
+3. POST /api/production/security/block-ip - Bloqueio manual de IP
+4. POST /api/production/security/unblock-ip - Desbloqueio de IP
+5. GET /api/production/load-testing/available-tests - Testes disponíveis
+6. POST /api/production/load-testing/start - Iniciar teste de carga
+7. GET /api/production/load-testing/{test_id}/status - Status de execução
+8. POST /api/production/load-testing/{test_id}/stop - Parar teste
+9. GET /api/production/performance/database - Performance do banco
+10. POST /api/production/database/optimize - Otimização do banco
+11. POST /api/production/cache/clear - Limpeza de cache
+12. GET /api/production/system/health - Status geral do sistema
 
 COMPONENTES TESTADOS:
-- Workflow Engine: Sistema de workflows automatizados
-- Notification System: Sistema de notificações automáticas
-- Retry System: Sistema de retry automático
-- Integration Phase 4D: Inicialização dos 3 sistemas no startup
+- Security Hardening System: Sistema de segurança avançada e proteção de APIs
+- Load Testing System: Sistema automatizado de teste de carga
+- Database Optimization System: Sistema de otimização de banco e cache
+- System Health Monitoring: Monitoramento geral integrado
 
 CASOS DE TESTE ESPECÍFICOS:
-- Caso A: Workflow H-1B completo (should execute all steps successfully)
-- Caso B: Notification templates (should list 8+ templates with different channels)
-- Caso C: Retry system (should show configurations for 6+ operation types)
+- Caso A: Security system funcionando com rate limiting
+- Caso B: Load testing system operacional (4 testes disponíveis)
+- Caso C: Database optimization system ativo
+- Caso D: System health reporting completo
+- Caso E: Cache system (in-memory já que Redis não está disponível)
+- Caso F: Middleware de segurança aplicado corretamente
 """
 
 import requests
