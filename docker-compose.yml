@@ -1,0 +1,215 @@
+# Docker Compose para OSPREY Immigration Platform
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: osprey-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-osprey-mongo-2024}
+      MONGO_INITDB_DATABASE: ${MONGO_DB:-osprey_immigration}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - osprey-network
+    command: mongod --auth
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Redis Cache (Optional)
+  redis:
+    image: redis:7-alpine
+    container_name: osprey-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - osprey-network
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-osprey-redis-2024}
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: osprey-backend
+    restart: unless-stopped
+    environment:
+      # Database
+      MONGO_URL: mongodb://${MONGO_USERNAME:-osprey_user}:${MONGO_PASSWORD:-osprey_pass_2024}@mongodb:27017/${MONGO_DB:-osprey_immigration}?authSource=${MONGO_DB:-osprey_immigration}
+      
+      # Redis
+      REDIS_URL: redis://:${REDIS_PASSWORD:-osprey-redis-2024}@redis:6379/0
+      
+      # JWT
+      JWT_SECRET: ${JWT_SECRET:-osprey-jwt-secret-change-in-production}
+      JWT_ALGORITHM: HS256
+      
+      # OpenAI
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      
+      # Google APIs
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      
+      # Emergent LLM
+      EMERGENT_LLM_KEY: ${EMERGENT_LLM_KEY}
+      
+      # Application
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      DEBUG: ${DEBUG:-false}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      
+      # File Upload
+      MAX_FILE_SIZE: ${MAX_FILE_SIZE:-10485760}  # 10MB
+      UPLOAD_DIR: /app/uploads
+      
+      # Rate Limiting
+      RATE_LIMIT_ENABLED: ${RATE_LIMIT_ENABLED:-true}
+      DEFAULT_RATE_LIMIT: ${DEFAULT_RATE_LIMIT:-60}
+      
+      # Security
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      
+    ports:
+      - "8001:8001"
+    volumes:
+      - backend_uploads:/app/uploads
+      - backend_logs:/app/logs
+      - backend_cache:/app/cache
+    networks:
+      - osprey-network
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/api/production/system/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: osprey-frontend
+    restart: unless-stopped
+    environment:
+      REACT_APP_BACKEND_URL: ${REACT_APP_BACKEND_URL:-http://localhost:8001}
+      REACT_APP_ENVIRONMENT: ${ENVIRONMENT:-production}
+    ports:
+      - "3000:3000"
+    networks:
+      - osprey-network
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Nginx Load Balancer (Production)
+  nginx:
+    image: nginx:alpine
+    container_name: osprey-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    networks:
+      - osprey-network
+    depends_on:
+      - frontend
+      - backend
+    profiles:
+      - production
+
+  # Monitoring (Optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: osprey-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - osprey-network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    profiles:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: osprey-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - osprey-network
+    profiles:
+      - monitoring
+
+# Networks
+networks:
+  osprey-network:
+    driver: bridge
+
+# Volumes
+volumes:
+  mongodb_data:
+    driver: local
+  mongodb_config:
+    driver: local
+  redis_data:
+    driver: local
+  backend_uploads:
+    driver: local
+  backend_logs:
+    driver: local
+  backend_cache:
+    driver: local
+  nginx_logs:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
