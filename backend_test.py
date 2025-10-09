@@ -625,8 +625,8 @@ class Phase4BProductionOptimizationTester:
             return None
     
     def test_system_health_monitoring(self):
-        """TESTE 5: PDF Generation with Real Data - _generate_real_index_pdf() e _create_master_packet_with_real_data()"""
-        print("📄 TESTE 5: Geração de PDF com Dados Reais")
+        """TESTE 5: System Health Monitoring - Monitoramento Geral do Sistema"""
+        print("🏥 TESTE 5: System Health - Monitoramento Geral do Sistema")
         
         # Create test case with documents
         case_id = self.create_test_case_with_documents()
