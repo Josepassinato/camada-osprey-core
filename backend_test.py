@@ -4277,6 +4277,9 @@ Documento de identidade brasileiro
         print("🔧 BUG CORRIGIDO: Cache key generation mudou de primeiros 100 bytes para hash completo")
         print("=" * 80)
         
+        # Run the critical IMG_7602.png specific test first
+        self.test_img_7602_specific_document_analysis()
+        
         # Run the cache collision prevention tests
         self.test_cache_collision_prevention_sequential_uploads()
         self.test_real_document_processing_no_contamination()
