@@ -484,7 +484,7 @@ Equipe OSPREY Immigration
                 notification.status = NotificationStatus.FAILED
         
         # Update in database
-        if self.db:
+        if self.db is not None:
             await self._save_notification_to_db(notification)
     
     async def _send_email(self, notification: Notification):
