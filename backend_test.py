@@ -467,123 +467,205 @@ Data de Emissão: 01/02/2020
         print("Cenário: Testar com imagens reais mencionadas na conversa")
         
         try:
-            # Test with minimal case (no basic_info)
-            minimal_case_data = {
-                "form_code": "H-1B"
-                # No session_token, minimal data
-            }
+            # Simulate the real scenario from the review request
+            # User reported uploading driver's license and getting passport results
             
-            case_response = self.session.post(
-                f"{API_BASE}/auto-application/start",
-                json=minimal_case_data
-            )
+            # STEP 1: Upload Brazilian ID Card (simulating s2ay4b42_IMG_7531.png)
+            print("🆔 STEP 1: Uploading Brazilian ID Card (RG)")
             
-            minimal_case_id = None
-            if case_response.status_code == 200:
-                case_result = case_response.json()
-                minimal_case_id = case_result.get('case', {}).get('case_id')
-            
-            # Test document analysis with minimal case
-            passport_content = """PASSPORT
+            brazilian_id_content = """CARTEIRA DE IDENTIDADE
 REPÚBLICA FEDERATIVA DO BRASIL
-PASSPORT
-Type: P
-Country Code: BRA
-Passport No: BR987654321
-Surname: SANTOS
-Given Names: MARIA
-""" + "Minimal passport content for testing. " * 2000
+ESTADO DE SÃO PAULO
+SECRETARIA DA SEGURANÇA PÚBLICA
+INSTITUTO DE IDENTIFICAÇÃO RICARDO GUMBLETON DAUNT
+
+RG: 12.345.678-9
+Nome: FERNANDA COSTA LIMA
+Filiação: ROBERTO LIMA / SANDRA COSTA
+Data de Nascimento: 08/03/1992
+Naturalidade: SÃO PAULO - SP
+Data de Expedição: 15/07/2018
+CPF: 123.456.789-00
+""" + "Brazilian ID card content with specific identifiers. " * 2000
             
-            files = {
-                'file': ('passport_minimal.pdf', passport_content.encode('utf-8'), 'application/pdf')
+            files_id = {
+                'file': ('brazilian_id_fernanda.png', brazilian_id_content.encode('utf-8'), 'image/png')
             }
-            data = {
-                'document_type': 'passport',
+            data_id = {
+                'document_type': 'passport',  # User expects passport but uploads ID
                 'visa_type': 'H-1B',
-                'case_id': minimal_case_id or 'TEST-MINIMAL-CASE'
+                'case_id': 'REAL-DOC-TEST-ID'
             }
             
             headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
             
-            response = requests.post(
+            response_id = requests.post(
                 f"{API_BASE}/documents/analyze-with-ai",
-                files=files,
-                data=data,
+                files=files_id,
+                data=data_id,
                 headers=headers
             )
             
-            if response.status_code == 200:
-                result = response.json()
-                
-                # Should handle gracefully without NoneType errors
-                is_valid = result.get('valid')
-                completeness = result.get('completeness', 0)
-                extracted_data = result.get('extracted_data', {})
-                
-                # Should use default "Usuário" name and continue analysis
-                graceful_handling = completeness > 0 and extracted_data
-                no_none_errors = 'nonetype' not in str(result).lower() and 'error' not in str(result).lower()
-                
+            if response_id.status_code != 200:
                 self.log_test(
-                    "Minimal Case - Graceful Handling",
-                    graceful_handling and no_none_errors,
-                    f"✅ Graceful handling: completeness={completeness}%, no_errors={no_none_errors}",
-                    {
-                        "valid": is_valid,
-                        "completeness": completeness,
-                        "graceful_handling": graceful_handling,
-                        "no_none_errors": no_none_errors,
-                        "extracted_data_keys": list(extracted_data.keys()) if extracted_data else [],
-                        "case_id": minimal_case_id or 'TEST-MINIMAL-CASE'
-                    }
-                )
-                
-                # Test with completely invalid case_id
-                invalid_files = {
-                    'file': ('passport_invalid.pdf', passport_content.encode('utf-8'), 'application/pdf')
-                }
-                invalid_data = {
-                    'document_type': 'passport',
-                    'visa_type': 'H-1B',
-                    'case_id': 'INVALID-CASE-ID-DOES-NOT-EXIST'
-                }
-                
-                invalid_response = requests.post(
-                    f"{API_BASE}/documents/analyze-with-ai",
-                    files=invalid_files,
-                    data=invalid_data,
-                    headers=headers
-                )
-                
-                if invalid_response.status_code == 200:
-                    invalid_result = invalid_response.json()
-                    invalid_completeness = invalid_result.get('completeness', 0)
-                    
-                    # Should still work with default "Usuário" name
-                    works_with_invalid_case = invalid_completeness > 0
-                    
-                    self.log_test(
-                        "Invalid Case - Default Handling",
-                        works_with_invalid_case,
-                        f"✅ Works with invalid case: completeness={invalid_completeness}%",
-                        {
-                            "works_with_invalid_case": works_with_invalid_case,
-                            "completeness": invalid_completeness,
-                            "uses_default_name": True  # Should use "Usuário"
-                        }
-                    )
-                
-            else:
-                self.log_test(
-                    "Minimal Case - Document Processing",
+                    "Real Document - Brazilian ID Upload",
                     False,
-                    f"❌ HTTP {response.status_code}",
-                    {"status_code": response.status_code, "error": response.text[:200]}
+                    f"❌ Failed to upload Brazilian ID: {response_id.status_code}",
+                    {"error": response_id.text[:200]}
                 )
-                
+                return
+            
+            result_id = response_id.json()
+            extracted_data_id = result_id.get('extracted_data', {})
+            detected_type_id = extracted_data_id.get('detected_type', '')
+            
+            # Should detect as ID card, not passport
+            id_correctly_detected = 'id' in detected_type_id.lower() or 'carteira' in str(result_id).lower() or 'identidade' in str(result_id).lower()
+            
+            self.log_test(
+                "Real Document - Brazilian ID Detection",
+                id_correctly_detected,
+                f"✅ Brazilian ID detected correctly: type={detected_type_id}",
+                {
+                    "document": "Brazilian ID Card",
+                    "detected_type": detected_type_id,
+                    "id_correctly_detected": id_correctly_detected,
+                    "valid": result_id.get('valid', False),
+                    "completeness": result_id.get('completeness', 0),
+                    "contains_id_keywords": any(word in str(result_id).lower() for word in ['carteira', 'identidade', 'fernanda', 'costa'])
+                }
+            )
+            
+            # STEP 2: Upload Driver's License (simulating kxf1p849_IMG_5082.jpeg)
+            print("🚗 STEP 2: Uploading Driver's License (CNH)")
+            time.sleep(1)  # Ensure different timestamp
+            
+            drivers_license_content = """CNH - CARTEIRA NACIONAL DE HABILITAÇÃO
+DETRAN - DEPARTAMENTO DE TRÂNSITO DO ESTADO DO RIO DE JANEIRO
+RICARDO SANTOS PEREIRA
+Categoria: AB
+Número: 87654321098
+Data de Nascimento: 22/11/1987
+CPF: 876.543.210-98
+RG: 8765432-1 SSP/RJ
+Filiação: CARLOS PEREIRA / MARIA SANTOS
+Data de Emissão: 20/03/2020
+Data de Validade: 20/03/2030
+Local de Nascimento: RIO DE JANEIRO - RJ
+Observações: DOADOR DE ÓRGÃOS
+""" + "Driver's license content with specific identifiers. " * 2000
+            
+            files_cnh = {
+                'file': ('drivers_license_ricardo.jpeg', drivers_license_content.encode('utf-8'), 'image/jpeg')
+            }
+            data_cnh = {
+                'document_type': 'passport',  # User expects passport but uploads CNH
+                'visa_type': 'H-1B',
+                'case_id': 'REAL-DOC-TEST-CNH'
+            }
+            
+            response_cnh = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files_cnh,
+                data=data_cnh,
+                headers=headers
+            )
+            
+            if response_cnh.status_code != 200:
+                self.log_test(
+                    "Real Document - Driver's License Upload",
+                    False,
+                    f"❌ Failed to upload Driver's License: {response_cnh.status_code}",
+                    {"error": response_cnh.text[:200]}
+                )
+                return
+            
+            result_cnh = response_cnh.json()
+            extracted_data_cnh = result_cnh.get('extracted_data', {})
+            detected_type_cnh = extracted_data_cnh.get('detected_type', '')
+            
+            # Should detect as driver's license, not passport
+            cnh_correctly_detected = 'driver' in detected_type_cnh.lower() or 'cnh' in str(result_cnh).lower() or 'habilitação' in str(result_cnh).lower()
+            
+            self.log_test(
+                "Real Document - Driver's License Detection",
+                cnh_correctly_detected,
+                f"✅ Driver's License detected correctly: type={detected_type_cnh}",
+                {
+                    "document": "Driver's License",
+                    "detected_type": detected_type_cnh,
+                    "cnh_correctly_detected": cnh_correctly_detected,
+                    "valid": result_cnh.get('valid', False),
+                    "completeness": result_cnh.get('completeness', 0),
+                    "contains_cnh_keywords": any(word in str(result_cnh).lower() for word in ['cnh', 'habilitação', 'ricardo', 'santos'])
+                }
+            )
+            
+            # STEP 3: Verify No Cross-Contamination
+            print("🔍 STEP 3: Verifying No Cross-Contamination Between Documents")
+            
+            # Check that results are completely different
+            results_different = str(result_id) != str(result_cnh)
+            types_different = detected_type_id.lower() != detected_type_cnh.lower()
+            
+            # Check that each document has its specific content
+            id_has_id_content = any(word in str(result_id).lower() for word in ['fernanda', 'costa', 'identidade'])
+            cnh_has_cnh_content = any(word in str(result_cnh).lower() for word in ['ricardo', 'santos', 'habilitação'])
+            
+            # Verify no contamination (ID result doesn't have CNH content and vice versa)
+            no_id_contamination = not any(word in str(result_id).lower() for word in ['ricardo', 'santos', 'habilitação'])
+            no_cnh_contamination = not any(word in str(result_cnh).lower() for word in ['fernanda', 'costa', 'identidade'])
+            
+            no_cross_contamination = (
+                results_different and 
+                types_different and 
+                id_has_id_content and 
+                cnh_has_cnh_content and
+                no_id_contamination and 
+                no_cnh_contamination
+            )
+            
+            self.log_test(
+                "Real Document - No Cross-Contamination",
+                no_cross_contamination,
+                f"✅ No contamination: results_diff={results_different}, types_diff={types_different}",
+                {
+                    "no_cross_contamination": no_cross_contamination,
+                    "results_different": results_different,
+                    "types_different": types_different,
+                    "id_has_correct_content": id_has_id_content,
+                    "cnh_has_correct_content": cnh_has_cnh_content,
+                    "no_id_contamination": no_id_contamination,
+                    "no_cnh_contamination": no_cnh_contamination,
+                    "id_type": detected_type_id,
+                    "cnh_type": detected_type_cnh
+                }
+            )
+            
+            # STEP 4: Test Document Type Mismatch Detection
+            print("⚠️ STEP 4: Testing Document Type Mismatch Detection")
+            
+            # Both documents were uploaded as 'passport' but should be rejected as wrong type
+            id_rejected_correctly = not result_id.get('valid', True) or 'incorreto' in str(result_id).lower()
+            cnh_rejected_correctly = not result_cnh.get('valid', True) or 'incorreto' in str(result_cnh).lower()
+            
+            self.log_test(
+                "Real Document - Type Mismatch Detection",
+                id_rejected_correctly and cnh_rejected_correctly,
+                f"✅ Type mismatches detected: ID_rejected={id_rejected_correctly}, CNH_rejected={cnh_rejected_correctly}",
+                {
+                    "id_rejected_correctly": id_rejected_correctly,
+                    "cnh_rejected_correctly": cnh_rejected_correctly,
+                    "id_valid": result_id.get('valid', True),
+                    "cnh_valid": result_cnh.get('valid', True),
+                    "id_issues": result_id.get('issues', [])[:2],
+                    "cnh_issues": result_cnh.get('issues', [])[:2]
+                }
+            )
+            
         except Exception as e:
             self.log_test(
-                "Minimal Case - Exception",
+                "Real Document - Processing Test",
                 False,
                 f"❌ Exception: {str(e)}"
             )
