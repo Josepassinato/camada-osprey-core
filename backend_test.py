@@ -982,7 +982,7 @@ class Phase4AEnhancedTester:
                 f"Exception: {str(e)}"
             )
             return None
-    def test_specific_test_cases(self):
+    def test_specific_phase4a_test_cases(self):
         """TESTE 6: Casos de Teste Específicos"""
         print("🎯 TESTE 6: Casos de Teste Específicos")
         
