@@ -5425,7 +5425,7 @@ async def auto_fill_form_from_documents(request: dict):
         filler = IntelligentFormFiller()
         
         # Gerar sugestões
-        suggestions = await filler.generate_intelligent_suggestions(case, form_code)
+        suggestions = await filler.generate_intelligent_suggestions(case, form_code, db_connection=db)
         
         # Converter sugestões em dados de formulário preenchido
         auto_filled_data = {}
