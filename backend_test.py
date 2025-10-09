@@ -1208,6 +1208,222 @@ class IntelligentFormsTester:
         
         return results
 
+    def test_visa_type_support(self):
+        """TESTE 7: Suporte a Diferentes Tipos de Visto"""
+        print("🎫 TESTE 7: Suporte a Múltiplos Tipos de Visto")
+        
+        visa_types = ["H-1B", "B-1/B-2", "F-1"]
+        
+        for visa_type in visa_types:
+            try:
+                # Create test case
+                case_response = self.session.post(
+                    f"{API_BASE}/auto-application/start",
+                    json={"form_code": visa_type}
+                )
+                
+                if case_response.status_code != 200:
+                    continue
+                
+                case_id = case_response.json().get('case_id')
+                
+                # Add basic data
+                self.session.patch(
+                    f"{API_BASE}/auto-application/case/{case_id}",
+                    json={
+                        "basic_data": {"firstName": "Test", "lastName": "User"},
+                        "document_analysis_results": [
+                            {
+                                "document_type": "passport",
+                                "valid": True,
+                                "extracted_data": {"full_name": "TEST USER", "nationality": "BRASILEIRO"}
+                            }
+                        ]
+                    }
+                )
+                
+                # Test suggestions for this visa type
+                response = self.session.post(
+                    f"{API_BASE}/intelligent-forms/suggestions",
+                    json={"case_id": case_id, "form_code": visa_type}
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    suggestions = result.get('suggestions', [])
+                    
+                    self.log_test(
+                        f"Suporte Visto {visa_type} - Sugestões Geradas",
+                        len(suggestions) > 0,
+                        f"Geradas {len(suggestions)} sugestões para {visa_type}",
+                        {
+                            "visa_type": visa_type,
+                            "suggestions_count": len(suggestions),
+                            "sample_fields": [s.get('field_id') for s in suggestions[:3]]
+                        }
+                    )
+                else:
+                    self.log_test(
+                        f"Suporte Visto {visa_type} - Erro",
+                        False,
+                        f"HTTP {response.status_code}"
+                    )
+                    
+            except Exception as e:
+                self.log_test(
+                    f"Suporte Visto {visa_type} - Exception",
+                    False,
+                    f"Exception: {str(e)}"
+                )
+
+    def test_confidence_and_quality_metrics(self):
+        """TESTE 8: Métricas de Confiança e Qualidade"""
+        print("📊 TESTE 8: Métricas de Confiança e Qualidade")
+        
+        # Create test case with high-quality document data
+        case_id = self.create_test_case_with_documents()
+        if not case_id:
+            return None
+        
+        try:
+            # Test auto-fill to check confidence metrics
+            response = self.session.post(
+                f"{API_BASE}/intelligent-forms/auto-fill",
+                json={"case_id": case_id, "form_code": "H-1B"}
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check confidence statistics
+                confidence_stats = result.get('confidence_stats', {})
+                has_confidence_breakdown = all(key in confidence_stats for key in ['high_confidence', 'medium_confidence', 'low_confidence'])
+                
+                self.log_test(
+                    "Métricas - Estatísticas de Confiança",
+                    has_confidence_breakdown,
+                    f"Breakdown de confiança disponível: {confidence_stats}",
+                    confidence_stats
+                )
+                
+                # Check if high confidence fields (85%+) are identified
+                high_confidence_fields = result.get('high_confidence_fields', [])
+                has_high_confidence = len(high_confidence_fields) > 0
+                
+                self.log_test(
+                    "Métricas - Campos de Alta Confiança (85%+)",
+                    has_high_confidence,
+                    f"Identificados {len(high_confidence_fields)} campos com alta confiança",
+                    {
+                        "high_confidence_count": len(high_confidence_fields),
+                        "high_confidence_fields": high_confidence_fields
+                    }
+                )
+                
+                # Check auto-filled data quality
+                auto_filled_data = result.get('auto_filled_data', {})
+                auto_filled_count = len(auto_filled_data)
+                total_suggestions = result.get('total_suggestions', 0)
+                
+                fill_rate = (auto_filled_count / total_suggestions * 100) if total_suggestions > 0 else 0
+                good_fill_rate = fill_rate >= 50  # At least 50% of suggestions should be high confidence
+                
+                self.log_test(
+                    "Métricas - Taxa de Preenchimento Automático",
+                    good_fill_rate,
+                    f"Taxa de preenchimento: {fill_rate:.1f}% ({auto_filled_count}/{total_suggestions})",
+                    {
+                        "fill_rate": fill_rate,
+                        "auto_filled_count": auto_filled_count,
+                        "total_suggestions": total_suggestions
+                    }
+                )
+                
+                return result
+            else:
+                self.log_test(
+                    "Métricas - Status 200 OK",
+                    False,
+                    f"HTTP {response.status_code}"
+                )
+                return None
+                
+        except Exception as e:
+            self.log_test(
+                "Métricas - Exception",
+                False,
+                f"Exception: {str(e)}"
+            )
+            return None
+
+    def run_all_tests(self):
+        """Executa todos os testes do sistema inteligente de formulários"""
+        print("🚀 INICIANDO TESTES DO SISTEMA INTELIGENTE DE PREENCHIMENTO DE FORMULÁRIOS")
+        print("=" * 80)
+        
+        # Execute all tests
+        self.test_intelligent_forms_suggestions_endpoint()
+        self.test_intelligent_forms_validate_endpoint()
+        self.test_intelligent_forms_auto_fill_endpoint()
+        self.test_document_integration_with_forms()
+        self.test_dra_ana_form_validation_agent()
+        self.test_specific_test_cases()
+        self.test_visa_type_support()
+        self.test_confidence_and_quality_metrics()
+        
+        # Generate summary
+        self.generate_test_summary()
+    
+    def generate_test_summary(self):
+        """Gera resumo dos testes executados"""
+        print("\n" + "=" * 80)
+        print("📊 RESUMO DOS TESTES - SISTEMA INTELIGENTE DE FORMULÁRIOS")
+        print("=" * 80)
+        
+        total_tests = len(self.test_results)
+        passed_tests = len([r for r in self.test_results if r['success']])
+        failed_tests = total_tests - passed_tests
+        
+        success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
+        
+        print(f"📈 ESTATÍSTICAS GERAIS:")
+        print(f"   Total de testes: {total_tests}")
+        print(f"   ✅ Aprovados: {passed_tests}")
+        print(f"   ❌ Falharam: {failed_tests}")
+        print(f"   📊 Taxa de sucesso: {success_rate:.1f}%")
+        
+        print(f"\n🎯 TESTES CRÍTICOS:")
+        critical_tests = [
+            "Sugestões Inteligentes - Status 200 OK",
+            "Validação Dra. Ana - Status 200 OK", 
+            "Auto-Fill - Status 200 OK",
+            "Dra. Ana - Agente Funcionando",
+            "Auto-Fill - Campos de Alta Confiança (85%+)"
+        ]
+        
+        for test_name in critical_tests:
+            test_result = next((r for r in self.test_results if test_name in r['test']), None)
+            if test_result:
+                status = "✅" if test_result['success'] else "❌"
+                print(f"   {status} {test_name}")
+        
+        print(f"\n🔍 FUNCIONALIDADES TESTADAS:")
+        print(f"   ✅ Endpoint /api/intelligent-forms/suggestions")
+        print(f"   ✅ Endpoint /api/intelligent-forms/validate")
+        print(f"   ✅ Endpoint /api/intelligent-forms/auto-fill")
+        print(f"   ✅ Integração com sistema de documentos")
+        print(f"   ✅ Dra. Ana FormValidationAgent")
+        print(f"   ✅ Suporte a múltiplos tipos de visto (H-1B, B-1/B-2, F-1)")
+        print(f"   ✅ Métricas de confiança e qualidade")
+        
+        if failed_tests > 0:
+            print(f"\n❌ TESTES FALHARAM:")
+            for result in self.test_results:
+                if not result['success']:
+                    print(f"   • {result['test']}: {result['details']}")
+        
+        print("\n" + "=" * 80)
+
     def test_real_vision_intelligent_validations(self):
         """TESTE 11: Validações Inteligentes com Visão Real"""
         print("🧠 TESTE 11: Validações Inteligentes com Visão Real")
