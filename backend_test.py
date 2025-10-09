@@ -7378,6 +7378,90 @@ MRZ extraction should work properly.
         print()
         
         # TESTE 6: Múltiplos tipos de documento
+        
+        # RESUMO DOS RESULTADOS
+        print("📊 RESUMO DOS RESULTADOS")
+        print("=" * 80)
+        
+        total_tests = len(self.test_results)
+        passed_tests = sum(1 for result in self.test_results if result['success'])
+        failed_tests = total_tests - passed_tests
+        
+        print(f"Total de testes: {total_tests}")
+        print(f"✅ Aprovados: {passed_tests}")
+        print(f"❌ Falharam: {failed_tests}")
+        print(f"📈 Taxa de sucesso: {(passed_tests/total_tests*100):.1f}%")
+        print()
+        
+        # Mostrar testes que falharam
+        if failed_tests > 0:
+            print("❌ TESTES QUE FALHARAM:")
+            for result in self.test_results:
+                if not result['success']:
+                    print(f"  • {result['test']}: {result['details']}")
+            print()
+        
+        # Verificações críticas
+        critical_checks = [
+            "Upload Básico - Status 200 OK",
+            "Validação Tipo - Detecção de Erro", 
+            "Validação Nome - Detecção de Erro",
+            "Validação Expiração - Detecção de Erro",
+            "Policy Engine - Integração Ativa"
+        ]
+        
+        critical_results = []
+        for check in critical_checks:
+            test_result = next((r for r in self.test_results if check in r['test']), None)
+            if test_result:
+                critical_results.append({
+                    'name': check,
+                    'passed': test_result['success']
+                })
+        
+        print("🎯 VERIFICAÇÕES CRÍTICAS:")
+        for result in critical_results:
+            status = "✅" if result['passed'] else "❌"
+            print(f"  {status} {result['name']}")
+        
+        critical_passed = sum(1 for r in critical_results if r['passed'])
+        print(f"\n📊 Críticas aprovadas: {critical_passed}/{len(critical_results)}")
+        
+        return {
+            'total_tests': total_tests,
+            'passed_tests': passed_tests,
+            'failed_tests': failed_tests,
+            'success_rate': passed_tests/total_tests*100,
+            'critical_passed': critical_passed,
+            'critical_total': len(critical_results)
+        }
+
+
+def main():
+    """Execute native document validation tests"""
+    print("🔬 INICIANDO TESTES DO SISTEMA DE VALIDAÇÃO NATIVO")
+    print("Sistema substitui Google Document AI por análise nativa do LLM")
+    print()
+    
+    tester = NativeDocumentValidationTester()
+    results = tester.run_native_document_validation_tests()
+    
+    print("\n🏁 TESTES CONCLUÍDOS")
+    print(f"Taxa de sucesso geral: {results['success_rate']:.1f}%")
+    print(f"Verificações críticas: {results['critical_passed']}/{results['critical_total']}")
+    
+    # Return appropriate exit code
+    if results['critical_passed'] == results['critical_total'] and results['success_rate'] >= 80:
+        print("✅ SISTEMA DE VALIDAÇÃO NATIVO FUNCIONANDO CORRETAMENTE")
+        return 0
+    else:
+        print("❌ SISTEMA PRECISA DE CORREÇÕES")
+        return 1
+
+
+if __name__ == "__main__":
+    import sys
+    sys.exit(main())
         self.test_multiple_document_types()
         print()
         
