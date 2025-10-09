@@ -365,66 +365,103 @@ class IntelligentFormsTester:
             )
             return None
     
-    def test_name_validation(self):
-        """TESTE 3: Validação de Nome Não Corresponde"""
-        print("👤 TESTE 3: Validação de Nome")
+    def test_intelligent_forms_auto_fill_endpoint(self):
+        """TESTE 3: POST /api/intelligent-forms/auto-fill"""
+        print("🚀 TESTE 3: Endpoint de Preenchimento Automático")
         
-        # Test case: Document with different name than applicant
-        test_content = self.create_test_document(
-            "PASSPORT\nMARIA SANTOS OLIVEIRA\nPassport Number: B98765432\nExpiry: 2026-06-15",
-            "passport_maria.pdf"
-        )
-        
-        files = {
-            'file': ('passport_maria.pdf', test_content, 'application/pdf')
-        }
-        data = {
-            'document_type': 'passport',
-            'visa_type': 'H-1B',
-            'case_id': 'TEST-NAME-VALIDATION'
-        }
+        # Create test case with documents
+        case_id = self.create_test_case_with_documents()
+        if not case_id:
+            self.log_test(
+                "Auto-Fill - Criação de Caso",
+                False,
+                "Falha ao criar caso de teste"
+            )
+            return None
         
         try:
-            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            request_data = {
+                "case_id": case_id,
+                "form_code": "H-1B"
+            }
             
-            response = requests.post(
-                f"{API_BASE}/documents/analyze-with-ai",
-                files=files,
-                data=data,
-                headers=headers
+            response = self.session.post(
+                f"{API_BASE}/intelligent-forms/auto-fill",
+                json=request_data
             )
             
             if response.status_code == 200:
                 result = response.json()
                 
-                # Check if validation detected name mismatch
-                issues = result.get('issues', [])
-                name_error_found = any("NOME NÃO CORRESPONDE" in issue for issue in issues)
+                # Check required response structure
+                required_fields = ['success', 'case_id', 'form_code', 'auto_filled_data', 'high_confidence_fields', 'confidence_stats']
+                has_all_fields = all(field in result for field in required_fields)
                 
                 self.log_test(
-                    "Validação Nome - Detecção de Erro",
-                    name_error_found,
-                    f"Mensagem '❌ NOME NÃO CORRESPONDE' encontrada: {name_error_found}",
+                    "Auto-Fill - Estrutura de Resposta",
+                    has_all_fields,
+                    f"Campos presentes: {list(result.keys())}",
                     {
-                        "issues_found": len(issues),
-                        "name_error_detected": name_error_found,
-                        "issues": issues[:3]
+                        "status_code": response.status_code,
+                        "response_structure": {field: field in result for field in required_fields}
+                    }
+                )
+                
+                # Check if auto-fill populated fields
+                auto_filled_data = result.get('auto_filled_data', {})
+                has_auto_filled = len(auto_filled_data) > 0
+                
+                self.log_test(
+                    "Auto-Fill - Campos Preenchidos Automaticamente",
+                    has_auto_filled,
+                    f"Preenchidos {len(auto_filled_data)} campos automaticamente",
+                    {
+                        "auto_filled_fields": len(auto_filled_data),
+                        "sample_fields": list(auto_filled_data.keys())[:5] if auto_filled_data else []
+                    }
+                )
+                
+                # Check confidence statistics
+                confidence_stats = result.get('confidence_stats', {})
+                has_confidence_stats = 'high_confidence' in confidence_stats
+                
+                self.log_test(
+                    "Auto-Fill - Estatísticas de Confiança",
+                    has_confidence_stats,
+                    f"Estatísticas de confiança disponíveis: {confidence_stats}",
+                    {
+                        "confidence_stats": confidence_stats,
+                        "high_confidence_count": confidence_stats.get('high_confidence', 0)
+                    }
+                )
+                
+                # Check high confidence fields (85%+)
+                high_confidence_fields = result.get('high_confidence_fields', [])
+                has_high_confidence = len(high_confidence_fields) > 0
+                
+                self.log_test(
+                    "Auto-Fill - Campos de Alta Confiança (85%+)",
+                    has_high_confidence,
+                    f"Campos com alta confiança: {len(high_confidence_fields)}",
+                    {
+                        "high_confidence_fields": high_confidence_fields,
+                        "high_confidence_count": len(high_confidence_fields)
                     }
                 )
                 
                 return result
             else:
                 self.log_test(
-                    "Validação Nome - Detecção de Erro",
+                    "Auto-Fill - Status 200 OK",
                     False,
-                    f"HTTP {response.status_code}",
-                    response.text
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    {"status_code": response.status_code, "error": response.text}
                 )
                 return None
                 
         except Exception as e:
             self.log_test(
-                "Validação Nome - Detecção de Erro",
+                "Auto-Fill - Status 200 OK",
                 False,
                 f"Exception: {str(e)}"
             )
