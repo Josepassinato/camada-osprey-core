@@ -676,165 +676,283 @@ Observações: DOADOR DE ÓRGÃOS
         print("Cenário: Testar documentos com tamanhos similares e mesmo formato")
         
         try:
-            # Test with high-quality document that should get 85%+ completeness
-            high_quality_passport = """PASSPORT
+            # This test specifically addresses the old bug where cache keys were generated
+            # using only first 100 bytes + file size, causing collisions between different documents
+            
+            # Create base content that will be similar in first 100 bytes
+            base_content = """DOCUMENTO OFICIAL
 REPÚBLICA FEDERATIVA DO BRASIL
-PASSPORT
+MINISTÉRIO DA JUSTIÇA E SEGURANÇA PÚBLICA
+DOCUMENTO NÚMERO: """
+            
+            # STEP 1: Create Document 1 - Passport with specific content
+            print("📄 STEP 1: Creating Document 1 (Passport) - Similar start, unique content")
+            
+            passport_unique = base_content + """BR987654321
+PASSPORT / PASSAPORTE
 Type: P
 Country Code: BRA
-Passport No: BR123456789
-Surname: OLIVEIRA
-Given Names: JOÃO CARLOS
+Surname: ALMEIDA
+Given Names: PATRICIA REGINA
 Nationality: BRAZILIAN
-Date of Birth: 25/12/1985
-Sex: M
-Place of Birth: RIO DE JANEIRO, RJ
-Date of Issue: 15/06/2020
-Date of Expiry: 15/06/2030
+Date of Birth: 10/05/1983
+Sex: F
+Place of Birth: SALVADOR, BA
+Date of Issue: 20/08/2021
+Date of Expiry: 20/08/2031
 Authority: DPF
-Issuing Office: DPF/RJ
-MRZ Line 1: P<BRAJOAO<CARLOS<OLIVEIRA<<<<<<<<<<<<<<<<<<<<
-MRZ Line 2: BR1234567890BRA8512251M3006155<<<<<<<<<<<<<<04
-""" + "High quality passport content with all required fields. " * 3000
+""" + "Passport specific padding content. " * 2000  # Reach target size
             
-            # Create case with complete basic_info
-            case_data = {
-                "form_code": "H-1B",
-                "session_token": f"precision_test_{uuid.uuid4().hex[:8]}"
-            }
+            # STEP 2: Create Document 2 - Birth Certificate with same start but different content
+            print("📄 STEP 2: Creating Document 2 (Birth Certificate) - Similar start, unique content")
             
-            case_response = self.session.post(
-                f"{API_BASE}/auto-application/start",
-                json=case_data
+            birth_cert_unique = base_content + """BC123456789
+CERTIDÃO DE NASCIMENTO / BIRTH CERTIFICATE
+CARTÓRIO DO REGISTRO CIVIL
+Nome: PATRICIA REGINA ALMEIDA
+Data de Nascimento: 10/05/1983
+Local: SALVADOR - BA
+Pai: JOSÉ ALMEIDA
+Mãe: REGINA ALMEIDA
+Cartório: 2º OFÍCIO DE REGISTRO CIVIL
+Livro: 456 Folha: 789 Termo: 123
+""" + "Birth certificate specific padding content. " * 2000  # Same target size
+            
+            # STEP 3: Create Document 3 - Marriage Certificate with same start
+            print("📄 STEP 3: Creating Document 3 (Marriage Certificate) - Similar start, unique content")
+            
+            marriage_cert_unique = base_content + """MC456789123
+CERTIDÃO DE CASAMENTO / MARRIAGE CERTIFICATE
+CARTÓRIO DO REGISTRO CIVIL
+Cônjuge 1: PATRICIA REGINA ALMEIDA
+Cônjuge 2: CARLOS EDUARDO SANTOS
+Data do Casamento: 15/12/2010
+Local: SALVADOR - BA
+Cartório: 1º OFÍCIO DE REGISTRO CIVIL
+Livro: 789 Folha: 123 Termo: 456
+""" + "Marriage certificate specific padding content. " * 2000  # Same target size
+            
+            # Verify all documents have similar first 100 bytes but different full content
+            first_100_passport = passport_unique[:100]
+            first_100_birth = birth_cert_unique[:100]
+            first_100_marriage = marriage_cert_unique[:100]
+            
+            # They should be very similar in first 100 bytes (old bug scenario)
+            similar_start = (
+                first_100_passport[:50] == first_100_birth[:50] == first_100_marriage[:50]
             )
             
-            case_id = None
-            if case_response.status_code == 200:
-                case_result = case_response.json()
-                case_id = case_result.get('case', {}).get('case_id')
-                
-                # Add complete basic_info
-                complete_basic_info = {
-                    "firstName": "João Carlos",
-                    "lastName": "Oliveira",
-                    "email": "joao.oliveira@test.com",
-                    "phone": "+55 21 99999-9999",
-                    "dateOfBirth": "1985-12-25",
-                    "placeOfBirth": "Rio de Janeiro, RJ, Brasil",
-                    "nationality": "Brazilian",
-                    "passportNumber": "BR123456789"
-                }
-                
-                update_response = self.session.patch(
-                    f"{API_BASE}/auto-application/case/{case_id}",
-                    json={
-                        "form_data": {
-                            "basic_info": complete_basic_info
-                        },
-                        "current_step": "documents"
-                    }
-                )
+            # But different in full content (should get unique cache keys with fix)
+            different_full_content = (
+                passport_unique != birth_cert_unique != marriage_cert_unique
+            )
             
-            files = {
-                'file': ('high_quality_passport.pdf', high_quality_passport.encode('utf-8'), 'application/pdf')
-            }
-            data = {
-                'document_type': 'passport',
-                'visa_type': 'H-1B',
-                'case_id': case_id or 'PRECISION-TEST'
-            }
+            print(f"📊 Content Analysis: similar_start={similar_start}, different_full={different_full_content}")
             
             headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
             
-            response = requests.post(
+            # Upload Document 1 (Passport)
+            files_1 = {
+                'file': ('passport_patricia.pdf', passport_unique.encode('utf-8'), 'application/pdf')
+            }
+            data_1 = {
+                'document_type': 'passport',
+                'visa_type': 'H-1B',
+                'case_id': 'CACHE-UNIQUE-1'
+            }
+            
+            response_1 = requests.post(
                 f"{API_BASE}/documents/analyze-with-ai",
-                files=files,
-                data=data,
+                files=files_1,
+                data=data_1,
                 headers=headers
             )
             
-            if response.status_code == 200:
-                result = response.json()
-                
-                # Check precision metrics
-                completeness = result.get('completeness', 0)
-                extracted_data = result.get('extracted_data', {})
-                detected_type = extracted_data.get('detected_type', '')
-                confidence = extracted_data.get('confidence', 0)
-                analysis_method = extracted_data.get('analysis_method', '')
-                
-                # Check for rich extracted data
-                security_features = extracted_data.get('security_features', {})
-                full_text_extracted = extracted_data.get('full_text_extracted', '')
-                quality_assessment = extracted_data.get('quality_assessment', {})
-                
-                # Precision indicators
-                high_completeness = completeness >= 85
-                accurate_type_detection = 'passport' in detected_type.lower() if detected_type else False
-                rich_extraction = len(str(security_features)) > 50 and len(full_text_extracted) > 100
-                
+            if response_1.status_code != 200:
                 self.log_test(
-                    "Precision Verification - High Completeness Score",
-                    high_completeness,
-                    f"✅ High precision: completeness={completeness}% (target: 85%+)",
-                    {
-                        "completeness": completeness,
-                        "high_completeness": high_completeness,
-                        "target_met": completeness >= 85
-                    }
-                )
-                
-                self.log_test(
-                    "Precision Verification - Accurate Type Detection",
-                    accurate_type_detection,
-                    f"✅ Accurate detection: detected_type='{detected_type}', confidence={confidence}",
-                    {
-                        "detected_type": detected_type,
-                        "confidence": confidence,
-                        "accurate_type_detection": accurate_type_detection,
-                        "analysis_method": analysis_method
-                    }
-                )
-                
-                self.log_test(
-                    "Precision Verification - Rich Data Extraction",
-                    rich_extraction,
-                    f"✅ Rich extraction: security_features={len(str(security_features))} chars, full_text={len(full_text_extracted)} chars",
-                    {
-                        "security_features_length": len(str(security_features)),
-                        "full_text_length": len(full_text_extracted),
-                        "quality_assessment_present": bool(quality_assessment),
-                        "rich_extraction": rich_extraction,
-                        "security_features_sample": str(security_features)[:100] if security_features else "",
-                        "full_text_sample": full_text_extracted[:100] if full_text_extracted else ""
-                    }
-                )
-                
-                # Check that we're not falling back to native analysis due to errors
-                no_fallback_due_to_errors = 'real_vision' in analysis_method.lower() if analysis_method else False
-                
-                self.log_test(
-                    "Precision Verification - No Error Fallback",
-                    no_fallback_due_to_errors,
-                    f"✅ No error fallback: analysis_method='{analysis_method}'",
-                    {
-                        "analysis_method": analysis_method,
-                        "no_fallback_due_to_errors": no_fallback_due_to_errors,
-                        "using_real_vision": 'real_vision' in analysis_method.lower() if analysis_method else False
-                    }
-                )
-                
-            else:
-                self.log_test(
-                    "Precision Verification - Document Processing",
+                    "Cache Uniqueness - Document 1 Upload",
                     False,
-                    f"❌ HTTP {response.status_code}",
-                    {"status_code": response.status_code, "error": response.text[:200]}
+                    f"❌ Failed to upload Document 1: {response_1.status_code}",
+                    {"error": response_1.text[:200]}
+                )
+                return
+            
+            result_1 = response_1.json()
+            extracted_1 = result_1.get('extracted_data', {})
+            type_1 = extracted_1.get('detected_type', '')
+            
+            # Upload Document 2 (Birth Certificate) - should get different analysis despite similar start
+            time.sleep(0.5)  # Small delay
+            
+            files_2 = {
+                'file': ('birth_cert_patricia.pdf', birth_cert_unique.encode('utf-8'), 'application/pdf')
+            }
+            data_2 = {
+                'document_type': 'birth_certificate',
+                'visa_type': 'H-1B',
+                'case_id': 'CACHE-UNIQUE-2'
+            }
+            
+            response_2 = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files_2,
+                data=data_2,
+                headers=headers
+            )
+            
+            if response_2.status_code != 200:
+                self.log_test(
+                    "Cache Uniqueness - Document 2 Upload",
+                    False,
+                    f"❌ Failed to upload Document 2: {response_2.status_code}",
+                    {"error": response_2.text[:200]}
+                )
+                return
+            
+            result_2 = response_2.json()
+            extracted_2 = result_2.get('extracted_data', {})
+            type_2 = extracted_2.get('detected_type', '')
+            
+            # Upload Document 3 (Marriage Certificate)
+            time.sleep(0.5)  # Small delay
+            
+            files_3 = {
+                'file': ('marriage_cert_patricia.pdf', marriage_cert_unique.encode('utf-8'), 'application/pdf')
+            }
+            data_3 = {
+                'document_type': 'marriage_certificate',
+                'visa_type': 'H-1B',
+                'case_id': 'CACHE-UNIQUE-3'
+            }
+            
+            response_3 = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files_3,
+                data=data_3,
+                headers=headers
+            )
+            
+            if response_3.status_code != 200:
+                self.log_test(
+                    "Cache Uniqueness - Document 3 Upload",
+                    False,
+                    f"❌ Failed to upload Document 3: {response_3.status_code}",
+                    {"error": response_3.text[:200]}
+                )
+                return
+            
+            result_3 = response_3.json()
+            extracted_3 = result_3.get('extracted_data', {})
+            type_3 = extracted_3.get('detected_type', '')
+            
+            # VERIFICATION: Each document should get unique analysis despite similar starts
+            
+            # Check that detected types are different
+            types_unique = len(set([type_1.lower(), type_2.lower(), type_3.lower()])) >= 2
+            
+            # Check that results are different
+            results_unique = (
+                str(result_1) != str(result_2) and 
+                str(result_2) != str(result_3) and 
+                str(result_1) != str(result_3)
+            )
+            
+            # Check for document-specific content in results
+            passport_content_in_1 = any(word in str(result_1).lower() for word in ['passport', 'passaporte', 'patricia', 'almeida'])
+            birth_content_in_2 = any(word in str(result_2).lower() for word in ['birth', 'nascimento', 'cartório', 'registro'])
+            marriage_content_in_3 = any(word in str(result_3).lower() for word in ['marriage', 'casamento', 'cônjuge', 'carlos'])
+            
+            # Check no cross-contamination
+            no_contamination = (
+                not any(word in str(result_1).lower() for word in ['casamento', 'carlos']) and  # No marriage content in passport
+                not any(word in str(result_2).lower() for word in ['passport', 'passaporte']) and  # No passport content in birth cert
+                not any(word in str(result_3).lower() for word in ['nascimento', 'registro'])  # No birth cert content in marriage
+            )
+            
+            cache_fix_working = (
+                types_unique and 
+                results_unique and 
+                passport_content_in_1 and 
+                birth_content_in_2 and 
+                marriage_content_in_3 and
+                no_contamination
+            )
+            
+            self.log_test(
+                "Cache Uniqueness - Similar Start Different Content",
+                cache_fix_working,
+                f"✅ Cache collision fix working: types_unique={types_unique}, results_unique={results_unique}",
+                {
+                    "cache_fix_working": cache_fix_working,
+                    "similar_start_bytes": similar_start,
+                    "different_full_content": different_full_content,
+                    "types_unique": types_unique,
+                    "results_unique": results_unique,
+                    "passport_content_correct": passport_content_in_1,
+                    "birth_content_correct": birth_content_in_2,
+                    "marriage_content_correct": marriage_content_in_3,
+                    "no_contamination": no_contamination,
+                    "doc1_type": type_1,
+                    "doc2_type": type_2,
+                    "doc3_type": type_3
+                }
+            )
+            
+            # Test with multiple JPEG files (same format, similar sizes)
+            print("📸 STEP 4: Testing Multiple JPEG Files - Same Format")
+            
+            jpeg_content_base = "JPEG Document Content - "
+            
+            # Create 3 JPEG files with similar sizes but different content
+            jpeg_files = []
+            for i in range(3):
+                content = jpeg_content_base + f"Document {i+1} specific content. " * 2000
+                jpeg_files.append({
+                    'content': content,
+                    'filename': f'document_{i+1}.jpeg',
+                    'doc_type': ['passport', 'driver_license', 'birth_certificate'][i]
+                })
+            
+            jpeg_results = []
+            for i, jpeg_file in enumerate(jpeg_files):
+                files_jpeg = {
+                    'file': (jpeg_file['filename'], jpeg_file['content'].encode('utf-8'), 'image/jpeg')
+                }
+                data_jpeg = {
+                    'document_type': jpeg_file['doc_type'],
+                    'visa_type': 'H-1B',
+                    'case_id': f'JPEG-TEST-{i+1}'
+                }
+                
+                response_jpeg = requests.post(
+                    f"{API_BASE}/documents/analyze-with-ai",
+                    files=files_jpeg,
+                    data=data_jpeg,
+                    headers=headers
                 )
                 
+                if response_jpeg.status_code == 200:
+                    jpeg_results.append(response_jpeg.json())
+                    time.sleep(0.3)  # Small delay between uploads
+            
+            # Verify JPEG files get unique results
+            jpeg_unique = len(set(str(result) for result in jpeg_results)) == len(jpeg_results)
+            
+            self.log_test(
+                "Cache Uniqueness - Multiple JPEG Same Format",
+                jpeg_unique and len(jpeg_results) >= 2,
+                f"✅ JPEG files unique: {len(jpeg_results)} files, all_unique={jpeg_unique}",
+                {
+                    "jpeg_files_processed": len(jpeg_results),
+                    "all_results_unique": jpeg_unique,
+                    "same_format": True,
+                    "similar_sizes": True
+                }
+            )
+            
         except Exception as e:
             self.log_test(
-                "Precision Verification - Exception",
+                "Cache Uniqueness - Similar Sizes Test",
                 False,
                 f"❌ Exception: {str(e)}"
             )
