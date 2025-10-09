@@ -270,6 +270,285 @@ class IntelligentTutorSystemTester:
                     f"❌ Exception: {str(e)}"
                 )
     
+    def test_tutor_checklist_endpoint(self):
+        """TESTE 2: Tutor Checklist - Checklist personalizado de documentos"""
+        print("📋 TESTE 2: Tutor Checklist - Checklist personalizado de documentos")
+        
+        # Test data as specified in the review request
+        test_request = {
+            "visa_type": "h1b"
+        }
+        
+        try:
+            response = self.session.post(
+                f"{API_BASE}/tutor/checklist",
+                json=test_request
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check response structure
+                has_success = result.get('success', False)
+                checklist = result.get('checklist', {})
+                has_checklist_content = len(str(checklist)) > 50
+                
+                # Check for expected checklist structure
+                has_documents = 'required_documents' in str(checklist) or 'documents' in str(checklist)
+                has_status = 'status' in str(checklist) or 'pending' in str(checklist) or 'uploaded' in str(checklist)
+                
+                self.log_test(
+                    "Tutor Checklist - Checklist Personalizado",
+                    has_success and has_checklist_content,
+                    f"✅ Checklist gerado: {len(str(checklist))} caracteres, estrutura: docs={has_documents}, status={has_status}",
+                    {
+                        "success": has_success,
+                        "checklist_length": len(str(checklist)),
+                        "has_documents": has_documents,
+                        "has_status": has_status,
+                        "visa_type": test_request["visa_type"],
+                        "checklist_preview": str(checklist)[:300] if checklist else ""
+                    }
+                )
+            else:
+                self.log_test(
+                    "Tutor Checklist - Checklist Personalizado",
+                    False,
+                    f"❌ HTTP {response.status_code}",
+                    {"status_code": response.status_code, "error": response.text[:200]}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "Tutor Checklist - Checklist Personalizado",
+                False,
+                f"❌ Exception: {str(e)}"
+            )
+
+    def test_tutor_progress_analysis_endpoint(self):
+        """TESTE 3: Tutor Progress Analysis - Análise de progresso personalizada"""
+        print("📊 TESTE 3: Tutor Progress Analysis - Análise de progresso personalizada")
+        
+        # Test data as specified in the review request
+        test_request = {
+            "visa_type": "h1b"
+        }
+        
+        try:
+            response = self.session.post(
+                f"{API_BASE}/tutor/progress-analysis",
+                json=test_request
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check response structure
+                has_success = result.get('success', False)
+                analysis = result.get('analysis', {})
+                has_analysis_content = len(str(analysis)) > 50
+                
+                # Check for expected analysis components
+                analysis_str = str(analysis).lower()
+                has_progress_info = any(word in analysis_str for word in ['progresso', 'progress', 'completado', 'completed', 'etapa', 'step'])
+                has_recommendations = any(word in analysis_str for word in ['recomendação', 'recommendation', 'sugestão', 'suggestion', 'próximo', 'next'])
+                
+                self.log_test(
+                    "Tutor Progress Analysis - Análise Personalizada",
+                    has_success and has_analysis_content,
+                    f"✅ Análise gerada: {len(str(analysis))} caracteres, progresso={has_progress_info}, recomendações={has_recommendations}",
+                    {
+                        "success": has_success,
+                        "analysis_length": len(str(analysis)),
+                        "has_progress_info": has_progress_info,
+                        "has_recommendations": has_recommendations,
+                        "visa_type": test_request["visa_type"],
+                        "analysis_preview": str(analysis)[:300] if analysis else ""
+                    }
+                )
+            else:
+                self.log_test(
+                    "Tutor Progress Analysis - Análise Personalizada",
+                    False,
+                    f"❌ HTTP {response.status_code}",
+                    {"status_code": response.status_code, "error": response.text[:200]}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "Tutor Progress Analysis - Análise Personalizada",
+                False,
+                f"❌ Exception: {str(e)}"
+            )
+
+    def test_tutor_common_mistakes_endpoint(self):
+        """TESTE 4: Tutor Common Mistakes - Erros comuns da etapa atual"""
+        print("⚠️ TESTE 4: Tutor Common Mistakes - Erros comuns da etapa atual")
+        
+        # Test data as specified in the review request
+        test_request = {
+            "current_step": "document_upload",
+            "visa_type": "h1b"
+        }
+        
+        try:
+            response = self.session.post(
+                f"{API_BASE}/tutor/common-mistakes",
+                json=test_request
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check response structure
+                has_success = result.get('success', False)
+                mistakes = result.get('mistakes', {})
+                has_mistakes_content = len(str(mistakes)) > 50
+                
+                # Check for expected mistakes structure
+                mistakes_str = str(mistakes).lower()
+                has_error_info = any(word in mistakes_str for word in ['erro', 'error', 'mistake', 'problema', 'issue'])
+                has_prevention_tips = any(word in mistakes_str for word in ['evitar', 'avoid', 'prevenção', 'prevention', 'dica', 'tip'])
+                
+                self.log_test(
+                    "Tutor Common Mistakes - Erros Comuns",
+                    has_success and has_mistakes_content,
+                    f"✅ Erros comuns identificados: {len(str(mistakes))} caracteres, erros={has_error_info}, prevenção={has_prevention_tips}",
+                    {
+                        "success": has_success,
+                        "mistakes_length": len(str(mistakes)),
+                        "has_error_info": has_error_info,
+                        "has_prevention_tips": has_prevention_tips,
+                        "current_step": test_request["current_step"],
+                        "visa_type": test_request["visa_type"],
+                        "mistakes_preview": str(mistakes)[:300] if mistakes else ""
+                    }
+                )
+            else:
+                self.log_test(
+                    "Tutor Common Mistakes - Erros Comuns",
+                    False,
+                    f"❌ HTTP {response.status_code}",
+                    {"status_code": response.status_code, "error": response.text[:200]}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "Tutor Common Mistakes - Erros Comuns",
+                False,
+                f"❌ Exception: {str(e)}"
+            )
+
+    def test_tutor_interview_preparation_endpoint(self):
+        """TESTE 5: Tutor Interview Preparation - Preparação personalizada para entrevista"""
+        print("🎤 TESTE 5: Tutor Interview Preparation - Preparação personalizada para entrevista")
+        
+        # Test data as specified in the review request
+        test_request = {
+            "visa_type": "h1b"
+        }
+        
+        try:
+            response = self.session.post(
+                f"{API_BASE}/tutor/interview-preparation",
+                json=test_request
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Check response structure
+                has_success = result.get('success', False)
+                preparation = result.get('preparation', {})
+                has_preparation_content = len(str(preparation)) > 50
+                
+                # Check for expected interview preparation components
+                prep_str = str(preparation).lower()
+                has_questions = any(word in prep_str for word in ['pergunta', 'question', 'entrevista', 'interview'])
+                has_tips = any(word in prep_str for word in ['dica', 'tip', 'preparação', 'preparation', 'conselho', 'advice'])
+                has_brazilian_context = any(word in prep_str for word in ['brasil', 'brasileiro', 'brasileira', 'consulado'])
+                
+                self.log_test(
+                    "Tutor Interview Preparation - Preparação Personalizada",
+                    has_success and has_preparation_content,
+                    f"✅ Preparação gerada: {len(str(preparation))} caracteres, perguntas={has_questions}, dicas={has_tips}, contexto BR={has_brazilian_context}",
+                    {
+                        "success": has_success,
+                        "preparation_length": len(str(preparation)),
+                        "has_questions": has_questions,
+                        "has_tips": has_tips,
+                        "has_brazilian_context": has_brazilian_context,
+                        "visa_type": test_request["visa_type"],
+                        "preparation_preview": str(preparation)[:300] if preparation else ""
+                    }
+                )
+            else:
+                self.log_test(
+                    "Tutor Interview Preparation - Preparação Personalizada",
+                    False,
+                    f"❌ HTTP {response.status_code}",
+                    {"status_code": response.status_code, "error": response.text[:200]}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "Tutor Interview Preparation - Preparação Personalizada",
+                False,
+                f"❌ Exception: {str(e)}"
+            )
+
+    def test_tutor_error_handling(self):
+        """TESTE 6: Tutor Error Handling - Tratamento de erros"""
+        print("🚨 TESTE 6: Tutor Error Handling - Tratamento de erros")
+        
+        # Test with invalid data
+        invalid_tests = [
+            {
+                "name": "Invalid Visa Type",
+                "endpoint": "/tutor/guidance",
+                "data": {"current_step": "document_upload", "visa_type": "invalid_visa"}
+            },
+            {
+                "name": "Missing Required Fields",
+                "endpoint": "/tutor/checklist",
+                "data": {}  # Missing visa_type
+            },
+            {
+                "name": "Invalid Current Step",
+                "endpoint": "/tutor/common-mistakes",
+                "data": {"current_step": "invalid_step", "visa_type": "h1b"}
+            }
+        ]
+        
+        for test_case in invalid_tests:
+            try:
+                response = self.session.post(
+                    f"{API_BASE}{test_case['endpoint']}",
+                    json=test_case['data']
+                )
+                
+                # Should return error status (400, 422, or 500)
+                is_error_response = response.status_code >= 400
+                
+                self.log_test(
+                    f"Error Handling - {test_case['name']}",
+                    is_error_response,
+                    f"✅ Erro tratado corretamente: HTTP {response.status_code}",
+                    {
+                        "endpoint": test_case['endpoint'],
+                        "status_code": response.status_code,
+                        "test_data": test_case['data'],
+                        "error_handled": is_error_response
+                    }
+                )
+                
+            except Exception as e:
+                self.log_test(
+                    f"Error Handling - {test_case['name']}",
+                    False,
+                    f"❌ Exception: {str(e)}"
+                )
+
     def test_disclaimer_debug_flow(self):
         """TESTE ESPECÍFICO: Fluxo Completo de Disclaimer com Debug - OSP-DEBUG-TEST"""
         print("🔍 TESTE ESPECÍFICO: Fluxo Completo de Disclaimer com Debug - OSP-DEBUG-TEST")
