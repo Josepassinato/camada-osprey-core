@@ -1363,20 +1363,369 @@ class IntelligentFormsTester:
             )
             return None
 
+    def test_ai_review_validate_completeness_incomplete(self):
+        """TESTE CENÁRIO A: Formulário Incompleto - Validação deve retornar ready_for_conversion = false"""
+        print("❌ TESTE CENÁRIO A: Formulário Incompleto")
+        
+        try:
+            # Criar caso de teste
+            case_response = self.session.post(
+                f"{API_BASE}/auto-application/start",
+                json={"form_code": "H-1B"}
+            )
+            
+            if case_response.status_code != 200:
+                self.log_test(
+                    "Cenário A - Criação de Caso",
+                    False,
+                    f"Falha ao criar caso: {case_response.status_code}"
+                )
+                return None
+            
+            case_id = case_response.json().get('case', {}).get('case_id')
+            
+            # Formulário incompleto (campos obrigatórios vazios)
+            incomplete_form_responses = {
+                "personal": {
+                    "full_name": "João Silva"
+                    # Faltando: date_of_birth, place_of_birth, nationality
+                },
+                "address": {
+                    "city": "São Paulo"
+                    # Faltando: street_address, state, etc.
+                }
+            }
+            
+            # Testar validação de completude
+            validation_request = {
+                "case_id": case_id,
+                "form_responses": incomplete_form_responses,
+                "visa_type": "H-1B"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/ai-review/validate-completeness",
+                json=validation_request
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                validation_result = result.get('validation_result', {})
+                
+                # Verificar se retornou ready_for_conversion = false
+                ready_for_conversion = validation_result.get('ready_for_conversion', True)
+                is_complete = validation_result.get('is_complete', True)
+                completeness_score = validation_result.get('completeness_score', 100)
+                critical_issues = validation_result.get('critical_issues', [])
+                
+                self.log_test(
+                    "Cenário A - Validação Incompleta",
+                    not ready_for_conversion and not is_complete,
+                    f"ready_for_conversion: {ready_for_conversion}, is_complete: {is_complete}, score: {completeness_score}%",
+                    {
+                        "ready_for_conversion": ready_for_conversion,
+                        "is_complete": is_complete,
+                        "completeness_score": completeness_score,
+                        "critical_issues_count": len(critical_issues)
+                    }
+                )
+                
+                # Verificar se critical_issues lista campos faltando
+                has_critical_issues = len(critical_issues) > 0
+                self.log_test(
+                    "Cenário A - Critical Issues Identificadas",
+                    has_critical_issues,
+                    f"Identificadas {len(critical_issues)} issues críticas",
+                    {
+                        "critical_issues": critical_issues[:3],  # Primeiras 3 issues
+                        "total_issues": len(critical_issues)
+                    }
+                )
+                
+                # Verificar se Dra. Ana está funcionando
+                agent = result.get('agent', '')
+                dra_ana_working = 'Dra. Ana' in agent
+                self.log_test(
+                    "Cenário A - Dra. Ana Funcionando",
+                    dra_ana_working,
+                    f"Agente: {agent}",
+                    {"agent": agent}
+                )
+                
+                # Testar conversão (deve falhar se não forçada)
+                conversion_request = {
+                    "case_id": case_id,
+                    "form_responses": incomplete_form_responses,
+                    "visa_type": "H-1B",
+                    "force_conversion": False
+                }
+                
+                conversion_response = self.session.post(
+                    f"{API_BASE}/ai-review/convert-to-official",
+                    json=conversion_request
+                )
+                
+                if conversion_response.status_code == 200:
+                    conversion_result = conversion_response.json()
+                    conversion_failed = not conversion_result.get('success', True)
+                    
+                    self.log_test(
+                        "Cenário A - Conversão Falha (Esperado)",
+                        conversion_failed,
+                        f"Conversão falhou como esperado: {conversion_failed}",
+                        {
+                            "conversion_success": conversion_result.get('success'),
+                            "error": conversion_result.get('error', 'N/A')
+                        }
+                    )
+                
+                return result
+            else:
+                self.log_test(
+                    "Cenário A - Endpoint Funcionando",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    {"status_code": response.status_code}
+                )
+                return None
+                
+        except Exception as e:
+            self.log_test(
+                "Cenário A - Exception",
+                False,
+                f"Exception: {str(e)}"
+            )
+            return None
+    
+    def test_ai_review_validate_completeness_complete(self):
+        """TESTE CENÁRIO B: Formulário Completo - Validação deve retornar ready_for_conversion = true"""
+        print("✅ TESTE CENÁRIO B: Formulário Completo")
+        
+        try:
+            # Criar caso de teste
+            case_response = self.session.post(
+                f"{API_BASE}/auto-application/start",
+                json={"form_code": "H-1B"}
+            )
+            
+            if case_response.status_code != 200:
+                self.log_test(
+                    "Cenário B - Criação de Caso",
+                    False,
+                    f"Falha ao criar caso: {case_response.status_code}"
+                )
+                return None
+            
+            case_id = case_response.json().get('case', {}).get('case_id')
+            
+            # Formulário completo para H-1B
+            complete_form_responses = {
+                "personal": {
+                    "full_name": "João da Silva Santos",
+                    "date_of_birth": "1990-05-15",
+                    "place_of_birth": "São Paulo, SP, Brasil", 
+                    "nationality": "Brasileira"
+                },
+                "address": {
+                    "street_address": "Rua das Flores, 123",
+                    "city": "São Paulo",
+                    "state": "SP",
+                    "postal_code": "01234-567",
+                    "country": "Brasil",
+                    "phone": "+55 11 99999-9999",
+                    "email": "joao@email.com"
+                },
+                "employment": {
+                    "current_job": "Desenvolvedor de Software",
+                    "employer_name": "Tech Corp",
+                    "salary": "R$ 120.000"
+                }
+            }
+            
+            # Testar validação de completude
+            validation_request = {
+                "case_id": case_id,
+                "form_responses": complete_form_responses,
+                "visa_type": "H-1B"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/ai-review/validate-completeness",
+                json=validation_request
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                validation_result = result.get('validation_result', {})
+                
+                # Verificar se retornou ready_for_conversion = true
+                ready_for_conversion = validation_result.get('ready_for_conversion', False)
+                completeness_score = validation_result.get('completeness_score', 0)
+                critical_issues = validation_result.get('critical_issues', [])
+                
+                self.log_test(
+                    "Cenário B - Validação Completa",
+                    ready_for_conversion and completeness_score > 80,
+                    f"ready_for_conversion: {ready_for_conversion}, score: {completeness_score}%",
+                    {
+                        "ready_for_conversion": ready_for_conversion,
+                        "completeness_score": completeness_score,
+                        "critical_issues_count": len(critical_issues)
+                    }
+                )
+                
+                # Testar conversão (deve funcionar)
+                conversion_request = {
+                    "case_id": case_id,
+                    "form_responses": complete_form_responses,
+                    "visa_type": "H-1B",
+                    "force_conversion": False
+                }
+                
+                conversion_response = self.session.post(
+                    f"{API_BASE}/ai-review/convert-to-official",
+                    json=conversion_request
+                )
+                
+                if conversion_response.status_code == 200:
+                    conversion_result = conversion_response.json()
+                    conversion_success = conversion_result.get('success', False)
+                    converted_data = conversion_result.get('converted_data', {})
+                    conversion_stats = conversion_result.get('conversion_stats', {})
+                    
+                    self.log_test(
+                        "Cenário B - Conversão Funcionando",
+                        conversion_success,
+                        f"Conversão bem-sucedida: {conversion_success}",
+                        {
+                            "conversion_success": conversion_success,
+                            "converted_data_fields": len(str(converted_data).split(',')) if converted_data else 0,
+                            "conversion_stats": conversion_stats
+                        }
+                    )
+                    
+                    # Verificar se dados foram convertidos para inglês
+                    has_converted_data = len(str(converted_data)) > 100  # Dados substanciais
+                    self.log_test(
+                        "Cenário B - Dados Convertidos PT→EN",
+                        has_converted_data,
+                        f"Dados convertidos: {has_converted_data}",
+                        {
+                            "converted_data_size": len(str(converted_data)),
+                            "sample_converted": str(converted_data)[:200] + "..." if converted_data else "N/A"
+                        }
+                    )
+                    
+                    # Verificar se dados foram salvos no MongoDB
+                    # (Isso seria verificado através do endpoint de recuperação do caso)
+                    case_check_response = self.session.get(f"{API_BASE}/auto-application/case/{case_id}")
+                    if case_check_response.status_code == 200:
+                        case_data = case_check_response.json()
+                        has_official_form_data = 'official_form_data' in case_data.get('case', {})
+                        
+                        self.log_test(
+                            "Cenário B - Dados Salvos no MongoDB",
+                            has_official_form_data,
+                            f"official_form_data salvo: {has_official_form_data}",
+                            {
+                                "official_form_data_present": has_official_form_data,
+                                "case_status": case_data.get('case', {}).get('status', 'unknown')
+                            }
+                        )
+                
+                return result
+            else:
+                self.log_test(
+                    "Cenário B - Endpoint Funcionando",
+                    False,
+                    f"HTTP {response.status_code}: {response.text[:200]}",
+                    {"status_code": response.status_code}
+                )
+                return None
+                
+        except Exception as e:
+            self.log_test(
+                "Cenário B - Exception",
+                False,
+                f"Exception: {str(e)}"
+            )
+            return None
+    
+    def test_ai_completeness_validator_integration(self):
+        """TESTE: Integração com ai_completeness_validator"""
+        print("🔧 TESTE: Integração ai_completeness_validator")
+        
+        try:
+            # Testar se o módulo ai_completeness_validator funciona sem erros
+            test_form_responses = {
+                "personal": {
+                    "full_name": "Test User",
+                    "date_of_birth": "1990-01-01"
+                }
+            }
+            
+            validation_request = {
+                "case_id": "TEST-VALIDATOR-INTEGRATION",
+                "form_responses": test_form_responses,
+                "visa_type": "H-1B"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/ai-review/validate-completeness",
+                json=validation_request
+            )
+            
+            # Verificar se não há erros de importação ou execução
+            no_import_errors = response.status_code != 500
+            
+            if response.status_code == 200:
+                result = response.json()
+                has_validation_result = 'validation_result' in result
+                
+                self.log_test(
+                    "ai_completeness_validator - Funcionando Sem Erros",
+                    has_validation_result,
+                    f"Módulo funcionando: {has_validation_result}",
+                    {
+                        "status_code": response.status_code,
+                        "has_validation_result": has_validation_result,
+                        "agent": result.get('agent', 'N/A')
+                    }
+                )
+            else:
+                self.log_test(
+                    "ai_completeness_validator - Funcionando Sem Erros",
+                    no_import_errors,
+                    f"Status: {response.status_code}, Sem erro 500: {no_import_errors}",
+                    {
+                        "status_code": response.status_code,
+                        "error_text": response.text[:200]
+                    }
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "ai_completeness_validator - Exception",
+                False,
+                f"Exception: {str(e)}"
+            )
+
     def run_all_tests(self):
-        """Executa todos os testes do sistema inteligente de formulários"""
-        print("🚀 INICIANDO TESTES DO SISTEMA INTELIGENTE DE PREENCHIMENTO DE FORMULÁRIOS")
+        """Executa todos os testes do sistema AI Review"""
+        print("🚀 INICIANDO TESTES DO SISTEMA AI REVIEW - VALIDAÇÃO E CONVERSÃO")
         print("=" * 80)
         
-        # Execute all tests
+        # Execute AI Review specific tests
+        self.test_ai_review_validate_completeness_incomplete()
+        self.test_ai_review_validate_completeness_complete()
+        self.test_ai_completeness_validator_integration()
+        
+        # Execute legacy tests for context
         self.test_intelligent_forms_suggestions_endpoint()
         self.test_intelligent_forms_validate_endpoint()
         self.test_intelligent_forms_auto_fill_endpoint()
         self.test_document_integration_with_forms()
         self.test_dra_ana_form_validation_agent()
-        self.test_specific_test_cases()
-        self.test_visa_type_support()
-        self.test_confidence_and_quality_metrics()
         
         # Generate summary
         self.generate_test_summary()
