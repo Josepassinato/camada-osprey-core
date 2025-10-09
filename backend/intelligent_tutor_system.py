@@ -408,9 +408,9 @@ class IntelligentTutorSystem:
         fallback_guidance = {
             "document_upload": f"📄 Nesta etapa, você precisa carregar os documentos necessários para o visto {visa_type}. Certifique-se de que todos os documentos estejam em boa qualidade, legíveis e dentro da validade. Escaneie em alta resolução (300 DPI) e em formato PDF.",
             "form_filling": f"📝 Agora é hora de preencher o formulário oficial para o visto {visa_type}. Tenha em mãos todos os seus documentos e responda todas as perguntas com precisão e honestidade. Não deixe campos em branco.",
-            "review": f"🔍 Revise cuidadosamente todas as informações antes de finalizar. Verifique se todos os documentos estão corretos, completos e correspondem às informações do formulário.",
-            "payment": f"💳 Chegou a hora do pagamento das taxas consulares. Acesse o site oficial do consulado americano, tenha seu cartão de crédito internacional em mãos e guarde o comprovante de pagamento.",
-            "interview_prep": f"🗣️ Prepare-se para a entrevista consular. Revise suas respostas do formulário, pratique com perguntas comuns em inglês e separe todos os documentos originais.",
+            "review": "🔍 Revise cuidadosamente todas as informações antes de finalizar. Verifique se todos os documentos estão corretos, completos e correspondem às informações do formulário.",
+            "payment": "💳 Chegou a hora do pagamento das taxas consulares. Acesse o site oficial do consulado americano, tenha seu cartão de crédito internacional em mãos e guarde o comprovante de pagamento.",
+            "interview_prep": "🗣️ Prepare-se para a entrevista consular. Revise suas respostas do formulário, pratique com perguntas comuns em inglês e separe todos os documentos originais.",
             "default": f"ℹ️ Continue seguindo as etapas do processo para o visto {visa_type}. Mantenha todos os documentos organizados e acompanhe os prazos. Em caso de dúvidas, consulte nossa documentação."
         }
         
