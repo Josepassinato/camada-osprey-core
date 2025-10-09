@@ -1,33 +1,38 @@
 """
-Sistema de Tutor Inteligente para Usuários Leigos
-Versão melhorada com foco em orientação prática e suporte personalizado
+Sistema de Tutor Inteligente para Imigração
+Fornece orientação personalizada e contextual aos usuários durante todo o processo de imigração
 """
 
-from datetime import datetime, timezone
-from typing import Dict, List, Optional, Any, Tuple
-from enum import Enum
-from pydantic import BaseModel
 import logging
+from typing import Dict, List, Any, Optional
+from enum import Enum
+import openai
+import os
+from datetime import datetime, timezone
+import uuid
 import json
 
 logger = logging.getLogger(__name__)
 
-class TutorAction(str, Enum):
-    """Ações disponíveis do tutor"""
-    EXPLAIN = "explain"          # Explicar um conceito
-    GUIDE = "guide"              # Guiar através de um processo
-    VALIDATE = "validate"        # Validar informações do usuário
-    SUGGEST = "suggest"          # Sugerir próximos passos
-    WARN = "warn"               # Avisar sobre possíveis problemas
-    CELEBRATE = "celebrate"     # Parabenizar conquistas
-    CORRECT = "correct"         # Corrigir erros comuns
-
 class TutorPersonality(str, Enum):
-    """Personalidades do tutor"""
-    FRIENDLY = "friendly"        # Amigável e encorajador
-    PROFESSIONAL = "professional" # Profissional e direto
-    MENTOR = "mentor"           # Como um mentor experiente
-    PATIENT = "patient"         # Paciente com iniciantes
+    """Personalidades disponíveis para o tutor"""
+    FRIENDLY = "friendly"  # Amigável e encorajador
+    PROFESSIONAL = "professional"  # Profissional e direto
+    DETAILED = "detailed"  # Detalhista e explicativo
+    SIMPLIFIED = "simplified"  # Simplificado para iniciantes
+
+class TutorAction(str, Enum):
+    """Ações que o tutor pode realizar"""
+    DOCUMENT_GUIDANCE = "document_guidance"
+    FORM_ASSISTANCE = "form_assistance"
+    TIMELINE_ESTIMATION = "timeline_estimation"
+    REQUIREMENT_CHECK = "requirement_check"
+    NEXT_STEPS = "next_steps"
+    TROUBLESHOOTING = "troubleshooting"
+    DOCUMENT_CHECKLIST = "document_checklist"
+    PROGRESS_ANALYSIS = "progress_analysis"
+    COMMON_MISTAKES = "common_mistakes"
+    INTERVIEW_PREP = "interview_prep"
 
 class TutorMessage(BaseModel):
     """Mensagem do tutor personalizada"""
