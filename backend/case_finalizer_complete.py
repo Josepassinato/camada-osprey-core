@@ -498,6 +498,398 @@ class CaseFinalizerComplete:
         
         return recommendations
     
+    async def _audit_case_advanced_real(self, case_id: str, scenario_key: str) -> Dict[str, Any]:
+        """
+        Auditoria avançada usando dados reais do MongoDB
+        """
+        try:
+            if not self.data_integrator:
+                logger.warning("Data integrator not available, using legacy audit")
+                return self._audit_case_advanced(case_id, scenario_key)
+            
+            # Recuperar dados completos do caso
+            complete_data = await self.data_integrator.get_case_complete_data(case_id)
+            
+            scenario = self.supported_scenarios[scenario_key]
+            required_docs = scenario["required_docs"]
+            optional_docs = scenario["optional_docs"]
+            
+            # Analisar documentos reais
+            available_docs = []
+            missing_docs = []
+            warnings = []
+            
+            # Mapear documentos disponíveis
+            doc_type_mapping = {
+                "passport": ["passport", "travel_document"],
+                "diploma": ["diploma", "degree", "certificate"],
+                "employment_letter": ["employment_letter", "job_offer"],
+                "i797": ["i797", "uscis_notice"],
+                "birth_certificate": ["birth_certificate"],
+                "marriage_certificate": ["marriage_certificate"],
+                "medical_exam": ["medical_exam", "i693"],
+                "financial_documents": ["bank_statement", "tax_return", "paystub"]
+            }
+            
+            # Verificar cada documento real contra os requisitos
+            real_docs = complete_data["documents"]
+            
+            for req_doc in required_docs:
+                doc_found = False
+                for real_doc in real_docs:
+                    real_doc_type = real_doc.get("document_type", "").lower()
+                    mapped_types = doc_type_mapping.get(req_doc, [req_doc])
+                    
+                    if any(mapped_type in real_doc_type for mapped_type in mapped_types):
+                        if real_doc.get("validation_status") == "validated":
+                            available_docs.append(req_doc)
+                            doc_found = True
+                            break
+                        else:
+                            warnings.append(f"Documento {req_doc} presente mas não validado: {real_doc['filename']}")
+                
+                if not doc_found:
+                    missing_docs.append(req_doc)
+            
+            # Verificar documentos opcionais
+            for opt_doc in optional_docs:
+                doc_found = False
+                for real_doc in real_docs:
+                    real_doc_type = real_doc.get("document_type", "").lower()
+                    mapped_types = doc_type_mapping.get(opt_doc, [opt_doc])
+                    
+                    if any(mapped_type in real_doc_type for mapped_type in mapped_types):
+                        if real_doc.get("validation_status") == "validated":
+                            available_docs.append(opt_doc)
+                            doc_found = True
+                            break
+                
+                if not doc_found:
+                    warnings.append(f"Documento opcional recomendado: {opt_doc}")
+            
+            # Verificações específicas com dados reais
+            specific_checks = await self._perform_real_scenario_checks(scenario_key, complete_data)
+            
+            # Calcular quality score baseado nos dados reais
+            quality_scores = [d.get("confidence_score", 0) for d in real_docs if d.get("include_in_packet")]
+            avg_quality = sum(quality_scores) / len(quality_scores) if quality_scores else 0
+            
+            status = "needs_correction" if missing_docs or specific_checks["critical_issues"] else "approved"
+            
+            return {
+                "status": status,
+                "available": available_docs,
+                "missing": missing_docs,
+                "warnings": warnings + specific_checks["warnings"],
+                "quality_score": avg_quality,
+                "real_documents_count": len(real_docs),
+                "validated_documents_count": len([d for d in real_docs if d.get("validation_status") == "validated"]),
+                "specific_checks": specific_checks,
+                "recommendations": self._generate_audit_recommendations(scenario_key, missing_docs),
+                "packet_metadata": await self.data_integrator.get_packet_metadata(case_id) if self.data_integrator else {}
+            }
+            
+        except Exception as e:
+            logger.error(f"Error in real data audit: {e}")
+            # Fallback para auditoria legacy
+            return self._audit_case_advanced(case_id, scenario_key)
+    
+    async def _perform_real_scenario_checks(self, scenario_key: str, complete_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Verificações específicas usando dados reais
+        """
+        checks = {"critical_issues": [], "warnings": [], "recommendations": []}
+        
+        real_docs = complete_data["documents"]
+        form_data = complete_data["form_data"]
+        cover_letters = complete_data["cover_letters"]
+        
+        if scenario_key.startswith("H-1B"):
+            # Verificações H-1B com dados reais
+            diploma_docs = [d for d in real_docs if "diploma" in d.get("document_type", "").lower()]
+            employment_docs = [d for d in real_docs if "employment" in d.get("document_type", "").lower()]
+            
+            if diploma_docs and employment_docs:
+                checks["recommendations"].append("✅ Diploma e carta de emprego presentes - verificar consistência de especialização")
+            
+            # Verificar se há I-797 anterior para extensões
+            if scenario_key == "H-1B_extension":
+                i797_docs = [d for d in real_docs if "i797" in d.get("document_type", "").lower()]
+                if not i797_docs:
+                    checks["critical_issues"].append("❌ I-797 anterior obrigatório para extensões H-1B")
+            
+            # Verificar carta de apresentação
+            if not cover_letters:
+                checks["warnings"].append("⚠️ Carta de apresentação não gerada - recomendado para H-1B")
+        
+        elif scenario_key.startswith("I-485"):
+            # Verificações I-485 com dados reais
+            medical_docs = [d for d in real_docs if "medical" in d.get("document_type", "").lower()]
+            if not medical_docs:
+                checks["critical_issues"].append("❌ Exame médico I-693 obrigatório para I-485")
+            
+            # Verificar formulários I-765 e I-131 se aplicável
+            if form_data.get("employment_authorization_requested"):
+                checks["recommendations"].append("✅ I-765 deve ser incluído para autorização de trabalho")
+        
+        elif scenario_key.startswith("F-1"):
+            # Verificações F-1 com dados reais
+            if scenario_key == "F-1_initial":
+                sevis_found = any("sevis" in d.get("document_type", "").lower() for d in real_docs)
+                if not sevis_found:
+                    checks["critical_issues"].append("❌ Recibo SEVIS I-901 obrigatório para F-1 inicial")
+        
+        # Verificações gerais de qualidade
+        low_quality_docs = [d for d in real_docs if d.get("confidence_score", 1.0) < 0.7]
+        if low_quality_docs:
+            checks["warnings"].append(f"⚠️ {len(low_quality_docs)} documentos com qualidade baixa detectados")
+        
+        return checks
+    
+    async def _create_master_packet_with_real_data(self, case_id: str, audit_result: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Cria master packet usando documentos reais do MongoDB
+        """
+        try:
+            if not self.data_integrator:
+                logger.warning("Data integrator not available, creating example packet")
+                return self._create_master_packet_real(case_id, audit_result)
+            
+            # Recuperar dados completos
+            complete_data = await self.data_integrator.get_case_complete_data(case_id)
+            real_docs = [d for d in complete_data["documents"] if d["include_in_packet"]]
+            
+            if not real_docs:
+                logger.warning(f"No documents to include in packet for case {case_id}")
+                return self._create_master_packet_real(case_id, audit_result)
+            
+            # Criar PDF writer
+            pdf_writer = PdfWriter()
+            
+            # Processar documentos reais
+            processed_docs = []
+            total_pages = 0
+            
+            for doc_info in real_docs:
+                try:
+                    # Recuperar dados binários do documento
+                    file_data = await self.data_integrator.get_document_file_data(doc_info["document_id"])
+                    
+                    if file_data:
+                        # Salvar temporariamente
+                        temp_file = await self.data_integrator.save_temporary_file(
+                            file_data, doc_info["filename"]
+                        )
+                        
+                        # Adicionar ao PDF se for PDF
+                        if temp_file.suffix.lower() == '.pdf':
+                            try:
+                                doc_reader = PdfReader(str(temp_file))
+                                pages_count = len(doc_reader.pages)
+                                
+                                # Adicionar páginas ao master packet
+                                for page in doc_reader.pages:
+                                    pdf_writer.add_page(page)
+                                
+                                processed_docs.append({
+                                    "name": doc_info["filename"],
+                                    "type": doc_info["document_type"],
+                                    "pages": pages_count,
+                                    "quality": doc_info.get("confidence_score", 0),
+                                    "status": "included"
+                                })
+                                
+                                total_pages += pages_count
+                                
+                            except Exception as pdf_error:
+                                logger.warning(f"Error processing PDF {doc_info['filename']}: {pdf_error}")
+                                processed_docs.append({
+                                    "name": doc_info["filename"],
+                                    "type": doc_info["document_type"],
+                                    "pages": 0,
+                                    "status": "error",
+                                    "error": str(pdf_error)
+                                })
+                        else:
+                            # Para não-PDFs, criar uma página de referência
+                            processed_docs.append({
+                                "name": doc_info["filename"],
+                                "type": doc_info["document_type"],
+                                "pages": 1,
+                                "status": "referenced",
+                                "note": f"Arquivo {temp_file.suffix} referenciado no índice"
+                            })
+                        
+                        # Limpar arquivo temporário
+                        if temp_file.exists():
+                            temp_file.unlink()
+                            
+                    else:
+                        logger.warning(f"No file data found for document {doc_info['document_id']}")
+                        processed_docs.append({
+                            "name": doc_info["filename"],
+                            "type": doc_info["document_type"],
+                            "pages": 0,
+                            "status": "missing"
+                        })
+                
+                except Exception as doc_error:
+                    logger.error(f"Error processing document {doc_info.get('document_id')}: {doc_error}")
+                    continue
+            
+            # Gerar índice com documentos reais
+            index_pdf_path = await self._generate_real_index_pdf(case_id, processed_docs, complete_data)
+            
+            # Adicionar índice ao início do packet
+            if index_pdf_path.exists():
+                try:
+                    index_reader = PdfReader(str(index_pdf_path))
+                    # Inserir índice no início
+                    for i, page in enumerate(index_reader.pages):
+                        pdf_writer.insert_page(page, i)
+                    total_pages += len(index_reader.pages)
+                    
+                    # Limpar arquivo de índice temporário
+                    index_pdf_path.unlink()
+                    
+                except Exception as index_error:
+                    logger.warning(f"Error adding index to packet: {index_error}")
+            
+            # Salvar master packet final
+            master_packet_path = self.temp_dir / f"master_packet_{case_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+            
+            if pdf_writer.pages:
+                with open(master_packet_path, 'wb') as output_file:
+                    pdf_writer.write(output_file)
+            else:
+                # Criar PDF de exemplo se não há páginas
+                self._create_example_master_packet(master_packet_path, case_id, processed_docs)
+            
+            # Calcular estatísticas
+            file_size_mb = master_packet_path.stat().st_size / (1024*1024) if master_packet_path.exists() else 0
+            
+            return {
+                "success": True,
+                "packet_path": str(master_packet_path),
+                "total_pages": total_pages,
+                "documents_included": len([d for d in processed_docs if d.get("status") == "included"]),
+                "documents_processed": len(processed_docs),
+                "index_included": True,
+                "file_size_mb": round(file_size_mb, 2),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "download_expires": (datetime.now(timezone.utc).timestamp() + 86400 * 7),  # 7 dias
+                "security_hash": hashlib.sha256(str(master_packet_path).encode()).hexdigest()[:16],
+                "document_summary": processed_docs,
+                "metadata": audit_result.get("packet_metadata", {})
+            }
+            
+        except Exception as e:
+            logger.error(f"Error creating master packet with real data: {e}")
+            # Fallback para criação de exemplo
+            return self._create_master_packet_real(case_id, audit_result)
+    
+    async def _generate_real_index_pdf(self, case_id: str, processed_docs: List[Dict], complete_data: Dict) -> Path:
+        """
+        Gera PDF índice com informações reais do caso
+        """
+        index_path = self.temp_dir / f"real_index_{case_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+        
+        # Criar documento PDF
+        doc = SimpleDocTemplate(str(index_path), pagesize=letter)
+        styles = getSampleStyleSheet()
+        
+        # Estilos personalizados
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=18,
+            alignment=TA_CENTER,
+            spaceAfter=20
+        )
+        
+        subtitle_style = ParagraphStyle(
+            'CustomSubtitle',
+            parent=styles['Heading2'],
+            fontSize=14,
+            alignment=TA_LEFT,
+            spaceAfter=15
+        )
+        
+        content = []
+        
+        # Cabeçalho
+        content.append(Paragraph("U.S. IMMIGRATION PETITION PACKAGE", title_style))
+        content.append(Paragraph("Complete Document Index & Summary", styles['Heading3']))
+        content.append(Spacer(1, 20))
+        
+        # Informações do caso
+        case_info = complete_data["case_info"]
+        content.append(Paragraph("CASE INFORMATION", subtitle_style))
+        content.append(Paragraph(f"<b>Case ID:</b> {case_info['case_id']}", styles['Normal']))
+        content.append(Paragraph(f"<b>Visa Type:</b> {case_info['visa_type']}", styles['Normal']))
+        content.append(Paragraph(f"<b>Generated:</b> {datetime.now().strftime('%B %d, %Y at %I:%M %p EST')}", styles['Normal']))
+        content.append(Paragraph(f"<b>Total Documents:</b> {len(processed_docs)}", styles['Normal']))
+        content.append(Spacer(1, 15))
+        
+        # Estatísticas do pacote
+        stats = complete_data["statistics"]
+        content.append(Paragraph("PACKAGE STATISTICS", subtitle_style))
+        content.append(Paragraph(f"<b>Documents Validated:</b> {stats['validated_documents']}/{stats['total_documents']}", styles['Normal']))
+        content.append(Paragraph(f"<b>Forms Completed:</b> {stats['forms_completed']}", styles['Normal']))
+        content.append(Paragraph(f"<b>Cover Letters:</b> {stats['letters_generated']}", styles['Normal']))
+        content.append(Spacer(1, 15))
+        
+        # Lista detalhada de documentos
+        content.append(Paragraph("DOCUMENT INVENTORY", subtitle_style))
+        
+        page_counter = 3  # Começar após as páginas do índice
+        
+        for i, doc in enumerate(processed_docs, 1):
+            status_symbol = {
+                "included": "✓",
+                "referenced": "◊",
+                "missing": "✗",
+                "error": "⚠"
+            }.get(doc.get("status", "unknown"), "?")
+            
+            quality_info = ""
+            if doc.get("quality"):
+                quality_pct = int(doc["quality"] * 100)
+                quality_info = f" (Quality: {quality_pct}%)"
+            
+            pages_info = f" - Pages {page_counter}-{page_counter + doc.get('pages', 1) - 1}" if doc.get('pages', 0) > 0 else " - Referenced only"
+            
+            doc_line = f"{status_symbol} {i}. {doc['name']} [{doc.get('type', 'unknown').upper()}]{quality_info}{pages_info}"
+            content.append(Paragraph(doc_line, styles['Normal']))
+            
+            if doc.get("note"):
+                content.append(Paragraph(f"    <i>{doc['note']}</i>", styles['Normal']))
+            
+            if doc.get("error"):
+                content.append(Paragraph(f"    <b>Error:</b> {doc['error']}", styles['Normal']))
+            
+            page_counter += doc.get("pages", 1)
+        
+        content.append(Spacer(1, 20))
+        
+        # Legendas
+        content.append(Paragraph("DOCUMENT STATUS LEGEND", subtitle_style))
+        content.append(Paragraph("✓ Included in packet  |  ◊ Referenced only  |  ✗ Missing  |  ⚠ Processing error", styles['Normal']))
+        content.append(Spacer(1, 15))
+        
+        # Disclaimer
+        content.append(Paragraph("IMPORTANT NOTICE", subtitle_style))
+        content.append(Paragraph(
+            "<i>This package was generated by an automated system. Please review all documents for completeness and accuracy before submission to USCIS. "
+            "This service does not constitute legal advice. Consult with an immigration attorney for case-specific guidance.</i>", 
+            styles['Normal']
+        ))
+        
+        # Gerar PDF
+        doc.build(content)
+        
+        return index_path
+    
     def _generate_instructions_complete(self, scenario_key: str, postage: str, language: str) -> Dict[str, Any]:
         """
         Gera instruções completas baseadas em templates de conhecimento
