@@ -6257,27 +6257,37 @@ async def analyze_document_with_real_ai(
                 case_id=case_id
             )
             
-            # Get extracted data (DocumentAIResult is a dataclass)
-            extracted_text = ocr_result.full_text if hasattr(ocr_result, 'full_text') else ''
-            extracted_fields = ocr_result.extracted_fields if hasattr(ocr_result, 'extracted_fields') else {}
-            detected_type = ocr_result.document_type if hasattr(ocr_result, 'document_type') else document_type
-            confidence = ocr_result.confidence if hasattr(ocr_result, 'confidence') else 0.0
+            logger.info(f"✅ Native LLM analysis complete")
+            logger.info(f"   → Result: {native_result}")
             
-            # ENHANCED: Text-based classification for Brazilian documents
-            text_lower = extracted_text.lower()
-            if any(keyword in text_lower for keyword in ['carteira nacional de habilitação', 'cnh', 'detran', 'categoria', 'permissão']):
-                detected_type = 'driver_license'
-                logger.info("🔍 Text classifier override: Detected as driver_license (CNH)")
-            elif any(keyword in text_lower for keyword in ['república federativa do brasil', 'passaporte', 'passport', 'mrz']):
-                detected_type = 'passport'
-                logger.info("🔍 Text classifier override: Detected as passport")
+            # Extract data from native result
+            extracted_data = native_result.get('extracted_data', {})
+            detected_type = extracted_data.get('detected_type', document_type)
+            confidence = extracted_data.get('confidence', 0.85)
             
-            logger.info(f"✅ Google Document AI extraction complete")
+            # Update analysis result with native analysis
+            analysis_result.update({
+                "valid": native_result.get('valid', True),
+                "legible": native_result.get('legible', True),
+                "completeness": native_result.get('completeness', 85),
+                "extracted_data": {
+                    **analysis_result.get('extracted_data', {}),
+                    **extracted_data
+                }
+            })
+            
+            # Get any issues from native analysis
+            native_issues = native_result.get('issues', [])
+            if native_issues:
+                analysis_result["issues"].extend(native_issues)
+                analysis_result["valid"] = False
+                analysis_result["completeness"] = 30
+            
+            logger.info(f"✅ Native analysis integration complete")
             logger.info(f"   → Detected Type: {detected_type}")
             logger.info(f"   → Expected Type: {document_type}")
             logger.info(f"   → Confidence: {confidence}")
-            logger.info(f"   → Extracted Text Length: {len(extracted_text)}")
-            logger.info(f"   → Extracted Fields: {list(extracted_fields.keys())}")
+            logger.info(f"   → Issues Found: {len(native_issues)}")
             
             # **LOGICAL VALIDATIONS** (NO AI needed!)
             validation_issues = []
