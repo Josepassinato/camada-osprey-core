@@ -137,11 +137,13 @@ const CoverLetterModule: React.FC = () => {
 
   // Card 1: Visa Type Selection (Auto from case)
   useEffect(() => {
+    console.log('🔄 Card progression check:', { visaType, currentCard });
     if (visaType && currentCard === 1) {
+      console.log('✅ Auto-progressing to Card 2 with visa type:', visaType);
       setCurrentCard(2);
       generateDirectives();
     }
-  }, [visaType]);
+  }, [visaType, currentCard]);
 
   // Card 2: Generate and display directives
   const generateDirectives = async () => {
