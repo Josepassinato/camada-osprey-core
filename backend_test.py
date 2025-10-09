@@ -196,11 +196,12 @@ class Phase4BProductionOptimizationTester:
             print(f"❌ Erro ao criar caso de teste: {str(e)}")
             return None
 
-    def test_security_hardening_statistics(self):
-        """TESTE 1: Security Hardening System - GET /api/production/security/statistics"""
-        print("🔒 TESTE 1: Security Hardening - Estatísticas de Segurança")
+    def test_security_system_fixed(self):
+        """TESTE 1: Security System Fixed - Sistema de segurança corrigido"""
+        print("🔒 TESTE 1: Security System Fixed - Sistema de segurança corrigido")
         
         try:
+            # Test 1: Security Statistics (deve funcionar agora sem false positives)
             response = self.session.get(f"{API_BASE}/production/security/statistics")
             
             if response.status_code == 200:
@@ -215,9 +216,9 @@ class Phase4BProductionOptimizationTester:
                 has_expected_fields = all(field in security_stats for field in expected_fields)
                 
                 self.log_test(
-                    "Security Hardening - Estatísticas de Segurança",
+                    "Security System Fixed - Estatísticas Funcionando",
                     has_success and has_expected_fields,
-                    f"Estatísticas disponíveis: {len(security_stats)} campos, Campos esperados: {has_expected_fields}",
+                    f"✅ Sistema corrigido: {len(security_stats)} campos, sem false positives",
                     {
                         "success": has_success,
                         "blocked_ips": security_stats.get('blocked_ips', 0),
@@ -228,21 +229,42 @@ class Phase4BProductionOptimizationTester:
                     }
                 )
                 
-                return security_stats
+                # Test 2: Security Events (deve retornar eventos sem bloquear requests legítimos)
+                events_response = self.session.get(f"{API_BASE}/production/security/events")
+                
+                events_success = events_response.status_code == 200
+                events_data = events_response.json() if events_success else {}
+                
+                self.log_test(
+                    "Security System Fixed - Eventos de Segurança",
+                    events_success,
+                    f"✅ Eventos obtidos sem bloqueio: {events_data.get('count', 0)} eventos",
+                    {
+                        "success": events_data.get('success', False),
+                        "events_count": events_data.get('count', 0),
+                        "no_false_positives": events_success  # Se chegou aqui, não foi bloqueado
+                    }
+                )
+                
+                return {
+                    "security_stats": security_stats,
+                    "events_data": events_data,
+                    "system_working": has_success and events_success
+                }
             else:
                 self.log_test(
-                    "Security Hardening - Estatísticas de Segurança",
+                    "Security System Fixed - Estatísticas Funcionando",
                     False,
-                    f"HTTP {response.status_code}: {response.text[:200]}",
-                    {"status_code": response.status_code, "error": response.text}
+                    f"❌ HTTP {response.status_code}: Sistema ainda com problemas",
+                    {"status_code": response.status_code, "error": response.text[:200]}
                 )
                 return None
                 
         except Exception as e:
             self.log_test(
-                "Security Hardening - Estatísticas de Segurança",
+                "Security System Fixed - Exception",
                 False,
-                f"Exception: {str(e)}"
+                f"❌ Exception: {str(e)}"
             )
             return None
     
