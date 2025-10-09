@@ -295,49 +295,80 @@ class DocumentValidationTester:
                 f"❌ Exception: {str(e)}"
             )
     
-    def test_tutor_checklist_endpoint(self):
-        """TESTE 2: Tutor Checklist - Checklist personalizado de documentos"""
-        print("📋 TESTE 2: Tutor Checklist - Checklist personalizado de documentos")
-        
-        # Test data as specified in the review request
-        test_request = {
-            "visa_type": "h1b"
-        }
+    def test_cnh_vs_passport_case(self):
+        """TESTE 2: CNH vs Passaporte - Arquivo grande enviado como CNH"""
+        print("📋 TESTE 2: CNH vs Passaporte - Arquivo grande enviado como CNH")
+        print("Cenário: Usuário enviou passaporte quando era esperado CNH")
         
         try:
-            response = self.session.post(
-                f"{API_BASE}/tutor/checklist",
-                json=test_request
+            # Simular arquivo grande (> 2.5MB) que seria típico de passaporte
+            # quando o sistema espera CNH
+            large_file_content = self.create_large_document_content("PASSPORT\nREPUBLIC OF BRAZIL\nMaria Santos\nPassport No: BR123456")
+            
+            files = {
+                'file': ('passport_maria.pdf', large_file_content, 'application/pdf')
+            }
+            data = {
+                'document_type': 'driver_license',  # Sistema espera CNH
+                'visa_type': 'B-1/B-2',
+                'case_id': 'TEST-CNH-PASSPORT'
+            }
+            
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files,
+                data=data,
+                headers=headers
             )
             
             if response.status_code == 200:
                 result = response.json()
                 
-                # Check response structure
-                has_success = result.get('success', False)
-                checklist = result.get('checklist', {})
-                has_checklist_content = len(str(checklist)) > 50
+                # Verificar se detectou erro de tipo de documento
+                issues = result.get('issues', [])
+                dra_paula_assessment = result.get('dra_paula_assessment', '')
                 
-                # Check for expected checklist structure
-                has_documents = 'required_documents' in str(checklist) or 'documents' in str(checklist)
-                has_status = 'status' in str(checklist) or 'pending' in str(checklist) or 'uploaded' in str(checklist)
+                # Procurar pela mensagem específica de tipo incorreto
+                type_error_detected = any('TIPO DE DOCUMENTO INCORRETO' in issue for issue in issues)
+                specific_message_found = 'Passaporte' in dra_paula_assessment and 'Carteira de Motorista' in dra_paula_assessment
+                
+                # Verificar se documento foi rejeitado
+                is_valid = result.get('valid', True)
                 
                 self.log_test(
-                    "Tutor Checklist - Checklist Personalizado",
-                    has_success and has_checklist_content,
-                    f"✅ Checklist gerado: {len(str(checklist))} caracteres, estrutura: docs={has_documents}, status={has_status}",
+                    "CNH vs Passaporte - Detecção de Tipo Incorreto",
+                    type_error_detected and not is_valid,
+                    f"✅ Erro detectado: tipo_incorreto={type_error_detected}, rejeitado={not is_valid}, mensagem_específica={specific_message_found}",
                     {
-                        "success": has_success,
-                        "checklist_length": len(str(checklist)),
-                        "has_documents": has_documents,
-                        "has_status": has_status,
-                        "visa_type": test_request["visa_type"],
-                        "checklist_preview": str(checklist)[:300] if checklist else ""
+                        "valid": is_valid,
+                        "type_error_detected": type_error_detected,
+                        "specific_message_found": specific_message_found,
+                        "issues_count": len(issues),
+                        "dra_paula_assessment": dra_paula_assessment[:200],
+                        "issues_sample": issues[:2] if issues else []
                     }
                 )
+                
+                # Verificar orientação específica para CNH
+                cnh_guidance = 'CNH' in dra_paula_assessment or 'carteira de motorista' in dra_paula_assessment.lower()
+                clear_instruction = 'necessário' in dra_paula_assessment.lower() or 'carregue' in dra_paula_assessment.lower()
+                
+                self.log_test(
+                    "CNH vs Passaporte - Orientação Específica",
+                    cnh_guidance and clear_instruction,
+                    f"✅ Orientação clara: CNH_mencionada={cnh_guidance}, instrução_clara={clear_instruction}",
+                    {
+                        "cnh_guidance": cnh_guidance,
+                        "clear_instruction": clear_instruction,
+                        "full_assessment": dra_paula_assessment
+                    }
+                )
+                
             else:
                 self.log_test(
-                    "Tutor Checklist - Checklist Personalizado",
+                    "CNH vs Passaporte - Detecção de Tipo Incorreto",
                     False,
                     f"❌ HTTP {response.status_code}",
                     {"status_code": response.status_code, "error": response.text[:200]}
@@ -345,7 +376,7 @@ class DocumentValidationTester:
                 
         except Exception as e:
             self.log_test(
-                "Tutor Checklist - Checklist Personalizado",
+                "CNH vs Passaporte - Detecção de Tipo Incorreto",
                 False,
                 f"❌ Exception: {str(e)}"
             )
