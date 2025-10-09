@@ -64,8 +64,10 @@ class OCRCache:
     
     def _generate_cache_key(self, image_data: str, mode: str = "auto", language: str = "eng") -> str:
         """Generate unique cache key for image + parameters"""
-        # Create hash from image data and parameters
-        content = f"{image_data[:100]}{len(image_data)}{mode}{language}"  # Use sample + length for efficiency
+        # FIXED: Use full content hash to prevent cache collisions between different documents
+        # Previous bug: Used only first 100 bytes + length, causing different documents to share cache keys
+        full_content_hash = hashlib.sha256(image_data.encode() if isinstance(image_data, str) else image_data).hexdigest()
+        content = f"{full_content_hash}{mode}{language}"
         return hashlib.sha256(content.encode()).hexdigest()[:16]
     
     async def get_or_compute(self, 
