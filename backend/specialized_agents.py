@@ -8,7 +8,7 @@ import asyncio
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 import logging
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+import openai
 from document_validation_database import (
     DOCUMENT_VALIDATION_DATABASE, 
     VISA_DOCUMENT_REQUIREMENTS,
