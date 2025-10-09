@@ -21,7 +21,7 @@ import io
 BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://validai-imm.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
-class RealVisionSystemTester:
+class IntelligentFormsTester:
     def __init__(self):
         self.test_results = []
         self.session = requests.Session()
