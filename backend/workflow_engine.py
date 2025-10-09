@@ -304,7 +304,7 @@ class WorkflowEngine:
         self.active_executions[execution_id] = execution
         
         # Salvar no banco se disponível
-        if self.db:
+        if self.db is not None:
             await self._save_execution_to_db(execution)
         
         logger.info(f"🚀 Started workflow {workflow_name} for case {case_id} (execution: {execution_id})")
