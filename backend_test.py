@@ -801,7 +801,7 @@ class Phase4AEnhancedTester:
             )
             return None
     
-    def test_dra_ana_form_validation_agent(self):
+    def test_pdf_generation_with_real_data(self):
         """TESTE 5: Funcionalidade da Dra. Ana (FormValidationAgent)"""
         print("👩‍⚕️ TESTE 5: Dra. Ana - FormValidationAgent")
         
