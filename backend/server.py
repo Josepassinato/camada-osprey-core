@@ -1219,7 +1219,9 @@ Responda apenas com o JSON estruturado, sem explicações adicionais.
         }
 
 # Authentication routes (keeping existing ones)
-@api_router.post("/auth/signup")
+@api_router.post("/auth/signup", tags=["Authentication"],
+                 summary="Registrar novo usuário",
+                 description="Cria uma nova conta de usuário na plataforma OSPREY com validação completa")
 async def signup(user_data: UserCreate):
     """Register a new user"""
     try:
