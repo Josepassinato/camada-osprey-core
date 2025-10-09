@@ -90,11 +90,11 @@ class UserProgress(BaseModel):
     last_active: datetime = datetime.now(timezone.utc)
 
 class IntelligentTutorSystem:
-    """Sistema de Tutor Inteligente melhorado"""
+    """Sistema de Tutor Inteligente com IA melhorado para usuários leigos"""
     
     def __init__(self, db):
         self.db = db
-        self.collection = db.tutor_interactions
+        self.openai_key = os.environ.get('OPENAI_API_KEY')
         
         # Base de conhecimento estruturada por visa
         self.knowledge_base = {
