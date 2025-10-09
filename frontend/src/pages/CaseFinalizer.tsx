@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { makeApiCall } from "@/utils/api";
 import PacketPreview from "@/components/PacketPreview";
 import DisclaimerModal from "@/components/DisclaimerModal";
+import IntelligentTutor from "@/components/IntelligentTutor";
 import { 
   CheckCircle2, 
   AlertCircle, 
