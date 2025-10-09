@@ -1,0 +1,295 @@
+# OSPREY Immigration Platform - CI/CD Pipeline
+name: OSPREY CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ created ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_BACKEND: osprey-backend
+  IMAGE_NAME_FRONTEND: osprey-frontend
+
+jobs:
+  # ==============================================
+  # CODE QUALITY AND TESTING
+  # ==============================================
+  
+  test-backend:
+    name: 🐍 Backend Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:7.0
+        env:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: test-password
+          MONGO_INITDB_DATABASE: test_db
+        ports:
+          - 27017:27017
+        options: --health-cmd "echo 'db.runCommand(\"ping\").ok' | mongosh localhost:27017/test --quiet" --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: 📦 Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: 🔧 Install dependencies
+      working-directory: ./backend
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-asyncio
+
+    - name: 🧪 Run backend tests
+      working-directory: ./backend
+      env:
+        MONGO_URL: mongodb://admin:test-password@localhost:27017/test_db?authSource=admin
+        JWT_SECRET: test-secret
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        pytest --cov=. --cov-report=xml --cov-report=html
+      continue-on-error: true
+
+    - name: 📊 Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./backend/coverage.xml
+        directory: ./backend
+        flags: backend
+        name: codecov-backend
+
+  test-frontend:
+    name: ⚛️ Frontend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'yarn'
+        cache-dependency-path: frontend/yarn.lock
+
+    - name: 🔧 Install dependencies
+      working-directory: ./frontend
+      run: yarn install --frozen-lockfile
+
+    - name: 🧪 Run frontend tests
+      working-directory: ./frontend
+      run: |
+        yarn test --coverage --watchAll=false
+      continue-on-error: true
+
+    - name: 🔍 Run ESLint
+      working-directory: ./frontend
+      run: yarn lint
+      continue-on-error: true
+
+    - name: 🏗️ Build frontend
+      working-directory: ./frontend
+      run: yarn build
+
+    - name: 📊 Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        directory: ./frontend/coverage
+        flags: frontend
+        name: codecov-frontend
+
+  # ==============================================
+  # SECURITY SCANNING
+  # ==============================================
+
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🔍 Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: 📊 Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+    - name: 🐍 Python Security Check
+      working-directory: ./backend
+      run: |
+        pip install safety
+        safety check --json || true
+
+  # ==============================================
+  # BUILD AND PUSH DOCKER IMAGES
+  # ==============================================
+
+  build-backend:
+    name: 🐳 Build Backend Image
+    runs-on: ubuntu-latest
+    needs: [test-backend, security-scan]
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🏷️ Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME_BACKEND }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha,prefix={{branch}}-
+
+    - name: 🔐 Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 🏗️ Build and push backend image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+  build-frontend:
+    name: 🐳 Build Frontend Image
+    runs-on: ubuntu-latest
+    needs: [test-frontend, security-scan]
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🏷️ Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME_FRONTEND }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha,prefix={{branch}}-
+
+    - name: 🔐 Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 🏗️ Build and push frontend image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./frontend
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+  # ==============================================
+  # DEPLOYMENT
+  # ==============================================
+
+  deploy-staging:
+    name: 🚀 Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend]
+    if: github.ref == 'refs/heads/develop'
+    
+    environment:
+      name: staging
+      url: https://staging.osprey.com
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🚀 Deploy to staging
+      run: |
+        echo "Deploying to staging environment..."
+        # Add your staging deployment commands here
+        # Example: kubectl, docker-compose, or cloud deployment
+
+    - name: 🧪 Run staging smoke tests
+      run: |
+        echo "Running staging smoke tests..."
+        # Add staging smoke tests here
+
+  deploy-production:
+    name: 🚀 Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend]
+    if: github.ref == 'refs/heads/main'
+    
+    environment:
+      name: production
+      url: https://osprey.com
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🚀 Deploy to production
+      run: |
+        echo "Deploying to production environment..."
+        # Add your production deployment commands here
+
+    - name: 🧪 Run production smoke tests
+      run: |
+        echo "Running production smoke tests..."
+        # Add production smoke tests here
+
+  # ==============================================
+  # NOTIFICATIONS
+  # ==============================================
+
+  notify:
+    name: 📢 Notify
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    
+    steps:
+    - name: 📢 Notify deployment status
+      run: |
+        echo "Pipeline completed. Status: ${{ job.status }}"
+        # Add notification logic (Slack, email, etc.)
