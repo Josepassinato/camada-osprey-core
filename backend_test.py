@@ -9475,7 +9475,7 @@ def main():
     # Count critical document validation tests
     critical_tests = [
         "Passaporte vs CNH - Detecção de Tipo Incorreto",
-        "CNH vs Passaporte - Detecção de Tipo Incorreto", 
+        "Diploma vs Passaporte - Detecção de Tipo Incorreto", 
         "Certidão vs Passaporte - Detecção de Tipo Incorreto",
         "Validação de Tamanho - Arquivo Muito Pequeno"
     ]
