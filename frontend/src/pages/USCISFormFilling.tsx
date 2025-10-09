@@ -134,6 +134,15 @@ const USCISFormFilling = () => {
   const [validationResult, setValidationResult] = useState<any>(null);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  // Get current user for tutor
+  useEffect(() => {
+    const token = localStorage.getItem('osprey_token');
+    if (token) {
+      setCurrentUser({ id: 'user_123', email: 'user@example.com' });
+    }
+  }, []);
 
   // Session management
   const { 
