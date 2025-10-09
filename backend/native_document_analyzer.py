@@ -7,6 +7,7 @@ Substitui a integração complexa do Google Document AI
 import logging
 import base64
 import json
+import os
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from datetime import datetime, timezone
