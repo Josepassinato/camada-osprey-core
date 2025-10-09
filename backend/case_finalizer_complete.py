@@ -365,8 +365,8 @@ class CaseFinalizerComplete:
             
             logger.info(f"🚀 Case Finalizer Complete iniciado: job_id={job_id}, case_id={case_id}, scenario={scenario_key}")
             
-            # Executar auditoria avançada
-            audit_result = self._audit_case_advanced(case_id, scenario_key)
+            # Executar auditoria avançada com dados reais
+            audit_result = await self._audit_case_advanced_real(case_id, scenario_key)
             job_data["audit_result"] = audit_result
             
             if audit_result["status"] == "needs_correction":
