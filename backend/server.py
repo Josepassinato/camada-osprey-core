@@ -7483,16 +7483,16 @@ async def process_ai_step(request: dict):
 async def validate_form_data_ai(case, friendly_form_data, basic_data):
     """AI validation of form data completeness and accuracy"""
     try:
-        from emergentintegrations import EmergentLLM
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
         
-        # Use OpenAI directly or fallback to EmergentLLM
+        # Use ONLY user's personal OpenAI API key
         openai_key = os.environ.get('OPENAI_API_KEY')
-        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
         
-        if openai_key:
+        if not openai_key:
+            raise ValueError("OPENAI_API_KEY is required for AI validation")
+        
+        if True:  # Always use OpenAI now
             use_openai = True
-        else:
             llm = EmergentLLM(api_key=emergent_key)
             use_openai = False
         
@@ -7706,16 +7706,16 @@ async def translate_data_ai(case, friendly_form_data):
 async def generate_uscis_form_ai(case, friendly_form_data, basic_data):
     """AI generation of official USCIS form from friendly data"""
     try:
-        from emergentintegrations import EmergentLLM
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
         
-        # Use OpenAI directly or fallback to EmergentLLM
+        # Use ONLY user's personal OpenAI API key
         openai_key = os.environ.get('OPENAI_API_KEY')
-        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
         
-        if openai_key:
+        if not openai_key:
+            raise ValueError("OPENAI_API_KEY is required for AI validation")
+        
+        if True:  # Always use OpenAI now
             use_openai = True
-        else:
             llm = EmergentLLM(api_key=emergent_key)
             use_openai = False
         
@@ -7791,16 +7791,16 @@ async def generate_uscis_form_ai(case, friendly_form_data, basic_data):
 async def final_review_ai(case):
     """Final AI review of the complete USCIS form"""
     try:
-        from emergentintegrations import EmergentLLM
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
         
-        # Use OpenAI directly or fallback to EmergentLLM
+        # Use ONLY user's personal OpenAI API key
         openai_key = os.environ.get('OPENAI_API_KEY')
-        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
         
-        if openai_key:
+        if not openai_key:
+            raise ValueError("OPENAI_API_KEY is required for AI validation")
+        
+        if True:  # Always use OpenAI now
             use_openai = True
-        else:
             llm = EmergentLLM(api_key=emergent_key)
             use_openai = False
         
