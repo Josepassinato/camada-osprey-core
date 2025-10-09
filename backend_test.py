@@ -215,6 +215,296 @@ class DocumentAnalysisTester:
             print(f"❌ Erro ao criar caso de teste: {str(e)}")
             return None
 
+    def test_img_7602_specific_document_analysis(self):
+        """CRITICAL TEST: IMG_7602.png Specific Document Analysis - User Reported Issue"""
+        print("🎯 CRITICAL TEST: IMG_7602.png Specific Document Analysis")
+        print("Cenário: Testar documento específico IMG_7602.png reportado pelo usuário")
+        print("URL: https://customer-assets.emergentagent.com/job_formfill-aid/artifacts/hka5y6g5_IMG_7602.png")
+        
+        try:
+            # STEP 1: Download the specific document IMG_7602.png
+            print("📥 STEP 1: Downloading IMG_7602.png from user-provided URL")
+            
+            img_url = "https://customer-assets.emergentagent.com/job_formfill-aid/artifacts/hka5y6g5_IMG_7602.png"
+            
+            try:
+                img_response = requests.get(img_url, timeout=30)
+                if img_response.status_code == 200:
+                    img_content = img_response.content
+                    img_size = len(img_content)
+                    
+                    print(f"✅ Downloaded IMG_7602.png: {img_size} bytes")
+                    
+                    self.log_test(
+                        "IMG_7602 - Document Download",
+                        True,
+                        f"✅ Successfully downloaded IMG_7602.png: {img_size} bytes",
+                        {
+                            "file_size": img_size,
+                            "url": img_url,
+                            "content_type": img_response.headers.get('content-type', 'unknown')
+                        }
+                    )
+                else:
+                    self.log_test(
+                        "IMG_7602 - Document Download",
+                        False,
+                        f"❌ Failed to download IMG_7602.png: HTTP {img_response.status_code}",
+                        {"status_code": img_response.status_code, "url": img_url}
+                    )
+                    return
+                    
+            except Exception as e:
+                self.log_test(
+                    "IMG_7602 - Document Download",
+                    False,
+                    f"❌ Exception downloading IMG_7602.png: {str(e)}",
+                    {"error": str(e), "url": img_url}
+                )
+                return
+            
+            # STEP 2: Analyze IMG_7602.png - First Analysis
+            print("📄 STEP 2: First Analysis of IMG_7602.png")
+            
+            files_img = {
+                'file': ('IMG_7602.png', img_content, 'image/png')
+            }
+            data_img = {
+                'document_type': 'passport',  # User expects passport analysis
+                'visa_type': 'H-1B',
+                'case_id': 'IMG-7602-FIRST-ANALYSIS'
+            }
+            
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response_first = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files_img,
+                data=data_img,
+                headers=headers
+            )
+            
+            if response_first.status_code != 200:
+                self.log_test(
+                    "IMG_7602 - First Analysis",
+                    False,
+                    f"❌ Failed first analysis: HTTP {response_first.status_code}",
+                    {"status_code": response_first.status_code, "error": response_first.text[:200]}
+                )
+                return
+            
+            result_first = response_first.json()
+            extracted_data_first = result_first.get('extracted_data', {})
+            detected_type_first = extracted_data_first.get('detected_type', '')
+            completeness_first = result_first.get('completeness', 0)
+            analysis_method_first = extracted_data_first.get('analysis_method', '')
+            confidence_first = extracted_data_first.get('confidence', 0)
+            
+            self.log_test(
+                "IMG_7602 - First Analysis Complete",
+                True,
+                f"✅ First analysis: type={detected_type_first}, completeness={completeness_first}%, method={analysis_method_first}",
+                {
+                    "document": "IMG_7602.png (First)",
+                    "detected_type": detected_type_first,
+                    "completeness": completeness_first,
+                    "valid": result_first.get('valid', False),
+                    "analysis_method": analysis_method_first,
+                    "confidence": confidence_first,
+                    "issues_count": len(result_first.get('issues', [])),
+                    "assessment_length": len(result_first.get('dra_paula_assessment', ''))
+                }
+            )
+            
+            # STEP 3: Upload a different document to potentially cause cache collision
+            print("📄 STEP 3: Upload Different Document (Potential Cache Collision Test)")
+            time.sleep(1)  # Small delay
+            
+            different_doc_content = """CERTIDÃO DE NASCIMENTO
+BIRTH CERTIFICATE
+CARTÓRIO DO REGISTRO CIVIL
+Nome: JOÃO SILVA SANTOS
+Data de Nascimento: 15/08/1990
+Local: BRASÍLIA - DF
+Pai: CARLOS SANTOS
+Mãe: MARIA SILVA
+Cartório: 1º OFÍCIO DE REGISTRO CIVIL
+Livro: 456 Folha: 789 Termo: 123
+Data de Emissão: 10/03/2020
+""" + "Different document content to test cache collision. " * 3000
+            
+            files_different = {
+                'file': ('birth_certificate_joao.pdf', different_doc_content.encode('utf-8'), 'application/pdf')
+            }
+            data_different = {
+                'document_type': 'birth_certificate',
+                'visa_type': 'H-1B',
+                'case_id': 'DIFFERENT-DOC-COLLISION-TEST'
+            }
+            
+            response_different = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files_different,
+                data=data_different,
+                headers=headers
+            )
+            
+            if response_different.status_code == 200:
+                result_different = response_different.json()
+                extracted_different = result_different.get('extracted_data', {})
+                detected_type_different = extracted_different.get('detected_type', '')
+                
+                self.log_test(
+                    "IMG_7602 - Different Document Analysis",
+                    True,
+                    f"✅ Different document analyzed: type={detected_type_different}",
+                    {
+                        "document": "Different Document (Birth Certificate)",
+                        "detected_type": detected_type_different,
+                        "completeness": result_different.get('completeness', 0),
+                        "valid": result_different.get('valid', False)
+                    }
+                )
+            
+            # STEP 4: Re-analyze IMG_7602.png - Second Analysis (Critical Test)
+            print("📄 STEP 4: Second Analysis of IMG_7602.png (Critical Cache Test)")
+            time.sleep(1)  # Small delay
+            
+            files_img_second = {
+                'file': ('IMG_7602_second.png', img_content, 'image/png')  # Same content, different filename
+            }
+            data_img_second = {
+                'document_type': 'passport',
+                'visa_type': 'H-1B',
+                'case_id': 'IMG-7602-SECOND-ANALYSIS'
+            }
+            
+            response_second = requests.post(
+                f"{API_BASE}/documents/analyze-with-ai",
+                files=files_img_second,
+                data=data_img_second,
+                headers=headers
+            )
+            
+            if response_second.status_code != 200:
+                self.log_test(
+                    "IMG_7602 - Second Analysis",
+                    False,
+                    f"❌ Failed second analysis: HTTP {response_second.status_code}",
+                    {"status_code": response_second.status_code, "error": response_second.text[:200]}
+                )
+                return
+            
+            result_second = response_second.json()
+            extracted_data_second = result_second.get('extracted_data', {})
+            detected_type_second = extracted_data_second.get('detected_type', '')
+            completeness_second = result_second.get('completeness', 0)
+            analysis_method_second = extracted_data_second.get('analysis_method', '')
+            confidence_second = extracted_data_second.get('confidence', 0)
+            
+            self.log_test(
+                "IMG_7602 - Second Analysis Complete",
+                True,
+                f"✅ Second analysis: type={detected_type_second}, completeness={completeness_second}%, method={analysis_method_second}",
+                {
+                    "document": "IMG_7602.png (Second)",
+                    "detected_type": detected_type_second,
+                    "completeness": completeness_second,
+                    "valid": result_second.get('valid', False),
+                    "analysis_method": analysis_method_second,
+                    "confidence": confidence_second,
+                    "issues_count": len(result_second.get('issues', [])),
+                    "assessment_length": len(result_second.get('dra_paula_assessment', ''))
+                }
+            )
+            
+            # STEP 5: Verify Cache Collision is Resolved
+            print("🔍 STEP 5: Verifying Cache Collision Resolution")
+            
+            # Both analyses of IMG_7602.png should be consistent (not contaminated by different document)
+            same_detected_type = detected_type_first.lower() == detected_type_second.lower()
+            similar_completeness = abs(completeness_first - completeness_second) <= 10  # Allow 10% variance
+            same_analysis_method = analysis_method_first == analysis_method_second
+            similar_confidence = abs(confidence_first - confidence_second) <= 0.2  # Allow 20% variance
+            
+            # Check that IMG_7602 results are NOT contaminated by the different document
+            no_birth_cert_contamination = not any(word in str(result_second).lower() for word in ['nascimento', 'birth', 'cartório', 'joão', 'silva'])
+            
+            # Check that IMG_7602 gets analysis specific to its content
+            img_specific_analysis = (
+                detected_type_second != detected_type_different and  # Different from birth certificate
+                str(result_second) != str(result_different)  # Different analysis results
+            )
+            
+            cache_collision_resolved = (
+                same_detected_type and 
+                similar_completeness and 
+                same_analysis_method and 
+                similar_confidence and
+                no_birth_cert_contamination and 
+                img_specific_analysis
+            )
+            
+            self.log_test(
+                "IMG_7602 - Cache Collision Resolution",
+                cache_collision_resolved,
+                f"✅ Cache collision resolved: consistent={same_detected_type}, no_contamination={no_birth_cert_contamination}",
+                {
+                    "cache_collision_resolved": cache_collision_resolved,
+                    "same_detected_type": same_detected_type,
+                    "similar_completeness": similar_completeness,
+                    "same_analysis_method": same_analysis_method,
+                    "similar_confidence": similar_confidence,
+                    "no_birth_cert_contamination": no_birth_cert_contamination,
+                    "img_specific_analysis": img_specific_analysis,
+                    "first_type": detected_type_first,
+                    "second_type": detected_type_second,
+                    "different_doc_type": detected_type_different,
+                    "completeness_diff": abs(completeness_first - completeness_second),
+                    "confidence_diff": abs(confidence_first - confidence_second)
+                }
+            )
+            
+            # STEP 6: Verify Fresh Analysis (Not Cached Results)
+            print("🔄 STEP 6: Verifying Fresh Analysis Processing")
+            
+            # Check for indicators of fresh analysis vs cached results
+            has_real_vision_analysis = analysis_method_second == 'real_vision_native'
+            has_confidence_score = confidence_second > 0
+            has_substantive_assessment = len(result_second.get('dra_paula_assessment', '')) > 100
+            has_extracted_data = len(str(extracted_data_second)) > 50
+            
+            fresh_analysis_indicators = (
+                has_real_vision_analysis and 
+                has_confidence_score and 
+                has_substantive_assessment and 
+                has_extracted_data
+            )
+            
+            self.log_test(
+                "IMG_7602 - Fresh Analysis Verification",
+                fresh_analysis_indicators,
+                f"✅ Fresh analysis confirmed: real_vision={has_real_vision_analysis}, confidence={confidence_second}, assessment_len={len(result_second.get('dra_paula_assessment', ''))}",
+                {
+                    "fresh_analysis_indicators": fresh_analysis_indicators,
+                    "has_real_vision_analysis": has_real_vision_analysis,
+                    "has_confidence_score": has_confidence_score,
+                    "has_substantive_assessment": has_substantive_assessment,
+                    "has_extracted_data": has_extracted_data,
+                    "analysis_method": analysis_method_second,
+                    "confidence": confidence_second,
+                    "assessment_length": len(result_second.get('dra_paula_assessment', '')),
+                    "extracted_data_length": len(str(extracted_data_second))
+                }
+            )
+            
+        except Exception as e:
+            self.log_test(
+                "IMG_7602 - Specific Document Test",
+                False,
+                f"❌ Exception: {str(e)}"
+            )
+
     def test_cache_collision_prevention_sequential_uploads(self):
         """SCENARIO 1: Sequential Document Analysis - Test cache collision prevention"""
         print("🎯 SCENARIO 1: Sequential Document Analysis - Cache Collision Prevention")
