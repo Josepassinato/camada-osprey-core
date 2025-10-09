@@ -8163,8 +8163,8 @@ async def analyze_document_with_real_ai(
             logger.info(f"👁️ STARTING REAL VISION ANALYSIS for {document_type}")
             logger.info(f"Policy Engine result before vision analysis: issues={len(analysis_result.get('issues', []))}")
             
-            # Import real vision analyzer
-            from real_vision_analyzer import analyze_document_with_real_vision
+            # Import REAL vision analyzer (replaces simulation system)
+            from real_document_vision_analyzer import analyze_document_with_real_vision
             from dateutil import parser as date_parser
             import unicodedata
             
