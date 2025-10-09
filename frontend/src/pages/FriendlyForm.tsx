@@ -27,6 +27,7 @@ import {
 import SaveAndContinueModal from "@/components/SaveAndContinueModal";
 import OspreyOwlTutor from "@/components/OspreyOwlTutor";
 import { useFormSnapshot } from "@/hooks/useFormSnapshot";
+import { toast } from "@/hooks/use-toast";
 
 interface FormSection {
   id: string;
