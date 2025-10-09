@@ -533,6 +533,22 @@ const DocumentUpload = () => {
           </form>
         </div>
       </div>
+
+      {/* Disclaimer Modal */}
+      <DisclaimerModal
+        isOpen={showDisclaimer}
+        onClose={() => setShowDisclaimer(false)}
+        onAccept={async (consentHash) => {
+          await disclaimer.recordAcceptance('documents', consentHash, 'user-123', {
+            document_type: documentType,
+            uploaded_files: files.length,
+            timestamp: new Date().toISOString()
+          });
+        }}
+        stage="documents"
+        caseId={caseId}
+        loading={disclaimer.loading}
+      />
     </div>
   );
 };
