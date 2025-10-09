@@ -121,7 +121,7 @@ class IntelligentFormsTester:
             
             if response.status_code == 200:
                 result = response.json()
-                case_id = result.get('case_id')
+                case_id = result.get('case', {}).get('case_id')
                 
                 # Add some basic data to the case
                 basic_data = {
