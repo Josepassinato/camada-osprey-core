@@ -364,150 +364,139 @@ class Phase4BProductionOptimizationTester:
         """TESTE 3: Load Testing System - Sistema de Teste de Carga"""
         print("⚡ TESTE 3: Load Testing System - Testes de Carga Automatizados")
         
-        # First create a finalization job
-        case_id = self.create_test_case_with_documents()
-        if not case_id:
-            self.log_test(
-                "Preview System - Criação de Caso",
-                False,
-                "Falha ao criar caso de teste"
-            )
-            return None
-        
         try:
-            # Start finalization to get a job_id
-            request_data = {
-                "scenario_key": "H-1B_basic",
-                "postage": "USPS", 
-                "language": "pt"
-            }
+            # Test 1: Get available load tests
+            available_response = self.session.get(f"{API_BASE}/production/load-testing/available-tests")
             
-            start_response = self.session.post(
-                f"{API_BASE}/cases/{case_id}/finalize/start",
-                json=request_data
+            available_success = available_response.status_code == 200
+            available_data = available_response.json() if available_success else {}
+            
+            available_tests = available_data.get('available_tests', [])
+            expected_test_count = 4  # Based on the implementation
+            
+            self.log_test(
+                "Load Testing - Testes Disponíveis",
+                available_success and len(available_tests) >= expected_test_count,
+                f"Testes disponíveis: {len(available_tests)}/{expected_test_count} esperados",
+                {
+                    "success": available_data.get('success', False),
+                    "tests_count": len(available_tests),
+                    "test_types": [test.get('test_type') for test in available_tests],
+                    "expected_count": expected_test_count
+                }
             )
             
-            if start_response.status_code != 200:
-                self.log_test(
-                    "Preview System - Job Creation",
-                    False,
-                    f"Falha ao criar job: HTTP {start_response.status_code}",
-                    start_response.text
-                )
-                return None
-            
-            start_result = start_response.json()
-            job_id = start_result.get('job_id')
-            
-            if not job_id:
-                self.log_test(
-                    "Preview System - Job ID",
-                    False,
-                    "Job ID não retornado",
-                    start_result
-                )
-                return None
-            
-            # Wait for job to complete
-            print(f"⏳ Aguardando processamento do job {job_id}...")
-            time.sleep(5)
-            
-            # Test preview endpoint
-            preview_response = self.session.get(
-                f"{API_BASE}/cases/finalize/{job_id}/preview"
-            )
-            
-            if preview_response.status_code == 200:
-                preview_result = preview_response.json()
+            # Test 2: Start a load test (use a quick test)
+            if available_tests:
+                # Use the first available test type
+                test_type = available_tests[0].get('test_type', 'api_critical')
                 
-                # Check preview structure
-                required_fields = ['success', 'metadata', 'document_summary', 'quality_assessment', 'job_info']
-                has_all_fields = all(field in preview_result for field in required_fields)
+                start_request = {
+                    "test_type": test_type,
+                    "base_url": BACKEND_URL
+                }
+                
+                start_response = self.session.post(
+                    f"{API_BASE}/production/load-testing/start",
+                    json=start_request
+                )
+                
+                start_success = start_response.status_code == 200
+                start_data = start_response.json() if start_success else {}
+                test_id = start_data.get('test_id')
                 
                 self.log_test(
-                    "Preview System - Estrutura de Resposta",
-                    has_all_fields,
-                    f"Campos presentes: {list(preview_result.keys())}",
+                    "Load Testing - Iniciar Teste",
+                    start_success and test_id is not None,
+                    f"Teste iniciado: {test_type}, Test ID: {test_id}",
                     {
-                        "status_code": preview_response.status_code,
-                        "response_structure": {field: field in preview_result for field in required_fields}
+                        "success": start_data.get('success', False),
+                        "test_id": test_id,
+                        "test_type": start_data.get('test_type'),
+                        "message": start_data.get('message', '')
                     }
                 )
                 
-                # Check metadata completeness
-                metadata = preview_result.get('metadata', {})
-                has_metadata = len(metadata) > 0
-                
-                self.log_test(
-                    "Preview System - Metadados Completos",
-                    has_metadata,
-                    f"Metadados disponíveis: {len(metadata)} campos",
-                    {
-                        "metadata_fields": list(metadata.keys())[:5] if metadata else [],
-                        "metadata_count": len(metadata)
+                # Test 3: Check test status
+                if test_id:
+                    # Wait a moment for test to start
+                    time.sleep(2)
+                    
+                    status_response = self.session.get(
+                        f"{API_BASE}/production/load-testing/{test_id}/status"
+                    )
+                    
+                    status_success = status_response.status_code == 200
+                    status_data = status_response.json() if status_success else {}
+                    
+                    self.log_test(
+                        "Load Testing - Status do Teste",
+                        status_success,
+                        f"Status obtido: {status_data.get('status', 'unknown')}",
+                        {
+                            "success": status_data.get('success', False),
+                            "test_id": status_data.get('test_id'),
+                            "status": status_data.get('status'),
+                            "has_progress": 'progress' in status_data or 'result' in status_data
+                        }
+                    )
+                    
+                    # Test 4: Stop the test (to avoid long running tests)
+                    stop_response = self.session.post(
+                        f"{API_BASE}/production/load-testing/{test_id}/stop"
+                    )
+                    
+                    stop_success = stop_response.status_code == 200
+                    stop_data = stop_response.json() if stop_success else {}
+                    
+                    self.log_test(
+                        "Load Testing - Parar Teste",
+                        stop_success,
+                        f"Teste parado: {stop_data.get('success', False)}",
+                        {
+                            "success": stop_data.get('success', False),
+                            "test_id": stop_data.get('test_id'),
+                            "message": stop_data.get('message', '')
+                        }
+                    )
+                    
+                    # Overall load testing system assessment
+                    load_tests_passed = sum([available_success, start_success, status_success, stop_success])
+                    
+                    self.log_test(
+                        "Load Testing System - Funcionalidade Geral",
+                        load_tests_passed >= 3,  # At least 3 out of 4 should work
+                        f"Testes de carga aprovados: {load_tests_passed}/4",
+                        {
+                            "available_working": available_success,
+                            "start_working": start_success,
+                            "status_working": status_success,
+                            "stop_working": stop_success,
+                            "success_rate": f"{(load_tests_passed/4)*100:.1f}%"
+                        }
+                    )
+                    
+                    return {
+                        "available_tests": available_tests,
+                        "test_id": test_id,
+                        "tests_passed": load_tests_passed
                     }
-                )
-                
-                # Check document summary
-                document_summary = preview_result.get('document_summary', [])
-                has_documents = len(document_summary) > 0
-                
-                self.log_test(
-                    "Preview System - Resumo de Documentos",
-                    has_documents,
-                    f"Documentos no resumo: {len(document_summary)}",
-                    {
-                        "documents_count": len(document_summary),
-                        "sample_documents": [d.get('name', 'unknown') for d in document_summary[:3]] if document_summary else []
-                    }
-                )
-                
-                # Check quality assessment
-                quality_assessment = preview_result.get('quality_assessment', {})
-                has_quality_data = 'overall_score' in quality_assessment and 'recommendation' in quality_assessment
-                
-                self.log_test(
-                    "Preview System - Avaliação de Qualidade",
-                    has_quality_data,
-                    f"Score: {quality_assessment.get('overall_score', 0)}, Recomendação: {quality_assessment.get('recommendation', 'N/A')}",
-                    {
-                        "overall_score": quality_assessment.get('overall_score', 0),
-                        "recommendation": quality_assessment.get('recommendation'),
-                        "issues_count": len(quality_assessment.get('issues', [])),
-                        "warnings_count": len(quality_assessment.get('warnings', []))
-                    }
-                )
-                
-                # Check job info
-                job_info = preview_result.get('job_info', {})
-                has_job_info = 'job_id' in job_info and 'case_id' in job_info
-                
-                self.log_test(
-                    "Preview System - Informações do Job",
-                    has_job_info,
-                    f"Job ID: {job_info.get('job_id')}, Case ID: {job_info.get('case_id')}",
-                    {
-                        "job_id": job_info.get('job_id'),
-                        "case_id": job_info.get('case_id'),
-                        "scenario": job_info.get('scenario'),
-                        "created_at": job_info.get('created_at')
-                    }
-                )
-                
-                return {"job_id": job_id, "preview_data": preview_result}
-                
+                else:
+                    self.log_test(
+                        "Load Testing System - Test ID Missing",
+                        False,
+                        "Não foi possível obter test_id para continuar testes"
+                    )
             else:
                 self.log_test(
-                    "Preview System - Endpoint Funcionando",
+                    "Load Testing System - No Tests Available",
                     False,
-                    f"HTTP {preview_response.status_code}: {preview_response.text[:200]}",
-                    {"status_code": preview_response.status_code, "error": preview_response.text}
+                    "Nenhum teste de carga disponível"
                 )
-                return None
                 
         except Exception as e:
             self.log_test(
-                "Preview System - Exception",
+                "Load Testing System - Exception Geral",
                 False,
                 f"Exception: {str(e)}"
             )
