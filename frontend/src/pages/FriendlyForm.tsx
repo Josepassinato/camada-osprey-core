@@ -1018,6 +1018,121 @@ const FriendlyForm = () => {
         </div>
       </div>
 
+      {/* Validation Results Modal */}
+      {showValidationModal && validationResult && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${validationResult.ready_for_conversion ? 'bg-green-600' : 'bg-orange-600'}`}>
+                    {validationResult.ready_for_conversion ? (
+                      <CheckCircle className="h-5 w-5 text-white" />
+                    ) : (
+                      <AlertTriangle className="h-5 w-5 text-white" />
+                    )}
+                  </div>
+                  <div>
+                    <CardTitle>Dra. Ana - Validação de Completude</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Completude: {validationResult.completeness_score}%
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowValidationModal(false)}
+                >
+                  ✕
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Assessment */}
+              <div className={`p-4 rounded-lg ${validationResult.ready_for_conversion ? 'bg-green-50 border border-green-200' : 'bg-orange-50 border border-orange-200'}`}>
+                <p className={`text-sm ${validationResult.ready_for_conversion ? 'text-green-800' : 'text-orange-800'}`}>
+                  {validationResult.dra_ana_assessment}
+                </p>
+              </div>
+
+              {/* Critical Issues */}
+              {validationResult.critical_issues && validationResult.critical_issues.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-red-800 mb-2 flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    Problemas Críticos ({validationResult.critical_issues.length})
+                  </h4>
+                  <ul className="space-y-2">
+                    {validationResult.critical_issues.map((issue: any, index: number) => (
+                      <li key={index} className="text-sm bg-red-50 border border-red-200 rounded p-3">
+                        <div className="font-medium text-red-800">{issue.message}</div>
+                        <div className="text-red-600 text-xs mt-1">{issue.suggestion}</div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Important Issues */}
+              {validationResult.important_issues && validationResult.important_issues.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-orange-800 mb-2 flex items-center gap-2">
+                    <Info className="h-4 w-4" />
+                    Sugestões de Melhoria ({validationResult.important_issues.length})
+                  </h4>
+                  <ul className="space-y-2">
+                    {validationResult.important_issues.map((issue: any, index: number) => (
+                      <li key={index} className="text-sm bg-orange-50 border border-orange-200 rounded p-3">
+                        <div className="font-medium text-orange-800">{issue.message}</div>
+                        <div className="text-orange-600 text-xs mt-1">{issue.suggestion}</div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Next Steps */}
+              {validationResult.next_steps && validationResult.next_steps.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-gray-800 mb-2">Próximos Passos:</h4>
+                  <ul className="space-y-1">
+                    {validationResult.next_steps.map((step: string, index: number) => (
+                      <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
+                        <span className="text-blue-600 font-bold">{index + 1}.</span>
+                        {step}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex justify-between items-center pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowValidationModal(false)}
+                >
+                  Continuar Editando
+                </Button>
+                
+                {validationResult.ready_for_conversion && (
+                  <Button
+                    onClick={() => {
+                      setShowValidationModal(false);
+                      generateOfficialForms();
+                    }}
+                    className="bg-green-600 text-white hover:bg-green-700"
+                  >
+                    Converter para Oficial
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Osprey Owl Tutor Integration */}
       <OspreyOwlTutor 
         snapshot={snapshot}
