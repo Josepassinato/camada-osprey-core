@@ -6226,10 +6226,10 @@ async def analyze_document_with_real_ai(
             logger.error(f"❌ Policy Engine FASE 1 error: {e}")
             analysis_result["policy_engine_error"] = str(e)
         
-        # FASE 2: NATIVE LLM DOCUMENT ANALYSIS (DIRECT INTEGRATION)
+        # FASE 2: REAL VISION DOCUMENT ANALYSIS (NATIVE COMPUTER VISION)
         try:
-            logger.info(f"🔬 STARTING NATIVE LLM ANALYSIS for {document_type}")
-            logger.info(f"Policy Engine result before native analysis: issues={len(analysis_result.get('issues', []))}")
+            logger.info(f"👁️ STARTING REAL VISION ANALYSIS for {document_type}")
+            logger.info(f"Policy Engine result before vision analysis: issues={len(analysis_result.get('issues', []))}")
             
             # Import real vision analyzer
             from real_vision_analyzer import analyze_document_with_real_vision
