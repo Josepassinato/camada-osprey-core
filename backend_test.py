@@ -1252,6 +1252,239 @@ Data de Validade: 15/06/2024
             )
             return None
     
+    def test_brazilian_id_card_mismatch_scenario(self):
+        """TESTE ESPECÍFICO: Brazilian ID Card (RG) vs Passport Mismatch Detection"""
+        print("🆔 TESTE ESPECÍFICO: Brazilian ID Card (RG) vs Passport Mismatch Detection")
+        print("Cenário: Usuário enviou RG/Carteira de Identidade quando era esperado passaporte")
+        
+        try:
+            # Create test case for this scenario
+            case_id = "OSP-RG-MISMATCH-TEST"
+            
+            # Create a test case first
+            case_data = {
+                "form_code": "H-1B",
+                "session_token": f"test_session_{uuid.uuid4().hex[:8]}"
+            }
+            
+            case_response = self.session.post(
+                f"{API_BASE}/auto-application/start",
+                json=case_data
+            )
+            
+            if case_response.status_code == 200:
+                case_result = case_response.json()
+                case_id = case_result.get('case', {}).get('case_id', case_id)
+                
+                # Add basic data to the case
+                basic_data = {
+                    "firstName": "Carlos",
+                    "lastName": "Silva", 
+                    "email": "carlos.silva@test.com",
+                    "phone": "+55 11 99999-9999",
+                    "dateOfBirth": "1990-05-15",
+                    "placeOfBirth": "São Paulo, SP, Brasil",
+                    "nationality": "Brazilian"
+                }
+                
+                # Update case with basic data
+                update_response = self.session.patch(
+                    f"{API_BASE}/auto-application/case/{case_id}",
+                    json={
+                        "basic_data": basic_data,
+                        "current_step": "documents"
+                    }
+                )
+            
+            # Simulate Brazilian ID card (RG/Carteira de Identidade) content
+            rg_content = """CARTEIRA DE IDENTIDADE
+REPÚBLICA FEDERATIVA DO BRASIL
+ESTADO DE SÃO PAULO
+SECRETARIA DE SEGURANÇA PÚBLICA
+INSTITUTO DE IDENTIFICAÇÃO RICARDO GUMBLETON DAUNT
+
+RG: 12.345.678-9
+NOME: CARLOS EDUARDO SILVA
+FILIAÇÃO: JOÃO SILVA
+           MARIA SANTOS SILVA
+NATURALIDADE: SÃO PAULO - SP
+DATA DE NASCIMENTO: 15/05/1990
+DATA DE EXPEDIÇÃO: 10/03/2015
+CPF: 123.456.789-00
+
+ASSINATURA DO PORTADOR: [ASSINATURA]
+
+Este documento é válido em todo território nacional
+Documento de identidade brasileiro
+""" + "Padding content to reach adequate size for document analysis. " * 2000  # Make it > 50KB
+            
+            # Test 1: Download and analyze the actual image from the URL
+            print("📥 Tentando baixar imagem do URL fornecido...")
+            image_url = "https://customer-assets.emergentagent.com/job_formfill-aid/artifacts/s2ay4b42_IMG_7531.png"
+            
+            try:
+                import requests as req_lib
+                image_response = req_lib.get(image_url, timeout=30)
+                
+                if image_response.status_code == 200:
+                    print(f"✅ Imagem baixada com sucesso: {len(image_response.content)} bytes")
+                    
+                    # Use the actual downloaded image
+                    files = {
+                        'file': ('brazilian_id_card.png', image_response.content, 'image/png')
+                    }
+                    data = {
+                        'document_type': 'passport',  # INCORRETO - sistema espera passaporte
+                        'visa_type': 'H-1B',  # H-1B requer passaporte
+                        'case_id': case_id
+                    }
+                    
+                    headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                    
+                    response = requests.post(
+                        f"{API_BASE}/documents/analyze-with-ai",
+                        files=files,
+                        data=data,
+                        headers=headers
+                    )
+                    
+                    if response.status_code == 200:
+                        result = response.json()
+                        
+                        # Verificar se detectou erro de tipo de documento
+                        issues = result.get('issues', [])
+                        dra_paula_assessment = result.get('dra_paula_assessment', '')
+                        extracted_data = result.get('extracted_data', {})
+                        
+                        # Procurar por detecção de tipo incorreto
+                        type_error_detected = any('TIPO DE DOCUMENTO INCORRETO' in issue for issue in issues)
+                        type_mismatch_in_assessment = ('RG' in dra_paula_assessment or 'CARTEIRA DE IDENTIDADE' in dra_paula_assessment) and 'Passaporte' in dra_paula_assessment
+                        
+                        # Verificar se documento foi rejeitado apropriadamente
+                        is_valid = result.get('valid', True)
+                        detected_type = extracted_data.get('detected_type', '')
+                        
+                        # Verificar mensagem específica em português
+                        expected_message_found = any(phrase in dra_paula_assessment for phrase in [
+                            'RG/Carteira de Identidade',
+                            'mas esperado Passaporte',
+                            'TIPO DE DOCUMENTO INCORRETO'
+                        ])
+                        
+                        self.log_test(
+                            "Brazilian ID Mismatch - Real Image Analysis",
+                            not is_valid and (type_error_detected or type_mismatch_in_assessment or expected_message_found),
+                            f"✅ RG vs Passaporte detectado: válido={is_valid}, erro_tipo={type_error_detected}, mensagem_esperada={expected_message_found}",
+                            {
+                                "valid": is_valid,
+                                "type_error_detected": type_error_detected,
+                                "type_mismatch_in_assessment": type_mismatch_in_assessment,
+                                "expected_message_found": expected_message_found,
+                                "detected_type": detected_type,
+                                "issues_count": len(issues),
+                                "dra_paula_assessment": dra_paula_assessment[:300],
+                                "issues_sample": issues[:2] if issues else [],
+                                "image_size": len(image_response.content)
+                            }
+                        )
+                        
+                        # Verificar se mensagem está em português brasileiro
+                        portuguese_terms = ['documento', 'tipo', 'incorreto', 'passaporte', 'carteira', 'identidade']
+                        portuguese_message = sum(1 for term in portuguese_terms if term.lower() in dra_paula_assessment.lower())
+                        
+                        self.log_test(
+                            "Brazilian ID Mismatch - Portuguese Error Message",
+                            portuguese_message >= 3,
+                            f"✅ Mensagem em português: {portuguese_message}/6 termos encontrados",
+                            {
+                                "portuguese_terms_found": portuguese_message,
+                                "total_terms": len(portuguese_terms),
+                                "clear_guidance": len(dra_paula_assessment) > 50,
+                                "full_assessment": dra_paula_assessment
+                            }
+                        )
+                        
+                    else:
+                        self.log_test(
+                            "Brazilian ID Mismatch - Real Image Analysis",
+                            False,
+                            f"❌ HTTP {response.status_code}",
+                            {"status_code": response.status_code, "error": response.text[:200]}
+                        )
+                        
+                else:
+                    print(f"❌ Falha ao baixar imagem: HTTP {image_response.status_code}")
+                    raise Exception(f"Failed to download image: {image_response.status_code}")
+                    
+            except Exception as download_error:
+                print(f"⚠️ Erro ao baixar imagem real: {download_error}")
+                print("📝 Usando conteúdo simulado de RG...")
+                
+                # Fallback: Use simulated RG content
+                files = {
+                    'file': ('rg_carlos.pdf', rg_content.encode('utf-8'), 'application/pdf')
+                }
+                data = {
+                    'document_type': 'passport',  # INCORRETO - sistema espera passaporte
+                    'visa_type': 'H-1B',  # H-1B requer passaporte
+                    'case_id': case_id
+                }
+                
+                headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                
+                response = requests.post(
+                    f"{API_BASE}/documents/analyze-with-ai",
+                    files=files,
+                    data=data,
+                    headers=headers
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    
+                    # Verificar se detectou erro de tipo de documento
+                    issues = result.get('issues', [])
+                    dra_paula_assessment = result.get('dra_paula_assessment', '')
+                    extracted_data = result.get('extracted_data', {})
+                    
+                    # Procurar por detecção de tipo incorreto
+                    type_error_detected = any('TIPO DE DOCUMENTO INCORRETO' in issue for issue in issues)
+                    type_mismatch_in_assessment = ('RG' in dra_paula_assessment or 'CARTEIRA DE IDENTIDADE' in dra_paula_assessment) and 'Passaporte' in dra_paula_assessment
+                    
+                    # Verificar se documento foi rejeitado apropriadamente
+                    is_valid = result.get('valid', True)
+                    detected_type = extracted_data.get('detected_type', '')
+                    
+                    self.log_test(
+                        "Brazilian ID Mismatch - Simulated Content",
+                        not is_valid and (type_error_detected or type_mismatch_in_assessment),
+                        f"✅ RG simulado vs Passaporte: válido={is_valid}, erro_tipo={type_error_detected}",
+                        {
+                            "valid": is_valid,
+                            "type_error_detected": type_error_detected,
+                            "type_mismatch_in_assessment": type_mismatch_in_assessment,
+                            "detected_type": detected_type,
+                            "issues_count": len(issues),
+                            "dra_paula_assessment": dra_paula_assessment[:200],
+                            "content_type": "simulated"
+                        }
+                    )
+                    
+                else:
+                    self.log_test(
+                        "Brazilian ID Mismatch - Simulated Content",
+                        False,
+                        f"❌ HTTP {response.status_code}",
+                        {"status_code": response.status_code, "error": response.text[:200]}
+                    )
+                    
+        except Exception as e:
+            self.log_test(
+                "Brazilian ID Mismatch - Exception",
+                False,
+                f"❌ Exception: {str(e)}"
+            )
+
     def test_disclaimer_status_and_reports(self):
         """TESTE 5: Disclaimer Status and Reports - Status detalhado e relatórios"""
         print("📊 TESTE 5: Disclaimer Status and Reports - Status detalhado e relatórios")
