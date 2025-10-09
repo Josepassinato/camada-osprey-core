@@ -58,29 +58,29 @@ class DisclaimerSystem:
         # Textos padrão dos disclaimers por estágio
         self.disclaimer_texts = {
             DisclaimerStage.DOCUMENTS: """
-ACEITE DE RESPONSABILIDADE - DOCUMENTAÇÃO
+CONFIRMAÇÃO DE RESPONSABILIDADE - ETAPA DE DOCUMENTOS
 
-Ao prosseguir com o upload e validação de documentos, você confirma que:
+Ao concluir o upload e validação de documentos, você declara que:
 
-1. AUTENTICIDADE DOS DOCUMENTOS
-   • Todos os documentos enviados são ORIGINAIS e AUTÊNTICOS
-   • Não foram alterados, modificados ou falsificados de qualquer forma
-   • Você possui legal autoridade para fornecer estes documentos
+1. VERACIDADE DOS DOCUMENTOS
+   • Todos os documentos enviados foram fornecidos por VOCÊ
+   • São ORIGINAIS, AUTÊNTICOS e não foram alterados
+   • Você possui autorização legal para fornecer estes documentos
+   • Assume total responsabilidade por sua autenticidade
 
-2. RESPONSABILIDADE LEGAL
-   • Você é TOTALMENTE RESPONSÁVEL pela veracidade de todos os documentos
-   • Entende que documentos falsos podem resultar em negação permanente de vistos
-   • Assume todas as consequências legais por documentos inadequados
+2. RESPONSABILIDADE PELAS INFORMAÇÕES
+   • TODAS as informações contidas nos documentos são de sua responsabilidade
+   • Você verificou a correção de todos os dados antes do upload
+   • Entende que informações falsas podem comprometer seu processo
+   • Assume as consequências por qualquer informação incorreta
 
-3. SISTEMA INFORMATIVO
-   • Este sistema oferece validação INFORMATIVA baseada em padrões públicos
-   • NÃO substitui revisão profissional por advogado de imigração
-   • Recomendamos consulta jurídica para casos complexos
+3. APROVAÇÃO DA ETAPA
+   • Confirma que revisou todos os documentos enviados
+   • Aprova esta etapa como CORRETA e COMPLETA
+   • Autoriza o sistema a prosseguir para a próxima fase
+   • Entende que alterações futuras podem ser necessárias
 
-4. ISENÇÃO DE RESPONSABILIDADE
-   • O sistema não garante aprovação pelo USCIS
-   • Você é responsável por verificar todos os requisitos oficiais
-   • Este serviço não constitui aconselhamento jurídico
+IMPORTANTE: Este sistema é informativo. Para orientação específica, consulte um advogado de imigração.
             """,
             
             DisclaimerStage.FORMS: """
