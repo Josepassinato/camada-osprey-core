@@ -344,6 +344,14 @@ const USCISFormFilling = () => {
       ...prev,
       [field]: value
     }));
+    
+    // Auto-save after a short delay when user stops typing
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+    autoSaveTimeoutRef.current = setTimeout(() => {
+      saveUSCISFormDataSilently();
+    }, 2000); // Save 2 seconds after user stops typing
   };
 
   const saveUSCISFormData = async () => {
