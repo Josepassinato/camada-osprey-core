@@ -8279,13 +8279,18 @@ async def analyze_document_with_real_ai(
             
             # NOVO: Armazenar documento se aceito (não armazenar se há divergência de nome resolvível)
             if not analysis_result.get('name_mismatch_resolvable'):
-                await store_accepted_document(
-                    case_id=case_id,
-                    document_type=document_type,
-                    file_content=file_content,
-                    original_filename=file.filename or 'uploaded_document',
-                    analysis_result=analysis_result
-                )
+                try:
+                    storage_result = await store_accepted_document(
+                        case_id=case_id,
+                        document_type=document_type,
+                        file_content=file_content,
+                        original_filename=file.filename or 'uploaded_document',
+                        analysis_result=analysis_result
+                    )
+                    logger.info(f"📁 Document storage result: {storage_result.get('success', False)}")
+                except Exception as storage_error:
+                    logger.error(f"⚠️ Error storing document: {storage_error}")
+                    # Continue even if storage fails
             
             # Return combined analysis result (Policy Engine + Real Vision Analysis + Quality Assessment)
             return analysis_result
