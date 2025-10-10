@@ -8270,7 +8270,7 @@ async def analyze_document_with_real_ai(
             logger.info(f"✅ Real Vision validation complete - Total Issues: {len(analysis_result.get('issues', []))}")
             
             # NOVO: Verificar se há divergência de nome que pode ser resolvida
-            name_mismatch_info = await self._check_for_name_mismatch_resolution(
+            name_mismatch_info = await _check_for_name_mismatch_resolution(
                 analysis_result, case_id, applicant_name
             )
             
