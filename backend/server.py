@@ -9232,6 +9232,43 @@ async def reprocess_document_with_passport_name(
             detail=f"Erro ao reprocessar documento: {str(e)}"
         )
 
+async def _check_for_name_mismatch_resolution(analysis_result: Dict[str, Any], case_id: str, applicant_name: str) -> Optional[Dict[str, Any]]:
+    """
+    Verifica se há divergência de nome que pode ser resolvida com nome do passaporte
+    """
+    try:
+        # Verificar se há divergência de nome
+        name_match_status = analysis_result.get('name_match_status', '')
+        full_text = analysis_result.get('full_text_extracted', '')
+        
+        if 'mismatch' in name_match_status or 'não corresponde' in full_text.lower():
+            # Extrair nome detectado no documento
+            extracted_fields = analysis_result.get('extracted_fields', {})
+            detected_name = (
+                extracted_fields.get('detected_name_in_document') or
+                extracted_fields.get('full_name') or
+                analysis_result.get('extracted_data', {}).get('full_name')
+            )
+            
+            if detected_name and detected_name.strip() != applicant_name:
+                logger.info(f"🔍 Name mismatch detected - Registered: '{applicant_name}' vs Document: '{detected_name}'")
+                
+                return {
+                    'name_mismatch_resolvable': True,
+                    'name_mismatch_details': {
+                        'registered_name': applicant_name,
+                        'detected_name': detected_name,
+                        'can_use_passport_name': True,
+                        'resolution_message': f"Nome no cadastro ('{applicant_name}') difere do passaporte ('{detected_name}'). Deseja usar o nome do passaporte?"
+                    }
+                }
+        
+        return None
+        
+    except Exception as e:
+        logger.warning(f"⚠️ Error checking name mismatch: {e}")
+        return None
+
 # Health Check Endpoint - CRITICAL for deployment (RESILIENT VERSION)
 @api_router.get("/health")
 async def health_check():
