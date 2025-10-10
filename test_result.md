@@ -124,7 +124,7 @@ frontend:
     implemented: true
     working: false
     file: "/app/frontend/src/pages/DocumentUpload.tsx"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
     needs_retesting: false
     status_history:
@@ -134,6 +134,9 @@ frontend:
       - working: false
         agent: "testing"
         comment: "❌ PROCESSING INDICATORS NOT WORKING IN PRODUCTION: Comprehensive UI testing reveals processing indicators are not appearing during document upload as reported by user. ROOT CAUSE ANALYSIS: 1) ❌ Authentication Issue - Document upload requires valid osprey_token in localStorage, demo credentials (test@test.com/password123) return 401 Unauthorized, 2) ❌ API Validation Error - When token is present, API call to /api/documents/analyze-with-ai returns 422 error due to missing required 'case_id' field, 3) ❌ Processing State Cleared - API failures cause processing indicators to be removed before user can see them, 4) ✅ Code Logic Working - Console logs show processing state management is executing correctly ('🔄 Starting upload', '📝 Adding to processing'), 5) ❌ Visual Feedback Missing - Processing indicators (spinner, progress counter, status messages) are not visible to users due to immediate API failures. CRITICAL ISSUES: Authentication system preventing document upload testing, missing case_id parameter causing API validation failures, processing indicators disappearing too quickly on errors. USER REPORT CONFIRMED: Processing indicators are indeed not showing during document upload."
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL ROUTING ISSUE DISCOVERED - DOCUMENTUPLOAD COMPONENT NOT RENDERING: Comprehensive debugging reveals the root cause why processing indicators and passport name option are not appearing. CRITICAL FINDINGS: 1) ❌ React Router Issue - Despite URL showing '/documents/upload', the DocumentUpload component is NOT rendering, instead AutoApplicationStart component renders on all routes, 2) ❌ Component Never Loads - Processing indicators and passport name modal cannot appear because the DocumentUpload component itself never loads, 3) ✅ Code Implementation Correct - Both features are correctly implemented in DocumentUpload.tsx (lines 45-48 for processing indicators, lines 50-57 for passport modal) and PassportNameOption.tsx, 4) ❌ Routing Configuration Issue - App.tsx shows correct route definition (line 55: <Route path='/documents/upload' element={<DocumentUpload />} />) but React Router is not functioning properly, 5) ✅ Temporary Fix Works - Direct page reload at correct URL does load DocumentUpload component, confirming implementation is correct. ROOT CAUSE: React Router routing system is broken, causing wrong component to render regardless of URL. USER REPORT CONFIRMED: Features not appearing because component never renders due to routing failure."
 
   - task: "Passport Name Option Modal"
     implemented: true
