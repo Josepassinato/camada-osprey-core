@@ -293,7 +293,7 @@ const DocumentUpload = () => {
       if (issueDate) formData.append('issue_date', issueDate + 'T00:00:00Z');
 
       try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/documents/upload`, {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/documents/analyze-with-ai`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
