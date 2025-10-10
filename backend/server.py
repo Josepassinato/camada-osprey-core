@@ -8270,11 +8270,11 @@ async def analyze_document_with_real_ai(
             logger.info(f"✅ Real Vision validation complete - Total Issues: {len(analysis_result.get('issues', []))}")
             
             # NOVO: Armazenar documento se aceito
-            await self._store_accepted_document_if_valid(
+            await store_accepted_document(
                 case_id=case_id,
                 document_type=document_type,
                 file_content=file_content,
-                original_filename=getattr(document, 'filename', 'uploaded_document'),
+                original_filename=file.filename or 'uploaded_document',
                 analysis_result=analysis_result
             )
             
