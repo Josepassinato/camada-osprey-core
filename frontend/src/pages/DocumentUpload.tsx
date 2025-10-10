@@ -286,11 +286,13 @@ const DocumentUpload = () => {
       setProcessingFiles(prev => [...prev, fileName]);
 
       const formData = new FormData();
-      formData.append('file', uploadedFile.file);
+      formData.append('document', uploadedFile.file);  // Campo correto é 'document'
       formData.append('document_type', documentType);
-      formData.append('tags', tags);
-      if (expirationDate) formData.append('expiration_date', expirationDate + 'T23:59:59Z');
-      if (issueDate) formData.append('issue_date', issueDate + 'T00:00:00Z');
+      formData.append('visa_type', 'H-1B');
+      formData.append('case_id', caseId || '');
+      if (tags) formData.append('tags', tags);
+      if (expirationDate) formData.append('expiration_date', expirationDate);
+      if (issueDate) formData.append('issue_date', issueDate);
 
       try {
         const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/documents/analyze-with-ai`, {
