@@ -1000,6 +1000,30 @@ backend:
         agent: "testing"
         comment: "✅ USCIS FORM EDGE CASES HANDLED CORRECTLY: System properly handles edge cases. Invalid case_id returns HTTP 404 as expected. Empty form data (uscis_form_data={}, completed_sections=[]) accepted with HTTP 200, allowing users to clear form progress if needed. System robust against invalid inputs while maintaining data integrity for valid operations."
 
+  - task: "Passport Name Option - POST /api/case/{case_id}/use-passport-name"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSPORT NAME ENDPOINT WORKING PERFECTLY: Comprehensive testing of POST /api/case/{case_id}/use-passport-name endpoint completed with 100% success rate. FUNCTIONALITY VERIFIED: 1) ✅ Case Data Updates - Successfully updates both form_data.basic_info and basic_data fields with passport name, 2) ✅ Name Parsing - Correctly splits passport name into firstName and lastName components, 3) ✅ Database Updates - Updates are properly applied to MongoDB auto_cases collection, 4) ✅ Metadata Tracking - Adds passport_name_used metadata with timestamp and reason, 5) ✅ Response Structure - Returns success, case_id, passport_name, updated_fields, message, and timestamp, 6) ✅ Error Handling - Properly validates required passport_name field (400 error), handles non-existent cases (404 error), 7) ✅ Database Verification - Case retrieval confirms all updates are persisted correctly. ENDPOINT READY: Fully functional for PassportNameOption modal integration."
+
+  - task: "Passport Name Option - POST /api/documents/reprocess-with-passport-name"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ DOCUMENT REPROCESSING ENDPOINT WORKING PERFECTLY: Comprehensive testing of POST /api/documents/reprocess-with-passport-name endpoint completed with 100% success rate. FUNCTIONALITY VERIFIED: 1) ✅ Analysis Result Updates - Successfully updates analysis result to valid=true, decision='accepted', 2) ✅ Name Mismatch Resolution - Sets name_mismatch_resolved=true and passport_name_used field, 3) ✅ Issues Removal - Removes name-related issues from issues_found array, 4) ✅ Portuguese Assessment - Updates dra_paula_assessment with acceptance message in Portuguese, 5) ✅ Response Structure - Returns success, case_id, document_filename, passport_name, analysis_result, message, and timestamp, 6) ✅ Error Handling - Validates required fields (case_id, document_filename, passport_name) with 400 error for missing fields, 7) ✅ Reprocessing Logic - Correctly transforms rejected document analysis to accepted status. ENDPOINT READY: Fully functional for document reprocessing after passport name resolution."
+
 frontend:
   - task: "Cover Letter Module Frontend Integration"
     implemented: true
