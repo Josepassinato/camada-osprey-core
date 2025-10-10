@@ -307,7 +307,7 @@ Responda sempre em português brasileiro com análise precisa e decisiva."""
         if 'corresponde' in response_lower or 'match' in response_lower:
             return "match"
         elif 'não corresponde' in response_lower or 'não match' in response_lower:
-            return "mismatch"
+            return "mismatch_passport_name_option"  # Indica que pode oferecer opção
         elif applicant_lower in response_lower:
             return "likely_match"
         else:
