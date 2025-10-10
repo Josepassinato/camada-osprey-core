@@ -370,6 +370,12 @@ const DocumentUploadAuto = () => {
         return;
       }
 
+      const fileName = file.name;
+      
+      // Adicionar aos documentos em processamento
+      console.log('🔄 Adding to processing:', fileName);
+      setProcessingDocs(prev => [...prev, fileName]);
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('document_type', documentType);
@@ -382,6 +388,23 @@ const DocumentUploadAuto = () => {
         
         // Analyze document with REAL AI (Dr. Miguel)
         const aiAnalysis = await realDocumentAnalysis(file, documentType);
+        
+        // Remover do processamento e adicionar aos completados
+        setProcessingDocs(prev => prev.filter(f => f !== fileName));
+        setCompletedDocs(prev => [...prev, fileName]);
+        
+        // Verificar divergência de nome (apenas para passaportes)
+        if (documentType === 'passport' && aiAnalysis?.name_mismatch_resolvable) {
+          console.log('🔍 Name mismatch detected:', aiAnalysis);
+          setNameMismatchDetails({
+            documentFileName: fileName,
+            detectedName: aiAnalysis.extracted_data?.full_name || 'Nome não detectado',
+            registeredName: case_?.basic_data?.full_name || case_?.form_data?.basic_info?.full_name || 'Usuário',
+            caseId: caseId || ''
+          });
+          setShowPassportNameOption(true);
+          return; // Não salvar ainda até decisão do usuário
+        }
         
         const uploadedFile: UploadedFile = {
           id: `file_${Date.now()}`,
@@ -414,6 +437,8 @@ const DocumentUploadAuto = () => {
     } catch (error) {
       console.error('Upload error:', error);
       setError('Erro no upload. Tente novamente.');
+      // Remover do processamento em caso de erro
+      setProcessingDocs(prev => prev.filter(f => f !== file.name));
     } finally {
       setIsUploading(false);
     }
