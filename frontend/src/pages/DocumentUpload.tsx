@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import DisclaimerModal from "@/components/DisclaimerModal";
 import { useDisclaimer } from "@/hooks/useDisclaimer";
 import IntelligentTutor from "@/components/IntelligentTutor";
+import PassportNameOption from '../components/PassportNameOption';
 
 interface UploadedFile {
   file: File;
