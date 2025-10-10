@@ -5073,7 +5073,10 @@ Documento de identidade brasileiro
         # PRIORITY 3: Test specific user document with OpenAI direct
         self.test_img_7602_specific_document_analysis()
         
-        # PRIORITY 4: Basic functionality tests to ensure system still works
+        # PRIORITY 4: Test passport name option endpoints
+        self.test_passport_name_option_endpoints()
+        
+        # PRIORITY 5: Basic functionality tests to ensure system still works
         self.test_document_upload_and_analysis()
         self.test_document_type_validation()
         self.test_error_handling()
