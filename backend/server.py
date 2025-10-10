@@ -8297,6 +8297,18 @@ from document_storage_system import store_accepted_document
             analysis_result["issues"].extend(fallback_issues)
             analysis_result["completeness"] = 60  # Partial analysis
             
+            # Mesmo com erro, tentar armazenar se válido
+            try:
+                await self._store_accepted_document_if_valid(
+                    case_id=case_id,
+                    document_type=document_type,
+                    file_content=file_content,
+                    original_filename=getattr(document, 'filename', 'uploaded_document'),
+                    analysis_result=analysis_result
+                )
+            except Exception as storage_error:
+                logger.warning(f"⚠️ Could not store document after validation error: {storage_error}")
+            
             return analysis_result
         
     except HTTPException:
