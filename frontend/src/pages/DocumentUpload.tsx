@@ -290,6 +290,7 @@ const DocumentUpload = () => {
       setError('Erro no upload dos documentos');
     } finally {
       setIsUploading(false);
+      setProcessingFiles([]); // Limpar lista de processamento
     }
   };
 
