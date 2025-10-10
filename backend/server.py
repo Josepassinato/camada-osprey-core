@@ -8157,7 +8157,7 @@ async def analyze_document_with_real_ai(
             
             # Import RESTORED native document analyzer (original working system)
             from native_document_analyzer import NativeDocumentAnalyzer
-from document_storage_system import store_accepted_document
+            from document_storage_system import store_accepted_document
             from dateutil import parser as date_parser
             import unicodedata
             
