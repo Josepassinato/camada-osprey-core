@@ -8935,11 +8935,26 @@ async def health_check():
         "note": "Service is healthy and ready to handle requests"
     }
 
-# Root health check (alternative endpoint)
+# Root health check (alternative endpoint) - ALWAYS HEALTHY
 @app.get("/")
 async def root_health():
-    """Root endpoint health check"""
-    return {"status": "OSPREY Immigration Platform - Running", "health": "OK"}
+    """Root endpoint health check - always returns healthy for basic deployment validation"""
+    return {
+        "status": "healthy", 
+        "service": "OSPREY Immigration Platform",
+        "state": "running",
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+# Simple health endpoint without dependencies 
+@app.get("/health")
+async def simple_health():
+    """Simple health check without external dependencies"""
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "service": "osprey-backend"
+    }
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
