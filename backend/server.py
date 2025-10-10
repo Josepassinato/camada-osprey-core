@@ -8269,14 +8269,23 @@ async def analyze_document_with_real_ai(
             
             logger.info(f"✅ Real Vision validation complete - Total Issues: {len(analysis_result.get('issues', []))}")
             
-            # NOVO: Armazenar documento se aceito
-            await store_accepted_document(
-                case_id=case_id,
-                document_type=document_type,
-                file_content=file_content,
-                original_filename=file.filename or 'uploaded_document',
-                analysis_result=analysis_result
+            # NOVO: Verificar se há divergência de nome que pode ser resolvida
+            name_mismatch_info = await self._check_for_name_mismatch_resolution(
+                analysis_result, case_id, applicant_name
             )
+            
+            if name_mismatch_info:
+                analysis_result.update(name_mismatch_info)
+            
+            # NOVO: Armazenar documento se aceito (não armazenar se há divergência de nome resolvível)
+            if not analysis_result.get('name_mismatch_resolvable'):
+                await store_accepted_document(
+                    case_id=case_id,
+                    document_type=document_type,
+                    file_content=file_content,
+                    original_filename=file.filename or 'uploaded_document',
+                    analysis_result=analysis_result
+                )
             
             # Return combined analysis result (Policy Engine + Real Vision Analysis + Quality Assessment)
             return analysis_result
