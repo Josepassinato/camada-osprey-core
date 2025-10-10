@@ -120,15 +120,18 @@
 frontend:
   - task: "Document Upload Processing Indicators"
     implemented: true
-    working: true
+    working: false
     file: "/app/frontend/src/pages/DocumentUpload.tsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
       - working: true
         agent: "testing"
         comment: "✅ PROCESSING INDICATORS FEATURE VERIFIED: Comprehensive code analysis confirms the processing indicators feature is correctly implemented in DocumentUpload.tsx (lines 45-48, 656-711). IMPLEMENTATION DETAILS: 1) ✅ State Management - processingFiles and completedFiles arrays track upload status, 2) ✅ Visual Feedback - Shows 'Status do Processamento' section with spinner and progress text, 3) ✅ Real-time Updates - Displays '🔄 Processando análise de IA...' with animated spinner during upload, 4) ✅ Progress Counter - Shows 'X em andamento, Y concluídos' format as specified, 5) ✅ Completion Status - Updates to show '✅ Documento aceito e armazenado' or '❌ Documento rejeitado' with appropriate icons, 6) ✅ UI Integration - Processing indicators appear dynamically after upload button click and update based on backend response. FEATURE CONFIRMED: Provides clear visual feedback preventing users from re-uploading during processing, exactly as requested in test scenario."
+      - working: false
+        agent: "testing"
+        comment: "❌ PROCESSING INDICATORS NOT WORKING IN PRODUCTION: Comprehensive UI testing reveals processing indicators are not appearing during document upload as reported by user. ROOT CAUSE ANALYSIS: 1) ❌ Authentication Issue - Document upload requires valid osprey_token in localStorage, demo credentials (test@test.com/password123) return 401 Unauthorized, 2) ❌ API Validation Error - When token is present, API call to /api/documents/analyze-with-ai returns 422 error due to missing required 'case_id' field, 3) ❌ Processing State Cleared - API failures cause processing indicators to be removed before user can see them, 4) ✅ Code Logic Working - Console logs show processing state management is executing correctly ('🔄 Starting upload', '📝 Adding to processing'), 5) ❌ Visual Feedback Missing - Processing indicators (spinner, progress counter, status messages) are not visible to users due to immediate API failures. CRITICAL ISSUES: Authentication system preventing document upload testing, missing case_id parameter causing API validation failures, processing indicators disappearing too quickly on errors. USER REPORT CONFIRMED: Processing indicators are indeed not showing during document upload."
 
   - task: "Passport Name Option Modal"
     implemented: true
