@@ -181,6 +181,11 @@ const DocumentUpload = () => {
     setIsUploading(true);
     setError("");
     setSuccess([]);
+    
+    // Resetar estados de processamento
+    setProcessingFiles([]);
+    setCompletedFiles([]);
+    setAnalysisResults({});
 
     const token = localStorage.getItem('osprey_token');
     if (!token) {
