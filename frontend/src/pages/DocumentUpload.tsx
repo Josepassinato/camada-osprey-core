@@ -282,8 +282,13 @@ const DocumentUpload = () => {
     const uploadPromises = files.map(async (uploadedFile) => {
       const fileName = uploadedFile.file.name;
       
+      console.log('🔄 Starting upload for:', fileName);
+      
       // Adicionar arquivo à lista de processamento
-      setProcessingFiles(prev => [...prev, fileName]);
+      setProcessingFiles(prev => {
+        console.log('📝 Adding to processing:', fileName, 'Current processing:', prev);
+        return [...prev, fileName];
+      });
 
       const formData = new FormData();
       formData.append('file', uploadedFile.file);  // Campo correto é 'file'
