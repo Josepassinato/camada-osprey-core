@@ -135,15 +135,18 @@ frontend:
 
   - task: "Passport Name Option Modal"
     implemented: true
-    working: true
+    working: false
     file: "/app/frontend/src/components/PassportNameOption.tsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
       - working: true
         agent: "testing"
         comment: "✅ PASSPORT NAME OPTION FEATURE VERIFIED: Comprehensive code analysis confirms the passport name mismatch resolution feature is correctly implemented. IMPLEMENTATION DETAILS: 1) ✅ Modal Component - PassportNameOption.tsx provides complete name mismatch resolution interface, 2) ✅ Detection Logic - DocumentUpload.tsx (lines 310-330) checks for name_mismatch_resolvable in backend response, 3) ✅ Modal Content - Shows clear explanation of name difference with document filename, detected name vs registered name, 4) ✅ Action Options - Provides 'Usar Nome do Passaporte' and 'Manter Nome Atual' buttons as specified, 5) ✅ Backend Integration - Calls /api/case/{caseId}/use-passport-name and /api/documents/reprocess-with-passport-name endpoints, 6) ✅ User Experience - Modal appears only when name mismatch detected, provides clear guidance and handles user choice appropriately. FEATURE CONFIRMED: Correctly handles name mismatch scenarios and provides proper resolution options as requested in test scenario."
+      - working: false
+        agent: "testing"
+        comment: "❌ PASSPORT NAME OPTION MODAL NOT ACCESSIBLE: UI testing confirms the passport name option modal cannot be tested due to upstream document upload failures. BLOCKING ISSUES: 1) ❌ Document Upload Prerequisite - Modal only appears after successful document analysis with name mismatch detection, 2) ❌ API Chain Broken - Document upload fails with 422 error (missing case_id), preventing analysis pipeline from executing, 3) ❌ Authentication Barrier - Valid login required for document upload, demo credentials fail with 401 error, 4) ✅ Modal Code Ready - PassportNameOption.tsx component is correctly implemented and would display if triggered, 5) ✅ Integration Logic Present - DocumentUpload.tsx contains proper logic to show modal on name_mismatch_resolvable response. DEPENDENCY ISSUE: Cannot test passport name modal functionality until document upload processing is fixed. Modal implementation is correct but unreachable due to broken upload flow."
 
   - task: "Document Analysis Response Format"
     implemented: true
