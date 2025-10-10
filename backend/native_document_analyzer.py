@@ -293,6 +293,19 @@ Responda sempre em português brasileiro com análise precisa e decisiva."""
                     fields[field] = match.group(1).strip()
                     break
         
+        # Extrair nome detectado no documento para casos de divergência
+        detected_name_patterns = [
+            r'nome no documento é[:\s]*[\'"]([^\'"]+)[\'"]',
+            r'documento.*nome[:\s]*[\'"]([^\'"]+)[\'"]',
+            r'passaporte.*nome[:\s]*[\'"]([^\'"]+)[\'"]',
+        ]
+        
+        for pattern in detected_name_patterns:
+            match = re.search(pattern, response, re.IGNORECASE)
+            if match:
+                fields['detected_name_in_document'] = match.group(1).strip()
+                break
+        
         return fields
     
     def _check_name_match_from_llm(self, response: str, applicant_name: str) -> str:
