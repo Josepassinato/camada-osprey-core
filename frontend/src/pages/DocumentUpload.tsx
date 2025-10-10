@@ -195,6 +195,11 @@ const DocumentUpload = () => {
 
     // Upload each file individually
     const uploadPromises = files.map(async (uploadedFile) => {
+      const fileName = uploadedFile.file.name;
+      
+      // Adicionar arquivo à lista de processamento
+      setProcessingFiles(prev => [...prev, fileName]);
+
       const formData = new FormData();
       formData.append('file', uploadedFile.file);
       formData.append('document_type', documentType);
