@@ -499,8 +499,6 @@ VISA_SPECIFICATIONS = {
         "processing_time": "3-8 meses",
         
         "required_documents": [
-            "Formulário I-129 (Petição de Trabalhador Não-Imigrante)",
-            "Suplemento H (Classificação H)",
             "Labor Condition Application (LCA) certificada",
             "Carta de oferta de emprego",
             "Evidência de qualificações educacionais",
@@ -509,6 +507,9 @@ VISA_SPECIFICATIONS = {
             "Histórico acadêmico oficial",
             "Avaliação de credenciais (se necessário)"
         ],
+        
+        # NOTE: Formulário I-129 e Suplemento H são gerados automaticamente pela IA
+        # após o preenchimento do questionário amigável. Não devem ser carregados pelo usuário.
         
         "evidence_required": {
             "specialty_occupation": [
