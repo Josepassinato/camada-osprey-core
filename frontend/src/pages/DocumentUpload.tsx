@@ -300,7 +300,7 @@ const DocumentUpload = () => {
       formData.append('file', uploadedFile.file);  // Campo correto é 'file'
       formData.append('document_type', documentType);
       formData.append('visa_type', 'H-1B');
-      formData.append('case_id', caseId || '');
+      formData.append('case_id', currentCaseId);
       if (tags) formData.append('tags', tags);
       if (expirationDate) formData.append('expiration_date', expirationDate);
       if (issueDate) formData.append('issue_date', issueDate);
