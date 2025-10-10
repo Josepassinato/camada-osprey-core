@@ -4431,7 +4431,9 @@ async def start_load_test(request: dict):
     """Inicia teste de carga automatizado"""
     try:
         test_type = request.get("test_type", "api_critical")
-        base_url = request.get("base_url", "http://localhost:8001")
+        # Use environment variable or construct from current host
+        default_base_url = os.environ.get('BASE_URL', 'http://localhost:8001')
+        base_url = request.get("base_url", default_base_url)
         
         # Validate test type
         if test_type not in load_testing_system.default_configs:
