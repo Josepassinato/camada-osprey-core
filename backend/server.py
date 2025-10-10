@@ -8899,6 +8899,54 @@ async def startup_db_client():
 
 # Endpoints duplicados removidos - versões corretas estão acima
 
+# Health Check Endpoint - CRITICAL for deployment
+@api_router.get("/health")
+async def health_check():
+    """
+    Health check endpoint for deployment monitoring
+    Required by Emergent platform for deployment validation
+    """
+    try:
+        # Test MongoDB connection
+        await db.admin.command('ping')
+        
+        return {
+            "status": "healthy",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "services": {
+                "mongodb": "connected",
+                "fastapi": "running",
+                "port": 8001
+            },
+            "version": "1.0.0"
+        }
+    except Exception as e:
+        logger.error(f"Health check failed: {str(e)}")
+        raise HTTPException(
+            status_code=503, 
+            detail={
+                "status": "unhealthy",
+                "error": str(e),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        )
+
+# Root health check (alternative endpoint)
+@app.get("/")
+async def root_health():
+    """Root endpoint health check"""
+    return {"status": "OSPREY Immigration Platform - Running", "health": "OK"}
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(
+        "server:app",
+        host="0.0.0.0",
+        port=8001,
+        reload=False,  # Desabilitado para produção
+        log_level="info"
+    )
