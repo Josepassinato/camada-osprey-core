@@ -115,7 +115,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "IMPLEMENTAÇÃO DISCLAIMER SYSTEM + SOCIAL SECURITY VALIDATOR: Implementar sistema robusto de disclaimer com aceite de responsabilidade no final de cada etapa do processo (documentos, formulários, carta, revisão, final). Cada aceite deve conter confirmação específica: 'reconheço que todas as informações acima foram fornecidas por mim e são de minha responsabilidade. E aprovo esta etapa de conclusão confirmando que estão corretos'. Também implementar validador de Social Security Card. FOCO: 1) DisclaimerModal componente reutilizável, 2) DisclaimerSystem backend completo, 3) Endpoints /disclaimer/* funcionais, 4) Social Security Card validator com validação USCIS, 5) Integração no CaseFinalizer, 6) Hook useDisclaimer para frontend."
+user_problem_statement: "Test the document upload processing indicators and passport name option features that were recently implemented. Verify that the two new features are working: 1) Processing Indicators: Visual feedback during document upload showing processing status, 2) Passport Name Option: Modal for name mismatch resolution when document name differs from registered name."
 
 backend:
   - task: "Complete Application Save System - User Account Creation"
