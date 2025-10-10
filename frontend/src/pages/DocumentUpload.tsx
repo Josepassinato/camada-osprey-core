@@ -338,8 +338,14 @@ const DocumentUpload = () => {
           }
           
           // Mover arquivo para lista de completados
-          setProcessingFiles(prev => prev.filter(f => f !== fileName));
-          setCompletedFiles(prev => [...prev, fileName]);
+          setProcessingFiles(prev => {
+            console.log('📝 Removing from processing:', fileName);
+            return prev.filter(f => f !== fileName);
+          });
+          setCompletedFiles(prev => {
+            console.log('📝 Adding to completed:', fileName);
+            return [...prev, fileName];
+          });
           setAnalysisResults(prev => ({...prev, [fileName]: result}));
           
           return {
