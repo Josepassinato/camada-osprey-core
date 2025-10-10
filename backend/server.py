@@ -8806,7 +8806,9 @@ async def startup_db_client():
             raise ValueError("MONGO_URL environment variable must be set for production deployment")
         
         client = AsyncIOMotorClient(mongo_url)
-        db = client[os.environ.get('DB_NAME', 'osprey_immigration_db')]  # Database name
+        # Database name - use environment variable or secure default
+        db_name = os.environ.get('DB_NAME', 'osprey_immigration_production')
+        db = client[db_name]  # Database name
         
         # Test the connection
         await client.admin.command('ping')
