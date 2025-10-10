@@ -389,21 +389,43 @@ const DocumentUploadAuto = () => {
         // Analyze document with REAL AI (Dr. Miguel)
         const aiAnalysis = await realDocumentAnalysis(file, documentType);
         
+        console.log('🔍 AI Analysis Result:', JSON.stringify(aiAnalysis, null, 2));
+        console.log('🔍 Checking name mismatch:', {
+          documentType,
+          name_mismatch_resolvable: aiAnalysis?.name_mismatch_resolvable,
+          name_mismatch_details: aiAnalysis?.name_mismatch_details
+        });
+        
         // Remover do processamento e adicionar aos completados
         setProcessingDocs(prev => prev.filter(f => f !== fileName));
         setCompletedDocs(prev => [...prev, fileName]);
         
         // Verificar divergência de nome (apenas para passaportes)
         if (documentType === 'passport' && aiAnalysis?.name_mismatch_resolvable) {
-          console.log('🔍 Name mismatch detected:', aiAnalysis);
+          console.log('✅ Name mismatch detected! Opening modal...');
+          
+          const detectedName = aiAnalysis.name_mismatch_details?.detected_name || 
+                               aiAnalysis.extracted_data?.full_name || 
+                               'Nome não detectado';
+          const registeredName = aiAnalysis.name_mismatch_details?.registered_name ||
+                                case_?.basic_data?.full_name || 
+                                case_?.form_data?.basic_info?.full_name || 
+                                'Usuário';
+          
           setNameMismatchDetails({
             documentFileName: fileName,
-            detectedName: aiAnalysis.extracted_data?.full_name || 'Nome não detectado',
-            registeredName: case_?.basic_data?.full_name || case_?.form_data?.basic_info?.full_name || 'Usuário',
+            detectedName: detectedName,
+            registeredName: registeredName,
             caseId: caseId || ''
           });
           setShowPassportNameOption(true);
+          console.log('✅ Modal state set to true');
           return; // Não salvar ainda até decisão do usuário
+        } else {
+          console.log('ℹ️ No name mismatch modal triggered', {
+            isPassport: documentType === 'passport',
+            hasResolvableFlag: !!aiAnalysis?.name_mismatch_resolvable
+          });
         }
         
         const uploadedFile: UploadedFile = {
