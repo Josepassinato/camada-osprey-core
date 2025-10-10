@@ -311,8 +311,11 @@ const DocumentUpload = () => {
         if (response.ok) {
           const result = await response.json();
           
+          console.log('✅ Analysis result:', result);
+          
           // Verificar se há divergência de nome resolvível
           if (result.name_mismatch_resolvable && result.name_mismatch_details) {
+            console.log('🔍 Name mismatch detected:', result.name_mismatch_details);
             setNameMismatchDetails({
               documentFileName: fileName,
               detectedName: result.name_mismatch_details.detected_name,
