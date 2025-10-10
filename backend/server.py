@@ -8314,12 +8314,19 @@ async def analyze_document_with_real_ai(
             logger.info(f"✅ Real Vision validation complete - Total Issues: {len(analysis_result.get('issues', []))}")
             
             # NOVO: Verificar se há divergência de nome que pode ser resolvida
+            logger.info(f"🔍 CALLING _check_for_name_mismatch_resolution with applicant_name='{applicant_name}'")
             name_mismatch_info = await _check_for_name_mismatch_resolution(
                 analysis_result, case_id, applicant_name
             )
             
+            logger.info(f"🔍 RESULT from _check_for_name_mismatch_resolution: {name_mismatch_info}")
+            
             if name_mismatch_info:
+                logger.info(f"✅ UPDATING analysis_result with name_mismatch_info")
                 analysis_result.update(name_mismatch_info)
+                logger.info(f"✅ name_mismatch_resolvable now in analysis_result: {analysis_result.get('name_mismatch_resolvable')}")
+            else:
+                logger.info(f"ℹ️ No name mismatch info to add")
             
             # NOVO: Armazenar documento se aceito (não armazenar se há divergência de nome resolvível)
             if not analysis_result.get('name_mismatch_resolvable'):
