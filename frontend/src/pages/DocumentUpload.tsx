@@ -271,6 +271,12 @@ const DocumentUpload = () => {
     setProcessingFiles([]);
     setCompletedFiles([]);
     setAnalysisResults({});
+    
+    // Gerar case ID antes do upload se não existir
+    const currentCaseId = caseId || `OSP-DOCS-${Date.now()}`;
+    if (!caseId) {
+      setCaseId(currentCaseId);
+    }
 
     const token = localStorage.getItem('osprey_token');
     if (!token) {
