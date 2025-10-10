@@ -319,22 +319,6 @@ const DocumentUpload = () => {
           
           console.log('✅ Analysis result:', result);
           
-          // TEMPORÁRIO: Forçar detecção de divergência para teste
-          const shouldSimulateMismatch = !result.valid || result.issues_found?.some((issue: string) => 
-            issue.includes('nome') || issue.includes('corresponde')
-          );
-          
-          if (shouldSimulateMismatch) {
-            console.log('🔄 Simulating name mismatch for testing');
-            result.name_mismatch_resolvable = true;
-            result.name_mismatch_details = {
-              registered_name: 'Nome no Cadastro',
-              detected_name: 'Nome no Documento',
-              can_use_passport_name: true,
-              resolution_message: 'Nome detectado difere do cadastro. Deseja usar nome do documento?'
-            };
-          }
-          
           // Verificar se há divergência de nome resolvível
           if (result.name_mismatch_resolvable && result.name_mismatch_details) {
             console.log('🔍 Name mismatch detected:', result.name_mismatch_details);
