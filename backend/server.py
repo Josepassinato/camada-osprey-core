@@ -7383,12 +7383,56 @@ async def authorize_uscis_form(case_id: str, request: dict):
         if result.modified_count == 0:
             raise HTTPException(status_code=500, detail="Failed to authorize and save form")
         
+        # NOVO: Salvar formulário USCIS na pasta do processo
+        try:
+            from document_storage_system import store_accepted_document
+            import json
+            
+            # Criar conteúdo do formulário como JSON
+            form_content = {
+                "form_type": f"USCIS_{case.get('form_code', 'UNKNOWN')}",
+                "generated_by_ai": True,
+                "authorized_by_user": True,
+                "authorization_timestamp": authorization_timestamp,
+                "form_data": generated_form_data,
+                "case_id": case_id,
+                "created_at": datetime.utcnow().isoformat()
+            }
+            
+            form_content_bytes = json.dumps(form_content, indent=2, ensure_ascii=False).encode('utf-8')
+            
+            # Análise simulada para documento aceito
+            analysis_result = {
+                "valid": True,
+                "decision": "accepted", 
+                "document_type": "uscis_form",
+                "completeness": 100,
+                "dra_paula_assessment": "✅ FORMULÁRIO USCIS AUTORIZADO: Formulário oficial gerado pela IA e autorizado pelo aplicante",
+                "generated_by_ai": True,
+                "authorized_by_user": True
+            }
+            
+            storage_result = await store_accepted_document(
+                case_id=case_id,
+                document_type="uscis_form",
+                file_content=form_content_bytes,
+                original_filename=f"USCIS_{case.get('form_code', 'FORM')}_{case_id}.json",
+                analysis_result=analysis_result
+            )
+            
+            logger.info(f"📁 USCIS form stored in case folder: {storage_result.get('success', False)}")
+            
+        except Exception as storage_error:
+            logger.error(f"⚠️ Error storing USCIS form to case folder: {storage_error}")
+            # Continue even if storage fails - form is still saved in database
+        
         return {
             "success": True,
-            "message": "Formulário USCIS autorizado e salvo automaticamente",
+            "message": "Formulário USCIS autorizado e salvo automaticamente na pasta do processo",
             "case_id": case_id,
             "document_saved": True,
-            "document_id": uscis_document["id"]
+            "document_id": uscis_document["id"],
+            "stored_in_case_folder": storage_result.get('success', False) if 'storage_result' in locals() else False
         }
     
     except HTTPException:
