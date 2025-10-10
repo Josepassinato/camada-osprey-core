@@ -142,7 +142,7 @@ frontend:
     implemented: true
     working: false
     file: "/app/frontend/src/components/PassportNameOption.tsx"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
     needs_retesting: false
     status_history:
@@ -152,6 +152,9 @@ frontend:
       - working: false
         agent: "testing"
         comment: "❌ PASSPORT NAME OPTION MODAL NOT ACCESSIBLE: UI testing confirms the passport name option modal cannot be tested due to upstream document upload failures. BLOCKING ISSUES: 1) ❌ Document Upload Prerequisite - Modal only appears after successful document analysis with name mismatch detection, 2) ❌ API Chain Broken - Document upload fails with 422 error (missing case_id), preventing analysis pipeline from executing, 3) ❌ Authentication Barrier - Valid login required for document upload, demo credentials fail with 401 error, 4) ✅ Modal Code Ready - PassportNameOption.tsx component is correctly implemented and would display if triggered, 5) ✅ Integration Logic Present - DocumentUpload.tsx contains proper logic to show modal on name_mismatch_resolvable response. DEPENDENCY ISSUE: Cannot test passport name modal functionality until document upload processing is fixed. Modal implementation is correct but unreachable due to broken upload flow."
+      - working: false
+        agent: "testing"
+        comment: "❌ PASSPORT NAME MODAL CANNOT APPEAR DUE TO ROUTING ISSUE: Same critical routing issue affects passport name modal functionality. CRITICAL FINDINGS: 1) ❌ Component Never Renders - PassportNameOption modal cannot appear because the parent DocumentUpload component never renders due to React Router failure, 2) ✅ Modal Implementation Perfect - PassportNameOption.tsx (lines 1-124) is correctly implemented with proper props interface, modal overlay, name comparison display, and action buttons, 3) ✅ Integration Logic Correct - DocumentUpload.tsx (lines 322-331) correctly checks for name_mismatch_resolvable and sets modal state, 4) ❌ Routing Blocks Everything - React Router issue prevents DocumentUpload component from loading, making modal unreachable regardless of backend response, 5) ✅ Backend Integration Ready - Modal correctly calls /api/case/{caseId}/use-passport-name and /api/documents/reprocess-with-passport-name endpoints when triggered. ROOT CAUSE: Same React Router routing failure that prevents DocumentUpload component from rendering. Modal code is production-ready but cannot execute due to upstream routing issue."
 
   - task: "Document Analysis Response Format"
     implemented: true
