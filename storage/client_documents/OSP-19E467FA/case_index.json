@@ -1,0 +1,22 @@
+{
+  "case_id": "OSP-19E467FA",
+  "documents": [
+    {
+      "filename": "passport_20251010_205553_bfc474a23cf14c9d_IMG_7496.png",
+      "document_type": "passport",
+      "original_filename": "IMG_7496.png",
+      "stored_at": "2025-10-10T20:55:53.905506+00:00",
+      "file_hash": "bfc474a23cf14c9d",
+      "file_size": 731813
+    },
+    {
+      "filename": "passport_20251010_205624_0cbd18799c48672e_625972f1-0498-484f-b.jpeg",
+      "document_type": "passport",
+      "original_filename": "625972f1-0498-484f-bf95-45b03a0041d4.jpeg",
+      "stored_at": "2025-10-10T20:56:24.531000+00:00",
+      "file_hash": "0cbd18799c48672e",
+      "file_size": 106107
+    }
+  ],
+  "last_updated": "2025-10-10T20:56:24.532441+00:00"
+}
