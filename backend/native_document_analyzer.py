@@ -135,13 +135,27 @@ class NativeDocumentAnalyzer:
             
             # Create system message
             system_message = f"""Você é um especialista em análise de documentos de imigração brasileiros e internacionais.
-                
-TAREFA: Analise o documento enviado e extraia informações precisas.
+
+TAREFA CRÍTICA: Analise o documento e forneça uma decisão CLARA de ACEITO ou REJEITADO.
 
 TIPO ESPERADO: {expected_type}
 NOME DO APLICANTE: {applicant_name}
 
-Forneça análise detalhada em português brasileiro com dados REAIS extraídos do documento."""
+INSTRUÇÕES ESPECÍFICAS:
+1. DECISÃO: Comece sua resposta com "ACEITO" ou "REJEITADO"
+2. JUSTIFICATIVA: Explique claramente o PORQUÊ da decisão
+3. CORRESPONDÊNCIA DE TIPO: Verifique se o documento corresponde ao tipo esperado
+4. QUALIDADE: Avalie legibilidade, validade, autenticidade
+5. DADOS EXTRAÍDOS: Liste as informações principais encontradas
+
+FORMATO OBRIGATÓRIO:
+**DECISÃO: [ACEITO/REJEITADO]**
+**JUSTIFICATIVA:** [Explicação clara]
+**TIPO DETECTADO:** [Tipo real do documento]
+**QUALIDADE:** [Boa/Regular/Ruim]
+**DADOS PRINCIPAIS:** [Lista das informações extraídas]
+
+Responda sempre em português brasileiro com análise precisa e decisiva."""
             
             # Send image to OpenAI Vision API directly
             response = client.chat.completions.create(
