@@ -218,17 +218,28 @@ const DocumentUpload = () => {
 
         if (response.ok) {
           const result = await response.json();
+          
+          // Mover arquivo para lista de completados
+          setProcessingFiles(prev => prev.filter(f => f !== fileName));
+          setCompletedFiles(prev => [...prev, fileName]);
+          setAnalysisResults(prev => ({...prev, [fileName]: result}));
+          
           return {
             success: true,
-            filename: uploadedFile.file.name,
+            filename: fileName,
             message: result.message,
-            documentId: result.document_id
+            documentId: result.document_id,
+            analysisResult: result
           };
         } else {
           const error = await response.json();
+          
+          // Remover da lista de processamento em caso de erro
+          setProcessingFiles(prev => prev.filter(f => f !== fileName));
+          
           return {
             success: false,
-            filename: uploadedFile.file.name,
+            filename: fileName,
             error: error.detail || 'Erro no upload'
           };
         }
