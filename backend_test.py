@@ -4702,6 +4702,357 @@ Documento de identidade brasileiro
             )
             return None
 
+    def test_passport_name_option_endpoints(self):
+        """Test the two passport name option backend endpoints"""
+        print("🎯 TESTING PASSPORT NAME OPTION ENDPOINTS")
+        print("Cenário: Testar endpoints para resolução de divergência de nome")
+        
+        try:
+            # STEP 1: Create a test case first
+            print("📋 STEP 1: Creating test case for passport name testing")
+            
+            case_data = {
+                "form_code": "H-1B",
+                "session_token": f"passport_test_{uuid.uuid4().hex[:8]}"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/auto-application/start",
+                json=case_data
+            )
+            
+            if response.status_code != 200:
+                self.log_test(
+                    "Passport Name - Case Creation",
+                    False,
+                    f"❌ Failed to create test case: {response.status_code}",
+                    {"error": response.text[:200]}
+                )
+                return
+            
+            result = response.json()
+            case_id = result.get('case', {}).get('case_id')
+            
+            if not case_id:
+                self.log_test(
+                    "Passport Name - Case Creation",
+                    False,
+                    "❌ No case_id returned from case creation",
+                    {"response": result}
+                )
+                return
+            
+            # Add basic data to the case
+            basic_data = {
+                "firstName": "Carlos",
+                "lastName": "Silva",
+                "full_name": "Carlos Silva",
+                "email": "carlos.silva@test.com",
+                "phone": "+55 11 99999-9999",
+                "dateOfBirth": "1990-05-15",
+                "placeOfBirth": "São Paulo, SP, Brasil",
+                "nationality": "Brazilian"
+            }
+            
+            # Update case with basic data
+            update_response = self.session.patch(
+                f"{API_BASE}/auto-application/case/{case_id}",
+                json={
+                    "basic_data": basic_data,
+                    "form_data": {
+                        "basic_info": basic_data
+                    },
+                    "current_step": "documents"
+                }
+            )
+            
+            if update_response.status_code == 200:
+                self.log_test(
+                    "Passport Name - Case Setup",
+                    True,
+                    f"✅ Test case created and setup: {case_id}",
+                    {
+                        "case_id": case_id,
+                        "basic_data_added": True,
+                        "form_data_added": True
+                    }
+                )
+            else:
+                self.log_test(
+                    "Passport Name - Case Setup",
+                    False,
+                    f"❌ Failed to setup case data: {update_response.status_code}",
+                    {"error": update_response.text[:200]}
+                )
+                return
+            
+            # STEP 2: Test POST /api/case/{case_id}/use-passport-name endpoint
+            print("📝 STEP 2: Testing use-passport-name endpoint")
+            
+            passport_name_request = {
+                "passport_name": "Carlos Eduardo Silva Santos",
+                "document_filename": "passport_carlos.pdf"
+            }
+            
+            use_passport_response = self.session.post(
+                f"{API_BASE}/case/{case_id}/use-passport-name",
+                json=passport_name_request
+            )
+            
+            if use_passport_response.status_code == 200:
+                passport_result = use_passport_response.json()
+                
+                # Verify response structure
+                has_success = passport_result.get('success', False)
+                has_case_id = passport_result.get('case_id') == case_id
+                has_passport_name = passport_result.get('passport_name') == "Carlos Eduardo Silva Santos"
+                has_updated_fields = isinstance(passport_result.get('updated_fields'), list)
+                has_message = len(passport_result.get('message', '')) > 0
+                has_timestamp = 'timestamp' in passport_result
+                
+                endpoint_working = (
+                    has_success and 
+                    has_case_id and 
+                    has_passport_name and 
+                    has_updated_fields and 
+                    has_message and 
+                    has_timestamp
+                )
+                
+                self.log_test(
+                    "Passport Name - use-passport-name Endpoint",
+                    endpoint_working,
+                    f"✅ Endpoint working: success={has_success}, updated_fields={passport_result.get('updated_fields', [])}",
+                    {
+                        "endpoint_working": endpoint_working,
+                        "response_structure_valid": True,
+                        "success": has_success,
+                        "case_id_match": has_case_id,
+                        "passport_name_match": has_passport_name,
+                        "updated_fields": passport_result.get('updated_fields', []),
+                        "message": passport_result.get('message', ''),
+                        "has_timestamp": has_timestamp
+                    }
+                )
+                
+                # Verify database updates by retrieving the case
+                case_check_response = self.session.get(f"{API_BASE}/auto-application/case/{case_id}")
+                
+                if case_check_response.status_code == 200:
+                    updated_case = case_check_response.json()
+                    case_data = updated_case.get('case', {})
+                    
+                    # Check if form_data.basic_info was updated
+                    form_basic_info = case_data.get('form_data', {}).get('basic_info', {})
+                    basic_data_updated = case_data.get('basic_data', {})
+                    passport_metadata = case_data.get('passport_name_used', {})
+                    
+                    form_name_updated = form_basic_info.get('full_name') == "Carlos Eduardo Silva Santos"
+                    basic_name_updated = basic_data_updated.get('full_name') == "Carlos Eduardo Silva Santos"
+                    has_passport_metadata = passport_metadata.get('passport_name') == "Carlos Eduardo Silva Santos"
+                    
+                    database_updated = form_name_updated and basic_name_updated and has_passport_metadata
+                    
+                    self.log_test(
+                        "Passport Name - Database Updates",
+                        database_updated,
+                        f"✅ Database updated: form_data={form_name_updated}, basic_data={basic_name_updated}, metadata={has_passport_metadata}",
+                        {
+                            "database_updated": database_updated,
+                            "form_data_updated": form_name_updated,
+                            "basic_data_updated": basic_name_updated,
+                            "passport_metadata_added": has_passport_metadata,
+                            "form_full_name": form_basic_info.get('full_name'),
+                            "basic_full_name": basic_data_updated.get('full_name'),
+                            "passport_metadata": passport_metadata
+                        }
+                    )
+                
+            else:
+                self.log_test(
+                    "Passport Name - use-passport-name Endpoint",
+                    False,
+                    f"❌ Endpoint failed: HTTP {use_passport_response.status_code}",
+                    {
+                        "status_code": use_passport_response.status_code,
+                        "error": use_passport_response.text[:200]
+                    }
+                )
+                return
+            
+            # STEP 3: Test POST /api/documents/reprocess-with-passport-name endpoint
+            print("🔄 STEP 3: Testing reprocess-with-passport-name endpoint")
+            
+            # Create original analysis data (simulating a rejected document due to name mismatch)
+            original_analysis = {
+                "valid": False,
+                "decision": "rejected",
+                "completeness": 85,
+                "issues_found": [
+                    "❌ NOME NÃO CORRESPONDE: Nome no documento 'Carlos Eduardo Silva Santos' difere do nome registrado 'Carlos Silva'"
+                ],
+                "extracted_data": {
+                    "full_name": "Carlos Eduardo Silva Santos",
+                    "document_number": "BR987654321",
+                    "detected_type": "passport",
+                    "confidence": 0.92
+                },
+                "dra_paula_assessment": "Documento rejeitado devido à divergência de nome."
+            }
+            
+            reprocess_request = {
+                "case_id": case_id,
+                "document_filename": "passport_carlos.pdf",
+                "passport_name": "Carlos Eduardo Silva Santos",
+                "original_analysis": original_analysis
+            }
+            
+            reprocess_response = self.session.post(
+                f"{API_BASE}/documents/reprocess-with-passport-name",
+                json=reprocess_request
+            )
+            
+            if reprocess_response.status_code == 200:
+                reprocess_result = reprocess_response.json()
+                
+                # Verify response structure
+                has_success = reprocess_result.get('success', False)
+                has_case_id = reprocess_result.get('case_id') == case_id
+                has_document_filename = reprocess_result.get('document_filename') == "passport_carlos.pdf"
+                has_passport_name = reprocess_result.get('passport_name') == "Carlos Eduardo Silva Santos"
+                has_analysis_result = 'analysis_result' in reprocess_result
+                has_message = len(reprocess_result.get('message', '')) > 0
+                has_timestamp = 'timestamp' in reprocess_result
+                
+                # Verify analysis result updates
+                analysis_result = reprocess_result.get('analysis_result', {})
+                is_valid = analysis_result.get('valid', False)
+                is_accepted = analysis_result.get('decision') == "accepted"
+                name_resolved = analysis_result.get('name_mismatch_resolved', False)
+                has_passport_name_used = analysis_result.get('passport_name_used') == "Carlos Eduardo Silva Santos"
+                issues_removed = len(analysis_result.get('issues_found', [])) == 0
+                has_acceptance_message = "ACEITO" in analysis_result.get('dra_paula_assessment', '')
+                
+                reprocess_working = (
+                    has_success and 
+                    has_case_id and 
+                    has_document_filename and 
+                    has_passport_name and 
+                    has_analysis_result and 
+                    has_message and 
+                    has_timestamp and
+                    is_valid and 
+                    is_accepted and 
+                    name_resolved and 
+                    has_passport_name_used and 
+                    issues_removed and 
+                    has_acceptance_message
+                )
+                
+                self.log_test(
+                    "Passport Name - reprocess-with-passport-name Endpoint",
+                    reprocess_working,
+                    f"✅ Reprocess working: valid={is_valid}, decision={analysis_result.get('decision')}, issues_removed={issues_removed}",
+                    {
+                        "reprocess_working": reprocess_working,
+                        "response_structure_valid": True,
+                        "success": has_success,
+                        "case_id_match": has_case_id,
+                        "document_filename_match": has_document_filename,
+                        "passport_name_match": has_passport_name,
+                        "analysis_valid": is_valid,
+                        "analysis_accepted": is_accepted,
+                        "name_mismatch_resolved": name_resolved,
+                        "passport_name_used": has_passport_name_used,
+                        "issues_removed": issues_removed,
+                        "has_acceptance_message": has_acceptance_message,
+                        "analysis_result": analysis_result
+                    }
+                )
+                
+            else:
+                self.log_test(
+                    "Passport Name - reprocess-with-passport-name Endpoint",
+                    False,
+                    f"❌ Reprocess endpoint failed: HTTP {reprocess_response.status_code}",
+                    {
+                        "status_code": reprocess_response.status_code,
+                        "error": reprocess_response.text[:200]
+                    }
+                )
+                return
+            
+            # STEP 4: Test error handling - missing required fields
+            print("⚠️ STEP 4: Testing error handling for missing fields")
+            
+            # Test use-passport-name with missing passport_name
+            invalid_request = {"document_filename": "test.pdf"}
+            
+            error_response = self.session.post(
+                f"{API_BASE}/case/{case_id}/use-passport-name",
+                json=invalid_request
+            )
+            
+            error_handled_correctly = error_response.status_code == 400
+            
+            # Test reprocess-with-passport-name with missing fields
+            invalid_reprocess = {"case_id": case_id}  # Missing document_filename and passport_name
+            
+            reprocess_error_response = self.session.post(
+                f"{API_BASE}/documents/reprocess-with-passport-name",
+                json=invalid_reprocess
+            )
+            
+            reprocess_error_handled = reprocess_error_response.status_code == 400
+            
+            error_handling_working = error_handled_correctly and reprocess_error_handled
+            
+            self.log_test(
+                "Passport Name - Error Handling",
+                error_handling_working,
+                f"✅ Error handling working: use-passport={error_handled_correctly}, reprocess={reprocess_error_handled}",
+                {
+                    "error_handling_working": error_handling_working,
+                    "use_passport_error_handled": error_handled_correctly,
+                    "reprocess_error_handled": reprocess_error_handled,
+                    "use_passport_status": error_response.status_code,
+                    "reprocess_status": reprocess_error_response.status_code
+                }
+            )
+            
+            # STEP 5: Test with non-existent case
+            print("🔍 STEP 5: Testing with non-existent case")
+            
+            fake_case_id = "OSP-FAKE123"
+            fake_request = {
+                "passport_name": "Test Name",
+                "document_filename": "test.pdf"
+            }
+            
+            fake_case_response = self.session.post(
+                f"{API_BASE}/case/{fake_case_id}/use-passport-name",
+                json=fake_request
+            )
+            
+            case_not_found_handled = fake_case_response.status_code == 404
+            
+            self.log_test(
+                "Passport Name - Non-existent Case Handling",
+                case_not_found_handled,
+                f"✅ Non-existent case handled: status={fake_case_response.status_code}",
+                {
+                    "case_not_found_handled": case_not_found_handled,
+                    "status_code": fake_case_response.status_code
+                }
+            )
+            
+        except Exception as e:
+            self.log_test(
+                "Passport Name - Endpoints Test",
+                False,
+                f"❌ Exception: {str(e)}"
+            )
+
     def run_all_tests(self):
         """Run all OpenAI direct integration tests"""
         print("🚀 INICIANDO TESTES DE INTEGRAÇÃO DIRETA COM OPENAI")
