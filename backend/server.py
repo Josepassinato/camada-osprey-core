@@ -8956,6 +8956,18 @@ async def simple_health():
         "service": "osprey-backend"
     }
 
+# Readiness probe endpoint
+@app.get("/ready")
+async def readiness_probe():
+    """Kubernetes-style readiness probe"""
+    return {"status": "ready"}
+
+# Liveness probe endpoint  
+@app.get("/live")
+async def liveness_probe():
+    """Kubernetes-style liveness probe"""
+    return {"status": "alive"}
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
