@@ -286,7 +286,7 @@ const DocumentUpload = () => {
       setProcessingFiles(prev => [...prev, fileName]);
 
       const formData = new FormData();
-      formData.append('document', uploadedFile.file);  // Campo correto é 'document'
+      formData.append('file', uploadedFile.file);  // Campo correto é 'file'
       formData.append('document_type', documentType);
       formData.append('visa_type', 'H-1B');
       formData.append('case_id', caseId || '');
