@@ -166,6 +166,81 @@ const DocumentUpload = () => {
       return prev.filter(f => f.id !== id);
     });
   };
+  // Função para lidar com a escolha de usar nome do passaporte
+  const handleUsePassportName = async (usePassportName: boolean) => {
+    if (!nameMismatchDetails) return;
+
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    const token = localStorage.getItem('osprey_token');
+
+    try {
+      if (usePassportName) {
+        // Atualizar dados do caso com nome do passaporte
+        const updateResponse = await fetch(`${backendUrl}/api/case/${nameMismatchDetails.caseId}/use-passport-name`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            passport_name: nameMismatchDetails.detectedName,
+            document_filename: nameMismatchDetails.documentFileName
+          })
+        });
+
+        if (updateResponse.ok) {
+          // Reprocessar documento como aceito
+          const reprocessResponse = await fetch(`${backendUrl}/api/documents/reprocess-with-passport-name`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              case_id: nameMismatchDetails.caseId,
+              document_filename: nameMismatchDetails.documentFileName,
+              passport_name: nameMismatchDetails.detectedName,
+              original_analysis: analysisResults[nameMismatchDetails.documentFileName] || {}
+            })
+          });
+
+          if (reprocessResponse.ok) {
+            const reprocessResult = await reprocessResponse.json();
+            
+            // Adicionar à lista de completados como aceito
+            setCompletedFiles(prev => [...prev, nameMismatchDetails.documentFileName]);
+            setAnalysisResults(prev => ({
+              ...prev, 
+              [nameMismatchDetails.documentFileName]: reprocessResult.analysis_result
+            }));
+            
+            setSuccess(prev => [...prev, `${nameMismatchDetails.documentFileName}: Documento aceito com nome do passaporte`]);
+          }
+        }
+      } else {
+        // Manter nome atual - documento permanece rejeitado
+        setCompletedFiles(prev => [...prev, nameMismatchDetails.documentFileName]);
+        setError(`${nameMismatchDetails.documentFileName}: Documento rejeitado por divergência de nome`);
+      }
+    } catch (error) {
+      setError(`Erro ao processar escolha de nome: ${error}`);
+    }
+
+    // Fechar modal
+    setShowPassportNameOption(false);
+    setNameMismatchDetails(null);
+  };
+
+  const handleCancelPassportName = () => {
+    if (nameMismatchDetails) {
+      // Adicionar aos completados como rejeitado
+      setCompletedFiles(prev => [...prev, nameMismatchDetails.documentFileName]);
+      setError(`${nameMismatchDetails.documentFileName}: Processamento cancelado pelo usuário`);
+    }
+    
+    setShowPassportNameOption(false);
+    setNameMismatchDetails(null);
+  };
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
