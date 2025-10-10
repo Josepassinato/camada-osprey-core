@@ -46,6 +46,15 @@ const DocumentUpload = () => {
   const [processingFiles, setProcessingFiles] = useState<string[]>([]);
   const [completedFiles, setCompletedFiles] = useState<string[]>([]);
   const [analysisResults, setAnalysisResults] = useState<{[key: string]: any}>({});
+  
+  // Estados para opção de nome do passaporte
+  const [showPassportNameOption, setShowPassportNameOption] = useState<boolean>(false);
+  const [nameMismatchDetails, setNameMismatchDetails] = useState<{
+    documentFileName: string;
+    detectedName: string;
+    registeredName: string;
+    caseId: string;
+  } | null>(null);
 
   // Get current user for tutor
   useEffect(() => {
