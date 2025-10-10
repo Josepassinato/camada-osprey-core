@@ -20,6 +20,7 @@ import {
   Image
 } from "lucide-react";
 import OspreyOwlTutor from "@/components/OspreyOwlTutor";
+import PassportNameOption from "@/components/PassportNameOption";
 import { useFormSnapshot } from "@/hooks/useFormSnapshot";
 
 interface DocumentRequirement {
