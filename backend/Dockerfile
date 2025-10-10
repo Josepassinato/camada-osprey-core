@@ -57,4 +57,4 @@ ENV ENVIRONMENT=production
 ENV LOG_LEVEL=info
 
 # Start command
-CMD ["python", "-m", "uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8001", "--workers", "4"]
+CMD ["python", "-m", "uvicorn", "server:app", "--host", "0.0.0.0", "--port", "${PORT:-8001}", "--workers", "1"]
