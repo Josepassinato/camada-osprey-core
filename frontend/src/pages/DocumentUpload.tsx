@@ -244,9 +244,12 @@ const DocumentUpload = () => {
           };
         }
       } catch (error) {
+        // Remover da lista de processamento em caso de erro de conexão
+        setProcessingFiles(prev => prev.filter(f => f !== fileName));
+        
         return {
           success: false,
-          filename: uploadedFile.file.name,
+          filename: fileName,
           error: 'Erro de conexão'
         };
       }
