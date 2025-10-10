@@ -1177,6 +1177,58 @@ const DocumentUploadAuto = () => {
         </div>
       </div>
       
+      {/* Processing Indicators */}
+      {(processingDocs.length > 0 || completedDocs.length > 0) && (
+        <div className="fixed bottom-20 right-4 w-80 bg-white border-2 border-black rounded-lg shadow-xl p-4 z-40">
+          <h4 className="font-bold text-black mb-3 flex items-center gap-2">
+            <div className="animate-pulse h-3 w-3 bg-blue-500 rounded-full"></div>
+            Status do Processamento
+          </h4>
+          
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {/* Arquivos em processamento */}
+            {processingDocs.map((fileName) => (
+              <div key={fileName} className="flex items-center gap-2 p-2 bg-yellow-50 rounded border border-yellow-200">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-yellow-400 border-t-transparent"></div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-yellow-800 truncate">📄 {fileName}</p>
+                  <p className="text-xs text-yellow-600">🔄 Processando análise de IA...</p>
+                </div>
+              </div>
+            ))}
+            
+            {/* Arquivos completados */}
+            {completedDocs.map((fileName) => (
+              <div key={fileName} className="flex items-center gap-2 p-2 bg-green-50 rounded border border-green-200">
+                <div className="h-4 w-4 rounded-full bg-green-500 flex items-center justify-center text-white text-xs">✓</div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-green-800 truncate">📄 {fileName}</p>
+                  <p className="text-xs text-green-600">✅ Análise completada</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Resumo */}
+          <div className="mt-3 pt-3 border-t border-gray-200">
+            <p className="text-xs text-gray-600">
+              📊 {processingDocs.length} em andamento, {completedDocs.length} concluídos
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Passport Name Option Modal */}
+      {showPassportNameOption && nameMismatchDetails && (
+        <PassportNameOption
+          documentFileName={nameMismatchDetails.documentFileName}
+          detectedName={nameMismatchDetails.detectedName}
+          registeredName={nameMismatchDetails.registeredName}
+          onUsePassportName={handleUsePassportName}
+          onCancel={handleCancelPassportName}
+        />
+      )}
+
       {/* Osprey Owl Tutor Integration */}
       <OspreyOwlTutor 
         snapshot={snapshot}
