@@ -40,7 +40,12 @@ export const VoiceMic: React.FC<VoiceMicProps> = ({
   const maxReconnectAttempts = 5;
 
   // Use environment variable for backend URL (production-ready)
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001';
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  
+  if (!backendUrl) {
+    console.error('❌ VITE_BACKEND_URL not set - VoiceMic will not function');
+    return null; // Don't render component if no backend URL
+  }
   const wsUrl = `${backendUrl.replace('http', 'ws')}/ws/voice/${sessionId || 'default'}`;
 
   // Initialize WebSocket connection
