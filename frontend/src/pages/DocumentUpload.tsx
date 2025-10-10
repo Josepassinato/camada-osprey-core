@@ -229,6 +229,29 @@ const DocumentUpload = () => {
         if (response.ok) {
           const result = await response.json();
           
+          // Verificar se há divergência de nome resolvível
+          if (result.name_mismatch_resolvable && result.name_mismatch_details) {
+            setNameMismatchDetails({
+              documentFileName: fileName,
+              detectedName: result.name_mismatch_details.detected_name,
+              registeredName: result.name_mismatch_details.registered_name,
+              caseId: caseId || ''
+            });
+            setShowPassportNameOption(true);
+            
+            // Remover da lista de processamento mas não adicionar aos completados ainda
+            setProcessingFiles(prev => prev.filter(f => f !== fileName));
+            
+            return {
+              success: true,
+              filename: fileName,
+              message: "Divergência de nome detectada - aguardando escolha do usuário",
+              documentId: result.document_id,
+              analysisResult: result,
+              nameMismatch: true
+            };
+          }
+          
           // Mover arquivo para lista de completados
           setProcessingFiles(prev => prev.filter(f => f !== fileName));
           setCompletedFiles(prev => [...prev, fileName]);
