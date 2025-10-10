@@ -840,6 +840,52 @@ const DocumentUploadAuto = () => {
     ));
   };
 
+  const handleUsePassportName = async (usePassportName: boolean) => {
+    if (!nameMismatchDetails) return;
+
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+    try {
+      if (usePassportName) {
+        // Atualizar dados do caso com nome do passaporte
+        const updateResponse = await fetch(`${backendUrl}/api/case/${nameMismatchDetails.caseId}/use-passport-name`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            passport_name: nameMismatchDetails.detectedName,
+            document_filename: nameMismatchDetails.documentFileName
+          })
+        });
+
+        if (updateResponse.ok) {
+          console.log('✅ Caso atualizado com nome do passaporte');
+          
+          // Recarregar caso para pegar dados atualizados
+          if (caseId) {
+            await fetchCase();
+          }
+        }
+      }
+      
+      console.log(`✅ Decisão de nome: ${usePassportName ? 'Usar passaporte' : 'Manter atual'}`);
+    } catch (error) {
+      console.error('Erro ao processar nome do passaporte:', error);
+      setError(`Erro ao processar escolha de nome: ${error}`);
+    }
+
+    // Fechar modal
+    setShowPassportNameOption(false);
+    setNameMismatchDetails(null);
+  };
+
+  const handleCancelPassportName = () => {
+    console.log('❌ Usuário cancelou escolha de nome');
+    setShowPassportNameOption(false);
+    setNameMismatchDetails(null);
+  };
+
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
