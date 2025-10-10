@@ -39,11 +39,8 @@ export const VoiceMic: React.FC<VoiceMicProps> = ({
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
 
-  // Robust backend URL detection for preview environment
-  const isPreview = typeof window !== 'undefined' && window.location.hostname.includes('preview.emergentagent.com');
-  const backendUrl = isPreview 
-    ? 'https://formfill-aid.preview.emergentagent.com'
-    : (import.meta.env.VITE_BACKEND_URL || 'https://formfill-aid.preview.emergentagent.com');
+  // Use environment variable for backend URL (production-ready)
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001';
   const wsUrl = `${backendUrl.replace('http', 'ws')}/ws/voice/${sessionId || 'default'}`;
 
   // Initialize WebSocket connection
