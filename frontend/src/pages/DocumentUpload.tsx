@@ -40,6 +40,11 @@ const DocumentUpload = () => {
   const [success, setSuccess] = useState<string[]>([]);
   const [dragActive, setDragActive] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  
+  // Novos estados para indicadores de processamento
+  const [processingFiles, setProcessingFiles] = useState<string[]>([]);
+  const [completedFiles, setCompletedFiles] = useState<string[]>([]);
+  const [analysisResults, setAnalysisResults] = useState<{[key: string]: any}>({});
 
   // Get current user for tutor
   useEffect(() => {
