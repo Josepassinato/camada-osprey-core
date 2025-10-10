@@ -1,0 +1,22 @@
+{
+  "case_id": "OSP-86E69527",
+  "documents": [
+    {
+      "filename": "passport_20251010_200238_bfc474a23cf14c9d_IMG_7496.png",
+      "document_type": "passport",
+      "original_filename": "IMG_7496.png",
+      "stored_at": "2025-10-10T20:02:38.745016+00:00",
+      "file_hash": "bfc474a23cf14c9d",
+      "file_size": 731813
+    },
+    {
+      "filename": "passport_20251010_200305_050f325580e2d9b2_IMG_5082.jpeg",
+      "document_type": "passport",
+      "original_filename": "IMG_5082.jpeg",
+      "stored_at": "2025-10-10T20:03:05.639812+00:00",
+      "file_hash": "050f325580e2d9b2",
+      "file_size": 1299072
+    }
+  ],
+  "last_updated": "2025-10-10T20:03:05.641473+00:00"
+}
