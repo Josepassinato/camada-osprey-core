@@ -4,23 +4,15 @@
  */
 
 export const getBackendUrl = (): string => {
-  // Check if we're in preview environment
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    
-    // Preview environment detection
-    if (hostname.includes('preview.emergentagent.com')) {
-      return 'https://formfill-aid.preview.emergentagent.com';
-    }
-    
-    // Production environment detection  
-    if (hostname.includes('emergentagent.com') && !hostname.includes('preview')) {
-      return 'https://formfill-aid.preview.emergentagent.com'; // Will be updated for production
-    }
+  // Always prioritize environment variable first
+  if (import.meta.env.VITE_BACKEND_URL) {
+    return import.meta.env.VITE_BACKEND_URL;
   }
   
-  // Fallback to environment variable or preview URL
-  return import.meta.env.VITE_BACKEND_URL || 'https://formfill-aid.preview.emergentagent.com';
+  // DEPRECATED: Environment variable should be set for all deployments
+  // This fallback exists only for development environments
+  console.warn('⚠️ VITE_BACKEND_URL not set - using development fallback');
+  return 'http://localhost:8001';
 };
 
 export const getApiUrl = (endpoint: string): string => {
