@@ -218,6 +218,19 @@ const DocumentUploadAuto = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
+  
+  // Estados para indicadores de processamento
+  const [processingDocs, setProcessingDocs] = useState<string[]>([]);
+  const [completedDocs, setCompletedDocs] = useState<string[]>([]);
+  
+  // Estados para modal de nome do passaporte
+  const [showPassportNameOption, setShowPassportNameOption] = useState(false);
+  const [nameMismatchDetails, setNameMismatchDetails] = useState<{
+    documentFileName: string;
+    detectedName: string;
+    registeredName: string;
+    caseId: string;
+  } | null>(null);
 
   // Form snapshot for OspreyOwlTutor integration
   const { snapshot } = useFormSnapshot({
