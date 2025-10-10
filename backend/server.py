@@ -8967,5 +8967,7 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=8001,
         reload=False,  # Desabilitado para produção
-        log_level="info"
+        log_level="info",
+        workers=1,  # Single worker para deployment estável
+        timeout_keep_alive=30
     )
