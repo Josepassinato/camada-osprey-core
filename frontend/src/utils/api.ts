@@ -9,9 +9,16 @@ export const getBackendUrl = (): string => {
     return import.meta.env.VITE_BACKEND_URL;
   }
   
-  // PRODUCTION ERROR: Environment variable MUST be set for deployments
-  console.error('❌ VITE_BACKEND_URL not set - deployment will fail');
-  throw new Error('VITE_BACKEND_URL environment variable is required for production deployment');
+  // PRODUCTION FALLBACK: Construct backend URL from current domain if not set
+  if (typeof window !== 'undefined') {
+    const currentDomain = window.location.origin;
+    console.warn('⚠️ VITE_BACKEND_URL not set - using current domain fallback');
+    return currentDomain; // Same domain for API calls
+  }
+  
+  // Server-side fallback (should not happen in production)
+  console.error('❌ VITE_BACKEND_URL not available and no window object');
+  return 'http://localhost:8001';
 };
 
 export const getApiUrl = (endpoint: string): string => {
