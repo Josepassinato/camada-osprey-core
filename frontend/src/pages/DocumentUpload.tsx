@@ -760,6 +760,17 @@ const DocumentUpload = () => {
         />
       )}
 
+      {/* Passport Name Option Modal */}
+      {showPassportNameOption && nameMismatchDetails && (
+        <PassportNameOption
+          documentFileName={nameMismatchDetails.documentFileName}
+          detectedName={nameMismatchDetails.detectedName}
+          registeredName={nameMismatchDetails.registeredName}
+          onUsePassportName={handleUsePassportName}
+          onCancel={handleCancelPassportName}
+        />
+      )}
+
       {/* Disclaimer Modal */}
       <DisclaimerModal
         isOpen={showDisclaimer}
