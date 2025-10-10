@@ -8977,7 +8977,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "server:app",
         host="0.0.0.0",
-        port=8001,
+        port=int(os.environ.get('PORT', 8001)),  # Use environment PORT or fallback to 8001
         reload=False,  # Desabilitado para produção
         log_level="info",
         workers=1,  # Single worker para deployment estável
