@@ -543,6 +543,63 @@ const DocumentUpload = () => {
               </CardContent>
             </Card>
 
+            {/* Processing Indicators */}
+            {(processingFiles.length > 0 || completedFiles.length > 0) && (
+              <Card className="glass border-0 bg-blue-50/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <div className="animate-pulse h-4 w-4 bg-blue-500 rounded-full"></div>
+                    Status do Processamento
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {/* Arquivos em processamento */}
+                  {processingFiles.map((fileName) => (
+                    <div key={fileName} className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-yellow-400 border-t-transparent"></div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-yellow-800">📄 {fileName}</p>
+                        <p className="text-xs text-yellow-600">🔄 Processando análise de IA...</p>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Arquivos completados */}
+                  {completedFiles.map((fileName) => {
+                    const result = analysisResults[fileName];
+                    const isAccepted = result?.valid || (result?.dra_paula_assessment && result.dra_paula_assessment.includes('ACEITO'));
+                    
+                    return (
+                      <div key={fileName} className={`flex items-center gap-3 p-3 rounded-lg border ${
+                        isAccepted ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                      }`}>
+                        <div className={`h-4 w-4 rounded-full flex items-center justify-center ${
+                          isAccepted ? 'bg-green-500' : 'bg-red-500'
+                        }`}>
+                          {isAccepted ? '✓' : '✗'}
+                        </div>
+                        <div className="flex-1">
+                          <p className={`text-sm font-medium ${isAccepted ? 'text-green-800' : 'text-red-800'}`}>
+                            📄 {fileName}
+                          </p>
+                          <p className={`text-xs ${isAccepted ? 'text-green-600' : 'text-red-600'}`}>
+                            {isAccepted ? '✅ Documento aceito e armazenado' : '❌ Documento rejeitado'}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  
+                  {/* Resumo */}
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-600">
+                      📊 Processamento: {processingFiles.length} em andamento, {completedFiles.length} concluídos
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Submit Button */}
             <div className="flex justify-end gap-4">
               <Button
