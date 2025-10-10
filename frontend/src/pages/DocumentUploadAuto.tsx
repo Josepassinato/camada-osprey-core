@@ -467,57 +467,34 @@ const DocumentUploadAuto = () => {
   };
 
   const realDocumentAnalysis = async (file: File, documentType: string) => {
-    // REAL Dr. Miguel AI Analysis - Critical Security Function
-    const visaType = case_?.form_code;
-    
-    if (!visaType) {
-      throw new Error('Tipo de visto não definido. Por favor, selecione o tipo de visto primeiro.');
-    }
-    
     try {
-      // Call backend for REAL analysis
-      const sessionToken = localStorage.getItem('osprey_session_token');
+      console.log('🔄 Calling REAL backend AI analysis for:', file.name, documentType);
+      
+      const backendUrl = import.meta.env.VITE_BACKEND_URL;
+      
+      // Create FormData for backend
       const formData = new FormData();
       formData.append('file', file);
       formData.append('document_type', documentType);
-      formData.append('visa_type', visaType);
       formData.append('case_id', caseId || '');
       
-      let url = `${import.meta.env.VITE_BACKEND_URL}/api/documents/analyze-with-ai`;
-      if (sessionToken && sessionToken !== 'null') {
-        url += `?session_token=${sessionToken}`;
-      }
-
-      const response = await fetch(url, {
+      // Call REAL backend endpoint with AI analysis
+      const response = await fetch(`${backendUrl}/api/documents/analyze-with-ai`, {
         method: 'POST',
         body: formData
       });
-
-      if (response.ok) {
-        const analysisResult = await response.json();
-        
-        // **CRITICAL FIX**: Ensure issues array exists and is properly formatted
-        if (!analysisResult.issues) {
-          analysisResult.issues = [];
-        }
-        
-        // Log for debugging
-        console.log('✅ Backend analysis result:', {
-          valid: analysisResult.valid,
-          completeness: analysisResult.completeness,
-          issuesCount: analysisResult.issues?.length || 0,
-          issues: analysisResult.issues
-        });
-        
-        return analysisResult;
-      } else {
-        throw new Error('API analysis failed');
-      }
-    } catch (error) {
-      console.error('Real analysis failed, using enhanced validation:', error);
       
-      // Enhanced fallback validation (not random!)
-      return await enhancedDocumentValidation(file, documentType, visaType);
+      if (!response.ok) {
+        throw new Error(`Backend analysis failed: ${response.status}`);
+      }
+      
+      const analysisResult = await response.json();
+      console.log('✅ Backend analysis result:', analysisResult);
+      
+      return analysisResult;
+    } catch (error) {
+      console.error('Real document analysis error:', error);
+      throw error;
     }
   };
 
