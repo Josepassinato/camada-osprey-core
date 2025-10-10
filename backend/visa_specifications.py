@@ -420,15 +420,15 @@ VISA_SPECIFICATIONS = {
         "processing_time": "2-4 meses",
         
         "required_documents": [
-            "Formulário I-129 (Petição de Trabalhador Não-Imigrante)",
-            "Suplemento O (Classificação O)",
             "Contrato ou resumo dos termos do emprego",
             "Itinerário detalhado das atividades nos EUA",
             "Carta de consulta de organização apropriada",
             "Evidência de habilidade extraordinária",
-            "Cópia do passaporte",
-            "Taxa de petição I-129"
+            "Cópia do passaporte"
         ],
+        
+        # NOTE: Formulário I-129 e Suplementos são gerados automaticamente pela IA
+        # após o preenchimento do questionário amigável. Não devem ser carregados pelo usuário.
         
         "evidence_required": {
             "extraordinary_ability_arts": [
