@@ -9,10 +9,9 @@ export const getBackendUrl = (): string => {
     return import.meta.env.VITE_BACKEND_URL;
   }
   
-  // DEPRECATED: Environment variable should be set for all deployments
-  // This fallback exists only for development environments
-  console.warn('⚠️ VITE_BACKEND_URL not set - using development fallback');
-  return 'http://localhost:8001';
+  // PRODUCTION ERROR: Environment variable MUST be set for deployments
+  console.error('❌ VITE_BACKEND_URL not set - deployment will fail');
+  throw new Error('VITE_BACKEND_URL environment variable is required for production deployment');
 };
 
 export const getApiUrl = (endpoint: string): string => {
