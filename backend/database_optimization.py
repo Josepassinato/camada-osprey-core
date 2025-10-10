@@ -113,8 +113,10 @@ class DatabaseOptimizationSystem:
             
         try:
             # Try to connect to Redis (optional)
+            # Use environment variable for Redis URL (production-ready)
+            redis_url = os.environ.get('REDIS_URL', 'redis://localhost:6379')
             self.redis_client = await aioredis.from_url(
-                "redis://localhost:6379",
+                redis_url,
                 encoding="utf-8",
                 decode_responses=True,
                 socket_connect_timeout=5,
