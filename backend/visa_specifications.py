@@ -342,7 +342,6 @@ VISA_SPECIFICATIONS = {
         "processing_time": "2-5 anos",
         
         "required_documents": [
-            "Formulário I-589 preenchido",
             "Evidência de identidade (passaporte, certidão de nascimento)",
             "Declaração pessoal detalhada sobre perseguição",
             "Evidências de perseguição ou ameaças",
@@ -350,6 +349,8 @@ VISA_SPECIFICATIONS = {
             "Relatórios sobre condições do país",
             "Fotos tipo passaporte (2 fotos)"
         ],
+        
+        # NOTE: Formulário I-589 é gerado automaticamente pela IA após o questionário amigável
         
         "evidence_required": {
             "persecution_evidence": [
