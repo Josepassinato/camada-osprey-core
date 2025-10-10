@@ -426,13 +426,9 @@ const DocumentUpload = () => {
 
       // If all succeeded, show disclaimer
       if (failures.length === 0) {
-        // Generate case ID based on uploaded documents
-        const newCaseId = `OSP-DOCS-${Date.now()}`;
-        setCaseId(newCaseId);
-        
         setTimeout(() => {
           setShowDisclaimer(true);
-        }, 2000);
+        }, 1000);
       }
 
     } catch (error) {
