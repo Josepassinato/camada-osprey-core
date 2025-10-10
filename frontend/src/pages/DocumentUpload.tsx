@@ -300,6 +300,9 @@ const DocumentUpload = () => {
       if (issueDate) formData.append('issue_date', issueDate);
 
       try {
+        // Simular delay para mostrar indicador de processamento
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/documents/analyze-with-ai`, {
           method: 'POST',
           headers: {
