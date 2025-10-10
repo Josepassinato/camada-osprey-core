@@ -9312,14 +9312,20 @@ async def _check_for_name_mismatch_resolution(analysis_result: Dict[str, Any], c
             # Extrair nome detectado no documento de múltiplas fontes
             extracted_fields = analysis_result.get('extracted_fields', {})
             extracted_data = analysis_result.get('extracted_data', {})
+            policy_engine = analysis_result.get('policy_engine', {})
+            policy_fields = policy_engine.get('fields', {}).get('policy_fields', {})
+            full_name_field = policy_fields.get('full_name', {})
             
             detected_name = (
                 extracted_fields.get('detected_name_in_document') or
                 extracted_fields.get('full_name') or
                 extracted_data.get('full_name') or
                 extracted_data.get('name') or
-                extracted_data.get('holder_name')
+                extracted_data.get('holder_name') or
+                (full_name_field.get('best_match', {}).get('value') if full_name_field.get('found') else None)
             )
+            
+            logger.info(f"🔍 Extracted sources: extracted_fields={extracted_fields.get('full_name')}, extracted_data={extracted_data.get('full_name')}, policy_engine={full_name_field.get('best_match', {}).get('value') if full_name_field.get('found') else None}")
             
             logger.info(f"🔍 Detected name in document: '{detected_name}'")
             
