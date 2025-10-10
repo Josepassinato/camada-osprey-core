@@ -93,15 +93,20 @@ class NativeDocumentAnalyzer:
     def _create_analysis_prompt(self, expected_type: str, applicant_name: str) -> str:
         """Cria prompt para análise do documento"""
         return f"""
-        Analise este documento e forneça:
+        ANALISE ESTE DOCUMENTO DE IMIGRAÇÃO:
         
-        1. TIPO DE DOCUMENTO: Identifique se é {expected_type} ou outro tipo
-        2. VALIDADE: Verifique se o documento está vencido
-        3. NOME: Se o nome no documento corresponde a "{applicant_name}"
-        4. LEGIBILIDADE: Se o documento está claro e legível
-        5. DADOS EXTRAÍDOS: Extraia informações chave do documento
+        1. **TIPO DE DOCUMENTO**: Identifique o tipo real (esperado: {expected_type})
+        2. **NOME COMPLETO**: Extraia o nome EXATO que está escrito no documento
+        3. **CORRESPONDÊNCIA DE NOME**: Compare o nome extraído com o nome cadastrado: "{applicant_name}"
+        4. **QUALIDADE E VALIDADE**: Verifique legibilidade e se está vencido
+        5. **DADOS CRÍTICOS**: Extraia número do documento, datas, nacionalidade
         
-        Responda em português brasileiro com foco em documentos de imigração.
+        INSTRUÇÕES CRÍTICAS:
+        - Se o nome no documento for diferente de "{applicant_name}", informe claramente os dois nomes
+        - Se o documento for ilegível ou de tipo errado, rejeite com justificativa
+        - Extraia SEMPRE o nome completo real que aparece no documento
+        
+        Forneça análise precisa e completa em português brasileiro.
         """
     
     async def _perform_real_llm_analysis(
