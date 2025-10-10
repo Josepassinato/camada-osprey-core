@@ -8799,8 +8799,11 @@ async def startup_db_client():
     global client, db
     
     try:
-        # MongoDB connection string - usually set via environment variable
-        mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/')
+        # MongoDB connection string - REQUIRED environment variable
+        mongo_url = os.environ.get('MONGO_URL')
+        if not mongo_url:
+            logger.error("❌ MONGO_URL environment variable is required")
+            raise ValueError("MONGO_URL environment variable must be set for production deployment")
         
         client = AsyncIOMotorClient(mongo_url)
         db = client[os.environ.get('DB_NAME', 'osprey_immigration_db')]  # Database name
