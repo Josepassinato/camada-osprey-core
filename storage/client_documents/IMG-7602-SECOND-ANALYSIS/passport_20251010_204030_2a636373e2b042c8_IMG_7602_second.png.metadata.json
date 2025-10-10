@@ -1,0 +1,565 @@
+{
+  "case_id": "IMG-7602-SECOND-ANALYSIS",
+  "document_type": "passport",
+  "original_filename": "IMG_7602_second.png",
+  "stored_filename": "passport_20251010_204030_2a636373e2b042c8_IMG_7602_second.png",
+  "file_hash": "2a636373e2b042c8",
+  "file_size": 504210,
+  "stored_at": "2025-10-10T20:40:30.657459+00:00",
+  "analysis_result": {
+    "valid": true,
+    "legible": true,
+    "completeness": 80,
+    "issues": [],
+    "extracted_data": {
+      "document_type": "passport",
+      "file_name": "IMG_7602_second.png",
+      "validation_status": "PROCESSED",
+      "visa_context": "H-1B",
+      "full_name": "completo no documento corresponde ao nome cadastrado \"Usuário\". O passaporte está dentro do prazo de validade.",
+      "document_number": "do Documento",
+      "expiry_date": ".",
+      "detected_type": "passport",
+      "confidence": 0.8,
+      "analysis_method": "native_llm_restored",
+      "full_text_extracted": "**DECISÃO: ACEITO**\n\n**JUSTIFICATIVA:** O documento é do tipo esperado (passaporte) e os dados extraídos do documento estão corretos e legíveis. O nome completo no documento corresponde ao nome cadastrado \"Usuário\". O passaporte está dentro do prazo de validade.\n\n**TIPO DETECTADO:** Passaporte\n\n**QUALIDADE:** Boa\n\n**DADOS PRINCIPAIS:**\n\n- **Nome Completo:** Usuário\n- **Número do Documento:** YC792396\n- **Nacionalidade:** Brasileiro\n- **Data de Nascimento:** 09/04/1970\n- **Local de Nascimento:** Canoas, RS, Brasil\n- **Data de Emissão:** 14/09/2018\n- **Data de Expiração:** 13/09/2028\n- **Autoridade Emissora:** Polícia Federal",
+      "security_features": [],
+      "quality_score": 0.8
+    },
+    "dra_paula_assessment": "✅ DOCUMENTO ANALISADO: passport processado com visão real",
+    "policy_engine": {
+      "document_id": "doc_59074",
+      "doc_type": "PASSPORT_ID_PAGE",
+      "status": "done",
+      "quality": {
+        "status": "ok",
+        "checks": {
+          "file_size": {
+            "status": "pass",
+            "message": "Arquivo: 492.4KB (0.5MB)",
+            "size_bytes": 504210,
+            "size_kb": 492.392578125,
+            "size_mb": 0.4808521270751953
+          },
+          "format": {
+            "status": "pass",
+            "message": "Formato: image/png",
+            "mime_type": "image/png",
+            "supported": true,
+            "magic_bytes_detected": "png"
+          },
+          "image_specific": {
+            "status": "pass",
+            "message": "Imagem 1320x2868, RGB",
+            "width": 1320,
+            "height": 2868,
+            "mode": "RGB",
+            "estimated_dpi": 155.2941176470588,
+            "blur_score": 5257.6806686830305,
+            "warnings": []
+          }
+        },
+        "warnings": [],
+        "errors": [],
+        "metadata": {}
+      },
+      "policy_checks": [
+        {
+          "rule": "quality:min_dpi",
+          "result": "alert",
+          "message": "DPI estimado (155) abaixo do mínimo (200)",
+          "severity": "medium"
+        },
+        {
+          "rule": "quality:file_size",
+          "result": "pass",
+          "message": "Arquivo: 492.4KB (0.5MB)",
+          "severity": "low"
+        },
+        {
+          "rule": "language:english_detected",
+          "result": "pass",
+          "message": "Documento em inglês ou traduzido",
+          "severity": "low"
+        }
+      ],
+      "fields": {
+        "passport_number": [
+          {
+            "value": "Document",
+            "normalized_value": "DOCUMENT",
+            "confidence": 0.64,
+            "validation": {
+              "is_valid": true,
+              "confidence": 0.85,
+              "normalized_value": "DOCUMENT",
+              "issues": [],
+              "validation_method": "nationality_aware_passport_validator"
+            },
+            "position": {
+              "start_pos": 0,
+              "end_pos": 8,
+              "line_number": 1,
+              "context_before": "",
+              "context_after": "type: passport, Filename: IMG_7602_second.png"
+            },
+            "pattern_used": "\\b([A-Z0-9]{6,12})\\b",
+            "field_type": "passport_number"
+          },
+          {
+            "value": "passport",
+            "normalized_value": "PASSPORT",
+            "confidence": 0.64,
+            "validation": {
+              "is_valid": true,
+              "confidence": 0.85,
+              "normalized_value": "PASSPORT",
+              "issues": [],
+              "validation_method": "nationality_aware_passport_validator"
+            },
+            "position": {
+              "start_pos": 15,
+              "end_pos": 23,
+              "line_number": 1,
+              "context_before": "Document type:",
+              "context_after": ", Filename: IMG_7602_second.png"
+            },
+            "pattern_used": "\\b([A-Z0-9]{6,12})\\b",
+            "field_type": "passport_number"
+          },
+          {
+            "value": "Filename",
+            "normalized_value": "FILENAME",
+            "confidence": 0.64,
+            "validation": {
+              "is_valid": true,
+              "confidence": 0.85,
+              "normalized_value": "FILENAME",
+              "issues": [],
+              "validation_method": "nationality_aware_passport_validator"
+            },
+            "position": {
+              "start_pos": 25,
+              "end_pos": 33,
+              "line_number": 1,
+              "context_before": "Document type: passport,",
+              "context_after": ": IMG_7602_second.png"
+            },
+            "pattern_used": "\\b([A-Z0-9]{6,12})\\b",
+            "field_type": "passport_number"
+          }
+        ],
+        "name_fields": [
+          {
+            "value": "IMG",
+            "normalized_value": "Img",
+            "confidence": 0.7600000000000001,
+            "validation": {
+              "is_valid": true,
+              "confidence": 0.85,
+              "normalized_value": "Img",
+              "issues": [],
+              "validation_method": "name_format_validator"
+            },
+            "position": {
+              "start_pos": 29,
+              "end_pos": 38,
+              "line_number": 1,
+              "context_before": "Document type: passport, File",
+              "context_after": "_7602_second.png"
+            },
+            "pattern_used": "(?:Name|Nome|Surname|Apellido)[:\\s]*([A-Z][a-zA-Z\\s\\-\\']{2,50})",
+            "field_type": "name_fields"
+          }
+        ],
+        "policy_fields": {
+          "full_name": {
+            "found": true,
+            "values": [
+              {
+                "value": "Document type: passport, Filename: IMG_7602_second.png",
+                "normalized_value": "Document type: passport, Filename: IMG_7602_second.png",
+                "confidence": 0.8,
+                "validation": {
+                  "field_name": "full_name",
+                  "original_value": "Document type: passport, Filename: IMG_7602_second.png",
+                  "is_valid": true,
+                  "confidence": 0.8,
+                  "normalized_value": "Document type: passport, Filename: IMG_7602_second.png",
+                  "validation_method": "basic_presence_check",
+                  "issues": [],
+                  "recommendations": []
+                },
+                "position": {
+                  "start_pos": 0,
+                  "end_pos": 54,
+                  "line_number": 1,
+                  "context_before": "",
+                  "context_after": ""
+                },
+                "is_required": true,
+                "description": "Nome completo do portador do passaporte"
+              }
+            ],
+            "required": true,
+            "best_match": {
+              "value": "Document type: passport, Filename: IMG_7602_second.png",
+              "normalized_value": "Document type: passport, Filename: IMG_7602_second.png",
+              "confidence": 0.8,
+              "validation": {
+                "field_name": "full_name",
+                "original_value": "Document type: passport, Filename: IMG_7602_second.png",
+                "is_valid": true,
+                "confidence": 0.8,
+                "normalized_value": "Document type: passport, Filename: IMG_7602_second.png",
+                "validation_method": "basic_presence_check",
+                "issues": [],
+                "recommendations": []
+              },
+              "position": {
+                "start_pos": 0,
+                "end_pos": 54,
+                "line_number": 1,
+                "context_before": "",
+                "context_after": ""
+              },
+              "is_required": true,
+              "description": "Nome completo do portador do passaporte"
+            }
+          },
+          "passport_number": {
+            "found": true,
+            "values": [
+              {
+                "value": "Document",
+                "normalized_value": "Document",
+                "confidence": 0.85,
+                "validation": {
+                  "field_name": "passport_number",
+                  "original_value": "Document",
+                  "is_valid": true,
+                  "confidence": 0.85,
+                  "normalized_value": "Document",
+                  "validation_method": "nationality_aware_passport",
+                  "issues": [],
+                  "recommendations": []
+                },
+                "position": {
+                  "start_pos": 0,
+                  "end_pos": 8,
+                  "line_number": 1,
+                  "context_before": "",
+                  "context_after": "type: passport, Filename: IMG_7602_second.png"
+                },
+                "is_required": true,
+                "description": "Número do passaporte"
+              },
+              {
+                "value": "passport",
+                "normalized_value": "passport",
+                "confidence": 0.85,
+                "validation": {
+                  "field_name": "passport_number",
+                  "original_value": "passport",
+                  "is_valid": true,
+                  "confidence": 0.85,
+                  "normalized_value": "passport",
+                  "validation_method": "nationality_aware_passport",
+                  "issues": [],
+                  "recommendations": []
+                },
+                "position": {
+                  "start_pos": 15,
+                  "end_pos": 23,
+                  "line_number": 1,
+                  "context_before": "Document type:",
+                  "context_after": ", Filename: IMG_7602_second.png"
+                },
+                "is_required": true,
+                "description": "Número do passaporte"
+              },
+              {
+                "value": "Filename",
+                "normalized_value": "Filename",
+                "confidence": 0.85,
+                "validation": {
+                  "field_name": "passport_number",
+                  "original_value": "Filename",
+                  "is_valid": true,
+                  "confidence": 0.85,
+                  "normalized_value": "Filename",
+                  "validation_method": "nationality_aware_passport",
+                  "issues": [],
+                  "recommendations": []
+                },
+                "position": {
+                  "start_pos": 25,
+                  "end_pos": 33,
+                  "line_number": 1,
+                  "context_before": "Document type: passport,",
+                  "context_after": ": IMG_7602_second.png"
+                },
+                "is_required": true,
+                "description": "Número do passaporte"
+              }
+            ],
+            "required": true,
+            "best_match": {
+              "value": "Document",
+              "normalized_value": "Document",
+              "confidence": 0.85,
+              "validation": {
+                "field_name": "passport_number",
+                "original_value": "Document",
+                "is_valid": true,
+                "confidence": 0.85,
+                "normalized_value": "Document",
+                "validation_method": "nationality_aware_passport",
+                "issues": [],
+                "recommendations": []
+              },
+              "position": {
+                "start_pos": 0,
+                "end_pos": 8,
+                "line_number": 1,
+                "context_before": "",
+                "context_after": "type: passport, Filename: IMG_7602_second.png"
+              },
+              "is_required": true,
+              "description": "Número do passaporte"
+            }
+          },
+          "date_of_birth": {
+            "found": false,
+            "values": [],
+            "required": true,
+            "best_match": null
+          },
+          "expiry_date": {
+            "found": false,
+            "values": [],
+            "required": true,
+            "best_match": null
+          },
+          "nationality": {
+            "found": true,
+            "values": [
+              {
+                "value": "Document type: passport, Filename: IMG_7602_second.png",
+                "normalized_value": "Document type: passport, Filename: IMG_7602_second.png",
+                "confidence": 0.8,
+                "validation": {
+                  "field_name": "nationality",
+                  "original_value": "Document type: passport, Filename: IMG_7602_second.png",
+                  "is_valid": true,
+                  "confidence": 0.8,
+                  "normalized_value": "Document type: passport, Filename: IMG_7602_second.png",
+                  "validation_method": "basic_presence_check",
+                  "issues": [],
+                  "recommendations": []
+                },
+                "position": {
+                  "start_pos": 0,
+                  "end_pos": 54,
+                  "line_number": 1,
+                  "context_before": "",
+                  "context_after": ""
+                },
+                "is_required": true,
+                "description": "Nacionalidade"
+              }
+            ],
+            "required": true,
+            "best_match": {
+              "value": "Document type: passport, Filename: IMG_7602_second.png",
+              "normalized_value": "Document type: passport, Filename: IMG_7602_second.png",
+              "confidence": 0.8,
+              "validation": {
+                "field_name": "nationality",
+                "original_value": "Document type: passport, Filename: IMG_7602_second.png",
+                "is_valid": true,
+                "confidence": 0.8,
+                "normalized_value": "Document type: passport, Filename: IMG_7602_second.png",
+                "validation_method": "basic_presence_check",
+                "issues": [],
+                "recommendations": []
+              },
+              "position": {
+                "start_pos": 0,
+                "end_pos": 54,
+                "line_number": 1,
+                "context_before": "",
+                "context_after": ""
+              },
+              "is_required": true,
+              "description": "Nacionalidade"
+            }
+          },
+          "place_of_birth": {
+            "found": true,
+            "values": [
+              {
+                "value": "Document type: passport, Filename: IMG_7602_second.png",
+                "normalized_value": "Document type: passport, Filename: IMG_7602_second.png",
+                "confidence": 0.8,
+                "validation": {
+                  "field_name": "place_of_birth",
+                  "original_value": "Document type: passport, Filename: IMG_7602_second.png",
+                  "is_valid": true,
+                  "confidence": 0.8,
+                  "normalized_value": "Document type: passport, Filename: IMG_7602_second.png",
+                  "validation_method": "basic_presence_check",
+                  "issues": [],
+                  "recommendations": []
+                },
+                "position": {
+                  "start_pos": 0,
+                  "end_pos": 54,
+                  "line_number": 1,
+                  "context_before": "",
+                  "context_after": ""
+                },
+                "is_required": true,
+                "description": "Local de nascimento"
+              }
+            ],
+            "required": true,
+            "best_match": {
+              "value": "Document type: passport, Filename: IMG_7602_second.png",
+              "normalized_value": "Document type: passport, Filename: IMG_7602_second.png",
+              "confidence": 0.8,
+              "validation": {
+                "field_name": "place_of_birth",
+                "original_value": "Document type: passport, Filename: IMG_7602_second.png",
+                "is_valid": true,
+                "confidence": 0.8,
+                "normalized_value": "Document type: passport, Filename: IMG_7602_second.png",
+                "validation_method": "basic_presence_check",
+                "issues": [],
+                "recommendations": []
+              },
+              "position": {
+                "start_pos": 0,
+                "end_pos": 54,
+                "line_number": 1,
+                "context_before": "",
+                "context_after": ""
+              },
+              "is_required": true,
+              "description": "Local de nascimento"
+            }
+          }
+        }
+      },
+      "consistency": [],
+      "overall_score": 0.7570833333333333,
+      "decision": "FAIL",
+      "messages": [
+        "❌ Documento rejeitado - Corrija os problemas identificados",
+        "🌐 Idioma: Document in insufficient_text requires certified English translation",
+        "• Certified Translation Required: Document in insufficient_text requires certified English translation",
+        "📋 Campos obrigatórios não encontrados: date_of_birth, expiry_date"
+      ],
+      "language_analysis": {
+        "document_type": "PASSPORT_ID_PAGE",
+        "language_detection": {
+          "primary_language": "insufficient_text",
+          "confidence": 0.0,
+          "language_scores": {},
+          "mixed_language": false,
+          "text_length": 6
+        },
+        "translation_rule": {
+          "rule": "CFR_103_2_b_3",
+          "english_required": false,
+          "certified_translation_required": true,
+          "acceptable_languages": [
+            "en"
+          ],
+          "exceptions": [
+            "mrz_section"
+          ],
+          "description": "8 CFR 103.2(b)(3) - Foreign language documents must be accompanied by certified English translation"
+        },
+        "compliance": {
+          "status": "requires_translation",
+          "compliant": false,
+          "requires_translation": true,
+          "message": "Document in insufficient_text requires certified English translation",
+          "severity": "high",
+          "rule_reference": "CFR_103_2_b_3"
+        },
+        "recommendations": [
+          {
+            "type": "translation_required",
+            "severity": "high",
+            "title": "Certified Translation Required",
+            "description": "Document in insufficient_text requires certified English translation",
+            "actions": [
+              "Obtain certified English translation from qualified translator",
+              "Ensure translator provides certificate of accuracy",
+              "Submit both original document and certified translation",
+              "Translation must comply with CFR_103_2_b_3"
+            ],
+            "rule_reference": "CFR_103_2_b_3"
+          },
+          {
+            "type": "quality_improvement",
+            "severity": "medium",
+            "title": "Document Quality Issue",
+            "description": "Text extraction confidence is low - document may be unclear",
+            "actions": [
+              "Ensure document is high resolution and clearly legible",
+              "Check for proper scanning/photo quality",
+              "Consider re-scanning if text appears blurry"
+            ]
+          }
+        ],
+        "status": "requires_translation",
+        "requires_action": true
+      },
+      "translation_certificate": {
+        "has_translation_certificate": false,
+        "indicators_found": [],
+        "confidence": 0.0,
+        "status": "not_found"
+      }
+    },
+    "standardized_doc_type": "PASSPORT_ID_PAGE",
+    "quality_analysis": {
+      "status": "ok",
+      "checks": {
+        "file_size": {
+          "status": "pass",
+          "message": "Arquivo: 492.4KB (0.5MB)",
+          "size_bytes": 504210,
+          "size_kb": 492.392578125,
+          "size_mb": 0.4808521270751953
+        },
+        "format": {
+          "status": "pass",
+          "message": "Formato: image/png",
+          "mime_type": "image/png",
+          "supported": true,
+          "magic_bytes_detected": "png"
+        },
+        "image_specific": {
+          "status": "pass",
+          "message": "Imagem 1320x2868, RGB",
+          "width": 1320,
+          "height": 2868,
+          "mode": "RGB",
+          "estimated_dpi": 155.2941176470588,
+          "blur_score": 5257.6806686830305,
+          "warnings": []
+        }
+      },
+      "warnings": [],
+      "errors": [],
+      "metadata": {}
+    },
+    "policy_score": 0.7570833333333333,
+    "policy_decision": "FAIL"
+  },
+  "custom_metadata": {}
+}

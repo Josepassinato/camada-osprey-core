@@ -1,0 +1,14 @@
+{
+  "case_id": "OPENAI-DIRECT-TEST-IMG7602",
+  "documents": [
+    {
+      "filename": "passport_20251010_204012_2a636373e2b042c8_IMG_7602.png",
+      "document_type": "passport",
+      "original_filename": "IMG_7602.png",
+      "stored_at": "2025-10-10T20:40:12.577050+00:00",
+      "file_hash": "2a636373e2b042c8",
+      "file_size": 504210
+    }
+  ],
+  "last_updated": "2025-10-10T20:40:12.578341+00:00"
+}
