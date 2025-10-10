@@ -345,7 +345,7 @@ const DocumentUpload = () => {
               documentFileName: fileName,
               detectedName: result.name_mismatch_details.detected_name,
               registeredName: result.name_mismatch_details.registered_name,
-              caseId: caseId || ''
+              caseId: currentCaseId
             });
             setShowPassportNameOption(true);
             
