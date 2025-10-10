@@ -8928,6 +8928,137 @@ async def startup_db_client():
 
 # Endpoints duplicados removidos - versões corretas estão acima
 
+# NOVOS ENDPOINTS PARA SISTEMA DE ARMAZENAMENTO DE DOCUMENTOS
+
+@api_router.get("/case/{case_id}/documents")
+async def get_case_documents_endpoint(case_id: str):
+    """
+    Retorna lista de documentos armazenados para um caso
+    """
+    try:
+        from document_storage_system import get_case_documents
+        
+        logger.info(f"📄 Retrieving documents for case: {case_id}")
+        
+        documents_info = await get_case_documents(case_id)
+        
+        logger.info(f"✅ Found {documents_info.get('count', 0)} documents for case {case_id}")
+        
+        return {
+            "success": True,
+            "case_id": case_id,
+            "documents": documents_info.get("documents", []),
+            "document_count": documents_info.get("count", 0),
+            "last_updated": documents_info.get("last_updated", ""),
+            "message": f"Encontrados {documents_info.get('count', 0)} documentos aceitos"
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Error retrieving case documents: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao buscar documentos do caso: {str(e)}"
+        )
+
+@api_router.post("/case/{case_id}/prepare-final-package")
+async def prepare_final_document_package_endpoint(case_id: str):
+    """
+    Prepara pacote final com todos os documentos aceitos do caso
+    """
+    try:
+        from document_storage_system import prepare_final_package
+        
+        logger.info(f"📦 Preparing final package for case: {case_id}")
+        
+        package_result = await prepare_final_package(case_id)
+        
+        if not package_result.get("success"):
+            raise HTTPException(
+                status_code=400,
+                detail=package_result.get("message", "Erro ao preparar pacote final")
+            )
+        
+        logger.info(f"✅ Final package prepared: {package_result.get('document_count', 0)} documents")
+        
+        return {
+            "success": True,
+            "case_id": case_id,
+            "package_directory": package_result.get("package_directory"),
+            "document_count": package_result.get("document_count", 0),
+            "copied_files": package_result.get("copied_files", []),
+            "manifest_path": package_result.get("manifest_path"),
+            "message": package_result.get("message", "Pacote final criado com sucesso"),
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error preparing final package: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao preparar pacote final: {str(e)}"
+        )
+
+@api_router.get("/case/{case_id}/document-summary")
+async def get_document_summary_endpoint(case_id: str):
+    """
+    Retorna resumo dos documentos do caso organizados por tipo
+    """
+    try:
+        from document_storage_system import get_case_documents
+        
+        logger.info(f"📊 Getting document summary for case: {case_id}")
+        
+        documents_info = await get_case_documents(case_id)
+        documents = documents_info.get("documents", [])
+        
+        # Organizar por tipo de documento
+        summary_by_type = {}
+        total_size = 0
+        
+        for doc in documents:
+            doc_type = doc.get("document_type", "unknown")
+            file_size = doc.get("file_size", 0)
+            total_size += file_size
+            
+            if doc_type not in summary_by_type:
+                summary_by_type[doc_type] = {
+                    "count": 0,
+                    "total_size": 0,
+                    "files": []
+                }
+            
+            summary_by_type[doc_type]["count"] += 1
+            summary_by_type[doc_type]["total_size"] += file_size
+            summary_by_type[doc_type]["files"].append({
+                "filename": doc.get("filename"),
+                "original_filename": doc.get("original_filename"),
+                "stored_at": doc.get("stored_at"),
+                "file_size": file_size
+            })
+        
+        logger.info(f"✅ Document summary prepared: {len(summary_by_type)} types, {len(documents)} total documents")
+        
+        return {
+            "success": True,
+            "case_id": case_id,
+            "total_documents": len(documents),
+            "total_size_bytes": total_size,
+            "total_size_mb": round(total_size / 1024 / 1024, 2),
+            "document_types": len(summary_by_type),
+            "summary_by_type": summary_by_type,
+            "last_updated": documents_info.get("last_updated", ""),
+            "message": f"Resumo de {len(documents)} documentos organizados por tipo"
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Error getting document summary: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao gerar resumo de documentos: {str(e)}"
+        )
+
 # Health Check Endpoint - CRITICAL for deployment (RESILIENT VERSION)
 @api_router.get("/health")
 async def health_check():
