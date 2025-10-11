@@ -386,19 +386,20 @@ const DocumentUploadAuto = () => {
       reader.onload = async (e) => {
         const base64 = e.target?.result as string;
         
-        // Analyze document with REAL AI (Dr. Miguel)
-        const aiAnalysis = await realDocumentAnalysis(file, documentType);
-        
-        console.log('🔍 AI Analysis Result:', JSON.stringify(aiAnalysis, null, 2));
-        console.log('🔍 Checking name mismatch:', {
-          documentType,
-          name_mismatch_resolvable: aiAnalysis?.name_mismatch_resolvable,
-          name_mismatch_details: aiAnalysis?.name_mismatch_details
-        });
-        
-        // Remover do processamento e adicionar aos completados
-        setProcessingDocs(prev => prev.filter(f => f !== fileName));
-        setCompletedDocs(prev => [...prev, fileName]);
+        try {
+          // Analyze document with REAL AI (Dr. Miguel)
+          const aiAnalysis = await realDocumentAnalysis(file, documentType);
+          
+          console.log('🔍 AI Analysis Result:', JSON.stringify(aiAnalysis, null, 2));
+          console.log('🔍 Checking name mismatch:', {
+            documentType,
+            name_mismatch_resolvable: aiAnalysis?.name_mismatch_resolvable,
+            name_mismatch_details: aiAnalysis?.name_mismatch_details
+          });
+          
+          // Remover do processamento e adicionar aos completados
+          setProcessingDocs(prev => prev.filter(f => f !== fileName));
+          setCompletedDocs(prev => [...prev, fileName]);
         
         // Verificar divergência de nome (apenas para passaportes)
         if (documentType === 'passport' && aiAnalysis?.name_mismatch_resolvable) {
