@@ -8313,28 +8313,29 @@ async def analyze_document_with_real_ai(
             
             logger.info(f"✅ Real Vision validation complete - Total Issues: {len(analysis_result.get('issues', []))}")
             
-            # NOVO: Verificar se há divergência de nome que pode ser resolvida
+            # NOVO: Verificar se há divergência de nome que pode ser resolvida - ANTES DO RETURN!
             logger.info(f"🔍🔍🔍 CHECKPOINT 1: About to check name mismatch")
             logger.info(f"🔍🔍🔍 document_type={document_type}, is_passport={document_type == 'passport'}")
             logger.info(f"🔍🔍🔍 applicant_name='{applicant_name}', case_id='{case_id}'")
             
             if document_type == 'passport':
                 logger.info(f"🔍 CALLING _check_for_name_mismatch_resolution with applicant_name='{applicant_name}'")
-                name_mismatch_info = await _check_for_name_mismatch_resolution(
-                    analysis_result, case_id, applicant_name
-                )
+                try:
+                    name_mismatch_info = await _check_for_name_mismatch_resolution(
+                        analysis_result, case_id, applicant_name
+                    )
+                    logger.info(f"🔍 RESULT from _check_for_name_mismatch_resolution: {name_mismatch_info}")
+                    
+                    if name_mismatch_info:
+                        logger.info(f"✅ UPDATING analysis_result with name_mismatch_info")
+                        analysis_result.update(name_mismatch_info)
+                        logger.info(f"✅ name_mismatch_resolvable now in analysis_result: {analysis_result.get('name_mismatch_resolvable')}")
+                    else:
+                        logger.info(f"ℹ️ No name mismatch info to add")
+                except Exception as name_check_error:
+                    logger.error(f"⚠️ Error checking name mismatch: {name_check_error}")
             else:
                 logger.info(f"ℹ️ Skipping name mismatch check - not a passport (type: {document_type})")
-                name_mismatch_info = None
-            
-            logger.info(f"🔍 RESULT from _check_for_name_mismatch_resolution: {name_mismatch_info}")
-            
-            if name_mismatch_info:
-                logger.info(f"✅ UPDATING analysis_result with name_mismatch_info")
-                analysis_result.update(name_mismatch_info)
-                logger.info(f"✅ name_mismatch_resolvable now in analysis_result: {analysis_result.get('name_mismatch_resolvable')}")
-            else:
-                logger.info(f"ℹ️ No name mismatch info to add")
             
             # NOVO: Armazenar documento se aceito (não armazenar se há divergência de nome resolvível)
             if not analysis_result.get('name_mismatch_resolvable'):
@@ -8352,6 +8353,7 @@ async def analyze_document_with_real_ai(
                     # Continue even if storage fails
             
             # Return combined analysis result (Policy Engine + Real Vision Analysis + Quality Assessment)
+            logger.info(f"🎯 FINAL: Returning analysis_result with name_mismatch_resolvable={analysis_result.get('name_mismatch_resolvable')}")
             return analysis_result
             
         except Exception as validation_error:
