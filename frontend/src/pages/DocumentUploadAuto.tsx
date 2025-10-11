@@ -493,23 +493,45 @@ const DocumentUploadAuto = () => {
       formData.append('case_id', caseId);
       
       console.log('📤 Sending to:', `${backendUrl}/api/documents/analyze-with-ai`);
-      
-      // Call REAL backend endpoint with AI analysis
-      const response = await fetch(`${backendUrl}/api/documents/analyze-with-ai`, {
-        method: 'POST',
-        body: formData
+      console.log('📤 FormData fields:', {
+        file_name: file.name,
+        file_size: file.size,
+        file_type: file.type,
+        document_type: documentType,
+        case_id: caseId
       });
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ Backend error:', response.status, errorText);
-        throw new Error(`Backend analysis failed: ${response.status} - ${errorText}`);
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+      
+      try {
+        // Call REAL backend endpoint with AI analysis
+        const response = await fetch(`${backendUrl}/api/documents/analyze-with-ai`, {
+          method: 'POST',
+          body: formData,
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('❌ Backend error:', response.status, errorText);
+          throw new Error(`Análise falhou (${response.status}): ${errorText.substring(0, 200)}`);
+        }
+        
+        const analysisResult = await response.json();
+        console.log('✅ Backend analysis result:', analysisResult);
+        
+        return analysisResult;
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId);
+        if (fetchError.name === 'AbortError') {
+          throw new Error('Análise demorou muito (timeout de 60s). Tente com um arquivo menor.');
+        }
+        throw fetchError;
       }
-      
-      const analysisResult = await response.json();
-      console.log('✅ Backend analysis result:', analysisResult);
-      
-      return analysisResult;
     } catch (error) {
       console.error('❌ Real document analysis error:', error);
       throw error;
