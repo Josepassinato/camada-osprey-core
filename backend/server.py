@@ -8314,10 +8314,18 @@ async def analyze_document_with_real_ai(
             logger.info(f"✅ Real Vision validation complete - Total Issues: {len(analysis_result.get('issues', []))}")
             
             # NOVO: Verificar se há divergência de nome que pode ser resolvida
-            logger.info(f"🔍 CALLING _check_for_name_mismatch_resolution with applicant_name='{applicant_name}'")
-            name_mismatch_info = await _check_for_name_mismatch_resolution(
-                analysis_result, case_id, applicant_name
-            )
+            logger.info(f"🔍🔍🔍 CHECKPOINT 1: About to check name mismatch")
+            logger.info(f"🔍🔍🔍 document_type={document_type}, is_passport={document_type == 'passport'}")
+            logger.info(f"🔍🔍🔍 applicant_name='{applicant_name}', case_id='{case_id}'")
+            
+            if document_type == 'passport':
+                logger.info(f"🔍 CALLING _check_for_name_mismatch_resolution with applicant_name='{applicant_name}'")
+                name_mismatch_info = await _check_for_name_mismatch_resolution(
+                    analysis_result, case_id, applicant_name
+                )
+            else:
+                logger.info(f"ℹ️ Skipping name mismatch check - not a passport (type: {document_type})")
+                name_mismatch_info = None
             
             logger.info(f"🔍 RESULT from _check_for_name_mismatch_resolution: {name_mismatch_info}")
             
