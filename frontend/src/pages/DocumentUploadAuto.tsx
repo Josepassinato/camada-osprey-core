@@ -1034,6 +1034,23 @@ const DocumentUploadAuto = () => {
       <div className="px-4 py-6 sm:px-6 sm:py-8">
         <div className="max-w-4xl mx-auto space-y-6">
           
+          {/* Upload Error Alert */}
+          {uploadError && (
+            <div className="bg-red-50 border-2 border-red-500 rounded-lg p-4 flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-red-900 text-sm mb-1">Erro no Upload</h3>
+                <p className="text-red-700 text-sm">{uploadError}</p>
+                <button 
+                  onClick={() => setUploadError('')}
+                  className="mt-2 text-xs text-red-600 underline hover:text-red-800"
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
+          )}
+          
           {/* Progress */}
           <div className="bg-white border border-black rounded-lg p-4">
             <div className="flex items-center justify-between mb-3">
