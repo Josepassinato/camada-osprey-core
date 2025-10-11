@@ -457,9 +457,10 @@ const DocumentUploadAuto = () => {
 
           // Save to case
           await saveDocumentToCase(uploadedFile, aiAnalysis);
-        } catch (analysisError) {
+        } catch (analysisError: any) {
           console.error('❌ Analysis error:', analysisError);
-          setError(`Erro na análise: ${analysisError}`);
+          const errorMsg = analysisError?.message || String(analysisError);
+          setUploadError(`Erro na análise: ${errorMsg}`);
           // Remover do processamento em caso de erro
           setProcessingDocs(prev => prev.filter(f => f !== fileName));
           setIsUploading(false);
@@ -469,9 +470,10 @@ const DocumentUploadAuto = () => {
       
       reader.readAsDataURL(file);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Upload error:', error);
-      setError(`Erro no upload: ${error}`);
+      const errorMsg = error?.message || String(error);
+      setUploadError(`Erro no upload: ${errorMsg}`);
       // Remover do processamento em caso de erro
       setProcessingDocs(prev => prev.filter(f => f !== file.name));
     } finally {
