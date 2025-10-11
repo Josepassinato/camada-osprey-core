@@ -1,0 +1,14 @@
+{
+  "case_id": "OSP-B4670EB4",
+  "documents": [
+    {
+      "filename": "passport_20251011_035344_050f325580e2d9b2_passport_test.jpeg",
+      "document_type": "passport",
+      "original_filename": "passport_test.jpeg",
+      "stored_at": "2025-10-11T03:53:44.337820+00:00",
+      "file_hash": "050f325580e2d9b2",
+      "file_size": 1299072
+    }
+  ],
+  "last_updated": "2025-10-11T03:53:44.339059+00:00"
+}
