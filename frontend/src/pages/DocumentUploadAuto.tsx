@@ -469,6 +469,11 @@ const DocumentUploadAuto = () => {
   const realDocumentAnalysis = async (file: File, documentType: string) => {
     try {
       console.log('🔄 Calling REAL backend AI analysis for:', file.name, documentType);
+      console.log('🔍 Case ID:', caseId);
+      
+      if (!caseId) {
+        throw new Error('Case ID não disponível. Por favor, recarregue a página.');
+      }
       
       const backendUrl = import.meta.env.VITE_BACKEND_URL;
       
@@ -476,7 +481,9 @@ const DocumentUploadAuto = () => {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('document_type', documentType);
-      formData.append('case_id', caseId || '');
+      formData.append('case_id', caseId);
+      
+      console.log('📤 Sending to:', `${backendUrl}/api/documents/analyze-with-ai`);
       
       // Call REAL backend endpoint with AI analysis
       const response = await fetch(`${backendUrl}/api/documents/analyze-with-ai`, {
@@ -485,7 +492,9 @@ const DocumentUploadAuto = () => {
       });
       
       if (!response.ok) {
-        throw new Error(`Backend analysis failed: ${response.status}`);
+        const errorText = await response.text();
+        console.error('❌ Backend error:', response.status, errorText);
+        throw new Error(`Backend analysis failed: ${response.status} - ${errorText}`);
       }
       
       const analysisResult = await response.json();
@@ -493,7 +502,7 @@ const DocumentUploadAuto = () => {
       
       return analysisResult;
     } catch (error) {
-      console.error('Real document analysis error:', error);
+      console.error('❌ Real document analysis error:', error);
       throw error;
     }
   };
