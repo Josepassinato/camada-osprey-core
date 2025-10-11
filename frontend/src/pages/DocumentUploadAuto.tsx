@@ -492,11 +492,18 @@ const DocumentUploadAuto = () => {
       
       const backendUrl = import.meta.env.VITE_BACKEND_URL;
       
+      // Get visa type from case
+      const visaType = case_?.form_code;
+      if (!visaType) {
+        throw new Error('Tipo de visto não disponível. Por favor, recarregue a página.');
+      }
+      
       // Create FormData for backend
       const formData = new FormData();
       formData.append('file', file);
       formData.append('document_type', documentType);
       formData.append('case_id', caseId);
+      formData.append('visa_type', visaType); // ✅ Campo obrigatório adicionado!
       
       console.log('📤 Sending to:', `${backendUrl}/api/documents/analyze-with-ai`);
       console.log('📤 FormData fields:', {
@@ -504,7 +511,8 @@ const DocumentUploadAuto = () => {
         file_size: file.size,
         file_type: file.type,
         document_type: documentType,
-        case_id: caseId
+        case_id: caseId,
+        visa_type: visaType
       });
       
       // Add timeout to prevent hanging
