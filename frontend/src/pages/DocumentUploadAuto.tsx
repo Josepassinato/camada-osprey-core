@@ -217,7 +217,8 @@ const DocumentUploadAuto = () => {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(""); // Erro crítico (caso não encontrado)
+  const [uploadError, setUploadError] = useState(""); // Erro de upload (não crítico)
   
   // Estados para indicadores de processamento
   const [processingDocs, setProcessingDocs] = useState<string[]>([]);
