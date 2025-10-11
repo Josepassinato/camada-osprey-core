@@ -365,9 +365,12 @@ const DocumentUploadAuto = () => {
     setIsUploading(true);
     
     try {
+      // Limpar erro anterior
+      setUploadError('');
+      
       // Validate file
       if (file.size > 10 * 1024 * 1024) { // 10MB
-        setError('Arquivo muito grande. Máximo 10MB.');
+        setUploadError('Arquivo muito grande. Máximo 10MB.');
         return;
       }
 
