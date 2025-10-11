@@ -451,15 +451,23 @@ const DocumentUploadAuto = () => {
           } : req
         ));
 
-        // Save to case
-        await saveDocumentToCase(uploadedFile, aiAnalysis);
+          // Save to case
+          await saveDocumentToCase(uploadedFile, aiAnalysis);
+        } catch (analysisError) {
+          console.error('❌ Analysis error:', analysisError);
+          setError(`Erro na análise: ${analysisError}`);
+          // Remover do processamento em caso de erro
+          setProcessingDocs(prev => prev.filter(f => f !== fileName));
+          setIsUploading(false);
+          return;
+        }
       };
       
       reader.readAsDataURL(file);
 
     } catch (error) {
-      console.error('Upload error:', error);
-      setError('Erro no upload. Tente novamente.');
+      console.error('❌ Upload error:', error);
+      setError(`Erro no upload: ${error}`);
       // Remover do processamento em caso de erro
       setProcessingDocs(prev => prev.filter(f => f !== file.name));
     } finally {
