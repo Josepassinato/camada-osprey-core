@@ -375,7 +375,7 @@ const AutoApplicationStart = () => {
               <div className="bg-white border border-gray-300 p-4 rounded">
                 <p className="font-medium text-black mb-2">✅ Você mantém controle total:</p>
                 <ul className="space-y-1 text-xs text-gray-600">
-                  <li>• Suas informações são organizadas pela nossa sistema</li>
+                  <li>• Suas informações são organizadas pelo nosso sistema</li>
                   <li>• Formulários oficiais são preenchidos automaticamente</li>
                   <li>• Você revisa e submete diretamente no USCIS</li>
                   <li>• Pode consultar advogados quando desejar</li>
