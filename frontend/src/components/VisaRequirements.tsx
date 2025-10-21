@@ -739,7 +739,7 @@ const VisaRequirements = ({ visaType, onClose }: VisaRequirementsProps) => {
             <p className="font-medium text-orange-800 mb-2">⚠️ Tradução Juramentada Necessária</p>
             <p className="text-sm text-orange-700">
               Documentos marcados com <Badge variant="outline" className="mx-1 text-xs border-orange-400 text-orange-700">Tradução Juramentada</Badge> 
-              devem ser traduzidos por tradutor certificado. Nossa IA identificará automaticamente quando seus documentos 
+              devem ser traduzidos por tradutor certificado. Nosso sistema identificará automaticamente quando seus documentos 
               precisarem de tradução e oferecerá parceiros qualificados.
             </p>
           </div>
