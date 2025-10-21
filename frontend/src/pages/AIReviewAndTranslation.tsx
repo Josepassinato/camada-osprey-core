@@ -53,7 +53,7 @@ const AIReviewAndTranslation = () => {
     {
       id: 'validation',
       title: 'Validação de Dados',
-      description: 'IA verifica se todas as respostas fazem sentido e estão completas',
+      description: 'Sistema verifica se todas as respostas fazem sentido e estão completas',
       status: 'pending'
     },
     {
