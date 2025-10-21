@@ -31,7 +31,7 @@ interface ValidationIssue {
   suggestion: string;
 }
 
-interface AIProcessingStep {
+interface SystemProcessingStep {
   id: string;
   title: string;
   description: string;
