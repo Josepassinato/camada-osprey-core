@@ -267,7 +267,7 @@ const SystemReviewAndTranslation = () => {
                     Clique no botão abaixo para iniciar o processamento inteligente do seu formulário.
                   </p>
                   <Button
-                    onClick={startAIProcessing}
+                    onClick={startSystemProcessing}
                     className="bg-black text-white hover:bg-gray-800 px-8 py-3"
                     size="lg"
                   >
