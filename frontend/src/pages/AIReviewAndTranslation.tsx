@@ -250,7 +250,7 @@ const SystemReviewAndTranslation = () => {
 
         {/* Main Content */}
         <div className="space-y-6">
-          {/* AI Processing Status */}
+          {/* System Processing Status */}
           <Card className="border-black">
             <CardHeader className="bg-black text-white">
               <CardTitle className="flex items-center gap-3">
