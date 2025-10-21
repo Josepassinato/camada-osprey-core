@@ -198,7 +198,7 @@ const AutoApplicationStart = () => {
               />
               <label htmlFor="terms-button" className="text-sm text-gray-600">
                 Entendo que esta é uma plataforma de auxílio digital para self-petitioners e não constitui consultoria jurídica. 
-                Aceito fazer minha própria aplicação com auxílio da IA e os termos de uso.
+                Aceito fazer minha própria aplicação com auxílio do sistema e os termos de uso.
               </label>
             </div>
             
