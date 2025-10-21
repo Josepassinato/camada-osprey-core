@@ -79,7 +79,7 @@ const CTA = () => {
                   onClick={() => navigate('/chat')}
                 >
                   <MessageSquare className="h-5 w-5" />
-                  Falar com Especialista IA
+                  Falar com Especialista
                 </Button>
               </div>
 
