@@ -368,7 +368,7 @@ const SystemReviewAndTranslation = () => {
                     Formulário USCIS Gerado com Sucesso!
                   </h3>
                   <p className="text-green-700 mb-6">
-                    Sua IA assistente analisou todas as respostas, verificou consistência, 
+                    Seu sistema assistente analisou todas as respostas, verificou consistência, 
                     traduziu para inglês jurídico e gerou o formulário oficial do USCIS.
                   </p>
                   
