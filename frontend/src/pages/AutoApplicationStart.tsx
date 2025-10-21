@@ -216,7 +216,7 @@ const AutoApplicationStart = () => {
             </div>
             <div className="flex items-center">
               <Zap className="h-4 w-4 mr-2" />
-              IA Avançada
+              Sistema Avançado
             </div>
             <div className="flex items-center">
               <FileText className="h-4 w-4 mr-2" />
