@@ -272,7 +272,7 @@ const SystemReviewAndTranslation = () => {
                     size="lg"
                   >
                     <Wand2 className="h-5 w-5 mr-2" />
-                    Iniciar Processamento IA
+                    Iniciar Processamento do Sistema
                   </Button>
                 </div>
               )}
