@@ -169,7 +169,7 @@ const SystemReviewAndTranslation = () => {
       console.error('System processing error:', error);
       toast({
         title: "Erro no Processamento",
-        description: "Erro durante o processamento da IA. Tente novamente.",
+        description: "Erro durante o processamento do sistema. Tente novamente.",
         variant: "destructive",
       });
     } finally {
