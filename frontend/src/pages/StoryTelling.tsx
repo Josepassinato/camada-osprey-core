@@ -735,7 +735,7 @@ As informações extraídas serão usadas para preencher automaticamente os form
                       <li>• Seja honesto e detalhado</li>
                       <li>• Inclua datas importantes</li>
                       <li>• Mencione documentos que você tem</li>
-                      <li>• Nossa sistema organiza as informações automaticamente</li>
+                      <li>• Nosso sistema organiza as informações automaticamente</li>
                       <li>• Você pode gravar ao invés de escrever</li>
                     </ul>
                   </div>
