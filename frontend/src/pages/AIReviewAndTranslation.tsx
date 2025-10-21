@@ -77,7 +77,7 @@ const AIReviewAndTranslation = () => {
     {
       id: 'final_review',
       title: 'Revisão Final',
-      description: 'IA confirma que formulário está completo e pronto',
+      description: 'Sistema confirma que formulário está completo e pronto',
       status: 'pending'
     }
   ]);
