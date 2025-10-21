@@ -115,7 +115,7 @@ const AIReviewAndTranslation = () => {
     }
   };
 
-  const startAIProcessing = async () => {
+  const startSystemProcessing = async () => {
     setIsProcessing(true);
     setCurrentStepIndex(0);
     
