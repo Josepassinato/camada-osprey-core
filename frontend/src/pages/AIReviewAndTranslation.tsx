@@ -421,4 +421,4 @@ const SystemReviewAndTranslation = () => {
   );
 };
 
-export default AIReviewAndTranslation;
+export default SystemReviewAndTranslation;
