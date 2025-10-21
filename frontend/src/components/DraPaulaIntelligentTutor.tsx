@@ -169,7 +169,7 @@ export class DraPaulaIntelligentTutor {
       trigger: 'onComplete',
       severity: 'success',
       message: '⭐ **Formulário Perfeito**: Todas as seções preenchidas sem erros! Excelente trabalho.',
-      actions: [{ label: 'Processar IA', event: 'go:ai' }],
+      actions: [{ label: 'Processar Sistema', event: 'go:ai' }],
       draPaulaInsight: 'Formulários completos e precisos aceleram o processo de aprovação.',
       priority: 5
     }
