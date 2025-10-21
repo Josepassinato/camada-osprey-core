@@ -65,7 +65,7 @@ const AIReviewAndTranslation = () => {
     {
       id: 'translation',
       title: 'Tradução Inteligente',
-      description: 'IA traduz respostas para inglês jurídico adequado ao USCIS',
+      description: 'Sistema traduz respostas para inglês jurídico adequado ao USCIS',
       status: 'pending'
     },
     {
