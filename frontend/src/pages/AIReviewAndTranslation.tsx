@@ -97,7 +97,7 @@ const AIReviewAndTranslation = () => {
         const data = await response.json();
         setCase(data.case);
         
-        // Check if AI processing was already completed
+        // Check if system processing was already completed
         if (data.case.uscis_form_generated) {
           setAllCompleted(true);
           setProcessingSteps(prev => prev.map(step => ({ ...step, status: 'completed' })));
