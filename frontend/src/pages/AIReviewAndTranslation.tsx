@@ -243,7 +243,7 @@ const SystemReviewAndTranslation = () => {
           </h1>
           
           <p className="text-gray-600">
-            Nossa IA está analisando suas respostas, verificando consistência e gerando 
+            Nosso sistema está analisando suas respostas, verificando consistência e gerando 
             o formulário USCIS oficial em inglês.
           </p>
         </div>
