@@ -71,7 +71,7 @@ const AIReviewAndTranslation = () => {
     {
       id: 'form_generation',
       title: 'Geração do Formulário Oficial',
-      description: 'IA mapeia dados para formulário USCIS oficial',
+      description: 'Sistema mapeia dados para formulário USCIS oficial',
       status: 'pending'
     },
     {
