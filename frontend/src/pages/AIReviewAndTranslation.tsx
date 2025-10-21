@@ -177,7 +177,7 @@ const SystemReviewAndTranslation = () => {
     }
   };
 
-  const processAIStep = async (stepId: string) => {
+  const processSystemStep = async (stepId: string) => {
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/ai-processing/step`, {
         method: 'POST',
