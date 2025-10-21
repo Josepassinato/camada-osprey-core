@@ -85,7 +85,7 @@ const ResponsibilityConfirmation = ({
       letter_verification: {
         title: "Verificação e Aprovação da Carta Gerada",
         icon: <Signature className="h-6 w-6 text-purple-600" />,
-        description: "Revise a carta gerada pela IA e confirme que todas as informações são verdadeiras.",
+        description: "Revise a carta gerada pelo sistema e confirme que todas as informações são verdadeiras.",
         confirmations: [
           {
             id: "reviewed_letter_content",
