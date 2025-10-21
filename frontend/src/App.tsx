@@ -60,7 +60,7 @@ const App = () => (
           <Route path="/auto-application/select-form" element={<SelectForm />} />
           <Route path="/auto-application/case/:caseId/basic-data" element={<BasicData />} />
           <Route path="/auto-application/case/:caseId/friendly-form" element={<FriendlyForm />} />
-          <Route path="/auto-application/case/:caseId/ai-review" element={<AIReviewAndTranslation />} />
+          <Route path="/auto-application/case/:caseId/ai-review" element={<SystemReviewAndTranslation />} />
           <Route path="/auto-application/case/:caseId/uscis-form" element={<USCISFormFilling />} />
           <Route path="/auto-application/case/:caseId/cover-letter" element={<CoverLetterModule />} />
           <Route path="/auto-application/case/:caseId/documents" element={<DocumentUploadAuto />} />
