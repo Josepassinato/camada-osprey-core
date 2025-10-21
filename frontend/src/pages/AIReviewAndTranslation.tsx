@@ -129,7 +129,7 @@ const SystemReviewAndTranslation = () => {
           index === i ? { ...step, status: 'processing' } : step
         ));
         
-        // Call AI processing for this step
+        // Call system processing for this step
         const result = await processAIStep(processingSteps[i].id);
         
         if (result.success) {
