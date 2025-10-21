@@ -803,7 +803,7 @@ export const OspreyOwlTutor: React.FC<OspreyOwlTutorProps> = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Brain className="h-4 w-4 text-blue-600" />
-                <span className="font-bold text-sm text-blue-900">IA Personalizada</span>
+                <span className="font-bold text-sm text-blue-900">Sistema Personalizado</span>
               </div>
               <button
                 onClick={() => setShowPersonalization(false)}
