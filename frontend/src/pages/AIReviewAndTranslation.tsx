@@ -130,7 +130,7 @@ const SystemReviewAndTranslation = () => {
         ));
         
         // Call system processing for this step
-        const result = await processAIStep(processingSteps[i].id);
+        const result = await processSystemStep(processingSteps[i].id);
         
         if (result.success) {
           // Update step to completed
