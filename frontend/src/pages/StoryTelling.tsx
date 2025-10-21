@@ -437,7 +437,7 @@ As informações extraídas serão usadas para preencher automaticamente os form
                   Sua História Pessoal
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Conte sua história de forma natural. Nossa sistema vai extrair as informações importantes automaticamente.
+                  Conte sua história de forma natural. Nosso sistema vai extrair as informações importantes automaticamente.
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
