@@ -49,7 +49,7 @@ const SystemReviewAndTranslation = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [validationIssues, setValidationIssues] = useState<ValidationIssue[]>([]);
-  const [processingSteps, setProcessingSteps] = useState<AIProcessingStep[]>([
+  const [processingSteps, setProcessingSteps] = useState<SystemProcessingStep[]>([
     {
       id: 'validation',
       title: 'Validação de Dados',
