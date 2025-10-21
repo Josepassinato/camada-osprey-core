@@ -248,7 +248,7 @@ const AutoApplicationStart = () => {
                 step: "01",
                 icon: <User className="h-8 w-8" />,
                 title: "Conte sua história",
-                description: "Nossa IA analisa sua situação pessoal e extrai informações importantes automaticamente em português."
+                description: "Nosso sistema analisa sua situação pessoal e extrai informações importantes automaticamente em português."
               },
               {
                 step: "02", 
