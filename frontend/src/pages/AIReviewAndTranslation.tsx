@@ -59,7 +59,7 @@ const AIReviewAndTranslation = () => {
     {
       id: 'consistency',
       title: 'Verificação de Consistência',
-      description: 'IA confirma que informações são consistentes entre si',
+      description: 'Sistema confirma que informações são consistentes entre si',
       status: 'pending'
     },
     {
