@@ -613,8 +613,8 @@ async def analyze_document_with_ai(document: UserDocument) -> Dict[str, Any]:
         return analysis
 
     except Exception as e:
-        logger.error(f"Error analyzing document with AI: {str(e)}")
-        # Return basic analysis if AI fails
+        logger.error(f"Error analyzing document with sistema: {str(e)}")
+        # Return basic analysis if sistema fails
         return {
             "completeness_score": 50,
             "validity_status": "unclear",
@@ -661,7 +661,7 @@ def get_progress_percentage(current_step: str) -> int:
 
 # Education helper functions (NEW)
 async def generate_interview_questions(interview_type: InterviewType, visa_type: VisaType, difficulty_level: DifficultyLevel) -> List[Dict[str, Any]]:
-    """Generate interview questions using AI"""
+    """Generate interview questions using sistema"""
     try:
         difficulty_map = {
             DifficultyLevel.beginner: "perguntas básicas e introdutórias",
@@ -739,7 +739,7 @@ async def generate_interview_questions(interview_type: InterviewType, visa_type:
         return []
 
 async def evaluate_interview_answer(question: Dict[str, Any], answer: str, visa_type: VisaType) -> Dict[str, Any]:
-    """Evaluate interview answer using AI"""
+    """Evaluate interview answer using sistema"""
     try:
         prompt = f"""
         Avalie esta resposta de entrevista de imigração:
@@ -883,7 +883,7 @@ async def generate_personalized_tips(user_id: str, user_profile: dict, applicati
     return tips
 
 async def search_knowledge_base(query: str, visa_type: Optional[VisaType] = None) -> Dict[str, Any]:
-    """Search knowledge base using AI"""
+    """Search knowledge base using sistema"""
     try:
         context_filter = f"para visto {visa_type.value}" if visa_type else "para imigração americana"
         
@@ -935,7 +935,7 @@ async def search_knowledge_base(query: str, visa_type: Optional[VisaType] = None
                 "answer": "Desculpe, não foi possível processar sua pergunta no momento. Tente reformulá-la ou consulte nossa seção de guias interativos.",
                 "related_topics": ["Guias de Visto", "Simulador de Entrevista", "Gestão de Documentos"],
                 "next_steps": ["Explore os guias interativos", "Use o simulador de entrevista"],
-                "resources": ["Centro de Ajuda", "Chat com IA"],
+                "resources": ["Centro de Ajuda", "Chat com sistema"],
                 "warnings": ["Esta é uma ferramenta educativa - não substitui consultoria jurídica"],
                 "confidence": "baixo"
             }
@@ -1446,7 +1446,7 @@ async def upload_document(
     issue_date: Optional[str] = Form(None),
     current_user = Depends(get_current_user)
 ):
-    """Upload a document with AI analysis"""
+    """Upload a document with sistema analysis"""
     try:
         # Validate file
         if not file:
@@ -1503,11 +1503,11 @@ async def upload_document(
         # Save to database
         await db.documents.insert_one(document.dict())
         
-        # Analyze with AI in background
+        # Analyze with sistema in background
         try:
             ai_analysis = await analyze_document_with_ai(document)
             
-            # Update document with AI analysis
+            # Update document with sistema analysis
             suggestions = ai_analysis.get('suggestions', [])
             status = DocumentStatus.approved if ai_analysis.get('validity_status') == 'valid' else DocumentStatus.requires_improvement
             
@@ -1524,8 +1524,8 @@ async def upload_document(
             )
             
         except Exception as ai_error:
-            logger.error(f"AI analysis failed: {str(ai_error)}")
-            # Continue without AI analysis
+            logger.error(f"sistema analysis failed: {str(ai_error)}")
+            # Continue without sistema analysis
         
         return {
             "message": "Document uploaded successfully",
@@ -1627,7 +1627,7 @@ async def get_validation_capabilities(current_user = Depends(get_current_user)):
                     "field_extractor": "Advanced regex with ML validation",
                     "translation_gate": "Language detection and requirements",
                     "consistency_engine": "Cross-document verification",
-                    "document_classifier": "AI-powered type detection"
+                    "document_classifier": "sistema-powered type detection"
                 }
             },
             "version": "2.0.0-phase3",
@@ -1640,7 +1640,7 @@ async def get_validation_capabilities(current_user = Depends(get_current_user)):
 
 @api_router.get("/documents/{document_id}")
 async def get_document_details(document_id: str, current_user = Depends(get_current_user)):
-    """Get document details including AI analysis"""
+    """Get document details including sistema analysis"""
     try:
         document = await db.documents.find_one({
             "id": document_id,
@@ -1738,7 +1738,7 @@ async def delete_document(document_id: str, current_user = Depends(get_current_u
 
 @api_router.post("/documents/{document_id}/reanalyze")
 async def reanalyze_document(document_id: str, current_user = Depends(get_current_user)):
-    """Reanalyze document with AI"""
+    """Reanalyze document with sistema"""
     try:
         # Get document
         document_data = await db.documents.find_one({
@@ -1752,7 +1752,7 @@ async def reanalyze_document(document_id: str, current_user = Depends(get_curren
         # Create document object for analysis
         document = UserDocument(**document_data)
         
-        # Analyze with AI
+        # Analyze with sistema
         ai_analysis = await analyze_document_with_ai(document)
         
         # Update document with new analysis
@@ -2069,7 +2069,7 @@ async def claim_anonymous_case(case_id: str, current_user = Depends(get_current_
 
 @api_router.post("/auto-application/extract-facts")
 async def extract_facts_from_story(request: dict):
-    """Extract structured facts from user's story using AI"""
+    """Extract structured facts from user's story using sistema"""
     try:
         case_id = request.get("case_id")
         story_text = request.get("story_text", "")
@@ -2081,7 +2081,7 @@ async def extract_facts_from_story(request: dict):
         # Get visa specifications for context
         visa_specs = get_visa_specifications(form_code) if form_code else {}
         
-        # Create AI prompt for fact extraction
+        # Create sistema prompt for fact extraction
         extraction_prompt = f"""
 Você é um assistente especializado em extrair informações estruturadas de narrativas para aplicações de imigração dos EUA.
 
@@ -2149,7 +2149,7 @@ Responda apenas com o JSON estruturado, sem explicações adicionais.
         except json.JSONDecodeError:
             # Fallback: create structured response based on keywords
             extracted_facts = {
-                "personal_info": {"extracted_from": "AI analysis of user story"},
+                "personal_info": {"extracted_from": "sistema analysis of user story"},
                 "immigration_history": {"status": "Extracted from narrative"},
                 "family_details": {"mentioned_in_story": True},
                 "employment_info": {"details": "See user narrative"},
@@ -2183,7 +2183,7 @@ Responda apenas com o JSON estruturado, sem explicações adicionais.
 
 @api_router.post("/auto-application/generate-forms")
 async def generate_official_forms(request: dict):
-    """Generate official USCIS forms from simplified responses using AI"""
+    """Generate official USCIS forms from simplified responses using sistema"""
     try:
         case_id = request.get("case_id")
         form_responses = request.get("form_responses", {})
@@ -2195,7 +2195,7 @@ async def generate_official_forms(request: dict):
         # Get visa specifications for context
         visa_specs = get_visa_specifications(form_code) if form_code else {}
         
-        # Create AI prompt for form conversion
+        # Create sistema prompt for form conversion
         conversion_prompt = f"""
 Você é um especialista em formulários do USCIS. Converta as respostas simplificadas em português para o formato oficial do formulário {form_code}.
 
@@ -2240,7 +2240,7 @@ Responda apenas com o JSON estruturado, sem explicações adicionais.
             max_tokens=3000
         )
         
-        # Parse AI response
+        # Parse sistema response
         ai_response = response.choices[0].message.content.strip()
         
         # Try to extract JSON from the response
@@ -4093,7 +4093,7 @@ async def get_dashboard(current_user = Depends(get_current_user)):
 # Chat history route (keeping existing)
 @api_router.get("/chat/history")
 async def get_chat_history(current_user = Depends(get_current_user)):
-    """Get user's chat history with AI"""
+    """Get user's chat history with sistema"""
     try:
         sessions = await db.chat_sessions.find(
             {"user_id": current_user["id"]}, {"_id": 0}
@@ -4122,7 +4122,7 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
-# AI-powered routes (keeping existing with user tracking)
+# sistema-powered routes (keeping existing with user tracking)
 @api_router.post("/chat", response_model=ChatResponse)
 async def immigration_chat(request: ChatRequest, current_user = Depends(get_current_user)):
     """Chat assistente especializado em imigração usando OpenAI"""
@@ -5066,7 +5066,7 @@ async def authorize_uscis_form(case_id: str, request: dict):
             "id": f"uscis_form_{case_id}",
             "document_type": "uscis_form",
             "name": f"Formulário USCIS {case.get('form_code', '')}",
-            "description": "Formulário oficial gerado automaticamente pela IA e autorizado pelo aplicante",
+            "description": "Formulário oficial gerado automaticamente pela sistema e autorizado pelo aplicante",
             "content_type": "application/pdf",
             "generated_by_ai": True,
             "authorized_by_user": True,
@@ -5112,10 +5112,10 @@ async def authorize_uscis_form(case_id: str, request: dict):
         logger.error(f"Error authorizing USCIS form: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error authorizing form: {str(e)}")
 
-# AI Processing Endpoint
+# sistema Processing Endpoint
 @api_router.post("/ai-processing/step")
 async def process_ai_step(request: dict):
-    """Process a single AI step for auto-application form generation with flexible parameters"""
+    """Process a single sistema step for auto-application form generation with flexible parameters"""
     try:
         # Extract parameters with flexible structure support
         case_id = request.get("case_id")
@@ -5155,7 +5155,7 @@ async def process_ai_step(request: dict):
         
         start_time = datetime.utcnow()
         
-        # Process different AI steps with enhanced error handling
+        # Process different sistema steps with enhanced error handling
         try:
             if step_id == "validation":
                 result = await validate_form_data_ai(case, friendly_form_data, basic_data)
@@ -5170,8 +5170,8 @@ async def process_ai_step(request: dict):
             else:
                 raise HTTPException(status_code=400, detail="Invalid step_id")
         except Exception as ai_error:
-            logger.error(f"AI processing error for step {step_id}: {str(ai_error)}")
-            # Provide fallback response for AI processing errors
+            logger.error(f"sistema processing error for step {step_id}: {str(ai_error)}")
+            # Provide fallback response for sistema processing errors
             result = {
                 "success": True,
                 "details": f"Processamento {step_id} concluído com observações",
@@ -5194,11 +5194,11 @@ async def process_ai_step(request: dict):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error in AI processing step {step_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error processing AI step: {str(e)}")
+        logger.error(f"Error in sistema processing step {step_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error processing sistema step: {str(e)}")
 
 async def validate_form_data_ai(case, friendly_form_data, basic_data):
-    """AI validation of form data completeness and accuracy"""
+    """sistema validation of form data completeness and accuracy"""
     try:
         from emergentintegrations import EmergentLLM
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
@@ -5283,11 +5283,11 @@ async def validate_form_data_ai(case, friendly_form_data, basic_data):
         }
         
     except Exception as e:
-        logger.error(f"Error in AI validation: {str(e)}")
+        logger.error(f"Error in sistema validation: {str(e)}")
         return {"details": "Validação concluída", "validation_issues": []}
 
 async def check_data_consistency_ai(case, friendly_form_data, basic_data):
-    """AI check for data consistency across different form sections"""
+    """sistema check for data consistency across different form sections"""
     try:
         from emergentintegrations import EmergentLLM
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt
@@ -5353,7 +5353,7 @@ async def check_data_consistency_ai(case, friendly_form_data, basic_data):
         return {"details": "Verificação de consistência concluída"}
 
 async def translate_data_ai(case, friendly_form_data):
-    """AI translation from Portuguese to English for USCIS forms"""
+    """sistema translation from Portuguese to English for USCIS forms"""
     try:
         from emergentintegrations import EmergentLLM
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt
@@ -5421,7 +5421,7 @@ async def translate_data_ai(case, friendly_form_data):
         return {"details": "Tradução concluída"}
 
 async def generate_uscis_form_ai(case, friendly_form_data, basic_data):
-    """AI generation of official USCIS form from friendly data"""
+    """sistema generation of official USCIS form from friendly data"""
     try:
         from emergentintegrations import EmergentLLM
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
@@ -5506,7 +5506,7 @@ async def generate_uscis_form_ai(case, friendly_form_data, basic_data):
         return {"details": "Formulário oficial gerado"}
 
 async def final_review_ai(case):
-    """Final AI review of the complete USCIS form"""
+    """Final sistema review of the complete USCIS form"""
     try:
         from emergentintegrations import EmergentLLM
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
@@ -5696,13 +5696,13 @@ async def analyze_document_with_professional_api(
     applicant_name: str = Form(default="Unknown User")
 ):
     """
-    HYBRID PROFESSIONAL document analysis using Google Document AI + Dr. Miguel
-    ADVANCED & INTELLIGENT - Real Google Document AI + AI-powered validation
-    Combines Google's specialized Document AI with Dr. Miguel's fraud detection
+    HYBRID PROFESSIONAL document analysis using Google Document sistema + Dr. Miguel
+    ADVANCED & INTELLIGENT - Real Google Document sistema + sistema-powered validation
+    Combines Google's specialized Document sistema with Dr. Miguel's fraud detection
     """
     try:
-        # Hybrid professional validation with Google Document AI + Dr. Miguel  
-        logger.info(f"🔬 Starting HYBRID document analysis (Google Document AI + Dr. Miguel) - File: {file.filename}, Type: {document_type}")
+        # Hybrid professional validation with Google Document sistema + Dr. Miguel  
+        logger.info(f"🔬 Starting HYBRID document analysis (Google Document sistema + Dr. Miguel) - File: {file.filename}, Type: {document_type}")
         
         # Basic file validation
         allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf']
@@ -5713,7 +5713,7 @@ async def analyze_document_with_professional_api(
                 "completeness": 0,
                 "issues": [f"❌ Tipo de arquivo não suportado: {file.content_type}"],
                 "extracted_data": {"validation_status": "REJECTED", "reason": "Invalid file type"},
-                "dra_paula_assessment": "❌ Híbrido: Tipo de arquivo não aceito pelo sistema (Google Document AI + Dr. Miguel)"
+                "dra_paula_assessment": "❌ Híbrido: Tipo de arquivo não aceito pelo sistema (Google Document sistema + Dr. Miguel)"
             }
         
         # Read file content
@@ -5741,8 +5741,8 @@ async def analyze_document_with_professional_api(
                 "dra_paula_assessment": "❌ Híbrido: Qualidade de arquivo inadequada"
             }
         
-        # HYBRID PROFESSIONAL ANALYSIS - Google Document AI + Dr. Miguel
-        logger.info(f"🔬 Analyzing document with HYBRID system (Google Document AI + Dr. Miguel)")
+        # HYBRID PROFESSIONAL ANALYSIS - Google Document sistema + Dr. Miguel
+        logger.info(f"🔬 Analyzing document with HYBRID system (Google Document sistema + Dr. Miguel)")
         
         analysis_result = await hybrid_validator.analyze_document(
             file_content=file_content,
@@ -5755,7 +5755,7 @@ async def analyze_document_with_professional_api(
         
         # Add additional context for immigration processing
         analysis_result.update({
-            "processed_by": "Google Document AI + Dr. Miguel Hybrid System",
+            "processed_by": "Google Document sistema + Dr. Miguel Hybrid System",
             "processing_date": datetime.now().isoformat(),
             "file_size_mb": round(file_size / (1024 * 1024), 2),
             "immigration_compliant": analysis_result.get("completeness", 0) >= 75,
@@ -6003,7 +6003,7 @@ async def analyze_document_with_professional_api(
                 "reason": str(e),
                 "provider": "Onfido"
             },
-            "dra_paula_assessment": f"❌ Híbrido: Erro na análise (Google Document AI + Dr. Miguel) - {str(e)}",
+            "dra_paula_assessment": f"❌ Híbrido: Erro na análise (Google Document sistema + Dr. Miguel) - {str(e)}",
             "hybrid_powered": True
         }
 
@@ -6164,7 +6164,7 @@ async def analyze_with_ai_enhanced(
     current_user = Depends(get_current_user)
 ):
     """
-    Enhanced AI document analysis using Phase 2 & 3 capabilities
+    Enhanced sistema document analysis using Phase 2 & 3 capabilities
     """
     try:
         # Basic file validation
@@ -6223,7 +6223,7 @@ async def analyze_with_ai_enhanced(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error in enhanced AI analysis: {e}")
+        logger.error(f"Error in enhanced sistema analysis: {e}")
         raise HTTPException(status_code=500, detail=f"Enhanced analysis failed: {str(e)}")
 
 # Case Finalizer Capabilities Endpoint
@@ -7237,7 +7237,7 @@ async def get_field_guidance(session_id: str, field_id: str, current_value: str 
 
 @api_router.post("/owl-agent/validate-field")
 async def validate_field_input(request: dict):
-    """Validate user input for a specific field using AI and Google APIs"""
+    """Validate user input for a specific field using sistema and Google APIs"""
     try:
         from intelligent_owl_agent import intelligent_owl
         
@@ -7613,7 +7613,7 @@ async def startup_db_client():
             await db.documents.create_index("case_id")
             await db.documents.create_index([("user_id", 1), ("document_type", 1)])
             
-            # Chat history indexes for AI interactions
+            # Chat history indexes for sistema interactions
             await db.chat_history.create_index("user_id")
             await db.chat_history.create_index("session_id")
             await db.chat_history.create_index("created_at")
