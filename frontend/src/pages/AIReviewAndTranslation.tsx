@@ -162,7 +162,7 @@ const SystemReviewAndTranslation = () => {
       setAllCompleted(true);
       toast({
         title: "Sucesso!",
-        description: "Formulário USCIS gerado com sucesso pela IA",
+        description: "Formulário USCIS gerado com sucesso pelo sistema",
       });
       
     } catch (error) {
