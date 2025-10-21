@@ -357,7 +357,7 @@ const TranslationPartners = ({
             <li>2. Entre em contato e envie seu documento</li>
             <li>3. Receba a tradução juramentada certificada</li>
             <li>4. Faça upload do documento traduzido na plataforma</li>
-            <li>5. Nossa IA validará e integrará à sua aplicação</li>
+            <li>5. Nosso sistema validará e integrará à sua aplicação</li>
           </ul>
         </AlertDescription>
       </Alert>
