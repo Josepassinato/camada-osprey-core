@@ -33,7 +33,7 @@ const Hero = () => {
               </h1>
               
               <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-2xl">
-                Plataforma completa com IA para auto aplicação de processos imigratórios. 
+                Plataforma completa com sistema para auto aplicação de processos imigratórios. 
                 <span className="text-foreground font-medium"> Rápido, seguro e 100% digital.</span>
               </p>
             </div>
