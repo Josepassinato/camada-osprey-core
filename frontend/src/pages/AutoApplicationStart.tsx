@@ -361,7 +361,7 @@ const AutoApplicationStart = () => {
               </p>
               
               <p>
-                <strong>Como funciona:</strong> Nossa sistema especializada organiza suas informações, preenche formulários 
+                <strong>Como funciona:</strong> Nosso sistema especializado organiza suas informações, preenche formulários 
                 oficiais do USCIS e fornece ajuda para que você possa fazer sua própria submissão 
                 diretamente no site oficial do governo americano.
               </p>
