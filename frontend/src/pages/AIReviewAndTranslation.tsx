@@ -235,7 +235,7 @@ const SystemReviewAndTranslation = () => {
           <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
             <span>Etapa 4 de 8</span>
             <span>•</span>
-            <span>Processamento IA e Tradução</span>
+            <span>Processamento do Sistema e Tradução</span>
           </div>
           
           <h1 className="text-3xl font-bold text-black mb-2">
