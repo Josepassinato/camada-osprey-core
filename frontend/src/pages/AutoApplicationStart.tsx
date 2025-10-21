@@ -136,7 +136,7 @@ const AutoApplicationStart = () => {
                 <div>
                   <h3 className="font-bold text-black mb-2">Self-Petitioner</h3>
                   <p className="text-sm text-gray-700">
-                    Você mantém controle total - nossa IA apenas organiza e orienta o processo
+                    Você mantém controle total - nosso sistema apenas organiza e orienta o processo
                   </p>
                 </div>
               </div>
