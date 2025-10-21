@@ -104,7 +104,7 @@ const ResponsibilityConfirmation = ({
             text: "Todas as informações da carta foram fornecidas PESSOALMENTE por mim e são de minha responsabilidade."
           }
         ],
-        legalText: "A IA organizou apenas as informações que você forneceu. Você mantém total responsabilidade pelo conteúdo da carta."
+        legalText: "O sistema organizou apenas as informações que você forneceu. Você mantém total responsabilidade pelo conteúdo da carta."
       },
 
       final_declaration: {
