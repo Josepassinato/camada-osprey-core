@@ -150,7 +150,7 @@ const TranslationPartners = ({
           <AlertDescription>
             <p className="font-medium text-orange-800 mb-2">📄 Documento identificado: {documentName}</p>
             <p className="text-orange-700 text-sm">
-              Nossa IA detectou que este documento precisa de tradução juramentada para ser aceito pelo USCIS. 
+              Nosso sistema detectou que este documento precisa de tradução juramentada para ser aceito pelo USCIS. 
               Selecione um de nossos parceiros certificados para realizar a tradução oficial.
             </p>
           </AlertDescription>
