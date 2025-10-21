@@ -217,7 +217,7 @@ export class SmartPersonalizationEngine {
       { id: 'basic_data', title: 'Dados Básicos', description: 'Informações pessoais coletadas' },
       { id: 'documents', title: 'Upload de Documentos', description: 'Documentos necessários enviados e validados' },
       { id: 'friendly_form', title: 'Formulário Amigável', description: 'Informações detalhadas preenchidas' },
-      { id: 'ai_review', title: 'Processamento IA', description: 'IA revisa e traduz suas informações' },
+      { id: 'ai_review', title: 'Processamento do Sistema', description: 'Sistema revisa e traduz suas informações' },
       { id: 'uscis_form', title: 'Formulário Oficial', description: 'Revisão e autorização do formulário USCIS' },
       { id: 'payment', title: 'Pagamento', description: 'Pagamento processado e documentos gerados' }
     ];
