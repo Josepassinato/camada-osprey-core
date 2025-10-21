@@ -653,13 +653,13 @@ const BasicData = () => {
                     <div className="w-6 h-6 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-xs font-bold">
                       4
                     </div>
-                    <span className="text-sm text-black">Formulário Amigável IA</span>
+                    <span className="text-sm text-black">Formulário Amigável sistema</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-6 h-6 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-xs font-bold">
                       5
                     </div>
-                    <span className="text-sm text-black">Processamento IA</span>
+                    <span className="text-sm text-black">Processamento sistema</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-6 h-6 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-xs font-bold">

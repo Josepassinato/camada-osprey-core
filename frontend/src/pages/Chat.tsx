@@ -144,7 +144,7 @@ const Chat = () => {
             <div>
               <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
                 <MessageSquare className="h-8 w-8 text-black" />
-                Chat com IA
+                Chat com sistema
               </h1>
               <p className="text-muted-foreground">
                 Assistente especializado em questões de imigração

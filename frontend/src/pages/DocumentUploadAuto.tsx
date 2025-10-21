@@ -374,7 +374,7 @@ const DocumentUploadAuto = () => {
       reader.onload = async (e) => {
         const base64 = e.target?.result as string;
         
-        // Analyze document with REAL AI (Dr. Miguel)
+        // Analyze document with REAL sistema (Dr. Miguel)
         const aiAnalysis = await realDocumentAnalysis(file, documentType);
         
         const uploadedFile: UploadedFile = {
@@ -414,7 +414,7 @@ const DocumentUploadAuto = () => {
   };
 
   const realDocumentAnalysis = async (file: File, documentType: string) => {
-    // REAL Dr. Miguel AI Analysis - Critical Security Function
+    // REAL Dr. Miguel sistema Analysis - Critical Security Function
     const visaType = case_?.form_code;
     
     if (!visaType) {
@@ -974,10 +974,10 @@ const DocumentUploadAuto = () => {
                       </Button>
                     </div>
 
-                    {/* AI Analysis Results */}
+                    {/* sistema Analysis Results */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-black">Análise da IA:</span>
+                        <span className="text-black">Análise da sistema:</span>
                         <div className="flex items-center gap-2">
                           {doc.aiAnalysis.valid ? (
                             <CheckCircle className="h-4 w-4 text-black" />
@@ -1078,7 +1078,7 @@ const DocumentUploadAuto = () => {
               disabled={!canContinue()}
               className="bg-black text-white hover:bg-gray-800 flex items-center gap-2 w-full sm:w-auto"
             >
-              Continuar para Formulário IA
+              Continuar para Formulário sistema
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>

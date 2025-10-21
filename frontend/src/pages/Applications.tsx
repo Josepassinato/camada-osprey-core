@@ -310,7 +310,7 @@ const Applications = () => {
                 onClick={() => navigate('/chat')}
               >
                 <FileText className="h-6 w-6" />
-                <span>Chat com IA</span>
+                <span>Chat com sistema</span>
               </Button>
             </div>
           </CardContent>

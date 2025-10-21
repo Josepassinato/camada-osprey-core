@@ -357,11 +357,11 @@ const AutoApplicationStart = () => {
             <div className="space-y-4 text-sm text-gray-700">
               <p>
                 <strong>O que somos:</strong> Uma plataforma tecnológica que auxilia <strong>self-petitioners</strong> 
-                (auto-aplicantes) a prepararem suas próprias aplicações de visto americano usando inteligência artificial.
+                (auto-aplicantes) a prepararem suas próprias aplicações de visto americano usando sistema.
               </p>
               
               <p>
-                <strong>Como funciona:</strong> Nossa IA especializada organiza suas informações, preenche formulários 
+                <strong>Como funciona:</strong> Nossa sistema especializada organiza suas informações, preenche formulários 
                 oficiais do USCIS e fornece ajuda para que você possa fazer sua própria submissão 
                 diretamente no site oficial do governo americano.
               </p>
@@ -375,7 +375,7 @@ const AutoApplicationStart = () => {
               <div className="bg-white border border-gray-300 p-4 rounded">
                 <p className="font-medium text-black mb-2">✅ Você mantém controle total:</p>
                 <ul className="space-y-1 text-xs text-gray-600">
-                  <li>• Suas informações são organizadas pela nossa IA</li>
+                  <li>• Suas informações são organizadas pela nossa sistema</li>
                   <li>• Formulários oficiais são preenchidos automaticamente</li>
                   <li>• Você revisa e submete diretamente no USCIS</li>
                   <li>• Pode consultar advogados quando desejar</li>

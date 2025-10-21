@@ -486,7 +486,7 @@ const InterviewSimulator = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Star className="h-5 w-5 text-gray-700" />
-                    Feedback da IA
+                    Feedback da sistema
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">

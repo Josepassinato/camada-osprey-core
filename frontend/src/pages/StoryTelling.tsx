@@ -116,7 +116,7 @@ const StoryTelling = () => {
         const data = await response.json();
         setVisaSpecs(data);
         
-        // Initialize AI assistance with visa-specific questions
+        // Initialize sistema assistance with visa-specific questions
         initializeAIAssistance(data);
       }
     } catch (error) {
@@ -230,7 +230,7 @@ Pode começar falando ou escrevendo como preferir. Eu vou fazer perguntas para e
     setIsLoadingAI(true);
     
     try {
-      // Simulate AI response
+      // Simulate sistema response
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       const aiResponse: AIAssistanceMessage = {
@@ -252,7 +252,7 @@ Você pode adicionar essas informações no seu texto acima. Se precisar de mais
       setAIMessages(prev => [...prev, aiResponse]);
       
     } catch (error) {
-      console.error('AI assistance error:', error);
+      console.error('sistema assistance error:', error);
     } finally {
       setIsLoadingAI(false);
     }
@@ -283,7 +283,7 @@ Você pode adicionar essas informações no seu texto acima. Se precisar de mais
         const data = await response.json();
         setExtractedFacts(data.extracted_facts);
         
-        // Add AI message about extraction
+        // Add sistema message about extraction
         const extractionMessage: AIAssistanceMessage = {
           id: Date.now().toString(),
           type: 'assistant',
@@ -437,7 +437,7 @@ As informações extraídas serão usadas para preencher automaticamente os form
                   Sua História Pessoal
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Conte sua história de forma natural. Nossa IA vai extrair as informações importantes automaticamente.
+                  Conte sua história de forma natural. Nossa sistema vai extrair as informações importantes automaticamente.
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -521,12 +521,12 @@ As informações extraídas serão usadas para preencher automaticamente os form
               </CardContent>
             </Card>
 
-            {/* AI Assistant */}
+            {/* sistema Assistant */}
             <Card className="glass border-0">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Bot className="h-5 w-5" />
-                  Assistente IA
+                  Assistente sistema
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -735,7 +735,7 @@ As informações extraídas serão usadas para preencher automaticamente os form
                       <li>• Seja honesto e detalhado</li>
                       <li>• Inclua datas importantes</li>
                       <li>• Mencione documentos que você tem</li>
-                      <li>• Nossa IA organiza as informações automaticamente</li>
+                      <li>• Nossa sistema organiza as informações automaticamente</li>
                       <li>• Você pode gravar ao invés de escrever</li>
                     </ul>
                   </div>

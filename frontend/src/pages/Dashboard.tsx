@@ -407,7 +407,7 @@ const Dashboard = () => {
                   onClick={() => navigate('/auto-application/start')}
                 >
                   <FileText className="h-4 w-4" />
-                  Auto-Aplicação AI
+                  Auto-Aplicação sistema
                 </Button>
                 <Button 
                   variant="outline" 
@@ -423,7 +423,7 @@ const Dashboard = () => {
                   onClick={() => navigate('/chat')}
                 >
                   <MessageSquare className="h-4 w-4" />
-                  Chat com IA
+                  Chat com sistema
                 </Button>
                 <Button 
                   variant="outline" 

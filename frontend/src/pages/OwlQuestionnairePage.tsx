@@ -151,7 +151,7 @@ const OwlQuestionnaireContent: React.FC = () => {
               <span>Agente Coruja - Sistema Inteligente de Questionários</span>
             </div>
             <div className="flex items-center gap-4">
-              <span>Powered by AI</span>
+              <span>Powered by sistema</span>
               <span>•</span>
               <span>USCIS Compliant</span>
             </div>

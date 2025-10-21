@@ -148,7 +148,7 @@ export const OwlAgent: React.FC = () => {
               Sistema Inteligente de Questionários para Imigração
             </CardDescription>
             <div className="flex flex-wrap gap-2 justify-center">
-              <Badge variant="secondary" className="text-xs">🤖 IA Inteligente</Badge>
+              <Badge variant="secondary" className="text-xs">🤖 sistema Inteligente</Badge>
               <Badge variant="secondary" className="text-xs">🌐 Multi-idioma</Badge>
               <Badge variant="secondary" className="text-xs">📋 USCIS Forms</Badge>
               <Badge variant="secondary" className="text-xs">💾 Salvamento Automático</Badge>

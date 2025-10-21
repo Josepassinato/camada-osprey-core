@@ -281,7 +281,7 @@ const NewApplication = () => {
                   <li>• Guia passo a passo personalizado</li>
                   <li>• Lista de documentos necessários</li>
                   <li>• Acompanhamento do progresso</li>
-                  <li>• Suporte de IA especializado</li>
+                  <li>• Suporte de sistema especializado</li>
                 </ul>
               </div>
               <div>

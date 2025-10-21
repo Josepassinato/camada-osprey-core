@@ -393,7 +393,7 @@ export const OwlPaymentSuccessPage: React.FC = () => {
                 </div>
                 <div className="flex items-center">
                   <CheckCircle className="mr-2 h-3 w-3 text-green-600" />
-                  <span>Dados validados por IA</span>
+                  <span>Dados validados por sistema</span>
                 </div>
                 <div className="flex items-center">
                   <Shield className="mr-2 h-3 w-3 text-blue-600" />

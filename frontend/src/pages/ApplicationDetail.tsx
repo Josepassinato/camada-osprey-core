@@ -328,7 +328,7 @@ const ApplicationDetail = () => {
                   onClick={() => navigate('/chat')}
                 >
                   <MessageSquare className="h-4 w-4" />
-                  Chat com IA
+                  Chat com sistema
                 </Button>
                 <Button 
                   variant="outline" 

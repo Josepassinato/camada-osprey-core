@@ -248,7 +248,7 @@ const Documents = () => {
                 Meus Documentos
               </h1>
               <p className="text-muted-foreground">
-                Gerencie seus documentos de imigração com análise IA
+                Gerencie seus documentos de imigração com análise sistema
               </p>
             </div>
             
@@ -452,11 +452,11 @@ const Documents = () => {
                         </div>
                       </div>
 
-                      {/* AI Analysis Summary */}
+                      {/* sistema Analysis Summary */}
                       {doc.ai_analysis && (
                         <div className="bg-white/30 rounded-lg p-4 space-y-3">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-foreground">Análise IA</span>
+                            <span className="text-sm font-medium text-foreground">Análise sistema</span>
                             <Badge className="bg-black/10 text-black border-black/20">
                               {doc.ai_analysis.completeness_score}% completo
                             </Badge>
@@ -610,10 +610,10 @@ const Documents = () => {
                 </div>
               </div>
 
-              {/* AI Analysis Details */}
+              {/* sistema Analysis Details */}
               {selectedDocument.ai_analysis && (
                 <div className="bg-white/30 rounded-lg p-4 space-y-4">
-                  <h4 className="font-medium text-foreground">Análise Detalhada da IA</h4>
+                  <h4 className="font-medium text-foreground">Análise Detalhada da sistema</h4>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>

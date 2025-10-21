@@ -80,7 +80,7 @@ const Footer = () => {
             
             {/* Description */}
             <p className="text-muted-foreground leading-relaxed max-w-md">
-              A plataforma líder em auto aplicação imigratória com tecnologia de IA avançada. 
+              A plataforma líder em auto aplicação imigratória com tecnologia de sistema avançada. 
               Transformando sonhos em realidade desde 2020.
             </p>
 
@@ -178,7 +178,7 @@ const Footer = () => {
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
               <span>🇺🇸 Baseado nos EUA</span>
               <span>🔒 Dados Seguros</span>
-              <span>⚡ Powered by AI</span>
+              <span>⚡ Powered by sistema</span>
             </div>
           </div>
         </div>

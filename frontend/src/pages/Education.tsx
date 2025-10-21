@@ -231,7 +231,7 @@ const Education = () => {
                 Centro Educacional
               </h1>
               <p className="text-muted-foreground">
-                Aprenda tudo sobre imigração com guias interativos e IA
+                Aprenda tudo sobre imigração com guias interativos e sistema
               </p>
             </div>
           </div>
@@ -380,7 +380,7 @@ const Education = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MessageSquare className="h-5 w-5 text-accent" />
-                  Simulador de Entrevista com IA
+                  Simulador de Entrevista com sistema
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -394,14 +394,14 @@ const Education = () => {
                         Pratique Entrevistas Consulares
                       </h3>
                       <p className="text-muted-foreground mb-4">
-                        Simule entrevistas reais com perguntas geradas por IA. Receba feedback 
+                        Simule entrevistas reais com perguntas geradas por sistema. Receba feedback 
                         personalizado para melhorar suas respostas e aumentar suas chances de aprovação.
                       </p>
                       
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4 text-sm">
                         <div className="flex items-center gap-2">
                           <Sparkles className="h-4 w-4 text-gray-700" />
-                          <span>Perguntas com IA</span>
+                          <span>Perguntas com sistema</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Target className="h-4 w-4 text-gray-700" />
@@ -576,7 +576,7 @@ const Education = () => {
                   onClick={() => navigate('/chat')}
                 >
                   <Sparkles className="h-4 w-4" />
-                  Chat com IA
+                  Chat com sistema
                 </Button>
                 <Button 
                   variant="outline" 

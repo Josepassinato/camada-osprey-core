@@ -167,7 +167,7 @@ const FriendlyForm = () => {
                  '',
           placeholder: 'Seu nome completo como no passaporte',
           aiSuggestion: extractedFacts.personal_info?.full_name ? 
-            `🤖 IA extraiu dos documentos: ${extractedFacts.personal_info.full_name}` : 
+            `🤖 sistema extraiu dos documentos: ${extractedFacts.personal_info.full_name}` : 
             (caseData.basic_data?.firstName ? `📋 Dados básicos: ${caseData.basic_data.firstName} ${caseData.basic_data.lastName}` : undefined)
         },
         {
@@ -177,7 +177,7 @@ const FriendlyForm = () => {
           required: true,
           value: extractedFacts.personal_info?.date_of_birth || caseData.basic_data?.dateOfBirth || '',
           aiSuggestion: extractedFacts.personal_info?.date_of_birth ? 
-            `🤖 IA extraiu dos documentos: ${extractedFacts.personal_info.date_of_birth}` : 
+            `🤖 sistema extraiu dos documentos: ${extractedFacts.personal_info.date_of_birth}` : 
             (caseData.basic_data?.dateOfBirth ? `📋 Dados básicos: ${caseData.basic_data.dateOfBirth}` : undefined)
         },
         {
@@ -188,7 +188,7 @@ const FriendlyForm = () => {
           value: extractedFacts.personal_info?.place_of_birth || caseData.basic_data?.countryOfBirth || '',
           placeholder: 'Cidade, Estado/Província, País',
           aiSuggestion: extractedFacts.personal_info?.place_of_birth ? 
-            `🤖 IA extraiu dos documentos: ${extractedFacts.personal_info.place_of_birth}` : 
+            `🤖 sistema extraiu dos documentos: ${extractedFacts.personal_info.place_of_birth}` : 
             (caseData.basic_data?.countryOfBirth ? `📋 Dados básicos: ${caseData.basic_data.countryOfBirth}` : undefined)
         },
         {
@@ -201,7 +201,7 @@ const FriendlyForm = () => {
                  caseData.basic_data?.nationality || 
                  'Brasileira',
           aiSuggestion: extractedFacts.personal_info?.nationality ? 
-            `🤖 IA extraiu dos documentos: ${extractedFacts.personal_info.nationality}` : 
+            `🤖 sistema extraiu dos documentos: ${extractedFacts.personal_info.nationality}` : 
             (caseData.basic_data?.countryOfBirth ? `📋 Dados básicos: ${caseData.basic_data.countryOfBirth}` : undefined)
         }
       ]
@@ -281,7 +281,7 @@ const FriendlyForm = () => {
           value: extractedFacts.personal_info?.phone || caseData.basic_data?.phoneNumber || '',
           placeholder: '+55 11 99999-9999',
           aiSuggestion: extractedFacts.personal_info?.phone ? 
-            `IA sugeriu: ${extractedFacts.personal_info.phone}` : 
+            `sistema sugeriu: ${extractedFacts.personal_info.phone}` : 
             (caseData.basic_data?.phoneNumber ? `Dados básicos: ${caseData.basic_data.phoneNumber}` : undefined)
         },
         {
@@ -292,7 +292,7 @@ const FriendlyForm = () => {
           value: extractedFacts.personal_info?.email || caseData.basic_data?.email || '',
           placeholder: 'seu@email.com',
           aiSuggestion: extractedFacts.personal_info?.email ? 
-            `IA sugeriu: ${extractedFacts.personal_info.email}` : 
+            `sistema sugeriu: ${extractedFacts.personal_info.email}` : 
             (caseData.basic_data?.email ? `Dados básicos: ${caseData.basic_data.email}` : undefined)
         }
       ]
@@ -315,7 +315,7 @@ const FriendlyForm = () => {
             required: true,
             value: extractedFacts.family_details?.marital_status || '',
             options: ['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)', 'Separado(a)'],
-            aiSuggestion: extractedFacts.family_details?.marital_status ? `IA sugeriu: ${extractedFacts.family_details.marital_status}` : undefined
+            aiSuggestion: extractedFacts.family_details?.marital_status ? `sistema sugeriu: ${extractedFacts.family_details.marital_status}` : undefined
           },
           {
             id: 'spouse_name',
@@ -324,7 +324,7 @@ const FriendlyForm = () => {
             required: false,
             value: extractedFacts.family_details?.spouse_info?.name || '',
             placeholder: 'Nome completo do cônjuge',
-            aiSuggestion: extractedFacts.family_details?.spouse_info ? `IA encontrou informações do cônjuge` : undefined
+            aiSuggestion: extractedFacts.family_details?.spouse_info ? `sistema encontrou informações do cônjuge` : undefined
           },
           {
             id: 'children_count',
@@ -332,7 +332,7 @@ const FriendlyForm = () => {
             type: 'number',
             required: false,
             value: extractedFacts.family_details?.children?.length || 0,
-            aiSuggestion: extractedFacts.family_details?.children ? `IA sugeriu: ${extractedFacts.family_details.children.length} filho(s)` : undefined
+            aiSuggestion: extractedFacts.family_details?.children ? `sistema sugeriu: ${extractedFacts.family_details.children.length} filho(s)` : undefined
           }
         ]
       });
@@ -354,7 +354,7 @@ const FriendlyForm = () => {
           required: formCode === 'H-1B' || formCode === 'O-1',
           value: extractedFacts.employment_info?.current_job || '',
           placeholder: 'Título do cargo atual',
-          aiSuggestion: extractedFacts.employment_info?.current_job ? `IA sugeriu: ${extractedFacts.employment_info.current_job}` : undefined
+          aiSuggestion: extractedFacts.employment_info?.current_job ? `sistema sugeriu: ${extractedFacts.employment_info.current_job}` : undefined
         },
         {
           id: 'employer_name',
@@ -363,7 +363,7 @@ const FriendlyForm = () => {
           required: formCode === 'H-1B' || formCode === 'O-1',
           value: extractedFacts.employment_info?.employer_details?.name || '',
           placeholder: 'Nome da empresa/organização',
-          aiSuggestion: extractedFacts.employment_info?.employer_details ? `IA encontrou detalhes do empregador` : undefined
+          aiSuggestion: extractedFacts.employment_info?.employer_details ? `sistema encontrou detalhes do empregador` : undefined
         },
         {
           id: 'salary',
@@ -372,7 +372,7 @@ const FriendlyForm = () => {
           required: false,
           value: extractedFacts.employment_info?.salary || '',
           placeholder: '$50,000 USD',
-          aiSuggestion: extractedFacts.employment_info?.salary ? `IA sugeriu: ${extractedFacts.employment_info.salary}` : undefined
+          aiSuggestion: extractedFacts.employment_info?.salary ? `sistema sugeriu: ${extractedFacts.employment_info.salary}` : undefined
         }
       ]
     });
@@ -393,7 +393,7 @@ const FriendlyForm = () => {
           required: formCode === 'H-1B',
           value: extractedFacts.education?.degrees?.[0] || '',
           options: ['Ensino Médio', 'Bacharelado', 'Mestrado', 'Doutorado', 'Outro'],
-          aiSuggestion: extractedFacts.education?.degrees ? `IA encontrou: ${extractedFacts.education.degrees.length} diploma(s)` : undefined
+          aiSuggestion: extractedFacts.education?.degrees ? `sistema encontrou: ${extractedFacts.education.degrees.length} diploma(s)` : undefined
         },
         {
           id: 'school_name',
@@ -402,7 +402,7 @@ const FriendlyForm = () => {
           required: false,
           value: extractedFacts.education?.schools?.[0] || '',
           placeholder: 'Nome da universidade/escola',
-          aiSuggestion: extractedFacts.education?.schools ? `IA sugeriu: ${extractedFacts.education.schools[0]}` : undefined
+          aiSuggestion: extractedFacts.education?.schools ? `sistema sugeriu: ${extractedFacts.education.schools[0]}` : undefined
         },
         {
           id: 'graduation_date',
@@ -410,7 +410,7 @@ const FriendlyForm = () => {
           type: 'date',
           required: false,
           value: extractedFacts.education?.graduation_dates?.[0] || '',
-          aiSuggestion: extractedFacts.education?.graduation_dates ? `IA sugeriu: ${extractedFacts.education.graduation_dates[0]}` : undefined
+          aiSuggestion: extractedFacts.education?.graduation_dates ? `sistema sugeriu: ${extractedFacts.education.graduation_dates[0]}` : undefined
         }
       ]
     });
@@ -432,7 +432,7 @@ const FriendlyForm = () => {
             required: formCode === 'N-400',
             value: extractedFacts.travel_history?.trips_outside_usa || '',
             placeholder: 'Descreva suas viagens: data, destino, duração, propósito',
-            aiSuggestion: extractedFacts.travel_history?.trips_outside_usa ? `IA encontrou informações de viagens` : undefined
+            aiSuggestion: extractedFacts.travel_history?.trips_outside_usa ? `sistema encontrou informações de viagens` : undefined
           },
           {
             id: 'longest_trip',
@@ -441,7 +441,7 @@ const FriendlyForm = () => {
             required: false,
             value: extractedFacts.travel_history?.duration || '',
             placeholder: 'Ex: 3 meses em 2022',
-            aiSuggestion: extractedFacts.travel_history?.duration ? `IA sugeriu: ${extractedFacts.travel_history.duration}` : undefined
+            aiSuggestion: extractedFacts.travel_history?.duration ? `sistema sugeriu: ${extractedFacts.travel_history.duration}` : undefined
           }
         ]
       });
@@ -918,7 +918,7 @@ const FriendlyForm = () => {
                     disabled={!canContinue()}
                     className="bg-black text-white hover:bg-gray-800 flex items-center gap-2"
                   >
-                    Continuar para Processamento IA
+                    Continuar para Processamento sistema
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </div>

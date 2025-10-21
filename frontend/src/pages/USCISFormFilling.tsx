@@ -139,7 +139,7 @@ const USCISFormFilling = () => {
     isSessionActive 
   } = useSessionManager();
 
-  // Form snapshot for AI analysis
+  // Form snapshot for sistema analysis
   const { snapshot } = useFormSnapshot(formData, {
     enabled: true,
     autoGenerate: true,
@@ -550,7 +550,7 @@ const USCISFormFilling = () => {
           </h1>
           
           <p className="text-gray-600">
-            ✅ Formulário oficial gerado pela IA com base nas suas respostas. 
+            ✅ Formulário oficial gerado pela sistema com base nas suas respostas. 
             Revise cuidadosamente e autorize para salvar automaticamente na sua pasta.
           </p>
         </div>
@@ -673,7 +673,7 @@ const USCISFormFilling = () => {
                 className="flex items-center gap-2"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Voltar para Processamento IA
+                Voltar para Processamento sistema
               </Button>
 
               <div className="flex flex-col sm:flex-row gap-3">

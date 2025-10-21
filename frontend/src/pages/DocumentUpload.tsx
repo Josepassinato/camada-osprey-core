@@ -248,7 +248,7 @@ const DocumentUpload = () => {
                 Upload de Documentos
               </h1>
               <p className="text-muted-foreground">
-                Faça upload dos seus documentos para análise com IA
+                Faça upload dos seus documentos para análise com sistema
               </p>
             </div>
           </div>
@@ -453,7 +453,7 @@ const DocumentUpload = () => {
               </CardContent>
             </Card>
 
-            {/* AI Analysis Info */}
+            {/* sistema Analysis Info */}
             <Card className="glass border-0 bg-gradient-to-r from-primary/5 to-accent/5">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
@@ -462,7 +462,7 @@ const DocumentUpload = () => {
                   </div>
                   <div className="flex-1">
                     <h4 className="font-medium text-foreground mb-2">
-                      Análise Automática com IA
+                      Análise Automática com sistema
                     </h4>
                     <div className="text-sm text-muted-foreground space-y-1">
                       <p>✅ Verificação automática de completude</p>
