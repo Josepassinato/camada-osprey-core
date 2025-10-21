@@ -127,7 +127,7 @@ const AutoApplicationStart = () => {
                 <div>
                   <h3 className="font-bold text-black mb-2">Auto-Aplicação Assistida</h3>
                   <p className="text-sm text-gray-700">
-                    Tecnologia de IA especializada te guia para fazer sua própria petição no USCIS
+                    Tecnologia de sistema especializada te guia para fazer sua própria petição no USCIS
                   </p>
                 </div>
               </div>
