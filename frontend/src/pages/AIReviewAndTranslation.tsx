@@ -40,7 +40,7 @@ interface SystemProcessingStep {
   duration?: number;
 }
 
-const AIReviewAndTranslation = () => {
+const SystemReviewAndTranslation = () => {
   const { caseId } = useParams<{ caseId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
