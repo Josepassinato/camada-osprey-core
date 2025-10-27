@@ -98,6 +98,14 @@ class ProductionVerificationTester:
         print("\n🇧🇷 5. SIMULAÇÃO CARLOS SILVA (PRIMEIRAS 4 ETAPAS)")
         self.test_carlos_silva_journey_basic()
         
+        # 6. I-539 Specific Implementation Testing
+        print("\n📋 6. TESTE ESPECÍFICO I-539 BACKEND")
+        self.test_i539_uscis_form_definition()
+        self.test_i539_owl_agent_fields()
+        self.test_i539_session_creation()
+        self.test_i539_field_validation()
+        self.test_i539_pricing_structure()
+        
         # Final Summary
         self.print_production_verification_summary()
     
