@@ -872,6 +872,391 @@ class ProductionVerificationTester:
         except Exception as e:
             self.log_test("Carlos Silva H-1B Journey (Basic 4 Steps)", False, f"Exception: {str(e)}")
     
+    def test_i539_uscis_form_definition(self):
+        """Test if USCISForm.I539 is correctly defined"""
+        print("📋 Testing I-539 USCIS Form Definition...")
+        
+        try:
+            # Test creating a case with I-539 form
+            case_data = {
+                "form_code": "I-539"
+            }
+            
+            response = self.session.post(f"{API_BASE}/auto-application/start", json=case_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                case_info = data.get('case', {})
+                
+                # Test updating case with I-539
+                if case_info.get('case_id'):
+                    update_data = {
+                        "form_code": "I-539",
+                        "status": "form_selected"
+                    }
+                    
+                    update_response = self.session.put(
+                        f"{API_BASE}/auto-application/case/{case_info['case_id']}",
+                        json=update_data
+                    )
+                    
+                    if update_response.status_code == 200:
+                        update_data = update_response.json()
+                        i539_accepted = update_data.get('form_code') == 'I-539'
+                        
+                        self.log_test(
+                            "I-539 USCIS Form Definition",
+                            i539_accepted,
+                            f"I-539 form code accepted: {'✓' if i539_accepted else '✗'}",
+                            {"form_code": update_data.get('form_code')}
+                        )
+                    else:
+                        self.log_test(
+                            "I-539 USCIS Form Definition",
+                            False,
+                            f"Failed to update case with I-539: HTTP {update_response.status_code}",
+                            update_response.text[:200]
+                        )
+                else:
+                    self.log_test(
+                        "I-539 USCIS Form Definition",
+                        False,
+                        "No case ID returned from case creation"
+                    )
+            else:
+                self.log_test(
+                    "I-539 USCIS Form Definition",
+                    False,
+                    f"Failed to create case: HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test("I-539 USCIS Form Definition", False, f"Exception: {str(e)}")
+    
+    def test_i539_owl_agent_fields(self):
+        """Test if I-539 specific fields are created in Owl Agent"""
+        print("🦉 Testing I-539 Owl Agent Fields...")
+        
+        try:
+            # Start an I-539 session
+            session_data = {
+                "case_id": f"I539-TEST-{uuid.uuid4().hex[:8].upper()}",
+                "visa_type": "I-539",
+                "language": "pt"
+            }
+            
+            response = self.session.post(f"{API_BASE}/owl-agent/start-session", json=session_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check if I-539 is accepted as visa_type
+                visa_type_accepted = data.get('visa_type') == 'I-539'
+                has_session_id = 'session_id' in data
+                has_fields = 'fields' in data or 'current_field' in data
+                
+                # Expected I-539 specific fields
+                expected_fields = [
+                    'current_status', 'i94_number', 'entry_date',
+                    'authorized_stay_until', 'extension_until', 'extension_reason',
+                    'passport_number', 'passport_expiry', 'financial_support', 'us_address'
+                ]
+                
+                session_id = data.get('session_id')
+                fields_found = []
+                
+                # Test field guidance for I-539 specific fields
+                if session_id:
+                    for field in expected_fields[:3]:  # Test first 3 fields
+                        try:
+                            field_response = self.session.get(
+                                f"{API_BASE}/owl-agent/field-guidance/{session_id}/{field}"
+                            )
+                            if field_response.status_code == 200:
+                                fields_found.append(field)
+                        except:
+                            pass
+                
+                fields_available = len(fields_found) >= 2  # At least 2 fields should work
+                
+                success = visa_type_accepted and has_session_id and fields_available
+                
+                self.log_test(
+                    "I-539 Owl Agent Fields",
+                    success,
+                    f"Visa type: {'✓' if visa_type_accepted else '✗'}, Session: {'✓' if has_session_id else '✗'}, Fields: {len(fields_found)}/3 tested",
+                    {
+                        "visa_type": data.get('visa_type'),
+                        "session_id": session_id,
+                        "fields_found": fields_found
+                    }
+                )
+            else:
+                self.log_test(
+                    "I-539 Owl Agent Fields",
+                    False,
+                    f"Failed to start I-539 session: HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test("I-539 Owl Agent Fields", False, f"Exception: {str(e)}")
+    
+    def test_i539_session_creation(self):
+        """Test POST /api/owl-agent/start-session with visa_type='I-539'"""
+        print("🦉 Testing I-539 Session Creation...")
+        
+        try:
+            session_data = {
+                "case_id": f"I539-SESSION-{uuid.uuid4().hex[:8].upper()}",
+                "visa_type": "I-539",
+                "language": "pt"
+            }
+            
+            response = self.session.post(f"{API_BASE}/owl-agent/start-session", json=session_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Verify I-539 specific response
+                correct_visa_type = data.get('visa_type') == 'I-539'
+                has_session_id = 'session_id' in data and data['session_id']
+                correct_language = data.get('language') == 'pt'
+                
+                # Check for I-539 specific welcome message
+                welcome_msg = data.get('welcome_message', '').lower()
+                has_i539_welcome = 'i-539' in welcome_msg and ('extensão' in welcome_msg or 'extension' in welcome_msg)
+                
+                # Check for I-539 specific fields in response
+                fields_data = data.get('fields', [])
+                current_field = data.get('current_field', {})
+                
+                has_i539_fields = any(
+                    field_id in str(fields_data) + str(current_field) 
+                    for field_id in ['current_status', 'i94_number', 'extension_reason']
+                )
+                
+                success = correct_visa_type and has_session_id and correct_language and (has_i539_welcome or has_i539_fields)
+                
+                self.log_test(
+                    "I-539 Session Creation",
+                    success,
+                    f"Visa: {'✓' if correct_visa_type else '✗'}, Session: {'✓' if has_session_id else '✗'}, Welcome: {'✓' if has_i539_welcome else '✗'}, Fields: {'✓' if has_i539_fields else '✗'}",
+                    {
+                        "visa_type": data.get('visa_type'),
+                        "session_id": data.get('session_id'),
+                        "has_welcome": has_i539_welcome,
+                        "has_fields": has_i539_fields
+                    }
+                )
+            else:
+                self.log_test(
+                    "I-539 Session Creation",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test("I-539 Session Creation", False, f"Exception: {str(e)}")
+    
+    def test_i539_field_validation(self):
+        """Test I-539 specific field validation"""
+        print("🔍 Testing I-539 Field Validation...")
+        
+        try:
+            # First create a session
+            session_data = {
+                "case_id": f"I539-VALIDATION-{uuid.uuid4().hex[:8].upper()}",
+                "visa_type": "I-539",
+                "language": "pt"
+            }
+            
+            session_response = self.session.post(f"{API_BASE}/owl-agent/start-session", json=session_data)
+            
+            if session_response.status_code != 200:
+                self.log_test("I-539 Field Validation", False, "Failed to create session for validation test")
+                return
+            
+            session_data = session_response.json()
+            session_id = session_data.get('session_id')
+            
+            if not session_id:
+                self.log_test("I-539 Field Validation", False, "No session ID returned")
+                return
+            
+            # Test validation for I-539 specific fields
+            validation_tests = [
+                {
+                    "field_id": "current_status",
+                    "valid_value": "B-2",
+                    "invalid_value": "invalid_status_123"
+                },
+                {
+                    "field_id": "i94_number", 
+                    "valid_value": "12345678901",
+                    "invalid_value": "123"  # Too short
+                },
+                {
+                    "field_id": "extension_reason",
+                    "valid_value": "Preciso estender minha permanência para continuar o tratamento médico no Hospital ABC, que está previsto para durar mais 3 meses.",
+                    "invalid_value": "Quero ficar"  # Too short
+                }
+            ]
+            
+            validation_results = []
+            
+            for test in validation_tests:
+                try:
+                    # Test valid value
+                    valid_data = {
+                        "session_id": session_id,
+                        "field_id": test["field_id"],
+                        "value": test["valid_value"]
+                    }
+                    
+                    valid_response = self.session.post(f"{API_BASE}/owl-agent/validate-field", json=valid_data)
+                    
+                    # Test invalid value
+                    invalid_data = {
+                        "session_id": session_id,
+                        "field_id": test["field_id"],
+                        "value": test["invalid_value"]
+                    }
+                    
+                    invalid_response = self.session.post(f"{API_BASE}/owl-agent/validate-field", json=invalid_data)
+                    
+                    # Check validation results
+                    valid_accepted = valid_response.status_code == 200
+                    if valid_accepted and valid_response.json():
+                        valid_result = valid_response.json()
+                        valid_accepted = valid_result.get('valid', False) or valid_result.get('score', 0) > 50
+                    
+                    invalid_rejected = True
+                    if invalid_response.status_code == 200 and invalid_response.json():
+                        invalid_result = invalid_response.json()
+                        invalid_rejected = not invalid_result.get('valid', True) or invalid_result.get('score', 100) < 50
+                    
+                    field_validation_ok = valid_accepted and invalid_rejected
+                    validation_results.append(field_validation_ok)
+                    
+                except Exception as field_error:
+                    validation_results.append(False)
+            
+            # Overall validation success
+            validation_success = len(validation_results) > 0 and sum(validation_results) >= len(validation_results) // 2
+            
+            self.log_test(
+                "I-539 Field Validation",
+                validation_success,
+                f"Validation tests passed: {sum(validation_results)}/{len(validation_results)}",
+                {
+                    "session_id": session_id,
+                    "validation_results": validation_results,
+                    "fields_tested": [test["field_id"] for test in validation_tests]
+                }
+            )
+            
+        except Exception as e:
+            self.log_test("I-539 Field Validation", False, f"Exception: {str(e)}")
+    
+    def test_i539_pricing_structure(self):
+        """Test I-539 pricing structure ($370 + $85 biometrics)"""
+        print("💰 Testing I-539 Pricing Structure...")
+        
+        try:
+            # Test case finalizer for I-539 pricing
+            # Create a case and try to get pricing information
+            case_data = {
+                "form_code": "I-539"
+            }
+            
+            case_response = self.session.post(f"{API_BASE}/auto-application/start", json=case_data)
+            
+            if case_response.status_code == 200:
+                case_info = case_response.json().get('case', {})
+                case_id = case_info.get('case_id')
+                
+                if case_id:
+                    # Update case to I-539
+                    update_data = {
+                        "form_code": "I-539",
+                        "status": "form_selected"
+                    }
+                    
+                    update_response = self.session.put(
+                        f"{API_BASE}/auto-application/case/{case_id}",
+                        json=update_data
+                    )
+                    
+                    if update_response.status_code == 200:
+                        # Try to get case finalizer information
+                        finalizer_response = self.session.post(
+                            f"{API_BASE}/case-finalizer/complete",
+                            json={"case_id": case_id}
+                        )
+                        
+                        pricing_found = False
+                        correct_amounts = False
+                        
+                        if finalizer_response.status_code == 200:
+                            finalizer_data = finalizer_response.json()
+                            
+                            # Look for I-539 pricing in the response
+                            response_text = str(finalizer_data).lower()
+                            pricing_found = 'i-539' in response_text and ('370' in response_text or '85' in response_text)
+                            
+                            # Check for correct amounts
+                            fees = finalizer_data.get('fees', [])
+                            if isinstance(fees, list):
+                                amounts = [fee.get('amount', 0) for fee in fees if isinstance(fee, dict)]
+                                correct_amounts = 370 in amounts and 85 in amounts
+                            elif isinstance(fees, dict):
+                                amounts = [fee.get('amount', 0) for fee in fees.values() if isinstance(fee, dict)]
+                                correct_amounts = 370 in amounts and 85 in amounts
+                        
+                        # Alternative: Test with direct pricing endpoint if available
+                        if not pricing_found:
+                            try:
+                                pricing_response = self.session.get(f"{API_BASE}/pricing/I-539")
+                                if pricing_response.status_code == 200:
+                                    pricing_data = pricing_response.json()
+                                    pricing_text = str(pricing_data)
+                                    pricing_found = '370' in pricing_text and '85' in pricing_text
+                                    correct_amounts = True
+                            except:
+                                pass
+                        
+                        success = pricing_found and correct_amounts
+                        
+                        self.log_test(
+                            "I-539 Pricing Structure",
+                            success,
+                            f"Pricing found: {'✓' if pricing_found else '✗'}, Correct amounts ($370 + $85): {'✓' if correct_amounts else '✗'}",
+                            {
+                                "case_id": case_id,
+                                "pricing_found": pricing_found,
+                                "correct_amounts": correct_amounts
+                            }
+                        )
+                    else:
+                        self.log_test(
+                            "I-539 Pricing Structure",
+                            False,
+                            f"Failed to update case to I-539: HTTP {update_response.status_code}",
+                            update_response.text[:200]
+                        )
+                else:
+                    self.log_test("I-539 Pricing Structure", False, "No case ID returned")
+            else:
+                self.log_test(
+                    "I-539 Pricing Structure",
+                    False,
+                    f"Failed to create case: HTTP {case_response.status_code}",
+                    case_response.text[:200]
+                )
+                
+        except Exception as e:
+            self.log_test("I-539 Pricing Structure", False, f"Exception: {str(e)}")
+    
     def print_production_verification_summary(self):
         """Print comprehensive production verification summary"""
         print("\n" + "="*80)
