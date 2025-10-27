@@ -526,12 +526,14 @@ class IntelligentOwlAgent:
             "pt": {
                 "H-1B": f"🦉 Olá! Sou a Coruja do Osprey e vou te guiar no preenchimento do questionário para o visto **H-1B**!\n\nO H-1B é um visto de trabalho para profissionais especializados. Vou te fazer perguntas em português e depois converter tudo para o formulário oficial do USCIS em inglês.\n\n✨ **Dicas importantes:**\n• Tenha seus documentos em mãos\n• Responda com precisão total\n• Posso validar informações em tempo real\n\nVamos começar? 🚀",
                 "F-1": f"🦉 Olá! Vou te guiar no questionário para o visto de estudante **F-1**!\n\nVamos preencher tudo em português e eu convertercie automaticamente para o formulário oficial. Tenha em mãos seu I-20 e documentos acadêmicos.\n\nPronto para começar? 📚✨",
-                "I-485": f"🦉 Bem-vindo! Vou te ajudar com o questionário do **I-485** (Ajuste de Status)!\n\nEste é um processo importante para obter o green card. Vou te guiar passo a passo com perguntas claras em português.\n\nVamos começar sua jornada para a residência permanente! 🏡✨"
+                "I-485": f"🦉 Bem-vindo! Vou te ajudar com o questionário do **I-485** (Ajuste de Status)!\n\nEste é um processo importante para obter o green card. Vou te guiar passo a passo com perguntas claras em português.\n\nVamos começar sua jornada para a residência permanente! 🏡✨",
+                "I-539": f"🦉 Olá! Vou te guiar no preenchimento do **I-539** (Extensão de Permanência)!\n\nO I-539 permite estender sua estadia legal nos EUA. Vou te fazer perguntas em português sobre seu status atual, motivo da extensão e documentos necessários.\n\n✨ **Tenha em mãos:**\n• Seu I-94 (registro de entrada)\n• Passaporte atual\n• Comprovantes financeiros\n• Documentação do motivo da extensão\n\nVamos garantir que sua permanência seja estendida corretamente! 📋🇺🇸"
             },
             "en": {
                 "H-1B": f"🦉 Hello! I'm Osprey Owl and I'll guide you through the **H-1B** questionnaire!\n\nH-1B is a work visa for specialized professionals. I'll ask questions in English and convert everything to the official USCIS form.\n\nReady to start? 🚀",
                 "F-1": f"🦉 Hello! I'll guide you through the **F-1** student visa questionnaire!\n\nHave your I-20 and academic documents ready. Let's get started! 📚✨",
-                "I-485": f"🦉 Welcome! I'll help you with the **I-485** (Adjustment of Status) questionnaire!\n\nThis is your path to a green card. Let's start your journey to permanent residence! 🏡✨"
+                "I-485": f"🦉 Welcome! I'll help you with the **I-485** (Adjustment of Status) questionnaire!\n\nThis is your path to a green card. Let's start your journey to permanent residence! 🏡✨",
+                "I-539": f"🦉 Hello! I'll guide you through the **I-539** (Extension of Stay) questionnaire!\n\nI-539 allows you to extend your legal stay in the US. I'll ask about your current status, extension reason, and required documents.\n\n✨ **Have ready:**\n• Your I-94 (entry record)\n• Current passport\n• Financial evidence\n• Extension reason documentation\n\nLet's ensure your stay is properly extended! 📋🇺🇸"
             }
         }
         
