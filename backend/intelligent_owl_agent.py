@@ -302,6 +302,178 @@ class IntelligentOwlAgent:
             visa_specific=["I-129", "I-485", "I-130"]
         )
         
+        # I-539 Extension of Stay Fields
+        guides["current_status"] = FieldGuide(
+            field_id="current_status",
+            question_pt="Qual é o seu status atual nos EUA (como consta no seu I-94)?",
+            question_en="What is your current status in the US (as shown on your I-94)?",
+            explanation_pt="Verifique seu I-94 ou registro de entrada. Normalmente será B-2 (turismo), B-1 (negócios), F-1 (estudante), etc.",
+            explanation_en="Check your I-94 or entry record. Usually B-2 (tourism), B-1 (business), F-1 (student), etc.",
+            examples=["B-2", "B-1", "F-1", "B-1/B-2"],
+            validation_rules={
+                "required": True,
+                "pattern": r"^[A-Z][A-Z0-9-]{1,10}$"
+            },
+            importance_level=5,
+            visa_specific=["I-539"]
+        )
+        
+        guides["i94_number"] = FieldGuide(
+            field_id="i94_number",
+            question_pt="Qual é o número do seu I-94 (registro de entrada nos EUA)?",
+            question_en="What is your I-94 number (US entry record)?",
+            explanation_pt="O I-94 é o documento eletrônico que registra sua entrada nos EUA. Encontre em i94.cbp.dhs.gov ou no carimbo do passaporte.",
+            explanation_en="I-94 is the electronic document recording your US entry. Find at i94.cbp.dhs.gov or passport stamp.",
+            examples=["12345678901", "98765432109", "11223344556"],
+            validation_rules={
+                "required": True,
+                "pattern": r"^\d{11}$",
+                "length": 11
+            },
+            importance_level=5,
+            visa_specific=["I-539"]
+        )
+        
+        guides["entry_date"] = FieldGuide(
+            field_id="entry_date",
+            question_pt="Quando você entrou nos EUA (data da sua última entrada)?",
+            question_en="When did you enter the US (date of your most recent entry)?",
+            explanation_pt="Informe a data da sua entrada mais recente nos EUA. Verifique no seu I-94 ou carimbo do passaporte.",
+            explanation_en="Provide the date of your most recent US entry. Check your I-94 or passport stamp.",
+            examples=["15/06/2023", "23/12/2023", "07/03/2024"],
+            validation_rules={
+                "required": True,
+                "format": "date",
+                "max_date": "today"
+            },
+            importance_level=5,
+            visa_specific=["I-539"]
+        )
+        
+        guides["authorized_stay_until"] = FieldGuide(
+            field_id="authorized_stay_until",
+            question_pt="Até quando você está autorizado a ficar nos EUA (data no I-94)?",
+            question_en="Until when are you authorized to stay in the US (I-94 date)?",
+            explanation_pt="Esta é a data limite atual da sua permanência legal nos EUA, conforme consta no seu I-94.",
+            explanation_en="This is your current legal stay expiration date in the US, as shown on your I-94.",
+            examples=["15/08/2024", "23/12/2024", "07/05/2024"],
+            validation_rules={
+                "required": True,
+                "format": "date"
+            },
+            importance_level=5,
+            visa_specific=["I-539"]
+        )
+        
+        guides["extension_until"] = FieldGuide(
+            field_id="extension_until",
+            question_pt="Até quando você gostaria de estender sua permanência?",
+            question_en="Until when would you like to extend your stay?",
+            explanation_pt="Escolha uma data razoável baseada no motivo da extensão. Normalmente até 6 meses a mais.",
+            explanation_en="Choose a reasonable date based on extension reason. Usually up to 6 months more.",
+            examples=["15/02/2025", "23/06/2025", "07/11/2024"],
+            validation_rules={
+                "required": True,
+                "format": "date",
+                "min_date": "today+1day"
+            },
+            importance_level=5,
+            visa_specific=["I-539"]
+        )
+        
+        guides["extension_reason"] = FieldGuide(
+            field_id="extension_reason",
+            question_pt="Qual é o motivo para solicitar a extensão da sua permanência?",
+            question_en="What is the reason for requesting extension of your stay?",
+            explanation_pt="Explique detalhadamente por que precisa ficar mais tempo. Seja específico e forneça evidências.",
+            explanation_en="Explain in detail why you need to stay longer. Be specific and provide evidence.",
+            examples=[
+                "Tratamento médico continuado no Hospital ABC",
+                "Participação em conferência internacional em Janeiro 2025",
+                "Aguardando resolução de questões familiares urgentes"
+            ],
+            validation_rules={
+                "required": True,
+                "min_length": 50,
+                "max_length": 1000
+            },
+            importance_level=5,
+            visa_specific=["I-539"]
+        )
+        
+        guides["passport_number"] = FieldGuide(
+            field_id="passport_number",
+            question_pt="Qual é o número do seu passaporte atual?",
+            question_en="What is your current passport number?",
+            explanation_pt="Informe o número do passaporte que você usou para entrar nos EUA.",
+            explanation_en="Provide the passport number you used to enter the US.",
+            examples=["AB1234567", "CD9876543", "EF1122334"],
+            validation_rules={
+                "required": True,
+                "min_length": 6,
+                "max_length": 15,
+                "pattern": r"^[A-Z0-9]+$"
+            },
+            importance_level=5,
+            visa_specific=["I-539", "ALL"]
+        )
+        
+        guides["passport_expiry"] = FieldGuide(
+            field_id="passport_expiry",
+            question_pt="Qual é a data de expiração do seu passaporte?",
+            question_en="What is your passport expiration date?",
+            explanation_pt="O passaporte deve estar válido durante toda a extensão solicitada.",
+            explanation_en="Passport must remain valid throughout the requested extension period.",
+            examples=["15/08/2025", "23/12/2026", "07/03/2027"],
+            validation_rules={
+                "required": True,
+                "format": "date",
+                "min_date": "today+30days"
+            },
+            importance_level=4,
+            visa_specific=["I-539", "ALL"]
+        )
+        
+        guides["financial_support"] = FieldGuide(
+            field_id="financial_support",
+            question_pt="Como você irá se sustentar financeiramente durante a extensão?",
+            question_en="How will you financially support yourself during the extension?",
+            explanation_pt="Descreva suas fontes de renda/recursos. Inclua extratos bancários, patrocínio familiar, etc.",
+            explanation_en="Describe your income sources/resources. Include bank statements, family sponsorship, etc.",
+            examples=[
+                "Recursos próprios - extrato bancário anexado mostrando $15,000",
+                "Suporte da família nos EUA - declaração de patrocínio anexada",
+                "Recursos de investimentos - comprovantes anexados"
+            ],
+            validation_rules={
+                "required": True,
+                "min_length": 30,
+                "max_length": 500
+            },
+            importance_level=4,
+            visa_specific=["I-539"]
+        )
+        
+        guides["us_address"] = FieldGuide(
+            field_id="us_address",
+            question_pt="Qual é o seu endereço atual nos EUA?",
+            question_en="What is your current US address?",
+            explanation_pt="Informe o endereço completo onde você está hospedado nos EUA.",
+            explanation_en="Provide the complete address where you are staying in the US.",
+            examples=[
+                "123 Main Street, Apt 4B, New York, NY 10001",
+                "456 Oak Avenue, Los Angeles, CA 90210",
+                "789 Pine Road, Miami, FL 33101"
+            ],
+            validation_rules={
+                "required": True,
+                "min_length": 15,
+                "us_address_validation": True
+            },
+            importance_level=4,
+            visa_specific=["I-539", "ALL"]
+        )
+        
         return guides
     
     async def start_guided_session(self, case_id: str, visa_type: str, user_language: str = "pt") -> Dict[str, Any]:
