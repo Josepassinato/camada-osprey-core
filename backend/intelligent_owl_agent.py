@@ -79,7 +79,11 @@ class IntelligentOwlAgent:
             emergent_key = os.environ.get('EMERGENT_LLM_KEY')
             if emergent_key:
                 from emergentintegrations.llm.chat import LlmChat
-                client = LlmChat(api_key=emergent_key)
+                client = LlmChat(
+                    api_key=emergent_key,
+                    session_id="owl_agent_session",
+                    system_message="You are an intelligent immigration assistant helping users with USCIS forms."
+                )
                 logger.info("🤖 Owl Agent: Emergent LLM client initialized with GPT-4o")
                 return {"type": "emergent", "client": client}
             
