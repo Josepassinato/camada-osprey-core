@@ -131,6 +131,14 @@ class CaseFinalizerComplete:
             "F-1_reinstatement": [
                 {"code": "I-539", "amount": 370, "note": "Taxa I-539 Change/Extension of Status"}
             ],
+            "I-539_extension": [
+                {"code": "I-539", "amount": 370, "note": "Taxa base I-539 Extension/Change of Status"},
+                {"code": "BIOMETRICS", "amount": 85, "note": "Taxa de biometria (se solicitada pelo USCIS)"}
+            ],
+            "I-539_change": [
+                {"code": "I-539", "amount": 370, "note": "Taxa base I-539 Extension/Change of Status"},
+                {"code": "BIOMETRICS", "amount": 85, "note": "Taxa de biometria (se solicitada pelo USCIS)"}
+            ],
             "I-485_employment": [
                 {"code": "I-485", "amount": 1140, "note": "Taxa I-485 Adjust Status"},
                 {"code": "BIOMETRICS", "amount": 85, "note": "Taxa biometria"},
