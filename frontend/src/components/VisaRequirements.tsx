@@ -452,6 +452,76 @@ const VisaRequirements = ({ visaType, onClose }: VisaRequirementsProps) => {
           'Advogado especializado é recomendado'
         ]
       },
+      'I-539': {
+        title: 'I-539: Extensão/Mudança de Status',
+        description: 'Solicitação para estender ou mudar status de não-imigrante nos EUA',
+        processingTime: '4-8 meses',
+        uscisfee: '$370 + $85 (biometria, se necessário)',
+        eligibility: [
+          'Entrada legal nos EUA com status válido',
+          'Manutenção do status atual (sem violações)',
+          'Aplicar antes do vencimento do status atual',
+          'Motivo válido para extensão ou mudança',
+          'Recursos financeiros suficientes para a permanência'
+        ],
+        documents: [
+          {
+            id: 'form_i539',
+            name: 'Formulário I-539',
+            description: 'Aplicação para extensão/mudança de status de não-imigrante',
+            required: true,
+            needsTranslation: false,
+            examples: ['Formulário I-539 completo', 'Taxa de $370']
+          },
+          {
+            id: 'i94_record',
+            name: 'I-94 (Registro de Entrada)',
+            description: 'Evidência do seu status atual nos EUA',
+            required: true,
+            needsTranslation: false,
+            examples: ['I-94 eletrônico de CBP.gov', 'Carimbo do passaporte', 'Cartão I-94 físico (se aplicável)']
+          },
+          {
+            id: 'passport_pages',
+            name: 'Páginas do Passaporte',
+            description: 'Cópias das páginas relevantes do passaporte',
+            required: true,
+            needsTranslation: false,
+            examples: ['Página de dados biográficos', 'Página com visto atual', 'Carimbo de entrada']
+          },
+          {
+            id: 'financial_documents',
+            name: 'Comprovantes Financeiros',
+            description: 'Evidência de recursos para se sustentar durante a extensão',
+            required: true,
+            needsTranslation: false,
+            examples: ['Extratos bancários', 'Carta de suporte financeiro', 'Declaração de renda']
+          },
+          {
+            id: 'extension_reason',
+            name: 'Documentação do Motivo',
+            description: 'Evidência que justifica a necessidade de extensão',
+            required: true,
+            needsTranslation: false,
+            examples: ['Carta médica', 'Convite para evento', 'Documentos familiares', 'Planos de viagem']
+          },
+          {
+            id: 'current_status_docs',
+            name: 'Documentos do Status Atual',
+            description: 'Documentação relacionada ao seu status atual nos EUA',
+            required: false,
+            needsTranslation: false,
+            examples: ['I-20 (F-1)', 'DS-2019 (J-1)', 'I-797 (H-1B)', 'Outros formulários de aprovação']
+          }
+        ],
+        tips: [
+          'Aplicar ANTES do vencimento do status atual',
+          'Incluir dependentes na mesma aplicação se aplicável',
+          'Não viajar enquanto I-539 estiver pendente (a menos que tenha autorização)',
+          'Manter documentação atualizada de recursos financeiros',
+          'Consulte advogado se teve violações de status anteriores'
+        ]
+      },
       'I-751': {
         title: 'I-751: Remoção de Condições',
         description: 'Remoção das condições do green card baseado em casamento',
