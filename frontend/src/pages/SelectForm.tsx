@@ -242,6 +242,24 @@ const SelectForm = () => {
         'Perseguição baseada em motivos protegidos',
         'Não ter cometido crimes graves'
       ]
+    },
+    {
+      code: 'I-539',
+      title: 'I-539: Extensão/Mudança de Status',
+      description: 'Para estender ou mudar seu status de não-imigrante nos EUA',
+      icon: <Clock className="h-6 w-6" />,
+      category: 'Extensão',
+      processingTime: '4-8 meses',
+      uscisfee: '$370',
+      complexity: 'Intermediário',
+      eligibility: [
+        'Estar legalmente nos EUA com status válido',
+        'Não ter violado termos do status atual',
+        'Aplicar antes do vencimento do status atual',
+        'Ter motivo válido para extensão',
+        'Comprovar recursos financeiros suficientes'
+      ],
+      popular: true
     }
   ];
 
