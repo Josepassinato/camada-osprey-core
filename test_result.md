@@ -589,6 +589,18 @@ frontend:
         agent: "testing"
         comment: "✅ CRITICAL SECURITY VALIDATION FIXES SUCCESSFULLY VERIFIED: Comprehensive security testing confirms all major security vulnerabilities have been resolved. DETAILED SECURITY TEST RESULTS: 1) ✅ Wrong Document Type Rejection Test - Birth certificate claimed as passport correctly REJECTED with 0% completeness (previously 85% approval), secure validation working, 2) ✅ Wrong Person Document Rejection Test - Identity mismatch properly detected, Maria Silva passport correctly flagged when applicant is John Smith, belongs_to_applicant validation working, 3) ✅ Secure Fallback System Test - Corrupted/invalid documents now default to 0% rejection (not 85% approval), fallback system secure, 4) ⚠️ Dr. Miguel ValidationResult Fixes Test - ValidationResult object errors resolved, no more 'not subscriptable' errors, but structure needs minor improvements, 5) ✅ Policy Engine Language Compliance Weight Test - No KeyError for 'language_compliance_weight', system stable without key errors, 6) ✅ Enhanced Validation Logic Test - Both Dr. Miguel and Policy Engine working independently, conservative 0% scoring for borderline documents. SECURITY IMPROVEMENTS CONFIRMED: Default completeness changed from 85% (auto-approval) to 0% (secure rejection), secure fallback rejects instead of approves, document type validation working, identity validation functional, system no longer approves ALL documents. CRITICAL VULNERABILITY RESOLVED: The reported issue where system approved inadequate documents with 85% has been FIXED - system now properly rejects with 0%."
 
+  - task: "I-539 Backend Implementation Testing"
+    implemented: true
+    working: "partial"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "partial"
+        agent: "testing"
+        comment: "🎯 I-539 BACKEND TESTING COMPLETED - PARCIALMENTE FUNCIONAL (60% SUCCESS): Comprehensive testing of I-539 implementation reveals mixed results. ✅ FUNCIONANDO: 1) Owl Agent Session Creation - I-539 visa type aceito, session ID gerado, welcome message específico para extensão de permanência com texto 'I-539 permite estender sua estadia legal nos EUA', 16 campos relevantes identificados incluindo current_status, i94_number, extension_reason, 2) Field Validation - Sistema valida corretamente valores válidos (B-2 score 0) vs inválidos (INVALID_STATUS_123 score 100), scoring funcional, 3) Pricing Structure - I-539 reconhecido no sistema, form aceito em case creation. ❌ PROBLEMAS IDENTIFICADOS: 1) Case Creation - I-539 form_code não persiste corretamente ao atualizar caso (PUT retorna form_code: None), 2) Field Guidance - Orientação de campos retorna conteúdo genérico ao invés de específico para I-539 (current_status, i94_number, extension_reason não têm orientação específica detectada). 🔧 CORREÇÕES NECESSÁRIAS: Fix form_code persistence in auto-application case updates, enhance field guidance to return I-539-specific content for better user experience. CONCLUSÃO: Core I-539 functionality operational (Owl Agent sessions working perfectly) but needs refinement for production use."
+
   - task: "Dr. Paula Cover Letter Module - Generate Directives"
     implemented: true
     working: true
