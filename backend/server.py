@@ -130,6 +130,7 @@ class USCISForm(str, Enum):
     I131 = "I-131"  # Application for Travel Document
     I129 = "I-129"  # Nonimmigrant Worker Petition
     I589 = "I-589"  # Application for Asylum
+    I539 = "I-539"  # Application to Extend/Change Nonimmigrant Status
     O1 = "O-1"      # Extraordinary Ability (part of I-129)
     H1B = "H-1B"    # Specialty Occupation (part of I-129)
     B1B2 = "B-1/B-2"  # Business/Tourism Visitor Visa
