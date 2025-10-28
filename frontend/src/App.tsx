@@ -32,6 +32,7 @@ import { OwlAgent } from "./pages/OwlAgent";
 import { OwlQuestionnairePage } from "./pages/OwlQuestionnairePage";
 import { OwlPaymentPage } from "./pages/OwlPaymentPage";
 import { OwlPaymentSuccessPage } from "./pages/OwlPaymentSuccessPage";
+import AdminVisaUpdatesPanel from "./pages/AdminVisaUpdatesPanel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
