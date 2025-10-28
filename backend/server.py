@@ -4816,15 +4816,14 @@ async def reject_visa_update(update_id: str, request: dict):
 async def run_manual_visa_scan():
     """Manually trigger visa information scan"""
     try:
-        # Get EMERGENT_LLM_KEY
-        from emergent_integrations_manager import get_llm_key
-        llm_key = get_llm_key()
+        # Get EMERGENT_LLM_KEY from environment
+        llm_key = os.environ.get('EMERGENT_LLM_KEY')
         
         if not llm_key:
-            raise HTTPException(status_code=500, detail="LLM key not configured")
+            raise HTTPException(status_code=500, detail="EMERGENT_LLM_KEY not configured")
         
         # Initialize and run updater
-        updater = VisaAutoUpdater(db, llm_key['emergent_llm_key'])
+        updater = VisaAutoUpdater(db, llm_key)
         result = await updater.run_weekly_update()
         
         return {
