@@ -33,7 +33,7 @@ class ScrapedData:
 class VisaAutoUpdater:
     def __init__(self, db: AsyncIOMotorDatabase, llm_key: str):
         self.db = db
-        self.llm_client = UniversalLLMClient(api_key=llm_key)
+        self.llm_client = LlmChat(api_key=llm_key)
         self.sources = {
             'uscis': 'https://egov.uscis.gov/processing-times/',
             'uscis_fees': 'https://www.uscis.gov/forms/filing-fees',
