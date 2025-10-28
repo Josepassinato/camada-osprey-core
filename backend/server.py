@@ -4952,8 +4952,6 @@ async def get_all_visa_information():
         logger.error(f"Error getting all visa information: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve visa information")
 
-return guides.get(form_code, [])
-
 def get_important_submission_notes(form_code: str) -> list:
     """Get important notes for submission"""
     
