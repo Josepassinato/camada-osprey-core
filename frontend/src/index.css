@@ -18,6 +18,21 @@ body, html, #root, .app {
   background-color: white !important;
 }
 
+/* Improve text contrast for better readability */
+.text-gray-500, .text-gray-400 {
+  color: rgb(75, 85, 99) !important; /* text-gray-600 - better contrast */
+}
+
+.text-gray-600 {
+  color: rgb(55, 65, 81) !important; /* text-gray-700 - even better contrast */
+}
+
+/* Ensure placeholder text is readable */
+::placeholder {
+  color: rgb(107, 114, 128) !important; /* text-gray-500 with better contrast */
+  opacity: 1;
+}
+
 /* Force all yellow/amber Tailwind classes to blue */
 .bg-yellow-50, .bg-yellow-100, .bg-yellow-200, .bg-yellow-300, .bg-yellow-400, .bg-yellow-500 {
   background-color: rgb(219, 234, 254) !important; /* bg-blue-100 */
@@ -50,6 +65,17 @@ body, html, #root, .app {
 
 [style*="color: yellow"], [style*="color: #ffff"] {
   color: rgb(37, 99, 235) !important;
+}
+
+/* Improve contrast for secondary text */
+.text-muted, .text-secondary {
+  color: rgb(75, 85, 99) !important; /* Better contrast than light grays */
+}
+
+/* Ensure buttons have good contrast */
+button:disabled, .btn:disabled {
+  color: rgb(107, 114, 128) !important;
+  background-color: rgb(243, 244, 246) !important;
 }
 
 /* Force white background for buttons and remove blue */
