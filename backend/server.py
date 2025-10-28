@@ -137,6 +137,56 @@ class USCISForm(str, Enum):
     F1 = "F-1"      # Student Visa
     AR11 = "AR-11"  # Change of Address
 
+class UpdateSource(str, Enum):
+    USCIS = "uscis"
+    STATE_DEPT = "state_department"
+    FEDERAL_REGISTER = "federal_register"
+    MANUAL = "manual"
+
+class UpdateStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved" 
+    REJECTED = "rejected"
+    AUTO_APPLIED = "auto_applied"
+
+class UpdateType(str, Enum):
+    PROCESSING_TIME = "processing_time"
+    FILING_FEE = "filing_fee"
+    FORM_REQUIREMENT = "form_requirement"
+    VISA_BULLETIN = "visa_bulletin"
+    REGULATION_CHANGE = "regulation_change"
+
+# Models for Visa Information Updates
+class VisaUpdate(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    form_code: USCISForm
+    update_type: UpdateType
+    source: UpdateSource
+    detected_date: datetime
+    effective_date: Optional[datetime] = None
+    title: str
+    description: str
+    old_value: Optional[Dict[str, Any]] = None
+    new_value: Dict[str, Any]
+    confidence_score: float = 0.0  # AI confidence in the update
+    status: UpdateStatus = UpdateStatus.PENDING
+    admin_notes: Optional[str] = None
+    approved_by: Optional[str] = None
+    approved_date: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class VisaInformation(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    form_code: USCISForm
+    processing_time: Optional[str] = None
+    filing_fee: Optional[str] = None
+    requirements: List[str] = []
+    documents: List[Dict[str, Any]] = []
+    visa_bulletin_data: Optional[Dict[str, Any]] = None
+    last_updated: datetime = Field(default_factory=datetime.utcnow)
+    version: int = 1
+    is_active: bool = True
+
 class CaseStatus(str, Enum):
     created = "created"
     form_selected = "form_selected"
