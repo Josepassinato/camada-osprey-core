@@ -4786,8 +4786,9 @@ async def approve_visa_update(update_id: str, request: Request):
 async def reject_visa_update(update_id: str, request: Request):
     """Reject a pending visa update"""
     try:
-        admin_notes = request.get("admin_notes", "")
-        admin_user = request.get("admin_user", "system")
+        body = await request.json()
+        admin_notes = body.get("admin_notes", "")
+        admin_user = body.get("admin_user", "system")
         
         # Mark update as rejected
         result = await db.visa_updates.update_one(
