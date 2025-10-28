@@ -441,9 +441,6 @@ class VisaAutoUpdater:
                 'priority': 'high' if pending_count > 5 else 'medium'
             })
 
-# Utility functions
-from uuid import uuid4
-
 async def schedule_weekly_updates():
     """Schedule function to be called weekly"""
     # This would be called by a scheduler like APScheduler or Celery
