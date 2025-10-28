@@ -66,6 +66,7 @@ import openai
 import yaml
 from immigration_expert import ImmigrationExpert, create_immigration_expert
 from google_document_ai_integration import hybrid_validator
+from visa_auto_updater import VisaAutoUpdater
 
 # Configure OpenAI
 openai.api_key = os.environ.get('OPENAI_API_KEY')
