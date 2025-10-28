@@ -376,8 +376,8 @@ class VisaAutoUpdater:
         """
         
         try:
-            response = await self.llm_client.generate_text(
-                prompt=prompt,
+            response = await self.llm_client.chat_async(
+                messages=[{"role": "user", "content": prompt}],
                 model="gpt-4o",
                 max_tokens=500,
                 temperature=0.1
