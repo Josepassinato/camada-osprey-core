@@ -4735,8 +4735,9 @@ async def get_pending_visa_updates(skip: int = 0, limit: int = 20):
 async def approve_visa_update(update_id: str, request: Request):
     """Approve a pending visa update and apply it to production"""
     try:
-        admin_notes = request.get("admin_notes", "")
-        admin_user = request.get("admin_user", "system")
+        body = await request.json()
+        admin_notes = body.get("admin_notes", "")
+        admin_user = body.get("admin_user", "system")
         
         # Get the pending update
         update = await db.visa_updates.find_one({"id": update_id, "status": "pending"})
