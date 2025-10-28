@@ -4708,9 +4708,6 @@ def get_step_by_step_guide(form_code: str) -> list:
             {"step": 8, "title": "Receber Visto", "description": "Visto será colado no passaporte"}
         ]
     }
-    
-    from visa_auto_updater import VisaAutoUpdater
-
 # Visa Auto-Update System
 @api_router.get("/admin/visa-updates/pending")
 async def get_pending_visa_updates(skip: int = 0, limit: int = 20):
