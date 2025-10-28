@@ -336,8 +336,19 @@ class VisaUpdatesSystemTester:
         print("🔍 Testing POST /api/admin/visa-updates/{id}/reject...")
         
         try:
-            # Test with a non-existent update ID to check error handling
-            update_id_to_test = "non-existent-update-id-12345"
+            # First, try to get pending updates to find a real update ID
+            pending_response = self.session.get(f"{API_BASE}/admin/visa-updates/pending")
+            
+            update_id_to_test = None
+            if pending_response.status_code == 200:
+                pending_data = pending_response.json()
+                updates = pending_data.get('updates', [])
+                if updates:
+                    update_id_to_test = updates[0].get('id')
+            
+            # If no real updates, test with a mock ID to check error handling
+            if not update_id_to_test:
+                update_id_to_test = "non-existent-update-id-12345"
             
             rejection_data = {
                 "admin_notes": "test rejection",
