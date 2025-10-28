@@ -4783,7 +4783,7 @@ async def approve_visa_update(update_id: str, request: Request):
         raise HTTPException(status_code=500, detail="Failed to approve update")
 
 @api_router.post("/admin/visa-updates/{update_id}/reject")
-async def reject_visa_update(update_id: str, request: dict):
+async def reject_visa_update(update_id: str, request: Request):
     """Reject a pending visa update"""
     try:
         admin_notes = request.get("admin_notes", "")
