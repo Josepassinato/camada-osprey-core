@@ -16,7 +16,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from uuid import uuid4
 
 # AI Integration for change detection
-from emergentintegrations import UniversalLLMClient
+from emergentintegrations.llm.chat import LlmChat
 
 logger = logging.getLogger(__name__)
 
