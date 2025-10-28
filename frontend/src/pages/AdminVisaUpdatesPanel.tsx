@@ -87,7 +87,8 @@ const AdminVisaUpdatesPanel = () => {
   const runManualScan = async () => {
     setScanLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/visa-updates/run-manual-scan`, {
+      const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
+      const response = await fetch(`${backendUrl}/api/admin/visa-updates/run-manual-scan`, {
         method: 'POST',
       });
       const data = await response.json();
