@@ -16,7 +16,7 @@ export const getBackendUrl = (): string => {
     
     // Preview environment detection
     if (hostname.includes('preview.emergentagent.com')) {
-      return 'https://iaimmigration.preview.emergentagent.com';
+      return 'https://agente-coruja.preview.emergentagent.com';
     }
     
     // Production environment - use production URL
@@ -31,7 +31,7 @@ export const getBackendUrl = (): string => {
   }
   
   // Final fallback for development
-  return 'https://iaimmigration.preview.emergentagent.com';
+  return 'https://agente-coruja.preview.emergentagent.com';
 };
 
 export const getApiUrl = (endpoint: string): string => {

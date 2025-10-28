@@ -1,6 +1,6 @@
 {
   "timestamp": "2025-10-01T21:31:02.533071",
-  "api_base": "https://iaimmigration.preview.emergentagent.com/api",
+  "api_base": "https://agente-coruja.preview.emergentagent.com/api",
   "total_tests": 21,
   "passed_tests": 17,
   "failed_tests": 4,

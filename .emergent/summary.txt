@@ -1,89 +1,110 @@
 <analysis>
-The trajectory documents a rapid, multi-phase feature development cycle for an AI immigration application tool. The work began by acknowledging a new major feature request: the Agente Coruja (Owl Agent), an intelligent questionnaire system.
+The trajectory details a complex, multi-phase development effort on an AI immigration application. Initially, the focus was on connecting the app to a custom domain, which was clarified as a non-code task. The project then shifted significantly to address critical bugs: a Dr. Paula AI JSON parsing error, followed by a comprehensive API health check that revealed and fixed four API issues (authentication, session management, case updates, payment initiation).
 
-Development proceeded through several distinct, user-driven phases. Phase 1 involved building the core backend for the Owl Agent, creating API endpoints in  and the agent's logic in . Phase 2 focused on the frontend, where a testing agent built the UI but uncovered a critical routing bug, which was subsequently fixed by ensuring a  was passed correctly.
+A full user journey simulation then uncovered further problems with document analysis completeness and Dr. Paula's responses, which were systematically debugged and resolved, often involving iterative mock adjustments and backend fixes. Following this, the application was prepared for production by removing all mock data and meticulously fixing critical authentication inconsistencies, ensuring user sessions and case association worked reliably. Aesthetic changes were then implemented, replacing all yellow/orange colors with blue and substituting IA mentions with sistema across the application, with rigorous verification for code integrity.
 
-Phase 3 introduced a user-requested feature for saving progress, requiring the implementation of a simple email/password authentication system. This involved adding new auth endpoints to the backend and new React components to the frontend. This phase also surfaced and resolved a critical technical bug related to MongoDB  JSON serialization.
-
-Phase 4 added a complete payment and finalization flow using Stripe, integrated via the  library. This included creating payment endpoints, frontend payment pages, and logic for downloading the final application package.
-
-The most recent work, Phase 5, addresses a user query about connecting the application to their custom domain, . The last actions involved inspecting environment files and searching the codebase, confirming the application is currently configured for a preview domain. The immediate next step is to address this domain configuration request.
+Most recently, the I-539 tourist visa extension process was implemented, covering backend enumeration, Owl Agent fields, frontend selection, document requirements, and payment fees. Finally, the developer began implementing an automated weekly visa information update system with administrative approval, which is the current ongoing task.
 </analysis>
 
 <product_requirements>
-The application is an AI-powered platform to assist users with the US immigration process. The primary focus of the recent development has been the Agente Coruja (Owl Agent) feature.
+The application, Agente Coruja (Owl Agent), is an AI-powered platform assisting users with the US immigration process, aiming to simplify form-filling and ensure data privacy. Key features include:
 
-**Agente Coruja - Intelligent Questionnaire:**
-*   **Goal:** Guide users through a multi-lingual, friendly questionnaire to auto-fill official USCIS forms.
-*   **Core Logic:** An AI (OpenAI GPT-5) provides real-time guidance, and user answers are validated.
-*   **Progress Saving:** Users must be able to save their progress. This is implemented with two options:
-    1.  **Continuous Navigation:** Progress is saved automatically for users who complete the form in one session.
-    2.  **Save and Return:** Users can create a simple account (email/password) to save their session and return later.
-*   **Finalization & Payment:** Upon completing the questionnaire, the user is directed to a payment page.
-    *   **Payment:** Stripe is used for payment processing.
-    *   **Delivery:** After successful payment, the user can either download the complete application package as a PDF or have it sent to their email.
-*   **Data Privacy:** The system must inform users that their data is deleted after the package is downloaded/sent, ensuring privacy.
-
-The overall goal is to provide a seamless, guided, and secure end-to-end experience for completing and obtaining immigration forms.
+*   **Intelligent Questionnaire:** Guides users through a multi-lingual questionnaire using OpenAI GPT-5 for real-time validation and guidance to auto-fill USCIS forms.
+*   **Progress Saving:** Users can save progress through continuous navigation or by creating a simple email/password account to return later.
+*   **Finalization & Payment:** After completing the questionnaire, users proceed to a Stripe-integrated payment page. Post-payment, they can download the application package as a PDF or have it emailed. Data is deleted after delivery.
+*   **I-539 Extension:** Implemented to allow users to apply for a tourist visa extension, following the existing guided questionnaire, payment, and document flow.
+*   **Automated Visa Updates (In Progress):** A system is being developed to automatically update visa requirements, rules, processing dates, and visa bulletin information weekly, with an administrative approval workflow before updates go live to users.
+*   **Custom Domain:** Users can connect the application to a custom domain (e.g., ), managed via the platform's deployment interface without code changes.
 </product_requirements>
 
 <key_technical_concepts>
-- **Full-Stack:** React frontend and Python FastAPI backend.
-- **Database:** MongoDB, with a critical fix implemented for  JSON serialization.
-- **AI Integration:** OpenAI GPT-5 (via  and ) for intelligent guidance.
-- **Payment Processing:** Real Stripe integration managed via the  library.
-- **Authentication:** A simple, custom-built email/password authentication system using  for password hashing.
-- **Asynchronous Programming:** Extensive use of  in the FastAPI backend for non-blocking database and API operations.
+- **Full-Stack:** React frontend, Python FastAPI backend.
+- **Database:** MongoDB (with  JSON serialization fix).
+- **AI Integration:** OpenAI GPT-5 for intelligent guidance (via ).
+- **Payment Processing:** Stripe integration for payments.
+- **Authentication:** Custom email/password system (, JWT with custom  for optional auth).
+- **Document Analysis:** Google Document AI for hybrid document validation.
+- **Asynchronous Programming:**  in FastAPI.
+- **Web Scraping:** Planned for automated visa updates.
 </key_technical_concepts>
 
 <code_architecture>
-The application is a monorepo with a  (React) and  (FastAPI) directory.
+The application is a monorepo with  (React) and  (FastAPI) directories.
 
 
 
 -   ****
-    -   **Importance:** The main FastAPI application file, defining all API routes, database connections, and startup/shutdown events.
-    -   **Summary of Changes:** This file was heavily modified to add multiple new API routers for the Owl Agent. This includes endpoints for starting sessions (), user authentication (, ), managing sessions (, ), and handling payments (, ). A crucial helper function, , was added to fix MongoDB  serialization errors.
-
-    
-
+    -   **Importance:** Main FastAPI app, API routes, DB connections.
+    -   **Summary of Changes:**
+        -   Added/modified routes for Owl Agent sessions, auth (, ), payments (, ), case management, and .
+        -   Fixed MongoDB  serialization ().
+        -   Improved error handling for Dr. Paula's AI response.
+        -   Fixed JWT constant definitions (, ) for authentication reliability.
+        -   Added  to  enum.
+        -   Added new admin endpoints for visa update management ().
+        -   Cleaned up mock data/test-specific logic for production.
 -   ****
-    -   **Importance:** Contains the core business logic for the Owl Agent's questionnaire, including field definitions, guidance prompts, and validation rules.
-    -   **Summary of Changes:** The file was populated with extensive dictionaries defining form fields, their types, validation rules, and AI-powered guidance prompts, forming the brain of the questionnaire.
-
+    -   **Importance:** Core logic for Owl Agent's questionnaire, field definitions, guidance.
+    -   **Summary of Changes:** Populated with  and  for various visa types, including newly added  specific fields and messages.
 -   ****
-    -   **Importance:** The root component of the React application, responsible for defining the application's routing structure.
-    -   **Summary of Changes:** New routes were added to handle the new pages for the Owl Agent flow, including , , and .
-
+    -   **Importance:** Handles document analysis using Google Document AI and integrates with Dr. Miguel for hybrid validation.
+    -   **Summary of Changes:** Debugged and improved mock data handling for testing completeness, fixed issues with  and  during mock testing, then removed mocks for production readiness.
 -   ****
-    -   **Importance:** The main entry point page for the Owl Agent feature. It manages the user's state, determining whether to show the authentication/session selection screen or the questionnaire itself.
-    -   **Summary of Changes:** Integrated the  and  components to create a comprehensive landing page for the feature. It now handles logic for starting new sessions for anonymous or authenticated users.
-
+    -   **Importance:** Defines the structure and pricing for application packages.
+    -   **Summary of Changes:** Added  specific fee packages.
+-   ** (NEW FILE)**
+    -   **Importance:** Will contain the logic for web scraping and AI-driven detection of visa rule changes.
+    -   **Summary of Changes:** Newly created file, intended for future implementation of the visa update system.
+-   ****
+    -   **Importance:** Root component for routing.
+    -   **Summary of Changes:** Added routes for Owl Agent flow, renamed  component to .
+-   ****
+    -   **Importance:** Main entry for Owl Agent feature, manages user state and authentication.
+    -   **Summary of Changes:** Integrated  and  for anonymous/authenticated user flow.
 -   ** & **
-    -   **Importance:** These new pages handle the final step of the user journey.
-    -   **Summary of Changes:**  was created to fetch a Stripe checkout session from the backend and redirect the user to Stripe.  is the landing page after a successful payment, providing download/email options and the privacy disclaimer.
-
+    -   **Importance:** Handle payment flow.
+    -   **Summary of Changes:** Created for fetching Stripe sessions and displaying payment success.
 -   ****
-    -   **Importance:** A new component created to handle user registration and login.
-    -   **Summary of Changes:** This component provides the UI form for new and returning users to create an account or log in to access their saved questionnaire sessions.
+    -   **Importance:** Manages the AI-powered cover letter generation and review.
+    -   **Summary of Changes:** Updated to handle improved backend AI error responses; underwent significant color (yellow/orange to blue) and text (IA to sistema) replacements.
+-   ****
+    -   **Importance:** Allows users to select the USCIS form type.
+    -   **Summary of Changes:** Added  as a selectable form option. Underwent color and text replacements, and text contrast fixes.
+-   ****
+    -   **Importance:** Displays detailed requirements for each visa type.
+    -   **Summary of Changes:** Added  specific document requirements. Corrected  to a blue variant.
+-   ****
+    -   **Importance:** Potentially related to voice interaction, likely a component handling WebSocket connections.
+    -   **Summary of Changes:** Removed hardcoded URLs, replaced with environment variables for production readiness.
+-   ****
+    -   **Importance:** Centralizes API configuration and utility functions.
+    -   **Summary of Changes:** Removed hardcoded preview URLs, replaced with dynamic  for production readiness.
+-   ****
+    -   **Importance:** Global CSS styling.
+    -   **Summary of Changes:** Added aggressive CSS rules to override yellow/orange backgrounds and improve text contrast globally (e.g.,  to darker shades).
 </code_architecture>
 
 <pending_tasks>
-- **Configure Custom Domain:** The user wants the application to be connected to . The current setup uses a preview URL ().
-- **Fix  Bug:** An old, unresolved bug where selecting a visa type defaults to B-1/B-2 was mentioned in the initial project context but never addressed.
+-   **Full I-539 Functionality:**
+    -   Ensure  form_code is correctly saved and persisted in the backend.
+    -   Verify I-539 specific field guidance is consistently provided, not generic.
+    -   Ensure the I-539 card is correctly displayed and visible in the frontend.
+-   ** Bug:** An old bug where selecting a visa type defaults to B-1/B-2 remains unaddressed.
+-   **Automated Visa Updates:** Complete the implementation of the React component for the admin panel to manage visa updates.
+-   **Code Cleanup (Optional):** Address remaining hardcoded fallback URLs and ensure all hooks use the URL utility function as identified during deployment readiness checks.
 </pending_tasks>
 
 <current_work>
-The immediate task is responding to the user's request to connect the application to their custom domain, . The previous engineer has already performed the initial investigation and confirmed that the application is not currently configured for this domain.
+The immediate work is implementing the Sistema de Atualização Automática de Vistos (Automated Visa Update System). This system aims to weekly update visa information, rules, processing dates, and visa bulletin data, with an administrative approval process.
 
-The last actions taken were:
-1.  Reading the frontend environment configuration file: , which revealed .
-2.  Reading the backend environment configuration file: .
-3.  Searching the entire application for any references to the custom domain or the preview domain: .
+So far, the following steps have been completed:
+1.  **Database Structure for Versioning:** The  model in  has been updated to include fields for tracking updates (, ) and a new  model has been defined to store proposed changes.
+2.  **Web Scraping and AI Module Creation:** A new file, , has been created to house the logic for web scraping and using AI to detect changes in visa information.
+3.  **Admin Panel Endpoints:** New API endpoints have been added to  for managing visa updates, including  (to view/manage updates), , and  (for administrative approval/rejection).
 
-This investigation confirmed the current URL configuration and established that no part of the codebase is hardcoded to the user's desired domain. The work is paused at the point of needing to formulate a plan to assist the user with the domain setup.
+The AI engineer was in the process of starting **Step 4: Creating the React component for the administrative panel**, which will be the interface for reviewing and approving these automated visa updates.
 </current_work>
 
 <optional_next_step>
-Explain to the user that the application is currently on a preview domain and outline the steps required to connect it to . This involves DNS configuration on their domain provider and updating environment variables.
+Create the React component for the admin panel to manage the automated visa updates.
 </optional_next_step>
