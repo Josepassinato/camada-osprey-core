@@ -39,11 +39,11 @@ export const VoiceMic: React.FC<VoiceMicProps> = ({
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
 
-  // Robust backend URL detection for preview environment
-  const isPreview = typeof window !== 'undefined' && window.location.hostname.includes('preview.emergentagent.com');
-  const backendUrl = isPreview 
-    ? 'https://iaimmigration.preview.emergentagent.com'
-    : (import.meta.env.VITE_BACKEND_URL || 'https://iaimmigration.preview.emergentagent.com');
+  // Use the centralized API utility for consistent backend URL
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 
+    (typeof window !== 'undefined' && window.location.hostname.includes('preview.emergentagent.com')
+      ? 'https://iaimmigration.preview.emergentagent.com'
+      : 'https://www.iaimmigration.com');
   const wsUrl = `${backendUrl.replace('http', 'ws')}/ws/voice/${sessionId || 'default'}`;
 
   // Initialize WebSocket connection
