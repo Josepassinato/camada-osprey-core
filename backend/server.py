@@ -4810,7 +4810,7 @@ async def reject_visa_update(update_id: str, request: Request):
         
     except Exception as e:
         logger.error(f"Error rejecting update: {e}")
-        raise HTTPException(status_code=500, detail="Failed to reject update")
+        raise HTTPException(status_code=500, detail=f"Failed to reject update: {str(e)}")
 
 @api_router.post("/admin/visa-updates/run-manual-scan")
 async def run_manual_visa_scan():
