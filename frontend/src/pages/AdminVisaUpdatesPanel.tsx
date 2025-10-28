@@ -135,7 +135,8 @@ const AdminVisaUpdatesPanel = () => {
 
   const rejectUpdate = async (updateId: string, adminNotes: string = '') => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/visa-updates/${updateId}/reject`, {
+      const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
+      const response = await fetch(`${backendUrl}/api/admin/visa-updates/${updateId}/reject`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
