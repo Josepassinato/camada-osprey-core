@@ -4751,7 +4751,6 @@ async def approve_visa_update(update_id: str, request: Request):
             "data": update["new_value"],
             "last_updated": datetime.utcnow(),
             "updated_by": admin_user,
-            "version": 1,
             "is_active": True
         }
         
