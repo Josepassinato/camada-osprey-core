@@ -4,7 +4,13 @@
  */
 
 export const getBackendUrl = (): string => {
-  // Check if we're in preview environment
+  // Always prioritize environment variable first
+  const envBackendUrl = import.meta.env.VITE_BACKEND_URL;
+  if (envBackendUrl) {
+    return envBackendUrl;
+  }
+  
+  // Browser environment detection as fallback
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     
@@ -13,14 +19,19 @@ export const getBackendUrl = (): string => {
       return 'https://iaimmigration.preview.emergentagent.com';
     }
     
-    // Production environment detection  
+    // Production environment - use production URL
     if (hostname.includes('emergentagent.com') && !hostname.includes('preview')) {
-      return 'https://iaimmigration.preview.emergentagent.com'; // Will be updated for production
+      return 'https://www.iaimmigration.com';
+    }
+    
+    // Custom domain detection
+    if (hostname === 'www.iaimmigration.com' || hostname === 'iaimmigration.com') {
+      return 'https://www.iaimmigration.com';
     }
   }
   
-  // Fallback to environment variable or preview URL
-  return import.meta.env.VITE_BACKEND_URL || 'https://iaimmigration.preview.emergentagent.com';
+  // Final fallback for development
+  return 'https://iaimmigration.preview.emergentagent.com';
 };
 
 export const getApiUrl = (endpoint: string): string => {
