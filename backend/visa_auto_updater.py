@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from bs4 import BeautifulSoup
 import logging
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from uuid import uuid4
 
 # AI Integration for change detection
 from emergentintegrations import UniversalLLMClient
