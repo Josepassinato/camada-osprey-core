@@ -4732,7 +4732,7 @@ async def get_pending_visa_updates(skip: int = 0, limit: int = 20):
         raise HTTPException(status_code=500, detail="Failed to retrieve pending updates")
 
 @api_router.post("/admin/visa-updates/{update_id}/approve")
-async def approve_visa_update(update_id: str, request: dict):
+async def approve_visa_update(update_id: str, request: Request):
     """Approve a pending visa update and apply it to production"""
     try:
         admin_notes = request.get("admin_notes", "")
