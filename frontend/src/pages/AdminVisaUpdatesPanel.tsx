@@ -56,22 +56,24 @@ const AdminVisaUpdatesPanel = () => {
   const loadData = async () => {
     setLoading(true);
     try {
+      const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
+      
       // Load pending updates
-      const pendingResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/visa-updates/pending`);
+      const pendingResponse = await fetch(`${backendUrl}/api/admin/visa-updates/pending`);
       const pendingData = await pendingResponse.json();
       if (pendingData.success) {
         setPendingUpdates(pendingData.updates);
       }
 
       // Load update history
-      const historyResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/visa-updates/history?limit=20`);
+      const historyResponse = await fetch(`${backendUrl}/api/admin/visa-updates/history?limit=20`);
       const historyData = await historyResponse.json();
       if (historyData.success) {
         setUpdateHistory(historyData.updates);
       }
 
       // Load notifications
-      const notificationResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/notifications`);
+      const notificationResponse = await fetch(`${backendUrl}/api/admin/notifications`);
       const notificationData = await notificationResponse.json();
       if (notificationData.success) {
         setNotifications(notificationData.notifications);
