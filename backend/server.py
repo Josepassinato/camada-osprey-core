@@ -4779,7 +4779,7 @@ async def approve_visa_update(update_id: str, request: Request):
         
     except Exception as e:
         logger.error(f"Error approving update: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to approve update: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to approve update")
 
 @api_router.post("/admin/visa-updates/{update_id}/reject")
 async def reject_visa_update(update_id: str, request: Request):
