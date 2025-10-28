@@ -532,7 +532,7 @@ const SelectForm = () => {
                   <FileText className="h-4 w-4 text-gray-700" />
                   O Que Você Receberá para Sua Auto-Aplicação
                 </h4>
-                <ul className="space-y-1 text-sm text-muted-foreground">
+                <ul className="space-y-1 text-sm text-gray-900">
                   <li>• Formulário oficial organizado com suas informações</li>
                   <li>• Checklist de documentos personalizada</li>
                   <li>• Instruções detalhadas para sua auto-aplicação</li>
