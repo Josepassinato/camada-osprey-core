@@ -27,6 +27,11 @@ body, html, #root, .app {
   color: rgb(55, 65, 81) !important; /* text-gray-700 - even better contrast */
 }
 
+/* Improve muted text contrast significantly */
+.text-muted-foreground {
+  color: rgb(55, 65, 81) !important; /* Much darker gray for better readability */
+}
+
 /* Ensure placeholder text is readable */
 ::placeholder {
   color: rgb(107, 114, 128) !important; /* text-gray-500 with better contrast */
@@ -76,6 +81,11 @@ body, html, #root, .app {
 button:disabled, .btn:disabled {
   color: rgb(107, 114, 128) !important;
   background-color: rgb(243, 244, 246) !important;
+}
+
+/* Improve specific UI elements contrast */
+.text-sm.text-muted-foreground {
+  color: rgb(31, 41, 55) !important; /* text-gray-800 - very dark for small text */
 }
 
 /* Force white background for buttons and remove blue */
