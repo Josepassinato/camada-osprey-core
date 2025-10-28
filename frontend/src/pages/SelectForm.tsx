@@ -520,7 +520,7 @@ const SelectForm = () => {
                   <AlertTriangle className="h-4 w-4 text-gray-700" />
                   Antes de Começar
                 </h4>
-                <ul className="space-y-1 text-sm text-muted-foreground">
+                <ul className="space-y-1 text-sm text-gray-900">
                   <li>• Verifique se você atende aos requisitos básicos</li>
                   <li>• Tenha todos os documentos necessários em mãos</li>
                   <li>• O processo pode levar várias sessões para ser concluído</li>
