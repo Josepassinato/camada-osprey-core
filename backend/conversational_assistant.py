@@ -8,12 +8,13 @@ import json
 import logging
 from typing import Dict, List, Any, Optional
 from datetime import datetime
-import openai
+from emergentintegrations import OAICompatible
 
 logger = logging.getLogger(__name__)
 
-# Configure OpenAI
-openai.api_key = os.environ.get('EMERGENT_LLM_KEY') or os.environ.get('OPENAI_API_KEY')
+# Initialize emergent integrations client
+emergent_llm_key = os.environ.get('EMERGENT_LLM_KEY')
+client = OAICompatible(emergent_llm_key)
 
 class ConversationalAssistant:
     """Assistente conversacional que ajuda usuários com dúvidas sobre imigração"""
