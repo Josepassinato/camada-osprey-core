@@ -35,6 +35,7 @@ import { OwlPaymentPage } from "./pages/OwlPaymentPage";
 import { OwlPaymentSuccessPage } from "./pages/OwlPaymentSuccessPage";
 import AdminVisaUpdatesPanel from "./pages/AdminVisaUpdatesPanel";
 import AdaptiveFormExample from "./pages/AdaptiveFormExample";
+import ProactiveAlertsDemo from "./pages/ProactiveAlertsDemo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
