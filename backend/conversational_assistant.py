@@ -113,23 +113,6 @@ ALWAYS:
             if user_context:
                 context_info = f"\nContexto do usuário: {json.dumps(user_context, ensure_ascii=False)}"
             
-            # Construir mensagens
-            messages = [
-                {
-                    "role": "system",
-                    "content": self._get_system_prompt(language_mode, visa_type) + context_info
-                }
-            ]
-            
-            # Adicionar histórico (últimas 10 mensagens para não exceder limite)
-            messages.extend(self.conversation_history[session_id][-10:])
-            
-            # Adicionar mensagem atual
-            messages.append({
-                "role": "user",
-                "content": user_message
-            })
-            
             # Chamar OpenAI
             llm = create_llm_client(
                 system_message=self._get_system_prompt(language_mode, visa_type) + context_info,
