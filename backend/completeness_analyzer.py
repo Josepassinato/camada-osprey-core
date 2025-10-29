@@ -10,12 +10,20 @@ from typing import Dict, List, Any, Optional
 from datetime import datetime
 from enum import Enum
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+import uuid
 
 logger = logging.getLogger(__name__)
 
 # Initialize emergent integrations client
 emergent_llm_key = os.environ.get('EMERGENT_LLM_KEY')
-llm_client = LlmChat(api_key=emergent_llm_key)
+
+def create_llm_client(system_message: str) -> LlmChat:
+    """Create LlmChat instance with required parameters"""
+    return LlmChat(
+        api_key=emergent_llm_key,
+        session_id=str(uuid.uuid4()),
+        system_message=system_message
+    )
 
 class CompletenessLevel(str, Enum):
     """Níveis de completude da aplicação"""
