@@ -8158,8 +8158,8 @@ async def get_adaptive_text(context: str, key: str, mode: str = "simple"):
 # ===== PROACTIVE ALERTS SYSTEM =====
 from proactive_alerts import ProactiveAlertSystem, AlertType, AlertPriority
 
-# Initialize alert system
-alert_system = ProactiveAlertSystem(db)
+# Initialize alert system (will be set in startup event after db is ready)
+alert_system = None
 
 @api_router.get("/alerts/{case_id}")
 async def get_case_alerts(case_id: str, include_dismissed: bool = False):
