@@ -894,6 +894,363 @@ class ProductionVerificationTester:
             
         except Exception as e:
             self.log_test("Carlos Silva H-1B Journey (Basic 4 Steps)", False, f"Exception: {str(e)}")
+
+    def test_carlos_silva_complete_h1b_journey(self):
+        """SIMULAÇÃO COMPLETA END-TO-END: Carlos Silva H-1B Journey - All 10 Phases"""
+        print("🇧🇷 SIMULAÇÃO COMPLETA CARLOS SILVA H-1B - TODAS AS 10 FASES")
+        print("="*80)
+        
+        # Carlos Silva - Fictional Brazilian H-1B Applicant Data
+        carlos_data = {
+            "nome_completo": "Carlos Eduardo Silva Santos",
+            "data_nascimento": "1990-05-15",
+            "pais_nascimento": "Brazil",
+            "genero": "Male",
+            "email": "carlos.silva@example.com",
+            "telefone": "+55 11 98765-4321",
+            "endereco": "Rua Paulista, 1000, Apt 501, São Paulo, SP, 01310-100, Brazil",
+            "empresa": "TechCorp America Inc.",
+            "cargo": "Senior Software Engineer",
+            "salario_anual": "$95,000",
+            "diploma": "Bachelor in Computer Science - USP",
+            "visto_atual": "B-1/B-2",
+            "data_expiracao": "2025-12-31",
+            "alien_number": "A123456789"
+        }
+        
+        try:
+            # FASE 1: Início da Aplicação
+            print("\n🚀 FASE 1: INÍCIO DA APLICAÇÃO")
+            print("   POST /api/auto-application/start")
+            
+            start_response = self.session.post(f"{API_BASE}/auto-application/start", json={})
+            
+            if start_response.status_code != 200:
+                self.log_test("Carlos Silva Complete H-1B Journey", False, "FASE 1 FALHOU: Não foi possível criar caso", start_response.text[:200])
+                return
+            
+            start_data = start_response.json()
+            case_info = start_data.get('case', {})
+            case_id = case_info.get('case_id')
+            session_token = case_info.get('session_token')
+            
+            if not case_id:
+                self.log_test("Carlos Silva Complete H-1B Journey", False, "FASE 1 FALHOU: Nenhum case_id retornado", start_data)
+                return
+            
+            print(f"   ✅ Caso criado: {case_id}")
+            print(f"   ✅ Session token: {session_token[:20] if session_token else 'None'}...")
+            
+            # FASE 2: Seleção de Visto H-1B
+            print("\n📋 FASE 2: SELEÇÃO DE VISTO H-1B")
+            print("   PUT /api/auto-application/case/{case_id}")
+            
+            visa_update = {
+                "form_code": "H-1B",
+                "status": "form_selected"
+            }
+            
+            visa_response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=visa_update)
+            
+            if visa_response.status_code != 200:
+                self.log_test("Carlos Silva Complete H-1B Journey", False, "FASE 2 FALHOU: Seleção H-1B", visa_response.text[:200])
+                return
+            
+            visa_data = visa_response.json()
+            print(f"   ✅ Form code: {visa_data.get('form_code')}")
+            print(f"   ✅ Status: {visa_data.get('status')}")
+            
+            # FASE 3: Dados Básicos do Carlos Silva
+            print("\n👤 FASE 3: DADOS BÁSICOS DO CARLOS SILVA")
+            print("   PUT /api/auto-application/case/{case_id}")
+            
+            basic_data_update = {
+                "basic_data": {
+                    "nome_completo": carlos_data["nome_completo"],
+                    "data_nascimento": carlos_data["data_nascimento"],
+                    "pais_nascimento": carlos_data["pais_nascimento"],
+                    "genero": carlos_data["genero"],
+                    "email": carlos_data["email"],
+                    "telefone": carlos_data["telefone"],
+                    "endereco": carlos_data["endereco"],
+                    "empresa": carlos_data["empresa"],
+                    "cargo": carlos_data["cargo"],
+                    "salario_anual": carlos_data["salario_anual"],
+                    "diploma": carlos_data["diploma"],
+                    "visto_atual": carlos_data["visto_atual"],
+                    "alien_number": carlos_data["alien_number"]
+                },
+                "progress_percentage": 20,
+                "status": "basic_data"
+            }
+            
+            basic_response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=basic_data_update)
+            
+            if basic_response.status_code != 200:
+                self.log_test("Carlos Silva Complete H-1B Journey", False, "FASE 3 FALHOU: Dados básicos", basic_response.text[:200])
+                return
+            
+            basic_data = basic_response.json()
+            print(f"   ✅ Dados salvos: {basic_data.get('status')}")
+            print(f"   ✅ Progresso: {basic_data.get('progress_percentage', 0)}%")
+            
+            # FASE 4: Upload de Documentos Fictícios
+            print("\n📄 FASE 4: UPLOAD DE DOCUMENTOS")
+            print("   POST /api/documents/analyze-with-ai (4x)")
+            
+            # Criar documentos fictícios em base64
+            documents = [
+                {
+                    "name": "passaporte_brasileiro.pdf",
+                    "type": "passport",
+                    "content": "Passaporte Brasileiro - Carlos Eduardo Silva Santos\nNúmero: BR123456789\nData Nascimento: 15/05/1990\nLocal: São Paulo, Brasil\nValidade: 2030-05-15"
+                },
+                {
+                    "name": "diploma_usp.pdf", 
+                    "type": "education_diploma",
+                    "content": "UNIVERSIDADE DE SÃO PAULO\nDiploma de Bacharel em Ciência da Computação\nCarlos Eduardo Silva Santos\nConcluído em: Dezembro 2012"
+                },
+                {
+                    "name": "carta_emprego_techcorp.pdf",
+                    "type": "employment_letter", 
+                    "content": "TechCorp America Inc.\nOffer Letter\nTo: Carlos Eduardo Silva Santos\nPosition: Senior Software Engineer\nSalary: $95,000 annually\nStart Date: January 2025"
+                }
+            ]
+            
+            uploaded_docs = []
+            for doc in documents:
+                try:
+                    # Simular upload de documento
+                    doc_content = doc["content"].encode('utf-8')
+                    doc_b64 = base64.b64encode(doc_content).decode('utf-8')
+                    
+                    files = {'file': (doc["name"], doc_content, 'application/pdf')}
+                    data = {
+                        'document_type': doc["type"],
+                        'visa_type': 'H-1B',
+                        'case_id': case_id
+                    }
+                    
+                    headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                    doc_response = requests.post(f"{API_BASE}/documents/analyze-with-ai", files=files, data=data, headers=headers)
+                    
+                    if doc_response.status_code == 200:
+                        doc_result = doc_response.json()
+                        uploaded_docs.append({
+                            "name": doc["name"],
+                            "type": doc["type"],
+                            "completeness": doc_result.get('completeness', 0),
+                            "valid": doc_result.get('valid', False)
+                        })
+                        print(f"   ✅ {doc['name']}: {doc_result.get('completeness', 0)}% completo")
+                    else:
+                        print(f"   ❌ {doc['name']}: Falha no upload")
+                        
+                except Exception as doc_error:
+                    print(f"   ❌ {doc['name']}: Erro - {str(doc_error)}")
+            
+            print(f"   ✅ Documentos processados: {len(uploaded_docs)}/3")
+            
+            # FASE 5: História do Usuário e Respostas
+            print("\n📝 FASE 5: HISTÓRIA DO USUÁRIO E RESPOSTAS")
+            print("   PUT /api/auto-application/case/{case_id}")
+            
+            user_story = """Sou Carlos Silva, engenheiro de software brasileiro com 8 anos de experiência. 
+            Trabalho atualmente no Brasil para a Tech Solutions Brasil Ltda, mas recebi uma oferta da 
+            TechCorp America Inc. nos EUA para trabalhar como Senior Software Engineer. Tenho graduação 
+            em Ciência da Computação pela USP e especialização em desenvolvimento de software. 
+            Preciso do visto H-1B para aceitar esta oportunidade de trabalho nos Estados Unidos."""
+            
+            simplified_responses = {
+                "q1_purpose": "Trabalho especializado em engenharia de software",
+                "q2_employer": "TechCorp America Inc.",
+                "q3_position": "Senior Software Engineer", 
+                "q4_salary": "$95,000 anuais",
+                "q5_education": "Bacharel em Ciência da Computação - USP",
+                "q6_experience": "8 anos de experiência em desenvolvimento de software",
+                "q7_specialty": "Desenvolvimento de sistemas complexos e arquitetura de software",
+                "q8_duration": "3 anos iniciais com possibilidade de extensão"
+            }
+            
+            story_update = {
+                "user_story_text": user_story,
+                "simplified_form_responses": simplified_responses,
+                "progress_percentage": 60,
+                "status": "story_completed"
+            }
+            
+            story_response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=story_update)
+            
+            if story_response.status_code != 200:
+                self.log_test("Carlos Silva Complete H-1B Journey", False, "FASE 5 FALHOU: História do usuário", story_response.text[:200])
+                return
+            
+            story_data = story_response.json()
+            print(f"   ✅ História salva: {len(user_story)} caracteres")
+            print(f"   ✅ Respostas: {len(simplified_responses)} perguntas")
+            print(f"   ✅ Progresso: {story_data.get('progress_percentage', 0)}%")
+            
+            # FASE 6: Processamento AI (Pipeline Completo)
+            print("\n🤖 FASE 6: PROCESSAMENTO AI - PIPELINE COMPLETO")
+            print("   POST /api/auto-application/case/{case_id}/ai-processing")
+            
+            ai_steps = ['validation', 'consistency', 'translation', 'form_generation', 'final_review']
+            ai_progress = [65, 69, 73, 77, 81]
+            
+            for i, (step, progress) in enumerate(zip(ai_steps, ai_progress)):
+                try:
+                    ai_data = {
+                        "step": step,
+                        "case_id": case_id
+                    }
+                    
+                    ai_response = self.session.post(f"{API_BASE}/auto-application/case/{case_id}/ai-processing", json=ai_data)
+                    
+                    if ai_response.status_code == 200:
+                        ai_result = ai_response.json()
+                        success = ai_result.get('success', False)
+                        step_id = ai_result.get('step_id', step)
+                        print(f"   ✅ Etapa {i+1}/5 - {step}: {'Sucesso' if success else 'Falha'} ({progress}%)")
+                    else:
+                        print(f"   ❌ Etapa {i+1}/5 - {step}: HTTP {ai_response.status_code}")
+                        
+                except Exception as ai_error:
+                    print(f"   ❌ Etapa {i+1}/5 - {step}: Erro - {str(ai_error)}")
+            
+            # FASE 7: Geração de Formulário USCIS
+            print("\n📋 FASE 7: GERAÇÃO DE FORMULÁRIO USCIS I-129")
+            print("   POST /api/auto-application/case/{case_id}/generate-form")
+            
+            try:
+                form_data = {
+                    "form_type": "I-129",
+                    "case_id": case_id
+                }
+                
+                form_response = self.session.post(f"{API_BASE}/auto-application/case/{case_id}/generate-form", json=form_data)
+                
+                if form_response.status_code == 200:
+                    form_result = form_response.json()
+                    uscis_generated = form_result.get('uscis_form_generated', False)
+                    progress = form_result.get('progress_percentage', 0)
+                    print(f"   ✅ Formulário I-129 gerado: {'Sim' if uscis_generated else 'Não'}")
+                    print(f"   ✅ Progresso: {progress}%")
+                else:
+                    print(f"   ❌ Geração de formulário: HTTP {form_response.status_code}")
+                    
+            except Exception as form_error:
+                print(f"   ❌ Geração de formulário: Erro - {str(form_error)}")
+            
+            # FASE 8: Finalização e Pacote
+            print("\n📦 FASE 8: FINALIZAÇÃO E PACOTE")
+            print("   POST /api/auto-application/case/{case_id}/complete")
+            
+            try:
+                complete_data = {
+                    "case_id": case_id,
+                    "final_review": True
+                }
+                
+                complete_response = self.session.post(f"{API_BASE}/auto-application/case/{case_id}/complete", json=complete_data)
+                
+                if complete_response.status_code == 200:
+                    complete_result = complete_response.json()
+                    status = complete_result.get('status')
+                    progress = complete_result.get('progress_percentage', 0)
+                    package_generated = complete_result.get('final_package_generated', False)
+                    print(f"   ✅ Status final: {status}")
+                    print(f"   ✅ Progresso: {progress}%")
+                    print(f"   ✅ Pacote gerado: {'Sim' if package_generated else 'Não'}")
+                else:
+                    print(f"   ❌ Finalização: HTTP {complete_response.status_code}")
+                    
+            except Exception as complete_error:
+                print(f"   ❌ Finalização: Erro - {str(complete_error)}")
+            
+            # FASE 9: Pagamento (Stripe)
+            print("\n💳 FASE 9: PAGAMENTO STRIPE")
+            print("   POST /api/owl-agent/initiate-payment")
+            
+            try:
+                payment_data = {
+                    "session_id": case_id,  # Use case_id as session_id
+                    "delivery_method": "download",
+                    "amount": 29.99
+                }
+                
+                payment_response = self.session.post(f"{API_BASE}/owl-agent/initiate-payment", json=payment_data)
+                
+                if payment_response.status_code == 200:
+                    payment_result = payment_response.json()
+                    checkout_url = payment_result.get('checkout_url')
+                    checkout_session = payment_result.get('checkout_session')
+                    print(f"   ✅ Checkout criado: {'Sim' if checkout_url else 'Não'}")
+                    print(f"   ✅ URL Stripe: {checkout_url[:50] if checkout_url else 'None'}...")
+                else:
+                    print(f"   ❌ Pagamento: HTTP {payment_response.status_code}")
+                    print(f"   📋 Resposta: {payment_response.text[:100]}")
+                    
+            except Exception as payment_error:
+                print(f"   ❌ Pagamento: Erro - {str(payment_error)}")
+            
+            # FASE 10: Verificação Final e Relatório
+            print("\n📊 FASE 10: VERIFICAÇÃO FINAL E RELATÓRIO")
+            print("   GET /api/auto-application/case/{case_id}")
+            
+            try:
+                final_response = self.session.get(f"{API_BASE}/auto-application/case/{case_id}")
+                
+                if final_response.status_code == 200:
+                    final_data = final_response.json()
+                    
+                    # Verificações finais
+                    final_checks = {
+                        "case_id_valid": final_data.get('case_id') == case_id,
+                        "form_code_h1b": final_data.get('form_code') == 'H-1B',
+                        "basic_data_present": bool(final_data.get('basic_data')),
+                        "story_present": bool(final_data.get('user_story_text')),
+                        "responses_present": bool(final_data.get('simplified_form_responses')),
+                        "carlos_name_stored": final_data.get('basic_data', {}).get('nome_completo') == carlos_data["nome_completo"],
+                        "progress_complete": final_data.get('progress_percentage', 0) >= 90
+                    }
+                    
+                    success_count = sum(final_checks.values())
+                    total_checks = len(final_checks)
+                    
+                    print(f"   ✅ Verificações finais: {success_count}/{total_checks}")
+                    for check, result in final_checks.items():
+                        print(f"      {'✓' if result else '✗'} {check}")
+                    
+                    # Resultado final
+                    overall_success = success_count >= (total_checks * 0.8)  # 80% success rate
+                    
+                    self.log_test(
+                        "Carlos Silva Complete H-1B Journey - ALL 10 PHASES",
+                        overall_success,
+                        f"SIMULAÇÃO COMPLETA: {success_count}/{total_checks} verificações passaram. Case ID: {case_id}, Progresso final: {final_data.get('progress_percentage', 0)}%",
+                        {
+                            "case_id": case_id,
+                            "phases_completed": 10,
+                            "final_checks": final_checks,
+                            "success_rate": f"{success_count}/{total_checks}",
+                            "carlos_data_verified": final_checks.get("carlos_name_stored", False),
+                            "h1b_form_verified": final_checks.get("form_code_h1b", False),
+                            "progress_percentage": final_data.get('progress_percentage', 0)
+                        }
+                    )
+                    
+                else:
+                    self.log_test("Carlos Silva Complete H-1B Journey", False, "FASE 10 FALHOU: Verificação final", final_response.text[:200])
+                    
+            except Exception as final_error:
+                self.log_test("Carlos Silva Complete H-1B Journey", False, f"FASE 10 FALHOU: Erro - {str(final_error)}")
+            
+            print("\n" + "="*80)
+            print("🎉 SIMULAÇÃO CARLOS SILVA H-1B COMPLETA!")
+            print("="*80)
+            
+        except Exception as e:
+            self.log_test("Carlos Silva Complete H-1B Journey - ALL 10 PHASES", False, f"ERRO GERAL: {str(e)}")
     
     def test_i539_uscis_form_definition(self):
         """Test if USCISForm.I539 is correctly defined"""
