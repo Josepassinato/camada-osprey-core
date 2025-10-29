@@ -8177,6 +8177,59 @@ async def get_success_factors(visa_type: str):
 
 # ===== END CONVERSATIONAL ASSISTANT & SOCIAL PROOF =====
 
+# ===== ADAPTIVE LANGUAGE SYSTEM =====
+from adaptive_texts import ADAPTIVE_TEXTS, get_text, get_context_texts
+
+@api_router.get("/adaptive-texts/{context}")
+async def get_adaptive_texts(context: str, mode: str = "simple"):
+    """Retorna textos adaptativos para um contexto específico"""
+    try:
+        if context == "all":
+            # Retornar todos os contextos
+            return {
+                "success": True,
+                "mode": mode,
+                "texts": {ctx: ADAPTIVE_TEXTS[ctx][mode] for ctx in ADAPTIVE_TEXTS.keys()}
+            }
+        
+        texts = get_context_texts(context, mode)
+        
+        if not texts:
+            raise HTTPException(status_code=404, detail=f"Context '{context}' not found")
+        
+        return {
+            "success": True,
+            "context": context,
+            "mode": mode,
+            "texts": texts
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting adaptive texts: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/adaptive-texts/{context}/{key}")
+async def get_adaptive_text(context: str, key: str, mode: str = "simple"):
+    """Retorna um texto adaptativo específico"""
+    try:
+        text = get_text(context, key, mode)
+        
+        return {
+            "success": True,
+            "context": context,
+            "key": key,
+            "mode": mode,
+            "text": text
+        }
+    
+    except Exception as e:
+        logger.error(f"Error getting adaptive text: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ===== END ADAPTIVE LANGUAGE SYSTEM =====
+
 app.include_router(api_router)
 
 app.add_middleware(
