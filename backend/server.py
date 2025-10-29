@@ -8258,7 +8258,7 @@ logger = logging.getLogger(__name__)
 @app.on_event("startup")
 async def startup_db_client():
     """Startup event to connect to MongoDB with optimized indexes"""
-    global client, db
+    global client, db, alert_system
     
     try:
         # MongoDB connection string - usually set via environment variable
@@ -8271,6 +8271,10 @@ async def startup_db_client():
         await client.admin.command('ping')
         
         logger.info("Successfully connected to MongoDB!")
+        
+        # Initialize alert system with connected db
+        alert_system = ProactiveAlertSystem(db)
+        logger.info("Proactive Alert System initialized!")
         
         # Create optimized indexes for better performance
         try:
