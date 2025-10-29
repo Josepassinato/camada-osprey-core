@@ -309,12 +309,14 @@ Use linguagem simples e emojis quando apropriado.
 IMPORTANTE: Esta é informação educativa. Sempre mencione que não substitui consultoria jurídica.
 """
             
-            response = llm_client.chat(
+            llm = create_llm_client(
+                system_message=system_prompt,
+                session_id=f"quick_{datetime.utcnow().timestamp()}"
+            )
+            
+            response = llm.chat(
                 model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    UserMessage(content=question)
-                ],
+                messages=[UserMessage(content=question)],
                 max_tokens=400,
                 temperature=0.7
             )
