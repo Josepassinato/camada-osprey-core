@@ -8155,6 +8155,89 @@ async def get_adaptive_text(context: str, key: str, mode: str = "simple"):
 
 # ===== END ADAPTIVE LANGUAGE SYSTEM =====
 
+# ===== PROACTIVE ALERTS SYSTEM =====
+from proactive_alerts import ProactiveAlertSystem, AlertType, AlertPriority
+
+# Initialize alert system
+alert_system = ProactiveAlertSystem(db)
+
+@api_router.get("/alerts/{case_id}")
+async def get_case_alerts(case_id: str, include_dismissed: bool = False):
+    """Retorna alertas para um caso específico"""
+    try:
+        if include_dismissed:
+            alerts = await alert_system.generate_alerts_for_case(case_id)
+        else:
+            alerts = await alert_system.get_active_alerts(case_id)
+        
+        return {
+            "success": True,
+            "case_id": case_id,
+            "alerts": alerts,
+            "total": len(alerts)
+        }
+    
+    except Exception as e:
+        logger.error(f"Error getting alerts: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/alerts/{case_id}/dismiss/{alert_id}")
+async def dismiss_alert(case_id: str, alert_id: str):
+    """Marca um alerta como dispensado"""
+    try:
+        success = await alert_system.mark_alert_dismissed(alert_id, case_id)
+        
+        if success:
+            return {
+                "success": True,
+                "message": "Alert dismissed successfully"
+            }
+        else:
+            raise HTTPException(status_code=404, detail="Alert not found")
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error dismissing alert: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/alerts/{case_id}/summary")
+async def get_alerts_summary(case_id: str):
+    """Retorna resumo de alertas por tipo e prioridade"""
+    try:
+        alerts = await alert_system.get_active_alerts(case_id)
+        
+        # Contar por tipo
+        by_type = {}
+        for alert in alerts:
+            alert_type = alert["type"]
+            by_type[alert_type] = by_type.get(alert_type, 0) + 1
+        
+        # Contar por prioridade
+        by_priority = {}
+        for alert in alerts:
+            priority = alert["priority"]
+            by_priority[priority] = by_priority.get(priority, 0) + 1
+        
+        # Pegar alertas urgentes
+        urgent_alerts = [a for a in alerts if a["priority"] == AlertPriority.URGENT]
+        
+        return {
+            "success": True,
+            "case_id": case_id,
+            "total_alerts": len(alerts),
+            "by_type": by_type,
+            "by_priority": by_priority,
+            "urgent_count": len(urgent_alerts),
+            "urgent_alerts": urgent_alerts[:3]  # Top 3 urgent
+        }
+    
+    except Exception as e:
+        logger.error(f"Error getting alerts summary: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ===== END PROACTIVE ALERTS SYSTEM =====
+
 app.include_router(api_router)
 
 app.add_middleware(
