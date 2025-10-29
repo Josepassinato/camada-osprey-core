@@ -35,7 +35,7 @@ export const AdaptiveFormExample: React.FC = () => {
   };
 
   const validateForm = () => {
-    const newErrors: Record<string, string>> = {};
+    const newErrors: Record<string, string> = {};
 
     if (!formData.full_name) newErrors.full_name = tValidation('required');
     if (!formData.email) {
