@@ -119,15 +119,17 @@ ALWAYS:
                 session_id=session_id
             )
             
-            # Build message list for chat
-            chat_messages = []
+            # Build conversation history
+            conversation = ""
             for msg in self.conversation_history[session_id][-10:]:
-                chat_messages.append(UserMessage(content=msg["content"]) if msg["role"] == "user" else msg)
-            chat_messages.append(UserMessage(content=user_message))
+                role = "User" if msg["role"] == "user" else "Assistant"
+                conversation += f"{role}: {msg['content']}\n"
             
-            response = llm.chat(
+            conversation += f"User: {user_message}\n"
+            
+            response = llm.send_message(
+                conversation,
                 model="gpt-4o",
-                messages=chat_messages,
                 max_tokens=800,
                 temperature=0.7
             )
