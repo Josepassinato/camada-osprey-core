@@ -1692,6 +1692,352 @@ class ProductionVerificationTester:
         except Exception as e:
             self.log_test("Visa Updates Edge Cases", False, f"Exception: {str(e)}")
     
+    def test_completeness_analysis_endpoint(self):
+        """Test POST /api/analyze-completeness"""
+        print("📊 Testing Completeness Analysis Endpoint...")
+        
+        try:
+            # Test with I-130 visa type data as specified in the review request
+            test_data = {
+                "visa_type": "I-130",
+                "user_data": {
+                    "petitioner_full_name": "John Smith",
+                    "beneficiary_full_name": "Maria Silva",
+                    "beneficiary_dob": "1990-06-23",
+                    "relationship_type": "Esposa",
+                    "beneficiary_current_address": "Rua do Forró, 77"
+                },
+                "context": "Testing completeness analysis with sample I-130 data"
+            }
+            
+            response = self.session.post(f"{API_BASE}/analyze-completeness", json=test_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check response structure
+                has_success = data.get('success') is True
+                has_analysis = 'analysis' in data
+                
+                if has_analysis:
+                    analysis = data['analysis']
+                    has_overall_score = 'overall_score' in analysis
+                    has_level = 'level' in analysis
+                    has_categories = 'categories' in analysis
+                    has_critical_issues = 'critical_issues' in analysis
+                    has_warnings = 'warnings' in analysis
+                    has_recommendations = 'recommendations' in analysis
+                    
+                    # Check score is between 0-100
+                    score_valid = False
+                    if has_overall_score:
+                        score = analysis.get('overall_score', 0)
+                        score_valid = isinstance(score, (int, float)) and 0 <= score <= 100
+                    
+                    # Check level is valid enum
+                    level_valid = analysis.get('level') in ['critical', 'warning', 'good']
+                    
+                    success = (has_success and has_analysis and has_overall_score and 
+                              has_level and has_categories and score_valid and level_valid)
+                    
+                    self.log_test(
+                        "POST /api/analyze-completeness",
+                        success,
+                        f"Score: {analysis.get('overall_score', 'N/A')}%, Level: {analysis.get('level', 'N/A')}, Categories: {len(analysis.get('categories', {}))}, Issues: {len(analysis.get('critical_issues', []))}",
+                        {
+                            "overall_score": analysis.get('overall_score'),
+                            "level": analysis.get('level'),
+                            "categories_count": len(analysis.get('categories', {})),
+                            "critical_issues_count": len(analysis.get('critical_issues', [])),
+                            "warnings_count": len(analysis.get('warnings', [])),
+                            "recommendations_count": len(analysis.get('recommendations', []))
+                        }
+                    )
+                else:
+                    self.log_test(
+                        "POST /api/analyze-completeness",
+                        False,
+                        "Missing analysis object in response",
+                        data
+                    )
+            else:
+                self.log_test(
+                    "POST /api/analyze-completeness",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test("POST /api/analyze-completeness", False, f"Exception: {str(e)}")
+    
+    def test_visa_checklist_endpoint(self):
+        """Test GET /api/visa-checklist/{visa_type}"""
+        print("📋 Testing Visa Checklist Endpoint...")
+        
+        # Test valid visa types
+        visa_types_to_test = ["I-130", "H-1B", "I-539"]
+        
+        for visa_type in visa_types_to_test:
+            try:
+                response = self.session.get(f"{API_BASE}/visa-checklist/{visa_type}")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    # Check response structure
+                    has_success = data.get('success') is True
+                    has_checklist_items = 'checklist_items' in data
+                    
+                    if has_checklist_items:
+                        items = data['checklist_items']
+                        items_is_array = isinstance(items, list)
+                        has_field_descriptions = len(items) > 0 and all(
+                            isinstance(item, dict) and 'field' in item and 'description' in item 
+                            for item in items[:3]  # Check first 3 items
+                        )
+                        
+                        success = has_success and items_is_array and has_field_descriptions
+                        
+                        self.log_test(
+                            f"GET /api/visa-checklist/{visa_type}",
+                            success,
+                            f"Items: {len(items)}, Structure: {'✓' if has_field_descriptions else '✗'}",
+                            {"visa_type": visa_type, "items_count": len(items)}
+                        )
+                    else:
+                        self.log_test(
+                            f"GET /api/visa-checklist/{visa_type}",
+                            False,
+                            "Missing checklist_items in response",
+                            data
+                        )
+                elif response.status_code == 404:
+                    # Test with invalid visa type should return 404
+                    if visa_type == "INVALID_VISA":
+                        self.log_test(
+                            f"GET /api/visa-checklist/{visa_type}",
+                            True,
+                            "Correctly returns 404 for invalid visa type",
+                            {"status": "404_expected"}
+                        )
+                    else:
+                        self.log_test(
+                            f"GET /api/visa-checklist/{visa_type}",
+                            False,
+                            f"Unexpected 404 for valid visa type {visa_type}",
+                            response.text[:200]
+                        )
+                else:
+                    self.log_test(
+                        f"GET /api/visa-checklist/{visa_type}",
+                        False,
+                        f"HTTP {response.status_code}",
+                        response.text[:200]
+                    )
+            except Exception as e:
+                self.log_test(f"GET /api/visa-checklist/{visa_type}", False, f"Exception: {str(e)}")
+        
+        # Test invalid visa type
+        try:
+            response = self.session.get(f"{API_BASE}/visa-checklist/INVALID_VISA_TYPE")
+            
+            # Should return 404 for invalid visa type
+            returns_404 = response.status_code == 404
+            
+            self.log_test(
+                "GET /api/visa-checklist/INVALID_VISA_TYPE",
+                returns_404,
+                f"Invalid visa type handling: {'✓' if returns_404 else '✗'} (Status: {response.status_code})",
+                {"returns_404": returns_404}
+            )
+        except Exception as e:
+            self.log_test("GET /api/visa-checklist/INVALID_VISA_TYPE", False, f"Exception: {str(e)}")
+    
+    def test_submission_validation_endpoint(self):
+        """Test POST /api/validate-submission"""
+        print("🔍 Testing Submission Validation Endpoint...")
+        
+        # First, we need a real case_id from database
+        # Try to create a case first or use existing one
+        case_id_to_test = None
+        
+        # Try to use existing case from previous tests
+        if self.auto_case_id:
+            case_id_to_test = self.auto_case_id
+        elif self.carlos_case_id:
+            case_id_to_test = self.carlos_case_id
+        else:
+            # Create a new case for testing
+            try:
+                case_response = self.session.post(f"{API_BASE}/auto-application/start", json={})
+                if case_response.status_code == 200:
+                    case_data = case_response.json().get('case', {})
+                    case_id_to_test = case_data.get('case_id')
+            except:
+                pass
+        
+        if not case_id_to_test:
+            self.log_test(
+                "POST /api/validate-submission",
+                False,
+                "No case ID available for testing submission validation"
+            )
+            return
+        
+        try:
+            # Test submission validation
+            validation_data = {
+                "case_id": case_id_to_test,
+                "confirm_warnings": False
+            }
+            
+            response = self.session.post(f"{API_BASE}/validate-submission", json=validation_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check response structure
+                has_success = data.get('success') is True
+                has_can_submit = 'can_submit' in data
+                has_analysis = 'analysis' in data
+                has_requires_confirmation = 'requires_confirmation' in data
+                
+                # can_submit should be boolean
+                can_submit_valid = isinstance(data.get('can_submit'), bool)
+                
+                # analysis should have expected structure
+                analysis_valid = False
+                if has_analysis:
+                    analysis = data['analysis']
+                    analysis_valid = (
+                        'overall_score' in analysis and
+                        'level' in analysis and
+                        isinstance(analysis.get('overall_score'), (int, float))
+                    )
+                
+                success = (has_success and has_can_submit and has_analysis and 
+                          has_requires_confirmation and can_submit_valid and analysis_valid)
+                
+                self.log_test(
+                    "POST /api/validate-submission",
+                    success,
+                    f"Can submit: {data.get('can_submit')}, Score: {data.get('analysis', {}).get('overall_score', 'N/A')}%, Requires confirmation: {data.get('requires_confirmation')}",
+                    {
+                        "case_id": case_id_to_test,
+                        "can_submit": data.get('can_submit'),
+                        "overall_score": data.get('analysis', {}).get('overall_score'),
+                        "requires_confirmation": data.get('requires_confirmation')
+                    }
+                )
+            elif response.status_code == 404:
+                # Test with non-existent case ID
+                invalid_data = {
+                    "case_id": "NON_EXISTENT_CASE_ID",
+                    "confirm_warnings": False
+                }
+                
+                invalid_response = self.session.post(f"{API_BASE}/validate-submission", json=invalid_data)
+                returns_404 = invalid_response.status_code == 404
+                
+                self.log_test(
+                    "POST /api/validate-submission",
+                    returns_404,
+                    f"Non-existent case handling: {'✓' if returns_404 else '✗'} (Status: {invalid_response.status_code})",
+                    {"returns_404_for_invalid": returns_404}
+                )
+            else:
+                self.log_test(
+                    "POST /api/validate-submission",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test("POST /api/validate-submission", False, f"Exception: {str(e)}")
+    
+    def test_case_mode_update_endpoint(self):
+        """Test PATCH /api/auto-application/case/{case_id}/mode"""
+        print("⚙️ Testing Case Mode Update Endpoint...")
+        
+        # Use existing case ID if available
+        case_id_to_test = None
+        
+        if self.auto_case_id:
+            case_id_to_test = self.auto_case_id
+        elif self.carlos_case_id:
+            case_id_to_test = self.carlos_case_id
+        else:
+            # Create a new case for testing
+            try:
+                case_response = self.session.post(f"{API_BASE}/auto-application/start", json={})
+                if case_response.status_code == 200:
+                    case_data = case_response.json().get('case', {})
+                    case_id_to_test = case_data.get('case_id')
+            except:
+                pass
+        
+        if not case_id_to_test:
+            self.log_test(
+                "PATCH /api/auto-application/case/{case_id}/mode",
+                False,
+                "No case ID available for testing mode update"
+            )
+            return
+        
+        try:
+            # Test updating mode from "draft" to "submission"
+            response = self.session.patch(
+                f"{API_BASE}/auto-application/case/{case_id_to_test}/mode?mode=submission"
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check response structure
+                has_success = data.get('success') is True
+                has_message = 'message' in data
+                has_case_id = data.get('case_id') == case_id_to_test
+                has_mode = data.get('mode') == 'submission'
+                
+                success = has_success and has_message and has_case_id and has_mode
+                
+                # Test with invalid mode (should return 400)
+                invalid_response = self.session.patch(
+                    f"{API_BASE}/auto-application/case/{case_id_to_test}/mode?mode=invalid_mode"
+                )
+                
+                rejects_invalid_mode = invalid_response.status_code == 400
+                
+                # Test with non-existent case_id (should return 404)
+                nonexistent_response = self.session.patch(
+                    f"{API_BASE}/auto-application/case/NON_EXISTENT_CASE/mode?mode=draft"
+                )
+                
+                returns_404_for_invalid_case = nonexistent_response.status_code == 404
+                
+                overall_success = success and rejects_invalid_mode and returns_404_for_invalid_case
+                
+                self.log_test(
+                    "PATCH /api/auto-application/case/{case_id}/mode",
+                    overall_success,
+                    f"Mode update: {'✓' if success else '✗'}, Invalid mode rejection: {'✓' if rejects_invalid_mode else '✗'}, 404 for invalid case: {'✓' if returns_404_for_invalid_case else '✗'}",
+                    {
+                        "case_id": case_id_to_test,
+                        "mode_updated": success,
+                        "rejects_invalid_mode": rejects_invalid_mode,
+                        "returns_404_for_invalid_case": returns_404_for_invalid_case
+                    }
+                )
+            else:
+                self.log_test(
+                    "PATCH /api/auto-application/case/{case_id}/mode",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test("PATCH /api/auto-application/case/{case_id}/mode", False, f"Exception: {str(e)}")
+    
     def print_production_verification_summary(self):
         """Print comprehensive production verification summary"""
         print("\n" + "="*80)
