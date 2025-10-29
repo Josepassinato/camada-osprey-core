@@ -194,7 +194,7 @@ class CompletenessAnalyzer:
             IMPORTANTE: Seja educativo, não diretivo. Use frases como "O USCIS geralmente requer..." ao invés de "Você deve...".
             """
             
-            response = await self.openai_client.chat.completions.create(
+            response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
                     {
