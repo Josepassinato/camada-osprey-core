@@ -66,6 +66,10 @@ class ProductionVerificationTester:
         print("🚀 INICIANDO VERIFICAÇÃO FINAL COMPLETA DO SISTEMA EM PRODUÇÃO")
         print("="*80)
         
+        # TESTE RÁPIDO DE PROGRESSO - VERIFICAR progress_percentage
+        print("\n⚡ TESTE RÁPIDO DE PROGRESSO - progress_percentage")
+        self.test_progress_percentage_quick_verification()
+        
         # 1. Core APIs Functioning
         print("\n📡 1. VERIFICAÇÕES DE APIs CORE FUNCIONANDO")
         self.test_auth_signup_production()
