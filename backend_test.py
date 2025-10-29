@@ -117,6 +117,13 @@ class ProductionVerificationTester:
         self.test_visa_updates_database_collections()
         self.test_visa_updates_edge_cases()
         
+        # 8. Completeness Analysis System Testing
+        print("\n📊 8. COMPLETENESS ANALYSIS SYSTEM TESTING")
+        self.test_completeness_analysis_endpoint()
+        self.test_visa_checklist_endpoint()
+        self.test_submission_validation_endpoint()
+        self.test_case_mode_update_endpoint()
+        
         # Final Summary
         self.print_production_verification_summary()
     
