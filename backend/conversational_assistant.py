@@ -20,7 +20,6 @@ class ConversationalAssistant:
     """Assistente conversacional que ajuda usuários com dúvidas sobre imigração"""
     
     def __init__(self):
-        self.openai_client = openai
         self.conversation_history = {}  # Armazena histórico por session_id
     
     def _get_system_prompt(self, language_mode: str = "simple", visa_type: str = None) -> str:
