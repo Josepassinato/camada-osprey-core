@@ -149,7 +149,7 @@ class CompletenessAnalyzer:
     """Analisador de completude usando IA"""
     
     def __init__(self):
-        self.openai_client = openai
+        pass
     
     async def analyze_field_quality(
         self,
