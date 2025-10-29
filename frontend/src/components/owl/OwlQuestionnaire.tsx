@@ -114,7 +114,7 @@ export const OwlQuestionnaire: React.FC = () => {
   ];
 
   const getBackendUrl = () => {
-    return import.meta.env.VITE_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+    return import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://agente-coruja-1.preview.emergentagent.com';
   };
 
   // Initialize session when component mounts
