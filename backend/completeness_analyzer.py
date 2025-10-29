@@ -194,17 +194,14 @@ class CompletenessAnalyzer:
             IMPORTANTE: Seja educativo, não diretivo. Use frases como "O USCIS geralmente requer..." ao invés de "Você deve...".
             """
             
-            response = client.chat.completions.create(
+            response = llm_client.chat(
                 model="gpt-4o",
                 messages=[
                     {
                         "role": "system",
                         "content": "Você é um assistente educativo sobre requisitos do USCIS. Forneça feedback baseado em informações públicas, nunca como aconselhamento jurídico."
                     },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
+                    UserMessage(content=prompt)
                 ],
                 max_tokens=500,
                 temperature=0.3
