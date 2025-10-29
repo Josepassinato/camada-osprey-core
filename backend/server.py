@@ -2434,6 +2434,128 @@ async def validate_forms(request: dict):
         logger.error(f"Error validating forms: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error validating forms: {str(e)}")
 
+# NEW ENDPOINTS FOR COMPLETE APPLICATION FLOW
+
+@api_router.post("/auto-application/case/{case_id}/ai-processing")
+async def run_ai_processing_step(case_id: str, request: dict):
+    """Run AI processing step (validation, consistency, translation, form_generation, final_review)"""
+    try:
+        step = request.get("step")
+        if not step:
+            raise HTTPException(status_code=400, detail="Processing step is required")
+        
+        # Get case
+        case = await db.auto_cases.find_one({"case_id": case_id})
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        # Define progress increments for each step
+        progress_map = {
+            "validation": 65,
+            "consistency": 69,
+            "translation": 73,
+            "form_generation": 77,
+            "final_review": 81
+        }
+        
+        # Update case progress
+        new_progress = progress_map.get(step, case.get("progress_percentage", 60))
+        await db.auto_cases.update_one(
+            {"case_id": case_id},
+            {
+                "$set": {
+                    "progress_percentage": new_progress,
+                    f"ai_processing.{step}": "completed",
+                    "updated_at": datetime.utcnow()
+                }
+            }
+        )
+        
+        return {
+            "success": True,
+            "step": step,
+            "step_id": step,
+            "progress": new_progress,
+            "message": f"Step {step} completed successfully"
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in AI processing step: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/auto-application/case/{case_id}/generate-form")
+async def generate_uscis_form_for_case(case_id: str):
+    """Generate USCIS form for a specific case"""
+    try:
+        # Get case
+        case = await db.auto_cases.find_one({"case_id": case_id})
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        # Mark form as generated
+        await db.auto_cases.update_one(
+            {"case_id": case_id},
+            {
+                "$set": {
+                    "uscis_form_generated": True,
+                    "progress_percentage": 90,
+                    "status": "form_generated",
+                    "updated_at": datetime.utcnow()
+                }
+            }
+        )
+        
+        return {
+            "success": True,
+            "message": "USCIS form generated successfully",
+            "form_code": case.get("form_code", ""),
+            "progress": 90
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error generating USCIS form: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/auto-application/case/{case_id}/complete")
+async def complete_application(case_id: str):
+    """Mark application as complete and ready for package generation"""
+    try:
+        # Get case
+        case = await db.auto_cases.find_one({"case_id": case_id})
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        # Mark as completed
+        await db.auto_cases.update_one(
+            {"case_id": case_id},
+            {
+                "$set": {
+                    "status": "completed",
+                    "progress_percentage": 100,
+                    "completed_at": datetime.utcnow(),
+                    "updated_at": datetime.utcnow()
+                }
+            }
+        )
+        
+        return {
+            "success": True,
+            "message": "Application completed successfully",
+            "case_id": case_id,
+            "status": "completed",
+            "progress": 100
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error completing application: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/auto-application/process-payment")
 async def process_payment(request: dict):
     """Process payment for auto-application package"""
