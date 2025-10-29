@@ -478,8 +478,10 @@ class ProductionVerificationTester:
                 return
             
             h1b_data = h1b_response.json()
-            h1b_progress = h1b_data.get('progress_percentage', 0)
-            h1b_form = h1b_data.get('form_code')
+            # Handle nested case structure
+            case_data = h1b_data.get('case', h1b_data)
+            h1b_progress = case_data.get('progress_percentage', 0)
+            h1b_form = case_data.get('form_code')
             
             print(f"   ✅ Form code: {h1b_form}")
             print(f"   ✅ Progress atualizado: {h1b_progress}%")
