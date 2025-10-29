@@ -8005,100 +8005,25 @@ async def update_case_mode(case_id: str, mode: str):
 # ===== END COMPLETENESS ANALYSIS SYSTEM =====
 
 # ===== CONVERSATIONAL ASSISTANT & SOCIAL PROOF =====
-from conversational_assistant import ConversationalAssistant, COMMON_QUESTIONS
+# NOTA: Conversational Assistant DESATIVADO - Substituído por Alertas Proativos
+# from conversational_assistant import ConversationalAssistant, COMMON_QUESTIONS
 from social_proof_system import SocialProofSystem
 
 # Initialize systems
-conversational_assistant = ConversationalAssistant()
+# conversational_assistant = ConversationalAssistant()  # DESATIVADO
 social_proof_system = SocialProofSystem()
 
-class ChatRequest(BaseModel):
-    """Request para chat conversacional"""
-    session_id: str
-    message: str
-    language_mode: str = "simple"  # simple or technical
-    visa_type: Optional[str] = None
-    user_context: Optional[Dict[str, Any]] = None
-
-class QuickAnswerRequest(BaseModel):
-    """Request para resposta rápida"""
-    question: str
-    visa_type: Optional[str] = None
+# Conversational endpoints commented out - replaced by proactive alerts
+# @api_router.post("/conversational/chat")
+# @api_router.post("/conversational/quick-answer")
+# @api_router.get("/conversational/common-questions")
+# @api_router.delete("/conversational/history/{session_id}")
 
 class SimilarCasesRequest(BaseModel):
     """Request para casos similares"""
     visa_type: str
     user_profile: Optional[Dict[str, Any]] = None
     limit: int = 3
-
-@api_router.post("/conversational/chat")
-async def conversational_chat(request: ChatRequest):
-    """Chat conversacional com assistente IA"""
-    try:
-        response = await conversational_assistant.chat(
-            session_id=request.session_id,
-            user_message=request.message,
-            language_mode=request.language_mode,
-            visa_type=request.visa_type,
-            user_context=request.user_context
-        )
-        
-        return response
-    
-    except Exception as e:
-        logger.error(f"Error in conversational chat: {e}")
-        raise HTTPException(status_code=500, detail=f"Chat error: {str(e)}")
-
-@api_router.post("/conversational/quick-answer")
-async def quick_answer(request: QuickAnswerRequest):
-    """Resposta rápida para perguntas comuns"""
-    try:
-        answer = await conversational_assistant.get_quick_answer(
-            question=request.question,
-            visa_type=request.visa_type
-        )
-        
-        return {
-            "success": True,
-            "answer": answer,
-            "question": request.question
-        }
-    
-    except Exception as e:
-        logger.error(f"Error getting quick answer: {e}")
-        raise HTTPException(status_code=500, detail=f"Quick answer error: {str(e)}")
-
-@api_router.get("/conversational/common-questions")
-async def get_common_questions(language_mode: str = "simple"):
-    """Retorna FAQ com respostas pré-definidas"""
-    try:
-        questions = {}
-        for key, value in COMMON_QUESTIONS.items():
-            questions[key] = value.get(language_mode, value.get("simple"))
-        
-        return {
-            "success": True,
-            "questions": questions,
-            "total": len(questions)
-        }
-    
-    except Exception as e:
-        logger.error(f"Error getting common questions: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.delete("/conversational/history/{session_id}")
-async def clear_conversation_history(session_id: str):
-    """Limpa histórico de conversa"""
-    try:
-        conversational_assistant.clear_history(session_id)
-        return {
-            "success": True,
-            "message": "Conversation history cleared"
-        }
-    
-    except Exception as e:
-        logger.error(f"Error clearing history: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/social-proof/similar-cases")
 async def get_similar_cases(request: SimilarCasesRequest):
