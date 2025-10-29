@@ -299,9 +299,9 @@ IMPORTANTE: Esta é informação educativa. Sempre mencione que não substitui c
                 session_id=f"quick_{datetime.utcnow().timestamp()}"
             )
             
-            response = llm.chat(
+            response = llm.send_message(
+                question,
                 model="gpt-4o",
-                messages=[UserMessage(content=question)],
                 max_tokens=400,
                 temperature=0.7
             )
