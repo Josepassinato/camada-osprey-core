@@ -2469,6 +2469,14 @@ async def run_ai_processing_step(case_id: str, request: dict):
         
         # Update case progress
         new_progress = progress_map.get(step, case.get("progress_percentage", 60))
+        
+        # Initialize ai_processing if it's null
+        if case.get("ai_processing") is None:
+            await db.auto_cases.update_one(
+                {"case_id": case_id},
+                {"$set": {"ai_processing": {}}}
+            )
+        
         await db.auto_cases.update_one(
             {"case_id": case_id},
             {
