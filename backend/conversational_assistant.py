@@ -134,7 +134,7 @@ ALWAYS:
                 temperature=0.7
             )
             
-            assistant_message = response.choices[0].message.content.strip()
+            assistant_message = response.strip()
             
             # Atualizar histórico
             self.conversation_history[session_id].append({
