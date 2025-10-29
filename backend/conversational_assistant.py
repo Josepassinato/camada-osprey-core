@@ -124,7 +124,7 @@ ALWAYS:
             })
             
             # Chamar OpenAI
-            response = client.chat.completions.create(
+            response = llm_client.chat(
                 model="gpt-4o",
                 messages=messages,
                 max_tokens=800,
