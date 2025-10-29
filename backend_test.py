@@ -94,8 +94,12 @@ class ProductionVerificationTester:
         self.test_mock_mode_only_when_unconfigured()
         self.test_production_logging()
         
-        # 5. Carlos Silva Basic Journey Simulation
-        print("\n🇧🇷 5. SIMULAÇÃO CARLOS SILVA (PRIMEIRAS 4 ETAPAS)")
+        # 5. Carlos Silva Complete Journey Simulation (All 10 Phases)
+        print("\n🇧🇷 5. SIMULAÇÃO COMPLETA CARLOS SILVA H-1B (TODAS AS 10 FASES)")
+        self.test_carlos_silva_complete_h1b_journey()
+        
+        # 5b. Carlos Silva Basic Journey Simulation (Legacy)
+        print("\n🇧🇷 5b. SIMULAÇÃO CARLOS SILVA (PRIMEIRAS 4 ETAPAS - LEGACY)")
         self.test_carlos_silva_journey_basic()
         
         # 6. I-539 Specific Implementation Testing
