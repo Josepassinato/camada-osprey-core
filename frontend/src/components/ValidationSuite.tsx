@@ -14,7 +14,7 @@ import CompletenessAnalyzer from './CompletenessAnalyzer';
 import VisaChecklist from './VisaChecklist';
 import DraftSubmissionMode from './DraftSubmissionMode';
 
-interface ValidationSuite Props {
+interface ValidationSuiteProps {
   caseId: string;
   visaType: string;
   userData: Record<string, any>;
