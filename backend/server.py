@@ -300,6 +300,10 @@ class AutoApplicationCase(BaseModel):
     form_code: Optional[USCISForm] = None
     status: CaseStatus = CaseStatus.created
     
+    # Progress Tracking
+    progress_percentage: int = 0  # 0-100%
+    current_step: Optional[str] = None
+    
     # Basic Data
     basic_data: Optional[Dict[str, Any]] = None
     
@@ -315,12 +319,17 @@ class AutoApplicationCase(BaseModel):
     # Form Data
     simplified_form_responses: Optional[Dict[str, Any]] = None
     official_form_data: Optional[Dict[str, Any]] = None
+    uscis_form_generated: bool = False
+    
+    # AI Processing Tracking
+    ai_processing: Optional[Dict[str, Any]] = None
     
     # Payment & Final
     payment_status: Optional[str] = None
     payment_id: Optional[str] = None
     final_package_generated: bool = False
     final_package_url: Optional[str] = None
+    completed_at: Optional[datetime] = None
     
     # Metadata
     created_at: datetime = Field(default_factory=datetime.utcnow)
