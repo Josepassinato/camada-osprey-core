@@ -546,7 +546,9 @@ class ProductionVerificationTester:
                 # Verificar se progress foi atualizado para 65
                 get_response = self.session.get(f"{API_BASE}/auto-application/case/{case_id}")
                 if get_response.status_code == 200:
-                    current_case = get_response.json()
+                    current_case_response = get_response.json()
+                    # Handle nested case structure
+                    current_case = current_case_response.get('case', current_case_response)
                     ai_progress = current_case.get('progress_percentage', 0)
                     print(f"   ✅ Progress após AI: {ai_progress}%")
                     
