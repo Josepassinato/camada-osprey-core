@@ -291,11 +291,11 @@ Use linguagem simples e emojis quando apropriado.
 IMPORTANTE: Esta é informação educativa. Sempre mencione que não substitui consultoria jurídica.
 """
             
-            response = client.chat.completions.create(
+            response = llm_client.chat(
                 model="gpt-4o",
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": question}
+                    UserMessage(content=question)
                 ],
                 max_tokens=400,
                 temperature=0.7
