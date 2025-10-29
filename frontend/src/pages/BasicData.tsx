@@ -693,14 +693,6 @@ const BasicData = () => {
         </div>
       </div>
 
-      {/* Osprey Owl Tutor - Debug Version */}
-      <div className="fixed bottom-4 right-4 z-50">
-        <div className="bg-red-100 border border-red-300 rounded p-2 text-xs">
-          <p>🦉 Debug: Case ID: {case_?.case_id}</p>
-          <p>🦉 Debug: Snapshot: {snapshot ? 'exists' : 'null'}</p>
-          <p>🦉 Debug: Enabled: {!!case_?.case_id ? 'yes' : 'no'}</p>
-        </div>
-      </div>
       
       <OspreyOwlTutor 
         snapshot={snapshot}
