@@ -14,7 +14,14 @@ logger = logging.getLogger(__name__)
 
 # Initialize emergent integrations client
 emergent_llm_key = os.environ.get('EMERGENT_LLM_KEY')
-llm_client = LlmChat(api_key=emergent_llm_key)
+
+def create_llm_client(system_message: str, session_id: str) -> LlmChat:
+    """Create LlmChat instance with required parameters"""
+    return LlmChat(
+        api_key=emergent_llm_key,
+        session_id=session_id,
+        system_message=system_message
+    )
 
 class ConversationalAssistant:
     """Assistente conversacional que ajuda usuários com dúvidas sobre imigração"""
