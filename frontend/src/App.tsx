@@ -80,11 +80,14 @@ const App = () => (
           <Route path="/owl-agent/payment-success" element={<OwlPaymentSuccessPage />} />
           {/* Admin Panel Routes */}
           <Route path="/admin/visa-updates" element={<AdminVisaUpdatesPanel />} />
+          {/* Demo/Example Routes */}
+          <Route path="/demo/adaptive-language" element={<AdaptiveFormExample />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 
