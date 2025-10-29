@@ -512,8 +512,10 @@ class ProductionVerificationTester:
                 return
             
             basic_data = basic_response.json()
-            basic_progress = basic_data.get('progress_percentage', 0)
-            stored_basic_data = basic_data.get('basic_data', {})
+            # Handle nested case structure
+            case_data = basic_data.get('case', basic_data)
+            basic_progress = case_data.get('progress_percentage', 0)
+            stored_basic_data = case_data.get('basic_data', {})
             
             print(f"   ✅ Dados salvos: {stored_basic_data.get('name', 'N/A')}")
             print(f"   ✅ Progress atualizado: {basic_progress}%")
