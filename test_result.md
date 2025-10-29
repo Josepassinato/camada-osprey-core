@@ -1021,8 +1021,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Completeness Analysis System Backend - TESTED AND WORKING"
+    - "Conversational Assistant with Voice - AI-powered Chat - TESTED WITH CRITICAL ISSUES"
+    - "Social Proof System - Pessoas Como Você Success Stories - TESTED AND WORKING"
   stuck_tasks:
+    - "Conversational Assistant OpenAI API Integration (failing with success=False responses)"
     - "Dr. Miguel Identity Validation (needs improvement for different person detection)"
   test_all: false
   test_priority: "critical_first"
