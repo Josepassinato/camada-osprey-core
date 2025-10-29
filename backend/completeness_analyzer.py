@@ -211,7 +211,7 @@ class CompletenessAnalyzer:
                 temperature=0.3
             )
             
-            result_text = response.choices[0].message.content.strip()
+            result_text = response.strip()
             result_text = result_text.replace('```json', '').replace('```', '').strip()
             result = json.loads(result_text)
             
