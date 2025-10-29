@@ -54,7 +54,7 @@ export const ProactiveAlertsDisplay: React.FC<ProactiveAlertsDisplayProps> = ({
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://agente-coruja-1.preview.emergentagent.com';
 
   useEffect(() => {
     if (caseId) {
@@ -355,7 +355,7 @@ export const AlertsBadge: React.FC<{ caseId: string }> = ({ caseId }) => {
   const [count, setCount] = useState(0);
   const [urgentCount, setUrgentCount] = useState(0);
 
-  const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://agente-coruja-1.preview.emergentagent.com';
 
   useEffect(() => {
     const fetchSummary = async () => {
