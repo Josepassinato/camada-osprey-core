@@ -204,9 +204,9 @@ class CompletenessAnalyzer:
             
             response = create_llm_client(
                 "Você é um assistente educativo sobre requisitos do USCIS. Forneça feedback baseado em informações públicas, nunca como aconselhamento jurídico."
-            ).chat(
+            ).send_message(
+                prompt,
                 model="gpt-4o",
-                messages=[UserMessage(content=prompt)],
                 max_tokens=500,
                 temperature=0.3
             )
