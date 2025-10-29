@@ -8004,6 +8004,179 @@ async def update_case_mode(case_id: str, mode: str):
 
 # ===== END COMPLETENESS ANALYSIS SYSTEM =====
 
+# ===== CONVERSATIONAL ASSISTANT & SOCIAL PROOF =====
+from conversational_assistant import ConversationalAssistant, COMMON_QUESTIONS
+from social_proof_system import SocialProofSystem
+
+# Initialize systems
+conversational_assistant = ConversationalAssistant()
+social_proof_system = SocialProofSystem()
+
+class ChatRequest(BaseModel):
+    """Request para chat conversacional"""
+    session_id: str
+    message: str
+    language_mode: str = "simple"  # simple or technical
+    visa_type: Optional[str] = None
+    user_context: Optional[Dict[str, Any]] = None
+
+class QuickAnswerRequest(BaseModel):
+    """Request para resposta rápida"""
+    question: str
+    visa_type: Optional[str] = None
+
+class SimilarCasesRequest(BaseModel):
+    """Request para casos similares"""
+    visa_type: str
+    user_profile: Optional[Dict[str, Any]] = None
+    limit: int = 3
+
+@api_router.post("/conversational/chat")
+async def conversational_chat(request: ChatRequest):
+    """Chat conversacional com assistente IA"""
+    try:
+        response = await conversational_assistant.chat(
+            session_id=request.session_id,
+            user_message=request.message,
+            language_mode=request.language_mode,
+            visa_type=request.visa_type,
+            user_context=request.user_context
+        )
+        
+        return response
+    
+    except Exception as e:
+        logger.error(f"Error in conversational chat: {e}")
+        raise HTTPException(status_code=500, detail=f"Chat error: {str(e)}")
+
+@api_router.post("/conversational/quick-answer")
+async def quick_answer(request: QuickAnswerRequest):
+    """Resposta rápida para perguntas comuns"""
+    try:
+        answer = await conversational_assistant.get_quick_answer(
+            question=request.question,
+            visa_type=request.visa_type
+        )
+        
+        return {
+            "success": True,
+            "answer": answer,
+            "question": request.question
+        }
+    
+    except Exception as e:
+        logger.error(f"Error getting quick answer: {e}")
+        raise HTTPException(status_code=500, detail=f"Quick answer error: {str(e)}")
+
+@api_router.get("/conversational/common-questions")
+async def get_common_questions(language_mode: str = "simple"):
+    """Retorna FAQ com respostas pré-definidas"""
+    try:
+        questions = {}
+        for key, value in COMMON_QUESTIONS.items():
+            questions[key] = value.get(language_mode, value.get("simple"))
+        
+        return {
+            "success": True,
+            "questions": questions,
+            "total": len(questions)
+        }
+    
+    except Exception as e:
+        logger.error(f"Error getting common questions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.delete("/conversational/history/{session_id}")
+async def clear_conversation_history(session_id: str):
+    """Limpa histórico de conversa"""
+    try:
+        conversational_assistant.clear_history(session_id)
+        return {
+            "success": True,
+            "message": "Conversation history cleared"
+        }
+    
+    except Exception as e:
+        logger.error(f"Error clearing history: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/social-proof/similar-cases")
+async def get_similar_cases(request: SimilarCasesRequest):
+    """Retorna casos similares de sucesso"""
+    try:
+        result = social_proof_system.get_similar_cases(
+            visa_type=request.visa_type,
+            user_profile=request.user_profile,
+            limit=request.limit
+        )
+        
+        if not result.get("success"):
+            raise HTTPException(status_code=404, detail=result.get("message"))
+        
+        return result
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting similar cases: {e}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+@api_router.get("/social-proof/statistics/{visa_type}")
+async def get_visa_statistics(visa_type: str):
+    """Retorna estatísticas agregadas por tipo de visto"""
+    try:
+        result = social_proof_system.get_statistics(visa_type)
+        
+        if not result.get("success"):
+            raise HTTPException(status_code=404, detail=result.get("message"))
+        
+        return result
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting statistics: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/social-proof/timeline-estimate/{visa_type}")
+async def get_timeline_estimate(visa_type: str, completeness: Optional[int] = None):
+    """Estima timeline de processamento"""
+    try:
+        result = social_proof_system.get_timeline_estimate(
+            visa_type=visa_type,
+            user_completeness=completeness
+        )
+        
+        if not result.get("success"):
+            raise HTTPException(status_code=404, detail=result.get("message"))
+        
+        return result
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting timeline estimate: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/social-proof/success-factors/{visa_type}")
+async def get_success_factors(visa_type: str):
+    """Retorna fatores que aumentam sucesso"""
+    try:
+        result = social_proof_system.get_success_factors(visa_type)
+        
+        if not result.get("success"):
+            raise HTTPException(status_code=404, detail=result.get("message"))
+        
+        return result
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting success factors: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ===== END CONVERSATIONAL ASSISTANT & SOCIAL PROOF =====
+
 app.include_router(api_router)
 
 app.add_middleware(
