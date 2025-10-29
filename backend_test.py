@@ -1280,6 +1280,726 @@ class ProductionVerificationTester:
         except Exception as e:
             self.log_test("I-539 Pricing Structure", False, f"Exception: {str(e)}")
     
+    def test_conversational_assistant_endpoints(self):
+        """Test Conversational Assistant endpoints comprehensively"""
+        print("🤖 Testing Conversational Assistant Endpoints...")
+        
+        # Test A: POST /api/conversational/chat
+        self.test_conversational_chat()
+        
+        # Test B: POST /api/conversational/chat (continued conversation)
+        self.test_conversational_chat_continued()
+        
+        # Test C: POST /api/conversational/quick-answer
+        self.test_conversational_quick_answer()
+        
+        # Test D: GET /api/conversational/common-questions
+        self.test_conversational_common_questions()
+        
+        # Test E: DELETE /api/conversational/history/{session_id}
+        self.test_conversational_delete_history()
+        
+        # Test L: Test conversation with technical mode
+        self.test_conversational_technical_mode()
+    
+    def test_conversational_chat(self):
+        """Test POST /api/conversational/chat with simple language mode"""
+        print("💬 Testing Conversational Chat - Simple Mode...")
+        
+        try:
+            chat_data = {
+                "session_id": "test_session_123",
+                "message": "O que é peticionário?",
+                "language_mode": "simple",
+                "visa_type": "I-130"
+            }
+            
+            response = self.session.post(f"{API_BASE}/conversational/chat", json=chat_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check response structure
+                has_success = data.get('success') is True
+                has_response = 'response' in data and data['response']
+                has_suggestions = 'suggestions' in data and isinstance(data['suggestions'], list)
+                has_conversation_id = data.get('conversation_id') == "test_session_123"
+                has_timestamp = 'timestamp' in data
+                
+                # Check response quality (should be in simple Portuguese)
+                response_text = data.get('response', '').lower()
+                is_portuguese = any(word in response_text for word in ['é', 'que', 'para', 'pessoa', 'visto'])
+                is_simple_language = 'peticionário' in response_text and ('simples' in response_text or 'fácil' in response_text)
+                
+                # Check suggestions are relevant
+                suggestions = data.get('suggestions', [])
+                has_relevant_suggestions = len(suggestions) > 0 and len(suggestions) <= 3
+                
+                success = (has_success and has_response and has_suggestions and 
+                          has_conversation_id and has_timestamp and is_portuguese and 
+                          is_simple_language and has_relevant_suggestions)
+                
+                self.log_test(
+                    "POST /api/conversational/chat (Simple Mode)",
+                    success,
+                    f"Success: {'✓' if has_success else '✗'}, Response: {'✓' if has_response else '✗'}, Portuguese: {'✓' if is_portuguese else '✗'}, Simple: {'✓' if is_simple_language else '✗'}, Suggestions: {len(suggestions)}",
+                    {
+                        "success": has_success,
+                        "response_length": len(data.get('response', '')),
+                        "suggestions_count": len(suggestions),
+                        "conversation_id": data.get('conversation_id')
+                    }
+                )
+            else:
+                self.log_test(
+                    "POST /api/conversational/chat (Simple Mode)",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test("POST /api/conversational/chat (Simple Mode)", False, f"Exception: {str(e)}")
+    
+    def test_conversational_chat_continued(self):
+        """Test continued conversation with same session_id"""
+        print("💬 Testing Conversational Chat - Continued Conversation...")
+        
+        try:
+            # Second message in same session
+            chat_data = {
+                "session_id": "test_session_123",
+                "message": "Quanto tempo demora?",
+                "language_mode": "simple",
+                "visa_type": "I-130"
+            }
+            
+            response = self.session.post(f"{API_BASE}/conversational/chat", json=chat_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check context awareness
+                has_success = data.get('success') is True
+                has_response = 'response' in data and data['response']
+                same_session = data.get('conversation_id') == "test_session_123"
+                
+                # Check if response is contextual (should reference I-130)
+                response_text = data.get('response', '').lower()
+                is_contextual = 'i-130' in response_text or 'família' in response_text or 'meses' in response_text
+                
+                success = has_success and has_response and same_session and is_contextual
+                
+                self.log_test(
+                    "POST /api/conversational/chat (Continued)",
+                    success,
+                    f"Success: {'✓' if has_success else '✗'}, Contextual: {'✓' if is_contextual else '✗'}, Session: {'✓' if same_session else '✗'}",
+                    {
+                        "success": has_success,
+                        "contextual": is_contextual,
+                        "session_id": data.get('conversation_id')
+                    }
+                )
+            else:
+                self.log_test(
+                    "POST /api/conversational/chat (Continued)",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test("POST /api/conversational/chat (Continued)", False, f"Exception: {str(e)}")
+    
+    def test_conversational_quick_answer(self):
+        """Test POST /api/conversational/quick-answer"""
+        print("⚡ Testing Conversational Quick Answer...")
+        
+        try:
+            quick_data = {
+                "question": "Quanto custa o processo de imigração?",
+                "visa_type": "I-130"
+            }
+            
+            response = self.session.post(f"{API_BASE}/conversational/quick-answer", json=quick_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check response structure
+                has_answer = 'answer' in data and data['answer']
+                
+                # Check answer quality
+                answer_text = data.get('answer', '').lower()
+                is_portuguese = any(word in answer_text for word in ['custo', 'taxa', 'dinheiro', 'valor'])
+                mentions_amounts = any(symbol in answer_text for symbol in ['$', 'r$', '535', '370'])
+                has_disclaimer = 'consultoria' in answer_text or 'advogado' in answer_text
+                
+                success = has_answer and is_portuguese and (mentions_amounts or has_disclaimer)
+                
+                self.log_test(
+                    "POST /api/conversational/quick-answer",
+                    success,
+                    f"Answer: {'✓' if has_answer else '✗'}, Portuguese: {'✓' if is_portuguese else '✗'}, Amounts: {'✓' if mentions_amounts else '✗'}, Disclaimer: {'✓' if has_disclaimer else '✗'}",
+                    {
+                        "has_answer": has_answer,
+                        "answer_length": len(data.get('answer', '')),
+                        "mentions_amounts": mentions_amounts
+                    }
+                )
+            else:
+                self.log_test(
+                    "POST /api/conversational/quick-answer",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test("POST /api/conversational/quick-answer", False, f"Exception: {str(e)}")
+    
+    def test_conversational_common_questions(self):
+        """Test GET /api/conversational/common-questions"""
+        print("❓ Testing Conversational Common Questions...")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/conversational/common-questions?language_mode=simple")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check response structure
+                has_success = data.get('success') is True
+                has_questions = 'questions' in data and isinstance(data['questions'], dict)
+                
+                # Check questions content
+                questions = data.get('questions', {})
+                has_peticionario = 'o que é peticionário' in questions
+                has_custo = 'quanto custa' in questions
+                
+                # Check question structure
+                question_structure_valid = True
+                if has_peticionario:
+                    peticionario_data = questions.get('o que é peticionário', {})
+                    question_structure_valid = (
+                        'simple' in peticionario_data and 
+                        isinstance(peticionario_data['simple'], str) and
+                        len(peticionario_data['simple']) > 50
+                    )
+                
+                success = has_success and has_questions and has_peticionario and has_custo and question_structure_valid
+                
+                self.log_test(
+                    "GET /api/conversational/common-questions",
+                    success,
+                    f"Success: {'✓' if has_success else '✗'}, Questions: {'✓' if has_questions else '✗'}, Peticionário: {'✓' if has_peticionario else '✗'}, Structure: {'✓' if question_structure_valid else '✗'}",
+                    {
+                        "success": has_success,
+                        "questions_count": len(questions),
+                        "has_peticionario": has_peticionario,
+                        "structure_valid": question_structure_valid
+                    }
+                )
+            else:
+                self.log_test(
+                    "GET /api/conversational/common-questions",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test("GET /api/conversational/common-questions", False, f"Exception: {str(e)}")
+    
+    def test_conversational_delete_history(self):
+        """Test DELETE /api/conversational/history/{session_id}"""
+        print("🗑️ Testing Conversational Delete History...")
+        
+        try:
+            response = self.session.delete(f"{API_BASE}/conversational/history/test_session_123")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check response structure
+                has_success = data.get('success') is True
+                has_message = 'message' in data and data['message']
+                
+                # Check message content
+                message_text = data.get('message', '').lower()
+                indicates_cleared = 'cleared' in message_text or 'limpo' in message_text or 'removido' in message_text
+                
+                success = has_success and has_message and indicates_cleared
+                
+                self.log_test(
+                    "DELETE /api/conversational/history/{session_id}",
+                    success,
+                    f"Success: {'✓' if has_success else '✗'}, Message: {'✓' if has_message else '✗'}, Cleared: {'✓' if indicates_cleared else '✗'}",
+                    {
+                        "success": has_success,
+                        "message": data.get('message', ''),
+                        "cleared": indicates_cleared
+                    }
+                )
+            else:
+                self.log_test(
+                    "DELETE /api/conversational/history/{session_id}",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test("DELETE /api/conversational/history/{session_id}", False, f"Exception: {str(e)}")
+    
+    def test_conversational_technical_mode(self):
+        """Test conversation with technical language mode"""
+        print("🔧 Testing Conversational Technical Mode...")
+        
+        try:
+            chat_data = {
+                "session_id": "tech_session_456",
+                "message": "What is a petitioner in immigration law?",
+                "language_mode": "technical",
+                "visa_type": "I-130"
+            }
+            
+            response = self.session.post(f"{API_BASE}/conversational/chat", json=chat_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check response structure
+                has_success = data.get('success') is True
+                has_response = 'response' in data and data['response']
+                
+                # Check technical language usage
+                response_text = data.get('response', '').lower()
+                uses_technical_terms = any(term in response_text for term in [
+                    'uscis', 'petitioner', 'beneficiary', 'form i-130', 'lawful permanent resident'
+                ])
+                
+                # Should be more formal than simple mode
+                is_technical_style = (
+                    'petitioner' in response_text and 
+                    ('form' in response_text or 'uscis' in response_text)
+                )
+                
+                success = has_success and has_response and uses_technical_terms and is_technical_style
+                
+                self.log_test(
+                    "POST /api/conversational/chat (Technical Mode)",
+                    success,
+                    f"Success: {'✓' if has_success else '✗'}, Technical Terms: {'✓' if uses_technical_terms else '✗'}, Style: {'✓' if is_technical_style else '✗'}",
+                    {
+                        "success": has_success,
+                        "technical_terms": uses_technical_terms,
+                        "technical_style": is_technical_style
+                    }
+                )
+            else:
+                self.log_test(
+                    "POST /api/conversational/chat (Technical Mode)",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test("POST /api/conversational/chat (Technical Mode)", False, f"Exception: {str(e)}")
+    
+    def test_social_proof_system_endpoints(self):
+        """Test Social Proof System endpoints comprehensively"""
+        print("👥 Testing Social Proof System Endpoints...")
+        
+        # Test F: POST /api/social-proof/similar-cases
+        self.test_social_proof_similar_cases()
+        
+        # Test G: GET /api/social-proof/statistics/I-130
+        self.test_social_proof_statistics_i130()
+        
+        # Test H: GET /api/social-proof/statistics/H-1B
+        self.test_social_proof_statistics_h1b()
+        
+        # Test I: GET /api/social-proof/timeline-estimate/I-130
+        self.test_social_proof_timeline_estimate()
+        
+        # Test J: GET /api/social-proof/success-factors/I-130
+        self.test_social_proof_success_factors()
+        
+        # Test K: Test with invalid visa type
+        self.test_social_proof_invalid_visa_type()
+        
+        # Test M: Test social proof without user profile
+        self.test_social_proof_no_user_profile()
+    
+    def test_social_proof_similar_cases(self):
+        """Test POST /api/social-proof/similar-cases"""
+        print("👥 Testing Social Proof Similar Cases...")
+        
+        try:
+            cases_data = {
+                "visa_type": "I-130",
+                "user_profile": {
+                    "country": "Brasil",
+                    "age": 29,
+                    "situation": "casado"
+                },
+                "limit": 3
+            }
+            
+            response = self.session.post(f"{API_BASE}/social-proof/similar-cases", json=cases_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check response structure
+                has_success = data.get('success') is True
+                has_cases = 'cases' in data and isinstance(data['cases'], list)
+                has_statistics = 'statistics' in data and isinstance(data['statistics'], dict)
+                has_message = 'message' in data and data['message']
+                
+                # Check cases content
+                cases = data.get('cases', [])
+                correct_limit = len(cases) <= 3 and len(cases) > 0
+                
+                # Check case structure
+                case_structure_valid = True
+                if cases:
+                    first_case = cases[0]
+                    case_structure_valid = all(field in first_case for field in [
+                        'name_initial', 'age', 'country', 'situation', 'timeline_months', 
+                        'status', 'testimonial', 'top_tip'
+                    ])
+                
+                # Check statistics structure
+                statistics = data.get('statistics', {})
+                stats_valid = all(field in statistics for field in [
+                    'total_cases', 'avg_timeline_months', 'approval_rate'
+                ])
+                
+                # Check for Brazilian cases (should match user profile)
+                has_brazilian_cases = any('Brasil' in case.get('country', '') for case in cases)
+                
+                success = (has_success and has_cases and has_statistics and has_message and 
+                          correct_limit and case_structure_valid and stats_valid)
+                
+                self.log_test(
+                    "POST /api/social-proof/similar-cases",
+                    success,
+                    f"Success: {'✓' if has_success else '✗'}, Cases: {len(cases)}/3, Structure: {'✓' if case_structure_valid else '✗'}, Stats: {'✓' if stats_valid else '✗'}, Brazilian: {'✓' if has_brazilian_cases else '✗'}",
+                    {
+                        "success": has_success,
+                        "cases_count": len(cases),
+                        "case_structure_valid": case_structure_valid,
+                        "stats_valid": stats_valid,
+                        "has_brazilian": has_brazilian_cases
+                    }
+                )
+            else:
+                self.log_test(
+                    "POST /api/social-proof/similar-cases",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test("POST /api/social-proof/similar-cases", False, f"Exception: {str(e)}")
+    
+    def test_social_proof_statistics_i130(self):
+        """Test GET /api/social-proof/statistics/I-130"""
+        print("📊 Testing Social Proof Statistics I-130...")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/social-proof/statistics/I-130")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check response structure
+                has_success = data.get('success') is True
+                has_statistics = 'statistics' in data and isinstance(data['statistics'], dict)
+                correct_visa_type = data.get('visa_type') == 'I-130'
+                
+                # Check statistics content
+                statistics = data.get('statistics', {})
+                has_total_cases = statistics.get('total_cases', 0) > 10000  # Should be 12,847+
+                has_approval_rate = 80 <= statistics.get('approval_rate', 0) <= 95  # Should be ~87%
+                has_avg_timeline = 10 <= statistics.get('avg_timeline_months', 0) <= 20  # Should be ~14 months
+                
+                # Check for timeline distribution
+                has_timeline_dist = 'timeline_distribution' in statistics
+                timeline_dist = statistics.get('timeline_distribution', {})
+                timeline_dist_valid = len(timeline_dist) >= 3 if has_timeline_dist else False
+                
+                # Check for success factors
+                has_success_factors = 'success_factors' in statistics
+                success_factors = statistics.get('success_factors', [])
+                success_factors_valid = len(success_factors) >= 2 if has_success_factors else False
+                
+                success = (has_success and has_statistics and correct_visa_type and 
+                          has_total_cases and has_approval_rate and has_avg_timeline and
+                          timeline_dist_valid and success_factors_valid)
+                
+                self.log_test(
+                    "GET /api/social-proof/statistics/I-130",
+                    success,
+                    f"Success: {'✓' if has_success else '✗'}, Cases: {statistics.get('total_cases', 0)}, Approval: {statistics.get('approval_rate', 0)}%, Timeline: {statistics.get('avg_timeline_months', 0)}mo, Factors: {len(success_factors)}",
+                    {
+                        "success": has_success,
+                        "total_cases": statistics.get('total_cases', 0),
+                        "approval_rate": statistics.get('approval_rate', 0),
+                        "avg_timeline": statistics.get('avg_timeline_months', 0),
+                        "success_factors_count": len(success_factors)
+                    }
+                )
+            else:
+                self.log_test(
+                    "GET /api/social-proof/statistics/I-130",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test("GET /api/social-proof/statistics/I-130", False, f"Exception: {str(e)}")
+    
+    def test_social_proof_statistics_h1b(self):
+        """Test GET /api/social-proof/statistics/H-1B"""
+        print("📊 Testing Social Proof Statistics H-1B...")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/social-proof/statistics/H-1B")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check response structure
+                has_success = data.get('success') is True
+                has_statistics = 'statistics' in data and isinstance(data['statistics'], dict)
+                correct_visa_type = data.get('visa_type') == 'H-1B'
+                
+                # Check H-1B specific statistics
+                statistics = data.get('statistics', {})
+                has_total_cases = statistics.get('total_cases', 0) > 5000  # Should be 8,923+
+                has_approval_rate = 60 <= statistics.get('approval_rate', 0) <= 85  # Should be ~73%
+                has_avg_timeline = 3 <= statistics.get('avg_timeline_months', 0) <= 8  # Should be ~5 months
+                
+                # Check for H-1B specific field (lottery rate)
+                has_lottery_rate = 'lottery_rate' in statistics
+                lottery_rate_valid = 20 <= statistics.get('lottery_rate', 0) <= 35 if has_lottery_rate else False
+                
+                success = (has_success and has_statistics and correct_visa_type and 
+                          has_total_cases and has_approval_rate and has_avg_timeline and
+                          lottery_rate_valid)
+                
+                self.log_test(
+                    "GET /api/social-proof/statistics/H-1B",
+                    success,
+                    f"Success: {'✓' if has_success else '✗'}, Cases: {statistics.get('total_cases', 0)}, Approval: {statistics.get('approval_rate', 0)}%, Lottery: {statistics.get('lottery_rate', 0)}%",
+                    {
+                        "success": has_success,
+                        "total_cases": statistics.get('total_cases', 0),
+                        "approval_rate": statistics.get('approval_rate', 0),
+                        "lottery_rate": statistics.get('lottery_rate', 0)
+                    }
+                )
+            else:
+                self.log_test(
+                    "GET /api/social-proof/statistics/H-1B",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test("GET /api/social-proof/statistics/H-1B", False, f"Exception: {str(e)}")
+    
+    def test_social_proof_timeline_estimate(self):
+        """Test GET /api/social-proof/timeline-estimate/I-130"""
+        print("⏱️ Testing Social Proof Timeline Estimate...")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/social-proof/timeline-estimate/I-130?completeness=85")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check response structure
+                has_success = data.get('success') is True
+                has_estimated_months = 'estimated_months' in data
+                has_range = 'range_min' in data and 'range_max' in data
+                has_note = 'note' in data and data['note']
+                has_distribution = 'distribution' in data
+                
+                # Check estimate values
+                estimated_months = data.get('estimated_months', 0)
+                range_min = data.get('range_min', 0)
+                range_max = data.get('range_max', 0)
+                
+                estimate_reasonable = 10 <= estimated_months <= 20  # Should be around 14 months
+                range_valid = range_min < estimated_months < range_max
+                
+                # Check completeness adjustment
+                note_text = data.get('note', '').lower()
+                mentions_completeness = 'complet' in note_text or 'timeline' in note_text
+                
+                success = (has_success and has_estimated_months and has_range and has_note and
+                          has_distribution and estimate_reasonable and range_valid and mentions_completeness)
+                
+                self.log_test(
+                    "GET /api/social-proof/timeline-estimate/I-130",
+                    success,
+                    f"Success: {'✓' if has_success else '✗'}, Estimate: {estimated_months}mo, Range: {range_min}-{range_max}mo, Note: {'✓' if mentions_completeness else '✗'}",
+                    {
+                        "success": has_success,
+                        "estimated_months": estimated_months,
+                        "range_min": range_min,
+                        "range_max": range_max,
+                        "mentions_completeness": mentions_completeness
+                    }
+                )
+            else:
+                self.log_test(
+                    "GET /api/social-proof/timeline-estimate/I-130",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test("GET /api/social-proof/timeline-estimate/I-130", False, f"Exception: {str(e)}")
+    
+    def test_social_proof_success_factors(self):
+        """Test GET /api/social-proof/success-factors/I-130"""
+        print("🎯 Testing Social Proof Success Factors...")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/social-proof/success-factors/I-130")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check response structure
+                has_success = data.get('success') is True
+                has_approval_rate = 'approval_rate' in data
+                has_success_factors = 'success_factors' in data and isinstance(data['success_factors'], list)
+                has_common_issues = 'common_issues' in data and isinstance(data['common_issues'], list)
+                has_recommendation = 'recommendation' in data and data['recommendation']
+                
+                # Check content quality
+                success_factors = data.get('success_factors', [])
+                factors_valid = len(success_factors) >= 2
+                
+                common_issues = data.get('common_issues', [])
+                issues_valid = len(common_issues) >= 2
+                
+                # Check recommendation content
+                recommendation = data.get('recommendation', '').lower()
+                recommendation_valid = any(word in recommendation for word in [
+                    'taxa', 'aprovação', 'chance', 'preparação', 'documentação'
+                ])
+                
+                success = (has_success and has_approval_rate and has_success_factors and 
+                          has_common_issues and has_recommendation and factors_valid and 
+                          issues_valid and recommendation_valid)
+                
+                self.log_test(
+                    "GET /api/social-proof/success-factors/I-130",
+                    success,
+                    f"Success: {'✓' if has_success else '✗'}, Factors: {len(success_factors)}, Issues: {len(common_issues)}, Recommendation: {'✓' if recommendation_valid else '✗'}",
+                    {
+                        "success": has_success,
+                        "approval_rate": data.get('approval_rate', 0),
+                        "factors_count": len(success_factors),
+                        "issues_count": len(common_issues),
+                        "recommendation_valid": recommendation_valid
+                    }
+                )
+            else:
+                self.log_test(
+                    "GET /api/social-proof/success-factors/I-130",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test("GET /api/social-proof/success-factors/I-130", False, f"Exception: {str(e)}")
+    
+    def test_social_proof_invalid_visa_type(self):
+        """Test with invalid visa type - should return 404 error"""
+        print("❌ Testing Social Proof Invalid Visa Type...")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/social-proof/statistics/INVALID")
+            
+            # Should return error (404 or 400)
+            is_error_response = response.status_code >= 400
+            
+            if response.status_code == 200:
+                # If 200, should have success: false
+                data = response.json()
+                has_error_in_response = data.get('success') is False
+                success = has_error_in_response
+            else:
+                success = is_error_response
+            
+            self.log_test(
+                "GET /api/social-proof/statistics/INVALID (Error Handling)",
+                success,
+                f"Error response: {'✓' if is_error_response else '✗'} (Status: {response.status_code})",
+                {
+                    "status_code": response.status_code,
+                    "is_error": is_error_response
+                }
+            )
+        except Exception as e:
+            self.log_test("GET /api/social-proof/statistics/INVALID (Error Handling)", False, f"Exception: {str(e)}")
+    
+    def test_social_proof_no_user_profile(self):
+        """Test social proof without user profile - should return random cases"""
+        print("🎲 Testing Social Proof Without User Profile...")
+        
+        try:
+            cases_data = {
+                "visa_type": "I-130",
+                "limit": 3
+            }
+            
+            response = self.session.post(f"{API_BASE}/social-proof/similar-cases", json=cases_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check response structure
+                has_success = data.get('success') is True
+                has_cases = 'cases' in data and isinstance(data['cases'], list)
+                
+                # Should still return cases (random selection)
+                cases = data.get('cases', [])
+                returns_cases = len(cases) > 0 and len(cases) <= 3
+                
+                # Cases should have proper structure
+                case_structure_valid = True
+                if cases:
+                    first_case = cases[0]
+                    case_structure_valid = all(field in first_case for field in [
+                        'name_initial', 'country', 'testimonial'
+                    ])
+                
+                success = has_success and has_cases and returns_cases and case_structure_valid
+                
+                self.log_test(
+                    "POST /api/social-proof/similar-cases (No Profile)",
+                    success,
+                    f"Success: {'✓' if has_success else '✗'}, Cases: {len(cases)}, Structure: {'✓' if case_structure_valid else '✗'}",
+                    {
+                        "success": has_success,
+                        "cases_count": len(cases),
+                        "case_structure_valid": case_structure_valid
+                    }
+                )
+            else:
+                self.log_test(
+                    "POST /api/social-proof/similar-cases (No Profile)",
+                    False,
+                    f"HTTP {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_test("POST /api/social-proof/similar-cases (No Profile)", False, f"Exception: {str(e)}")
+    
     def test_admin_visa_updates_pending(self):
         """Test GET /api/admin/visa-updates/pending"""
         print("🤖 Testing Admin Visa Updates - Pending...")
