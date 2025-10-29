@@ -8273,6 +8273,7 @@ async def startup_db_client():
         logger.info("Successfully connected to MongoDB!")
         
         # Initialize alert system with connected db
+        global alert_system
         alert_system = ProactiveAlertSystem(db)
         logger.info("Proactive Alert System initialized!")
         
