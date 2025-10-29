@@ -8,13 +8,13 @@ import json
 import logging
 from typing import Dict, List, Any, Optional
 from datetime import datetime
-from emergentintegrations import OAICompatible
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 logger = logging.getLogger(__name__)
 
 # Initialize emergent integrations client
 emergent_llm_key = os.environ.get('EMERGENT_LLM_KEY')
-client = OAICompatible(emergent_llm_key)
+llm_client = LlmChat(api_key=emergent_llm_key)
 
 class ConversationalAssistant:
     """Assistente conversacional que ajuda usuários com dúvidas sobre imigração"""
