@@ -429,6 +429,207 @@ class ProductionVerificationTester:
         except Exception as e:
             self.log_test("Owl Agent Basic Endpoints", False, f"Exception: {str(e)}")
     
+    def test_progress_percentage_quick_verification(self):
+        """TESTE RÁPIDO DE PROGRESSO - Verificar se progress_percentage agora incrementa corretamente"""
+        print("⚡ TESTE RÁPIDO DE PROGRESSO - VERIFICAÇÃO progress_percentage")
+        print("="*80)
+        
+        try:
+            # ETAPA 1: Criar Caso
+            print("\n📋 ETAPA 1: CRIAR CASO")
+            print("   POST /api/auto-application/start")
+            
+            start_response = self.session.post(f"{API_BASE}/auto-application/start", json={})
+            
+            if start_response.status_code != 200:
+                self.log_test("Progress Percentage Quick Test", False, "ETAPA 1 FALHOU: Não foi possível criar caso", start_response.text[:200])
+                return
+            
+            start_data = start_response.json()
+            case_info = start_data.get('case', {})
+            case_id = case_info.get('case_id')
+            initial_progress = case_info.get('progress_percentage', 0)
+            
+            if not case_id:
+                self.log_test("Progress Percentage Quick Test", False, "ETAPA 1 FALHOU: Nenhum case_id retornado", start_data)
+                return
+            
+            print(f"   ✅ Case criado: {case_id}")
+            print(f"   ✅ Progress inicial: {initial_progress}%")
+            
+            # Validar: case criado com progress_percentage = 0
+            etapa1_success = initial_progress == 0
+            if not etapa1_success:
+                print(f"   ❌ ERRO: Progress deveria ser 0, mas é {initial_progress}")
+            
+            # ETAPA 2: Selecionar H-1B e Atualizar Progresso
+            print("\n📋 ETAPA 2: SELECIONAR H-1B E ATUALIZAR PROGRESSO")
+            print("   PUT /api/auto-application/case/{case_id}")
+            
+            h1b_update = {
+                "form_code": "H-1B",
+                "progress_percentage": 20
+            }
+            
+            h1b_response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=h1b_update)
+            
+            if h1b_response.status_code != 200:
+                self.log_test("Progress Percentage Quick Test", False, "ETAPA 2 FALHOU: Seleção H-1B", h1b_response.text[:200])
+                return
+            
+            h1b_data = h1b_response.json()
+            h1b_progress = h1b_data.get('progress_percentage', 0)
+            h1b_form = h1b_data.get('form_code')
+            
+            print(f"   ✅ Form code: {h1b_form}")
+            print(f"   ✅ Progress atualizado: {h1b_progress}%")
+            
+            # Validar: progress_percentage = 20
+            etapa2_success = h1b_progress == 20 and h1b_form == "H-1B"
+            if not etapa2_success:
+                print(f"   ❌ ERRO: Progress deveria ser 20, mas é {h1b_progress}")
+            
+            # ETAPA 3: Adicionar Dados Básicos
+            print("\n📋 ETAPA 3: ADICIONAR DADOS BÁSICOS")
+            print("   PUT /api/auto-application/case/{case_id}")
+            
+            basic_data_update = {
+                "basic_data": {
+                    "name": "Carlos Silva",
+                    "email": "carlos.silva@example.com",
+                    "phone": "+5511987654321",
+                    "nationality": "Brazilian"
+                },
+                "progress_percentage": 40
+            }
+            
+            basic_response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=basic_data_update)
+            
+            if basic_response.status_code != 200:
+                self.log_test("Progress Percentage Quick Test", False, "ETAPA 3 FALHOU: Dados básicos", basic_response.text[:200])
+                return
+            
+            basic_data = basic_response.json()
+            basic_progress = basic_data.get('progress_percentage', 0)
+            stored_basic_data = basic_data.get('basic_data', {})
+            
+            print(f"   ✅ Dados salvos: {stored_basic_data.get('name', 'N/A')}")
+            print(f"   ✅ Progress atualizado: {basic_progress}%")
+            
+            # Validar: progress_percentage = 40
+            etapa3_success = basic_progress == 40 and stored_basic_data.get('name') == "Carlos Silva"
+            if not etapa3_success:
+                print(f"   ❌ ERRO: Progress deveria ser 40, mas é {basic_progress}")
+            
+            # ETAPA 4: Executar AI Processing Step
+            print("\n📋 ETAPA 4: EXECUTAR AI PROCESSING STEP")
+            print("   POST /api/auto-application/case/{case_id}/ai-processing")
+            
+            ai_data = {
+                "step": "validation"
+            }
+            
+            ai_response = self.session.post(f"{API_BASE}/auto-application/case/{case_id}/ai-processing", json=ai_data)
+            
+            if ai_response.status_code == 200:
+                ai_result = ai_response.json()
+                ai_success = ai_result.get('success', False)
+                ai_step_id = ai_result.get('step_id', 'validation')
+                
+                print(f"   ✅ AI Processing: {'Sucesso' if ai_success else 'Falha'}")
+                print(f"   ✅ Step ID: {ai_step_id}")
+                
+                # Verificar se progress foi atualizado para 65
+                get_response = self.session.get(f"{API_BASE}/auto-application/case/{case_id}")
+                if get_response.status_code == 200:
+                    current_case = get_response.json()
+                    ai_progress = current_case.get('progress_percentage', 0)
+                    print(f"   ✅ Progress após AI: {ai_progress}%")
+                    
+                    # Validar: progress_percentage = 65 (conforme definido no endpoint)
+                    etapa4_success = ai_progress == 65 and ai_success
+                    if not etapa4_success:
+                        print(f"   ❌ ERRO: Progress deveria ser 65, mas é {ai_progress}")
+                else:
+                    etapa4_success = False
+                    print(f"   ❌ ERRO: Não foi possível verificar progress após AI processing")
+            else:
+                etapa4_success = False
+                print(f"   ❌ AI Processing falhou: HTTP {ai_response.status_code}")
+                print(f"   📋 Resposta: {ai_response.text[:200]}")
+            
+            # ETAPA 5: Verificação Final
+            print("\n📋 ETAPA 5: VERIFICAÇÃO FINAL")
+            print("   GET /api/auto-application/case/{case_id}")
+            
+            final_response = self.session.get(f"{API_BASE}/auto-application/case/{case_id}")
+            
+            if final_response.status_code != 200:
+                self.log_test("Progress Percentage Quick Test", False, "ETAPA 5 FALHOU: Verificação final", final_response.text[:200])
+                return
+            
+            final_data = final_response.json()
+            
+            # Validações finais
+            final_checks = {
+                "progress_percentage_exists": 'progress_percentage' in final_data,
+                "progress_percentage_65": final_data.get('progress_percentage') == 65,
+                "form_code_h1b": final_data.get('form_code') == "H-1B",
+                "basic_data_exists": bool(final_data.get('basic_data')),
+                "case_id_matches": final_data.get('case_id') == case_id
+            }
+            
+            print(f"   ✅ Progress final: {final_data.get('progress_percentage', 'N/A')}%")
+            print(f"   ✅ Form code: {final_data.get('form_code', 'N/A')}")
+            print(f"   ✅ Basic data: {'Presente' if final_data.get('basic_data') else 'Ausente'}")
+            
+            # Verificar progresso incrementou de 0 → 20 → 40 → 65
+            progress_sequence_correct = (
+                initial_progress == 0 and
+                h1b_progress == 20 and
+                basic_progress == 40 and
+                final_data.get('progress_percentage') == 65
+            )
+            
+            print(f"\n📊 SEQUÊNCIA DE PROGRESSO:")
+            print(f"   0% → 20% → 40% → 65%")
+            print(f"   {initial_progress}% → {h1b_progress}% → {basic_progress}% → {final_data.get('progress_percentage')}%")
+            
+            # Resultado final
+            all_etapas_success = etapa1_success and etapa2_success and etapa3_success and etapa4_success
+            all_final_checks = all(final_checks.values())
+            overall_success = all_etapas_success and all_final_checks and progress_sequence_correct
+            
+            success_count = sum([etapa1_success, etapa2_success, etapa3_success, etapa4_success]) + sum(final_checks.values())
+            total_checks = 4 + len(final_checks)
+            
+            print(f"\n📋 CRITÉRIOS DE SUCESSO:")
+            print(f"   ✅ Campo progress_percentage criado com valor 0 inicialmente: {'✓' if etapa1_success else '✗'}")
+            print(f"   ✅ Campo progress_percentage atualizado via PUT: {'✓' if etapa2_success and etapa3_success else '✗'}")
+            print(f"   ✅ Campo progress_percentage atualizado via AI processing: {'✓' if etapa4_success else '✗'}")
+            print(f"   ✅ Campo progress_percentage retornado corretamente no GET: {'✓' if final_checks['progress_percentage_exists'] else '✗'}")
+            print(f"   ✅ Progresso incrementa de 0 → 20 → 40 → 65: {'✓' if progress_sequence_correct else '✗'}")
+            
+            self.log_test(
+                "Progress Percentage Quick Verification - 5 Etapas",
+                overall_success,
+                f"TESTE RÁPIDO COMPLETO: {success_count}/{total_checks} verificações passaram. Sequência: 0→20→40→65% {'✓' if progress_sequence_correct else '✗'}",
+                {
+                    "case_id": case_id,
+                    "progress_sequence": f"{initial_progress}→{h1b_progress}→{basic_progress}→{final_data.get('progress_percentage')}",
+                    "etapa1_success": etapa1_success,
+                    "etapa2_success": etapa2_success,
+                    "etapa3_success": etapa3_success,
+                    "etapa4_success": etapa4_success,
+                    "final_checks": final_checks,
+                    "progress_sequence_correct": progress_sequence_correct,
+                    "overall_success": overall_success
+                }
+            )
+            
+        except Exception as e:
+            self.log_test("Progress Percentage Quick Verification", False, f"ERRO GERAL: {str(e)}")
+    
     def test_no_forced_mocks(self):
         """Verify no forced mocks in Google Document AI"""
         print("🚫 Testing No Forced Mocks...")
