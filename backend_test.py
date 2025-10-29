@@ -572,7 +572,9 @@ class ProductionVerificationTester:
                 self.log_test("Progress Percentage Quick Test", False, "ETAPA 5 FALHOU: Verificação final", final_response.text[:200])
                 return
             
-            final_data = final_response.json()
+            final_response_data = final_response.json()
+            # Handle nested case structure for GET endpoint
+            final_data = final_response_data.get('case', final_response_data)
             
             # Validações finais
             final_checks = {
