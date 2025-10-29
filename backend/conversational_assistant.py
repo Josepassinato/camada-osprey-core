@@ -131,9 +131,20 @@ ALWAYS:
             })
             
             # Chamar OpenAI
-            response = llm_client.chat(
+            llm = create_llm_client(
+                system_message=self._get_system_prompt(language_mode, visa_type) + context_info,
+                session_id=session_id
+            )
+            
+            # Build message list for chat
+            chat_messages = []
+            for msg in self.conversation_history[session_id][-10:]:
+                chat_messages.append(UserMessage(content=msg["content"]) if msg["role"] == "user" else msg)
+            chat_messages.append(UserMessage(content=user_message))
+            
+            response = llm.chat(
                 model="gpt-4o",
-                messages=messages,
+                messages=chat_messages,
                 max_tokens=800,
                 temperature=0.7
             )
