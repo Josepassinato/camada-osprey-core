@@ -277,6 +277,13 @@ const BasicData = () => {
     );
   }
 
+  // Calculate form completeness
+  const calculateCompleteness = () => {
+    const requiredFields = ['firstName', 'lastName', 'dateOfBirth', 'countryOfBirth', 'gender', 'currentAddress', 'city', 'phoneNumber', 'email'];
+    const filledFields = requiredFields.filter(field => formData[field as keyof BasicDataForm] && String(formData[field as keyof BasicDataForm]).trim() !== '');
+    return Math.round((filledFields.length / requiredFields.length) * 100);
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header - Mobile Optimized */}
