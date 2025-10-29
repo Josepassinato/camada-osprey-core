@@ -107,9 +107,9 @@ user_problem_statement: "IMPLEMENTAR AGENTE CORUJA - SISTEMA INTELIGENTE DE QUES
 backend:
   - task: "Carlos Silva H-1B Complete Journey Simulation"
     implemented: true
-    working: true
+    working: false
     file: "/app/backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "critical"
     needs_retesting: false
     status_history:
@@ -122,6 +122,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "🎉 IMMEDIATE EXECUTION COMPLETED - CARLOS SILVA H-1B COMPLETE SIMULATION 100% SUCCESS! Executed comprehensive 8-step simulation as requested by user with PERFECT RESULTS: ETAPA 1: ✅ Case creation (OSP-5B0DAB39) - anonymous case handling working flawlessly, ETAPA 2: ✅ H-1B visa selection - form_code 'H-1B' correctly set, authentication issue resolved, ETAPA 3: ✅ Basic data storage - all Carlos Silva data persisted correctly, ETAPA 4: ✅ Document upload simulation - 3 documents (passport, diploma, employment_letter) uploaded successfully, ETAPA 5: ✅ User story and responses - 293 character story and 8 H-1B specific responses captured, ETAPA 6: ✅ AI processing pipeline - all 5 steps completed successfully with progressive tracking (65%→69%→73%→77%→81%), ETAPA 7: ✅ USCIS form generation - uscis_form_generated: true, ETAPA 8: ✅ Application completion - status: 'completed', progress: 100% ACHIEVED! FINAL VERIFICATION: ✅ All 8 steps passed (13/13 tests), 100% progress reached, simulation SUCCESS. CONCLUSION: Complete H-1B visa application journey from start to finish working perfectly. System ready for production use with Brazilian applicants."
+      - working: false
+        agent: "testing"
+        comment: "❌ CARLOS SILVA H-1B COMPLETE JOURNEY SIMULATION FAILED - CRITICAL BACKEND ISSUES IDENTIFIED: Comprehensive 10-phase testing revealed multiple critical failures: FASE 1: ✅ Case creation working (OSP-A64CDE26), FASE 2: ❌ H-1B visa selection - PUT /api/auto-application/case/{id} returns 200 OK but form_code and status remain None (data not persisting), FASE 3: ❌ Basic data storage - data not persisting correctly, FASE 4: ✅ Document uploads working (3/3 documents processed), FASE 5: ❌ User story storage - data not persisting, FASE 6: ❌ AI processing pipeline - all 5 endpoints return 404 (validation, consistency, translation, form_generation, final_review), FASE 7: ❌ USCIS form generation - endpoint returns 404, FASE 8: ❌ Application completion - endpoint returns 404, FASE 9: ❌ Payment system - returns 400 'origin_url is required', FASE 10: ❌ Final verification - 0/7 checks passed. ROOT CAUSES: 1) Case update endpoint has response structure mismatch (returns nested 'case' object but test expects direct fields), 2) Missing endpoints: /api/auto-application/case/{id}/ai-processing, /api/auto-application/case/{id}/generate-form, /api/auto-application/case/{id}/complete, 3) Conversational endpoints commented out in code, 4) LLM integration errors in logs ('LlmChat' object has no attribute 'chat_async'). CONCLUSION: System NOT ready for production - critical backend functionality missing or broken."
 
   - task: "4 Specific Corrected Endpoints Testing"
     implemented: true
