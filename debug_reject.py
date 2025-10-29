@@ -7,7 +7,7 @@ import requests
 import json
 
 # Get backend URL
-API_BASE = "https://agente-coruja.preview.emergentagent.com/api"
+API_BASE = "https://agente-coruja-1.preview.emergentagent.com/api"
 
 # Get a pending update ID
 response = requests.get(f"{API_BASE}/admin/visa-updates/pending")
