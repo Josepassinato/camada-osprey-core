@@ -83,6 +83,7 @@ const App = () => (
           <Route path="/admin/visa-updates" element={<AdminVisaUpdatesPanel />} />
           {/* Demo/Example Routes */}
           <Route path="/demo/adaptive-language" element={<AdaptiveFormExample />} />
+          <Route path="/demo/proactive-alerts" element={<ProactiveAlertsDemo />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
