@@ -34,7 +34,7 @@ class DraPaulaGeminiAgent:
         
         self.knowledge_base = dra_paula_knowledge
         self.provider = "google"
-        self.model = "gemini-2.0-flash-exp"
+        self.model = "gemini-pro"  # Modelo estável do Gemini
         
         logger.info(f"✅ DraPaulaGeminiAgent initialized with {self.provider}/{self.model}")
     
