@@ -148,7 +148,7 @@ class HybridDraPaulaAgent:
         # Get knowledge from local base (same as Gemini)
         visa_knowledge = ""
         if visa_type:
-            visa_info = dra_paula_knowledge.get_visa_knowledge(visa_type)
+            visa_info = dra_paula_knowledge.get_visa_specific_knowledge(visa_type)
             if visa_info:
                 import json
                 visa_knowledge = f"""
