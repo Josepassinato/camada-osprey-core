@@ -128,15 +128,11 @@ INSTRUÇÕES DE RESPOSTA:
             
             chat = LlmChat(
                 api_key=self.emergent_key,
-                session_id=f"dra_paula_{hash(question) % 100000}",
-                system_message="Você é a Dra. Paula, especialista em imigração americana."
-            )
-            response_obj = chat.send_message(
-                UserMessage(text=full_prompt)
+                session_id=f"dra_paula_{hash(question) % 100000}"
             ).with_model(self.provider, self.model)
             
-            # Await the response
-            response = await response_obj
+            # Send message
+            response = await chat.send_message(UserMessage(text=full_prompt))
             
             result = {
                 "success": True,
