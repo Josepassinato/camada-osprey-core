@@ -128,7 +128,8 @@ INSTRUÇÕES DE RESPOSTA:
             
             chat = LlmChat(
                 api_key=self.emergent_key,
-                session_id=f"dra_paula_{hash(question) % 100000}"
+                session_id=f"dra_paula_{hash(question) % 100000}",
+                system_message="Você é a Dra. Paula, especialista em imigração americana para brasileiros."
             ).with_model(self.provider, self.model)
             
             # Send message
