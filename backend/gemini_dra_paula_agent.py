@@ -132,7 +132,7 @@ INSTRUÇÕES DE RESPOSTA:
                 system_message="Você é a Dra. Paula, especialista em imigração americana."
             )
             response = await chat.send_message(
-                UserMessage(content=full_prompt)
+                UserMessage(text=full_prompt)
             ).with_model(self.provider, self.model)
             
             result = {
