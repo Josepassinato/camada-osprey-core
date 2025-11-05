@@ -126,7 +126,11 @@ INSTRUÇÕES DE RESPOSTA:
             # Call Gemini via EMERGENT_LLM_KEY
             logger.info(f"🤖 Calling Gemini for question: {question[:50]}...")
             
-            chat = LlmChat(api_key=self.emergent_key)
+            chat = LlmChat(
+                api_key=self.emergent_key,
+                session_id=f"dra_paula_{hash(question) % 100000}",
+                system_message="Você é a Dra. Paula, especialista em imigração americana."
+            )
             response = await chat.send_message(
                 UserMessage(content=full_prompt)
             ).with_model(self.provider, self.model)
