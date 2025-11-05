@@ -75,7 +75,7 @@ Uso deste sistema é por sua conta e risco."""
             # Get relevant knowledge from local base
             visa_knowledge = ""
             if visa_type:
-                visa_info = self.knowledge_base.get_visa_knowledge(visa_type)
+                visa_info = self.knowledge_base.get_visa_specific_knowledge(visa_type)
                 if visa_info:
                     visa_knowledge = f"""
                     
