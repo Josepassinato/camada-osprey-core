@@ -131,9 +131,12 @@ INSTRUÇÕES DE RESPOSTA:
                 session_id=f"dra_paula_{hash(question) % 100000}",
                 system_message="Você é a Dra. Paula, especialista em imigração americana."
             )
-            response = await chat.send_message(
+            response_obj = chat.send_message(
                 UserMessage(text=full_prompt)
             ).with_model(self.provider, self.model)
+            
+            # Await the response
+            response = await response_obj
             
             result = {
                 "success": True,
