@@ -5171,12 +5171,8 @@ async def get_visa_detailed_information(visa_type: str, process_type: str = "bot
     try:
         from visa_information_detailed import get_visa_processing_info
         
-        # Log what we received
-        logger.info(f"📋 Received visa_type: '{visa_type}', process_type: '{process_type}'")
-        
         # Normalize visa type (handle variations)
         visa_type_normalized = visa_type.upper().replace("_", "-")
-        logger.info(f"📋 Normalized to: '{visa_type_normalized}'")
         
         # Get detailed information
         info = get_visa_processing_info(visa_type_normalized, process_type)
