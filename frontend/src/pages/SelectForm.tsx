@@ -96,13 +96,14 @@ const SelectForm = () => {
   const loadVisaDetails = async () => {
     if (!processType) return;
     
-    const visaCodes = ['I-539', 'H-1B', 'F-1', 'I-130'];
+    const visaCodes = ['I-539', 'H-1B', 'F-1', 'I-130', 'B-1/B-2', 'O-1', 'N-400', 'I-765', 'I-485', 'I-90', 'I-751', 'I-589'];
     const detailsMap: Record<string, any> = {};
     
     for (const code of visaCodes) {
       try {
+        const encodedCode = encodeURIComponent(code);
         const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/visa-detailed-info/${code}?process_type=${processType}`
+          `${import.meta.env.VITE_BACKEND_URL}/api/visa-detailed-info/${encodedCode}?process_type=${processType}`
         );
         if (response.ok) {
           const data = await response.json();
