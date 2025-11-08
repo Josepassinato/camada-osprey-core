@@ -46,6 +46,8 @@ const SelectForm = () => {
   const [error, setError] = useState("");
   const [showRequirements, setShowRequirements] = useState(false);
   const [selectedVisaType, setSelectedVisaType] = useState("");
+  const [processType, setProcessType] = useState<'consular' | 'change_of_status' | null>(null);
+  const [showProcessSelector, setShowProcessSelector] = useState(true);
 
   // Listen for start application event from VisaRequirements component
   React.useEffect(() => {
@@ -58,6 +60,11 @@ const SelectForm = () => {
     window.addEventListener('startApplication', handleStartApplication as EventListener);
     return () => window.removeEventListener('startApplication', handleStartApplication as EventListener);
   }, []);
+
+  const handleProcessTypeSelect = (type: 'consular' | 'change_of_status') => {
+    setProcessType(type);
+    setShowProcessSelector(false);
+  };
 
   const uscisforms: USCISFormType[] = [
     {
