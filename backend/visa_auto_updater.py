@@ -33,11 +33,13 @@ class ScrapedData:
 class VisaAutoUpdater:
     def __init__(self, db: AsyncIOMotorDatabase, llm_key: str):
         self.db = db
+        self.llm_key = llm_key
+        # Initialize LLM client with Gemini (avoiding OpenAI restrictions)
         self.llm_client = LlmChat(
             api_key=llm_key,
             session_id="visa_auto_updater",
-            system_message="You are an AI assistant that analyzes visa information changes for USCIS, State Department, and Federal Register updates."
-        )
+            system_message="You are an AI assistant that analyzes visa information changes for USCIS, State Department, and Federal Register updates. Provide factual, educational information only."
+        ).with_model("google", "gemini-pro")
         self.sources = {
             'uscis': 'https://egov.uscis.gov/processing-times/',
             'uscis_fees': 'https://www.uscis.gov/forms/filing-fees',
