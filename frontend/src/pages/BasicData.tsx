@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ProactiveAlertsDisplay from "@/components/ProactiveAlertsDisplay";
 import SaveAndContinueModal from "@/components/SaveAndContinueModal";
+import ProcessTypeBadge from "@/components/ProcessTypeBadge";
 import { useFormSnapshot } from "@/hooks/useFormSnapshot";
 import { useSessionManager } from "@/hooks/useSessionManager";
+import { useProcessType } from "@/contexts/ProcessTypeContext";
 import { 
   ArrowLeft,
   ArrowRight,
