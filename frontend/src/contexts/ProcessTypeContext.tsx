@@ -18,9 +18,11 @@ export const ProcessTypeProvider: React.FC<{ children: ReactNode }> = ({ childre
   });
 
   const setProcessType = (type: ProcessType) => {
+    console.log('🔔 ProcessTypeContext: setProcessType called with', type);
     setProcessTypeState(type);
     if (type) {
       localStorage.setItem('osprey_process_type', type);
+      console.log('✅ ProcessTypeContext: Saved to localStorage', localStorage.getItem('osprey_process_type'));
     } else {
       localStorage.removeItem('osprey_process_type');
     }
