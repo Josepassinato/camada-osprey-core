@@ -96,7 +96,13 @@ const SelectForm = () => {
   const loadVisaDetails = async () => {
     if (!processType) return;
     
-    const visaCodes = ['I-539', 'H-1B', 'F-1', 'I-130', 'B-1/B-2', 'O-1', 'N-400', 'I-765', 'I-485', 'I-90', 'I-751', 'I-589'];
+    let visaCodes = ['I-539', 'H-1B', 'F-1', 'I-130', 'B-1/B-2', 'O-1', 'N-400', 'I-765', 'I-485', 'I-90', 'I-751', 'I-589'];
+    
+    // Remove B-1/B-2 if change of status (not available for that process)
+    if (processType === 'change_of_status') {
+      visaCodes = visaCodes.filter(code => code !== 'B-1/B-2');
+    }
+    
     const detailsMap: Record<string, any> = {};
     
     for (const code of visaCodes) {
