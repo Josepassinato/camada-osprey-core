@@ -8478,6 +8478,22 @@ async def startup_db_client():
         except Exception as index_error:
             logger.warning(f"Some indexes may already exist: {str(index_error)}")
         
+        # Initialize and start Visa Update Scheduler
+        try:
+            from scheduler_visa_updates import get_visa_update_scheduler
+            
+            llm_key = os.environ.get('EMERGENT_LLM_KEY')
+            if llm_key:
+                global visa_scheduler
+                visa_scheduler = get_visa_update_scheduler(db, llm_key)
+                visa_scheduler.start()
+                logger.info("✅ Visa Update Scheduler started successfully!")
+            else:
+                logger.warning("⚠️ EMERGENT_LLM_KEY not found - Visa update scheduler not started")
+                
+        except Exception as scheduler_error:
+            logger.error(f"❌ Failed to start visa update scheduler: {str(scheduler_error)}")
+        
     except Exception as e:
         logger.error(f"Error connecting to MongoDB: {str(e)}")
         raise e
