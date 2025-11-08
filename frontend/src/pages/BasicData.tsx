@@ -67,6 +67,8 @@ const BasicData = () => {
   const navigate = useNavigate();
   const { processType, setProcessType } = useProcessType();
   
+  console.log('📍 BasicData: processType from context =', processType);
+  
   const [visaSpecs, setVisaSpecs] = useState<VisaSpecs | null>(null);
   const [formData, setFormData] = useState<BasicDataForm>({
     firstName: '',
