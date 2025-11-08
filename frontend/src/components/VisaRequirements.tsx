@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useEffect } from "react";
 import { 
   FileText, 
   Clock, 
@@ -14,7 +16,9 @@ import {
   Calendar,
   Building,
   GraduationCap,
-  Globe
+  Globe,
+  Plane,
+  Home
 } from "lucide-react";
 
 interface VisaRequirement {
@@ -32,6 +36,37 @@ interface VisaRequirementsProps {
 }
 
 const VisaRequirements = ({ visaType, onClose }: VisaRequirementsProps) => {
+  const [detailedInfo, setDetailedInfo] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedProcess, setSelectedProcess] = useState<'consular' | 'change_of_status'>('consular');
+
+  useEffect(() => {
+    const fetchDetailedInfo = async () => {
+      try {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://agente-coruja-1.preview.emergentagent.com';
+        const response = await fetch(`${backendUrl}/api/visa-detailed-info/${visaType}?process_type=both`);
+        const data = await response.json();
+        
+        if (data.success) {
+          setDetailedInfo(data.information);
+        }
+      } catch (error) {
+        console.error('Error fetching detailed visa info:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetailedInfo();
+  }, [visaType]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
   const getVisaDetails = (type: string) => {
     const requirements: Record<string, any> = {
       'H-1B': {
