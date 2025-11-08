@@ -4996,6 +4996,59 @@ async def get_visa_update_history(skip: int = 0, limit: int = 50):
         logger.error(f"Error getting update history: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve update history")
 
+
+@api_router.get("/admin/visa-updates/scheduler/status")
+async def get_scheduler_status():
+    """Get visa update scheduler status"""
+    try:
+        global visa_scheduler
+        
+        if 'visa_scheduler' not in globals() or visa_scheduler is None:
+            return {
+                "success": True,
+                "is_running": False,
+                "message": "Scheduler not initialized"
+            }
+        
+        status = await visa_scheduler.get_schedule_status()
+        
+        # Get recent scheduler logs
+        recent_logs = await db.scheduler_logs.find(
+            {"job_type": "visa_update"}
+        ).sort("executed_at", -1).limit(5).to_list(length=None)
+        
+        return {
+            "success": True,
+            **status,
+            "recent_logs": serialize_doc(recent_logs)
+        }
+    except Exception as e:
+        logger.error(f"Error getting scheduler status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/admin/visa-updates/scheduler/trigger")
+async def trigger_manual_scheduler_update():
+    """Manually trigger visa update scan (outside of schedule)"""
+    try:
+        global visa_scheduler
+        
+        if 'visa_scheduler' not in globals() or visa_scheduler is None:
+            raise HTTPException(status_code=503, detail="Scheduler not initialized")
+        
+        # Trigger manual update in background
+        asyncio.create_task(visa_scheduler.trigger_manual_update())
+        
+        return {
+            "success": True,
+            "message": "Manual visa update triggered. Check pending updates in a few minutes."
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error triggering manual update: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.get("/admin/notifications")
 async def get_admin_notifications():
     """Get admin notifications"""
