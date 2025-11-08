@@ -5144,6 +5144,50 @@ async def get_all_visa_information():
         logger.error(f"Error getting all visa information: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve visa information")
 
+
+
+@api_router.get("/visa-detailed-info/{visa_type}")
+async def get_visa_detailed_information(visa_type: str, process_type: str = "both"):
+    """
+    Get detailed visa information with separate data for consular processing and change of status
+    
+    Args:
+        visa_type: F-1, H-1B, I-130, I-539
+        process_type: "consular", "change_of_status", or "both"  (default: "both")
+    
+    Returns comprehensive information including:
+    - Processing times (separated by consular vs change of status)
+    - Fees (separated by consular vs change of status)
+    - Steps for each process type
+    - Eligibility criteria
+    """
+    try:
+        from visa_information_detailed import get_visa_processing_info
+        
+        # Normalize visa type (handle variations)
+        visa_type_normalized = visa_type.upper().replace("_", "-")
+        
+        # Get detailed information
+        info = get_visa_processing_info(visa_type_normalized, process_type)
+        
+        if "error" in info:
+            raise HTTPException(status_code=404, detail=info["error"])
+        
+        return {
+            "success": True,
+            "visa_type": visa_type_normalized,
+            "process_type": process_type,
+            "information": info,
+            "source": "USCIS public information - Educational purposes only",
+            "disclaimer": "⚖️ Esta informação é educativa. Consulte advogado de imigração licenciado para decisões legais específicas."
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting detailed visa information: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 def get_important_submission_notes(form_code: str) -> list:
     """Get important notes for submission"""
     
