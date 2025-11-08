@@ -80,8 +80,10 @@ const SelectForm = () => {
   }, []);
 
   const handleProcessTypeSelect = (type: 'consular' | 'change_of_status') => {
+    console.log('🎯 Process type selected:', type);
     setProcessType(type);
     setShowProcessSelector(false);
+    console.log('✅ Process selector hidden, showing visa forms');
   };
 
   // Load visa details when processType changes
