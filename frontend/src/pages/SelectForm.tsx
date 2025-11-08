@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import VisaRequirements from "@/components/VisaRequirements";
+import ProcessTypeSelector from "@/components/ProcessTypeSelector";
 import { 
   ArrowLeft,
   ArrowRight,
