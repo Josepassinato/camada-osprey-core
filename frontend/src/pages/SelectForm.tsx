@@ -414,10 +414,15 @@ const SelectForm = () => {
     const details = visaDetailsMap[formCode];
     if (!details) return null;
     
+    const processKey = processType === 'consular' ? 'processo_consular' : 'change_of_status';
+    const processDetails = details[processKey];
+    
+    if (!processDetails) return null;
+    
     return {
-      processingTime: details.processing_time || 'Consulte USCIS',
-      fee: details.fee || 'Varia',
-      requirements: details.key_requirements || []
+      processingTime: processDetails.tempo_processamento || 'Consulte USCIS',
+      fee: processDetails.taxas?.total || 'Varia',
+      requirements: details.criterios_elegibilidade || []
     };
   };
 
