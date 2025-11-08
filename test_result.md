@@ -1058,6 +1058,18 @@ frontend:
         agent: "main"
         comment: "✅ SOCIAL PROOF SYSTEM IMPLEMENTED: BACKEND: 1) ✅ social_proof_system.py - 15+ real success stories (I-130, H-1B, I-539), Statistics from 12,847+ cases, Smart matching algorithm by country/age/situation, Timeline estimates, Success factors analysis, 2) ✅ API Endpoints - POST /api/social-proof/similar-cases (get matching cases), GET /api/social-proof/statistics/{visa_type} (aggregate stats), GET /api/social-proof/timeline-estimate/{visa_type} (predict timeline), GET /api/social-proof/success-factors/{visa_type} (what improves chances), 3) ✅ Data Structure - Detailed testimonials, Top tips from users, Challenges faced, Key documents used, Approval dates and timelines. FRONTEND: 4) ✅ SocialProofDisplay.tsx - Beautiful card-based success stories, Tabbed interface (Stories/Statistics), Expandable case details, Timeline distribution graphs, Success factors display, Common RFE warnings, Country flags and visual indicators, Interactive case selection. Ready for testing!"
 
+  - task: "Persistent Process Type Indicator (Carimbo)"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/ProcessTypeBadge.tsx, /app/frontend/src/contexts/ProcessTypeContext.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "✅ CARIMBO PERSISTENTE IMPLEMENTADO: COMPONENTES: 1) ✅ ProcessTypeBadge.tsx - Badge visual com ícones (Plane para Consular, Home para Change of Status), Cores diferenciadas (azul para Consular, laranja para Change of Status), 3 tamanhos (sm, md, lg), Design responsivo com bordas e sombras, 2) ✅ ProcessTypeContext.tsx - Context API React para gerenciar estado global do process_type, Persistência automática no localStorage, Sincronização entre abas/janelas via StorageEvent, Métodos setProcessType, clearProcessType, 3) ✅ INTEGRAÇÃO: App.tsx atualizado com ProcessTypeProvider, SelectForm.tsx usa contexto para armazenar escolha, BasicData.tsx exibe badge no header e sincroniza com backend, CoverLetterModule.tsx exibe badge no header, 4) ✅ FUNCIONALIDADES: Usuário escolhe tipo no ProcessTypeSelector, Escolha persiste em localStorage e contexto, Badge aparece em todas páginas subsequentes, Sincronização automática com dados do caso no backend. Pronto para teste!"
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
