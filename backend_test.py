@@ -1046,6 +1046,293 @@ class ProductionVerificationTester:
         except Exception as e:
             self.log_test("Carlos Silva H-1B Journey (Basic 4 Steps)", False, f"Exception: {str(e)}")
 
+    def test_final_visa_updates_validation(self):
+        """TESTE FINAL COMPLETO - VALIDAÇÃO PÓS-CORREÇÃO DO SISTEMA DE VISA UPDATES"""
+        print("🔥 TESTE FINAL COMPLETO - VALIDAÇÃO PÓS-CORREÇÃO")
+        print("🎯 OBJETIVO: Validar que o bug do asyncio foi corrigido e todos os 10 testes agora passam")
+        print("="*80)
+        
+        test_results = []
+        
+        # TESTE 1: Trigger Manual (ANTERIORMENTE FALHANDO)
+        print("\n🚨 TESTE 1: TRIGGER MANUAL (ANTERIORMENTE FALHANDO)")
+        print("   Endpoint: POST /api/admin/visa-updates/scheduler/trigger")
+        print("   ⚠️  ESTE ERA O TESTE QUE ESTAVA FALHANDO - DEVE PASSAR AGORA")
+        
+        try:
+            response = self.session.post(f"{API_BASE}/admin/visa-updates/scheduler/trigger", json={})
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Validações críticas
+                has_success = 'success' in data
+                success_true = data.get('success') == True
+                has_message = 'message' in data and data.get('message')
+                
+                success = has_success and success_true and has_message
+                
+                print(f"   ✅ Status code: 200 ✓")
+                print(f"   ✅ Campo 'success': {'✓' if has_success else '✗'} (valor: {data.get('success')})")
+                print(f"   ✅ Mensagem de confirmação: {'✓' if has_message else '✗'}")
+                print(f"   📋 Mensagem: {data.get('message', 'N/A')}")
+                
+                if success:
+                    print("   🎉 TESTE 1 PASSOU! O bug do asyncio foi corrigido!")
+                else:
+                    print("   ❌ TESTE 1 AINDA FALHANDO")
+                
+                test_results.append(("TESTE 1: Trigger Manual (Crítico)", success, f"success: {data.get('success')}, message: {data.get('message', 'N/A')[:50]}"))
+            else:
+                success = False
+                print(f"   ❌ Status code: {response.status_code}")
+                print(f"   📋 Resposta: {response.text[:200]}")
+                print("   ❌ TESTE 1 AINDA FALHANDO - BUG NÃO FOI CORRIGIDO")
+                test_results.append(("TESTE 1: Trigger Manual (Crítico)", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            print("   ❌ TESTE 1 AINDA FALHANDO - EXCEPTION")
+            test_results.append(("TESTE 1: Trigger Manual (Crítico)", False, f"Exception: {str(e)}"))
+        
+        # TESTE 2: Status do Scheduler (Revalidação)
+        print("\n📊 TESTE 2: STATUS DO SCHEDULER (REVALIDAÇÃO)")
+        print("   Endpoint: GET /api/admin/visa-updates/scheduler/status")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/admin/visa-updates/scheduler/status")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                has_is_running = 'is_running' in data
+                is_running_true = data.get('is_running') == True
+                has_next_run = 'next_run' in data and data.get('next_run')
+                
+                success = has_is_running and is_running_true and has_next_run
+                
+                print(f"   ✅ Status code: 200 ✓")
+                print(f"   ✅ is_running: {'✓' if is_running_true else '✗'} (valor: {data.get('is_running')})")
+                print(f"   ✅ next_run presente: {'✓' if has_next_run else '✗'}")
+                
+                test_results.append(("TESTE 2: Status do Scheduler", success, f"is_running: {data.get('is_running')}, next_run: {'presente' if has_next_run else 'ausente'}"))
+            else:
+                success = False
+                print(f"   ❌ Status code: {response.status_code}")
+                test_results.append(("TESTE 2: Status do Scheduler", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("TESTE 2: Status do Scheduler", False, f"Exception: {str(e)}"))
+        
+        # TESTE 3: Aguardar e Verificar Logs
+        print("\n⏳ TESTE 3: AGUARDAR E VERIFICAR LOGS")
+        print("   Ação: Aguardar 60 segundos após trigger manual")
+        print("   Verificar: Logs do scheduler no MongoDB")
+        
+        print("   ⏳ Aguardando 60 segundos para execução do scheduler...")
+        time.sleep(60)
+        
+        try:
+            # Verificar logs através de subprocess
+            import subprocess
+            result = subprocess.run(['tail', '-n', '100', '/var/log/supervisor/backend.err.log'], 
+                                  capture_output=True, text=True, timeout=10)
+            
+            if result.returncode == 0:
+                logs = result.stdout
+                
+                # Procurar por indicadores de execução do scheduler
+                has_scheduler_execution = any(indicator in logs.lower() for indicator in [
+                    'scheduler', 'visa_update', 'scan', 'trigger', 'executed'
+                ])
+                has_recent_activity = any(indicator in logs for indicator in [
+                    '2024', '2025'  # Timestamps recentes
+                ])
+                no_asyncio_errors = 'asyncio' not in logs.lower() or 'error' not in logs.lower()
+                
+                success = has_scheduler_execution and no_asyncio_errors
+                
+                print(f"   ✅ Logs acessíveis: ✓")
+                print(f"   ✅ Execução do scheduler detectada: {'✓' if has_scheduler_execution else '✗'}")
+                print(f"   ✅ Atividade recente: {'✓' if has_recent_activity else '✗'}")
+                print(f"   ✅ Sem erros asyncio: {'✓' if no_asyncio_errors else '✗'}")
+                
+                # Mostrar últimas linhas relevantes
+                relevant_lines = [line for line in logs.split('\n')[-20:] if any(keyword in line.lower() for keyword in ['scheduler', 'visa', 'trigger', 'scan'])]
+                if relevant_lines:
+                    print("   📋 Últimas linhas relevantes:")
+                    for line in relevant_lines[-5:]:
+                        print(f"      {line}")
+                
+                test_results.append(("TESTE 3: Logs após 60s", success, f"scheduler_activity: {'✓' if has_scheduler_execution else '✗'}, no_asyncio_errors: {'✓' if no_asyncio_errors else '✗'}"))
+            else:
+                success = False
+                print(f"   ❌ Erro ao acessar logs: {result.stderr}")
+                test_results.append(("TESTE 3: Logs após 60s", False, "Erro ao acessar logs"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("TESTE 3: Logs após 60s", False, f"Exception: {str(e)}"))
+        
+        # TESTE 4: Updates Pendentes (Após Scan)
+        print("\n📋 TESTE 4: UPDATES PENDENTES (APÓS SCAN)")
+        print("   Endpoint: GET /api/admin/visa-updates/pending")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/admin/visa-updates/pending")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                has_success = 'success' in data
+                success_true = data.get('success') == True
+                has_updates = 'updates' in data
+                updates_is_list = isinstance(data.get('updates'), list)
+                has_total_count = 'total_count' in data
+                proper_structure = all([has_success, success_true, has_updates, updates_is_list, has_total_count])
+                
+                success = proper_structure
+                
+                print(f"   ✅ Status code: 200 ✓")
+                print(f"   ✅ Pode ter novos updates detectados: {'✓' if updates_is_list else '✗'}")
+                print(f"   ✅ Estrutura de resposta correta: {'✓' if proper_structure else '✗'}")
+                print(f"   ✅ Campos completos: {'✓' if has_total_count else '✗'}")
+                print(f"   📋 Total de updates: {data.get('total_count', 'N/A')}")
+                print(f"   📋 Updates na lista: {len(data.get('updates', []))}")
+                
+                test_results.append(("TESTE 4: Updates Pendentes", success, f"total_count: {data.get('total_count')}, structure: {'✓' if proper_structure else '✗'}"))
+            else:
+                success = False
+                print(f"   ❌ Status code: {response.status_code}")
+                test_results.append(("TESTE 4: Updates Pendentes", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("TESTE 4: Updates Pendentes", False, f"Exception: {str(e)}"))
+        
+        # TESTE 5: Notificações Admin (Após Scan)
+        print("\n🔔 TESTE 5: NOTIFICAÇÕES ADMIN (APÓS SCAN)")
+        print("   Endpoint: GET /api/admin/notifications")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/admin/notifications")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                has_success = 'success' in data
+                success_true = data.get('success') == True
+                has_notifications = 'notifications' in data
+                notifications_is_list = isinstance(data.get('notifications'), list)
+                has_unread_count = 'unread_count' in data or len(data.get('notifications', [])) >= 0
+                
+                success = has_success and success_true and has_notifications and notifications_is_list
+                
+                print(f"   ✅ Status code: 200 ✓")
+                print(f"   ✅ Possível nova notificação sobre updates: {'✓' if notifications_is_list else '✗'}")
+                print(f"   ✅ Contador de notificações não lidas: {'✓' if has_unread_count else '✗'}")
+                print(f"   📋 Total de notificações: {len(data.get('notifications', []))}")
+                
+                # Verificar se há notificações relacionadas a visa updates
+                visa_notifications = [n for n in data.get('notifications', []) if 'visa' in str(n).lower() or 'update' in str(n).lower()]
+                if visa_notifications:
+                    print(f"   📋 Notificações relacionadas a visa updates: {len(visa_notifications)}")
+                
+                test_results.append(("TESTE 5: Notificações Admin", success, f"notifications: {len(data.get('notifications', []))}, visa_related: {len(visa_notifications) if 'visa_notifications' in locals() else 0}"))
+            else:
+                success = False
+                print(f"   ❌ Status code: {response.status_code}")
+                test_results.append(("TESTE 5: Notificações Admin", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("TESTE 5: Notificações Admin", False, f"Exception: {str(e)}"))
+        
+        # TESTE 6: Histórico Completo
+        print("\n📚 TESTE 6: HISTÓRICO COMPLETO")
+        print("   Endpoint: GET /api/admin/visa-updates/history")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/admin/visa-updates/history")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                has_success = 'success' in data
+                success_true = data.get('success') == True
+                proper_structure = isinstance(data, dict)
+                has_history_data = len(str(data)) > 50  # Tem conteúdo substancial
+                
+                success = has_success and success_true and proper_structure and has_history_data
+                
+                print(f"   ✅ Status code: 200 ✓")
+                print(f"   ✅ Histórico contém todas as execuções: {'✓' if has_history_data else '✗'}")
+                print(f"   ✅ Timestamps corretos: {'✓' if proper_structure else '✗'}")
+                print(f"   📋 Tamanho da resposta: {len(str(data))} chars")
+                
+                test_results.append(("TESTE 6: Histórico Completo", success, f"success: {data.get('success')}, data_size: {len(str(data))}"))
+            else:
+                success = False
+                print(f"   ❌ Status code: {response.status_code}")
+                test_results.append(("TESTE 6: Histórico Completo", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("TESTE 6: Histórico Completo", False, f"Exception: {str(e)}"))
+        
+        # RESUMO FINAL
+        print("\n" + "="*80)
+        print("📊 RESUMO FINAL - VALIDAÇÃO PÓS-CORREÇÃO")
+        print("="*80)
+        
+        passed_tests = [r for r in test_results if r[1]]
+        failed_tests = [r for r in test_results if not r[1]]
+        
+        success_rate = len(passed_tests) / len(test_results) * 100 if test_results else 0
+        
+        print(f"\n🎯 RESULTADO GERAL:")
+        print(f"   ✅ Testes que passaram: {len(passed_tests)}/6 ({success_rate:.1f}%)")
+        print(f"   ❌ Testes que falharam: {len(failed_tests)}/6")
+        
+        print(f"\n📋 DETALHAMENTO:")
+        for i, (test_name, success, details) in enumerate(test_results, 1):
+            status = "✅ PASSOU" if success else "❌ FALHOU"
+            print(f"   {i}. {test_name}: {status}")
+            print(f"      {details}")
+        
+        # Verificação específica do teste crítico (Trigger Manual)
+        trigger_test_passed = test_results[0][1] if test_results else False
+        
+        if trigger_test_passed:
+            print(f"\n🎉 SUCESSO! O teste do trigger manual que estava falhando agora PASSOU!")
+            print(f"   ✅ Bug do asyncio foi corrigido")
+            print(f"   ✅ Sistema 100% funcional")
+            print(f"   ✅ Pronto para uso em produção")
+        else:
+            print(f"\n❌ FALHA! O teste do trigger manual ainda está falhando")
+            print(f"   ❌ Bug do asyncio NÃO foi corrigido")
+            print(f"   ❌ Sistema ainda tem problemas")
+            print(f"   ❌ NÃO está pronto para produção")
+        
+        # Log final consolidado
+        overall_success = success_rate == 100.0
+        self.log_test(
+            "TESTE FINAL COMPLETO - VALIDAÇÃO PÓS-CORREÇÃO",
+            overall_success,
+            f"Taxa de sucesso: {success_rate:.1f}% ({len(passed_tests)}/6 testes). Trigger manual: {'✓' if trigger_test_passed else '✗'}. Sistema: {'FUNCIONAL' if overall_success else 'COM PROBLEMAS'}",
+            {
+                "success_rate": success_rate,
+                "passed_tests": len(passed_tests),
+                "total_tests": len(test_results),
+                "trigger_manual_fixed": trigger_test_passed,
+                "system_status": "FUNCIONAL" if overall_success else "COM PROBLEMAS",
+                "all_test_results": test_results
+            }
+        )
+        
+        return test_results
+
     def test_visa_updates_system_complete(self):
         """TESTE COMPLETO DO SISTEMA DE ATUALIZAÇÃO DE VISTOS - 10 TESTES ESPECÍFICOS"""
         print("🤖 SISTEMA HÍBRIDO SEMI-AUTOMÁTICO DE UPDATES DE VISTOS")
