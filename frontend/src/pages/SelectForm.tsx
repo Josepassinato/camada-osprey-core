@@ -434,21 +434,38 @@ const SelectForm = () => {
       {/* Header - Mobile Optimized */}
       <div className="bg-white border-b border-black">
         <div className="px-4 py-4 sm:py-6">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate('/auto-application/start')}
-              className="p-2 hover:bg-gray-100"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div>
-              <h1 className="text-lg sm:text-2xl font-bold text-black">
-                Escolha seu Formulário
-              </h1>
-              <p className="text-sm text-black hidden sm:block">
-                Selecione o tipo de formulário USCIS
-              </p>
+          <div className="flex items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <Button 
+                variant="ghost" 
+                onClick={() => navigate('/auto-application/start')}
+                className="p-2 hover:bg-gray-100"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <div>
+                <h1 className="text-lg sm:text-2xl font-bold text-black">
+                  Escolha seu Formulário
+                </h1>
+                <p className="text-sm text-black hidden sm:block">
+                  {processType === 'consular' 
+                    ? 'Processo Consular - Formulários e taxas para aplicação no consulado' 
+                    : 'Mudança de Status - Formulários e taxas para aplicação dentro dos EUA'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {processType === 'consular' ? (
+                <div className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium border-2 border-blue-500">
+                  <Plane className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Processo Consular</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 bg-orange-100 text-orange-800 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium border-2 border-orange-500">
+                  <Home className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Mudança de Status</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
