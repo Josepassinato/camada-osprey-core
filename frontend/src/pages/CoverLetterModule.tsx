@@ -342,7 +342,10 @@ const CoverLetterModule: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Carta de Apresentação</h1>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-3xl font-bold text-gray-900">Carta de Apresentação</h1>
+            <ProcessTypeBadge processType={processType} size="md" />
+          </div>
           <p className="text-gray-600 mt-2">
             Crie sua carta de apresentação com orientação da Dra. Paula B2C
           </p>
