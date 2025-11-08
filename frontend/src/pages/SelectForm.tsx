@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import VisaRequirements from "@/components/VisaRequirements";
 import ProcessTypeSelector from "@/components/ProcessTypeSelector";
+import { useProcessType } from "@/contexts/ProcessTypeContext";
 import { 
   ArrowLeft,
   ArrowRight,
