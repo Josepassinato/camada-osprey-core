@@ -84,7 +84,7 @@ export const CompletenessAnalyzer: React.FC<CompletenessAnalyzerProps> = ({
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [showDetails, setShowDetails] = useState(false);
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://agente-coruja-1.preview.emergentagent.com';
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://owlagent.preview.emergentagent.com';
 
   useEffect(() => {
     if (autoAnalyze && visaType && userData) {

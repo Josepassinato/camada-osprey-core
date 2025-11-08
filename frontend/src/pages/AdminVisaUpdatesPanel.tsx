@@ -56,7 +56,7 @@ const AdminVisaUpdatesPanel = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://agente-coruja-1.preview.emergentagent.com';
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://owlagent.preview.emergentagent.com';
       
       // Load pending updates
       const pendingResponse = await fetch(`${backendUrl}/api/admin/visa-updates/pending`);
@@ -87,7 +87,7 @@ const AdminVisaUpdatesPanel = () => {
   const runManualScan = async () => {
     setScanLoading(true);
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://agente-coruja-1.preview.emergentagent.com';
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://owlagent.preview.emergentagent.com';
       const response = await fetch(`${backendUrl}/api/admin/visa-updates/run-manual-scan`, {
         method: 'POST',
       });
@@ -108,7 +108,7 @@ const AdminVisaUpdatesPanel = () => {
 
   const approveUpdate = async (updateId: string, adminNotes: string = '') => {
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://agente-coruja-1.preview.emergentagent.com';
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://owlagent.preview.emergentagent.com';
       const response = await fetch(`${backendUrl}/api/admin/visa-updates/${updateId}/approve`, {
         method: 'POST',
         headers: {
@@ -135,7 +135,7 @@ const AdminVisaUpdatesPanel = () => {
 
   const rejectUpdate = async (updateId: string, adminNotes: string = '') => {
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://agente-coruja-1.preview.emergentagent.com';
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://owlagent.preview.emergentagent.com';
       const response = await fetch(`${backendUrl}/api/admin/visa-updates/${updateId}/reject`, {
         method: 'POST',
         headers: {

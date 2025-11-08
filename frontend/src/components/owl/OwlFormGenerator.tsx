@@ -24,7 +24,7 @@ export const OwlFormGenerator: React.FC<OwlFormGeneratorProps> = ({ className = 
   const [error, setError] = useState<string | null>(null);
 
   const getBackendUrl = () => {
-    return import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://agente-coruja-1.preview.emergentagent.com';
+    return import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://owlagent.preview.emergentagent.com';
   };
 
   const generateForm = async () => {

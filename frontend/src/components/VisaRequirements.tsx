@@ -29,7 +29,7 @@ const VisaRequirements = ({ visaType, onClose }: VisaRequirementsProps) => {
   useEffect(() => {
     const fetchDetailedInfo = async () => {
       try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://agente-coruja-1.preview.emergentagent.com';
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://owlagent.preview.emergentagent.com';
         const response = await fetch(`${backendUrl}/api/visa-detailed-info/${visaType}?process_type=both`);
         const data = await response.json();
         
