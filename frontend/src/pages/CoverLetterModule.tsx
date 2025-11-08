@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import ProcessTypeBadge from "@/components/ProcessTypeBadge";
+import { useProcessType } from "@/contexts/ProcessTypeContext";
 import { makeApiCall } from "@/utils/api";
 import { CheckCircle2, AlertCircle, FileText, Loader2 } from "lucide-react";
 
