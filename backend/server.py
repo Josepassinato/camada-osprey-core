@@ -342,10 +342,12 @@ class AutoApplicationCase(BaseModel):
     
 class CaseCreate(BaseModel):
     form_code: Optional[USCISForm] = None
+    process_type: Optional[str] = None  # 'consular' or 'change_of_status'
     session_token: Optional[str] = None  # For anonymous users
     
 class CaseUpdate(BaseModel):
     form_code: Optional[USCISForm] = None
+    process_type: Optional[str] = None  # 'consular' or 'change_of_status'
     status: Optional[CaseStatus] = None
     basic_data: Optional[Dict[str, Any]] = None
     user_story_text: Optional[str] = None
