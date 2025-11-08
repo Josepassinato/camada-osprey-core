@@ -144,6 +144,11 @@ const BasicData = () => {
         const data = await response.json();
         setCase(data.case);
         
+        // Sync process type from backend to context
+        if (data.case.process_type && !processType) {
+          setProcessType(data.case.process_type);
+        }
+        
         // Load existing basic data if available
         if (data.case.basic_data) {
           setFormData(data.case.basic_data);
