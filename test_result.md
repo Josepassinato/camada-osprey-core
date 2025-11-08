@@ -1078,14 +1078,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Visa Detailed Info and Process Type Differentiation System - TESTED AND WORKING 100%"
-    - "Conversational Assistant with Voice - AI-powered Chat - TESTED WITH CRITICAL ISSUES"
-    - "Social Proof System - Pessoas Como Você Success Stories - TESTED AND WORKING"
-  stuck_tasks:
-    - "Conversational Assistant OpenAI API Integration (failing with success=False responses)"
-    - "Dr. Miguel Identity Validation (needs improvement for different person detection)"
+    - "Visa Detailed Info and Process Type Differentiation System"
+    - "Persistent Process Type Indicator (Carimbo)"
+  stuck_tasks: []
   test_all: false
-  test_priority: "critical_first"
+  test_priority: "high_first"
 
 agent_communication:
     -agent: "main"
