@@ -117,7 +117,8 @@ const SelectForm = () => {
     setVisaDetailsMap(detailsMap);
   };
 
-  const uscisforms: USCISFormType[] = [
+  // Define all available forms
+  const allForms: USCISFormType[] = [
     {
       code: 'B-1/B-2',
       title: 'B-1/B-2: Visto de Negócios e Turismo',
