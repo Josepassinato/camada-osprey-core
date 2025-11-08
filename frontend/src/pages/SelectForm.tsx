@@ -282,8 +282,8 @@ const SelectForm = () => {
       const existingCaseId = localStorage.getItem('osprey_current_case_id');
       
       if (existingCaseId) {
-        // Update existing case with form_code
-        console.log('🔄 Updating existing case with form_code:', formCode);
+        // Update existing case with form_code and process_type
+        console.log('🔄 Updating existing case with form_code:', formCode, 'and process_type:', processType);
         console.log('🔄 Session token:', sessionToken);
         console.log('🔄 Existing case ID:', existingCaseId);
         
@@ -294,6 +294,7 @@ const SelectForm = () => {
           },
           body: JSON.stringify({
             form_code: formCode,
+            process_type: processType,
             session_token: sessionToken
           }),
         });
@@ -314,8 +315,8 @@ const SelectForm = () => {
         }
       }
       
-      // Create new case with form_code
-      console.log('🆕 Creating new case with form_code:', formCode);
+      // Create new case with form_code and process_type
+      console.log('🆕 Creating new case with form_code:', formCode, 'and process_type:', processType);
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auto-application/start`, {
         method: 'POST',
         headers: {
@@ -323,6 +324,7 @@ const SelectForm = () => {
         },
         body: JSON.stringify({
           form_code: formCode,
+          process_type: processType,
           session_token: sessionToken
         }),
       });
