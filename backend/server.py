@@ -8502,4 +8502,16 @@ async def startup_db_client():
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
+    """Shutdown event to close connections"""
+    # Stop scheduler
+    try:
+        global visa_scheduler
+        if 'visa_scheduler' in globals() and visa_scheduler:
+            visa_scheduler.stop()
+            logger.info("✅ Visa update scheduler stopped")
+    except Exception as e:
+        logger.error(f"Error stopping scheduler: {str(e)}")
+    
+    # Close MongoDB connection
     client.close()
+    logger.info("✅ MongoDB connection closed")
