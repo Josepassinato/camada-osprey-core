@@ -409,6 +409,18 @@ const SelectForm = () => {
     return icons[category as keyof typeof icons] || '📄';
   };
 
+  // Get visa details based on process type
+  const getVisaDetails = (formCode: string) => {
+    const details = visaDetailsMap[formCode];
+    if (!details) return null;
+    
+    return {
+      processingTime: details.processing_time || 'Consulte USCIS',
+      fee: details.fee || 'Varia',
+      requirements: details.key_requirements || []
+    };
+  };
+
   return (
     <>
       {/* Show Process Type Selector first */}
