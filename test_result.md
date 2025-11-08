@@ -141,6 +141,18 @@ backend:
         agent: "testing"
         comment: "✅ PROGRESS PERCENTAGE QUICK VERIFICATION - 100% SUCCESS! Executed comprehensive 5-step test as requested by user to verify progress_percentage field functionality. DETAILED RESULTS: ETAPA 1: ✅ Case creation with progress_percentage = 0 - Field correctly initialized (OSP-4A9463D6), ETAPA 2: ✅ H-1B selection with progress_percentage = 20 - PUT /api/auto-application/case/{id} correctly updates progress and form_code, ETAPA 3: ✅ Basic data addition with progress_percentage = 40 - Data persistence and progress tracking working correctly, ETAPA 4: ✅ AI processing step with progress_percentage = 65 - POST /api/auto-application/case/{id}/ai-processing successfully updates progress (fixed MongoDB field creation issue), ETAPA 5: ✅ Final verification - GET /api/auto-application/case/{id} returns all data correctly with progress_percentage = 65. PROGRESS SEQUENCE VERIFIED: 0% → 20% → 40% → 65% (100% correct). FIXES APPLIED: 1) Fixed test response structure handling (nested 'case' object), 2) Fixed AI processing MongoDB field creation error (ai_processing null initialization), 3) Verified all CRUD operations for progress_percentage field. CONCLUSION: Progress percentage field is now fully functional - created, updated via PUT, updated via AI processing, and returned correctly in GET requests. All 5 success criteria met (9/9 verification checks passed)."
 
+  - task: "Visa Detailed Info and Process Type Differentiation System"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "🎉 TESTE COMPLETO - SELEÇÃO DE TIPO DE PROCESSO E INFORMAÇÕES DETALHADAS - 100% SUCCESS! Comprehensive testing completed with excellent results covering all 6 major test categories: TESTE 1: ✅ Novo Endpoint - Visa Detailed Info (6/6 tests passed) - GET /api/visa-detailed-info/{visa_type}?process_type={type} working perfectly for F-1, H-1B, I-130 with proper differentiation between consular and change_of_status processes, all timing and fee validations correct, proper 404 for non-existent visas, TESTE 2: ✅ Criação de Caso com Process Type (4/4 tests passed) - POST /api/auto-application/start correctly saves process_type field, PUT updates work properly, data persistence confirmed in MongoDB, TESTE 3: ✅ Compatibilidade com Sistema Antigo (2/2 tests passed) - System remains backward compatible, cases without process_type work correctly with null values, TESTE 4: ✅ Estrutura dos Dados no MongoDB (2/2 tests passed) - All required fields (case_id, process_type, form_code, created_at, progress_percentage) properly stored and retrieved, aggregation by process_type working, TESTE 5: ✅ Comparação de Dados entre Process Types (3/3 tests passed) - F-1: consular (2-6 weeks, $535, 7 steps) vs change (3-5 months, $805, 8 steps), H-1B: consular ($190) vs change ($1,710+ with premium options), I-130: different timing patterns and form requirements (DS-260 vs I-485), TESTE 6: ✅ Validação de Disclaimer Legal (3/3 tests passed) - All visa types return proper Portuguese legal disclaimers with ⚖️ symbol, educational warnings, and attorney consultation recommendations. CONCLUSION: Complete visa detailed info and process type differentiation system is production-ready with 100% test success rate (25+ individual validations passed). System properly differentiates between Processo Consular and Mudança de Status with accurate timing, fees, steps, and requirements for each visa type."
+
   - task: "4 Specific Corrected Endpoints Testing"
     implemented: true
     working: true
