@@ -495,7 +495,18 @@ backend:
         agent: "testing"
         comment: "⚠️ CHAT ENDPOINT INTEGRATION NOT FULLY TESTED: 1) ✅ Endpoint Available - /api/chat endpoint exists and functional, 2) ✅ Dra. Paula Integration - Immigration expert properly configured with Assistant ID asst_AV1O2IBTnDXpEZXiSSQGBT4, 3) ❌ Auth Token Issue - Testing limited due to authentication token not available in test environment, 4) ✅ Agent Ready - Dra. Paula B2C expert fully configured and ready for chat integration, 5) ✅ Legal Disclaimers - System configured to include proper legal disclaimers. Chat endpoint ready but requires authenticated testing to fully validate Dra. Paula integration."
 
-frontend:
+  - task: "Persistent Process Type Indicator (Carimbo)"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/components/ProcessTypeBadge.tsx"
+    stuck_count: 1
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ SISTEMA DE INDICADOR PERSISTENTE DE TIPO DE PROCESSO - FALHAS CRÍTICAS IDENTIFICADAS: Executei teste abrangente do sistema de badge conforme solicitado pelo usuário. RESULTADOS DETALHADOS: 1) ✅ PROCESSTYPESELECTOR FUNCIONANDO - Interface visual correta: 'Processo Consular' (fundo azul, ícone avião), 'Mudança de Status' (fundo laranja, ícone casa), seleção funcionando corretamente, 2) ❌ PERSISTÊNCIA NO LOCALSTORAGE FALHANDO - localStorage.getItem('osprey_process_type') retorna 'None' em vez de 'consular' ou 'change_of_status', processo não está sendo salvo corretamente, 3) ❌ BADGE NÃO APARECE NAS PÁGINAS - ProcessTypeBadge não visível na página BasicData (/auto-application/case/{caseId}/basic-data), ProcessTypeBadge não visível na página CoverLetterModule (/auto-application/case/{caseId}/cover-letter), testei múltiplos seletores CSS sem sucesso, 4) ❌ SINCRONIZAÇÃO BACKEND-FRONTEND FALHANDO - Process type não está sendo sincronizado do backend para o contexto React, useProcessType() não está recebendo dados do caso carregado, 5) ✅ COMPONENTES IMPLEMENTADOS CORRETAMENTE - ProcessTypeBadge.tsx: componente visual correto com cores e ícones, ProcessTypeSelector.tsx: seletor funcional com interface adequada, ProcessTypeContext.tsx: contexto React implementado, 6) ❌ INTEGRAÇÃO QUEBRADA - Badge não persiste após navegação entre páginas, Badge não persiste após reload da página, Fluxo completo não funciona como especificado. CONCLUSÃO: Sistema implementado mas não funcional - problemas críticos de persistência e sincronização impedem o funcionamento correto do indicador persistente."
+
   - task: "Agente Coruja - Frontend Implementation"
     implemented: true
     working: false
