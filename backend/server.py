@@ -1864,6 +1864,7 @@ async def start_auto_application(case_data: CaseCreate, current_user = Depends(g
             # Authenticated user - associate case with user
             case = AutoApplicationCase(
                 form_code=case_data.form_code,
+                process_type=case_data.process_type,
                 session_token=case_data.session_token,
                 user_id=current_user["id"],
                 expires_at=datetime.utcnow() + timedelta(days=30)  # Longer expiration for authenticated users
@@ -1872,6 +1873,7 @@ async def start_auto_application(case_data: CaseCreate, current_user = Depends(g
             # Anonymous user - create temporary case
             case = AutoApplicationCase(
                 form_code=case_data.form_code,
+                process_type=case_data.process_type,
                 session_token=case_data.session_token,
                 expires_at=datetime.utcnow() + timedelta(days=7)
             )
