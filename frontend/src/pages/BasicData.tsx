@@ -142,15 +142,11 @@ const BasicData = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('📦 BasicData: Case data from backend =', data.case);
         setCase(data.case);
         
         // Sync process type from backend to context
         if (data.case.process_type) {
-          console.log('🔄 BasicData: Syncing process_type from backend:', data.case.process_type);
           setProcessType(data.case.process_type);
-        } else {
-          console.log('⚠️ BasicData: No process_type in backend data');
         }
         
         // Load existing basic data if available
