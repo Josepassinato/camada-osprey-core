@@ -42,13 +42,13 @@ interface USCISFormType {
 
 const SelectForm = () => {
   const navigate = useNavigate();
-  const { processType, setProcessType } = useProcessType();
+  const { processType, setProcessType, clearProcessType } = useProcessType();
   const [selectedForm, setSelectedForm] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showRequirements, setShowRequirements] = useState(false);
   const [selectedVisaType, setSelectedVisaType] = useState("");
-  const [showProcessSelector, setShowProcessSelector] = useState(!processType);
+  const [showProcessSelector, setShowProcessSelector] = useState(true);
   const [visaDetailsMap, setVisaDetailsMap] = useState<Record<string, any>>({});
 
   // Listen for start application event from VisaRequirements component
