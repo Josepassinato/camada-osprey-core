@@ -13,11 +13,7 @@ const ProcessTypeBadge: React.FC<ProcessTypeBadgeProps> = ({
   className = '',
   size = 'md'
 }) => {
-  console.log('🎯 ProcessTypeBadge render:', { processType, className, size });
-  if (!processType) {
-    console.log('⚠️ ProcessTypeBadge: processType is null, not rendering');
-    return null;
-  }
+  if (!processType) return null;
 
   const isConsular = processType === 'consular';
   
