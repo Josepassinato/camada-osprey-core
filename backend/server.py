@@ -301,6 +301,9 @@ class AutoApplicationCase(BaseModel):
     form_code: Optional[USCISForm] = None
     status: CaseStatus = CaseStatus.created
     
+    # Process Type
+    process_type: Optional[str] = None  # 'consular' or 'change_of_status'
+    
     # Progress Tracking
     progress_percentage: int = 0  # 0-100%
     current_step: Optional[str] = None
