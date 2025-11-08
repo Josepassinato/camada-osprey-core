@@ -310,8 +310,11 @@ const BasicData = () => {
                 </p>
               </div>
             </div>
-            <div className="bg-black text-white text-xs px-2 py-1 rounded">
-              100%
+            <div className="flex items-center gap-2">
+              <ProcessTypeBadge processType={processType} size="sm" />
+              <div className="bg-black text-white text-xs px-2 py-1 rounded">
+                100%
+              </div>
             </div>
           </div>
         </div>
