@@ -1066,6 +1066,7 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Visa Detailed Info and Process Type Differentiation System - TESTED AND WORKING 100%"
     - "Conversational Assistant with Voice - AI-powered Chat - TESTED WITH CRITICAL ISSUES"
     - "Social Proof System - Pessoas Como Você Success Stories - TESTED AND WORKING"
   stuck_tasks:
