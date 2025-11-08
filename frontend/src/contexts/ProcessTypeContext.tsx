@@ -1,75 +1,50 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
+type ProcessType = 'consular' | 'change_of_status' | null;
 
 interface ProcessTypeContextType {
-  processType: 'consular' | 'change_of_status' | null;
-  setProcessType: (type: 'consular' | 'change_of_status') => void;
+  processType: ProcessType;
+  setProcessType: (type: ProcessType) => void;
   clearProcessType: () => void;
-  isConsular: boolean;
-  isChangeOfStatus: boolean;
-  getDisplayName: () => string;
-  getIcon: () => string;
-  getColor: () => string;
 }
 
 const ProcessTypeContext = createContext<ProcessTypeContextType | undefined>(undefined);
 
-export const ProcessTypeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [processType, setProcessTypeState] = useState<'consular' | 'change_of_status' | null>(null);
+export const ProcessTypeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [processType, setProcessTypeState] = useState<ProcessType>(() => {
+    // Initialize from localStorage on mount
+    const stored = localStorage.getItem('osprey_process_type');
+    return stored ? (stored as ProcessType) : null;
+  });
 
-  // Load from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('osprey_process_type');
-    if (saved === 'consular' || saved === 'change_of_status') {
-      setProcessTypeState(saved);
-    }
-  }, []);
-
-  const setProcessType = (type: 'consular' | 'change_of_status') => {
+  const setProcessType = (type: ProcessType) => {
     setProcessTypeState(type);
-    localStorage.setItem('osprey_process_type', type);
-    console.log('🔖 Process type set:', type);
+    if (type) {
+      localStorage.setItem('osprey_process_type', type);
+    } else {
+      localStorage.removeItem('osprey_process_type');
+    }
   };
 
   const clearProcessType = () => {
     setProcessTypeState(null);
     localStorage.removeItem('osprey_process_type');
-    console.log('🔖 Process type cleared');
   };
 
-  const isConsular = processType === 'consular';
-  const isChangeOfStatus = processType === 'change_of_status';
+  // Listen for case data and update process type
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'osprey_process_type') {
+        setProcessTypeState(e.newValue as ProcessType);
+      }
+    };
 
-  const getDisplayName = () => {
-    if (processType === 'consular') return 'Processo Consular';
-    if (processType === 'change_of_status') return 'Mudança de Status';
-    return '';
-  };
-
-  const getIcon = () => {
-    if (processType === 'consular') return '✈️';
-    if (processType === 'change_of_status') return '🏠';
-    return '';
-  };
-
-  const getColor = () => {
-    if (processType === 'consular') return 'blue';
-    if (processType === 'change_of_status') return 'orange';
-    return 'gray';
-  };
-
-  const value = {
-    processType,
-    setProcessType,
-    clearProcessType,
-    isConsular,
-    isChangeOfStatus,
-    getDisplayName,
-    getIcon,
-    getColor,
-  };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   return (
-    <ProcessTypeContext.Provider value={value}>
+    <ProcessTypeContext.Provider value={{ processType, setProcessType, clearProcessType }}>
       {children}
     </ProcessTypeContext.Provider>
   );
@@ -77,10 +52,8 @@ export const ProcessTypeProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
 export const useProcessType = () => {
   const context = useContext(ProcessTypeContext);
-  if (context === undefined) {
-    throw new Error('useProcessType must be used within a ProcessTypeProvider');
+  if (!context) {
+    throw new Error('useProcessType must be used within ProcessTypeProvider');
   }
   return context;
 };
-
-export default ProcessTypeContext;
