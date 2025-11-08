@@ -8,6 +8,7 @@ import os
 import time as time_module
 import uuid
 import logging
+import asyncio
 from pathlib import Path
 
 # Load environment variables FIRST before any other imports that might use them
