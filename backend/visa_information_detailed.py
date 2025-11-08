@@ -399,18 +399,12 @@ VISA_DETAILED_INFO = {
         },
         
         "change_of_status": {
-            "description": "Mudança para B-1/B-2 estando JÁ nos EUA (raro, geralmente extensão com I-539)",
-            "tempo_processamento": "Não aplicável",
-            "tempo_detalhes": "B-1/B-2 geralmente não permite mudança de status dentro dos EUA",
-            "taxas": {
-                "nota": "Não aplicável - B-1/B-2 é obtido via consulado"
-            },
+            "description": "NÃO APLICÁVEL - B-1/B-2 deve ser obtido via consulado",
+            "tempo_processamento": "N/A",
+            "tempo_detalhes": "B-1/B-2 não permite mudança de status. Para extensão dentro dos EUA, use I-539",
+            "taxas": {},
             "etapas": [],
-            "requisitos_especiais": [
-                "B-1/B-2 não permite mudança de status de outros vistos",
-                "Para extensão de B-1/B-2, use formulário I-539",
-                "Consulte advogado para casos especiais"
-            ]
+            "disponivel": False
         },
         
         "dependentes": "Cada pessoa precisa de visto próprio",
