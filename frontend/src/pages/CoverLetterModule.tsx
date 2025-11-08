@@ -53,6 +53,7 @@ interface FinalLetter {
 const CoverLetterModule: React.FC = () => {
   const { caseId } = useParams<{ caseId: string }>();
   const navigate = useNavigate();
+  const { processType } = useProcessType();
   
   // State management
   const [currentCard, setCurrentCard] = useState(1);
