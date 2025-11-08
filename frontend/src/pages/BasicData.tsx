@@ -65,6 +65,7 @@ interface BasicDataForm {
 const BasicData = () => {
   const { caseId } = useParams();
   const navigate = useNavigate();
+  const { processType, setProcessType } = useProcessType();
   
   const [visaSpecs, setVisaSpecs] = useState<VisaSpecs | null>(null);
   const [formData, setFormData] = useState<BasicDataForm>({
