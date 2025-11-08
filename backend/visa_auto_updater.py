@@ -382,11 +382,11 @@ class VisaAutoUpdater:
         """
         
         try:
-            response = await self.llm_client.chat_async(
-                messages=[{"role": "user", "content": prompt}],
-                model="gpt-4o",
-                max_tokens=500,
-                temperature=0.1
+            # Use correct LlmChat interface with send_message
+            from emergentintegrations.llm.chat import UserMessage
+            
+            response = await self.llm_client.send_message(
+                UserMessage(text=prompt)
             )
             
             # Parse JSON response
