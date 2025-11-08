@@ -63,9 +63,7 @@ const SelectForm = () => {
   }, []);
 
   const handleProcessTypeSelect = (type: 'consular' | 'change_of_status') => {
-    console.log('🎯 SelectForm: handleProcessTypeSelect called with', type);
     setProcessType(type);
-    console.log('✅ SelectForm: setProcessType called, processType should now be', type);
     setShowProcessSelector(false);
   };
 
