@@ -114,16 +114,9 @@ class ProductionVerificationTester:
         self.test_i539_field_validation()
         self.test_i539_pricing_structure()
         
-        # 7. Automated Visa Updates System Testing
-        print("\n🤖 7. AUTOMATED VISA UPDATES SYSTEM TESTING")
-        self.test_admin_visa_updates_pending()
-        self.test_admin_visa_updates_history()
-        self.test_admin_notifications()
-        self.test_admin_visa_updates_manual_scan()
-        self.test_admin_visa_updates_approve()
-        self.test_admin_visa_updates_reject()
-        self.test_visa_updates_database_collections()
-        self.test_visa_updates_edge_cases()
+        # 7. Sistema Híbrido Semi-Automático de Updates de Vistos - TESTE COMPLETO
+        print("\n🤖 7. SISTEMA HÍBRIDO SEMI-AUTOMÁTICO DE UPDATES DE VISTOS - TESTE COMPLETO")
+        self.test_visa_updates_system_complete()
         
         # 8. Completeness Analysis System Testing
         print("\n📊 8. COMPLETENESS ANALYSIS SYSTEM TESTING")
