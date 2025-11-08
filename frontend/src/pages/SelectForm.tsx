@@ -516,7 +516,7 @@ const SelectForm = () => {
         )}
 
         <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
-          {allForms.map((form) => (
+          {uscisforms.map((form) => (
             <div 
               key={form.code}
               className={`bg-white border-2 rounded-lg p-4 sm:p-6 cursor-pointer transition-all hover:shadow-lg ${
