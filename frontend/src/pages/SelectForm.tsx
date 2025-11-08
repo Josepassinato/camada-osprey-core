@@ -508,14 +508,18 @@ const SelectForm = () => {
                     <Clock className="h-3 w-3" />
                     <span>Prazo</span>
                   </div>
-                  <div className="font-medium text-black">{form.processingTime}</div>
+                  <div className="font-medium text-black">
+                    {getVisaDetails(form.code)?.processingTime || form.processingTime}
+                  </div>
                 </div>
                 <div>
                   <div className="flex items-center gap-1 text-black mb-1">
                     <DollarSign className="h-3 w-3" />
                     <span>Taxa USCIS</span>
                   </div>
-                  <div className="font-medium text-black">{form.uscisfee}</div>
+                  <div className="font-medium text-black">
+                    {getVisaDetails(form.code)?.fee || form.uscisfee}
+                  </div>
                 </div>
               </div>
 
