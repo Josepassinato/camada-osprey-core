@@ -68,6 +68,36 @@ const SelectForm = () => {
     setShowProcessSelector(false);
   };
 
+  // Load visa details when processType changes
+  React.useEffect(() => {
+    if (processType) {
+      loadVisaDetails();
+    }
+  }, [processType]);
+
+  const loadVisaDetails = async () => {
+    if (!processType) return;
+    
+    const visaCodes = ['I-539', 'H-1B', 'F-1', 'B-1/B-2', 'I-130', 'O-1'];
+    const detailsMap: Record<string, any> = {};
+    
+    for (const code of visaCodes) {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/api/visa-information/${code}?process_type=${processType}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          detailsMap[code] = data;
+        }
+      } catch (error) {
+        console.error(`Error loading details for ${code}:`, error);
+      }
+    }
+    
+    setVisaDetailsMap(detailsMap);
+  };
+
   const uscisforms: USCISFormType[] = [
     {
       code: 'B-1/B-2',
