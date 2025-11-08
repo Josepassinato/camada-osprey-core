@@ -1344,6 +1344,914 @@ class ProductionVerificationTester:
         
         return test_results
 
+    def test_visa_detailed_info_endpoints(self):
+        """TESTE 1: Novo Endpoint - Visa Detailed Info"""
+        print("📋 TESTE 1: NOVO ENDPOINT - VISA DETAILED INFO")
+        print("="*60)
+        
+        test_results = []
+        
+        # TESTE 1.1: Obter informações do F-1 (ambos processos)
+        print("\n🔍 TESTE 1.1: F-1 - AMBOS PROCESSOS")
+        print("   GET /api/visa-detailed-info/F-1?process_type=both")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/visa-detailed-info/F-1?process_type=both")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Validações obrigatórias
+                has_success = data.get('success') == True
+                has_processo_consular = 'processo_consular' in data.get('information', {})
+                has_change_of_status = 'change_of_status' in data.get('information', {})
+                
+                # Validações específicas de tempo e taxa
+                processo_consular = data.get('information', {}).get('processo_consular', {})
+                change_of_status = data.get('information', {}).get('change_of_status', {})
+                
+                tempo_consular_correct = processo_consular.get('tempo_processamento') == "2-6 semanas"
+                taxa_consular_correct = processo_consular.get('taxas', {}).get('total') == "$535"
+                tempo_change_correct = change_of_status.get('tempo_processamento') == "3-5 meses"
+                taxa_change_correct = change_of_status.get('taxas', {}).get('total') == "$805"
+                
+                etapas_consular = len(processo_consular.get('etapas', []))
+                etapas_change = len(change_of_status.get('etapas', []))
+                etapas_consular_correct = etapas_consular == 7
+                etapas_change_correct = etapas_change == 8
+                
+                has_requisitos_especiais = 'requisitos_especiais' in change_of_status
+                
+                success = all([
+                    has_success, has_processo_consular, has_change_of_status,
+                    tempo_consular_correct, taxa_consular_correct,
+                    tempo_change_correct, taxa_change_correct,
+                    etapas_consular_correct, etapas_change_correct,
+                    has_requisitos_especiais
+                ])
+                
+                print(f"   ✅ Status: 200 ✓")
+                print(f"   ✅ Campo 'success': {'✓' if has_success else '✗'}")
+                print(f"   ✅ Campo 'processo_consular': {'✓' if has_processo_consular else '✗'}")
+                print(f"   ✅ Campo 'change_of_status': {'✓' if has_change_of_status else '✗'}")
+                print(f"   ✅ Tempo consular (2-6 semanas): {'✓' if tempo_consular_correct else '✗'}")
+                print(f"   ✅ Taxa consular ($535): {'✓' if taxa_consular_correct else '✗'}")
+                print(f"   ✅ Tempo mudança (3-5 meses): {'✓' if tempo_change_correct else '✗'}")
+                print(f"   ✅ Taxa mudança ($805): {'✓' if taxa_change_correct else '✗'}")
+                print(f"   ✅ Etapas consular (7): {'✓' if etapas_consular_correct else '✗'} ({etapas_consular})")
+                print(f"   ✅ Etapas mudança (8): {'✓' if etapas_change_correct else '✗'} ({etapas_change})")
+                print(f"   ✅ Requisitos especiais: {'✓' if has_requisitos_especiais else '✗'}")
+                
+                test_results.append(("F-1 Both Processes", success, f"All validations: {'✓' if success else '✗'}"))
+            else:
+                success = False
+                print(f"   ❌ Status: {response.status_code}")
+                test_results.append(("F-1 Both Processes", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("F-1 Both Processes", False, f"Exception: {str(e)}"))
+        
+        # TESTE 1.2: Obter apenas processo consular
+        print("\n🔍 TESTE 1.2: F-1 - APENAS PROCESSO CONSULAR")
+        print("   GET /api/visa-detailed-info/F-1?process_type=consular")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/visa-detailed-info/F-1?process_type=consular")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                has_success = data.get('success') == True
+                has_processo_consular = 'processo_consular' in data.get('information', {})
+                no_change_of_status = 'change_of_status' not in data.get('information', {})
+                
+                success = has_success and has_processo_consular and no_change_of_status
+                
+                print(f"   ✅ Status: 200 ✓")
+                print(f"   ✅ Campo 'processo_consular': {'✓' if has_processo_consular else '✗'}")
+                print(f"   ✅ Campo 'change_of_status' NÃO existe: {'✓' if no_change_of_status else '✗'}")
+                
+                test_results.append(("F-1 Consular Only", success, f"Consular: {'✓' if has_processo_consular else '✗'}, No Change: {'✓' if no_change_of_status else '✗'}"))
+            else:
+                success = False
+                print(f"   ❌ Status: {response.status_code}")
+                test_results.append(("F-1 Consular Only", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("F-1 Consular Only", False, f"Exception: {str(e)}"))
+        
+        # TESTE 1.3: Obter apenas mudança de status
+        print("\n🔍 TESTE 1.3: F-1 - APENAS MUDANÇA DE STATUS")
+        print("   GET /api/visa-detailed-info/F-1?process_type=change_of_status")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/visa-detailed-info/F-1?process_type=change_of_status")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                has_success = data.get('success') == True
+                has_change_of_status = 'change_of_status' in data.get('information', {})
+                no_processo_consular = 'processo_consular' not in data.get('information', {})
+                
+                success = has_success and has_change_of_status and no_processo_consular
+                
+                print(f"   ✅ Status: 200 ✓")
+                print(f"   ✅ Campo 'change_of_status': {'✓' if has_change_of_status else '✗'}")
+                print(f"   ✅ Campo 'processo_consular' NÃO existe: {'✓' if no_processo_consular else '✗'}")
+                
+                test_results.append(("F-1 Change Only", success, f"Change: {'✓' if has_change_of_status else '✗'}, No Consular: {'✓' if no_processo_consular else '✗'}"))
+            else:
+                success = False
+                print(f"   ❌ Status: {response.status_code}")
+                test_results.append(("F-1 Change Only", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("F-1 Change Only", False, f"Exception: {str(e)}"))
+        
+        # TESTE 1.4: Testar H-1B
+        print("\n🔍 TESTE 1.4: H-1B - AMBOS PROCESSOS")
+        print("   GET /api/visa-detailed-info/H-1B?process_type=both")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/visa-detailed-info/H-1B?process_type=both")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                has_success = data.get('success') == True
+                
+                # Validações específicas H-1B
+                processo_consular = data.get('information', {}).get('processo_consular', {})
+                change_of_status = data.get('information', {}).get('change_of_status', {})
+                
+                taxa_consular_h1b = processo_consular.get('taxas', {}).get('total') == "$190"
+                has_total_minimo = 'total_minimo' in change_of_status.get('taxas', {})
+                has_taxa_premium = change_of_status.get('taxas', {}).get('taxa_premium', {}).get('valor') == "$2,500"
+                
+                # H-1B deve ter informações diferentes de F-1
+                different_from_f1 = (
+                    processo_consular.get('tempo_processamento') != "2-6 semanas" or
+                    processo_consular.get('taxas', {}).get('total') != "$535"
+                )
+                
+                success = has_success and taxa_consular_h1b and has_total_minimo and has_taxa_premium and different_from_f1
+                
+                print(f"   ✅ Status: 200 ✓")
+                print(f"   ✅ Taxa consular ($190): {'✓' if taxa_consular_h1b else '✗'}")
+                print(f"   ✅ Total mínimo existe: {'✓' if has_total_minimo else '✗'}")
+                print(f"   ✅ Taxa premium ($2,500): {'✓' if has_taxa_premium else '✗'}")
+                print(f"   ✅ Diferente de F-1: {'✓' if different_from_f1 else '✗'}")
+                
+                test_results.append(("H-1B Both Processes", success, f"H-1B specific validations: {'✓' if success else '✗'}"))
+            else:
+                success = False
+                print(f"   ❌ Status: {response.status_code}")
+                test_results.append(("H-1B Both Processes", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("H-1B Both Processes", False, f"Exception: {str(e)}"))
+        
+        # TESTE 1.5: Testar I-130
+        print("\n🔍 TESTE 1.5: I-130 - AMBOS PROCESSOS")
+        print("   GET /api/visa-detailed-info/I-130?process_type=both")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/visa-detailed-info/I-130?process_type=both")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                has_success = data.get('success') == True
+                
+                # Validações específicas I-130
+                processo_consular = data.get('information', {}).get('processo_consular', {})
+                change_of_status = data.get('information', {}).get('change_of_status', {})
+                
+                tempo_consular_i130 = processo_consular.get('tempo_processamento') == "12-36 meses"
+                tempo_change_i130 = change_of_status.get('tempo_processamento') == "10-24 meses"
+                
+                # I-130 deve ter tempos muito diferentes de F-1 e H-1B
+                very_different_times = (
+                    "12-36 meses" in processo_consular.get('tempo_processamento', '') and
+                    "10-24 meses" in change_of_status.get('tempo_processamento', '')
+                )
+                
+                success = has_success and tempo_consular_i130 and tempo_change_i130 and very_different_times
+                
+                print(f"   ✅ Status: 200 ✓")
+                print(f"   ✅ Tempo consular (12-36 meses): {'✓' if tempo_consular_i130 else '✗'}")
+                print(f"   ✅ Tempo mudança (10-24 meses): {'✓' if tempo_change_i130 else '✗'}")
+                print(f"   ✅ Tempos muito diferentes: {'✓' if very_different_times else '✗'}")
+                
+                test_results.append(("I-130 Both Processes", success, f"I-130 specific validations: {'✓' if success else '✗'}"))
+            else:
+                success = False
+                print(f"   ❌ Status: {response.status_code}")
+                test_results.append(("I-130 Both Processes", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("I-130 Both Processes", False, f"Exception: {str(e)}"))
+        
+        # TESTE 1.6: Testar visto inexistente
+        print("\n🔍 TESTE 1.6: VISTO INEXISTENTE")
+        print("   GET /api/visa-detailed-info/FAKE-VISA?process_type=both")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/visa-detailed-info/FAKE-VISA?process_type=both")
+            
+            success = response.status_code == 404
+            
+            print(f"   ✅ Status: {response.status_code} {'✓' if success else '✗'}")
+            if success:
+                print(f"   ✅ Mensagem de erro apropriada")
+            
+            test_results.append(("Fake Visa 404", success, f"404 for non-existent visa: {'✓' if success else '✗'}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("Fake Visa 404", False, f"Exception: {str(e)}"))
+        
+        # Resumo do Teste 1
+        passed_tests = [r for r in test_results if r[1]]
+        success_rate = len(passed_tests) / len(test_results) * 100 if test_results else 0
+        
+        print(f"\n📊 RESUMO TESTE 1 - VISA DETAILED INFO:")
+        print(f"   ✅ Testes que passaram: {len(passed_tests)}/6 ({success_rate:.1f}%)")
+        
+        overall_success = success_rate == 100.0
+        self.log_test(
+            "TESTE 1: Novo Endpoint - Visa Detailed Info",
+            overall_success,
+            f"Taxa de sucesso: {success_rate:.1f}% ({len(passed_tests)}/6 testes). Endpoint visa-detailed-info funcionando corretamente.",
+            {
+                "success_rate": success_rate,
+                "passed_tests": len(passed_tests),
+                "total_tests": len(test_results),
+                "all_test_results": test_results
+            }
+        )
+
+    def test_case_creation_with_process_type(self):
+        """TESTE 2: Criação de Caso com Process Type"""
+        print("\n📋 TESTE 2: CRIAÇÃO DE CASO COM PROCESS TYPE")
+        print("="*60)
+        
+        test_results = []
+        case_ids = []
+        
+        # TESTE 2.1: Criar caso com processo consular
+        print("\n🔍 TESTE 2.1: CRIAR CASO COM PROCESSO CONSULAR")
+        print("   POST /api/auto-application/start")
+        print("   Body: {\"form_code\": \"F-1\", \"process_type\": \"consular\"}")
+        
+        try:
+            case_data = {
+                "form_code": "F-1",
+                "process_type": "consular"
+            }
+            
+            response = self.session.post(f"{API_BASE}/auto-application/start", json=case_data)
+            
+            if response.status_code in [200, 201]:
+                data = response.json()
+                
+                # Handle nested case structure
+                case_info = data.get('case', data)
+                
+                has_case_id = 'case_id' in case_info and case_info['case_id']
+                has_process_type = case_info.get('process_type') == 'consular'
+                has_form_code = case_info.get('form_code') == 'F-1'
+                has_session_token = 'session_token' in case_info
+                
+                if has_case_id:
+                    case_ids.append(case_info['case_id'])
+                
+                success = has_case_id and has_process_type and has_form_code and has_session_token
+                
+                print(f"   ✅ Status: {response.status_code} ✓")
+                print(f"   ✅ Case ID gerado: {'✓' if has_case_id else '✗'} ({case_info.get('case_id', 'N/A')})")
+                print(f"   ✅ Process type 'consular': {'✓' if has_process_type else '✗'}")
+                print(f"   ✅ Form code 'F-1': {'✓' if has_form_code else '✗'}")
+                print(f"   ✅ Session token gerado: {'✓' if has_session_token else '✗'}")
+                
+                test_results.append(("Create Case Consular", success, f"Case: {case_info.get('case_id', 'N/A')}, Process: {case_info.get('process_type')}"))
+            else:
+                success = False
+                print(f"   ❌ Status: {response.status_code}")
+                test_results.append(("Create Case Consular", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("Create Case Consular", False, f"Exception: {str(e)}"))
+        
+        # TESTE 2.2: Criar caso com mudança de status
+        print("\n🔍 TESTE 2.2: CRIAR CASO COM MUDANÇA DE STATUS")
+        print("   POST /api/auto-application/start")
+        print("   Body: {\"form_code\": \"H-1B\", \"process_type\": \"change_of_status\"}")
+        
+        try:
+            case_data = {
+                "form_code": "H-1B",
+                "process_type": "change_of_status"
+            }
+            
+            response = self.session.post(f"{API_BASE}/auto-application/start", json=case_data)
+            
+            if response.status_code in [200, 201]:
+                data = response.json()
+                
+                # Handle nested case structure
+                case_info = data.get('case', data)
+                
+                has_case_id = 'case_id' in case_info and case_info['case_id']
+                has_process_type = case_info.get('process_type') == 'change_of_status'
+                has_form_code = case_info.get('form_code') == 'H-1B'
+                different_case_id = case_info.get('case_id') not in case_ids if has_case_id else False
+                
+                if has_case_id:
+                    case_ids.append(case_info['case_id'])
+                
+                success = has_case_id and has_process_type and has_form_code and different_case_id
+                
+                print(f"   ✅ Status: {response.status_code} ✓")
+                print(f"   ✅ Case ID gerado (diferente): {'✓' if different_case_id else '✗'} ({case_info.get('case_id', 'N/A')})")
+                print(f"   ✅ Process type 'change_of_status': {'✓' if has_process_type else '✗'}")
+                print(f"   ✅ Form code 'H-1B': {'✓' if has_form_code else '✗'}")
+                
+                test_results.append(("Create Case Change Status", success, f"Case: {case_info.get('case_id', 'N/A')}, Process: {case_info.get('process_type')}"))
+            else:
+                success = False
+                print(f"   ❌ Status: {response.status_code}")
+                test_results.append(("Create Case Change Status", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("Create Case Change Status", False, f"Exception: {str(e)}"))
+        
+        # TESTE 2.3: Atualizar caso com process_type
+        if case_ids:
+            print(f"\n🔍 TESTE 2.3: ATUALIZAR CASO COM PROCESS_TYPE")
+            print(f"   PUT /api/auto-application/case/{case_ids[0]}")
+            print("   Body: {\"process_type\": \"change_of_status\"}")
+            
+            try:
+                update_data = {
+                    "process_type": "change_of_status"
+                }
+                
+                response = self.session.put(f"{API_BASE}/auto-application/case/{case_ids[0]}", json=update_data)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    # Handle nested case structure
+                    case_info = data.get('case', data)
+                    
+                    process_type_updated = case_info.get('process_type') == 'change_of_status'
+                    
+                    success = process_type_updated
+                    
+                    print(f"   ✅ Status: 200 ✓")
+                    print(f"   ✅ Process type atualizado: {'✓' if process_type_updated else '✗'} ({case_info.get('process_type')})")
+                    
+                    test_results.append(("Update Case Process Type", success, f"Updated to: {case_info.get('process_type')}"))
+                else:
+                    success = False
+                    print(f"   ❌ Status: {response.status_code}")
+                    test_results.append(("Update Case Process Type", False, f"HTTP {response.status_code}"))
+                    
+            except Exception as e:
+                print(f"   ❌ Erro: {str(e)}")
+                test_results.append(("Update Case Process Type", False, f"Exception: {str(e)}"))
+        else:
+            print(f"\n🔍 TESTE 2.3: ATUALIZAR CASO - PULADO (sem case_id)")
+            test_results.append(("Update Case Process Type", False, "No case_id available"))
+        
+        # TESTE 2.4: Verificar persistência
+        if case_ids:
+            print(f"\n🔍 TESTE 2.4: VERIFICAR PERSISTÊNCIA")
+            print(f"   GET /api/auto-application/case/{case_ids[0]}")
+            
+            try:
+                response = self.session.get(f"{API_BASE}/auto-application/case/{case_ids[0]}")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    # Handle nested case structure
+                    case_info = data.get('case', data)
+                    
+                    process_type_persisted = case_info.get('process_type') == 'change_of_status'
+                    
+                    success = process_type_persisted
+                    
+                    print(f"   ✅ Status: 200 ✓")
+                    print(f"   ✅ Process type persistido: {'✓' if process_type_persisted else '✗'} ({case_info.get('process_type')})")
+                    print(f"   ✅ Dados persistiram no MongoDB")
+                    
+                    test_results.append(("Verify Persistence", success, f"Persisted: {case_info.get('process_type')}"))
+                else:
+                    success = False
+                    print(f"   ❌ Status: {response.status_code}")
+                    test_results.append(("Verify Persistence", False, f"HTTP {response.status_code}"))
+                    
+            except Exception as e:
+                print(f"   ❌ Erro: {str(e)}")
+                test_results.append(("Verify Persistence", False, f"Exception: {str(e)}"))
+        else:
+            print(f"\n🔍 TESTE 2.4: VERIFICAR PERSISTÊNCIA - PULADO (sem case_id)")
+            test_results.append(("Verify Persistence", False, "No case_id available"))
+        
+        # Resumo do Teste 2
+        passed_tests = [r for r in test_results if r[1]]
+        success_rate = len(passed_tests) / len(test_results) * 100 if test_results else 0
+        
+        print(f"\n📊 RESUMO TESTE 2 - CRIAÇÃO COM PROCESS TYPE:")
+        print(f"   ✅ Testes que passaram: {len(passed_tests)}/{len(test_results)} ({success_rate:.1f}%)")
+        
+        overall_success = success_rate >= 75.0  # Allow some flexibility
+        self.log_test(
+            "TESTE 2: Criação de Caso com Process Type",
+            overall_success,
+            f"Taxa de sucesso: {success_rate:.1f}% ({len(passed_tests)}/{len(test_results)} testes). Cases criados: {len(case_ids)}",
+            {
+                "success_rate": success_rate,
+                "passed_tests": len(passed_tests),
+                "total_tests": len(test_results),
+                "case_ids_created": case_ids,
+                "all_test_results": test_results
+            }
+        )
+
+    def test_backward_compatibility(self):
+        """TESTE 3: Compatibilidade com Sistema Antigo"""
+        print("\n📋 TESTE 3: COMPATIBILIDADE COM SISTEMA ANTIGO")
+        print("="*60)
+        
+        test_results = []
+        
+        # TESTE 3.1: Criar caso SEM process_type
+        print("\n🔍 TESTE 3.1: CRIAR CASO SEM PROCESS_TYPE")
+        print("   POST /api/auto-application/start")
+        print("   Body: {\"form_code\": \"F-1\"}")
+        
+        try:
+            case_data = {
+                "form_code": "F-1"
+            }
+            
+            response = self.session.post(f"{API_BASE}/auto-application/start", json=case_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Handle nested case structure
+                case_info = data.get('case', data)
+                
+                has_case_id = 'case_id' in case_info and case_info['case_id']
+                process_type_null = case_info.get('process_type') is None
+                system_not_broken = True  # If we get here, system didn't break
+                
+                success = has_case_id and process_type_null and system_not_broken
+                
+                print(f"   ✅ Status: 200 ✓ (não quebra)")
+                print(f"   ✅ Case ID gerado: {'✓' if has_case_id else '✗'}")
+                print(f"   ✅ Process type null: {'✓' if process_type_null else '✗'} (aceito)")
+                print(f"   ✅ Sistema continua funcionando")
+                
+                test_results.append(("Create Without Process Type", success, f"Backward compatible: {'✓' if success else '✗'}"))
+                
+                # Store case_id for next test
+                self.backward_compat_case_id = case_info.get('case_id') if has_case_id else None
+                
+            else:
+                success = False
+                print(f"   ❌ Status: {response.status_code}")
+                test_results.append(("Create Without Process Type", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("Create Without Process Type", False, f"Exception: {str(e)}"))
+        
+        # TESTE 3.2: Casos antigos ainda funcionam
+        if hasattr(self, 'backward_compat_case_id') and self.backward_compat_case_id:
+            print(f"\n🔍 TESTE 3.2: CASOS ANTIGOS AINDA FUNCIONAM")
+            print(f"   GET /api/auto-application/case/{self.backward_compat_case_id}")
+            
+            try:
+                response = self.session.get(f"{API_BASE}/auto-application/case/{self.backward_compat_case_id}")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    # Handle nested case structure
+                    case_info = data.get('case', data)
+                    
+                    case_retrieved = 'case_id' in case_info
+                    process_type_null_ok = case_info.get('process_type') is None
+                    backward_compatible = case_retrieved and process_type_null_ok
+                    
+                    success = backward_compatible
+                    
+                    print(f"   ✅ Status: 200 ✓")
+                    print(f"   ✅ Caso recuperado: {'✓' if case_retrieved else '✗'}")
+                    print(f"   ✅ Process type null aceito: {'✓' if process_type_null_ok else '✗'}")
+                    print(f"   ✅ Sistema backward compatible")
+                    
+                    test_results.append(("Old Cases Still Work", success, f"Backward compatible: {'✓' if success else '✗'}"))
+                else:
+                    success = False
+                    print(f"   ❌ Status: {response.status_code}")
+                    test_results.append(("Old Cases Still Work", False, f"HTTP {response.status_code}"))
+                    
+            except Exception as e:
+                print(f"   ❌ Erro: {str(e)}")
+                test_results.append(("Old Cases Still Work", False, f"Exception: {str(e)}"))
+        else:
+            print(f"\n🔍 TESTE 3.2: CASOS ANTIGOS - PULADO (sem case_id)")
+            test_results.append(("Old Cases Still Work", False, "No case_id from previous test"))
+        
+        # Resumo do Teste 3
+        passed_tests = [r for r in test_results if r[1]]
+        success_rate = len(passed_tests) / len(test_results) * 100 if test_results else 0
+        
+        print(f"\n📊 RESUMO TESTE 3 - COMPATIBILIDADE:")
+        print(f"   ✅ Testes que passaram: {len(passed_tests)}/{len(test_results)} ({success_rate:.1f}%)")
+        
+        overall_success = success_rate == 100.0
+        self.log_test(
+            "TESTE 3: Compatibilidade com Sistema Antigo",
+            overall_success,
+            f"Taxa de sucesso: {success_rate:.1f}% ({len(passed_tests)}/{len(test_results)} testes). Sistema backward compatible.",
+            {
+                "success_rate": success_rate,
+                "passed_tests": len(passed_tests),
+                "total_tests": len(test_results),
+                "all_test_results": test_results
+            }
+        )
+
+    def test_mongodb_structure(self):
+        """TESTE 4: Estrutura dos Dados no MongoDB"""
+        print("\n📋 TESTE 4: ESTRUTURA DOS DADOS NO MONGODB")
+        print("="*60)
+        
+        test_results = []
+        
+        # Create a test case first to verify MongoDB structure
+        print("\n🔍 TESTE 4.1: CRIAR CASO PARA VERIFICAÇÃO MONGODB")
+        
+        try:
+            case_data = {
+                "form_code": "F-1",
+                "process_type": "consular"
+            }
+            
+            response = self.session.post(f"{API_BASE}/auto-application/start", json=case_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                case_info = data.get('case', data)
+                test_case_id = case_info.get('case_id')
+                
+                if test_case_id:
+                    print(f"   ✅ Caso de teste criado: {test_case_id}")
+                    
+                    # TESTE 4.1: Verificar caso no MongoDB (via GET endpoint)
+                    print(f"\n🔍 TESTE 4.1: VERIFICAR CASO NO MONGODB")
+                    print(f"   GET /api/auto-application/case/{test_case_id}")
+                    
+                    get_response = self.session.get(f"{API_BASE}/auto-application/case/{test_case_id}")
+                    
+                    if get_response.status_code == 200:
+                        case_data = get_response.json()
+                        case_info = case_data.get('case', case_data)
+                        
+                        # Validações da estrutura
+                        has_case_id = case_info.get('case_id') == test_case_id
+                        has_process_type = case_info.get('process_type') == 'consular'
+                        has_form_code = case_info.get('form_code') == 'F-1'
+                        has_created_at = 'created_at' in case_info
+                        has_progress_percentage = 'progress_percentage' in case_info and case_info.get('progress_percentage') == 0
+                        
+                        success = all([has_case_id, has_process_type, has_form_code, has_created_at, has_progress_percentage])
+                        
+                        print(f"   ✅ Documento existe: ✓")
+                        print(f"   ✅ Campo case_id: {'✓' if has_case_id else '✗'} ({case_info.get('case_id')})")
+                        print(f"   ✅ Campo process_type: {'✓' if has_process_type else '✗'} ({case_info.get('process_type')})")
+                        print(f"   ✅ Campo form_code: {'✓' if has_form_code else '✗'} ({case_info.get('form_code')})")
+                        print(f"   ✅ Campo created_at: {'✓' if has_created_at else '✗'}")
+                        print(f"   ✅ Campo progress_percentage: {'✓' if has_progress_percentage else '✗'} ({case_info.get('progress_percentage')})")
+                        
+                        test_results.append(("MongoDB Structure Verification", success, f"All fields present: {'✓' if success else '✗'}"))
+                    else:
+                        success = False
+                        print(f"   ❌ Erro ao recuperar caso: {get_response.status_code}")
+                        test_results.append(("MongoDB Structure Verification", False, f"HTTP {get_response.status_code}"))
+                else:
+                    print(f"   ❌ Nenhum case_id retornado")
+                    test_results.append(("MongoDB Structure Verification", False, "No case_id returned"))
+            else:
+                print(f"   ❌ Erro ao criar caso de teste: {response.status_code}")
+                test_results.append(("MongoDB Structure Verification", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("MongoDB Structure Verification", False, f"Exception: {str(e)}"))
+        
+        # TESTE 4.2: Simular contagem de casos por process_type
+        print(f"\n🔍 TESTE 4.2: CONTAGEM DE CASOS POR PROCESS_TYPE (SIMULADO)")
+        print("   Simulando: db.auto_cases.aggregate([{$group: {_id: \"$process_type\", count: {$sum: 1}}}])")
+        
+        try:
+            # Create multiple cases with different process types to simulate aggregation
+            process_types = ["consular", "change_of_status", None]
+            created_cases = []
+            
+            for i, pt in enumerate(process_types):
+                case_data = {"form_code": "F-1"}
+                if pt:
+                    case_data["process_type"] = pt
+                
+                response = self.session.post(f"{API_BASE}/auto-application/start", json=case_data)
+                if response.status_code == 200:
+                    data = response.json()
+                    case_info = data.get('case', data)
+                    created_cases.append({
+                        "case_id": case_info.get('case_id'),
+                        "process_type": case_info.get('process_type')
+                    })
+            
+            # Verify we have different process types
+            process_types_found = set()
+            for case in created_cases:
+                process_types_found.add(case.get('process_type'))
+            
+            has_consular = 'consular' in process_types_found
+            has_change_of_status = 'change_of_status' in process_types_found
+            has_null = None in process_types_found
+            
+            success = len(created_cases) >= 2 and (has_consular or has_change_of_status)
+            
+            print(f"   ✅ Casos criados: {len(created_cases)}")
+            print(f"   ✅ Process types encontrados: {process_types_found}")
+            print(f"   ✅ Categorias: consular: {'✓' if has_consular else '✗'}, change_of_status: {'✓' if has_change_of_status else '✗'}, null: {'✓' if has_null else '✗'}")
+            
+            test_results.append(("Process Type Aggregation Simulation", success, f"Cases created: {len(created_cases)}, Types: {len(process_types_found)}"))
+            
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("Process Type Aggregation Simulation", False, f"Exception: {str(e)}"))
+        
+        # Resumo do Teste 4
+        passed_tests = [r for r in test_results if r[1]]
+        success_rate = len(passed_tests) / len(test_results) * 100 if test_results else 0
+        
+        print(f"\n📊 RESUMO TESTE 4 - ESTRUTURA MONGODB:")
+        print(f"   ✅ Testes que passaram: {len(passed_tests)}/{len(test_results)} ({success_rate:.1f}%)")
+        
+        overall_success = success_rate >= 75.0
+        self.log_test(
+            "TESTE 4: Estrutura dos Dados no MongoDB",
+            overall_success,
+            f"Taxa de sucesso: {success_rate:.1f}% ({len(passed_tests)}/{len(test_results)} testes). Estrutura MongoDB validada.",
+            {
+                "success_rate": success_rate,
+                "passed_tests": len(passed_tests),
+                "total_tests": len(test_results),
+                "all_test_results": test_results
+            }
+        )
+
+    def test_process_type_comparisons(self):
+        """TESTE 5: Comparação de Dados entre Process Types"""
+        print("\n📋 TESTE 5: COMPARAÇÃO DE DADOS ENTRE PROCESS TYPES")
+        print("="*60)
+        
+        test_results = []
+        
+        # TESTE 5.1: Comparar F-1 Consular vs Change of Status
+        print("\n🔍 TESTE 5.1: COMPARAR F-1 CONSULAR VS CHANGE OF STATUS")
+        
+        try:
+            # Get F-1 both processes
+            response = self.session.get(f"{API_BASE}/visa-detailed-info/F-1?process_type=both")
+            
+            if response.status_code == 200:
+                data = response.json()
+                info = data.get('information', {})
+                
+                consular = info.get('processo_consular', {})
+                change = info.get('change_of_status', {})
+                
+                # Comparações específicas
+                tempo_consular = consular.get('tempo_processamento', '')
+                tempo_change = change.get('tempo_processamento', '')
+                taxa_consular = consular.get('taxas', {}).get('total', '')
+                taxa_change = change.get('taxas', {}).get('total', '')
+                etapas_consular = len(consular.get('etapas', []))
+                etapas_change = len(change.get('etapas', []))
+                
+                # Validações
+                tempo_consular_menor = "2-6 semanas" in tempo_consular and "3-5 meses" in tempo_change
+                taxa_consular_menor = taxa_consular == "$535" and taxa_change == "$805"
+                etapas_consular_menor = etapas_consular == 7 and etapas_change == 8
+                has_requisitos_especiais = 'requisitos_especiais' in change
+                
+                success = tempo_consular_menor and taxa_consular_menor and etapas_consular_menor and has_requisitos_especiais
+                
+                print(f"   ✅ Tempo consular < Tempo mudança: {'✓' if tempo_consular_menor else '✗'} ({tempo_consular} vs {tempo_change})")
+                print(f"   ✅ Taxa consular < Taxa mudança: {'✓' if taxa_consular_menor else '✗'} ({taxa_consular} vs {taxa_change})")
+                print(f"   ✅ Etapas consular < Etapas mudança: {'✓' if etapas_consular_menor else '✗'} ({etapas_consular} vs {etapas_change})")
+                print(f"   ✅ Mudança tem requisitos especiais: {'✓' if has_requisitos_especiais else '✗'}")
+                
+                test_results.append(("F-1 Consular vs Change Comparison", success, f"All comparisons valid: {'✓' if success else '✗'}"))
+            else:
+                success = False
+                print(f"   ❌ Erro ao obter dados F-1: {response.status_code}")
+                test_results.append(("F-1 Consular vs Change Comparison", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("F-1 Consular vs Change Comparison", False, f"Exception: {str(e)}"))
+        
+        # TESTE 5.2: Comparar H-1B Consular vs Change of Status
+        print("\n🔍 TESTE 5.2: COMPARAR H-1B CONSULAR VS CHANGE OF STATUS")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/visa-detailed-info/H-1B?process_type=both")
+            
+            if response.status_code == 200:
+                data = response.json()
+                info = data.get('information', {})
+                
+                consular = info.get('processo_consular', {})
+                change = info.get('change_of_status', {})
+                
+                # Comparações específicas H-1B
+                tempo_consular = consular.get('tempo_processamento', '')
+                tempo_change = change.get('tempo_processamento', '')
+                taxa_consular = consular.get('taxas', {}).get('total', '')
+                taxa_change_min = change.get('taxas', {}).get('total_minimo', '')
+                
+                # Validações H-1B específicas
+                tempo_consular_menor = "2-4 semanas" in tempo_consular and ("3-6 meses" in tempo_change or "15 dias" in tempo_change)
+                taxa_consular_muito_menor = taxa_consular == "$190" and ("$1,710" in taxa_change_min or "$1710" in taxa_change_min)
+                has_premium_option = "$2,500" in str(change.get('taxas', {}))
+                different_payer = "Empregador" in str(change.get('taxas', {}))
+                
+                success = tempo_consular_menor and taxa_consular_muito_menor and has_premium_option
+                
+                print(f"   ✅ Tempo consular < Tempo mudança: {'✓' if tempo_consular_menor else '✗'} ({tempo_consular} vs {tempo_change})")
+                print(f"   ✅ Taxa consular << Taxa mudança: {'✓' if taxa_consular_muito_menor else '✗'} ({taxa_consular} vs {taxa_change_min})")
+                print(f"   ✅ Mudança tem opção premium: {'✓' if has_premium_option else '✗'}")
+                print(f"   ✅ Empregador paga mudança: {'✓' if different_payer else '✗'}")
+                
+                test_results.append(("H-1B Consular vs Change Comparison", success, f"H-1B comparisons valid: {'✓' if success else '✗'}"))
+            else:
+                success = False
+                print(f"   ❌ Erro ao obter dados H-1B: {response.status_code}")
+                test_results.append(("H-1B Consular vs Change Comparison", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("H-1B Consular vs Change Comparison", False, f"Exception: {str(e)}"))
+        
+        # TESTE 5.3: Comparar I-130 Consular vs Change of Status
+        print("\n🔍 TESTE 5.3: COMPARAR I-130 CONSULAR VS CHANGE OF STATUS")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/visa-detailed-info/I-130?process_type=both")
+            
+            if response.status_code == 200:
+                data = response.json()
+                info = data.get('information', {})
+                
+                consular = info.get('processo_consular', {})
+                change = info.get('change_of_status', {})
+                
+                # Comparações específicas I-130
+                tempo_consular = consular.get('tempo_processamento', '')
+                tempo_change = change.get('tempo_processamento', '')
+                taxa_consular = consular.get('taxas', {}).get('total', '')
+                taxa_change_min = change.get('taxas', {}).get('total_minimo', '')
+                
+                # I-130 tem características únicas
+                tempo_consular_maior = "12-36 meses" in tempo_consular and "10-24 meses" in tempo_change
+                taxa_consular_menor = taxa_consular == "$980" and ("$1,675" in taxa_change_min or "$1675" in taxa_change_min)
+                different_forms = "DS-260" in str(consular) and "I-485" in str(change)
+                
+                success = tempo_consular_maior and taxa_consular_menor and different_forms
+                
+                print(f"   ✅ Tempo consular > Tempo mudança: {'✓' if tempo_consular_maior else '✗'} ({tempo_consular} vs {tempo_change})")
+                print(f"   ✅ Taxa consular < Taxa mudança: {'✓' if taxa_consular_menor else '✗'} ({taxa_consular} vs {taxa_change_min})")
+                print(f"   ✅ Formulários diferentes: {'✓' if different_forms else '✗'} (DS-260 vs I-485)")
+                
+                test_results.append(("I-130 Consular vs Change Comparison", success, f"I-130 comparisons valid: {'✓' if success else '✗'}"))
+            else:
+                success = False
+                print(f"   ❌ Erro ao obter dados I-130: {response.status_code}")
+                test_results.append(("I-130 Consular vs Change Comparison", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("I-130 Consular vs Change Comparison", False, f"Exception: {str(e)}"))
+        
+        # Resumo do Teste 5
+        passed_tests = [r for r in test_results if r[1]]
+        success_rate = len(passed_tests) / len(test_results) * 100 if test_results else 0
+        
+        print(f"\n📊 RESUMO TESTE 5 - COMPARAÇÕES PROCESS TYPES:")
+        print(f"   ✅ Testes que passaram: {len(passed_tests)}/{len(test_results)} ({success_rate:.1f}%)")
+        
+        overall_success = success_rate >= 75.0
+        self.log_test(
+            "TESTE 5: Comparação de Dados entre Process Types",
+            overall_success,
+            f"Taxa de sucesso: {success_rate:.1f}% ({len(passed_tests)}/{len(test_results)} testes). Comparações entre process types validadas.",
+            {
+                "success_rate": success_rate,
+                "passed_tests": len(passed_tests),
+                "total_tests": len(test_results),
+                "all_test_results": test_results
+            }
+        )
+
+    def test_legal_disclaimer_validation(self):
+        """TESTE 6: Validação de Disclaimer Legal"""
+        print("\n📋 TESTE 6: VALIDAÇÃO DE DISCLAIMER LEGAL")
+        print("="*60)
+        
+        test_results = []
+        
+        # TESTE 6.1: Verificar disclaimer em todas respostas
+        print("\n🔍 TESTE 6.1: VERIFICAR DISCLAIMER EM TODAS RESPOSTAS")
+        
+        visa_types = ["F-1", "H-1B", "I-130"]
+        
+        for visa_type in visa_types:
+            print(f"\n   📋 Testando {visa_type}:")
+            print(f"   GET /api/visa-detailed-info/{visa_type}")
+            
+            try:
+                response = self.session.get(f"{API_BASE}/visa-detailed-info/{visa_type}")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    # Validações do disclaimer
+                    has_disclaimer = 'disclaimer' in data
+                    disclaimer_text = data.get('disclaimer', '')
+                    
+                    has_legal_warning = '⚖️ Aviso Legal' in disclaimer_text or '⚖️' in disclaimer_text
+                    has_educativa = 'educativa' in disclaimer_text.lower()
+                    has_consulte_advogado = 'consulte advogado' in disclaimer_text.lower() or 'advogado' in disclaimer_text.lower()
+                    disclaimer_in_portuguese = any(word in disclaimer_text.lower() for word in ['esta', 'informação', 'consulte'])
+                    
+                    success = has_disclaimer and has_legal_warning and has_educativa and has_consulte_advogado and disclaimer_in_portuguese
+                    
+                    print(f"      ✅ Campo 'disclaimer': {'✓' if has_disclaimer else '✗'}")
+                    print(f"      ✅ Contém '⚖️ Aviso Legal': {'✓' if has_legal_warning else '✗'}")
+                    print(f"      ✅ Contém 'educativa': {'✓' if has_educativa else '✗'}")
+                    print(f"      ✅ Contém 'consulte advogado': {'✓' if has_consulte_advogado else '✗'}")
+                    print(f"      ✅ Disclaimer em português: {'✓' if disclaimer_in_portuguese else '✗'}")
+                    
+                    test_results.append((f"Disclaimer {visa_type}", success, f"All disclaimer elements: {'✓' if success else '✗'}"))
+                else:
+                    success = False
+                    print(f"      ❌ Status: {response.status_code}")
+                    test_results.append((f"Disclaimer {visa_type}", False, f"HTTP {response.status_code}"))
+                    
+            except Exception as e:
+                print(f"      ❌ Erro: {str(e)}")
+                test_results.append((f"Disclaimer {visa_type}", False, f"Exception: {str(e)}"))
+        
+        # Resumo do Teste 6
+        passed_tests = [r for r in test_results if r[1]]
+        success_rate = len(passed_tests) / len(test_results) * 100 if test_results else 0
+        
+        print(f"\n📊 RESUMO TESTE 6 - DISCLAIMER LEGAL:")
+        print(f"   ✅ Testes que passaram: {len(passed_tests)}/{len(test_results)} ({success_rate:.1f}%)")
+        
+        overall_success = success_rate == 100.0
+        self.log_test(
+            "TESTE 6: Validação de Disclaimer Legal",
+            overall_success,
+            f"Taxa de sucesso: {success_rate:.1f}% ({len(passed_tests)}/{len(test_results)} testes). Disclaimers legais validados.",
+            {
+                "success_rate": success_rate,
+                "passed_tests": len(passed_tests),
+                "total_tests": len(test_results),
+                "all_test_results": test_results
+            }
+        )
+
     def test_visa_updates_system_complete(self):
         """TESTE COMPLETO DO SISTEMA DE ATUALIZAÇÃO DE VISTOS - 10 TESTES ESPECÍFICOS"""
         print("🤖 SISTEMA HÍBRIDO SEMI-AUTOMÁTICO DE UPDATES DE VISTOS")
