@@ -422,14 +422,12 @@ const SelectForm = () => {
     return icons[category as keyof typeof icons] || '📄';
   };
 
-  // Get visa details based on process type
+  // Get visa details for change of status
   const getVisaDetails = (formCode: string) => {
     const details = visaDetailsMap[formCode];
     if (!details) return null;
     
-    const processKey = processType === 'consular' ? 'processo_consular' : 'change_of_status';
-    const processDetails = details[processKey];
-    
+    const processDetails = details.change_of_status;
     if (!processDetails) return null;
     
     return {
