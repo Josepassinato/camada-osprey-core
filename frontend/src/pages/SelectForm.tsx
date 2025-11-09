@@ -621,8 +621,6 @@ const SelectForm = () => {
         </DialogContent>
       </Dialog>
     </div>
-      )}
-    </>
   );
 };
 
