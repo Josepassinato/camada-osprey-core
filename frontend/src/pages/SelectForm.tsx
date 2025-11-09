@@ -284,14 +284,7 @@ const SelectForm = () => {
     }
   ];
 
-  // Filter forms based on process type
-  const uscisforms = React.useMemo(() => {
-    if (processType === 'change_of_status') {
-      // Remove B-1/B-2 for change of status (only available via consular)
-      return allFormsData.filter(form => form.code !== 'B-1/B-2');
-    }
-    return allFormsData;
-  }, [processType]);
+  // Forms are already filtered for change of status (no B-1/B-2)
 
   const createCase = async (formCode: string) => {
     setIsLoading(true);
