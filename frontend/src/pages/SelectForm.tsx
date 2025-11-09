@@ -72,12 +72,10 @@ const SelectForm = () => {
     setShowProcessSelector(false);
   };
 
-  // Load visa details when processType changes
+  // Load visa details for change of status
   React.useEffect(() => {
-    if (processType) {
-      loadVisaDetails();
-    }
-  }, [processType]);
+    loadVisaDetails();
+  }, []);
 
   const loadVisaDetails = async () => {
     if (!processType) return;
