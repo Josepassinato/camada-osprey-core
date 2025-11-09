@@ -96,26 +96,8 @@ const SelectForm = () => {
     setVisaDetailsMap(detailsMap);
   };
 
-  // Define all available forms
-  const allFormsData: USCISFormType[] = [
-    {
-      code: 'B-1/B-2',
-      title: 'B-1/B-2: Visto de Negócios e Turismo',
-      description: 'Para negócios, turismo, visitas familiares, tratamento médico ou eventos sociais nos EUA',
-      icon: <Plane className="h-6 w-6" />,
-      category: 'Turismo/Negócios',
-      processingTime: '2-4 semanas',
-      uscisfee: '$185',
-      complexity: 'Básico',
-      eligibility: [
-        'B-1: Reuniões de negócios, conferências, treinamentos',
-        'B-2: Turismo, visitas familiares, tratamento médico',
-        'Intenção de retornar ao Brasil',
-        'Vínculos fortes com país de origem',
-        'Recursos financeiros suficientes para a viagem'
-      ],
-      popular: true
-    },
+  // Define all available forms (for people already in USA - change of status only)
+  const uscisforms: USCISFormType[] = [
     {
       code: 'H-1B',
       title: 'H-1B: Trabalhador Especializado',
