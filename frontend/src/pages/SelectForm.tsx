@@ -50,20 +50,9 @@ const SelectForm = () => {
   const [selectedVisaType, setSelectedVisaType] = useState("");
   const [visaDetailsMap, setVisaDetailsMap] = useState<Record<string, any>>({});
 
-  // Clear process type and show selector when component mounts (new application flow)
+  // Set process type to always be "change_of_status" (application is only for people already in USA)
   React.useEffect(() => {
-    // Check if coming from start page (no case ID in URL)
-    const urlParams = new URLSearchParams(window.location.search);
-    const fromStart = !urlParams.has('caseId');
-    
-    if (fromStart) {
-      // Clear any previous process type selection for new applications
-      clearProcessType();
-      setShowProcessSelector(true);
-    } else {
-      // If there's already a process type, don't show selector
-      setShowProcessSelector(!processType);
-    }
+    setProcessType('change_of_status');
   }, []);
 
   // Listen for start application event from VisaRequirements component
