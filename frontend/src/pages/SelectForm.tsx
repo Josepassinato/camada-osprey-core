@@ -87,7 +87,7 @@ const SelectForm = () => {
       try {
         const encodedCode = encodeURIComponent(code);
         const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/visa-detailed-info/${encodedCode}?process_type=${processType}`
+          `${import.meta.env.VITE_BACKEND_URL}/api/visa-detailed-info/${encodedCode}?process_type=change_of_status`
         );
         if (response.ok) {
           const data = await response.json();
