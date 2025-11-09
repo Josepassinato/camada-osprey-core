@@ -426,24 +426,9 @@ const SelectForm = () => {
                   Escolha seu Formulário
                 </h1>
                 <p className="text-sm text-black hidden sm:block">
-                  {processType === 'consular' 
-                    ? 'Processo Consular - Formulários e taxas para aplicação no consulado' 
-                    : 'Mudança de Status - Formulários e taxas para aplicação dentro dos EUA'}
+                  Mudança de Status - Para pessoas já nos Estados Unidos
                 </p>
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {processType === 'consular' ? (
-                <div className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium border-2 border-blue-500">
-                  <Plane className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">Processo Consular</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 bg-orange-100 text-orange-800 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium border-2 border-orange-500">
-                  <Home className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">Mudança de Status</span>
-                </div>
-              )}
             </div>
           </div>
         </div>
