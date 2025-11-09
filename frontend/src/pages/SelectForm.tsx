@@ -408,15 +408,7 @@ const SelectForm = () => {
   };
 
   return (
-    <>
-      {/* Show Process Type Selector first */}
-      {showProcessSelector && (
-        <ProcessTypeSelector onSelect={handleProcessTypeSelect} />
-      )}
-
-      {/* Show Form Selection after process type is chosen */}
-      {!showProcessSelector && (
-        <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white">
       {/* Header - Mobile Optimized */}
       <div className="bg-white border-b border-black">
         <div className="px-4 py-4 sm:py-6">
