@@ -67,11 +67,6 @@ const SelectForm = () => {
     return () => window.removeEventListener('startApplication', handleStartApplication as EventListener);
   }, []);
 
-  const handleProcessTypeSelect = (type: 'consular' | 'change_of_status') => {
-    setProcessType(type);
-    setShowProcessSelector(false);
-  };
-
   // Load visa details for change of status
   React.useEffect(() => {
     loadVisaDetails();
