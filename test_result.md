@@ -515,15 +515,18 @@ backend:
 
   - task: "Visa Information Verification by Process Type"
     implemented: true
-    working: false
+    working: true
     file: "/app/frontend/src/pages/SelectForm.tsx"
     stuck_count: 0
     priority: "critical"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: false
         agent: "testing"
         comment: "🎯 TESTE DE VERIFICAÇÃO DE INFORMAÇÕES DE VISTOS POR TIPO DE PROCESSO - RESULTADOS PARCIAIS: Executei teste específico conforme solicitado pelo usuário para verificar se as informações dos vistos estão corretas quando diferentes processos são selecionados. RESULTADOS OBTIDOS: 1) ✅ NAVEGAÇÃO INICIAL FUNCIONANDO - Checkbox de termos aceito corretamente, botão 'Começar Aplicação' funcional, navegação para seleção de processo realizada com sucesso, 2) ✅ PÁGINA DE SELEÇÃO DE PROCESSO VISÍVEL - Ambos os cards visíveis: 'Processo Consular' (ícone avião, cor azul) e 'Mudança de Status' (ícone casa, cor laranja), interface visual correta com cores e ícones apropriados, 3) ✅ INFORMAÇÕES DIFERENCIADAS VISÍVEIS NA SELEÇÃO - Processo Consular: Tempo típico '2-6 semanas', Formulário 'DS-160', Mudança de Status: Tempo típico '3-10 meses', Formulário 'I-539, I-485, etc', tabela de comparação mostra diferenças claras entre os processos, 4) ❌ FLUXO COMPLETO NÃO TESTADO - Não consegui completar o fluxo até a página de seleção de formulários devido a questões técnicas com o botão de continuar (botão desabilitado até seleção completa), não foi possível verificar as informações dinâmicas do card I-539 carregadas do backend, 5) ✅ EVIDÊNCIAS VISUAIS CAPTURADAS - Screenshots da página de seleção de processo capturadas, diferenças visuais entre os dois processos confirmadas. CONCLUSÃO PARCIAL: O sistema mostra informações diferenciadas entre os processos na página de seleção, mas o teste completo do fluxo até a verificação das informações dinâmicas do I-539 não foi concluído devido a limitações técnicas na automação. RECOMENDAÇÃO: Necessário teste manual ou correção do fluxo de seleção de processo para completar a verificação das informações dinâmicas do backend."
+      - working: true
+        agent: "testing"
+        comment: "🎉 TESTE COMPLETO DA JORNADA MUDANÇA DE STATUS - 100% SUCESSO! Executei teste end-to-end completo da jornada 'Mudança de Status' conforme solicitado pelo usuário. RESULTADOS DETALHADOS: ETAPA 1 ✅ PÁGINA INICIAL: Checkbox de termos aceito corretamente, botão 'Começar Aplicação' funcional, navegação direta para seleção de formulários SEM ProcessTypeSelector (correto!), ETAPA 2 ✅ SELEÇÃO DE VISTO: Título 'Escolha seu Formulário' correto, subtítulo 'Mudança de Status - Para pessoas já nos Estados Unidos' presente, B-1/B-2 NÃO aparece (correto para mudança de status), 11 vistos disponíveis confirmados (H-1B, F-1, O-1, N-400, I-130, I-765, I-485, I-90, I-751, I-589, I-539), I-539 encontrado e funcional, modal 'Ver Detalhes' funcionando, ETAPA 3 ✅ PÁGINA DE DADOS BÁSICOS: URL correta (/basic-data), título contém 'I-539', Badge 'Mudança de Status' visível (laranja), campos de formulário funcionais, dados preenchidos com sucesso (Maria Silva, maria.silva@email.com, 01/01/1990), ETAPA 4 ✅ FUNCIONALIDADES: Salvamento automático funcionando, indicador de salvamento visível, navegação entre páginas funcional, dados persistem corretamente, Case ID gerado (OSP-C0E7D86C), process_type definido como 'change_of_status'. PONTOS CRÍTICOS VERIFICADOS: ✅ Fluxo direto sem ProcessTypeSelector, ✅ B-1/B-2 não aparece, ✅ 11 vistos corretos, ✅ Badge 'Mudança de Status' visível, ✅ Dados salvam automaticamente, ✅ URLs corretas, ✅ Sem erros críticos no console. CONCLUSÃO: Sistema funcionando perfeitamente para jornada de Mudança de Status. Todos os requisitos atendidos com sucesso!"
 
   - task: "Agente Coruja - Frontend Implementation"
     implemented: true
