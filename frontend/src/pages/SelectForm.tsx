@@ -48,7 +48,6 @@ const SelectForm = () => {
   const [error, setError] = useState("");
   const [showRequirements, setShowRequirements] = useState(false);
   const [selectedVisaType, setSelectedVisaType] = useState("");
-  const [showProcessSelector, setShowProcessSelector] = useState(true);
   const [visaDetailsMap, setVisaDetailsMap] = useState<Record<string, any>>({});
 
   // Clear process type and show selector when component mounts (new application flow)
