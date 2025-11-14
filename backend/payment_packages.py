@@ -258,3 +258,32 @@ def validate_visa_code(visa_code: str) -> bool:
         True se existe, False caso contrário
     """
     return visa_code in VISA_PACKAGES
+
+
+def calculate_final_price(visa_code: str, discount_percentage: float = 0.0) -> Dict:
+    """
+    Calcula preço final com desconto aplicado
+    
+    Args:
+        visa_code: Código do visto
+        discount_percentage: Porcentagem de desconto (0-100)
+    
+    Returns:
+        Dict com preço original, desconto e preço final
+    """
+    if visa_code not in VISA_PACKAGES:
+        raise ValueError(f"Visto {visa_code} não encontrado")
+    
+    original_price = VISA_PACKAGES[visa_code]["price"]
+    discount_amount = (original_price * discount_percentage) / 100.0
+    final_price = original_price - discount_amount
+    
+    return {
+        "visa_code": visa_code,
+        "visa_name": VISA_PACKAGES[visa_code]["name"],
+        "original_price": round(original_price, 2),
+        "discount_percentage": discount_percentage,
+        "discount_amount": round(discount_amount, 2),
+        "final_price": round(final_price, 2),
+        "savings": round(discount_amount, 2)
+    }
