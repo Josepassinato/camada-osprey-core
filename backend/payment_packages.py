@@ -178,6 +178,45 @@ VISA_PACKAGES = {
             "Carta com informações de taxas",
             "Acesso vitalício ao formulário salvo"
         ]
+    },
+    
+    # Categoria Premium - Vistos de Alto Valor
+    "EB-2 NIW": {
+        "name": "EB-2 NIW (National Interest Waiver)",
+        "price": 2500.00,
+        "category": "premium",
+        "category_name": "Premium",
+        "description": "Green Card por interesse nacional - Profissionais de alto nível",
+        "includes": [
+            "Formulário I-140 completo preenchido em PDF",
+            "Análise de elegibilidade detalhada",
+            "Estratégia de evidências personalizada",
+            "Checklist de documentação especializada",
+            "Guia de cartas de recomendação",
+            "Orientações sobre comprovação de interesse nacional",
+            "Instruções de envio ao USCIS",
+            "Carta com informações de taxas",
+            "Acesso vitalício ao formulário salvo"
+        ]
+    },
+    "EB-1A": {
+        "name": "EB-1A (Extraordinary Ability)",
+        "price": 3000.00,
+        "category": "premium",
+        "category_name": "Premium",
+        "description": "Green Card para pessoas com habilidade extraordinária",
+        "includes": [
+            "Formulário I-140 completo preenchido em PDF",
+            "Análise profunda dos 10 critérios EB-1A",
+            "Estratégia de evidências personalizada",
+            "Checklist de documentação avançada",
+            "Guia completo de cartas de recomendação",
+            "Orientações sobre prêmios e reconhecimentos",
+            "Análise de publicações e contribuições",
+            "Instruções de envio ao USCIS",
+            "Carta com informações de taxas",
+            "Acesso vitalício ao formulário salvo"
+        ]
     }
 }
 
