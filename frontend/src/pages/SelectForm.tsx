@@ -23,6 +23,7 @@ import {
   Star,
   CheckCircle,
   Plane,
+  Shield,
   Info
 } from "lucide-react";
 
