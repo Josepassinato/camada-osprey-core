@@ -277,7 +277,8 @@ const SelectForm = () => {
           console.log('✅ Form code verified:', data.case.form_code);
           // Store case ID for anonymous access
           localStorage.setItem('osprey_current_case_id', data.case.case_id);
-          navigate(`/auto-application/case/${data.case.case_id}/basic-data`);
+          // Redirect to payment page
+          navigate(`/payment?visa_code=${formCode}&case_id=${data.case.case_id}`);
         } else {
           console.error('❌ Form code mismatch!', {
             expected: formCode,
