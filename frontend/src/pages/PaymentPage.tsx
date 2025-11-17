@@ -63,15 +63,15 @@ const PaymentPage: React.FC = () => {
       setLoading(true);
       console.log(`📦 Loading package info for: ${visaCode}`);
       
-      const response = await makeApiCall(`/packages/${visaCode}`, 'GET');
-      console.log('📦 Package response:', response);
+      const data = await makeApiCall(`/packages/${visaCode}`, 'GET');
+      console.log('📦 Package data:', data);
       
-      if (response.success) {
-        setPackageInfo(response.package);
-        setPriceInfo(response.price_info);
+      if (data.success) {
+        setPackageInfo(data.package);
+        setPriceInfo(data.price_info);
         console.log('✅ Package info loaded successfully');
       } else {
-        console.error('❌ Package response error:', response);
+        console.error('❌ Package data error:', data);
         setError('Erro ao carregar informações do pacote');
       }
     } catch (err: any) {
