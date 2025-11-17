@@ -586,8 +586,22 @@ const BasicData = () => {
               <div className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">
+                    <label className="block text-sm font-medium text-black mb-2 flex items-center gap-2">
                       A-Number (se aplicável)
+                      <HelpTooltip
+                        title="O que é A-Number?"
+                        content={[
+                          "A-Number (Alien Registration Number) é um número único de 7-9 dígitos dado pelo USCIS.",
+                          "Você tem A-Number se já aplicou para visto de imigrante, Green Card, ou trabalho nos EUA.",
+                          "Deixe em branco se nunca recebeu um A-Number."
+                        ]}
+                        examples={[
+                          "A123456789 (9 dígitos)",
+                          "A12345678 (8 dígitos)",
+                          "Deixe vazio se não tiver"
+                        ]}
+                        size="sm"
+                      />
                     </label>
                     <input
                       type="text"
@@ -598,8 +612,21 @@ const BasicData = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">
+                    <label className="block text-sm font-medium text-black mb-2 flex items-center gap-2">
                       SSN (se aplicável)
+                      <HelpTooltip
+                        title="Social Security Number"
+                        content={[
+                          "O SSN é um número de 9 dígitos usado para impostos e emprego nos EUA.",
+                          "Você tem SSN se trabalhou legalmente nos EUA ou tem permissão de trabalho.",
+                          "Deixe em branco se não tiver SSN."
+                        ]}
+                        examples={[
+                          "123-45-6789",
+                          "Deixe vazio se não tiver"
+                        ]}
+                        size="sm"
+                      />
                     </label>
                     <input
                       type="text"
@@ -613,8 +640,22 @@ const BasicData = () => {
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">
+                    <label className="block text-sm font-medium text-black mb-2 flex items-center gap-2">
                       Status Atual nos EUA
+                      <HelpTooltip
+                        title="Status de Imigração Atual"
+                        content={[
+                          "Informe qual é seu status legal atual nos Estados Unidos.",
+                          "Este é o tipo de visto ou autorização que você tem atualmente."
+                        ]}
+                        examples={[
+                          "B-1/B-2 (Turista)",
+                          "F-1 (Estudante)",
+                          "H-1B (Trabalho)",
+                          "Green Card (Residente Permanente)"
+                        ]}
+                        size="sm"
+                      />
                     </label>
                     <input
                       type="text"
@@ -625,8 +666,22 @@ const BasicData = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">
+                    <label className="block text-sm font-medium text-black mb-2 flex items-center gap-2">
                       Expiração do Status
+                      <HelpTooltip
+                        title="Data de Expiração"
+                        content={[
+                          "Informe a data até quando seu status atual é válido.",
+                          "Esta data aparece no seu I-94 ou documento de autorização.",
+                          "Se seu I-94 diz 'D/S' (Duration of Status), use a data de validade do seu visto ou I-20."
+                        ]}
+                        examples={[
+                          "Veja seu I-94 online em: i94.cbp.dhs.gov",
+                          "Para F-1: data no seu I-20",
+                          "Para B-1/B-2: data no carimbo do passaporte"
+                        ]}
+                        size="sm"
+                      />
                     </label>
                     <input
                       type="date"
