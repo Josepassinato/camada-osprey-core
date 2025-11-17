@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import ProactiveAlertsDisplay from "@/components/ProactiveAlertsDisplay";
 import SaveAndContinueModal from "@/components/SaveAndContinueModal";
 import ProcessTypeBadge from "@/components/ProcessTypeBadge";
+import FeedbackPanel, { FeedbackItem } from "@/components/ui/FeedbackPanel";
+import HelpTooltip from "@/components/ui/HelpTooltip";
 import { useFormSnapshot } from "@/hooks/useFormSnapshot";
 import { useSessionManager } from "@/hooks/useSessionManager";
 import { useProcessType } from "@/contexts/ProcessTypeContext";
