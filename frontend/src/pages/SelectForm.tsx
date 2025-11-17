@@ -97,7 +97,7 @@ const SelectForm = () => {
   };
 
   // Define all available forms (for people already in USA - change of status only)
-  // LANÇAMENTO: Apenas 4 vistos principais para começar
+  // LANÇAMENTO: 7 vistos para venda + 1 sob consulta
   const uscisforms: USCISFormType[] = [
     {
       code: 'I-539',
@@ -151,9 +151,75 @@ const SelectForm = () => {
       popular: true
     },
     {
+      code: 'I-765',
+      title: 'I-765: Autorização de Trabalho (EAD)',
+      description: 'Para obter autorização de trabalho nos Estados Unidos',
+      icon: <Briefcase className="h-6 w-6" />,
+      category: 'Trabalho',
+      processingTime: '3-8 meses',
+      uscisfee: '$410 + $85',
+      complexity: 'Básico',
+      eligibility: [
+        'Status elegível para EAD (asylum, OPT, ajuste de status, etc)',
+        'Documentação do status atual',
+        'Formulário I-94 válido',
+        'Motivo válido para autorização de trabalho'
+      ]
+    },
+    {
+      code: 'I-90',
+      title: 'I-90: Renovação de Green Card',
+      description: 'Para renovar ou substituir seu Green Card',
+      icon: <CreditCard className="h-6 w-6" />,
+      category: 'Green Card',
+      processingTime: '8-12 meses',
+      uscisfee: '$455 + $85',
+      complexity: 'Básico',
+      eligibility: [
+        'Green Card expirado ou expirando em 6 meses',
+        'Green Card perdido, roubado ou danificado',
+        'Mudança de nome ou informações',
+        'Green Card emitido antes dos 14 anos (para atualizar)'
+      ]
+    },
+    {
+      code: 'EB-2 NIW',
+      title: 'EB-2 NIW: Green Card por Interesse Nacional',
+      description: 'Para profissionais altamente qualificados com mestrado ou superior',
+      icon: <Star className="h-6 w-6" />,
+      category: 'Green Card Premium',
+      processingTime: '12-18 meses',
+      uscisfee: '$700 + $85',
+      complexity: 'Avançado',
+      eligibility: [
+        'Mestrado ou superior (ou bacharelado + 5 anos de experiência)',
+        'Trabalho de interesse substancial para os EUA',
+        'Evidências de contribuições significativas',
+        'Dispensar oferta de emprego e certificação trabalhista'
+      ],
+      popular: true
+    },
+    {
+      code: 'EB-1A',
+      title: 'EB-1A: Habilidade Extraordinária',
+      description: 'Para pessoas com habilidade extraordinária reconhecida nacionalmente/internacionalmente',
+      icon: <Star className="h-6 w-6" />,
+      category: 'Green Card Premium',
+      processingTime: '8-12 meses',
+      uscisfee: '$700 + $85',
+      complexity: 'Avançado',
+      eligibility: [
+        'Reconhecimento nacional ou internacional',
+        'Atender 3 de 10 critérios EB-1A',
+        'Prêmios, publicações, contribuições importantes',
+        'Não necessita patrocinador ou oferta de emprego'
+      ],
+      popular: true
+    },
+    {
       code: 'I-589',
       title: 'I-589: Pedido de Asilo',
-      description: 'Para pessoas que buscam proteção nos EUA devido a perseguição',
+      description: 'SOB CONSULTA - Caso complexo que requer avaliação individual',
       icon: <Shield className="h-6 w-6" />,
       category: 'Proteção',
       processingTime: '2-7 anos',
@@ -164,8 +230,7 @@ const SelectForm = () => {
         'Baseado em raça, religião, nacionalidade, opinião política ou grupo social',
         'Aplicar dentro de 1 ano da chegada aos EUA',
         'Evidências de perseguição no país de origem'
-      ],
-      popular: true
+      ]
     }
     
     /* 
@@ -174,7 +239,7 @@ const SelectForm = () => {
     Serão reativados após lançamento inicial
     ============================================================
     
-    Demais vistos: H-1B, O-1, N-400, I-765, I-485, I-90, I-751
+    Demais vistos: H-1B, O-1, N-400, I-485, I-751
     FIM DOS VISTOS DESATIVADOS 
     ============================================================
     */
