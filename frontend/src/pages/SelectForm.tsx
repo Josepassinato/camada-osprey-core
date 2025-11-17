@@ -73,8 +73,8 @@ const SelectForm = () => {
   }, []);
 
   const loadVisaDetails = async () => {
-    // Only load visas available for change of status (people already in USA)
-    const visaCodes = ['I-539', 'H-1B', 'F-1', 'I-130', 'O-1', 'N-400', 'I-765', 'I-485', 'I-90', 'I-751', 'I-589'];
+    // Only load visas for LAUNCH (4 main visas)
+    const visaCodes = ['I-539', 'F-1', 'I-130', 'I-589'];
     
     const detailsMap: Record<string, any> = {};
     
