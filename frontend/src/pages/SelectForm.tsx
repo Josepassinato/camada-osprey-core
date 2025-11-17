@@ -96,7 +96,99 @@ const SelectForm = () => {
   };
 
   // Define all available forms (for people already in USA - change of status only)
+  // LANÇAMENTO: Apenas 4 vistos principais para começar
   const uscisforms: USCISFormType[] = [
+    {
+      code: 'I-539',
+      title: 'I-539: Extensão de Turista',
+      description: 'Para estender sua permanência como turista (B-1/B-2) nos Estados Unidos',
+      icon: <Plane className="h-6 w-6" />,
+      category: 'Turismo',
+      processingTime: '6-10 meses',
+      uscisfee: '$370 + $85',
+      complexity: 'Básico',
+      eligibility: [
+        'Atualmente nos EUA com visto de turista válido',
+        'Razão válida para extensão',
+        'Meios financeiros suficientes',
+        'Não trabalhar durante extensão'
+      ],
+      popular: true
+    },
+    {
+      code: 'F-1',
+      title: 'F-1: Visto de Estudante',
+      description: 'Para estudos acadêmicos em instituições americanas aprovadas',
+      icon: <GraduationCap className="h-6 w-6" />,
+      category: 'Educação',
+      processingTime: '3-5 meses',
+      uscisfee: '$370 + $350',
+      complexity: 'Intermediário',
+      eligibility: [
+        'Aceito em instituição aprovada pelo SEVP',
+        'Programa acadêmico ou de idiomas',
+        'Recursos financeiros para estudos',
+        'Intenção de retornar após estudos'
+      ],
+      popular: true
+    },
+    {
+      code: 'I-130',
+      title: 'I-130: Petição para Familiar (Casamento)',
+      description: 'Para petição de cônjuge ou familiar imediato para Green Card',
+      icon: <Heart className="h-6 w-6" />,
+      category: 'Família',
+      processingTime: '10-24 meses',
+      uscisfee: '$535',
+      complexity: 'Intermediário',
+      eligibility: [
+        'Peticionário cidadão americano ou residente permanente',
+        'Relação familiar qualificante (cônjuge, filho, pai/mãe)',
+        'Evidências de relacionamento genuíno',
+        'Capacidade financeira do peticionário'
+      ],
+      popular: true
+    },
+    {
+      code: 'I-589',
+      title: 'I-589: Pedido de Asilo',
+      description: 'Para pessoas que buscam proteção nos EUA devido a perseguição',
+      icon: <Shield className="h-6 w-6" />,
+      category: 'Proteção',
+      processingTime: '2-7 anos',
+      uscisfee: '$0 (Gratuito)',
+      complexity: 'Especial',
+      eligibility: [
+        'Perseguição ou medo fundamentado de perseguição',
+        'Baseado em raça, religião, nacionalidade, opinião política ou grupo social',
+        'Aplicar dentro de 1 ano da chegada aos EUA',
+        'Evidências de perseguição no país de origem'
+      ],
+      popular: true
+    }
+    
+    /* 
+    ============================================================
+    VISTOS DESATIVADOS TEMPORARIAMENTE PARA LANÇAMENTO
+    Serão reativados gradualmente após validação inicial
+    ============================================================
+    
+    Categoria Avançada ($1,400):
+    - H-1B: Trabalho Especializado
+    - O-1: Habilidade Extraordinária
+    - I-485: Ajuste de Status (Green Card)
+    
+    Categoria Básica/Especial ($299-$800):
+    - I-765: Autorização de Trabalho (EAD)
+    - I-90: Renovação de Green Card
+    - I-751: Remoção de Condições
+    - N-400: Cidadania Americana
+    
+    Para reativar: basta descomentar as seções abaixo
+    ============================================================
+    */
+    
+    /* DESATIVADO - H-1B
     {
       code: 'H-1B',
       title: 'H-1B: Trabalhador Especializado',
