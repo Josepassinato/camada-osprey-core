@@ -43,20 +43,14 @@ const AutoApplicationStart = () => {
       
       console.log('🔘 Session token generated:', sessionToken);
       
-      // Use utility function for robust API call
-      const response = await makeApiCall('/auto-application/start', {
-        method: 'POST',
-        body: JSON.stringify({
-          session_token: sessionToken
-        }),
+      // Use utility function for robust API call - now returns JSON directly
+      const data = await makeApiCall('/auto-application/start', 'POST', {
+        session_token: sessionToken
       });
 
-      console.log('🔘 Response status:', response.status);
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('🔘 Response data:', data);
-        
+      console.log('🔘 Response data:', data);
+      
+      if (data && data.case && data.case.case_id) {
         // Store case ID for anonymous access and form selection
         localStorage.setItem('osprey_current_case_id', data.case.case_id);
         
@@ -66,9 +60,8 @@ const AutoApplicationStart = () => {
           state: { caseId: data.case.case_id, sessionToken } 
         });
       } else {
-        const errorText = await response.text();
-        console.error('🔘 Response error:', errorText);
-        throw new Error(`Falha ao criar aplicação: ${response.status} - ${errorText}`);
+        console.error('🔘 Invalid response data:', data);
+        throw new Error('Resposta inválida do servidor');
       }
     } catch (error) {
       console.error('🔘 Error starting application:', error);
