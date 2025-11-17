@@ -491,27 +491,39 @@ const SelectForm = () => {
                   <Info className="h-3 w-3 mr-1" />
                   Ver Detalhes
                 </Button>
-                <Button 
-                  className={`text-xs ${
-                    selectedForm === form.code 
-                      ? 'bg-black text-white hover:bg-gray-800' 
-                      : 'bg-white border border-black text-black hover:bg-gray-50'
-                  }`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    createCase(form.code);
-                  }}
-                  disabled={isLoading && selectedForm === form.code}
-                >
-                  {isLoading && selectedForm === form.code ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  ) : (
-                    <>
-                      Começar
-                      <ArrowRight className="h-3 w-3 ml-1" />
-                    </>
-                  )}
-                </Button>
+                {form.code === 'I-589' ? (
+                  <Button 
+                    className="text-xs bg-black text-white hover:bg-gray-800"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.location.href = 'mailto:contato@agentecorujalaw.com?subject=Consulta sobre Asilo (I-589)&body=Olá, gostaria de mais informações sobre o processo de asilo (I-589).';
+                    }}
+                  >
+                    Solicitar Consulta
+                  </Button>
+                ) : (
+                  <Button 
+                    className={`text-xs ${
+                      selectedForm === form.code 
+                        ? 'bg-black text-white hover:bg-gray-800' 
+                        : 'bg-white border border-black text-black hover:bg-gray-50'
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      createCase(form.code);
+                    }}
+                    disabled={isLoading && selectedForm === form.code}
+                  >
+                    {isLoading && selectedForm === form.code ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    ) : (
+                      <>
+                        Começar
+                        <ArrowRight className="h-3 w-3 ml-1" />
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
             </div>
           ))}
