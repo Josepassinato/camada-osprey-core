@@ -437,8 +437,17 @@ const BasicData = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">
+                    <label className="block text-sm font-medium text-black mb-2 flex items-center gap-2">
                       Data de Nascimento <span className="text-black">*</span>
+                      <HelpTooltip
+                        title="Data de Nascimento"
+                        content="Use a data exatamente como aparece no seu passaporte. Esta informação deve ser consistente em todos os documentos."
+                        examples={[
+                          "Se seu passaporte diz 15/03/1990, use esta data",
+                          "Verifique se dia, mês e ano estão corretos"
+                        ]}
+                        size="sm"
+                      />
                     </label>
                     <input
                       type="date"
