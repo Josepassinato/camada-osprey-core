@@ -8631,11 +8631,6 @@ async def shutdown_db_client():
 # PAYMENT ENDPOINTS - STRIPE INTEGRATION
 # ============================================================================
 
-from payment_packages import get_visa_package, get_all_packages, calculate_final_price
-from voucher_system import validate_voucher, get_all_active_vouchers
-from stripe_integration import create_checkout_session, verify_payment_status, handle_stripe_webhook
-
-
 @api_router.post("/payment/create-checkout")
 async def create_payment_checkout(request: Request):
     """
