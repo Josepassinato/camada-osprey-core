@@ -62,25 +62,14 @@ class ProductionVerificationTester:
         print()
     
     def run_production_verification(self):
-        """Execute COMPREHENSIVE TESTING - PROCESS TYPE AND VISA DETAILED INFO"""
-        print("🚀 TESTE COMPLETO - SELEÇÃO DE TIPO DE PROCESSO E INFORMAÇÕES DETALHADAS")
-        print("🎯 OBJETIVO: Validar todas as novas funcionalidades implementadas para diferenciação entre Processo Consular e Mudança de Status")
+        """Execute COMPREHENSIVE TESTING - STRIPE PAYMENT SYSTEM"""
+        print("🚀 TESTE COMPLETO - SISTEMA DE PAGAMENTO STRIPE INTEGRADO")
+        print("🎯 OBJETIVO: Testar TODOS os endpoints de pagamento do backend - Sistema Stripe Integrado")
         print("="*80)
         
-        # PARTE 1: TESTES DO BACKEND
-        print("\n🔥 PARTE 1: TESTES DO BACKEND")
-        self.test_visa_detailed_info_endpoints()
-        self.test_case_creation_with_process_type()
-        self.test_backward_compatibility()
-        
-        # PARTE 2: VALIDAÇÕES DO MONGODB
-        print("\n🔥 PARTE 2: VALIDAÇÕES DO MONGODB")
-        self.test_mongodb_structure()
-        
-        # PARTE 3: COMPARAÇÕES E VALIDAÇÕES
-        print("\n🔥 PARTE 3: COMPARAÇÕES E VALIDAÇÕES")
-        self.test_process_type_comparisons()
-        self.test_legal_disclaimer_validation()
+        # TESTE COMPLETO DO SISTEMA DE PAGAMENTO
+        print("\n💳 SISTEMA DE PAGAMENTO STRIPE - TESTE COMPLETO")
+        self.test_stripe_payment_system_complete()
         
         # Final Summary
         self.print_production_verification_summary()
