@@ -93,27 +93,27 @@ const PaymentPage: React.FC = () => {
     setError('');
 
     try {
-      const response = await makeApiCall(
+      const data = await makeApiCall(
         `/vouchers/validate/${voucherCode}?visa_code=${visaCode}`,
         'GET'
       );
 
-      if (response.valid) {
+      if (data.valid) {
         setVoucherApplied(true);
-        setVoucherMessage(response.message);
+        setVoucherMessage(data.message);
         
         // Recarregar preço com voucher
-        const priceResponse = await makeApiCall(
+        const priceData = await makeApiCall(
           `/packages/${visaCode}?voucher_code=${voucherCode}`,
           'GET'
         );
         
-        if (priceResponse.success) {
-          setPriceInfo(priceResponse.price_info);
+        if (priceData.success) {
+          setPriceInfo(priceData.price_info);
         }
       } else {
         setVoucherApplied(false);
-        setVoucherMessage(response.message || 'Voucher inválido');
+        setVoucherMessage(data.message || 'Voucher inválido');
       }
     } catch (err: any) {
       setVoucherMessage(err.message || 'Erro ao validar voucher');
