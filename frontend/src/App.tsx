@@ -79,6 +79,10 @@ const App = () => (
           <Route path="/auto-application/case/:caseId/review" element={<VisualReview />} />
           <Route path="/auto-application/case/:caseId/payment" element={<PaymentAndDownload />} />
           <Route path="/auto-application/case/:caseId/finalize" element={<CaseFinalizer />} />
+          {/* Payment Routes */}
+          <Route path="/payment" element={<PaymentPage />} />
+          <Route path="/payment/success" element={<PaymentSuccess />} />
+          <Route path="/payment/cancel" element={<PaymentCancel />} />
           {/* Owl Agent Routes */}
           <Route path="/owl-agent" element={<OwlAgent />} />
           <Route path="/owl-agent/questionnaire" element={<OwlQuestionnairePage />} />
