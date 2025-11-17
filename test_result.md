@@ -1125,8 +1125,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Visa Information Verification by Process Type"
-    - "Agente Coruja - Frontend Implementation"
+    - "Stripe Payment System - Complete Backend Testing"
   stuck_tasks:
     - "Agente Coruja - Frontend Implementation"
   test_all: false
