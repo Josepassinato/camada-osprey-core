@@ -73,8 +73,8 @@ const SelectForm = () => {
   }, []);
 
   const loadVisaDetails = async () => {
-    // Only load visas for LAUNCH (4 main visas)
-    const visaCodes = ['I-539', 'F-1', 'I-130', 'I-589'];
+    // Load visas for LAUNCH - 7 vistos + 1 sob consulta
+    const visaCodes = ['I-539', 'F-1', 'I-130', 'I-765', 'I-90', 'EB-2 NIW', 'EB-1A', 'I-589'];
     
     const detailsMap: Record<string, any> = {};
     
