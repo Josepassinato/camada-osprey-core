@@ -8643,7 +8643,7 @@ async def create_payment_checkout(request: Request):
             voucher_code=voucher_code if voucher_code else None,
             success_url=success_url,
             cancel_url=cancel_url,
-            db=db
+            db=None  # Passar None ao invés de db para evitar erro de comparação
         )
         
         if not result.get('success'):
