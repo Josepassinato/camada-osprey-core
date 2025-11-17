@@ -8487,7 +8487,6 @@ async def get_alerts_summary(case_id: str):
 
 # ===== END PROACTIVE ALERTS SYSTEM =====
 
-app.include_router(api_router)
 
 app.add_middleware(
     CORSMiddleware,
