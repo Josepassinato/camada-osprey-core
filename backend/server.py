@@ -8609,6 +8609,192 @@ async def startup_db_client():
         raise e
 
 # Endpoints duplicados removidos - versões corretas estão acima
+# ============================================================================
+# PAYMENT ENDPOINTS - STRIPE INTEGRATION
+# ============================================================================
+
+@api_router.post("/payment/create-checkout")
+async def create_payment_checkout(request: Request):
+    """
+    Cria uma sessão de checkout do Stripe
+    
+    Body:
+        visa_code: Código do visto (ex: "H-1B")
+        case_id: ID do caso do usuário
+        voucher_code: Código do voucher (opcional)
+    """
+    try:
+        data = await request.json()
+        visa_code = data.get('visa_code')
+        case_id = data.get('case_id')
+        voucher_code = data.get('voucher_code', '').strip()
+        
+        if not visa_code or not case_id:
+            raise HTTPException(status_code=400, detail="visa_code e case_id são obrigatórios")
+        
+        # URLs de redirecionamento
+        frontend_url = os.environ.get('REACT_APP_BACKEND_URL', 'http://localhost:3000')
+        success_url = f"{frontend_url}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&case_id={case_id}"
+        cancel_url = f"{frontend_url}/payment/cancel?case_id={case_id}"
+        
+        # Criar sessão de checkout
+        result = await create_checkout_session(
+            visa_code=visa_code,
+            case_id=case_id,
+            voucher_code=voucher_code if voucher_code else None,
+            success_url=success_url,
+            cancel_url=cancel_url,
+            db=db
+        )
+        
+        if not result.get('success'):
+            raise HTTPException(status_code=400, detail=result.get('error', 'Erro ao criar checkout'))
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Erro ao criar checkout: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/payment/status/{session_id}")
+async def get_payment_status(session_id: str):
+    """
+    Verifica o status de um pagamento
+    """
+    try:
+        result = await verify_payment_status(session_id, db)
+        
+        if not result.get('success'):
+            raise HTTPException(status_code=400, detail=result.get('error', 'Erro ao verificar pagamento'))
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Erro ao verificar status: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/webhook/stripe")
+async def stripe_webhook(request: Request):
+    """
+    Webhook do Stripe para receber eventos de pagamento
+    """
+    try:
+        payload = await request.body()
+        sig_header = request.headers.get('stripe-signature')
+        
+        if not sig_header:
+            raise HTTPException(status_code=400, detail="Assinatura ausente")
+        
+        result = await handle_stripe_webhook(payload, sig_header, db)
+        
+        if not result.get('success'):
+            raise HTTPException(status_code=400, detail=result.get('error', 'Erro ao processar webhook'))
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Erro no webhook: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/vouchers/validate/{voucher_code}")
+async def validate_voucher_endpoint(voucher_code: str, visa_code: str):
+    """
+    Valida um voucher para um visto específico
+    
+    Query params:
+        visa_code: Código do visto (ex: "H-1B")
+    """
+    try:
+        result = await validate_voucher(voucher_code, visa_code, db)
+        return result.dict()
+        
+    except Exception as e:
+        logger.error(f"Erro ao validar voucher: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/vouchers/active")
+async def get_active_vouchers():
+    """
+    Retorna lista de vouchers ativos
+    """
+    try:
+        vouchers = get_all_active_vouchers()
+        return {
+            'success': True,
+            'vouchers': vouchers
+        }
+    except Exception as e:
+        logger.error(f"Erro ao listar vouchers: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/packages")
+async def get_payment_packages():
+    """
+    Retorna todos os pacotes de pagamento disponíveis
+    """
+    try:
+        packages = get_all_packages()
+        return {
+            'success': True,
+            'packages': packages
+        }
+    except Exception as e:
+        logger.error(f"Erro ao listar pacotes: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/packages/{visa_code}")
+async def get_visa_package_info(visa_code: str, voucher_code: Optional[str] = None):
+    """
+    Retorna informações de pacote e preço para um visto específico
+    
+    Query params:
+        voucher_code: Código do voucher (opcional)
+    """
+    try:
+        package = get_visa_package(visa_code)
+        
+        # Se voucher fornecido, validar e calcular desconto
+        discount_percentage = 0.0
+        voucher_info = None
+        
+        if voucher_code:
+            voucher_validation = await validate_voucher(voucher_code, visa_code, db)
+            if voucher_validation.valid:
+                discount_percentage = voucher_validation.discount_percentage
+                voucher_info = {
+                    'code': voucher_validation.voucher_code,
+                    'discount_percentage': discount_percentage,
+                    'message': voucher_validation.message
+                }
+        
+        # Calcular preço
+        price_info = calculate_final_price(visa_code, discount_percentage)
+        
+        return {
+            'success': True,
+            'package': package,
+            'price_info': price_info,
+            'voucher_info': voucher_info
+        }
+        
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error(f"Erro ao obter pacote: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
