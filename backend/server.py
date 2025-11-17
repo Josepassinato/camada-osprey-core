@@ -83,6 +83,11 @@ from specialized_agents import (
     create_urgency_triage
 )
 
+# Payment and Stripe Integration
+from payment_packages import get_visa_package, get_all_packages, calculate_final_price
+from voucher_system import validate_voucher, get_all_active_vouchers
+from stripe_integration import create_checkout_session, verify_payment_status, handle_stripe_webhook
+
 # MongoDB connection - initialized in startup event
 client = None
 db = None
