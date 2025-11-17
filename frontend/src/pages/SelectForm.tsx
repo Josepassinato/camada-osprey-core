@@ -173,38 +173,11 @@ const SelectForm = () => {
     VISTOS DESATIVADOS - Comentados abaixo
     Serão reativados após lançamento inicial
     ============================================================
-    */
     
-    /* DESATIVADO TEMPORARIAMENTE - Demais vistos
-    {
-      code: 'H-1B',
-      ...
-    },
-    {
-      code: 'O-1',
-      ...
-    },
-    {
-      code: 'N-400',
-      ...
-    },
-    {
-      code: 'I-765',
-      ...
-    },
-    {
-      code: 'I-485',
-      ...
-    },
-    {
-      code: 'I-90',
-      ...
-    },
-    {
-      code: 'I-751',
-      ...
-    }
-    FIM DOS VISTOS DESATIVADOS */
+    Demais vistos: H-1B, O-1, N-400, I-765, I-485, I-90, I-751
+    FIM DOS VISTOS DESATIVADOS 
+    ============================================================
+    */
   ];
 
   // Forms are already filtered for change of status (no B-1/B-2)
