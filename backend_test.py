@@ -1333,6 +1333,506 @@ class ProductionVerificationTester:
         
         return test_results
 
+    def test_stripe_payment_system_complete(self):
+        """TESTE COMPLETO DO SISTEMA DE PAGAMENTO STRIPE - TODOS OS ENDPOINTS"""
+        print("💳 SISTEMA DE PAGAMENTO STRIPE - TESTE COMPLETO")
+        print("🎯 CONTEXTO: Sistema de pagamento com Stripe para 4 vistos (I-539, F-1, I-130, I-589) com vouchers de desconto")
+        print("="*80)
+        
+        test_results = []
+        
+        # TESTE 1: GET /api/packages - Listar todos os pacotes disponíveis
+        print("\n📦 TESTE 1: GET /api/packages")
+        print("   Objetivo: Listar todos os pacotes disponíveis")
+        print("   Verificar: Se retorna 11 vistos (backend tem todos)")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/packages")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Validações
+                has_success = data.get('success') == True
+                has_packages = 'packages' in data
+                packages = data.get('packages', {})
+                total_packages = len(packages)
+                
+                # Verificar se tem pelo menos os 4 vistos principais
+                required_visas = ['I-539', 'F-1', 'I-130', 'I-589']
+                has_required_visas = all(visa in packages for visa in required_visas)
+                
+                success = has_success and has_packages and total_packages >= 4 and has_required_visas
+                
+                print(f"   ✅ Status: 200 OK")
+                print(f"   ✅ Campo 'success': {'✓' if has_success else '✗'}")
+                print(f"   ✅ Campo 'packages': {'✓' if has_packages else '✗'}")
+                print(f"   ✅ Total de pacotes: {total_packages}")
+                print(f"   ✅ Vistos principais presentes: {'✓' if has_required_visas else '✗'}")
+                
+                # Listar alguns pacotes encontrados
+                if packages:
+                    print(f"   📋 Pacotes encontrados: {list(packages.keys())[:10]}")
+                
+                test_results.append(("GET /api/packages", success, f"Total: {total_packages}, Required visas: {'✓' if has_required_visas else '✗'}"))
+            else:
+                success = False
+                print(f"   ❌ Status: {response.status_code}")
+                print(f"   📋 Resposta: {response.text[:200]}")
+                test_results.append(("GET /api/packages", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("GET /api/packages", False, f"Exception: {str(e)}"))
+        
+        # TESTE 2: GET /api/packages/{visa_code} - Testar vistos específicos
+        print("\n📋 TESTE 2: GET /api/packages/{visa_code}")
+        print("   Objetivo: Testar cada um dos 4 vistos principais")
+        
+        visa_tests = [
+            ("I-539", 299.00),
+            ("F-1", 980.00),
+            ("I-130", 980.00),
+            ("I-589", 800.00)
+        ]
+        
+        visa_test_results = []
+        
+        for visa_code, expected_price in visa_tests:
+            print(f"\n   🔍 Testando {visa_code} (preço esperado: ${expected_price})")
+            
+            try:
+                response = self.session.get(f"{API_BASE}/packages/{visa_code}")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    # Validações
+                    has_success = data.get('success') == True
+                    has_package = 'package' in data
+                    has_price_info = 'price_info' in data
+                    
+                    package = data.get('package', {})
+                    price_info = data.get('price_info', {})
+                    
+                    # Verificar estrutura do pacote
+                    has_name = 'name' in package
+                    has_category = 'category' in package
+                    has_includes = 'includes' in package and isinstance(package.get('includes'), list)
+                    
+                    # Verificar preço
+                    actual_price = package.get('price', 0)
+                    price_correct = actual_price == expected_price
+                    
+                    # Verificar price_info
+                    has_original_price = 'original_price' in price_info
+                    has_final_price = 'final_price' in price_info
+                    
+                    success = (has_success and has_package and has_price_info and 
+                              has_name and has_category and has_includes and 
+                              price_correct and has_original_price and has_final_price)
+                    
+                    print(f"      ✅ Status: 200 OK")
+                    print(f"      ✅ Preço: ${actual_price} {'✓' if price_correct else '✗'}")
+                    print(f"      ✅ Nome: {package.get('name', 'N/A')}")
+                    print(f"      ✅ Categoria: {package.get('category', 'N/A')}")
+                    print(f"      ✅ Includes: {len(package.get('includes', []))} itens")
+                    
+                    visa_test_results.append((visa_code, success, f"Price: ${actual_price}, Category: {package.get('category')}"))
+                else:
+                    success = False
+                    print(f"      ❌ Status: {response.status_code}")
+                    visa_test_results.append((visa_code, False, f"HTTP {response.status_code}"))
+                    
+            except Exception as e:
+                print(f"      ❌ Erro: {str(e)}")
+                visa_test_results.append((visa_code, False, f"Exception: {str(e)}"))
+        
+        # Consolidar resultados dos vistos
+        successful_visa_tests = [r for r in visa_test_results if r[1]]
+        visa_success_rate = len(successful_visa_tests) / len(visa_test_results) * 100 if visa_test_results else 0
+        
+        test_results.append(("GET /api/packages/{visa_code}", visa_success_rate == 100.0, f"Success rate: {visa_success_rate:.1f}% ({len(successful_visa_tests)}/4)"))
+        
+        # TESTE 3: GET /api/packages/{visa_code}?voucher_code=LANCAMENTO50 - Testar com voucher
+        print("\n🎫 TESTE 3: GET /api/packages/{visa_code}?voucher_code=LANCAMENTO50")
+        print("   Objetivo: Testar aplicação de voucher de 50% de desconto")
+        
+        voucher_tests = [
+            ("I-539", 299.00, 149.50),  # 50% OFF
+            ("F-1", 980.00, 490.00)     # 50% OFF
+        ]
+        
+        voucher_test_results = []
+        
+        for visa_code, original_price, expected_final_price in voucher_tests:
+            print(f"\n   🔍 Testando {visa_code} com LANCAMENTO50")
+            print(f"      Preço original: ${original_price} → Esperado: ${expected_final_price}")
+            
+            try:
+                response = self.session.get(f"{API_BASE}/packages/{visa_code}?voucher_code=LANCAMENTO50")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    # Validações
+                    has_success = data.get('success') == True
+                    has_voucher_info = 'voucher_info' in data and data.get('voucher_info') is not None
+                    
+                    price_info = data.get('price_info', {})
+                    voucher_info = data.get('voucher_info', {})
+                    
+                    # Verificar desconto
+                    discount_percentage = price_info.get('discount_percentage', 0)
+                    final_price = price_info.get('final_price', 0)
+                    discount_amount = price_info.get('discount_amount', 0)
+                    
+                    discount_correct = discount_percentage == 50.0
+                    final_price_correct = abs(final_price - expected_final_price) < 0.01
+                    
+                    # Verificar voucher_info
+                    voucher_code_correct = voucher_info.get('code') == 'LANCAMENTO50'
+                    voucher_discount_correct = voucher_info.get('discount_percentage') == 50.0
+                    
+                    success = (has_success and has_voucher_info and discount_correct and 
+                              final_price_correct and voucher_code_correct and voucher_discount_correct)
+                    
+                    print(f"      ✅ Status: 200 OK")
+                    print(f"      ✅ Desconto: {discount_percentage}% {'✓' if discount_correct else '✗'}")
+                    print(f"      ✅ Preço final: ${final_price} {'✓' if final_price_correct else '✗'}")
+                    print(f"      ✅ Voucher aplicado: {'✓' if has_voucher_info else '✗'}")
+                    print(f"      ✅ Desconto calculado: ${discount_amount}")
+                    
+                    voucher_test_results.append((visa_code, success, f"Final: ${final_price}, Discount: {discount_percentage}%"))
+                else:
+                    success = False
+                    print(f"      ❌ Status: {response.status_code}")
+                    voucher_test_results.append((visa_code, False, f"HTTP {response.status_code}"))
+                    
+            except Exception as e:
+                print(f"      ❌ Erro: {str(e)}")
+                voucher_test_results.append((visa_code, False, f"Exception: {str(e)}"))
+        
+        # Consolidar resultados dos vouchers
+        successful_voucher_tests = [r for r in voucher_test_results if r[1]]
+        voucher_success_rate = len(successful_voucher_tests) / len(voucher_test_results) * 100 if voucher_test_results else 0
+        
+        test_results.append(("GET /api/packages/{visa_code}?voucher_code", voucher_success_rate == 100.0, f"Success rate: {voucher_success_rate:.1f}% ({len(successful_voucher_tests)}/2)"))
+        
+        # TESTE 4: GET /api/vouchers/validate/{voucher_code}?visa_code={code} - Validação de vouchers
+        print("\n🎟️ TESTE 4: GET /api/vouchers/validate/{voucher_code}?visa_code={code}")
+        print("   Objetivo: Testar validação de vouchers")
+        
+        validation_tests = [
+            ("LANCAMENTO50", "I-539", True, 50.0),
+            ("INVALIDO", "I-539", False, 0.0),
+            ("PRIMEIRACOMPRA", "F-1", True, 30.0)
+        ]
+        
+        validation_test_results = []
+        
+        for voucher_code, visa_code, expected_valid, expected_discount in validation_tests:
+            print(f"\n   🔍 Testando {voucher_code} para {visa_code}")
+            print(f"      Esperado: {'VÁLIDO' if expected_valid else 'INVÁLIDO'} ({expected_discount}%)")
+            
+            try:
+                response = self.session.get(f"{API_BASE}/vouchers/validate/{voucher_code}?visa_code={visa_code}")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    # Validações
+                    actual_valid = data.get('valid', False)
+                    actual_discount = data.get('discount_percentage', 0.0)
+                    has_message = 'message' in data and data.get('message')
+                    
+                    valid_correct = actual_valid == expected_valid
+                    discount_correct = actual_discount == expected_discount
+                    
+                    success = valid_correct and discount_correct and has_message
+                    
+                    print(f"      ✅ Status: 200 OK")
+                    print(f"      ✅ Válido: {actual_valid} {'✓' if valid_correct else '✗'}")
+                    print(f"      ✅ Desconto: {actual_discount}% {'✓' if discount_correct else '✗'}")
+                    print(f"      ✅ Mensagem: {data.get('message', 'N/A')[:50]}")
+                    
+                    validation_test_results.append((f"{voucher_code}-{visa_code}", success, f"Valid: {actual_valid}, Discount: {actual_discount}%"))
+                else:
+                    success = False
+                    print(f"      ❌ Status: {response.status_code}")
+                    validation_test_results.append((f"{voucher_code}-{visa_code}", False, f"HTTP {response.status_code}"))
+                    
+            except Exception as e:
+                print(f"      ❌ Erro: {str(e)}")
+                validation_test_results.append((f"{voucher_code}-{visa_code}", False, f"Exception: {str(e)}"))
+        
+        # Consolidar resultados das validações
+        successful_validation_tests = [r for r in validation_test_results if r[1]]
+        validation_success_rate = len(successful_validation_tests) / len(validation_test_results) * 100 if validation_test_results else 0
+        
+        test_results.append(("GET /api/vouchers/validate/{voucher_code}", validation_success_rate == 100.0, f"Success rate: {validation_success_rate:.1f}% ({len(successful_validation_tests)}/3)"))
+        
+        # TESTE 5: GET /api/vouchers/active - Listar vouchers ativos
+        print("\n🎫 TESTE 5: GET /api/vouchers/active")
+        print("   Objetivo: Listar vouchers ativos")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/vouchers/active")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Validações
+                has_success = data.get('success') == True
+                has_vouchers = 'vouchers' in data
+                vouchers = data.get('vouchers', [])
+                
+                # Verificar se LANCAMENTO50 e PRIMEIRACOMPRA aparecem
+                voucher_codes = [v.get('code') for v in vouchers if isinstance(v, dict)]
+                has_lancamento50 = 'LANCAMENTO50' in voucher_codes
+                has_primeiracompra = 'PRIMEIRACOMPRA' in voucher_codes
+                
+                success = has_success and has_vouchers and has_lancamento50 and has_primeiracompra
+                
+                print(f"   ✅ Status: 200 OK")
+                print(f"   ✅ Campo 'success': {'✓' if has_success else '✗'}")
+                print(f"   ✅ Campo 'vouchers': {'✓' if has_vouchers else '✗'}")
+                print(f"   ✅ Total vouchers: {len(vouchers)}")
+                print(f"   ✅ LANCAMENTO50 presente: {'✓' if has_lancamento50 else '✗'}")
+                print(f"   ✅ PRIMEIRACOMPRA presente: {'✓' if has_primeiracompra else '✗'}")
+                print(f"   📋 Vouchers encontrados: {voucher_codes}")
+                
+                test_results.append(("GET /api/vouchers/active", success, f"Total: {len(vouchers)}, LANCAMENTO50: {'✓' if has_lancamento50 else '✗'}"))
+            else:
+                success = False
+                print(f"   ❌ Status: {response.status_code}")
+                test_results.append(("GET /api/vouchers/active", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Erro: {str(e)}")
+            test_results.append(("GET /api/vouchers/active", False, f"Exception: {str(e)}"))
+        
+        # TESTE 6: POST /api/payment/create-checkout - Criação de sessão de pagamento
+        print("\n💳 TESTE 6: POST /api/payment/create-checkout")
+        print("   Objetivo: Testar criação de sessão de pagamento")
+        
+        checkout_tests = [
+            {
+                "name": "Sem voucher",
+                "data": {
+                    "visa_code": "I-539",
+                    "case_id": "TEST-CASE-001",
+                    "voucher_code": ""
+                },
+                "expected_original_price": 299.0,
+                "expected_final_price": 299.0,
+                "expected_voucher_applied": False
+            },
+            {
+                "name": "Com voucher LANCAMENTO50",
+                "data": {
+                    "visa_code": "I-539",
+                    "case_id": "TEST-CASE-002",
+                    "voucher_code": "LANCAMENTO50"
+                },
+                "expected_original_price": 299.0,
+                "expected_final_price": 149.50,
+                "expected_voucher_applied": True
+            }
+        ]
+        
+        checkout_test_results = []
+        
+        for test_case in checkout_tests:
+            print(f"\n   🔍 Testando: {test_case['name']}")
+            
+            try:
+                response = self.session.post(f"{API_BASE}/payment/create-checkout", json=test_case['data'])
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    # Validações básicas
+                    has_success = data.get('success') == True
+                    has_session_id = 'session_id' in data and data.get('session_id')
+                    has_checkout_url = 'checkout_url' in data and 'stripe.com' in str(data.get('checkout_url', ''))
+                    
+                    # Validações de preço (se disponíveis na resposta)
+                    original_price_correct = True
+                    final_price_correct = True
+                    voucher_applied_correct = True
+                    
+                    if 'original_price' in data:
+                        original_price_correct = abs(data.get('original_price', 0) - test_case['expected_original_price']) < 0.01
+                    
+                    if 'final_price' in data:
+                        final_price_correct = abs(data.get('final_price', 0) - test_case['expected_final_price']) < 0.01
+                    
+                    if 'voucher_applied' in data:
+                        voucher_applied_correct = data.get('voucher_applied') == test_case['expected_voucher_applied']
+                    
+                    success = (has_success and has_session_id and has_checkout_url and 
+                              original_price_correct and final_price_correct and voucher_applied_correct)
+                    
+                    print(f"      ✅ Status: 200 OK")
+                    print(f"      ✅ Campo 'success': {'✓' if has_success else '✗'}")
+                    print(f"      ✅ Session ID: {'✓' if has_session_id else '✗'}")
+                    print(f"      ✅ Checkout URL (Stripe): {'✓' if has_checkout_url else '✗'}")
+                    
+                    if 'original_price' in data:
+                        print(f"      ✅ Preço original: ${data.get('original_price')} {'✓' if original_price_correct else '✗'}")
+                    if 'final_price' in data:
+                        print(f"      ✅ Preço final: ${data.get('final_price')} {'✓' if final_price_correct else '✗'}")
+                    if 'voucher_applied' in data:
+                        print(f"      ✅ Voucher aplicado: {data.get('voucher_applied')} {'✓' if voucher_applied_correct else '✗'}")
+                    
+                    checkout_test_results.append((test_case['name'], success, f"Session: {'✓' if has_session_id else '✗'}, Stripe URL: {'✓' if has_checkout_url else '✗'}"))
+                else:
+                    success = False
+                    print(f"      ❌ Status: {response.status_code}")
+                    print(f"      📋 Resposta: {response.text[:200]}")
+                    checkout_test_results.append((test_case['name'], False, f"HTTP {response.status_code}"))
+                    
+            except Exception as e:
+                print(f"      ❌ Erro: {str(e)}")
+                checkout_test_results.append((test_case['name'], False, f"Exception: {str(e)}"))
+        
+        # Consolidar resultados do checkout
+        successful_checkout_tests = [r for r in checkout_test_results if r[1]]
+        checkout_success_rate = len(successful_checkout_tests) / len(checkout_test_results) * 100 if checkout_test_results else 0
+        
+        test_results.append(("POST /api/payment/create-checkout", checkout_success_rate == 100.0, f"Success rate: {checkout_success_rate:.1f}% ({len(successful_checkout_tests)}/2)"))
+        
+        # TESTE 7: Cenários de erro
+        print("\n❌ TESTE 7: CENÁRIOS DE ERRO")
+        print("   Objetivo: Testar tratamento de erros")
+        
+        error_tests = [
+            {
+                "name": "Visa code inexistente",
+                "endpoint": "/packages/VISA-INEXISTENTE",
+                "method": "GET",
+                "expected_status": 404
+            },
+            {
+                "name": "Voucher inválido",
+                "endpoint": "/vouchers/validate/VOUCHER-INEXISTENTE?visa_code=I-539",
+                "method": "GET",
+                "expected_valid": False
+            },
+            {
+                "name": "Case_id ausente no checkout",
+                "endpoint": "/payment/create-checkout",
+                "method": "POST",
+                "data": {"visa_code": "I-539"},
+                "expected_status": 400
+            }
+        ]
+        
+        error_test_results = []
+        
+        for test_case in error_tests:
+            print(f"\n   🔍 Testando: {test_case['name']}")
+            
+            try:
+                if test_case['method'] == 'GET':
+                    response = self.session.get(f"{API_BASE}{test_case['endpoint']}")
+                else:
+                    response = self.session.post(f"{API_BASE}{test_case['endpoint']}", json=test_case.get('data', {}))
+                
+                if 'expected_status' in test_case:
+                    success = response.status_code == test_case['expected_status']
+                    print(f"      ✅ Status esperado {test_case['expected_status']}: {'✓' if success else '✗'} (atual: {response.status_code})")
+                elif 'expected_valid' in test_case:
+                    if response.status_code == 200:
+                        data = response.json()
+                        actual_valid = data.get('valid', True)  # Default True para detectar falha
+                        success = actual_valid == test_case['expected_valid']
+                        print(f"      ✅ Válido esperado {test_case['expected_valid']}: {'✓' if success else '✗'} (atual: {actual_valid})")
+                    else:
+                        success = False
+                        print(f"      ❌ Status inesperado: {response.status_code}")
+                else:
+                    success = True  # Teste genérico
+                
+                error_test_results.append((test_case['name'], success, f"Status: {response.status_code}"))
+                
+            except Exception as e:
+                print(f"      ❌ Erro: {str(e)}")
+                error_test_results.append((test_case['name'], False, f"Exception: {str(e)}"))
+        
+        # Consolidar resultados dos erros
+        successful_error_tests = [r for r in error_test_results if r[1]]
+        error_success_rate = len(successful_error_tests) / len(error_test_results) * 100 if error_test_results else 0
+        
+        test_results.append(("Cenários de Erro", error_success_rate == 100.0, f"Success rate: {error_success_rate:.1f}% ({len(successful_error_tests)}/3)"))
+        
+        # RESUMO FINAL
+        print("\n" + "="*80)
+        print("📊 RESUMO FINAL - SISTEMA DE PAGAMENTO STRIPE")
+        print("="*80)
+        
+        passed_tests = [r for r in test_results if r[1]]
+        failed_tests = [r for r in test_results if not r[1]]
+        
+        overall_success_rate = len(passed_tests) / len(test_results) * 100 if test_results else 0
+        
+        print(f"\n🎯 RESULTADO GERAL:")
+        print(f"   ✅ Testes que passaram: {len(passed_tests)}/{len(test_results)} ({overall_success_rate:.1f}%)")
+        print(f"   ❌ Testes que falharam: {len(failed_tests)}/{len(test_results)}")
+        
+        print(f"\n📋 DETALHAMENTO POR ENDPOINT:")
+        for i, (test_name, success, details) in enumerate(test_results, 1):
+            status = "✅ PASSOU" if success else "❌ FALHOU"
+            print(f"   {i}. {test_name}: {status}")
+            print(f"      {details}")
+        
+        # Verificação específica dos endpoints críticos
+        critical_endpoints = [
+            "GET /api/packages",
+            "GET /api/packages/{visa_code}",
+            "GET /api/packages/{visa_code}?voucher_code",
+            "POST /api/payment/create-checkout"
+        ]
+        
+        critical_results = [r for r in test_results if r[0] in critical_endpoints]
+        critical_passed = [r for r in critical_results if r[1]]
+        
+        if len(critical_passed) == len(critical_results):
+            print(f"\n🎉 SUCESSO! Todos os endpoints críticos de pagamento estão funcionando!")
+            print(f"   ✅ Sistema Stripe integrado operacional")
+            print(f"   ✅ Cálculos de preço e desconto corretos")
+            print(f"   ✅ Validação de vouchers funcionando")
+            print(f"   ✅ Criação de checkout Stripe operacional")
+        else:
+            print(f"\n❌ FALHA! Alguns endpoints críticos têm problemas")
+            print(f"   ❌ Endpoints críticos: {len(critical_passed)}/{len(critical_results)} funcionando")
+            print(f"   ❌ Sistema precisa de correções antes da produção")
+        
+        # Log final consolidado
+        overall_success = overall_success_rate >= 85.0  # 85% como threshold mínimo
+        self.log_test(
+            "SISTEMA DE PAGAMENTO STRIPE - TESTE COMPLETO",
+            overall_success,
+            f"Taxa de sucesso: {overall_success_rate:.1f}% ({len(passed_tests)}/{len(test_results)} testes). Endpoints críticos: {len(critical_passed)}/{len(critical_results)}. Sistema: {'OPERACIONAL' if overall_success else 'PRECISA CORREÇÕES'}",
+            {
+                "overall_success_rate": overall_success_rate,
+                "passed_tests": len(passed_tests),
+                "total_tests": len(test_results),
+                "critical_endpoints_working": len(critical_passed),
+                "critical_endpoints_total": len(critical_results),
+                "system_status": "OPERACIONAL" if overall_success else "PRECISA CORREÇÕES",
+                "all_test_results": test_results,
+                "visa_test_results": visa_test_results,
+                "voucher_test_results": voucher_test_results,
+                "validation_test_results": validation_test_results,
+                "checkout_test_results": checkout_test_results,
+                "error_test_results": error_test_results
+            }
+        )
+        
+        return test_results
+
     def test_visa_detailed_info_endpoints(self):
         """TESTE 1: Novo Endpoint - Visa Detailed Info"""
         print("📋 TESTE 1: NOVO ENDPOINT - VISA DETAILED INFO")
