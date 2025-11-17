@@ -528,6 +528,18 @@ backend:
         agent: "testing"
         comment: "🎉 TESTE COMPLETO DA JORNADA MUDANÇA DE STATUS - 100% SUCESSO! Executei teste end-to-end completo da jornada 'Mudança de Status' conforme solicitado pelo usuário. RESULTADOS DETALHADOS: ETAPA 1 ✅ PÁGINA INICIAL: Checkbox de termos aceito corretamente, botão 'Começar Aplicação' funcional, navegação direta para seleção de formulários SEM ProcessTypeSelector (correto!), ETAPA 2 ✅ SELEÇÃO DE VISTO: Título 'Escolha seu Formulário' correto, subtítulo 'Mudança de Status - Para pessoas já nos Estados Unidos' presente, B-1/B-2 NÃO aparece (correto para mudança de status), 11 vistos disponíveis confirmados (H-1B, F-1, O-1, N-400, I-130, I-765, I-485, I-90, I-751, I-589, I-539), I-539 encontrado e funcional, modal 'Ver Detalhes' funcionando, ETAPA 3 ✅ PÁGINA DE DADOS BÁSICOS: URL correta (/basic-data), título contém 'I-539', Badge 'Mudança de Status' visível (laranja), campos de formulário funcionais, dados preenchidos com sucesso (Maria Silva, maria.silva@email.com, 01/01/1990), ETAPA 4 ✅ FUNCIONALIDADES: Salvamento automático funcionando, indicador de salvamento visível, navegação entre páginas funcional, dados persistem corretamente, Case ID gerado (OSP-C0E7D86C), process_type definido como 'change_of_status'. PONTOS CRÍTICOS VERIFICADOS: ✅ Fluxo direto sem ProcessTypeSelector, ✅ B-1/B-2 não aparece, ✅ 11 vistos corretos, ✅ Badge 'Mudança de Status' visível, ✅ Dados salvam automaticamente, ✅ URLs corretas, ✅ Sem erros críticos no console. CONCLUSÃO: Sistema funcionando perfeitamente para jornada de Mudança de Status. Todos os requisitos atendidos com sucesso!"
 
+  - task: "Stripe Payment System - Complete Backend Testing"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "💳 STRIPE PAYMENT SYSTEM TESTING - MIXED RESULTS (57.1% SUCCESS): Comprehensive testing of all payment endpoints completed with significant findings. SUCCESSFUL ENDPOINTS: ✅ GET /api/packages - All 11 visa packages returned correctly (I-539: $299, F-1: $980, I-130: $980, I-589: $800), ✅ GET /api/packages/{visa_code} - All 4 main visas tested successfully with correct pricing, categories, and includes lists, ✅ GET /api/packages/{visa_code}?voucher_code=LANCAMENTO50 - Voucher application working perfectly (50% discount: I-539 $299→$149.50, F-1 $980→$490), ✅ GET /api/vouchers/active - Returns 2 active vouchers (LANCAMENTO50, PRIMEIRACOMPRA) correctly. CRITICAL ISSUES IDENTIFIED: ❌ POST /api/payment/create-checkout - FAILING with 'Invalid API Key provided: sk_live_***' error (Stripe API key issue), ❌ GET /api/vouchers/validate/INVALIDO - Returns HTTP 500 instead of proper validation response (error handling issue), ❌ Error handling inconsistent - some endpoints return 500 errors instead of proper 400/404 responses. ROOT CAUSES: 1) Stripe API key configuration issue preventing checkout session creation, 2) Voucher validation error handling needs improvement for invalid vouchers, 3) Exception handling in some endpoints not properly catching and returning appropriate HTTP status codes. CONCLUSION: Core pricing and voucher calculation logic is working perfectly, but payment processing and error handling need fixes before production deployment. System is 75% functional but requires Stripe configuration and error handling improvements."
+
   - task: "Agente Coruja - Frontend Implementation"
     implemented: true
     working: false
