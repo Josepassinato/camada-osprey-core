@@ -61,16 +61,21 @@ const PaymentPage: React.FC = () => {
   const loadPackageInfo = async () => {
     try {
       setLoading(true);
+      console.log(`📦 Loading package info for: ${visaCode}`);
+      
       const response = await makeApiCall(`/packages/${visaCode}`, 'GET');
+      console.log('📦 Package response:', response);
       
       if (response.success) {
         setPackageInfo(response.package);
         setPriceInfo(response.price_info);
+        console.log('✅ Package info loaded successfully');
       } else {
+        console.error('❌ Package response error:', response);
         setError('Erro ao carregar informações do pacote');
       }
     } catch (err: any) {
-      console.error('Erro ao carregar pacote:', err);
+      console.error('❌ Erro ao carregar pacote:', err);
       setError(err.message || 'Erro ao carregar informações');
     } finally {
       setLoading(false);
