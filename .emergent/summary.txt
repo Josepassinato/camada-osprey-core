@@ -1,98 +1,178 @@
-<analysis>
-The AI engineer's work primarily focused on enhancing the Agente Coruja application. Key tasks included fixing a critical frontend rendering issue caused by incorrect environment variable access ( vs  in Vite) across numerous files. Subsequently, visible debug warnings were eliminated, and the old conversational AI was successfully replaced by a proactive alert system on the  page. A full user journey simulation revealed bugs: non-persisting data, missing API endpoints (, , ), and a missing  field in the  model, all of which were addressed. A crucial discovery determined that Dra. Paula's AI knowledge base was entirely local, enabling a secure, gradual migration to Gemini, which was implemented as a hybrid system. The automated visa update system was improved with APScheduler integration and API endpoints. Most recently, the system was enhanced to differentiate visa fees and processing times for Consular Process versus Change of Status, which involved creating new backend data structures and updating the  frontend component. Finally, a  component was introduced at the start of the application flow to capture the user's process choice, which was successfully integrated into the backend.
-</analysis>
+<analysis>**original_problem_statement:**
+The initial request was to implement a persistent visual indicator (carimbo) for the user's chosen application process (Consular Process vs. Change of Status). During development, a series of user-driven pivots and bug fixes occurred:
+1.  A bug was discovered where selecting Change of Status still showed visa information for Consular Process.
+2.  After fixing the data display, another bug appeared where the process type selector was not showing at all.
+3.  The user then noted that many visas were missing detailed information, which was then populated by the agent.
+4.  Faced with complexity and routing issues (specifically with the B-1/B-2 visa), the user made a strategic decision to simplify the entire application to focus **exclusively on Change of Status** for users already in the USA.
+5.  Following this simplification, the user requested the implementation of Stripe for payments, with a pricing model based on visa categories.
+6.  The user provided LIVE Stripe API keys, which were configured by the agent.
+7.  A voucher system was also requested and implemented, with a  code for a 50% discount.
+8.  Finally, based on strategic feedback, the user requested a revision of the visas offered at launch, focusing on a mix of simple and high-value predictable cases (I-539, F-1, I-130, I-765, I-90, EB-2 NIW, EB-1A) and setting the complex Asylum case (I-589) to On Request ().
 
-<product_requirements>
-The Agente Coruja (Owl Agent) is an AI-powered platform designed to simplify US immigration processes with strong data privacy. It features an intelligent, multi-lingual OpenAI GPT-5 questionnaire with real-time validation and progress saving. A Stripe-integrated payment flow enables application package download, followed by data deletion. The I-539 tourist visa extension is fully implemented. An Automated Visa Update System is being developed for weekly updates requiring administrative approval. Recent enhancements include intelligent completeness analysis, social proof, adaptive language modes, and proactive alerts to guide users and prevent incomplete applications. The system now needs to clearly distinguish between Consular Process and Change of Status throughout the user's application journey.
-</product_requirements>
+**User's preferred language**:
+The user's primary language is **Portuguese**. The next agent MUST respond in Portuguese.
 
-<key_technical_concepts>
-- **Full-Stack:** React frontend (Vite), Python FastAPI backend.
-- **Database:** MongoDB.
-- **AI Integration:**  (LlmChat) for OpenAI GPT-5 and Gemini.
-- **Asynchronous Programming:**  in FastAPI.
-- **Scheduling:** APScheduler for automated tasks.
-- **Adaptive UI:** Context-driven language and guidance.
-</key_technical_concepts>
+**what currently exists?**
+The application is a full-stack platform (React/FastAPI) refactored to handle only Change of Status immigration applications. The Consular Process flow and the component to select it () have been completely removed.
 
-<code_architecture>
-The application has a monorepo structure with  (FastAPI) and  (React/Vite).
+The backend is configured with the user's **LIVE** Stripe secret and publishable keys. It has API endpoints to handle payment checkout creation (), retrieve package information, and check payment status. A pricing structure and a voucher system ( for 50% off) are defined in the backend code.
+
+The frontend is partially adapted for the payment flow: it has placeholder pages for payment, success, and cancellation, and redirects users to the payment page after they select a visa. The list of visas was filtered for a launch, but this is now being updated based on the user's latest request.
+
+**Last working item**:
+*   **Last item agent was working**: Implementing the user's final launch strategy by changing the displayed visas and their pricing. This involves updating the backend with new high-ticket prices for EB-2 NIW (,500) and EB-1A (,000), and modifying the frontend to show the new curated list of 7 visas, while changing the Asylum (I-589) visa to be On Request instead of having a direct payment flow.
+*   **Status**: NOT STARTED
+*   **Agent Testing Done**: N
+*   **Which testing method agent to use?**: Both. Backend testing via  to check new pricing. Frontend testing via screenshot tool to verify the new visa list and the On Request functionality.
+*   **User Testing Done**: N
+
+**All Pending/In progress Issue list**:
+*   **Issue 1: The payment user journey is incomplete. (P0)**
+*   **Issue 2: The  database collection has not been implemented. (P1)**
+
+Issues Detail:
+*   **Issue 1: The payment user journey is incomplete. (P0)**
+    *   **Attempted fixes**: The agent created backend endpoints for Stripe, fixed API key and registration issues in FastAPI, and created placeholder frontend pages (, ).
+    *   **Next debug checklist**:
+        1.  **Flesh out **:
+            *   Fetch package/price info from .
+            *   Implement UI for the Apply Voucher input field.
+            *   On Pay button click, call  with visa code and optional voucher.
+            *   On receiving the , redirect the user to Stripe.
+        2.  **Implement **:
+            *   Extract the  from the URL.
+            *   Poll the  endpoint until the status is paid.
+            *   On confirmation, update the case status in the backend and navigate the user to the next step (e.g., ).
+        3.  **Implement ** to show a cancellation message and guide the user back.
+    *   **Why fix this issue and what will be achieved with the fix?**: This is the core monetization feature. Completing it will allow the user to accept payments.
+    *   **Status**: IN PROGRESS
+    *   **Is recurring issue?**: N
+    *   **Should Test frontend/backend/both after fix?**: Both
+    *   **Blocked on other issue**: None.
+
+*   **Issue 2: The  database collection has not been implemented. (P1)**
+    *   **Attempted fixes**: The agent proposed the schema but did not implement the database logic.
+    *   **Next debug checklist**:
+        1.  In  or a new helper file, create functions to interact with a  collection in MongoDB.
+        2.  Update the  function in  to create a new transaction record with  before returning the checkout URL.
+        3.  Create a new webhook endpoint  to listen for Stripe events (e.g., ).
+        4.  When the webhook receives a success event, update the corresponding transaction record in the database to .
+    *   **Why fix this issue and what will be achieved with the fix?**: This provides a critical record of all payment attempts and successes, essential for business logic, analytics, and customer support. It also enables the  page to function reliably.
+    *   **Status**: NOT STARTED
+    *   **Is recurring issue?**: N
+    *   **Should Test frontend/backend/both after fix?**: Backend
+    *   **Blocked on other issue**: None.
+
+**In progress Task List**:
+*   **Task 1: Implement New Visa Launch Strategy. (P0)**
+    *   **Where to resume**:
+        *   **Backend**: Edit . Add new prices for  (,500) and  (,000). Ensure  and  are in the  category (99).
+        *   **Frontend**: Edit .
+            *   Update the  array to show this list: , , , , , , .
+            *   For  (Asilo), modify its card to display Sob Consulta and remove the payment button, possibly replacing it with a  link or a modal with contact information.
+    *   **What will be achieved with this?**: Aligns the application with the user's final go-to-market strategy.
+    *   **Status**: IN PROGRESS
+    *   **Should Test frontend/backend/both after fix?**: Both
+    *   **Blocked on something**: None.
+
+**Upcoming and Future Tasks**
+*   **Upcoming Tasks:**
+    *   (P2) Implement a database-backed voucher system instead of the current in-memory one in .
+*   **Future Tasks:**
+    *   Implement specific deliverables for high-ticket visas (EB-2 NIW, EB-1A), such as eligibility screening, cover letter generation, and evidence organization.
+    *   Implement a combined  +  flow.
+    *   Integrate other backend features (Completeness Analyzer, Social Proof) into the frontend.
+    *   Develop a Score Preditivo de Aprovação (Predictive Approval Score).
+    *   Develop a Simulador de Entrevista Básico (Basic Interview Simulator).
+
+**Completed work in this session**
+*   **App Simplification (DONE)**: Application refactored to focus exclusively on Change of Status, removing the Consular Process flow and related components.
+*   **Stripe Integration (Partially Done)**: User's LIVE keys were configured. Backend endpoints for creating checkouts and a voucher system are in place. The backend is confirmed to connect to Stripe and generate valid checkout sessions.
+*   **Visa Data Population (DONE)**:  was populated with extensive data, then stripped down to contain only Change of Status information.
+*   **UI/UX Fixes (DONE)**:
+    *   Fixed a bug where incorrect visa data was displayed.
+    *   Fixed a bug where the process selector component failed to appear.
+    *   Resolved a URL encoding issue for visa codes containing a .
+    *   Filtered the visa list for launch (now being revised).
+
+**Earlier issues found/mentioned but not fixed**
+*   None. The agent was responsive to all issues raised during the session.
+
+**Known issue recurrence from previous fork**
+*   None.
+
+**Code Architecture**
 
 
+**Key Technical Concepts**
+*   **Full-Stack**: React frontend (Vite), Python FastAPI backend.
+*   **Database**: MongoDB.
+*   **Payment Integration**: **Stripe (Live Mode)**. The system dynamically creates products and prices via API at checkout time.
+*   **API Design**: Endpoints for dynamic checkout creation, voucher validation.
+*   **Frontend State Management**: React , .
+*   **Frontend Routing**: .
 
--   ****
-    -   **Importance:** Main FastAPI app, API routes, DB connections.
-    -   **Summary of Changes:** Fixed  and  initialization. Added new API endpoints: , ,  for full application flow. Integrated APScheduler for visa updates, including startup/shutdown events and new admin endpoints. Added  and  to  model. Included a new endpoint  to serve detailed visa process information.  was added.
--   ****
-    -   **Importance:** Logic for web scraping and AI detection of visa rule changes.
-    -   **Summary of Changes:** Fixed  usage to  instead of  or .
--   ****
-    -   **Importance:** Analyzes user input completeness using AI.
-    -   **Summary of Changes:** Corrected  usage. Contains  which was identified for future updates with detailed visa info.
--   **** (NEWLY DISCOVERED)
-    -   **Importance:** Contains Dra. Paula's knowledge base, determined to be local.
-    -   **Summary of Changes:** Identified for use in the new hybrid agent.
--   **** (NEW FILE)
-    -   **Importance:** New agent specifically for Gemini.
-    -   **Summary of Changes:** Created as part of the Gemini migration strategy.
--   **** (NEW FILE)
-    -   **Importance:** Script to attempt extraction of knowledge from OpenAI Assistant.
-    -   **Summary of Changes:** Created and executed, revealing the OpenAI Assistant ID was non-existent.
--   **** (NEW FILE)
-    -   **Importance:** Manages AI responses, attempting Gemini first with a fallback to OpenAI.
-    -   **Summary of Changes:** Created, with multiple fixes to  usage (session_id,  parameter,  order, , ) for correct Gemini/OpenAI interaction.
--   **** (NEW FILE)
-    -   **Importance:** Handles scheduled execution of visa updates using APScheduler.
-    -   **Summary of Changes:** Created to manage and trigger .
--   **** (NEW FILE)
-    -   **Importance:** Stores detailed visa information, differentiating between consular process and change of status.
-    -   **Summary of Changes:** Created to centralize and structure this new data.
--   ****
-    -   **Importance:** Root component for routing and global providers.
-    -   **Summary of Changes:** Multiple  references were replaced with .
--   ****
-    -   **Importance:** User's basic data entry page.
-    -   **Summary of Changes:** Removed a visible debug information block.  (old conversational AI) was replaced with  and  was added.
--   ****
-    -   **Importance:** Page where users select the visa type.
-    -   **Summary of Changes:** Modified to integrate  before visa selection, storing the user's  choice and passing it to the  function.
--   ****
-    -   **Importance:** React context for managing adaptive language settings.
-    -   **Summary of Changes:**  was replaced with .
--   ****
-    -   **Importance:** Displays visa requirements and related information.
-    -   **Summary of Changes:** The file was re-created to fetch and display detailed visa information (consular vs. change of status) using Tabs, leveraging the new  endpoint.
--   **** (NEW FILE)
-    -   **Importance:** Allows users to choose between Consular Process and Change of Status at the start of the application.
-    -   **Summary of Changes:** Created and integrated into .
-</code_architecture>
+**key DB schema**
+*   **payment_transactions** (PROPOSED, NOT IMPLEMENTED): 
+*   **vouchers** (In-memory, needs DB migration): 
 
-<pending_tasks>
-- **Full I-539 Functionality:**
-    - Ensure  form_code is correctly saved and persisted in the backend.
-    - Verify I-539 specific field guidance is consistently provided, not generic.
-    - Ensure the I-539 card is correctly displayed and visible in the frontend.
-- ** Bug:** An old bug where selecting a visa type defaults to B-1/B-2 remains unaddressed.
-- **Frontend Integration:** Integrate newly built backend features (Completeness Analyzer, Social Proof, Adaptive Language) into the main application flow, particularly into forms like  and .
-- **Score Preditivo de Aprovação (Simple Version)**
-- **Simulador de Entrevista Básico**
-- **Freemium + Pricing Claro**
-- **Code Cleanup (Optional):** Address remaining hardcoded fallback URLs.
-- **Persistent Process Type Signal:** Implement a visual carimbo (stamp) on all pages to indicate the chosen Processo Consular or Mudança de Status.
-</pending_tasks>
+**changes in tech stack**
+*   **Stripe** has been added as the payment processing provider.
 
-<current_work>
-The most recent work involved implementing a crucial feature to differentiate between Consular Process and Change of Status for visa applications.
+**All files**
+*   **Created**:
+    *   : Placeholder screen for payment.
+    *   : Placeholder for after successful payment.
+    *   : Placeholder for after canceled payment.
+    *   : Defines visa pricing and categories.
+    *   : Manages promotional vouchers (currently in-memory).
+    *   : Contains logic for creating Stripe checkout sessions.
+*   **Updated**:
+    *   : Major refactoring to remove process selection, filter the visa list, and redirect to the new payment flow.
+    *   : Added routes for the new payment pages.
+    *   : Added payment API endpoints and fixed a critical bug with router registration order.
+    *   : Content was added, then stripped to align with the Change of Status only strategy.
+    *   : Added user's LIVE Stripe API keys.
 
-On the **backend**, a new file  was created to house structured data for both process types (e.g., separate fees, processing times, and requirements). A new API endpoint, , was added to  to serve this detailed information. The  model in  was updated to include a  field to store the user's choice.
+**Areas that need refactoring**:
+*   The unused files , , and  should be deleted.
+*   The voucher system in  is in-memory and should be migrated to a MongoDB collection for persistence.
 
-On the **frontend**, a new component, , was created. This component provides the UI for users to select their desired process type (Consular or Change of Status). The  page was modified to render  *before* the visa type selection. The  function in  was updated to send the  selected by the user to the backend when a new case is initiated.
+**key api endpoints**
+*   : Creates a Stripe checkout session. **(Working)**
+*   : Gets pricing info for a visa. **(Working)**
+*   : Checks a Stripe payment session's status. **(Working)**
+*   : (NOT IMPLEMENTED) To receive payment status updates from Stripe.
 
-Additionally, the  component was entirely re-created to consume data from the new  endpoint. It now displays visa information with a tabbed interface, allowing users to view details specific to Processo Consular and Mudança de Status separately.
+**Critical Info for New Agent**
+*   The application's scope is now narrow: **Change of Status only**. Do not re-implement Consular Process.
+*   **Stripe is configured with the user's LIVE keys.** Be cautious. The backend is confirmed to be able to create checkout sessions.
+*   The immediate priority is to implement the user's latest launch strategy: update the visa list and pricing, and then complete the end-to-end payment flow.
+*   The user wants  (Asilo/Asylum) to be Sob Consulta (On Request), not a standard purchasable item.
 
-A full system test, including both backend and frontend, confirmed that the  is functioning correctly, and the  is being captured and stored. The detailed visa information is now accessible via the new endpoint and displayed in the  component.
-</current_work>
+**documents created in this job**
+*   None.
 
-<optional_next_step>
-Implement a persistent visual indicator (carimbo) on all subsequent frontend pages to signal the user's chosen Processo Consular or Mudança de Status.
-</optional_next_step>
+**Last 5 User Messages and any pending user messages**
+1.  **User**: Proposes a new launch strategy: focus on high-value, predictable visas (like EB-2 NIW) and remove complex ones like Asylum. (Pending implementation)
+2.  **Agent**: Acknowledges feedback, proposes a phased rollout, and asks for confirmation on the new visa list for launch.
+3.  **User**: Adds EB-1A to the high-value list. (Pending implementation)
+4.  **Agent**: Confirms the final list and asks how to proceed.
+5.  **User**: Coloque eles agora e deixe o de asilo como sob consulta (Put them [the new visas] now and leave the asylum one as on-request). This is a direct order to implement the new launch strategy immediately. (Pending implementation)
+
+**Project Health Check:**
+*   **Broken**: The payment flow is not functional from the user's perspective. Frontend pages are placeholders.
+*   **Mocked**: The voucher system is in-memory, not database-backed.
+
+**Testing status**
+*   **Testing agent used after significant changes**: YES
+*   **Troubleshoot agent used after agent stuck in loop**: NO
+*   **Test files created**: None.
+*   **Known regressions**: None.
+
+**Credentials to test flow:**
+*   **Voucher Code**:  (provides a 50% discount).
+
+**What agent forgot to execute**
+*   The agent has not implemented the database logic for storing and tracking payment transactions ( collection), which is crucial for the payment success page and record-keeping.
+*   The agent has not deleted the now-obsolete files related to the  feature, leaving unused code in the project.</analysis>

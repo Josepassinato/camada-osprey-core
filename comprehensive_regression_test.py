@@ -13,7 +13,7 @@ from datetime import datetime
 import os
 from typing import Dict, Any
 
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://owlagent.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://visa-checkout-1.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 print(f"🔍 TESTE DE REGRESSÃO COMPLETO - SUBSTITUIÇÃO 'IA' → 'SISTEMA'")
