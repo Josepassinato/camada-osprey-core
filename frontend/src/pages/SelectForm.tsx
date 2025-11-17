@@ -169,210 +169,41 @@ const SelectForm = () => {
     
     /* 
     ============================================================
-    VISTOS DESATIVADOS TEMPORARIAMENTE PARA LANÇAMENTO
-    Serão reativados gradualmente após validação inicial
-    ============================================================
-    
-    Categoria Avançada ($1,400):
-    - H-1B: Trabalho Especializado
-    - O-1: Habilidade Extraordinária
-    - I-485: Ajuste de Status (Green Card)
-    
-    Categoria Básica/Especial ($299-$800):
-    - I-765: Autorização de Trabalho (EAD)
-    - I-90: Renovação de Green Card
-    - I-751: Remoção de Condições
-    - N-400: Cidadania Americana
-    
-    Para reativar: basta descomentar as seções abaixo
+    VISTOS DESATIVADOS - Comentados abaixo
+    Serão reativados após lançamento inicial
     ============================================================
     */
     
-    /* DESATIVADO - H-1B
+    /* DESATIVADO TEMPORARIAMENTE - Demais vistos
     {
       code: 'H-1B',
-      title: 'H-1B: Trabalhador Especializado',
-      description: 'Para profissionais com ensino superior em ocupação especializada nos EUA',
-      icon: <Briefcase className="h-6 w-6" />,
-      category: 'Trabalho',
-      processingTime: '2-4 meses',
-      uscisfee: '$555 + taxas',
-      complexity: 'Avançado',
-      eligibility: [
-        'Diploma de ensino superior ou equivalente',
-        'Oferta de trabalho em ocupação especializada',
-        'Empregador americano patrocinador',
-        'Qualificações específicas para a função'
-      ],
-      popular: true
-    },
-    {
-      code: 'F-1',
-      title: 'F-1: Visto de Estudante',
-      description: 'Para estudos acadêmicos em instituições americanas aprovadas',
-      icon: <GraduationCap className="h-6 w-6" />,
-      category: 'Educação',
-      processingTime: '2-6 semanas',
-      uscisfee: '$185 + $350',
-      complexity: 'Intermediário',
-      eligibility: [
-        'Aceito em instituição aprovada pelo SEVP',
-        'Programa acadêmico ou de idiomas',
-        'Recursos financeiros para estudos',
-        'Intenção de retornar após estudos'
-      ],
-      popular: true
+      ...
     },
     {
       code: 'O-1',
-      title: 'O-1: Habilidade Extraordinária',
-      description: 'Para indivíduos com habilidades extraordinárias em sua área',
-      icon: <Star className="h-6 w-6" />,
-      category: 'Trabalho',
-      processingTime: '2-4 meses',
-      uscisfee: '$555 + $1,440',
-      complexity: 'Avançado',
-      eligibility: [
-        'Habilidade extraordinária comprovada',
-        'Reconhecimento nacional/internacional',
-        'Evidências de conquistas substanciais',
-        'Continuação do trabalho na área'
-      ]
+      ...
     },
     {
       code: 'N-400',
-      title: 'N-400: Pedido de Naturalização',
-      description: 'Para residentes permanentes elegíveis que desejam se tornar cidadãos americanos',
-      icon: <Users className="h-6 w-6" />,
-      category: 'Cidadania',
-      processingTime: '8-12 meses',
-      uscisfee: '$725',
-      complexity: 'Intermediário',
-      eligibility: [
-        'Residente permanente há pelo menos 5 anos (ou 3 se casado com cidadão)',
-        'Fisicamente presente nos EUA pelo tempo requerido',
-        'Conhecimento básico de inglês e história americana',
-        'Bom caráter moral'
-      ],
-      popular: true
-    },
-    {
-      code: 'I-130',
-      title: 'I-130: Petição de Parente Estrangeiro',
-      description: 'Para cidadãos e residentes permanentes peticionarem familiares',
-      icon: <Heart className="h-6 w-6" />,
-      category: 'Família',
-      processingTime: '8-33 meses',
-      uscisfee: '$535',
-      complexity: 'Básico',
-      eligibility: [
-        'Ser cidadão americano ou residente permanente',
-        'Comprovar relacionamento familiar elegível',
-        'Cumprir requisitos de renda ou ter co-patrocinador',
-        'Familiares elegíveis: cônjuge, filhos, pais, irmãos'
-      ],
-      popular: true
+      ...
     },
     {
       code: 'I-765',
-      title: 'I-765: Autorização de Trabalho',
-      description: 'Para solicitar permissão de trabalho nos Estados Unidos',
-      icon: <Briefcase className="h-6 w-6" />,
-      category: 'Trabalho',
-      processingTime: '3-5 meses',
-      uscisfee: '$410',
-      complexity: 'Básico',
-      eligibility: [
-        'Ter categoria elegível (estudante, asylum, TPS, etc.)',
-        'Estar nos EUA legalmente',
-        'Não ter autorização de trabalho automática',
-        'Cumprir requisitos específicos da categoria'
-      ],
-      popular: true
+      ...
     },
     {
       code: 'I-485',
-      title: 'I-485: Ajuste de Status',
-      description: 'Para ajustar status para residente permanente estando nos EUA',
-      icon: <Home className="h-6 w-6" />,
-      category: 'Green Card',
-      processingTime: '8-24 meses',
-      uscisfee: '$1,225',
-      complexity: 'Avançado',
-      eligibility: [
-        'Ter petição aprovada ou ser elegível',
-        'Estar fisicamente presente nos EUA',
-        'Entrou legalmente nos EUA',
-        'Visa disponível (se aplicável)'
-      ]
+      ...
     },
     {
       code: 'I-90',
-      title: 'I-90: Renovação de Green Card',
-      description: 'Para renovar ou substituir cartão de residente permanente',
-      icon: <CreditCard className="h-6 w-6" />,
-      category: 'Green Card',
-      processingTime: '6-10 meses',
-      uscisfee: '$540',
-      complexity: 'Básico',
-      eligibility: [
-        'Ser residente permanente',
-        'Cartão expirado, perdido, roubado ou danificado',
-        'Mudança de informações (nome, gênero)',
-        'Erro no cartão emitido pelo USCIS'
-      ]
+      ...
     },
     {
       code: 'I-751',
-      title: 'I-751: Remoção de Condições',
-      description: 'Para remover condições do status de residente permanente',
-      icon: <FileText className="h-6 w-6" />,
-      category: 'Green Card',
-      processingTime: '12-18 meses',
-      uscisfee: '$595',
-      complexity: 'Intermediário',
-      eligibility: [
-        'Residente permanente condicional há quase 2 anos',
-        'Baseado em casamento ou investimento',
-        'Comprovar que o casamento é genuíno',
-        'Arquivo dentro de 90 dias antes da expiração'
-      ]
-    },
-    {
-      code: 'I-589',
-      title: 'I-589: Pedido de Asilo',
-      description: 'Para pessoas que buscam proteção nos EUA devido à perseguição',
-      icon: <Users className="h-6 w-6" />,
-      category: 'Asilo',
-      processingTime: '2-5 anos',
-      uscisfee: '$0',
-      complexity: 'Avançado',
-      eligibility: [
-        'Estar fisicamente presente nos EUA',
-        'Aplicar dentro de 1 ano da chegada (salvo exceções)',
-        'Demonstrar perseguição ou medo bem fundamentado',
-        'Perseguição baseada em motivos protegidos',
-        'Não ter cometido crimes graves'
-      ]
-    },
-    {
-      code: 'I-539',
-      title: 'I-539: Extensão/Mudança de Status',
-      description: 'Para estender ou mudar seu status de não-imigrante nos EUA',
-      icon: <Clock className="h-6 w-6" />,
-      category: 'Extensão',
-      processingTime: '4-8 meses',
-      uscisfee: '$370',
-      complexity: 'Intermediário',
-      eligibility: [
-        'Estar legalmente nos EUA com status válido',
-        'Não ter violado termos do status atual',
-        'Aplicar antes do vencimento do status atual',
-        'Ter motivo válido para extensão',
-        'Comprovar recursos financeiros suficientes'
-      ],
-      popular: true
+      ...
     }
+    FIM DOS VISTOS DESATIVADOS */
   ];
 
   // Forms are already filtered for change of status (no B-1/B-2)
