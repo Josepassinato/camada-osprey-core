@@ -294,6 +294,49 @@ const BasicData = () => {
     return Math.round((filledFields.length / requiredFields.length) * 100);
   };
 
+  // Generate feedback items
+  const generateFeedbackItems = (): FeedbackItem[] => {
+    const items: FeedbackItem[] = [];
+    const completeness = calculateCompleteness();
+
+    if (completeness === 100) {
+      items.push({
+        type: 'success',
+        message: '✅ Seus dados básicos estão completos',
+        details: ['Todas as informações obrigatórias foram preenchidas', 'Você pode prosseguir para a próxima etapa']
+      });
+    } else if (completeness >= 50) {
+      items.push({
+        type: 'warning',
+        message: `🚨 Formulário ${completeness}% completo`,
+        details: [
+          'Alguns campos obrigatórios ainda precisam ser preenchidos',
+          'Complete todos os campos para prosseguir'
+        ]
+      });
+    } else {
+      items.push({
+        type: 'info',
+        message: '📝 Comece preenchendo seus dados básicos',
+        details: ['Preencha as informações pessoais', 'Todos os campos marcados com * são obrigatórios']
+      });
+    }
+
+    // Payment status check
+    if (!case_?.payment_status || case_.payment_status !== 'paid') {
+      items.push({
+        type: 'locked',
+        message: '🔒 Pagamento pendente',
+        details: [
+          'Complete o pagamento para acessar todas as funcionalidades',
+          'Após o pagamento, você poderá finalizar e baixar seu formulário'
+        ]
+      });
+    }
+
+    return items;
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header - Mobile Optimized */}
