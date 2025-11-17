@@ -8795,6 +8795,10 @@ async def get_visa_package_info(visa_code: str, voucher_code: Optional[str] = No
         raise HTTPException(status_code=500, detail=str(e))
 
 
+
+# Include all API routes
+app.include_router(api_router)
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     """Shutdown event to close connections"""
