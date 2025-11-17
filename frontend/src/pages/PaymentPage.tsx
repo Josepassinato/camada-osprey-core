@@ -138,17 +138,17 @@ const PaymentPage: React.FC = () => {
     setError('');
 
     try {
-      const response = await makeApiCall('/payment/create-checkout', 'POST', {
+      const data = await makeApiCall('/payment/create-checkout', 'POST', {
         visa_code: visaCode,
         case_id: caseId,
         voucher_code: voucherApplied ? voucherCode : ''
       });
 
-      if (response.success && response.checkout_url) {
+      if (data.success && data.checkout_url) {
         // Redirecionar para Stripe Checkout
-        window.location.href = response.checkout_url;
+        window.location.href = data.checkout_url;
       } else {
-        setError(response.error || 'Erro ao criar sessão de pagamento');
+        setError(data.error || 'Erro ao criar sessão de pagamento');
         setIsProcessingPayment(false);
       }
     } catch (err: any) {
