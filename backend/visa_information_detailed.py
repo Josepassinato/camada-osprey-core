@@ -583,57 +583,123 @@ VISA_DETAILED_INFO = {
         ]
     },
     
-    "I-589": {
-        "name": "Pedido de Asilo e Proteção Contra Deportação",
-        "description": "Para pessoas que buscam proteção nos EUA devido a perseguição",
+    "EB-2 NIW": {
+        "name": "National Interest Waiver (NIW)",
+        "description": "Green Card para profissionais com habilidades excepcionais que beneficiam interesse nacional dos EUA",
         
         "change_of_status": {
-            "description": "Pedido de asilo estando JÁ nos EUA",
-            "tempo_processamento": "2-7 anos",
-            "tempo_detalhes": "Varia muito, backlog enorme no sistema",
+            "description": "Petição I-140 com NIW waiver - não requer empregador patrocinador",
+            "tempo_processamento": "12-24 meses",
+            "tempo_detalhes": "Tempo médio do USCIS para processar I-140 (pode usar premium processing)",
             "taxas": {
-                "taxa_i589": {
-                    "valor": "$0",
-                    "descricao": "Sem taxa para I-589",
-                    "pago_para": "N/A",
-                    "quando_pagar": "Gratuito"
+                "taxa_i140": {
+                    "valor": "$700",
+                    "descricao": "Taxa de processamento I-140",
+                    "pago_para": "USCIS",
+                    "quando_pagar": "Ao enviar petição"
                 },
-                "total": "$0"
+                "taxa_premium": {
+                    "valor": "$2,805",
+                    "descricao": "Premium Processing (opcional - resposta em 45 dias)",
+                    "pago_para": "USCIS",
+                    "quando_pagar": "Se desejar processamento acelerado"
+                },
+                "total": "$700 (ou $3,505 com premium)"
             },
             "etapas": [
-                "Aplicar dentro de 1 ano da chegada aos EUA (salvo exceções)",
-                "Preencher formulário I-589 completo",
-                "Escrever declaração pessoal detalhada",
-                "Juntar evidências de perseguição",
-                "Enviar ao USCIS (se afirmativo) ou Immigration Court",
-                "Aguardar entrevista (meses ou anos)",
-                "Entrevista com asylum officer ou juiz",
-                "Decisão inicial",
-                "Se negado: pode apelar",
-                "Se aprovado: aguardar Green Card (1 ano após aprovação)"
+                "Avaliar elegibilidade (3 prongs test)",
+                "Compilar evidências de mérito excepcional",
+                "Preparar carta de petição (cover letter)",
+                "Obter cartas de recomendação de experts",
+                "Preparar documentação de contribuições",
+                "Submeter I-140 ao USCIS",
+                "Aguardar aprovação (12-24 meses ou 45 dias com premium)",
+                "Após aprovação, aguardar priority date",
+                "Submeter I-485 ou processo consular"
             ],
             "requisitos_especiais": [
-                "Deve aplicar dentro de 1 ano da última entrada",
-                "Exceções: mudança de circunstâncias, razões extraordinárias",
-                "Pode trabalhar após 180 dias (I-765 gratuito)",
-                "Não pode viajar sem Advance Parole (perde caso)",
-                "Deve demonstrar perseguição ou medo bem fundamentado",
-                "Baseado em raça, religião, nacionalidade, opinião política, ou grupo social"
+                "Deve atender aos 3 prongs: mérito substancial, well-positioned, beneficial to US",
+                "Evidências extensivas de contribuições na área",
+                "Cartas de experts reconhecidos",
+                "Não requer oferta de emprego (self-petitioning)",
+                "Mestrado ou superior (ou equivalente)",
+                "Documentação profissional robusta"
             ]
         },
         
-        "dependentes": "Cônjuge e filhos menores podem ser incluídos",
-        "trabalho": "Permitido após 180 dias com EAD (gratuito)",
-        "duracao_maxima": "Asilo permanente (renovável indefinidamente até Green Card)",
+        "dependentes": "Cônjuge e filhos menores podem derivar Green Card",
+        "trabalho": "Sem restrições após Green Card",
+        "duracao_maxima": "Green Card permanente (10 anos)",
         
         "criterios_elegibilidade": [
-            "Estar fisicamente presente nos EUA",
-            "Aplicar dentro de 1 ano (salvo exceções)",
-            "Demonstrar perseguição ou medo bem fundamentado",
-            "Perseguição baseada em motivos protegidos",
-            "Não ter participado em perseguição de outros",
-            "Não ser perigo à segurança dos EUA",
-            "Não ter crimes graves"
+            "Mestrado ou superior (ou bacharel + 5 anos experiência progressiva)",
+            "Trabalho tem mérito substancial e importância nacional",
+            "Bem posicionado para avançar o trabalho proposto",
+            "Benefício para os EUA supera necessidade de PERM",
+            "Evidências de reconhecimento na área",
+            "Contribuições significativas e mensuráveis"
+        ]
+    },
+    
+    "EB-1A": {
+        "name": "Extraordinary Ability",
+        "description": "Green Card para indivíduos com habilidade extraordinária comprovada em sua área",
+        
+        "change_of_status": {
+            "description": "Petição I-140 para habilidade extraordinária - categoria premium de Green Card",
+            "tempo_processamento": "12-18 meses",
+            "tempo_detalhes": "Tempo médio do USCIS para processar I-140 (pode usar premium processing)",
+            "taxas": {
+                "taxa_i140": {
+                    "valor": "$700",
+                    "descricao": "Taxa de processamento I-140",
+                    "pago_para": "USCIS",
+                    "quando_pagar": "Ao enviar petição"
+                },
+                "taxa_premium": {
+                    "valor": "$2,805",
+                    "descricao": "Premium Processing (opcional - resposta em 45 dias)",
+                    "pago_para": "USCIS",
+                    "quando_pagar": "Se desejar processamento acelerado"
+                },
+                "total": "$700 (ou $3,505 com premium)"
+            },
+            "etapas": [
+                "Avaliar elegibilidade (3 de 10 critérios ou prêmio internacional)",
+                "Compilar evidências de reconhecimento extraordinário",
+                "Preparar carta de petição detalhada",
+                "Obter cartas de recomendação de luminares da área",
+                "Organizar portfólio de conquistas",
+                "Submeter I-140 ao USCIS",
+                "Aguardar aprovação (12-18 meses ou 45 dias com premium)",
+                "Priority date current imediatamente (EB-1)",
+                "Submeter I-485 ou processo consular"
+            ],
+            "requisitos_especiais": [
+                "Deve atender 3 dos 10 critérios OU prêmio internacional reconhecido",
+                "Evidências de reconhecimento sustentado nacional/internacional",
+                "Documentação extensiva e robusta",
+                "Não requer oferta de emprego (self-petitioning)",
+                "Continuar trabalhando na área de expertise",
+                "Priority date current (sem fila de espera)"
+            ]
+        },
+        
+        "dependentes": "Cônjuge e filhos menores podem derivar Green Card",
+        "trabalho": "Sem restrições após Green Card",
+        "duracao_maxima": "Green Card permanente (10 anos)",
+        
+        "criterios_elegibilidade": [
+            "Habilidade extraordinária em ciências, artes, educação, negócios ou atletismo",
+            "Reconhecimento sustentado nacional ou internacional",
+            "Prêmios ou distinções reconhecidos OU 3 dos 10 critérios",
+            "Membros de associações que exigem conquistas extraordinárias",
+            "Publicações sobre você em mídia profissional/mainstream",
+            "Contribuições originais de grande importância",
+            "Remuneração alta demonstrando reconhecimento",
+            "Participação como juiz do trabalho de outros",
+            "Papel crítico/leading em organizações prestigiosas",
+            "Sucesso comercial em artes performáticas"
         ]
     }
 }
