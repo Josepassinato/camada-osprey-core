@@ -46,7 +46,10 @@ const PaymentPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('🔍 PaymentPage - URL Params:', { visaCode, caseId });
+    
     if (!visaCode || !caseId) {
+      console.error('❌ Missing params:', { visaCode, caseId });
       setError('Informações de visto ou caso ausentes');
       setLoading(false);
       return;
