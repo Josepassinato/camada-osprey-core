@@ -41,7 +41,6 @@ const PaymentPage: React.FC = () => {
   const [voucherCode, setVoucherCode] = useState('');
   const [voucherApplied, setVoucherApplied] = useState(false);
   const [voucherMessage, setVoucherMessage] = useState('');
-  const [isValidatingVoucher, setIsValidatingVoucher] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
