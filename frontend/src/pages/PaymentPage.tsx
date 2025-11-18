@@ -323,61 +323,22 @@ const PaymentPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Voucher Input */}
-                <div className="border-t pt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Código de Voucher
-                  </label>
-                  
-                  {!voucherApplied ? (
-                    <div className="flex gap-2">
-                      <Input
-                        type="text"
-                        placeholder="Ex: LANCAMENTO50"
-                        value={voucherCode}
-                        onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
-                        disabled={isValidatingVoucher}
-                        className="flex-1"
-                      />
-                      <Button
-                        onClick={handleApplyVoucher}
-                        disabled={isValidatingVoucher || !voucherCode.trim()}
-                        variant="outline"
-                      >
-                        {isValidatingVoucher ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          'Aplicar'
-                        )}
-                      </Button>
-                    </div>
-                  ) : (
+                {/* Voucher Applied Message - Only shown when active via URL */}
+                {voucherApplied && (
+                  <div className="border-t pt-4">
                     <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-3">
                       <div className="flex items-center gap-2">
                         <CheckCircle className="h-5 w-5 text-green-600" />
-                        <span className="font-mono font-semibold text-green-700">
-                          {voucherCode}
-                        </span>
+                        <div>
+                          <p className="font-mono font-semibold text-green-700">
+                            {voucherCode}
+                          </p>
+                          <p className="text-xs text-green-600">{voucherMessage}</p>
+                        </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleRemoveVoucher}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        Remover
-                      </Button>
                     </div>
-                  )}
-                  
-                  {voucherMessage && (
-                    <Alert className={`mt-2 ${voucherApplied ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                      <AlertDescription className={voucherApplied ? 'text-green-700' : 'text-red-700'}>
-                        {voucherMessage}
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 {/* Error Message */}
                 {error && (
