@@ -98,55 +98,6 @@ const PaymentPage: React.FC = () => {
     }
   };
 
-  const handleApplyVoucher = async () => {
-    if (!voucherCode.trim()) {
-      setVoucherMessage('Por favor, insira um código de voucher');
-      return;
-    }
-
-    setIsValidatingVoucher(true);
-    setVoucherMessage('');
-    setError('');
-
-    try {
-      const data = await makeApiCall(
-        `/vouchers/validate/${voucherCode}?visa_code=${visaCode}`,
-        'GET'
-      );
-
-      if (data.valid) {
-        setVoucherApplied(true);
-        setVoucherMessage(data.message);
-        
-        // Recarregar preço com voucher
-        const priceData = await makeApiCall(
-          `/packages/${visaCode}?voucher_code=${voucherCode}`,
-          'GET'
-        );
-        
-        if (priceData.success) {
-          setPriceInfo(priceData.price_info);
-        }
-      } else {
-        setVoucherApplied(false);
-        setVoucherMessage(data.message || 'Voucher inválido');
-      }
-    } catch (err: any) {
-      setVoucherMessage(err.message || 'Erro ao validar voucher');
-    } finally {
-      setIsValidatingVoucher(false);
-    }
-  };
-
-  const handleRemoveVoucher = async () => {
-    setVoucherCode('');
-    setVoucherApplied(false);
-    setVoucherMessage('');
-    
-    // Recarregar preço sem voucher
-    await loadPackageInfo();
-  };
-
   const handlePayment = async () => {
     if (!caseId || !visaCode) return;
 
