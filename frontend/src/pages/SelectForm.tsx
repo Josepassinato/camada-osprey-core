@@ -43,8 +43,6 @@ interface USCISFormType {
 const SelectForm = () => {
   const navigate = useNavigate();
   const { processType, setProcessType, clearProcessType } = useProcessType();
-  const [searchParams] = useSearchParams();
-  const voucherFromUrl = searchParams.get('voucher'); // Preserve voucher from URL
   const [selectedForm, setSelectedForm] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
