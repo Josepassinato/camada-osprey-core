@@ -211,15 +211,6 @@ const PaymentPage: React.FC = () => {
                     </span>
                   </div>
                   
-                  {voucherApplied && priceInfo && priceInfo.discount_percentage > 0 && (
-                    <div className="flex justify-between items-center text-green-600">
-                      <span>Desconto ({priceInfo.discount_percentage}%)</span>
-                      <span className="font-semibold">
-                        -${priceInfo.discount_amount.toFixed(2)}
-                      </span>
-                    </div>
-                  )}
-                  
                   <div className="border-t pt-3 mt-3">
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-bold text-gray-900">Total</span>
