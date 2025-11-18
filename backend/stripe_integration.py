@@ -111,9 +111,7 @@ async def create_checkout_session(
             'session_id': session.id,
             'checkout_url': session.url,
             'original_price': original_price,
-            'discount_percentage': discount_percentage,
-            'final_price': final_price,
-            'voucher_applied': voucher_info is not None
+            'message': 'Cupons de desconto podem ser aplicados na página de checkout do Stripe'
         }
         
     except stripe.error.StripeError as e:
