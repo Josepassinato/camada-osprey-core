@@ -561,9 +561,6 @@ const SelectForm = () => {
             </div>
             );
           })}
-              </div>
-            </div>
-          ))}
         </div>
 
         {/* Info Section */}
