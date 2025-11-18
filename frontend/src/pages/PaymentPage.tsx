@@ -88,8 +88,7 @@ const PaymentPage: React.FC = () => {
     try {
       const data = await makeApiCall('/payment/create-checkout', 'POST', {
         visa_code: visaCode,
-        case_id: caseId,
-        voucher_code: voucherApplied ? voucherCode : ''
+        case_id: caseId
       });
 
       if (data.success && data.checkout_url) {
