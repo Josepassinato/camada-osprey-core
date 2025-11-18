@@ -533,9 +533,13 @@ const SelectForm = () => {
                 ) : (
                   <Button 
                     className={`text-xs ${
-                      selectedForm === form.code 
-                        ? 'bg-black text-white hover:bg-gray-800' 
-                        : 'bg-white border border-black text-black hover:bg-gray-50'
+                      isPremium
+                        ? selectedForm === form.code
+                          ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 shadow-lg'
+                          : 'bg-white border-2 border-purple-600 text-purple-600 hover:bg-purple-50'
+                        : selectedForm === form.code 
+                          ? 'bg-black text-white hover:bg-gray-800' 
+                          : 'bg-white border border-black text-black hover:bg-gray-50'
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -553,6 +557,10 @@ const SelectForm = () => {
                     )}
                   </Button>
                 )}
+              </div>
+            </div>
+            );
+          })}
               </div>
             </div>
           ))}
