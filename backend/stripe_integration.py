@@ -44,30 +44,14 @@ async def create_checkout_session(
         package = get_visa_package(visa_code)
         original_price = package["price"]
         
-        # Validar e aplicar voucher se fornecido
-        discount_percentage = 0.0
-        voucher_info = None
+        # Nota: O desconto será aplicado diretamente no Stripe via promotion codes
+        # Não aplicamos desconto aqui, o usuário digitará o cupom na página do Stripe
         
-        if voucher_code:
-            voucher_validation = await validate_voucher(voucher_code, visa_code, db)
-            if voucher_validation.valid:
-                discount_percentage = voucher_validation.discount_percentage
-                voucher_info = {
-                    "code": voucher_validation.voucher_code,
-                    "discount_percentage": discount_percentage,
-                    "message": voucher_validation.message
-                }
-                logger.info(f"Voucher {voucher_code} aplicado: {discount_percentage}% desconto")
-        
-        # Calcular preço final
-        price_calculation = calculate_final_price(visa_code, discount_percentage)
-        final_price = price_calculation["final_price"]
-        
-        # Criar linha de item para o Stripe
+        # Criar linha de item para o Stripe (preço cheio)
         line_items = [{
             'price_data': {
                 'currency': 'usd',
-                'unit_amount': int(final_price * 100),  # Stripe usa centavos
+                'unit_amount': int(original_price * 100),  # Stripe usa centavos
                 'product_data': {
                     'name': f'{package["name"]} - {visa_code}',
                     'description': package["description"],
@@ -76,13 +60,6 @@ async def create_checkout_session(
             },
             'quantity': 1,
         }]
-        
-        # Adicionar informação de desconto se houver voucher
-        if voucher_info:
-            line_items[0]['price_data']['product_data']['description'] += (
-                f"\n✨ Desconto aplicado: {discount_percentage}% OFF "
-                f"(Voucher: {voucher_info['code']})"
-            )
         
         # URLs de redirecionamento
         if not success_url:
