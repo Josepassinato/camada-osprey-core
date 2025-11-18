@@ -47,7 +47,7 @@ const PaymentPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('🔍 PaymentPage - URL Params:', { visaCode, caseId });
+    console.log('🔍 PaymentPage - URL Params:', { visaCode, caseId, voucherFromUrl });
     
     if (!visaCode || !caseId) {
       console.error('❌ Missing params:', { visaCode, caseId });
@@ -56,8 +56,14 @@ const PaymentPage: React.FC = () => {
       return;
     }
     
+    // Set voucher from URL if present
+    if (voucherFromUrl) {
+      setVoucherCode(voucherFromUrl);
+      console.log('🎟️ Voucher from URL:', voucherFromUrl);
+    }
+    
     loadPackageInfo();
-  }, [visaCode, caseId]);
+  }, [visaCode, caseId, voucherFromUrl]);
 
   const loadPackageInfo = async () => {
     try {
