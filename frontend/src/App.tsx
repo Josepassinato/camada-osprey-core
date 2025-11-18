@@ -18,7 +18,7 @@ import Chat from "./pages/Chat";
 import Applications from "./pages/Applications";
 import NewApplication from "./pages/NewApplication";
 import ApplicationDetail from "./pages/ApplicationDetail";
-import AutoApplicationStart from "./pages/AutoApplicationStart";
+import NewHomepage from "./pages/NewHomepage";
 import SelectForm from "./pages/SelectForm";
 import BasicData from "./pages/BasicData";
 import DocumentUploadAuto from "./pages/DocumentUploadAuto";
