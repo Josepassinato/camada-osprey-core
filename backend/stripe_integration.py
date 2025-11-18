@@ -78,10 +78,7 @@ async def create_checkout_session(
             metadata={
                 'case_id': case_id,
                 'visa_code': visa_code,
-                'voucher_code': voucher_code or '',
-                'original_price': str(original_price),
-                'discount_percentage': str(discount_percentage),
-                'final_price': str(final_price)
+                'original_price': str(original_price)
             },
             customer_email=None,  # Pode adicionar email do usuário
         )
