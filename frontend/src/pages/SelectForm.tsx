@@ -319,7 +319,8 @@ const SelectForm = () => {
           // Store case ID for anonymous access
           localStorage.setItem('osprey_current_case_id', data.case.case_id);
           // Redirect to payment page
-          navigate(`/payment?visa_code=${formCode}&case_id=${data.case.case_id}`);
+          const paymentUrl = `/payment?visa_code=${formCode}&case_id=${data.case.case_id}${voucherFromUrl ? `&voucher=${voucherFromUrl}` : ''}`;
+          navigate(paymentUrl);
         } else {
           console.error('❌ Form code mismatch!', {
             expected: formCode,
