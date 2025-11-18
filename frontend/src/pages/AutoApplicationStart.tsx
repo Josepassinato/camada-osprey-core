@@ -56,9 +56,10 @@ const AutoApplicationStart = () => {
         // Store case ID for anonymous access and form selection
         localStorage.setItem('osprey_current_case_id', data.case.case_id);
         
-        // Navigate to form selection with case ID
+        // Navigate to form selection with case ID and preserve voucher
         console.log('🔘 Navigating to form selection...');
-        navigate('/auto-application/select-form', { 
+        const selectFormUrl = `/auto-application/select-form${voucherFromUrl ? `?voucher=${voucherFromUrl}` : ''}`;
+        navigate(selectFormUrl, { 
           state: { caseId: data.case.case_id, sessionToken } 
         });
       } else {
