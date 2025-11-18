@@ -441,11 +441,19 @@ const SelectForm = () => {
               
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-black text-white rounded-lg flex items-center justify-center">
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center ${
+                    isPremium 
+                      ? 'bg-gradient-to-br from-purple-600 to-indigo-600 shadow-lg shadow-purple-300' 
+                      : 'bg-black'
+                  } text-white`}>
                     {form.icon}
                   </div>
                 </div>
-                <div className="bg-white border border-black px-2 py-1 rounded-full text-xs text-black">
+                <div className={`px-2 py-1 rounded-full text-xs ${
+                  isPremium 
+                    ? 'bg-purple-600 text-white font-semibold' 
+                    : 'bg-white border border-black text-black'
+                }`}>
                   {form.complexity}
                 </div>
               </div>
