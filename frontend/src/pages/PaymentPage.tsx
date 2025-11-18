@@ -81,7 +81,7 @@ const PaymentPage: React.FC = () => {
         // If voucher was applied from URL
         if (voucherFromUrl && data.voucher_info) {
           setVoucherApplied(true);
-          setVoucherMessage(`✅ Desconto aplicado: ${data.voucher_info.discount}% OFF`);
+          setVoucherMessage(data.voucher_info.message || `✅ Desconto aplicado: ${data.voucher_info.discount_percentage}% OFF`);
           console.log('🎟️ Voucher applied from URL:', data.voucher_info);
         }
         
