@@ -221,23 +221,6 @@ const PaymentPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Voucher Applied Message - Only shown when active via URL */}
-                {voucherApplied && (
-                  <div className="border-t pt-4">
-                    <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-3">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                        <div>
-                          <p className="font-mono font-semibold text-green-700">
-                            {voucherCode}
-                          </p>
-                          <p className="text-xs text-green-600">{voucherMessage}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 {/* Error Message */}
                 {error && (
                   <Alert className="bg-red-50 border-red-200">
