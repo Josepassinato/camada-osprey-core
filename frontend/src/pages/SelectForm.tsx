@@ -465,7 +465,11 @@ const SelectForm = () => {
               </p>
 
               <div className="mb-3">
-                <span className="inline-block bg-black text-white text-xs px-2 py-1 rounded">
+                <span className={`inline-block text-xs px-2 py-1 rounded font-medium ${
+                  isPremium 
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white' 
+                    : 'bg-black text-white'
+                }`}>
                   {form.category}
                 </span>
               </div>
