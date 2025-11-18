@@ -20,6 +20,8 @@ import {
 
 const AutoApplicationStart = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const voucherFromUrl = searchParams.get('voucher');
   const [agreed, setAgreed] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   
