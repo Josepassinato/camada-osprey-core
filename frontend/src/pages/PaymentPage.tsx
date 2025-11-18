@@ -218,11 +218,6 @@ const PaymentPage: React.FC = () => {
                         ${priceInfo?.final_price.toFixed(2)}
                       </span>
                     </div>
-                    {voucherApplied && priceInfo && priceInfo.savings > 0 && (
-                      <p className="text-sm text-green-600 text-right mt-1">
-                        Você economiza ${priceInfo.savings.toFixed(2)}!
-                      </p>
-                    )}
                   </div>
                 </div>
 
