@@ -90,12 +90,8 @@ async def create_checkout_session(
                 'case_id': case_id,
                 'visa_code': visa_code,
                 'original_price': original_price,
-                'discount_percentage': discount_percentage,
-                'final_price': final_price,
-                'voucher_code': voucher_code,
-                'voucher_info': voucher_info,
                 'payment_status': 'pending',
-                'stripe_session': session,
+                'stripe_session_url': session.url,
                 'created_at': datetime.utcnow(),
                 'updated_at': datetime.utcnow()
             }
