@@ -264,23 +264,23 @@ const PaymentPage: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Active Vouchers Info */}
-            <Card className="bg-blue-50 border-blue-200">
-              <CardHeader>
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Tag className="h-4 w-4" />
-                  Voucher Disponível
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="bg-white rounded-lg p-3 border border-blue-300">
-                    <p className="font-mono font-bold text-blue-700 text-lg">LANCAMENTO50</p>
-                    <p className="text-sm text-gray-600 mt-1">50% de desconto - Bônus de Lançamento</p>
+            {/* Voucher Applied Notice - Only shown when voucher is active */}
+            {voucherApplied && (
+              <Card className="bg-green-50 border-green-200">
+                <CardHeader>
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Desconto Especial Aplicado
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-white rounded-lg p-3 border border-green-300">
+                    <p className="font-mono font-bold text-green-700 text-lg">{voucherCode}</p>
+                    <p className="text-sm text-gray-600 mt-1">{voucherMessage}</p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Payment Info */}
