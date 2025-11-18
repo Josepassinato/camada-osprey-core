@@ -284,7 +284,8 @@ const SelectForm = () => {
           // Verify the update was successful
           if (updateData.case && updateData.case.form_code === formCode) {
             // Redirect to payment page
-            navigate(`/payment?visa_code=${formCode}&case_id=${existingCaseId}`);
+            const paymentUrl = `/payment?visa_code=${formCode}&case_id=${existingCaseId}${voucherFromUrl ? `&voucher=${voucherFromUrl}` : ''}`;
+            navigate(paymentUrl);
             return;
           } else {
             console.log('⚠️ Form code mismatch after update, creating new case');
