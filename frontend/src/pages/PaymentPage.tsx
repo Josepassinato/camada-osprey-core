@@ -59,21 +59,12 @@ const PaymentPage: React.FC = () => {
       setLoading(true);
       console.log(`📦 Loading package info for: ${visaCode}`);
       
-      // Check if voucher is in URL
-      const voucherParam = voucherFromUrl ? `?voucher_code=${voucherFromUrl}` : '';
-      const data = await makeApiCall(`/packages/${visaCode}${voucherParam}`, 'GET');
+      const data = await makeApiCall(`/packages/${visaCode}`, 'GET');
       console.log('📦 Package data:', data);
       
       if (data.success) {
         setPackageInfo(data.package);
         setPriceInfo(data.price_info);
-        
-        // If voucher was applied from URL
-        if (voucherFromUrl && data.voucher_info) {
-          setVoucherApplied(true);
-          setVoucherMessage(data.voucher_info.message || `✅ Desconto aplicado: ${data.voucher_info.discount_percentage}% OFF`);
-          console.log('🎟️ Voucher applied from URL:', data.voucher_info);
-        }
         
         console.log('✅ Package info loaded successfully');
       } else {
