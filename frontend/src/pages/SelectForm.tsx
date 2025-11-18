@@ -282,7 +282,7 @@ const SelectForm = () => {
           // Verify the update was successful
           if (updateData.case && updateData.case.form_code === formCode) {
             // Redirect to payment page
-            const paymentUrl = `/payment?visa_code=${formCode}&case_id=${existingCaseId}${voucherFromUrl ? `&voucher=${voucherFromUrl}` : ''}`;
+            const paymentUrl = `/payment?visa_code=${formCode}&case_id=${existingCaseId}`;
             navigate(paymentUrl);
             return;
           } else {
