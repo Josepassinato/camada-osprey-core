@@ -34,7 +34,6 @@ const PaymentPage: React.FC = () => {
   
   const visaCode = searchParams.get('visa_code');
   const caseId = searchParams.get('case_id');
-  const voucherFromUrl = searchParams.get('voucher'); // Get voucher from URL
   
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
   const [priceInfo, setPriceInfo] = useState<PriceInfo | null>(null);
