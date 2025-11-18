@@ -193,24 +193,6 @@ const PaymentPage: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Voucher Applied Notice - Only shown when voucher is active */}
-            {voucherApplied && (
-              <Card className="bg-green-50 border-green-200">
-                <CardHeader>
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Desconto Especial Aplicado
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="bg-white rounded-lg p-3 border border-green-300">
-                    <p className="font-mono font-bold text-green-700 text-lg">{voucherCode}</p>
-                    <p className="text-sm text-gray-600 mt-1">{voucherMessage}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </div>
 
           {/* Payment Info */}
