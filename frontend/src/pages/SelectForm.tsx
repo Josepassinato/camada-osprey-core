@@ -410,15 +410,30 @@ const SelectForm = () => {
         )}
 
         <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
-          {uscisforms.map((form) => (
+          {uscisforms.map((form) => {
+            // Identificar vistos premium
+            const isPremium = ['EB-2 NIW', 'EB-1A', 'I-765'].includes(form.code);
+            const premiumColors = isPremium 
+              ? 'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-300 hover:border-purple-500' 
+              : 'bg-white border-gray-200';
+            const selectedColors = selectedForm === form.code 
+              ? 'border-purple-600 shadow-2xl shadow-purple-200' 
+              : '';
+            
+            return (
             <div 
               key={form.code}
-              className={`bg-white border-2 rounded-lg p-4 sm:p-6 cursor-pointer transition-all hover:shadow-lg ${
-                selectedForm === form.code ? 'border-black shadow-lg' : 'border-gray-200'
-              }`}
+              className={`border-2 rounded-lg p-4 sm:p-6 cursor-pointer transition-all hover:shadow-lg ${
+                isPremium ? premiumColors : 'bg-white'
+              } ${selectedColors || (isPremium ? '' : selectedForm === form.code ? 'border-black shadow-lg' : 'border-gray-200')}`}
               onClick={() => setSelectedForm(form.code)}
             >
-              {form.popular && (
+              {isPremium && (
+                <div className="inline-block bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs px-3 py-1 rounded-full mb-3 font-semibold shadow-md">
+                  ⭐ Premium
+                </div>
+              )}
+              {form.popular && !isPremium && (
                 <div className="inline-block bg-black text-white text-xs px-2 py-1 rounded-full mb-3">
                   Popular
                 </div>
