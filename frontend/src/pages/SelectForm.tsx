@@ -381,7 +381,7 @@ const SelectForm = () => {
             <div className="flex items-center gap-3 sm:gap-4">
               <Button 
                 variant="ghost" 
-                onClick={() => navigate(`/auto-application/start${voucherFromUrl ? `?voucher=${voucherFromUrl}` : ''}`)}
+                onClick={() => navigate('/auto-application/start')}
                 className="p-2 hover:bg-gray-100"
               >
                 <ArrowLeft className="h-4 w-4" />
