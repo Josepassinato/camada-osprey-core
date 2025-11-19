@@ -364,7 +364,7 @@ const NewHomepage = () => {
               Preços Honestos. Sem Surpresas.
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Compare: Advogados cobram $5.000-$15.000. Nossa tecnologia torna acessível.
+              Compare: Serviços tradicionais cobram $5.000-$15.000. Nossa tecnologia torna acessível.
             </p>
           </div>
 
