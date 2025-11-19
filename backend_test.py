@@ -1481,8 +1481,8 @@ class ProductionVerificationTester:
             
             story_data = story_response.json()
             case_data = story_data.get('case', story_data)
-            stored_story = case_data.get('user_story', '')
-            stored_responses = case_data.get('simplified_responses', {})
+            stored_story = case_data.get('user_story_text', '')
+            stored_responses = case_data.get('simplified_form_responses', {})
             
             print(f"   ✅ História salva: {len(stored_story)} caracteres")
             print(f"   ✅ Respostas simplificadas: {len(stored_responses)} campos")
