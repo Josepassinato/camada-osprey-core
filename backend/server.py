@@ -8788,6 +8788,136 @@ async def generate_final_package_endpoint(case_id: str):
         logger.error(f"Erro ao gerar pacote: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# ============================================================================
+# KNOWLEDGE BASE ENDPOINTS (Admin Only)
+# ============================================================================
+
+@api_router.post("/admin/knowledge-base/upload")
+async def upload_knowledge_document(
+    file: UploadFile,
+    category: str = Form(...),
+    subcategory: str = Form(...),
+    form_types: str = Form(...),  # Comma-separated
+    description: str = Form(...),
+    uploaded_by: str = Form("admin")
+):
+    """
+    Upload documento para a base de conhecimento interna
+    ADMIN ONLY - Não exposto ao usuário final
+    """
+    try:
+        from knowledge_base_manager import KnowledgeBaseManager
+        
+        kb_manager = KnowledgeBaseManager(db)
+        
+        # Ler arquivo
+        file_data = await file.read()
+        
+        # Parse form types
+        form_types_list = [ft.strip() for ft in form_types.split(",")]
+        
+        # Upload
+        result = await kb_manager.upload_document(
+            file_data=file_data,
+            filename=file.filename,
+            category=category,
+            subcategory=subcategory,
+            form_types=form_types_list,
+            description=description,
+            uploaded_by=uploaded_by
+        )
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"Erro ao fazer upload: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/admin/knowledge-base/list")
+async def list_knowledge_documents(skip: int = 0, limit: int = 50):
+    """Lista todos os documentos da base de conhecimento"""
+    try:
+        from knowledge_base_manager import KnowledgeBaseManager
+        kb_manager = KnowledgeBaseManager(db)
+        return await kb_manager.list_all_documents(skip, limit)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/admin/knowledge-base/categories")
+async def get_knowledge_categories():
+    """Retorna categorias disponíveis"""
+    from knowledge_base_manager import KNOWLEDGE_BASE_CATEGORIES, SUPPORTED_FORM_TYPES
+    return {
+        "categories": KNOWLEDGE_BASE_CATEGORIES,
+        "form_types": SUPPORTED_FORM_TYPES
+    }
+
+@api_router.get("/admin/knowledge-base/{document_id}")
+async def get_knowledge_document(document_id: str):
+    """Busca documento específico por ID"""
+    try:
+        from knowledge_base_manager import KnowledgeBaseManager
+        kb_manager = KnowledgeBaseManager(db)
+        doc = await kb_manager.get_document_by_id(document_id)
+        
+        if not doc:
+            raise HTTPException(status_code=404, detail="Document not found")
+        
+        return doc
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/admin/knowledge-base/{document_id}/download")
+async def download_knowledge_document(document_id: str):
+    """Download do arquivo PDF"""
+    try:
+        from knowledge_base_manager import KnowledgeBaseManager
+        from fastapi.responses import Response
+        
+        kb_manager = KnowledgeBaseManager(db)
+        doc = await kb_manager.get_document_by_id(document_id)
+        
+        if not doc or 'file_data' not in doc:
+            raise HTTPException(status_code=404, detail="Document not found")
+        
+        return Response(
+            content=doc['file_data'],
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={doc['filename']}"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.delete("/admin/knowledge-base/{document_id}")
+async def delete_knowledge_document(document_id: str):
+    """Deleta documento da base"""
+    try:
+        from knowledge_base_manager import KnowledgeBaseManager
+        kb_manager = KnowledgeBaseManager(db)
+        return await kb_manager.delete_document(document_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/admin/knowledge-base/stats/overview")
+async def get_knowledge_stats():
+    """Estatísticas da base de conhecimento"""
+    try:
+        from knowledge_base_manager import KnowledgeBaseManager
+        kb_manager = KnowledgeBaseManager(db)
+        return await kb_manager.get_statistics()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/admin/knowledge-base/search")
+async def search_knowledge_base(q: str):
+    """Busca na base de conhecimento"""
+    try:
+        from knowledge_base_manager import KnowledgeBaseManager
+        kb_manager = KnowledgeBaseManager(db)
+        return await kb_manager.search_documents(q)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/packages/{visa_code}")
 async def get_visa_package_info(visa_code: str, voucher_code: Optional[str] = None):
     """
