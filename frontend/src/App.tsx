@@ -91,6 +91,7 @@ const App = () => (
           <Route path="/owl-agent/payment-success" element={<OwlPaymentSuccessPage />} />
           {/* Admin Panel Routes */}
           <Route path="/admin/visa-updates" element={<AdminVisaUpdatesPanel />} />
+          <Route path="/admin/knowledge-base" element={<AdminKnowledgeBase />} />
           {/* Demo/Example Routes */}
           {/* <Route path="/demo/adaptive-language" element={<AdaptiveFormExample />} /> */}
           <Route path="/demo/proactive-alerts" element={<ProactiveAlertsDemo />} />
