@@ -19,6 +19,7 @@ import Applications from "./pages/Applications";
 import NewApplication from "./pages/NewApplication";
 import ApplicationDetail from "./pages/ApplicationDetail";
 import NewHomepage from "./pages/NewHomepage";
+import AdminKnowledgeBase from "./pages/AdminKnowledgeBase";
 import SelectForm from "./pages/SelectForm";
 import BasicData from "./pages/BasicData";
 import DocumentUploadAuto from "./pages/DocumentUploadAuto";
