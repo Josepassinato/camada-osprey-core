@@ -8753,6 +8753,41 @@ async def get_payment_packages():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@api_router.get("/auto-application/case/{case_id}/generate-package")
+async def generate_final_package_endpoint(case_id: str, db=Depends(get_db)):
+    """
+    Gera pacote final completo com todos os documentos para envio ao USCIS
+    """
+    try:
+        # Buscar case no banco
+        case = await db.auto_application_cases.find_one({"case_id": case_id})
+        
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        # Importar gerador de pacotes
+        from package_generator import generate_final_package
+        
+        # Gerar pacote ZIP
+        package_bytes = generate_final_package(case)
+        
+        # Salvar no sistema de arquivos temporariamente
+        temp_path = f"/tmp/{case_id}_USCIS_Package.zip"
+        with open(temp_path, 'wb') as f:
+            f.write(package_bytes)
+        
+        # Retornar arquivo
+        from fastapi.responses import FileResponse
+        return FileResponse(
+            temp_path,
+            media_type='application/zip',
+            filename=f"{case_id}_USCIS_Complete_Package.zip"
+        )
+        
+    except Exception as e:
+        logger.error(f"Erro ao gerar pacote: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/packages/{visa_code}")
 async def get_visa_package_info(visa_code: str, voucher_code: Optional[str] = None):
     """
