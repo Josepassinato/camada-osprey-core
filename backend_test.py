@@ -1450,7 +1450,7 @@ class ProductionVerificationTester:
             
             f1_data = f1_response.json()
             case_data = f1_data.get('case', f1_data)
-            stored_f1_data = case_data.get('f1_data', {})
+            stored_f1_data = case_data.get('simplified_form_responses', {})
             
             print(f"   ✅ Universidade: {stored_f1_data.get('school_name', 'N/A')}")
             print(f"   ✅ Programa: {stored_f1_data.get('program', 'N/A')}")
