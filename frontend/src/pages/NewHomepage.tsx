@@ -170,6 +170,34 @@ const NewHomepage = () => {
         </div>
       </section>
 
+      {/* Important Notice */}
+      <section className="py-12 bg-gradient-to-r from-amber-50 to-orange-50 border-y-4 border-amber-400">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-2xl p-8 shadow-xl border-2 border-amber-400">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full flex items-center justify-center">
+                  <Shield className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  ⚖️ Aviso Importante sobre Orientação Jurídica
+                </h3>
+                <p className="text-lg text-gray-800 leading-relaxed mb-4">
+                  <strong className="text-amber-700">Caso você ainda não tenha clareza do seu melhor caminho imigratório,</strong> recomendamos <strong className="text-amber-700">fortemente a consulta de um advogado de imigração</strong> especializado antes de iniciar qualquer processo.
+                </p>
+                <div className="bg-amber-50 rounded-lg p-4 border-l-4 border-amber-500">
+                  <p className="text-sm text-gray-700">
+                    ℹ️ <strong>Nossa plataforma é uma ferramenta tecnológica</strong> que auxilia no preenchimento de formulários. Não substituímos aconselhamento jurídico personalizado. Para casos complexos ou dúvidas sobre elegibilidade, sempre consulte um profissional qualificado.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Problem/Solution Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
