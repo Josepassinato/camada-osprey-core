@@ -312,29 +312,328 @@ class USCISPackageGenerator:
         buffer.seek(0)
         return buffer.getvalue()
     
+    def generate_index_page(self) -> bytes:
+        """Gera página de índice/sumário do pacote"""
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter,
+                               topMargin=0.75*inch, bottomMargin=0.75*inch,
+                               leftMargin=0.75*inch, rightMargin=0.75*inch)
+        
+        story = []
+        styles = getSampleStyleSheet()
+        
+        title_style = ParagraphStyle(
+            'IndexTitle',
+            parent=styles['Heading1'],
+            fontSize=18,
+            spaceAfter=30,
+            alignment=TA_CENTER,
+            textColor=colors.HexColor('#000066')
+        )
+        
+        story.append(Paragraph("USCIS APPLICATION PACKAGE", title_style))
+        story.append(Paragraph(f"FORM {self.form_code} - COMPLETE SUBMISSION", styles['Heading2']))
+        story.append(Spacer(1, 0.3*inch))
+        
+        # Informações do caso
+        story.append(Paragraph(f"<b>Applicant:</b> {self.basic_data.get('firstName', '')} {self.basic_data.get('lastName', '')}", styles['Normal']))
+        story.append(Paragraph(f"<b>Case ID:</b> {self.case_id}", styles['Normal']))
+        story.append(Paragraph(f"<b>Date Prepared:</b> {datetime.now().strftime('%B %d, %Y')}", styles['Normal']))
+        story.append(Spacer(1, 0.4*inch))
+        
+        story.append(Paragraph("<b>PACKAGE CONTENTS:</b>", styles['Heading2']))
+        story.append(Spacer(1, 0.2*inch))
+        
+        # Índice de documentos
+        index_data = [
+            ['Section', 'Document', 'Description'],
+            ['', '', ''],
+            ['SECTION 1', 'Cover Letter', 'Introduction and summary of application'],
+            ['', 'Form ' + self.form_code, 'Official USCIS application form (completed in English)'],
+            ['', '', ''],
+            ['SECTION 2', 'Supporting Documents', 'All required evidence and documentation'],
+            ['', '• Passport Copy', 'Biographical page showing identity'],
+            ['', '• I-94 Record', 'Proof of legal entry to United States'],
+            ['', '• Additional Documents', 'All uploaded supporting evidence'],
+            ['', '', ''],
+            ['SECTION 3', 'Administrative', 'Checklists and instructions'],
+            ['', 'Document Checklist', 'Complete list of all included documents'],
+            ['', 'Mailing Instructions', 'How to submit this package to USCIS'],
+        ]
+        
+        table = Table(index_data, colWidths=[1.3*inch, 2.2*inch, 3*inch])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#000066')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 11),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('FONTNAME', (0, 2), (0, -1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 2), (-1, -1), 9),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('LEFTPADDING', (0, 0), (-1, -1), 8),
+            ('TOPPADDING', (0, 2), (-1, -1), 6),
+        ]))
+        
+        story.append(table)
+        story.append(Spacer(1, 0.4*inch))
+        
+        # Instruções importantes
+        story.append(Paragraph("<b>IMPORTANT INSTRUCTIONS:</b>", styles['Heading3']))
+        story.append(Paragraph("1. Review ALL documents carefully before mailing", styles['Normal']))
+        story.append(Paragraph("2. Sign Form " + self.form_code + " where indicated", styles['Normal']))
+        story.append(Paragraph("3. Make complete copies of everything for your records", styles['Normal']))
+        story.append(Paragraph("4. Follow the mailing instructions in Section 3", styles['Normal']))
+        story.append(Paragraph("5. Use certified mail with tracking number", styles['Normal']))
+        story.append(Spacer(1, 0.3*inch))
+        
+        story.append(Paragraph("<i>This package was prepared using Osprey Immigration Platform. All documents are organized in the proper order for USCIS submission.</i>", styles['Normal']))
+        
+        doc.build(story)
+        buffer.seek(0)
+        return buffer.getvalue()
+    
+    def generate_section_separator(self, section_number: int, section_title: str, description: str) -> bytes:
+        """Gera página separadora entre seções"""
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        
+        story = []
+        styles = getSampleStyleSheet()
+        
+        story.append(Spacer(1, 2*inch))
+        
+        title_style = ParagraphStyle(
+            'SectionTitle',
+            parent=styles['Heading1'],
+            fontSize=24,
+            alignment=TA_CENTER,
+            textColor=colors.HexColor('#000066'),
+            spaceAfter=20
+        )
+        
+        story.append(Paragraph(f"SECTION {section_number}", title_style))
+        story.append(Paragraph(section_title, styles['Heading2']))
+        story.append(Spacer(1, 0.3*inch))
+        story.append(Paragraph(description, styles['Normal']))
+        
+        doc.build(story)
+        buffer.seek(0)
+        return buffer.getvalue()
+    
     def generate_complete_package(self) -> bytes:
-        """Gera pacote ZIP com todos os documentos"""
+        """Gera pacote ZIP com TODOS os documentos organizados como advogados fazem"""
         zip_buffer = io.BytesIO()
         
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-            # 1. Formulário oficial
-            official_form = self.generate_official_form_pdf()
-            zip_file.writestr(f"01_Official_Form_{self.form_code}.pdf", official_form)
             
-            # 2. Carta de apresentação
+            # ============ ÍNDICE ============
+            index_page = self.generate_index_page()
+            zip_file.writestr("00_INDEX_Package_Contents.pdf", index_page)
+            
+            # ============ SECTION 1: APPLICATION FORMS ============
+            section1 = self.generate_section_separator(1, "APPLICATION FORMS", 
+                "This section contains the cover letter and official USCIS application form")
+            zip_file.writestr("Section_1_APPLICATION_FORMS/00_Section_Separator.pdf", section1)
+            
+            # 1. Carta de apresentação
             cover_letter = self.generate_cover_letter()
-            zip_file.writestr("02_Cover_Letter.pdf", cover_letter)
+            zip_file.writestr("Section_1_APPLICATION_FORMS/01_Cover_Letter.pdf", cover_letter)
             
-            # 3. Checklist
+            # 2. Formulário oficial USCIS preenchido pela IA
+            official_form = self.generate_official_form_pdf()
+            zip_file.writestr(f"Section_1_APPLICATION_FORMS/02_Form_{self.form_code}_COMPLETED.pdf", official_form)
+            
+            # ============ SECTION 2: SUPPORTING DOCUMENTS ============
+            section2 = self.generate_section_separator(2, "SUPPORTING DOCUMENTS", 
+                "This section contains all required supporting documentation and evidence")
+            zip_file.writestr("Section_2_SUPPORTING_DOCUMENTS/00_Section_Separator.pdf", section2)
+            
+            # Adicionar documentos do usuário (se existirem)
+            documents = self.case_data.get('documents', [])
+            doc_counter = 1
+            
+            # Documentos padrão que sempre devem ser incluídos (placeholder se não houver upload)
+            required_docs = [
+                ('Passport_Biographical_Page', 'Copy of passport biographical page'),
+                ('I94_Arrival_Departure_Record', 'Copy of I-94 Arrival/Departure Record'),
+                ('Current_Visa', 'Copy of current visa stamp'),
+                ('Financial_Evidence', 'Evidence of financial support'),
+            ]
+            
+            for doc_name, doc_description in required_docs:
+                # Verificar se usuário fez upload deste documento
+                user_doc = next((d for d in documents if doc_name.lower() in d.get('name', '').lower()), None)
+                
+                if user_doc and 'file_data' in user_doc:
+                    # Incluir documento real do usuário
+                    zip_file.writestr(
+                        f"Section_2_SUPPORTING_DOCUMENTS/{doc_counter:02d}_{doc_name}.pdf",
+                        user_doc['file_data']
+                    )
+                else:
+                    # Criar placeholder indicando que documento deve ser anexado
+                    placeholder = self.generate_document_placeholder(doc_name, doc_description)
+                    zip_file.writestr(
+                        f"Section_2_SUPPORTING_DOCUMENTS/{doc_counter:02d}_{doc_name}_PLACEHOLDER.pdf",
+                        placeholder
+                    )
+                
+                doc_counter += 1
+            
+            # Adicionar outros documentos que o usuário fez upload
+            other_docs = [d for d in documents if not any(req[0].lower() in d.get('name', '').lower() for req in required_docs)]
+            for doc in other_docs:
+                if 'file_data' in doc:
+                    filename = doc.get('name', f'Additional_Document_{doc_counter}')
+                    zip_file.writestr(
+                        f"Section_2_SUPPORTING_DOCUMENTS/{doc_counter:02d}_{filename}",
+                        doc['file_data']
+                    )
+                    doc_counter += 1
+            
+            # ============ SECTION 3: ADMINISTRATIVE ============
+            section3 = self.generate_section_separator(3, "ADMINISTRATIVE", 
+                "This section contains checklists and mailing instructions")
+            zip_file.writestr("Section_3_ADMINISTRATIVE/00_Section_Separator.pdf", section3)
+            
+            # 1. Document Checklist
             checklist = self.generate_document_checklist()
-            zip_file.writestr("03_Document_Checklist.pdf", checklist)
+            zip_file.writestr("Section_3_ADMINISTRATIVE/01_Document_Checklist.pdf", checklist)
             
-            # 4. Instruções de envio
+            # 2. Instruções de envio
             instructions = self.generate_mailing_instructions()
-            zip_file.writestr("04_Mailing_Instructions.txt", instructions.encode('utf-8'))
+            zip_file.writestr("Section_3_ADMINISTRATIVE/02_Mailing_Instructions.txt", instructions.encode('utf-8'))
+            
+            # 3. Adicionar README
+            readme = self.generate_readme()
+            zip_file.writestr("README_FIRST.txt", readme.encode('utf-8'))
         
         zip_buffer.seek(0)
         return zip_buffer.getvalue()
+    
+    def generate_document_placeholder(self, doc_name: str, description: str) -> bytes:
+        """Gera placeholder PDF para documentos não enviados"""
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        
+        story = []
+        styles = getSampleStyleSheet()
+        
+        story.append(Spacer(1, 2*inch))
+        
+        warning_style = ParagraphStyle(
+            'Warning',
+            parent=styles['Heading1'],
+            fontSize=16,
+            alignment=TA_CENTER,
+            textColor=colors.red,
+            spaceAfter=30
+        )
+        
+        story.append(Paragraph("⚠️ DOCUMENT REQUIRED", warning_style))
+        story.append(Paragraph(f"<b>{doc_name.replace('_', ' ')}</b>", styles['Heading2']))
+        story.append(Spacer(1, 0.3*inch))
+        story.append(Paragraph(description, styles['Normal']))
+        story.append(Spacer(1, 0.3*inch))
+        story.append(Paragraph("<b>ACTION REQUIRED:</b>", styles['Heading3']))
+        story.append(Paragraph("Please insert this document here before mailing your application to USCIS.", styles['Normal']))
+        
+        doc.build(story)
+        buffer.seek(0)
+        return buffer.getvalue()
+    
+    def generate_readme(self) -> str:
+        """Gera arquivo README"""
+        return f"""
+================================================================================
+                        USCIS APPLICATION PACKAGE
+                            FORM {self.form_code}
+================================================================================
+
+Applicant: {self.basic_data.get('firstName', '')} {self.basic_data.get('lastName', '')}
+Case ID: {self.case_id}
+Date Prepared: {datetime.now().strftime('%B %d, %Y')}
+
+================================================================================
+                            QUICK START GUIDE
+================================================================================
+
+📋 STEP 1: REVIEW THE INDEX
+   Open: 00_INDEX_Package_Contents.pdf
+   This shows you everything included in this package
+
+📝 STEP 2: REVIEW AND SIGN FORMS
+   Go to: Section_1_APPLICATION_FORMS/
+   • Read the cover letter
+   • Review Form {self.form_code} (already filled out in English by AI)
+   • Sign Form {self.form_code} where indicated
+   • Date the signature
+
+📎 STEP 3: CHECK SUPPORTING DOCUMENTS
+   Go to: Section_2_SUPPORTING_DOCUMENTS/
+   • Review all included documents
+   • If you see any PLACEHOLDER files, replace them with the actual documents
+   • Make sure all copies are clear and legible
+
+✅ STEP 4: USE THE CHECKLIST
+   Go to: Section_3_ADMINISTRATIVE/
+   • Open the Document Checklist
+   • Check off each item as you verify it
+   • Make sure nothing is missing
+
+📮 STEP 5: MAIL YOUR APPLICATION
+   • Follow instructions in: Section_3_ADMINISTRATIVE/02_Mailing_Instructions.txt
+   • Use certified mail with tracking
+   • Keep copies of EVERYTHING
+
+================================================================================
+                        PACKAGE ORGANIZATION
+================================================================================
+
+This package is organized exactly as immigration attorneys prepare submissions:
+
+📁 Section 1: APPLICATION FORMS
+   ├── Cover Letter
+   └── Official USCIS Form (completed in English)
+
+📁 Section 2: SUPPORTING DOCUMENTS  
+   ├── Passport Copy
+   ├── I-94 Record
+   ├── Visa Copy
+   ├── Financial Evidence
+   └── Additional Documents
+
+📁 Section 3: ADMINISTRATIVE
+   ├── Document Checklist
+   └── Mailing Instructions
+
+================================================================================
+                        IMPORTANT NOTES
+================================================================================
+
+✓ All forms are pre-filled in English by our AI system
+✓ Documents are organized in the order USCIS expects
+✓ Simply print, sign, and mail - no additional formatting needed
+✓ Keep complete copies of everything you mail
+
+⚠️ This is NOT legal advice. For complex cases, consult an immigration attorney.
+
+================================================================================
+                        NEED HELP?
+================================================================================
+
+Questions? Contact:
+• USCIS: 1-800-375-5283
+• Case Status: https://egov.uscis.gov/casestatus/
+
+================================================================================
+
+Good luck with your application!
+Prepared by Osprey Immigration Platform
+"""
     
     def generate_mailing_instructions(self) -> str:
         """Gera instruções de envio"""
