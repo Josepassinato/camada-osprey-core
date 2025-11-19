@@ -5531,7 +5531,7 @@ class ProductionVerificationTester:
             
             # CAMPOS ESPECÍFICOS DO F-1 PREENCHIDOS
             print(f"\n📝 CAMPOS ESPECÍFICOS DO F-1 PREENCHIDOS:")
-            responses = final_case.get('simplified_form_responses', {})
+            responses = final_case.get('simplified_form_responses') or {}
             f1_fields = {
                 "schoolName": responses.get('schoolName', 'N/A'),
                 "program": responses.get('program', 'N/A'),
