@@ -8984,6 +8984,11 @@ class SendPackageEmailRequest(BaseModel):
     application_type: str = "I-539"
     case_id: str
 
+class RequestPackageEmailRequest(BaseModel):
+    """Request model for user requesting package via email"""
+    case_id: str
+    user_email: EmailStr
+
 @api_router.post("/email/send-package")
 async def send_package_email(request: SendPackageEmailRequest):
     """
