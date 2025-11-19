@@ -153,7 +153,7 @@ const NewHomepage = () => {
                   className="h-4 w-4 mt-1 accent-purple-600 cursor-pointer"
                 />
                 <label htmlFor="terms-hero" className="text-sm text-gray-600 cursor-pointer">
-                  Concordo com os termos de uso e política de privacidade. Esta é uma ferramenta de auxílio, não consultoria jurídica.
+                  Concordo com os termos de uso e política de privacidade. Entendo que esta é uma ferramenta de auxílio tecnológico, não consultoria jurídica. Se não tenho clareza sobre meu caminho imigratório, consultarei um advogado especializado.
                 </label>
               </div>
               
