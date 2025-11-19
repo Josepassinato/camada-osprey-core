@@ -1458,15 +1458,29 @@ class ProductionVerificationTester:
             print(f"   ✅ Data início: {stored_f1_data.get('program_start_date', 'N/A')}")
             print(f"   ✅ Progress: {case_data.get('progress_percentage', 0)}%")
             
-            # ETAPA 4: História Detalhada
+            # ETAPA 4: História Detalhada (merge with existing F-1 data)
             print("\n📋 ETAPA 4: HISTÓRIA DETALHADA")
             print("   PUT /api/auto-application/case/{case_id}")
             
             story_update = {
                 "user_story_text": "Entrei nos Estados Unidos em setembro de 2024 como turista B-2 para conhecer universidades e participar de entrevistas. Durante minha estadia, fui aceita no programa de MBA da Stanford University, uma das mais prestigiadas escolas de negócios do mundo. Minha família no Brasil, proprietária de uma empresa de tecnologia, está me apoiando financeiramente com recursos mais do que suficientes para cobrir todos os custos do programa. Planejo completar meu MBA em 2 anos e retornar ao Brasil para assumir uma posição executiva na empresa da família, aplicando o conhecimento adquirido.",
                 "simplified_form_responses": {
+                    # Keep F-1 data from previous step
+                    "school_name": "Stanford University",
+                    "school_address": "450 Serra Mall, Stanford, CA 94305",
+                    "sevis_number": "N9876543210",
+                    "program": "Master of Business Administration (MBA)",
+                    "program_start_date": "2025-04-01",
+                    "program_end_date": "2027-06-15",
+                    "degree_level": "Master",
+                    "major": "Business Administration",
+                    "financial_support": "Family business and personal savings",
+                    "sponsor_name": "João Carlos Santos (Father - CEO)",
+                    "sponsor_relationship": "Father",
+                    "estimated_expenses": "$85,000 per year",
+                    # Add story-specific responses
                     "reason_change": "Aceita no MBA Stanford - top business school mundial",
-                    "financial_support": "Empresa familiar de tecnologia + poupança pessoal",
+                    "financial_support_detail": "Empresa familiar de tecnologia + poupança pessoal",
                     "intention_return": "Sim, assumir cargo executivo na empresa familiar",
                     "previous_study": "Bacharel em Administração - Fundação Getúlio Vargas (FGV)"
                 },
