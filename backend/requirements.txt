@@ -137,3 +137,4 @@ APScheduler==3.10.4
 # Payment Processing
 stripe>=4.0.0
 reportlab
+PyPDF2
