@@ -62,14 +62,14 @@ class ProductionVerificationTester:
         print()
     
     def run_production_verification(self):
-        """Execute COMPREHENSIVE TESTING - F-1 END-TO-END CASE"""
-        print("🚀 TESTE COMPLETO END-TO-END - CASO F-1 (VISTO DE ESTUDANTE)")
-        print("🎯 OBJETIVO: Testar fluxo completo de aplicação F-1 com dados do João Pedro Oliveira")
+        """Execute COMPREHENSIVE ADMIN KNOWLEDGE BASE TESTING"""
+        print("🔍 COMPREHENSIVE ADMIN KNOWLEDGE BASE SYSTEM TESTING")
+        print("🎯 OBJETIVO: Testar sistema completo de Knowledge Base para agentes internos")
         print("="*80)
         
-        # TESTE COMPLETO F-1 END-TO-END
-        print("\n🇧🇷 JOÃO PEDRO OLIVEIRA - F-1 COMPLETE JOURNEY")
-        self.test_f1_complete_end_to_end()
+        # ADMIN KNOWLEDGE BASE TESTING
+        print("\n📚 ADMIN KNOWLEDGE BASE - COMPREHENSIVE TESTING")
+        self.test_admin_knowledge_base_complete()
         
         # Final Summary
         self.print_production_verification_summary()
