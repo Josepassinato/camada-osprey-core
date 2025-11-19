@@ -309,6 +309,47 @@ const NewHomepage = () => {
         </div>
       </section>
 
+      {/* Not For You Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-xl p-8 border-2 border-gray-200 shadow-md">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+              ⚠️ Esta ferramenta <span className="text-red-600">NÃO é para você</span> se:
+            </h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              {[
+                {
+                  icon: "❓",
+                  text: "Você não sabe qual tipo de visto ou processo precisa aplicar"
+                },
+                {
+                  icon: "🤔",
+                  text: "Tem dúvidas sobre sua elegibilidade ou direito ao visto"
+                },
+                {
+                  icon: "⚖️",
+                  text: "Seu caso envolve questões criminais ou violações de status"
+                },
+                {
+                  icon: "🔍",
+                  text: "Precisa de análise estratégica personalizada do seu caso"
+                }
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-start gap-3 p-4 bg-red-50 rounded-lg border border-red-200">
+                  <span className="text-2xl flex-shrink-0">{item.icon}</span>
+                  <p className="text-gray-700">{item.text}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 p-4 bg-amber-50 rounded-lg border-l-4 border-amber-500">
+              <p className="text-sm text-gray-800">
+                <strong>💡 Nestes casos:</strong> Recomendamos fortemente que você consulte primeiro um advogado de imigração especializado para avaliar seu caso, definir a melhor estratégia e depois, se apropriado, utilize nossa ferramenta para executar o preenchimento dos formulários.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Problem/Solution Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
