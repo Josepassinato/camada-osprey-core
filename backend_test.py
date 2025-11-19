@@ -1463,8 +1463,8 @@ class ProductionVerificationTester:
             print("   PUT /api/auto-application/case/{case_id}")
             
             story_update = {
-                "user_story": "Entrei nos Estados Unidos em setembro de 2024 como turista B-2 para conhecer universidades e participar de entrevistas. Durante minha estadia, fui aceita no programa de MBA da Stanford University, uma das mais prestigiadas escolas de negócios do mundo. Minha família no Brasil, proprietária de uma empresa de tecnologia, está me apoiando financeiramente com recursos mais do que suficientes para cobrir todos os custos do programa. Planejo completar meu MBA em 2 anos e retornar ao Brasil para assumir uma posição executiva na empresa da família, aplicando o conhecimento adquirido.",
-                "simplified_responses": {
+                "user_story_text": "Entrei nos Estados Unidos em setembro de 2024 como turista B-2 para conhecer universidades e participar de entrevistas. Durante minha estadia, fui aceita no programa de MBA da Stanford University, uma das mais prestigiadas escolas de negócios do mundo. Minha família no Brasil, proprietária de uma empresa de tecnologia, está me apoiando financeiramente com recursos mais do que suficientes para cobrir todos os custos do programa. Planejo completar meu MBA em 2 anos e retornar ao Brasil para assumir uma posição executiva na empresa da família, aplicando o conhecimento adquirido.",
+                "simplified_form_responses": {
                     "reason_change": "Aceita no MBA Stanford - top business school mundial",
                     "financial_support": "Empresa familiar de tecnologia + poupança pessoal",
                     "intention_return": "Sim, assumir cargo executivo na empresa familiar",
