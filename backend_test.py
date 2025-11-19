@@ -1572,9 +1572,7 @@ class ProductionVerificationTester:
             
             completion_update = {
                 "status": "completed",
-                "progress_percentage": 100,
-                "documents_created": documents_created,
-                "completed_at": datetime.now().isoformat()
+                "progress_percentage": 100
             }
             
             completion_response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=completion_update)
