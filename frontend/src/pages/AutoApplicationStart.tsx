@@ -329,7 +329,7 @@ const AutoApplicationStart = () => {
               },
               {
                 quote: "Fiquei tão satisfeito com o serviço que voltei para fazer uma segunda aplicação com eles.",
-                author: "João P. - Advogado"
+                author: "João P. - Profissional de Imigração"
               }
             ].map((testimonial, index) => (
               <div key={index} className="bg-white p-8 rounded-lg">
