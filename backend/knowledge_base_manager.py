@@ -204,13 +204,12 @@ class KnowledgeBaseManager:
     async def search_documents(self, query: str) -> List[Dict]:
         """Busca documentos por texto"""
         # Busca no filename, description e extracted_text
-        regex = re.compile(query, re.IGNORECASE)
-        
+        # Use string pattern directly with MongoDB
         documents = await self.collection.find({
             "$or": [
-                {"filename": {"$regex": regex}},
-                {"description": {"$regex": regex}},
-                {"extracted_text": {"$regex": regex}}
+                {"filename": {"$regex": query, "$options": "i"}},
+                {"description": {"$regex": query, "$options": "i"}},
+                {"extracted_text": {"$regex": query, "$options": "i"}}
             ],
             "status": "active"
         }).to_list(length=50)
