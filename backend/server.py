@@ -9185,8 +9185,8 @@ async def send_package_email(request: SendPackageEmailRequest):
 @api_router.get("/download/package/{filename}")
 async def download_package(filename: str):
     """
-    Download de pacotes gerados (arquivos ZIP)
-    Exemplo: /api/download/package/Ana_Paula_Costa_I539_COMPLETE_PACKAGE.zip
+    Download de pacotes gerados (arquivos ZIP ou PDF)
+    Exemplo: /api/download/package/Roberto_Silva_Mendes_PACOTE_COMPLETO_DETALHADO.pdf
     """
     try:
         from fastapi.responses import FileResponse
@@ -9197,13 +9197,16 @@ async def download_package(filename: str):
         if not os.path.exists(file_path):
             raise HTTPException(status_code=404, detail="Arquivo não encontrado")
         
-        # Verificar se é um arquivo ZIP
-        if not filename.endswith('.zip'):
-            raise HTTPException(status_code=400, detail="Apenas arquivos ZIP são permitidos")
+        # Verificar se é um arquivo ZIP ou PDF
+        if not (filename.endswith('.zip') or filename.endswith('.pdf')):
+            raise HTTPException(status_code=400, detail="Apenas arquivos ZIP ou PDF são permitidos")
+        
+        # Determinar media type
+        media_type = "application/pdf" if filename.endswith('.pdf') else "application/zip"
         
         return FileResponse(
             path=file_path,
-            media_type="application/zip",
+            media_type=media_type,
             filename=filename,
             headers={
                 "Content-Disposition": f"attachment; filename={filename}"
