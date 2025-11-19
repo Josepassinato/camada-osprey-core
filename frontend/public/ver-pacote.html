@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Pacote - Maria da Silva Santos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #1f2937;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        
+        .case-id {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        
+        .info-box {
+            background: #e0f2fe;
+            border: 2px solid #0ea5e9;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        
+        .info-box h3 {
+            color: #075985;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .info-box ul {
+            list-style: none;
+            color: #075985;
+        }
+        
+        .info-box li {
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .info-box li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+        
+        .download-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+        
+        .download-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .alt-btn {
+            background: #3b82f6;
+        }
+        
+        .alt-btn:hover {
+            background: #2563eb;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 12px;
+        }
+        
+        .file-info {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .file-info p {
+            color: #374151;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">📄</div>
+        <h1>Pacote de Aplicação I-539</h1>
+        <p class="case-id">Maria da Silva Santos | Case ID: OSP-13035BA1</p>
+        
+        <div class="info-box">
+            <h3>📦 Conteúdo do Pacote (4 páginas):</h3>
+            <ul>
+                <li>Capa Profissional</li>
+                <li>Passaporte Brasileiro (BR555888999)</li>
+                <li>Carta de Aceitação Stanford MBA</li>
+                <li>Comprovante Financeiro (R$ 2.5M)</li>
+            </ul>
+        </div>
+        
+        <div class="file-info">
+            <p><strong>Nome do arquivo:</strong> maria-pacote.pdf</p>
+            <p><strong>Tamanho:</strong> 5.3 KB</p>
+            <p><strong>Páginas:</strong> 4</p>
+        </div>
+        
+        <a href="/api/download/package/maria-pacote.pdf" class="download-btn" download>
+            📥 Baixar Pacote Completo
+        </a>
+        
+        <a href="/api/download/package/Maria_da_Silva_Santos_PACOTE_COMPLETO_DETALHADO.pdf" class="download-btn alt-btn" download>
+            📥 Download Alternativo
+        </a>
+        
+        <div class="footer">
+            <p>🔒 Documento gerado automaticamente pelo OSPREY Immigration System</p>
+            <p>Se o download não iniciar, clique com botão direito e escolha "Salvar como"</p>
+        </div>
+    </div>
+</body>
+</html>
