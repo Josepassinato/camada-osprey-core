@@ -8988,6 +8988,7 @@ class SendPackageEmailRequest(BaseModel):
 async def send_package_email(request: SendPackageEmailRequest):
     """
     Envia o pacote de aplicação por email usando Resend.com
+    OPÇÃO 2 + 3: PDF único consolidado anexado + Link para download
     """
     try:
         if not RESEND_API_KEY:
@@ -8996,8 +8997,20 @@ async def send_package_email(request: SendPackageEmailRequest):
                 detail="Email service not configured. Please contact support."
             )
         
-        # Verificar se o arquivo existe
-        file_path = f"/app/{request.package_filename}"
+        # Procurar pelo PDF consolidado detalhado primeiro
+        pdf_filename = request.package_filename.replace('.zip', '_DETALHADO.pdf').replace('_F1_COMPLETE_PACKAGE', '_PACOTE_COMPLETO')
+        file_path = f"/app/{pdf_filename}"
+        
+        # Se não encontrar o detalhado, usar o consolidado normal
+        if not os.path.exists(file_path):
+            pdf_filename = request.package_filename.replace('.zip', '.pdf')
+            file_path = f"/app/{pdf_filename}"
+        
+        # Se ainda não encontrar, tentar o ZIP original
+        if not os.path.exists(file_path):
+            file_path = f"/app/{request.package_filename}"
+            pdf_filename = request.package_filename
+        
         if not os.path.exists(file_path):
             raise HTTPException(
                 status_code=404,
@@ -9009,6 +9022,10 @@ async def send_package_email(request: SendPackageEmailRequest):
             file_content = f.read()
         
         file_base64 = base64.b64encode(file_content).decode("utf-8")
+        
+        # Gerar link de download direto
+        backend_url = os.environ.get('BACKEND_URL', 'https://status-changer-1.preview.emergentagent.com')
+        download_link = f"{backend_url}/api/download/package/{pdf_filename}"
         
         # Template de email em HTML
         html_content = f"""
