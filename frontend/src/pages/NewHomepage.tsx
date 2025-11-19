@@ -338,7 +338,7 @@ const NewHomepage = () => {
               {
                 icon: <DollarSign className="h-8 w-8" />,
                 title: "Preço Justo",
-                description: "Até 95% mais barato que contratar um advogado."
+                description: "Até 95% mais barato que serviços tradicionais."
               }
             ].map((feature, idx) => (
               <div key={idx} className="text-center group">
