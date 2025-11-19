@@ -1149,7 +1149,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Stripe Payment System - Complete Backend Testing"
+    - "F-1 Complete End-to-End Test - João Pedro Oliveira"
   stuck_tasks:
     - "Agente Coruja - Frontend Implementation"
   test_all: false
