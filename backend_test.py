@@ -1586,7 +1586,7 @@ class ProductionVerificationTester:
             
             print(f"   ✅ Status: {case_data.get('status', 'N/A')}")
             print(f"   ✅ Progress: {case_data.get('progress_percentage', 0)}%")
-            print(f"   ✅ Documentos anexados: {len(case_data.get('documents_created', []))}")
+            print(f"   ✅ Caso marcado como completo")
             
             # ETAPA 7: Gerar Pacote Completo
             print("\n📋 ETAPA 7: GERAR PACOTE COMPLETO")
