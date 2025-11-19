@@ -62,14 +62,14 @@ class ProductionVerificationTester:
         print()
     
     def run_production_verification(self):
-        """Execute COMPREHENSIVE TESTING - STRIPE PAYMENT SYSTEM"""
-        print("🚀 TESTE COMPLETO - SISTEMA DE PAGAMENTO STRIPE INTEGRADO")
-        print("🎯 OBJETIVO: Testar TODOS os endpoints de pagamento do backend - Sistema Stripe Integrado")
+        """Execute COMPREHENSIVE TESTING - I-539 END-TO-END CASE"""
+        print("🚀 TESTE COMPLETO END-TO-END - CASO I-539 (EXTENSÃO DE TURISTA)")
+        print("🎯 OBJETIVO: Testar fluxo completo de aplicação I-539 com dados da Maria Silva Santos")
         print("="*80)
         
-        # TESTE COMPLETO DO SISTEMA DE PAGAMENTO
-        print("\n💳 SISTEMA DE PAGAMENTO STRIPE - TESTE COMPLETO")
-        self.test_stripe_payment_system_complete()
+        # TESTE COMPLETO I-539 END-TO-END
+        print("\n🇧🇷 MARIA SILVA SANTOS - I-539 COMPLETE JOURNEY")
+        self.test_i539_complete_end_to_end()
         
         # Final Summary
         self.print_production_verification_summary()
