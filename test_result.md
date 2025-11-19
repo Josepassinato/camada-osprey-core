@@ -1161,7 +1161,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "F-1 Complete End-to-End Test - João Pedro Oliveira"
+    - "Admin Knowledge Base System - Comprehensive Testing"
   stuck_tasks:
     - "Agente Coruja - Frontend Implementation"
   test_all: false
