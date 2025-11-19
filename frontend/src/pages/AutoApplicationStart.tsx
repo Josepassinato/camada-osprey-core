@@ -362,7 +362,7 @@ const AutoApplicationStart = () => {
               <p>
                 <strong>Importante:</strong> Esta é uma ferramenta de apoio tecnológico, não consultoria jurídica. 
                 Você permanece como o responsável pela sua aplicação (self-petitioner) e pode consultar um 
-                advogado especializado sempre que necessário.
+                profissional especializado sempre que necessário.
               </p>
               
               <div className="bg-white border border-gray-300 p-4 rounded">
