@@ -103,30 +103,32 @@ class I539EndToEndTester:
                 self.log_test("PASSO 1: Criar Case", False, f"HTTP {start_response.status_code}")
                 return
             
-            # PASSO 2: Preencher Basic Data
+            # PASSO 2: Preencher Basic Data (usando PUT endpoint)
             print("\n📋 PASSO 2: PREENCHER BASIC DATA")
-            print(f"   POST /api/auto-application/case/{case_id}/basic-data")
+            print(f"   PUT /api/auto-application/case/{case_id}")
             
             basic_data = {
-                "firstName": "Maria",
-                "middleName": "Silva",
-                "lastName": "Santos",
-                "dateOfBirth": "1990-03-15",
-                "countryOfBirth": "Brazil",
-                "gender": "Female",
-                "currentAddress": "123 Main Street, Apt 4B",
-                "city": "Miami",
-                "state": "FL",
-                "zipCode": "33101",
-                "country": "United States",
-                "phoneNumber": "+1 (305) 555-1234",
-                "email": "maria.silva@email.com",
-                "currentStatus": "B-2",
-                "statusExpiration": "2024-12-15",
-                "i94Number": "12345678901"
+                "basic_data": {
+                    "firstName": "Maria",
+                    "middleName": "Silva",
+                    "lastName": "Santos",
+                    "dateOfBirth": "1990-03-15",
+                    "countryOfBirth": "Brazil",
+                    "gender": "Female",
+                    "currentAddress": "123 Main Street, Apt 4B",
+                    "city": "Miami",
+                    "state": "FL",
+                    "zipCode": "33101",
+                    "country": "United States",
+                    "phoneNumber": "+1 (305) 555-1234",
+                    "email": "maria.silva@email.com",
+                    "currentStatus": "B-2",
+                    "statusExpiration": "2024-12-15",
+                    "i94Number": "12345678901"
+                }
             }
             
-            basic_response = self.session.post(f"{API_BASE}/auto-application/case/{case_id}/basic-data", json=basic_data)
+            basic_response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=basic_data)
             
             if basic_response.status_code == 200:
                 basic_result = basic_response.json()
