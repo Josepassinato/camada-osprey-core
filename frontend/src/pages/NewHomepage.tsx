@@ -103,7 +103,7 @@ const NewHomepage = () => {
             <div className="flex flex-wrap justify-center gap-6 mb-10">
               <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200">
                 <CheckCircle className="h-5 w-5 text-green-600" />
-                <span className="font-medium text-gray-900">Sem advogado necessário</span>
+                <span className="font-medium text-gray-900">100% Self-Service</span>
               </div>
               <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200">
                 <Clock className="h-5 w-5 text-blue-600" />
