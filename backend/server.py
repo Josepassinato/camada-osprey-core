@@ -9183,6 +9183,114 @@ async def send_package_email(request: SendPackageEmailRequest):
             detail=f"Erro ao enviar email: {str(e)}"
         )
 
+@api_router.post("/auto-application/case/{case_id}/send-email")
+async def request_package_by_email(case_id: str, request: RequestPackageEmailRequest):
+    """
+    Endpoint para o USUÁRIO solicitar o envio do pacote por email
+    
+    Fluxo:
+    1. Usuário fornece/confirma email
+    2. Sistema busca caso no banco
+    3. Valida se o caso está completo
+    4. Gera/encontra o pacote PDF
+    5. Envia por email
+    """
+    try:
+        # Validar case_id
+        if case_id != request.case_id:
+            raise HTTPException(status_code=400, detail="Case ID não corresponde")
+        
+        # Buscar caso no banco
+        case = await db.auto_application_cases.find_one({"case_id": case_id})
+        
+        if not case:
+            raise HTTPException(status_code=404, detail="Caso não encontrado")
+        
+        # Validar se o caso está completo
+        if case.get('status') != 'completed':
+            raise HTTPException(
+                status_code=400, 
+                detail="O caso precisa estar completo para enviar por email. Complete todas as etapas primeiro."
+            )
+        
+        # Verificar se progresso está em 100%
+        progress = case.get('progress_percentage', 0)
+        if progress < 100:
+            raise HTTPException(
+                status_code=400,
+                detail=f"O caso está {progress}% completo. Complete 100% antes de solicitar envio por email."
+            )
+        
+        # Atualizar email do usuário no caso
+        await db.auto_application_cases.update_one(
+            {"case_id": case_id},
+            {"$set": {"basic_data.email": request.user_email, "updated_at": datetime.utcnow()}}
+        )
+        
+        # Obter nome do usuário
+        user_name = case.get('basic_data', {}).get('full_name', 'Usuário')
+        application_type = case.get('form_code', 'I-539')
+        
+        # Buscar arquivo PDF (priorizar o detalhado)
+        base_filename = user_name.replace(' ', '_')
+        pdf_filenames = [
+            f"{base_filename}_PACOTE_COMPLETO_DETALHADO.pdf",
+            f"{base_filename}_I539_COMPLETE_PACKAGE.pdf",
+            f"{base_filename}_I539_F1_COMPLETE_PACKAGE.zip"
+        ]
+        
+        package_filename = None
+        for filename in pdf_filenames:
+            if os.path.exists(f"/app/{filename}"):
+                package_filename = filename
+                break
+        
+        if not package_filename:
+            # Tentar gerar o pacote
+            logger.info(f"Pacote não encontrado para {case_id}, tentando gerar...")
+            # Aqui você pode chamar a função de geração de pacote
+            raise HTTPException(
+                status_code=404,
+                detail="Pacote não encontrado. Por favor, entre em contato com o suporte."
+            )
+        
+        # Enviar email usando o endpoint existente
+        email_request = SendPackageEmailRequest(
+            user_email=request.user_email,
+            user_name=user_name,
+            package_filename=package_filename,
+            application_type=application_type,
+            case_id=case_id
+        )
+        
+        # Chamar função de envio de email
+        result = await send_package_email(email_request)
+        
+        # Registrar envio no banco
+        await db.auto_application_cases.update_one(
+            {"case_id": case_id},
+            {
+                "$set": {
+                    "email_sent": True,
+                    "email_sent_at": datetime.utcnow(),
+                    "email_sent_to": request.user_email
+                }
+            }
+        )
+        
+        return {
+            "success": True,
+            "message": f"Pacote enviado com sucesso para {request.user_email}",
+            "email_id": result.get("email_id"),
+            "case_id": case_id
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Erro ao solicitar envio de pacote por email: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ============================================================================
 # DOWNLOAD ENDPOINTS - Para arquivos gerados (pacotes, relatórios)
 # ============================================================================
