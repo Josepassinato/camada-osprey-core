@@ -8754,7 +8754,7 @@ async def get_payment_packages():
 
 
 @api_router.get("/auto-application/case/{case_id}/generate-package")
-async def generate_final_package_endpoint(case_id: str, db=Depends(get_db)):
+async def generate_final_package_endpoint(case_id: str):
     """
     Gera pacote final completo com todos os documentos para envio ao USCIS
     """
