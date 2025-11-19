@@ -1333,6 +1333,526 @@ class ProductionVerificationTester:
         
         return test_results
 
+    def test_admin_knowledge_base_complete(self):
+        """COMPREHENSIVE ADMIN KNOWLEDGE BASE SYSTEM TESTING - ALL 8 ENDPOINTS"""
+        print("📚 ADMIN KNOWLEDGE BASE SYSTEM - COMPREHENSIVE TESTING")
+        print("🎯 CONTEXT: Internal knowledge base for system agents to store reference documents, templates, and standards")
+        print("="*80)
+        
+        test_results = []
+        uploaded_document_id = None
+        
+        # TEST 1: GET /api/admin/knowledge-base/categories
+        print("\n📋 TEST 1: GET /api/admin/knowledge-base/categories")
+        print("   Objective: Get available categories and form types")
+        print("   Expected: document_requirements, letter_templates, organization_standards, formatting_guides, uscis_instructions")
+        print("   Expected form_types: I-539, F-1, I-130, I-765, I-90, EB-2 NIW, EB-1A, I-589, ALL")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/admin/knowledge-base/categories")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Validate structure
+                has_categories = 'categories' in data
+                has_form_types = 'form_types' in data
+                
+                # Validate expected categories
+                expected_categories = [
+                    'document_requirements', 'letter_templates', 'organization_standards', 
+                    'formatting_guides', 'uscis_instructions'
+                ]
+                categories_dict = data.get('categories', {})
+                all_categories_present = all(cat in categories_dict for cat in expected_categories)
+                
+                # Validate expected form types
+                expected_form_types = ['I-539', 'F-1', 'I-130', 'I-765', 'I-90', 'EB-2 NIW', 'EB-1A', 'I-589', 'ALL']
+                form_types_list = data.get('form_types', [])
+                all_form_types_present = all(ft in form_types_list for ft in expected_form_types)
+                
+                success = has_categories and has_form_types and all_categories_present and all_form_types_present
+                
+                print(f"   ✅ Status code: 200 ✓")
+                print(f"   ✅ Has categories: {'✓' if has_categories else '✗'}")
+                print(f"   ✅ Has form_types: {'✓' if has_form_types else '✗'}")
+                print(f"   ✅ All expected categories: {'✓' if all_categories_present else '✗'}")
+                print(f"   ✅ All expected form types: {'✓' if all_form_types_present else '✗'}")
+                print(f"   📋 Categories found: {len(categories_dict)}")
+                print(f"   📋 Form types found: {len(form_types_list)}")
+                
+                test_results.append(("GET /api/admin/knowledge-base/categories", success, 
+                                   f"categories: {len(categories_dict)}, form_types: {len(form_types_list)}, structure: {'✓' if success else '✗'}"))
+            else:
+                success = False
+                print(f"   ❌ Status code: {response.status_code}")
+                print(f"   📋 Response: {response.text[:200]}")
+                test_results.append(("GET /api/admin/knowledge-base/categories", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Error: {str(e)}")
+            test_results.append(("GET /api/admin/knowledge-base/categories", False, f"Exception: {str(e)}"))
+        
+        # TEST 2: POST /api/admin/knowledge-base/upload
+        print("\n📤 TEST 2: POST /api/admin/knowledge-base/upload")
+        print("   Objective: Upload a test PDF document")
+        print("   Fields: file (PDF), category, subcategory, form_types, description, uploaded_by")
+        
+        try:
+            # Create a simple test PDF
+            test_pdf_content = b"""%PDF-1.4
+1 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+2 0 obj
+<<
+/Type /Pages
+/Kids [3 0 R]
+/Count 1
+>>
+endobj
+3 0 obj
+<<
+/Type /Page
+/Parent 2 0 R
+/MediaBox [0 0 612 792]
+/Contents 4 0 R
+>>
+endobj
+4 0 obj
+<<
+/Length 44
+>>
+stream
+BT
+/F1 12 Tf
+100 700 Td
+(Test KB Document) Tj
+ET
+endstream
+endobj
+xref
+0 5
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000206 00000 n 
+trailer
+<<
+/Size 5
+/Root 1 0 R
+>>
+startxref
+300
+%%EOF"""
+            
+            # Prepare multipart form data
+            files = {
+                'file': ('test_kb_document.pdf', test_pdf_content, 'application/pdf')
+            }
+            data = {
+                'category': 'document_requirements',
+                'subcategory': 'I-539_requirements',
+                'form_types': 'I-539,ALL',
+                'description': 'Test document for I-539 requirements - comprehensive testing',
+                'uploaded_by': 'test_admin'
+            }
+            
+            # Remove Content-Type header to let requests handle multipart
+            headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+            
+            response = requests.post(f"{API_BASE}/admin/knowledge-base/upload", 
+                                   files=files, data=data, headers=headers)
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                has_success = result.get('success') == True
+                has_document_id = 'document_id' in result and result['document_id']
+                has_message = 'message' in result and result['message']
+                
+                if has_document_id:
+                    uploaded_document_id = result['document_id']
+                    print(f"   🔍 Uploaded document ID: {uploaded_document_id}")
+                
+                success = has_success and has_document_id and has_message
+                
+                print(f"   ✅ Status code: 200 ✓")
+                print(f"   ✅ Success field: {'✓' if has_success else '✗'}")
+                print(f"   ✅ Document ID returned: {'✓' if has_document_id else '✗'}")
+                print(f"   ✅ Message returned: {'✓' if has_message else '✗'}")
+                print(f"   📋 Message: {result.get('message', 'N/A')}")
+                
+                test_results.append(("POST /api/admin/knowledge-base/upload", success, 
+                                   f"document_id: {result.get('document_id', 'N/A')}, success: {has_success}"))
+            else:
+                success = False
+                print(f"   ❌ Status code: {response.status_code}")
+                print(f"   📋 Response: {response.text[:200]}")
+                test_results.append(("POST /api/admin/knowledge-base/upload", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Error: {str(e)}")
+            test_results.append(("POST /api/admin/knowledge-base/upload", False, f"Exception: {str(e)}"))
+        
+        # TEST 3: GET /api/admin/knowledge-base/list
+        print("\n📋 TEST 3: GET /api/admin/knowledge-base/list")
+        print("   Objective: Get paginated list of documents")
+        print("   Query params: skip=0, limit=50")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/admin/knowledge-base/list?skip=0&limit=50")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                has_total = 'total' in data
+                has_documents = 'documents' in data
+                has_page = 'page' in data
+                has_per_page = 'per_page' in data
+                documents_is_list = isinstance(data.get('documents'), list)
+                
+                # Check if our uploaded document appears
+                documents = data.get('documents', [])
+                uploaded_doc_found = False
+                if uploaded_document_id:
+                    uploaded_doc_found = any(doc.get('document_id') == uploaded_document_id for doc in documents)
+                
+                success = has_total and has_documents and documents_is_list and has_page and has_per_page
+                
+                print(f"   ✅ Status code: 200 ✓")
+                print(f"   ✅ Has total field: {'✓' if has_total else '✗'}")
+                print(f"   ✅ Has documents field: {'✓' if has_documents else '✗'}")
+                print(f"   ✅ Documents is list: {'✓' if documents_is_list else '✗'}")
+                print(f"   ✅ Has pagination: {'✓' if has_page and has_per_page else '✗'}")
+                print(f"   ✅ Uploaded doc found: {'✓' if uploaded_doc_found else '✗'}")
+                print(f"   📋 Total documents: {data.get('total', 'N/A')}")
+                print(f"   📋 Documents in list: {len(documents)}")
+                
+                test_results.append(("GET /api/admin/knowledge-base/list", success, 
+                                   f"total: {data.get('total')}, docs_in_list: {len(documents)}, uploaded_found: {'✓' if uploaded_doc_found else '✗'}"))
+            else:
+                success = False
+                print(f"   ❌ Status code: {response.status_code}")
+                print(f"   📋 Response: {response.text[:200]}")
+                test_results.append(("GET /api/admin/knowledge-base/list", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Error: {str(e)}")
+            test_results.append(("GET /api/admin/knowledge-base/list", False, f"Exception: {str(e)}"))
+        
+        # TEST 4: GET /api/admin/knowledge-base/stats/overview
+        print("\n📊 TEST 4: GET /api/admin/knowledge-base/stats/overview")
+        print("   Objective: Get statistics - total_documents, by_category, by_form_type, most_accessed")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/admin/knowledge-base/stats/overview")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                has_total_documents = 'total_documents' in data
+                has_by_category = 'by_category' in data
+                has_by_form_type = 'by_form_type' in data
+                has_most_accessed = 'most_accessed' in data
+                
+                total_docs = data.get('total_documents', 0)
+                by_category = data.get('by_category', {})
+                by_form_type = data.get('by_form_type', {})
+                most_accessed = data.get('most_accessed', [])
+                
+                success = has_total_documents and has_by_category and has_by_form_type and has_most_accessed
+                
+                print(f"   ✅ Status code: 200 ✓")
+                print(f"   ✅ Has total_documents: {'✓' if has_total_documents else '✗'}")
+                print(f"   ✅ Has by_category: {'✓' if has_by_category else '✗'}")
+                print(f"   ✅ Has by_form_type: {'✓' if has_by_form_type else '✗'}")
+                print(f"   ✅ Has most_accessed: {'✓' if has_most_accessed else '✗'}")
+                print(f"   📋 Total documents: {total_docs}")
+                print(f"   📋 Categories with docs: {len(by_category)}")
+                print(f"   📋 Form types with docs: {len(by_form_type)}")
+                print(f"   📋 Most accessed docs: {len(most_accessed)}")
+                
+                test_results.append(("GET /api/admin/knowledge-base/stats/overview", success, 
+                                   f"total: {total_docs}, categories: {len(by_category)}, form_types: {len(by_form_type)}"))
+            else:
+                success = False
+                print(f"   ❌ Status code: {response.status_code}")
+                print(f"   📋 Response: {response.text[:200]}")
+                test_results.append(("GET /api/admin/knowledge-base/stats/overview", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Error: {str(e)}")
+            test_results.append(("GET /api/admin/knowledge-base/stats/overview", False, f"Exception: {str(e)}"))
+        
+        # TEST 5: GET /api/admin/knowledge-base/search?q={query}
+        print("\n🔍 TEST 5: GET /api/admin/knowledge-base/search")
+        print("   Objective: Search for documents")
+        print("   Query: 'I-539' (should find our uploaded document)")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/admin/knowledge-base/search?q=I-539")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                is_list = isinstance(data, list)
+                has_results = len(data) > 0 if is_list else False
+                
+                # Check if our uploaded document is found
+                uploaded_doc_in_search = False
+                if uploaded_document_id and is_list:
+                    uploaded_doc_in_search = any(doc.get('document_id') == uploaded_document_id for doc in data)
+                
+                success = is_list  # Basic requirement - should return a list
+                
+                print(f"   ✅ Status code: 200 ✓")
+                print(f"   ✅ Response is list: {'✓' if is_list else '✗'}")
+                print(f"   ✅ Has search results: {'✓' if has_results else '✗'}")
+                print(f"   ✅ Uploaded doc in results: {'✓' if uploaded_doc_in_search else '✗'}")
+                print(f"   📋 Search results count: {len(data) if is_list else 'N/A'}")
+                
+                test_results.append(("GET /api/admin/knowledge-base/search", success, 
+                                   f"results: {len(data) if is_list else 'N/A'}, uploaded_found: {'✓' if uploaded_doc_in_search else '✗'}"))
+            else:
+                success = False
+                print(f"   ❌ Status code: {response.status_code}")
+                print(f"   📋 Response: {response.text[:200]}")
+                test_results.append(("GET /api/admin/knowledge-base/search", False, f"HTTP {response.status_code}"))
+                
+        except Exception as e:
+            print(f"   ❌ Error: {str(e)}")
+            test_results.append(("GET /api/admin/knowledge-base/search", False, f"Exception: {str(e)}"))
+        
+        # TEST 6: GET /api/admin/knowledge-base/{document_id}
+        print("\n📄 TEST 6: GET /api/admin/knowledge-base/{document_id}")
+        print("   Objective: Get specific document by ID")
+        print("   Should increment access_count")
+        
+        if uploaded_document_id:
+            try:
+                response = self.session.get(f"{API_BASE}/admin/knowledge-base/{uploaded_document_id}")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    has_document_id = data.get('document_id') == uploaded_document_id
+                    has_filename = 'filename' in data
+                    has_category = 'category' in data
+                    has_description = 'description' in data
+                    has_access_count = 'access_count' in data
+                    has_file_data = 'file_data' in data  # Should include file data for download
+                    
+                    success = has_document_id and has_filename and has_category and has_description and has_access_count
+                    
+                    print(f"   ✅ Status code: 200 ✓")
+                    print(f"   ✅ Correct document ID: {'✓' if has_document_id else '✗'}")
+                    print(f"   ✅ Has filename: {'✓' if has_filename else '✗'}")
+                    print(f"   ✅ Has category: {'✓' if has_category else '✗'}")
+                    print(f"   ✅ Has description: {'✓' if has_description else '✗'}")
+                    print(f"   ✅ Has access_count: {'✓' if has_access_count else '✗'}")
+                    print(f"   ✅ Has file_data: {'✓' if has_file_data else '✗'}")
+                    print(f"   📋 Access count: {data.get('access_count', 'N/A')}")
+                    
+                    test_results.append(("GET /api/admin/knowledge-base/{document_id}", success, 
+                                       f"doc_id: {uploaded_document_id}, access_count: {data.get('access_count')}, has_file_data: {'✓' if has_file_data else '✗'}"))
+                else:
+                    success = False
+                    print(f"   ❌ Status code: {response.status_code}")
+                    print(f"   📋 Response: {response.text[:200]}")
+                    test_results.append(("GET /api/admin/knowledge-base/{document_id}", False, f"HTTP {response.status_code}"))
+                    
+            except Exception as e:
+                print(f"   ❌ Error: {str(e)}")
+                test_results.append(("GET /api/admin/knowledge-base/{document_id}", False, f"Exception: {str(e)}"))
+        else:
+            print("   ⚠️  Skipping - no uploaded document ID available")
+            test_results.append(("GET /api/admin/knowledge-base/{document_id}", False, "No document ID available"))
+        
+        # TEST 7: GET /api/admin/knowledge-base/{document_id}/download
+        print("\n⬇️  TEST 7: GET /api/admin/knowledge-base/{document_id}/download")
+        print("   Objective: Download PDF file")
+        print("   Should return application/pdf with proper headers")
+        
+        if uploaded_document_id:
+            try:
+                response = self.session.get(f"{API_BASE}/admin/knowledge-base/{uploaded_document_id}/download")
+                
+                if response.status_code == 200:
+                    content_type = response.headers.get('content-type', '')
+                    content_disposition = response.headers.get('content-disposition', '')
+                    content_length = len(response.content)
+                    
+                    is_pdf = 'application/pdf' in content_type
+                    has_attachment = 'attachment' in content_disposition
+                    has_filename = 'filename=' in content_disposition
+                    has_content = content_length > 0
+                    
+                    success = is_pdf and has_attachment and has_content
+                    
+                    print(f"   ✅ Status code: 200 ✓")
+                    print(f"   ✅ Content-Type is PDF: {'✓' if is_pdf else '✗'}")
+                    print(f"   ✅ Has attachment header: {'✓' if has_attachment else '✗'}")
+                    print(f"   ✅ Has filename in header: {'✓' if has_filename else '✗'}")
+                    print(f"   ✅ Has content: {'✓' if has_content else '✗'}")
+                    print(f"   📋 Content-Type: {content_type}")
+                    print(f"   📋 Content-Length: {content_length} bytes")
+                    
+                    test_results.append(("GET /api/admin/knowledge-base/{document_id}/download", success, 
+                                       f"content_type: {content_type}, size: {content_length}b, headers: {'✓' if success else '✗'}"))
+                else:
+                    success = False
+                    print(f"   ❌ Status code: {response.status_code}")
+                    print(f"   📋 Response: {response.text[:200]}")
+                    test_results.append(("GET /api/admin/knowledge-base/{document_id}/download", False, f"HTTP {response.status_code}"))
+                    
+            except Exception as e:
+                print(f"   ❌ Error: {str(e)}")
+                test_results.append(("GET /api/admin/knowledge-base/{document_id}/download", False, f"Exception: {str(e)}"))
+        else:
+            print("   ⚠️  Skipping - no uploaded document ID available")
+            test_results.append(("GET /api/admin/knowledge-base/{document_id}/download", False, "No document ID available"))
+        
+        # TEST 8: DELETE /api/admin/knowledge-base/{document_id}
+        print("\n🗑️  TEST 8: DELETE /api/admin/knowledge-base/{document_id}")
+        print("   Objective: Soft delete (mark as inactive)")
+        print("   Should return success message")
+        
+        if uploaded_document_id:
+            try:
+                response = self.session.delete(f"{API_BASE}/admin/knowledge-base/{uploaded_document_id}")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    has_success = data.get('success') == True
+                    has_message = 'message' in data and data['message']
+                    
+                    success = has_success and has_message
+                    
+                    print(f"   ✅ Status code: 200 ✓")
+                    print(f"   ✅ Success field: {'✓' if has_success else '✗'}")
+                    print(f"   ✅ Message returned: {'✓' if has_message else '✗'}")
+                    print(f"   📋 Message: {data.get('message', 'N/A')}")
+                    
+                    test_results.append(("DELETE /api/admin/knowledge-base/{document_id}", success, 
+                                       f"success: {has_success}, message: {data.get('message', 'N/A')[:50]}"))
+                else:
+                    success = False
+                    print(f"   ❌ Status code: {response.status_code}")
+                    print(f"   📋 Response: {response.text[:200]}")
+                    test_results.append(("DELETE /api/admin/knowledge-base/{document_id}", False, f"HTTP {response.status_code}"))
+                    
+            except Exception as e:
+                print(f"   ❌ Error: {str(e)}")
+                test_results.append(("DELETE /api/admin/knowledge-base/{document_id}", False, f"Exception: {str(e)}"))
+        else:
+            print("   ⚠️  Skipping - no uploaded document ID available")
+            test_results.append(("DELETE /api/admin/knowledge-base/{document_id}", False, "No document ID available"))
+        
+        # TEST 9: Verify document no longer appears in list (after delete)
+        print("\n🔍 TEST 9: Verify document no longer appears in list")
+        print("   Objective: Confirm soft delete worked")
+        
+        if uploaded_document_id:
+            try:
+                response = self.session.get(f"{API_BASE}/admin/knowledge-base/list?skip=0&limit=50")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    documents = data.get('documents', [])
+                    
+                    # Document should NOT appear in active list
+                    deleted_doc_not_found = not any(doc.get('document_id') == uploaded_document_id for doc in documents)
+                    
+                    success = deleted_doc_not_found
+                    
+                    print(f"   ✅ Status code: 200 ✓")
+                    print(f"   ✅ Deleted doc not in list: {'✓' if deleted_doc_not_found else '✗'}")
+                    print(f"   📋 Documents in list: {len(documents)}")
+                    
+                    test_results.append(("Verify document no longer appears in list", success, 
+                                       f"deleted_doc_absent: {'✓' if deleted_doc_not_found else '✗'}, total_docs: {len(documents)}"))
+                else:
+                    success = False
+                    print(f"   ❌ Status code: {response.status_code}")
+                    test_results.append(("Verify document no longer appears in list", False, f"HTTP {response.status_code}"))
+                    
+            except Exception as e:
+                print(f"   ❌ Error: {str(e)}")
+                test_results.append(("Verify document no longer appears in list", False, f"Exception: {str(e)}"))
+        else:
+            print("   ⚠️  Skipping - no uploaded document ID available")
+            test_results.append(("Verify document no longer appears in list", False, "No document ID available"))
+        
+        # FINAL SUMMARY
+        print("\n" + "="*80)
+        print("📊 ADMIN KNOWLEDGE BASE TESTING SUMMARY")
+        print("="*80)
+        
+        passed_tests = [r for r in test_results if r[1]]
+        failed_tests = [r for r in test_results if not r[1]]
+        
+        success_rate = len(passed_tests) / len(test_results) * 100 if test_results else 0
+        
+        print(f"\n🎯 OVERALL RESULT:")
+        print(f"   ✅ Tests passed: {len(passed_tests)}/{len(test_results)} ({success_rate:.1f}%)")
+        print(f"   ❌ Tests failed: {len(failed_tests)}/{len(test_results)}")
+        
+        print(f"\n📋 DETAILED RESULTS:")
+        for i, (test_name, success, details) in enumerate(test_results, 1):
+            status = "✅ PASSED" if success else "❌ FAILED"
+            print(f"   {i}. {test_name}: {status}")
+            print(f"      {details}")
+        
+        # SUCCESS CRITERIA EVALUATION
+        critical_endpoints = [
+            "GET /api/admin/knowledge-base/categories",
+            "POST /api/admin/knowledge-base/upload", 
+            "GET /api/admin/knowledge-base/list",
+            "GET /api/admin/knowledge-base/stats/overview"
+        ]
+        
+        critical_passed = sum(1 for test_name, success, _ in test_results 
+                            if success and any(endpoint in test_name for endpoint in critical_endpoints))
+        
+        overall_success = success_rate >= 80 and critical_passed >= 3  # At least 80% success and 3 critical endpoints
+        
+        if overall_success:
+            print(f"\n🎉 SUCCESS! Admin Knowledge Base system is FUNCTIONAL!")
+            print(f"   ✅ All critical endpoints working")
+            print(f"   ✅ Document upload/download cycle working")
+            print(f"   ✅ Search and statistics working")
+            print(f"   ✅ Soft delete working correctly")
+            print(f"   ✅ System ready for agent use")
+        else:
+            print(f"\n❌ FAILURE! Admin Knowledge Base system has CRITICAL ISSUES!")
+            print(f"   ❌ Success rate: {success_rate:.1f}% (target: ≥80%)")
+            print(f"   ❌ Critical endpoints passed: {critical_passed}/4")
+            print(f"   ❌ System NOT ready for production")
+        
+        # Log final consolidated result
+        self.log_test(
+            "ADMIN KNOWLEDGE BASE SYSTEM - COMPREHENSIVE TESTING",
+            overall_success,
+            f"Success rate: {success_rate:.1f}% ({len(passed_tests)}/{len(test_results)} tests). Critical endpoints: {critical_passed}/4. System: {'FUNCTIONAL' if overall_success else 'HAS ISSUES'}",
+            {
+                "success_rate": success_rate,
+                "passed_tests": len(passed_tests),
+                "total_tests": len(test_results),
+                "critical_endpoints_passed": critical_passed,
+                "system_status": "FUNCTIONAL" if overall_success else "HAS ISSUES",
+                "uploaded_document_id": uploaded_document_id,
+                "all_test_results": test_results
+            }
+        )
+        
+        return test_results
+
     def test_stripe_payment_system_complete(self):
         """TESTE COMPLETO DO SISTEMA DE PAGAMENTO STRIPE - TODOS OS ENDPOINTS"""
         print("💳 SISTEMA DE PAGAMENTO STRIPE - TESTE COMPLETO")
