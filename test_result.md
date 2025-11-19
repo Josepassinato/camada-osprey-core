@@ -540,6 +540,18 @@ backend:
         agent: "testing"
         comment: "💳 STRIPE PAYMENT SYSTEM TESTING - MIXED RESULTS (57.1% SUCCESS): Comprehensive testing of all payment endpoints completed with significant findings. SUCCESSFUL ENDPOINTS: ✅ GET /api/packages - All 11 visa packages returned correctly (I-539: $299, F-1: $980, I-130: $980, I-589: $800), ✅ GET /api/packages/{visa_code} - All 4 main visas tested successfully with correct pricing, categories, and includes lists, ✅ GET /api/packages/{visa_code}?voucher_code=LANCAMENTO50 - Voucher application working perfectly (50% discount: I-539 $299→$149.50, F-1 $980→$490), ✅ GET /api/vouchers/active - Returns 2 active vouchers (LANCAMENTO50, PRIMEIRACOMPRA) correctly. CRITICAL ISSUES IDENTIFIED: ❌ POST /api/payment/create-checkout - FAILING with 'Invalid API Key provided: sk_live_***' error (Stripe API key issue), ❌ GET /api/vouchers/validate/INVALIDO - Returns HTTP 500 instead of proper validation response (error handling issue), ❌ Error handling inconsistent - some endpoints return 500 errors instead of proper 400/404 responses. ROOT CAUSES: 1) Stripe API key configuration issue preventing checkout session creation, 2) Voucher validation error handling needs improvement for invalid vouchers, 3) Exception handling in some endpoints not properly catching and returning appropriate HTTP status codes. CONCLUSION: Core pricing and voucher calculation logic is working perfectly, but payment processing and error handling need fixes before production deployment. System is 75% functional but requires Stripe configuration and error handling improvements."
 
+  - task: "I-539 Complete End-to-End Test - Maria Silva Santos"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "🎉 I-539 COMPLETE END-TO-END TEST - 100% SUCCESS! Executed comprehensive 8-step I-539 (Tourist Extension) simulation for Maria Silva Santos with PERFECT RESULTS: PASSO 1: ✅ Case creation (OSP-A791A74F) - I-539 form_code and change_of_status process_type correctly set, PASSO 2: ✅ Basic data storage - All Maria Silva Santos data persisted correctly (firstName: Maria, middleName: Silva, lastName: Santos, dateOfBirth: 1990-03-15, countryOfBirth: Brazil, currentStatus: B-2, statusExpiration: 2024-12-15, i94Number: 12345678901), PASSO 3: ✅ Case data verification - Case data available and accessible via GET endpoint, PASSO 4: ✅ User story submission - Tourist extension story and simplified form responses stored successfully (reasonForExtension: visit more American cities and meet fiancé's family, proposedStayDuration: 6 months, financialSupport: $15,000 savings), PASSO 5: ✅ AI processing - Validation step completed successfully (success: true), PASSO 6: ✅ Form generation - USCIS form generated successfully (success: true), PASSO 7: ✅ Case completion - Case completed successfully (status: completed), PASSO 8: ✅ Final verification - Final case status confirmed (status: completed, progress: 100%). CONCLUSION: Complete I-539 visa extension application journey from start to finish working perfectly with realistic Brazilian tourist data. All 8 steps passed (100% success rate). System ready for production use for I-539 tourist extension cases."
+
   - task: "Agente Coruja - Frontend Implementation"
     implemented: true
     working: false
