@@ -8959,6 +8959,126 @@ async def get_visa_package_info(visa_code: str, voucher_code: Optional[str] = No
         logger.error(f"Erro ao obter pacote: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# ============================================================================
+# DOWNLOAD ENDPOINTS - Para arquivos gerados (pacotes, relatórios)
+# ============================================================================
+
+@api_router.get("/download/package/{filename}")
+async def download_package(filename: str):
+    """
+    Download de pacotes gerados (arquivos ZIP)
+    Exemplo: /api/download/package/Ana_Paula_Costa_I539_COMPLETE_PACKAGE.zip
+    """
+    try:
+        from fastapi.responses import FileResponse
+        import os
+        
+        file_path = f"/app/{filename}"
+        
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=404, detail="Arquivo não encontrado")
+        
+        # Verificar se é um arquivo ZIP
+        if not filename.endswith('.zip'):
+            raise HTTPException(status_code=400, detail="Apenas arquivos ZIP são permitidos")
+        
+        return FileResponse(
+            path=file_path,
+            media_type="application/zip",
+            filename=filename,
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}"
+            }
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Erro ao fazer download do pacote: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/download/report/{filename}")
+async def download_report(filename: str):
+    """
+    Download de relatórios gerados (arquivos Markdown)
+    Exemplo: /api/download/report/RELATORIO_SIMULACAO_ANA_PAULA_COSTA.md
+    """
+    try:
+        from fastapi.responses import FileResponse
+        import os
+        
+        file_path = f"/app/{filename}"
+        
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=404, detail="Arquivo não encontrado")
+        
+        # Verificar se é um arquivo MD
+        if not filename.endswith('.md'):
+            raise HTTPException(status_code=400, detail="Apenas arquivos Markdown são permitidos")
+        
+        return FileResponse(
+            path=file_path,
+            media_type="text/markdown",
+            filename=filename,
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}"
+            }
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Erro ao fazer download do relatório: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/download/list")
+async def list_downloads():
+    """
+    Lista todos os arquivos disponíveis para download
+    """
+    try:
+        import os
+        import glob
+        
+        downloads = {
+            "packages": [],
+            "reports": []
+        }
+        
+        # Buscar arquivos ZIP
+        zip_files = glob.glob("/app/*.zip")
+        for file_path in zip_files:
+            filename = os.path.basename(file_path)
+            size = os.path.getsize(file_path)
+            downloads["packages"].append({
+                "filename": filename,
+                "size": size,
+                "size_human": f"{size / 1024:.1f} KB" if size < 1024*1024 else f"{size / (1024*1024):.1f} MB",
+                "download_url": f"/api/download/package/{filename}"
+            })
+        
+        # Buscar arquivos Markdown
+        md_files = glob.glob("/app/*.md")
+        for file_path in md_files:
+            filename = os.path.basename(file_path)
+            # Ignorar test_result.md e README.md do sistema
+            if filename in ['test_result.md', 'README.md']:
+                continue
+            size = os.path.getsize(file_path)
+            downloads["reports"].append({
+                "filename": filename,
+                "size": size,
+                "size_human": f"{size / 1024:.1f} KB",
+                "download_url": f"/api/download/report/{filename}"
+            })
+        
+        return {
+            "success": True,
+            "total_packages": len(downloads["packages"]),
+            "total_reports": len(downloads["reports"]),
+            "downloads": downloads
+        }
+    except Exception as e:
+        logger.error(f"Erro ao listar downloads: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # Include all API routes
