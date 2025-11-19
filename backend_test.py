@@ -1766,7 +1766,7 @@ SEVIS: N0123456789
                 c.drawString(3.5*inch, 7.0*inch, "15/05/2030")
                 
                 # Signature
-                c.setFont("Helvetica-Italic", 10)
+                c.setFont("Helvetica", 10)
                 c.drawString(1*inch, 2*inch, "Assinatura do Portador / Signature of Bearer:")
                 c.setFont("Helvetica-Bold", 14)
                 c.drawString(1*inch, 1.7*inch, "Roberto Silva Mendes")
