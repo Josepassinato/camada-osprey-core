@@ -62,14 +62,14 @@ class ProductionVerificationTester:
         print()
     
     def run_production_verification(self):
-        """Execute COMPREHENSIVE TESTING - I-539 END-TO-END CASE"""
-        print("🚀 TESTE COMPLETO END-TO-END - CASO I-539 (EXTENSÃO DE TURISTA)")
-        print("🎯 OBJETIVO: Testar fluxo completo de aplicação I-539 com dados da Maria Silva Santos")
+        """Execute COMPREHENSIVE TESTING - F-1 END-TO-END CASE"""
+        print("🚀 TESTE COMPLETO END-TO-END - CASO F-1 (VISTO DE ESTUDANTE)")
+        print("🎯 OBJETIVO: Testar fluxo completo de aplicação F-1 com dados do João Pedro Oliveira")
         print("="*80)
         
-        # TESTE COMPLETO I-539 END-TO-END
-        print("\n🇧🇷 MARIA SILVA SANTOS - I-539 COMPLETE JOURNEY")
-        self.test_i539_complete_end_to_end()
+        # TESTE COMPLETO F-1 END-TO-END
+        print("\n🇧🇷 JOÃO PEDRO OLIVEIRA - F-1 COMPLETE JOURNEY")
+        self.test_f1_complete_end_to_end()
         
         # Final Summary
         self.print_production_verification_summary()
