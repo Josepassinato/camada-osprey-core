@@ -1,178 +1,165 @@
 <analysis>**original_problem_statement:**
-The initial request was to implement a persistent visual indicator (carimbo) for the user's chosen application process (Consular Process vs. Change of Status). During development, a series of user-driven pivots and bug fixes occurred:
-1.  A bug was discovered where selecting Change of Status still showed visa information for Consular Process.
-2.  After fixing the data display, another bug appeared where the process type selector was not showing at all.
-3.  The user then noted that many visas were missing detailed information, which was then populated by the agent.
-4.  Faced with complexity and routing issues (specifically with the B-1/B-2 visa), the user made a strategic decision to simplify the entire application to focus **exclusively on Change of Status** for users already in the USA.
-5.  Following this simplification, the user requested the implementation of Stripe for payments, with a pricing model based on visa categories.
-6.  The user provided LIVE Stripe API keys, which were configured by the agent.
-7.  A voucher system was also requested and implemented, with a  code for a 50% discount.
-8.  Finally, based on strategic feedback, the user requested a revision of the visas offered at launch, focusing on a mix of simple and high-value predictable cases (I-539, F-1, I-130, I-765, I-90, EB-2 NIW, EB-1A) and setting the complex Asylum case (I-589) to On Request ().
+The user initially requested a simple visual indicator for immigration process types. This quickly evolved into a full-featured application development process. Key requests and pivots include:
+1.  **Simplification:** The application was refactored to focus exclusively on Change of Status applications for users within the USA.
+2.  **Monetization:** Stripe integration was implemented using the user's LIVE keys. The pricing model is based on visa categories.
+3.  **Voucher System:** A voucher system was requested. It was first implemented as a URL parameter-based discount, then refactored to use Stripe's native promotion code functionality at the checkout page. The code  was created in the user's Stripe account for a 50% discount.
+4.  **UI/UX Overhaul:** The agent implemented a new marketing-focused homepage with persuasive copy, sections to qualify the target audience (Is this tool for you?), and prominent legal disclaimers. It also added visual premium styling for high-value visas.
+5.  **End-to-End Flow:** The user requested a complete, downloadable package at the end of the process, similar to what a law firm would provide. This package should contain a cover letter, the pre-filled official USCIS form, and all documents uploaded by the user, organized into a professional ZIP archive.
+6.  **Internal Knowledge Base:** The user requested an admin-only feature to upload reference documents (checklists, templates, legal guidelines). This knowledge base is intended as an **internal manual** for the system's agents (backend logic) to ensure consistency and quality in document generation, **not** for providing legal advice to the end-user.
 
-**User's preferred language**:
-The user's primary language is **Portuguese**. The next agent MUST respond in Portuguese.
+**User's preferred language**: Portuguese. The next agent MUST respond in Portuguese.
 
 **what currently exists?**
-The application is a full-stack platform (React/FastAPI) refactored to handle only Change of Status immigration applications. The Consular Process flow and the component to select it () have been completely removed.
-
-The backend is configured with the user's **LIVE** Stripe secret and publishable keys. It has API endpoints to handle payment checkout creation (), retrieve package information, and check payment status. A pricing structure and a voucher system ( for 50% off) are defined in the backend code.
-
-The frontend is partially adapted for the payment flow: it has placeholder pages for payment, success, and cancellation, and redirects users to the payment page after they select a visa. The list of visas was filtered for a launch, but this is now being updated based on the user's latest request.
+A full-stack application (React/FastAPI/MongoDB) for Change of Status immigration cases. The frontend features a professional marketing homepage, a visa selection screen with premium styling for certain visas, and a payment flow that redirects to Stripe's checkout. The backend has a (partially implemented) flow for the I-539 visa. It can generate a professional, organized ZIP package containing a cover letter, a placeholder for the official form, and placeholders for user-uploaded documents. The Stripe integration uses LIVE keys and is configured to allow native Stripe promotion codes. The initial implementation of an admin-only internal Knowledge Base has begun, with backend endpoints and a frontend page created.
 
 **Last working item**:
-*   **Last item agent was working**: Implementing the user's final launch strategy by changing the displayed visas and their pricing. This involves updating the backend with new high-ticket prices for EB-2 NIW (,500) and EB-1A (,000), and modifying the frontend to show the new curated list of 7 visas, while changing the Asylum (I-589) visa to be On Request instead of having a direct payment flow.
-*   **Status**: NOT STARTED
-*   **Agent Testing Done**: N
-*   **Which testing method agent to use?**: Both. Backend testing via  to check new pricing. Frontend testing via screenshot tool to verify the new visa list and the On Request functionality.
-*   **User Testing Done**: N
+- Last item agent was working: Implementing the Internal Knowledge Base feature. The agent created the backend logic in , added the API endpoints to , and created the frontend admin page at . The final step was adding the new route to .
+- Status: IN PROGRESS
+- Agent Testing Done: N
+- Which testing method agent to use? Both. The backend endpoints for file upload and retrieval need to be tested via  or a Python script. The frontend admin panel needs to be tested visually via the screenshot tool to ensure the UI for uploading documents is functional.
+- User Testing Done: N
 
 **All Pending/In progress Issue list**:
-*   **Issue 1: The payment user journey is incomplete. (P0)**
-*   **Issue 2: The  database collection has not been implemented. (P1)**
+- Issue 1: The payment success flow is broken. (P0)
+- Issue 2: The backend logic for most visas is missing. (P1)
+- Issue 3: Payment transactions are not recorded in the database. (P2)
+- Issue 4: The final generated PDF form is a placeholder. (P3)
 
 Issues Detail:
-*   **Issue 1: The payment user journey is incomplete. (P0)**
-    *   **Attempted fixes**: The agent created backend endpoints for Stripe, fixed API key and registration issues in FastAPI, and created placeholder frontend pages (, ).
-    *   **Next debug checklist**:
-        1.  **Flesh out **:
-            *   Fetch package/price info from .
-            *   Implement UI for the Apply Voucher input field.
-            *   On Pay button click, call  with visa code and optional voucher.
-            *   On receiving the , redirect the user to Stripe.
-        2.  **Implement **:
-            *   Extract the  from the URL.
-            *   Poll the  endpoint until the status is paid.
-            *   On confirmation, update the case status in the backend and navigate the user to the next step (e.g., ).
-        3.  **Implement ** to show a cancellation message and guide the user back.
-    *   **Why fix this issue and what will be achieved with the fix?**: This is the core monetization feature. Completing it will allow the user to accept payments.
-    *   **Status**: IN PROGRESS
-    *   **Is recurring issue?**: N
-    *   **Should Test frontend/backend/both after fix?**: Both
-    *   **Blocked on other issue**: None.
+- Issue 1:
+    - Description: After a user successfully pays on Stripe, they are redirected to a placeholder success page (). This page does not have the logic to verify the payment status with the backend and then navigate the user to the next step of the application (e.g., ). This was identified as a critical bug from user feedback but was postponed and never fixed.
+    - Next debug checklist:
+        1.  In , implement the  hook to extract the  from the URL.
+        2.  Call the  backend endpoint.
+        3.  Once the status is confirmed as 'paid', use the  function to redirect the user to the appropriate application page (e.g., ).
+    - Why fix this issue and what will be achieved with the fix? This is a critical break in the core user journey. Fixing it will connect the payment step to the application-filling process, making the app usable.
+    - Status: NOT STARTED
+    - Is recurring issue? N
+    - Should Test frontend/backend/both after fix? Both.
+    - Blocked on other issue: None.
 
-*   **Issue 2: The  database collection has not been implemented. (P1)**
-    *   **Attempted fixes**: The agent proposed the schema but did not implement the database logic.
-    *   **Next debug checklist**:
-        1.  In  or a new helper file, create functions to interact with a  collection in MongoDB.
-        2.  Update the  function in  to create a new transaction record with  before returning the checkout URL.
-        3.  Create a new webhook endpoint  to listen for Stripe events (e.g., ).
-        4.  When the webhook receives a success event, update the corresponding transaction record in the database to .
-    *   **Why fix this issue and what will be achieved with the fix?**: This provides a critical record of all payment attempts and successes, essential for business logic, analytics, and customer support. It also enables the  page to function reliably.
-    *   **Status**: NOT STARTED
-    *   **Is recurring issue?**: N
-    *   **Should Test frontend/backend/both after fix?**: Backend
-    *   **Blocked on other issue**: None.
+- Issue 2:
+    - Description: The end-to-end test initiated by the user revealed that only the I-539 visa has some backend logic. Other visas, like F-1, fail because their specific endpoints and logic (e.g., for generating the correct USCIS form) have not been implemented.
+    - Next debug checklist:
+        1.  Review the existing I-539 implementation (form filling, package generation).
+        2.  Create similar backend logic and endpoints for the other priority visas (F-1, I-130, I-765, I-90, EB-2 NIW, EB-1A).
+        3.  This will likely involve creating new data structures for each form's fields.
+    - Why fix this issue and what will be achieved with the fix? To make the other offered visas functional beyond the payment screen.
+    - Status: NOT STARTED
+    - Is recurring issue? N
+    - Should Test frontend/backend/both after fix? Backend.
+    - Blocked on other issue: None.
+
+- Issue 3:
+    - Description: There is no database collection to log payment transactions. This makes it impossible to track payment statuses, handle refunds, or perform analytics. A  collection was proposed early on but never implemented.
+    - Next debug checklist:
+        1.  In  or a database utility file, define a  collection schema.
+        2.  In , when a checkout session is created, insert a new document into  with .
+        3.  Implement a Stripe webhook endpoint () to listen for  events and update the transaction status to .
+    - Why fix this issue and what will be achieved with the fix? It provides essential business logic for tracking revenue and enables the  page to reliably check payment status.
+    - Status: NOT STARTED
+    - Is recurring issue? N
+    - Should Test frontend/backend/both after fix? Backend.
+    - Blocked on other issue: None.
+
+- Issue 4:
+    - Description: The final package generator () creates a placeholder file () instead of generating the actual, filled-out PDF form based on user data. The logic for PDF generation exists in  () but is not integrated into the final package creation.
+    - Next debug checklist:
+        1.  In , import and call the  function.
+        2.  Ensure that the user's case data is fetched from the database and passed to the PDF generation function.
+        3.  Save the generated PDF into the temporary directory before zipping.
+    - Why fix this issue and what will be achieved with the fix? This is the core value proposition of the app. Fixing it will deliver the main product: a ready-to-file, pre-filled official form.
+    - Status: NOT STARTED
+    - Is recurring issue? N
+    - Should Test frontend/backend/both after fix? Backend.
+    - Blocked on other issue: Issue 2 (as this needs to be done for each visa type).
 
 **In progress Task List**:
-*   **Task 1: Implement New Visa Launch Strategy. (P0)**
-    *   **Where to resume**:
-        *   **Backend**: Edit . Add new prices for  (,500) and  (,000). Ensure  and  are in the  category (99).
-        *   **Frontend**: Edit .
-            *   Update the  array to show this list: , , , , , , .
-            *   For  (Asilo), modify its card to display Sob Consulta and remove the payment button, possibly replacing it with a  link or a modal with contact information.
-    *   **What will be achieved with this?**: Aligns the application with the user's final go-to-market strategy.
-    *   **Status**: IN PROGRESS
-    *   **Should Test frontend/backend/both after fix?**: Both
-    *   **Blocked on something**: None.
+- Task 1: Complete the Admin Knowledge Base feature (P0)
+    - Where to resume:
+        1.  Finish adding the route for  in .
+        2.  Implement the file upload functionality in , making it call the  endpoint.
+        3.  Implement the logic to display the list of uploaded documents by fetching from .
+        4.  Restart and test the full upload/display flow.
+    - What will be achieved with this? A functional admin panel where the user can upload reference documents for the system's internal use.
+    - Status: IN PROGRESS
+    - Should Test frontend/backend/both after fix? Both.
+    - Blocked on something: None.
 
 **Upcoming and Future Tasks**
-*   **Upcoming Tasks:**
-    *   (P2) Implement a database-backed voucher system instead of the current in-memory one in .
-*   **Future Tasks:**
-    *   Implement specific deliverables for high-ticket visas (EB-2 NIW, EB-1A), such as eligibility screening, cover letter generation, and evidence organization.
-    *   Implement a combined  +  flow.
-    *   Integrate other backend features (Completeness Analyzer, Social Proof) into the frontend.
-    *   Develop a Score Preditivo de Aprovação (Predictive Approval Score).
-    *   Develop a Simulador de Entrevista Básico (Basic Interview Simulator).
+- Integrate the Internal Knowledge Base with the package generator. The backend logic needs to be updated to consult the KB for checklists and templates when generating a package.
+- Implement the backend logic for all remaining visa types (F-1, I-130, I-765, I-90, EB-2 NIW, EB-1A).
+- Implement a user-facing dashboard to show case status and download links.
+- Implement real-time validation feedback on the data entry forms.
 
 **Completed work in this session**
-*   **App Simplification (DONE)**: Application refactored to focus exclusively on Change of Status, removing the Consular Process flow and related components.
-*   **Stripe Integration (Partially Done)**: User's LIVE keys were configured. Backend endpoints for creating checkouts and a voucher system are in place. The backend is confirmed to connect to Stripe and generate valid checkout sessions.
-*   **Visa Data Population (DONE)**:  was populated with extensive data, then stripped down to contain only Change of Status information.
-*   **UI/UX Fixes (DONE)**:
-    *   Fixed a bug where incorrect visa data was displayed.
-    *   Fixed a bug where the process selector component failed to appear.
-    *   Resolved a URL encoding issue for visa codes containing a .
-    *   Filtered the visa list for launch (now being revised).
+- **New Homepage:** A new, professional marketing-focused homepage was created and set as the main entry point. All references to advogado (lawyer) were removed and replaced with especialista (specialist) or removed entirely. A prominent disclaimer recommending consultation with a lawyer was added.
+- **Stripe Native Coupons:** The entire payment flow was refactored. The old system of applying discounts via URL parameters was removed. The new system enables Stripe's native promotion code field on the checkout page. A coupon  was created in the user's LIVE Stripe account.
+- **Professional Package Generation:** A backend feature was created () that assembles a professional-looking ZIP archive. The archive is organized with subfolders for the cover letter, official forms, and supporting documents.
+- **Premium Visa Styling:** The visa selection screen was updated to visually highlight premium visas (EB-2 NIW, I-765, EB-1A) with a distinct color scheme.
+- **Critical Bug Fixes:** Fixed two major bugs that were blocking the user flow: one that caused the payment page to fail to load package info, and another that broke the Começar Aplicação button on the homepage.
 
 **Earlier issues found/mentioned but not fixed**
-*   None. The agent was responsive to all issues raised during the session.
-
-**Known issue recurrence from previous fork**
-*   None.
+- The critical bugs from the user's review document (no redirection after payment, broken application flow) were diagnosed but only partially addressed. The core issue of redirecting the user after a successful payment remains outstanding.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-*   **Full-Stack**: React frontend (Vite), Python FastAPI backend.
-*   **Database**: MongoDB.
-*   **Payment Integration**: **Stripe (Live Mode)**. The system dynamically creates products and prices via API at checkout time.
-*   **API Design**: Endpoints for dynamic checkout creation, voucher validation.
-*   **Frontend State Management**: React , .
-*   **Frontend Routing**: .
+- **Full-Stack:** React (Vite), Python (FastAPI), MongoDB
+- **Payments:** Stripe (LIVE mode), using native promotion codes ().
+- **File Generation:**  for PDFs (logic exists but not fully integrated),  for creating the final package.
+- **Backend API:** Uses FastAPI routers. New endpoints for package generation and knowledge base management have been added.
+- **Frontend State:** React hooks (, , ).
 
 **key DB schema**
-*   **payment_transactions** (PROPOSED, NOT IMPLEMENTED): 
-*   **vouchers** (In-memory, needs DB migration): 
-
-**changes in tech stack**
-*   **Stripe** has been added as the payment processing provider.
+- **auto_application_cases**: 
+- **knowledge_base** (PROPOSED, PARTIALLY IMPLEMENTED): 
 
 **All files**
-*   **Created**:
-    *   : Placeholder screen for payment.
-    *   : Placeholder for after successful payment.
-    *   : Placeholder for after canceled payment.
-    *   : Defines visa pricing and categories.
-    *   : Manages promotional vouchers (currently in-memory).
-    *   : Contains logic for creating Stripe checkout sessions.
-*   **Updated**:
-    *   : Major refactoring to remove process selection, filter the visa list, and redirect to the new payment flow.
-    *   : Added routes for the new payment pages.
-    *   : Added payment API endpoints and fixed a critical bug with router registration order.
-    *   : Content was added, then stripped to align with the Change of Status only strategy.
-    *   : Added user's LIVE Stripe API keys.
-
-**Areas that need refactoring**:
-*   The unused files , , and  should be deleted.
-*   The voucher system in  is in-memory and should be migrated to a MongoDB collection for persistence.
-
-**key api endpoints**
-*   : Creates a Stripe checkout session. **(Working)**
-*   : Gets pricing info for a visa. **(Working)**
-*   : Checks a Stripe payment session's status. **(Working)**
-*   : (NOT IMPLEMENTED) To receive payment status updates from Stripe.
+- **Created**:
+    - : To create the final downloadable ZIP package for the user.
+    - : To handle logic for the admin-only internal knowledge base.
+    - : A complete replacement for the original start page, focused on marketing.
+    - : A new admin page for uploading documents to the knowledge base.
+- **Updated**:
+    - : Added routes for package generation and the knowledge base.
+    - : Refactored to support native Stripe coupons and remove pre-calculation of discounts.
+    - : Stripped of all client-side voucher logic.
+    - : Added styling for premium visas and removed voucher logic.
+    - : Removed voucher logic (this file is now effectively unused).
+    - : Routes updated to point to the new homepage and add the new admin page.
+    - : Corrected a critical bug in the main API utility function.
 
 **Critical Info for New Agent**
-*   The application's scope is now narrow: **Change of Status only**. Do not re-implement Consular Process.
-*   **Stripe is configured with the user's LIVE keys.** Be cautious. The backend is confirmed to be able to create checkout sessions.
-*   The immediate priority is to implement the user's latest launch strategy: update the visa list and pricing, and then complete the end-to-end payment flow.
-*   The user wants  (Asilo/Asylum) to be Sob Consulta (On Request), not a standard purchasable item.
+- **Stripe is LIVE:** All operations are with the user's real Stripe account. The system is now configured for **native Stripe coupons**. The  code must be entered by the user on the Stripe checkout page. Do not re-implement client-side discount logic.
+- **Internal Knowledge Base Purpose:** The KB feature is a high priority. Remember its purpose is to be an **internal manual** for the system's own logic, not a user-facing RAG system. The goal is quality control and standardization.
+- **Core Flow is Broken:** The most critical missing piece is the connection between a successful payment and the start of the application filling process. This needs to be fixed to make the app usable.
+- **Only I-539 is Partially Implemented:** Do not assume the backend logic for other visas exists. They need to be built out.
 
 **documents created in this job**
-*   None.
+- A professional final package  was generated as a proof-of-concept and made available for download. It contains organized folders and placeholder documents.
 
 **Last 5 User Messages and any pending user messages**
-1.  **User**: Proposes a new launch strategy: focus on high-value, predictable visas (like EB-2 NIW) and remove complex ones like Asylum. (Pending implementation)
-2.  **Agent**: Acknowledges feedback, proposes a phased rollout, and asks for confirmation on the new visa list for launch.
-3.  **User**: Adds EB-1A to the high-value list. (Pending implementation)
-4.  **Agent**: Confirms the final list and asks how to proceed.
-5.  **User**: Coloque eles agora e deixe o de asilo como sob consulta (Put them [the new visas] now and leave the asylum one as on-request). This is a direct order to implement the new launch strategy immediately. (Pending implementation)
+1.  **User:** Asks for the system to generate a complete, professional package ready for submission to USCIS, including uploaded documents. (Implemented)
+2.  **User:** Proposes creating an internal knowledge base for the system's agents to consult for checklists and templates, clarifying it should *not* give legal advice to users. (Pending)
+3.  **Agent:** Confirms understanding of the internal manual concept and proposes an implementation plan. (Acknowledged)
+4.  **User:** Approves the plan and asks the agent to build it so they can start uploading knowledge documents via an admin panel. Sim faça isto... (Pending)
+5.  **Agent:** Begins implementing the Knowledge Base feature. (In Progress)
 
 **Project Health Check:**
-*   **Broken**: The payment flow is not functional from the user's perspective. Frontend pages are placeholders.
-*   **Mocked**: The voucher system is in-memory, not database-backed.
+- **Broken**: The primary user journey is broken after payment. The application is not usable end-to-end for any visa type.
+- **Mocked**: The final package generation uses placeholder files for the user's uploaded documents and the official filled form, as the actual data integration and PDF filling logic are not yet connected.
 
 **Testing status**
-*   **Testing agent used after significant changes**: YES
-*   **Troubleshoot agent used after agent stuck in loop**: NO
-*   **Test files created**: None.
-*   **Known regressions**: None.
+- **Testing agent used after significant changes**: YES (for screenshots and running scripts)
+- **Troubleshoot agent used after agent stuck in loop**: NO
+- **Test files created**: None. Ad-hoc Python scripts were used.
+- **Known regressions**: None.
 
 **Credentials to test flow:**
-*   **Voucher Code**:  (provides a 50% discount).
+- **Stripe Coupon Code**:  (to be entered on the Stripe checkout page)
 
 **What agent forgot to execute**
-*   The agent has not implemented the database logic for storing and tracking payment transactions ( collection), which is crucial for the payment success page and record-keeping.
-*   The agent has not deleted the now-obsolete files related to the  feature, leaving unused code in the project.</analysis>
+- The agent did not fix the critical bug where the user is not redirected to the application flow after a successful payment. This was identified early from user feedback but was postponed to work on other features and never revisited.
+- The agent did not implement the backend logic for any visa other than a partial implementation for I-539. This leaves the majority of the advertised product non-functional.</analysis>

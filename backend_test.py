@@ -17,7 +17,7 @@ import hashlib
 import io
 
 # Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://visa-checkout-1.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://status-changer-1.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 print(f"🌐 PRODUCTION VERIFICATION TARGET: {BACKEND_URL}")
