@@ -184,7 +184,7 @@ const NewHomepage = () => {
               </h2>
               <ul className="space-y-4">
                 {[
-                  { icon: "💰", text: "Advogados cobram $5.000 - $15.000 por caso" },
+                  { icon: "💰", text: "Serviços tradicionais cobram $5.000 - $15.000 por caso" },
                   { icon: "⏰", text: "Meses de espera para agendar consultas" },
                   { icon: "📄", text: "Formulários confusos de 20+ páginas" },
                   { icon: "❌", text: "Erros custam tempo e dinheiro" }
