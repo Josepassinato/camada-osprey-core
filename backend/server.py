@@ -9094,16 +9094,31 @@ async def send_package_email(request: SendPackageEmailRequest):
                     
                     <h3>📦 O que está incluído no pacote:</h3>
                     <ul>
-                        <li>Carta de apresentação profissional</li>
-                        <li>Formulário USCIS preenchido</li>
-                        <li>Documentos de suporte organizados</li>
-                        <li>Instruções para submissão</li>
+                        <li>Informações completas do caso</li>
+                        <li>Dados pessoais e do passaporte</li>
+                        <li>Informações acadêmicas/profissionais</li>
+                        <li>Documentos de suporte (passaporte, cartas, comprovantes)</li>
+                        <li>Timeline do processo</li>
+                        <li>Instruções para submissão ao USCIS</li>
                     </ul>
+                    
+                    <h3>💾 Como Acessar o Pacote:</h3>
+                    <div style="background-color: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <p><strong>OPÇÃO 1:</strong> O arquivo PDF está anexado a este email. Basta abrir o anexo.</p>
+                        <p><strong>OPÇÃO 2:</strong> Clique no botão abaixo para baixar direto do navegador:</p>
+                        <div style="text-align: center;">
+                            <a href="{download_link}" class="button" style="background-color: #10b981; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+                                📥 BAIXAR PACOTE COMPLETO
+                            </a>
+                        </div>
+                        <p style="font-size: 12px; color: #666; margin-top: 10px;">O arquivo é um PDF único com todas as informações - fácil de abrir e imprimir!</p>
+                    </div>
                     
                     <h3>📝 Próximos Passos:</h3>
                     <ol>
-                        <li>Baixe e revise todos os documentos cuidadosamente</li>
-                        <li>Imprima os formulários em papel branco</li>
+                        <li>Abra o PDF anexado (ou baixe pelo link acima)</li>
+                        <li>Revise todos os documentos cuidadosamente</li>
+                        <li>Imprima as páginas necessárias em papel branco</li>
                         <li>Assine onde indicado</li>
                         <li>Envie ao USCIS conforme as instruções incluídas</li>
                     </ol>
