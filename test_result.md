@@ -105,6 +105,18 @@
 user_problem_statement: "IMPLEMENTAR AGENTE CORUJA - SISTEMA INTELIGENTE DE QUESTIONÁRIOS: Desenvolver o novo recurso 'Agente Coruja' que conduz usuários através de questionários inteligentes em tempo real, valida respostas usando Google APIs e OpenAI GPT-5, e gera formulários USCIS oficiais automaticamente preenchidos. Sistema multi-idioma (português/inglês) com orientação contextual e validação em tempo real."
 
 backend:
+  - task: "F-1 Complete End-to-End Test - João Pedro Oliveira"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ F-1 COMPLETE END-TO-END TEST - PARTIAL SUCCESS (55.6%): Executed comprehensive 7-step F-1 visa application test for João Pedro Oliveira as requested. DETAILED RESULTS: PASSO 1: ✅ Case F-1 created successfully (OSP-09E9C5AF) with form_code: F-1 and process_type: change_of_status, PASSO 2: ✅ Basic data saved correctly - João Pedro Oliveira's information (email: joao.oliveira@email.com, status: B-2, I-94: 98765432101) persisted successfully, PASSO 3: ❌ User story endpoint not available (HTTP 404) - F-1 specific data (Harvard University, SEVIS: N1234567890, Master in Computer Science) could not be stored, PASSO 4: ❌ AI validation endpoint not available (HTTP 404), PASSO 5: ✅ USCIS form generation working (returns success: true), PASSO 6: ✅ Status verification successful, PASSO 7: ❌ Download endpoint not available (HTTP 404). VERIFICATION RESULTS: 5/9 checks passed - ✅ F-1 case created, ✅ basic data saved, ✅ João Oliveira name correct, ✅ process type change_of_status, ✅ valid case ID, ❌ user story missing, ❌ Harvard University data missing, ❌ SEVIS number missing, ❌ B-2→F-1 status change data missing. DIFFERENCES FROM I-539: F-1 requires specific academic fields (SEVIS Number, I-20, school, program) vs I-539 extension fields, more rigorous financial support requirements, duration based on study program. CONCLUSION: Core F-1 case creation and basic data storage working correctly, but missing critical endpoints (user-story, ai-validation, download) prevent full F-1 application workflow. System partially functional for F-1 applications but requires missing endpoints for complete functionality."
+
   - task: "Carlos Silva H-1B Complete Journey Simulation"
     implemented: true
     working: false
