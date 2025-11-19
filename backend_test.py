@@ -1420,12 +1420,12 @@ class ProductionVerificationTester:
             print(f"   ✅ Status solicitado: {stored_basic_data.get('requested_status', 'N/A')}")
             print(f"   ✅ Progress: {case_data.get('progress_percentage', 0)}%")
             
-            # ETAPA 3: Dados F-1 - Stanford MBA
+            # ETAPA 3: Dados F-1 - Stanford MBA (via simplified_form_responses)
             print("\n📋 ETAPA 3: DADOS F-1 - STANFORD MBA")
             print("   PUT /api/auto-application/case/{case_id}")
             
             f1_data_update = {
-                "f1_data": {
+                "simplified_form_responses": {
                     "school_name": "Stanford University",
                     "school_address": "450 Serra Mall, Stanford, CA 94305",
                     "sevis_number": "N9876543210",
