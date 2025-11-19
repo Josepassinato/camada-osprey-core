@@ -9143,16 +9143,16 @@ async def send_package_email(request: SendPackageEmailRequest):
         </html>
         """
         
-        # Enviar email com anexo
+        # Enviar email com anexo (PDF único)
         params: resend.Emails.SendParams = {
             "from": SENDER_EMAIL,
             "to": [request.user_email],
-            "subject": f"Seu Pacote de Aplicação {request.application_type} - Case ID: {request.case_id}",
+            "subject": f"✅ Seu Pacote de Aplicação {request.application_type} - Case ID: {request.case_id}",
             "html": html_content,
             "attachments": [
                 {
                     "content": file_base64,
-                    "filename": request.package_filename,
+                    "filename": pdf_filename,
                 }
             ]
         }
