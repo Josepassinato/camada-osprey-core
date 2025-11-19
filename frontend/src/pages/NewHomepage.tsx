@@ -562,6 +562,25 @@ const NewHomepage = () => {
         </div>
       </section>
 
+      {/* Legal Disclaimer Before CTA */}
+      <section className="py-12 bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-xl p-6 shadow-md border-2 border-gray-200">
+            <div className="flex items-start gap-3">
+              <Shield className="h-6 w-6 text-amber-600 flex-shrink-0 mt-1" />
+              <div>
+                <h4 className="font-bold text-gray-900 mb-2">Disclaimer Importante:</h4>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  Esta plataforma é uma <strong>ferramenta de auxílio tecnológico</strong> e não constitui consultoria jurídica. 
+                  <strong className="text-amber-700"> Se você ainda não tem clareza sobre qual é o melhor caminho imigratório para seu caso, recomendamos fortemente consultar um advogado de imigração</strong> antes de prosseguir. 
+                  Nosso sistema auxilia no preenchimento de formulários, mas não avalia elegibilidade ou estratégias migratórias individuais.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="py-20 bg-gradient-to-r from-purple-600 to-indigo-600 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
