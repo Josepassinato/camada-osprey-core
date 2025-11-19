@@ -371,7 +371,7 @@ const AutoApplicationStart = () => {
                   <li>• Suas informações são organizadas pelo nosso sistema</li>
                   <li>• Formulários oficiais são preenchidos automaticamente</li>
                   <li>• Você revisa e submete diretamente no USCIS</li>
-                  <li>• Pode consultar advogados quando desejar</li>
+                  <li>• Pode consultar profissionais especializados quando desejar</li>
                 </ul>
               </div>
             </div>
