@@ -183,70 +183,77 @@ class I539EndToEndTester:
                 print(f"   📋 Resposta: {story_response.text[:200]}")
                 self.log_test("PASSO 4: Submeter User Story", False, f"HTTP {story_response.status_code}")
             
-            # PASSO 5: Verificar USCIS Form Generation
-            print("\n📋 PASSO 5: VERIFICAR USCIS FORM GENERATION")
-            print(f"   GET /api/auto-application/case/{case_id}/uscis-form")
+            # PASSO 5: AI Processing
+            print("\n📋 PASSO 5: AI PROCESSING")
+            print(f"   POST /api/auto-application/case/{case_id}/ai-processing")
             
-            uscis_form_response = self.session.get(f"{API_BASE}/auto-application/case/{case_id}/uscis-form")
+            ai_data = {
+                "step": "validation"
+            }
             
-            if uscis_form_response.status_code == 200:
-                uscis_form_result = uscis_form_response.json()
-                print(f"   ✅ USCIS form gerado com sucesso")
-                print(f"   ✅ Tipo: {type(uscis_form_result)}")
-                self.log_test("PASSO 5: USCIS Form Generation", True, "Form gerado com sucesso")
+            ai_response = self.session.post(f"{API_BASE}/auto-application/case/{case_id}/ai-processing", json=ai_data)
+            
+            if ai_response.status_code == 200:
+                ai_result = ai_response.json()
+                print(f"   ✅ AI processing executado com sucesso")
+                print(f"   ✅ Success: {ai_result.get('success', 'N/A')}")
+                self.log_test("PASSO 5: AI Processing", True, "AI processing executado com sucesso")
             else:
-                print(f"   ❌ Falha ao gerar USCIS form: HTTP {uscis_form_response.status_code}")
-                print(f"   📋 Resposta: {uscis_form_response.text[:200]}")
-                self.log_test("PASSO 5: USCIS Form Generation", False, f"HTTP {uscis_form_response.status_code}")
+                print(f"   ❌ Falha no AI processing: HTTP {ai_response.status_code}")
+                print(f"   📋 Resposta: {ai_response.text[:200]}")
+                self.log_test("PASSO 5: AI Processing", False, f"HTTP {ai_response.status_code}")
             
-            # PASSO 6: Verificar Document Checklist
-            print("\n📋 PASSO 6: VERIFICAR DOCUMENT CHECKLIST")
-            print(f"   GET /api/auto-application/case/{case_id}/documents/checklist")
+            # PASSO 6: Generate Form
+            print("\n📋 PASSO 6: GENERATE FORM")
+            print(f"   POST /api/auto-application/case/{case_id}/generate-form")
             
-            checklist_response = self.session.get(f"{API_BASE}/auto-application/case/{case_id}/documents/checklist")
+            generate_response = self.session.post(f"{API_BASE}/auto-application/case/{case_id}/generate-form", json={})
             
-            if checklist_response.status_code == 200:
-                checklist_result = checklist_response.json()
-                print(f"   ✅ Document checklist disponível")
-                print(f"   ✅ Estrutura: {type(checklist_result)}")
-                self.log_test("PASSO 6: Document Checklist", True, "Checklist disponível")
+            if generate_response.status_code == 200:
+                generate_result = generate_response.json()
+                print(f"   ✅ Form gerado com sucesso")
+                print(f"   ✅ Success: {generate_result.get('success', 'N/A')}")
+                self.log_test("PASSO 6: Generate Form", True, "Form gerado com sucesso")
             else:
-                print(f"   ❌ Falha ao obter document checklist: HTTP {checklist_response.status_code}")
-                print(f"   📋 Resposta: {checklist_response.text[:200]}")
-                self.log_test("PASSO 6: Document Checklist", False, f"HTTP {checklist_response.status_code}")
+                print(f"   ❌ Falha ao gerar form: HTTP {generate_response.status_code}")
+                print(f"   📋 Resposta: {generate_response.text[:200]}")
+                self.log_test("PASSO 6: Generate Form", False, f"HTTP {generate_response.status_code}")
             
-            # PASSO 7: Finalizar
-            print("\n📋 PASSO 7: FINALIZAR")
-            print(f"   GET /api/auto-application/case/{case_id}/finalize")
+            # PASSO 7: Complete Case
+            print("\n📋 PASSO 7: COMPLETE CASE")
+            print(f"   POST /api/auto-application/case/{case_id}/complete")
             
-            finalize_response = self.session.get(f"{API_BASE}/auto-application/case/{case_id}/finalize")
+            complete_response = self.session.post(f"{API_BASE}/auto-application/case/{case_id}/complete", json={})
             
-            if finalize_response.status_code == 200:
-                finalize_result = finalize_response.json()
-                print(f"   ✅ Case finalizado com sucesso")
-                print(f"   ✅ Status: {finalize_result.get('status', 'N/A')}")
-                self.log_test("PASSO 7: Finalizar", True, "Case finalizado com sucesso")
+            if complete_response.status_code == 200:
+                complete_result = complete_response.json()
+                print(f"   ✅ Case completado com sucesso")
+                print(f"   ✅ Status: {complete_result.get('status', 'N/A')}")
+                self.log_test("PASSO 7: Complete Case", True, "Case completado com sucesso")
             else:
-                print(f"   ❌ Falha ao finalizar case: HTTP {finalize_response.status_code}")
-                print(f"   📋 Resposta: {finalize_response.text[:200]}")
-                self.log_test("PASSO 7: Finalizar", False, f"HTTP {finalize_response.status_code}")
+                print(f"   ❌ Falha ao completar case: HTTP {complete_response.status_code}")
+                print(f"   📋 Resposta: {complete_response.text[:200]}")
+                self.log_test("PASSO 7: Complete Case", False, f"HTTP {complete_response.status_code}")
             
-            # PASSO 8: Obter Link de Download
-            print("\n📋 PASSO 8: OBTER LINK DE DOWNLOAD")
-            print(f"   GET /api/auto-application/case/{case_id}/download")
+            # PASSO 8: Verificar Final Case Status
+            print("\n📋 PASSO 8: VERIFICAR FINAL CASE STATUS")
+            print(f"   GET /api/auto-application/case/{case_id}")
             
-            download_response = self.session.get(f"{API_BASE}/auto-application/case/{case_id}/download")
+            final_response = self.session.get(f"{API_BASE}/auto-application/case/{case_id}")
             
-            if download_response.status_code == 200:
-                download_result = download_response.json()
-                download_url = download_result.get('download_url') or download_result.get('url')
-                print(f"   ✅ Link de download obtido com sucesso")
-                print(f"   ✅ URL: {download_url[:50] if download_url else 'N/A'}...")
-                self.log_test("PASSO 8: Link de Download", True, f"URL obtida: {bool(download_url)}")
+            if final_response.status_code == 200:
+                final_result = final_response.json()
+                case_data = final_result.get('case', final_result)
+                final_status = case_data.get('status')
+                progress = case_data.get('progress_percentage', 0)
+                print(f"   ✅ Final case status obtido")
+                print(f"   ✅ Status: {final_status}")
+                print(f"   ✅ Progress: {progress}%")
+                self.log_test("PASSO 8: Final Case Status", True, f"Status: {final_status}, Progress: {progress}%")
             else:
-                print(f"   ❌ Falha ao obter link de download: HTTP {download_response.status_code}")
-                print(f"   📋 Resposta: {download_response.text[:200]}")
-                self.log_test("PASSO 8: Link de Download", False, f"HTTP {download_response.status_code}")
+                print(f"   ❌ Falha ao obter final status: HTTP {final_response.status_code}")
+                print(f"   📋 Resposta: {final_response.text[:200]}")
+                self.log_test("PASSO 8: Final Case Status", False, f"HTTP {final_response.status_code}")
             
         except Exception as e:
             print(f"   ❌ Erro geral: {str(e)}")
