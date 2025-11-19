@@ -62,14 +62,14 @@ class ProductionVerificationTester:
         print()
     
     def run_production_verification(self):
-        """Execute COMPREHENSIVE ADMIN KNOWLEDGE BASE TESTING"""
-        print("🔍 COMPREHENSIVE ADMIN KNOWLEDGE BASE SYSTEM TESTING")
-        print("🎯 OBJETIVO: Testar sistema completo de Knowledge Base para agentes internos")
+        """Execute ANA PAULA COSTA I-539 COMPLETE SIMULATION"""
+        print("🎯 ANA PAULA COSTA I-539 COMPLETE SIMULATION")
+        print("🎯 OBJETIVO: Simular usuário real passando por TODO o processo de aplicação de visto")
         print("="*80)
         
-        # ADMIN KNOWLEDGE BASE TESTING
-        print("\n📚 ADMIN KNOWLEDGE BASE - COMPREHENSIVE TESTING")
-        self.test_admin_knowledge_base_complete()
+        # ANA PAULA COSTA I-539 SIMULATION
+        print("\n🇧🇷 ANA PAULA COSTA I-539 - SIMULAÇÃO COMPLETA")
+        self.test_ana_paula_costa_i539_complete_simulation()
         
         # Final Summary
         self.print_production_verification_summary()
