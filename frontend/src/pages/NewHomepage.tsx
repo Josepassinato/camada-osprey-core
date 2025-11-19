@@ -494,7 +494,7 @@ const NewHomepage = () => {
                 name: "Maria Silva",
                 role: "Visto F-1 Aprovado",
                 avatar: "👩🏻‍💼",
-                text: "Economizei mais de $8.000 que um advogado ia cobrar. O processo foi tão simples que consegui fazer sozinha em um fim de semana. Recomendo demais!",
+                text: "Economizei mais de $8.000 comparado aos serviços tradicionais. O processo foi tão simples que consegui fazer sozinha em um fim de semana. Recomendo demais!",
                 rating: 5
               },
               {
