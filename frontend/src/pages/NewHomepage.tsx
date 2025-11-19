@@ -198,6 +198,117 @@ const NewHomepage = () => {
         </div>
       </section>
 
+      {/* Target Audience - "Is This For You?" */}
+      <section className="py-20 bg-gradient-to-br from-purple-50 via-white to-indigo-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="inline-block px-4 py-2 bg-purple-100 rounded-full mb-4">
+              <span className="text-purple-700 font-semibold text-sm">Qualificação</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Esta Ferramenta É Para Você Se...
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Identifique-se com pelo menos uma das situações abaixo:
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+            {[
+              {
+                icon: <Target className="h-8 w-8" />,
+                title: "Você já sabe qual visto precisa",
+                description: "Já pesquisou, já sabe exatamente qual tipo de visto ou mudança de status você quer aplicar, só precisa de ajuda para preencher corretamente os formulários oficiais.",
+                color: "from-green-500 to-emerald-600",
+                highlight: "✓ Caminho definido"
+              },
+              {
+                icon: <FileText className="h-8 w-8" />,
+                title: "A burocracia te assusta",
+                description: "Você conhece seu caminho imigratório, tem direito ao visto, mas se perde na complexidade dos formulários oficiais de 20+ páginas do USCIS e na organização de documentos.",
+                color: "from-blue-500 to-cyan-600",
+                highlight: "✓ Precisa de orientação"
+              },
+              {
+                icon: <DollarSign className="h-8 w-8" />,
+                title: "Não tem recursos para profissional",
+                description: "Você tem status e direito de aplicar para um visto, mas não tem os $5.000-$15.000 necessários para contratar serviços tradicionais. Prefere investir em si mesmo.",
+                color: "from-purple-500 to-violet-600",
+                highlight: "✓ Orçamento limitado"
+              },
+              {
+                icon: <Shield className="h-8 w-8" />,
+                title: "Medo de errar sozinho",
+                description: "Você sabe que pode fazer self-petition ou auto aplicação, mas tem medo de cometer um erro banal que possa atrasar seu processo ou até prejudicá-lo. Precisa de validação.",
+                color: "from-orange-500 to-red-600",
+                highlight: "✓ Busca segurança"
+              },
+              {
+                icon: <Clock className="h-8 w-8" />,
+                title: "Quer agilidade e autonomia",
+                description: "Você não quer esperar semanas para agendar consultas ou depender da disponibilidade de terceiros. Quer começar hoje e ter controle total do seu processo no seu tempo.",
+                color: "from-indigo-500 to-blue-600",
+                highlight: "✓ Independência"
+              },
+              {
+                icon: <CheckCircle className="h-8 w-8" />,
+                title: "Já tem documentação organizada",
+                description: "Você é organizado, tem seus documentos em ordem (passaporte, I-94, comprovantes), só precisa de uma ferramenta inteligente que te guie no preenchimento correto dos formulários.",
+                color: "from-teal-500 to-green-600",
+                highlight: "✓ Está preparado"
+              }
+            ].map((item, idx) => (
+              <div 
+                key={idx}
+                className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border-2 border-gray-100 hover:border-purple-300 group"
+              >
+                <div className="flex items-start gap-4 mb-4">
+                  <div className={`w-14 h-14 bg-gradient-to-br ${item.color} rounded-xl flex items-center justify-center text-white flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform`}>
+                    {item.icon}
+                  </div>
+                  <div className="flex-1">
+                    <div className="inline-block px-3 py-1 bg-green-100 rounded-full mb-2">
+                      <span className="text-green-700 text-xs font-bold">{item.highlight}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <h3 className="text-xl font-bold text-gray-900 mb-3 leading-tight">
+                  {item.title}
+                </h3>
+                
+                <p className="text-gray-600 leading-relaxed text-sm">
+                  {item.description}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Call-out box */}
+          <div className="mt-12 max-w-4xl mx-auto">
+            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-8 text-white text-center shadow-2xl">
+              <h3 className="text-2xl md:text-3xl font-bold mb-4">
+                ✓ Se identificou com pelo menos uma situação acima?
+              </h3>
+              <p className="text-lg opacity-90 mb-6">
+                Então nossa ferramenta foi feita para você! Simplifique seu processo de imigração com tecnologia de ponta.
+              </p>
+              <Button 
+                onClick={startApplication}
+                disabled={!agreed || isCreating}
+                className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-full shadow-xl transform hover:scale-105 transition-all"
+              >
+                Começar Minha Aplicação Agora
+                <ArrowRight className="h-5 w-5 ml-2" />
+              </Button>
+              <p className="text-sm opacity-75 mt-4">
+                Sem cartão de crédito para começar • 100% Seguro
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Problem/Solution Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
