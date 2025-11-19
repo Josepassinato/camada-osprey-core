@@ -140,45 +140,48 @@ class I539EndToEndTester:
                 print(f"   📋 Resposta: {basic_response.text[:200]}")
                 self.log_test("PASSO 2: Basic Data", False, f"HTTP {basic_response.status_code}")
             
-            # PASSO 3: Verificar Friendly Form
-            print("\n📋 PASSO 3: VERIFICAR FRIENDLY FORM")
-            print(f"   GET /api/auto-application/case/{case_id}/friendly-form")
+            # PASSO 3: Verificar Case Data
+            print("\n📋 PASSO 3: VERIFICAR CASE DATA")
+            print(f"   GET /api/auto-application/case/{case_id}")
             
-            friendly_get_response = self.session.get(f"{API_BASE}/auto-application/case/{case_id}/friendly-form")
+            case_get_response = self.session.get(f"{API_BASE}/auto-application/case/{case_id}")
             
-            if friendly_get_response.status_code == 200:
-                friendly_get_result = friendly_get_response.json()
-                print(f"   ✅ Friendly form disponível")
-                print(f"   ✅ Estrutura: {type(friendly_get_result)}")
-                self.log_test("PASSO 3: Verificar Friendly Form", True, "Form disponível")
+            if case_get_response.status_code == 200:
+                case_get_result = case_get_response.json()
+                print(f"   ✅ Case data disponível")
+                print(f"   ✅ Estrutura: {type(case_get_result)}")
+                self.log_test("PASSO 3: Verificar Case Data", True, "Case data disponível")
             else:
-                print(f"   ❌ Falha ao obter friendly form: HTTP {friendly_get_response.status_code}")
-                print(f"   📋 Resposta: {friendly_get_response.text[:200]}")
-                self.log_test("PASSO 3: Verificar Friendly Form", False, f"HTTP {friendly_get_response.status_code}")
+                print(f"   ❌ Falha ao obter case data: HTTP {case_get_response.status_code}")
+                print(f"   📋 Resposta: {case_get_response.text[:200]}")
+                self.log_test("PASSO 3: Verificar Case Data", False, f"HTTP {case_get_response.status_code}")
             
-            # PASSO 4: Submeter Friendly Form
-            print("\n📋 PASSO 4: SUBMETER FRIENDLY FORM")
-            print(f"   POST /api/auto-application/case/{case_id}/friendly-form")
+            # PASSO 4: Submeter User Story
+            print("\n📋 PASSO 4: SUBMETER USER STORY")
+            print(f"   PUT /api/auto-application/case/{case_id}")
             
-            friendly_form_data = {
-                "currentStatus": "B-2",
-                "requestedStatus": "B-2",
-                "reasonForExtension": "Quero estender minha estadia para visitar mais cidades americanas e conhecer a família do meu noivo",
-                "proposedStayDuration": "6 months",
-                "financialSupport": "Tenho poupança de $15.000 e meu noivo me ajudará com hospedagem"
+            user_story_data = {
+                "user_story_text": "Quero estender minha estadia para visitar mais cidades americanas e conhecer a família do meu noivo. Tenho poupança de $15.000 e meu noivo me ajudará com hospedagem. Planejo ficar mais 6 meses.",
+                "simplified_form_responses": {
+                    "currentStatus": "B-2",
+                    "requestedStatus": "B-2",
+                    "reasonForExtension": "Quero estender minha estadia para visitar mais cidades americanas e conhecer a família do meu noivo",
+                    "proposedStayDuration": "6 months",
+                    "financialSupport": "Tenho poupança de $15.000 e meu noivo me ajudará com hospedagem"
+                }
             }
             
-            friendly_post_response = self.session.post(f"{API_BASE}/auto-application/case/{case_id}/friendly-form", json=friendly_form_data)
+            story_response = self.session.put(f"{API_BASE}/auto-application/case/{case_id}", json=user_story_data)
             
-            if friendly_post_response.status_code == 200:
-                friendly_post_result = friendly_post_response.json()
-                print(f"   ✅ Friendly form submetido com sucesso")
-                print(f"   ✅ Status: {friendly_post_result.get('status', 'N/A')}")
-                self.log_test("PASSO 4: Submeter Friendly Form", True, "Form submetido com sucesso")
+            if story_response.status_code == 200:
+                story_result = story_response.json()
+                print(f"   ✅ User story submetido com sucesso")
+                print(f"   ✅ Status: {story_result.get('status', 'N/A')}")
+                self.log_test("PASSO 4: Submeter User Story", True, "Story submetido com sucesso")
             else:
-                print(f"   ❌ Falha ao submeter friendly form: HTTP {friendly_post_response.status_code}")
-                print(f"   📋 Resposta: {friendly_post_response.text[:200]}")
-                self.log_test("PASSO 4: Submeter Friendly Form", False, f"HTTP {friendly_post_response.status_code}")
+                print(f"   ❌ Falha ao submeter user story: HTTP {story_response.status_code}")
+                print(f"   📋 Resposta: {story_response.text[:200]}")
+                self.log_test("PASSO 4: Submeter User Story", False, f"HTTP {story_response.status_code}")
             
             # PASSO 5: Verificar USCIS Form Generation
             print("\n📋 PASSO 5: VERIFICAR USCIS FORM GENERATION")
