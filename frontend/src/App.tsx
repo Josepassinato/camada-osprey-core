@@ -93,6 +93,9 @@ const App = () => (
           {/* Admin Panel Routes */}
           <Route path="/admin/visa-updates" element={<AdminVisaUpdatesPanel />} />
           <Route path="/admin/knowledge-base" element={<AdminKnowledgeBase />} />
+          
+          {/* Request Package Email */}
+          <Route path="/request-package-email/:caseId" element={<RequestPackageEmail />} />
           {/* Demo/Example Routes */}
           {/* <Route path="/demo/adaptive-language" element={<AdaptiveFormExample />} /> */}
           <Route path="/demo/proactive-alerts" element={<ProactiveAlertsDemo />} />
