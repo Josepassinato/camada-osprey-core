@@ -613,7 +613,7 @@ const NewHomepage = () => {
                 className="h-4 w-4 mt-1 accent-white cursor-pointer"
               />
               <label htmlFor="terms-final" className="text-sm opacity-90 cursor-pointer">
-                Concordo com os termos de uso. Esta é uma ferramenta tecnológica, não consultoria jurídica.
+                Concordo com os termos. Entendo que esta é uma ferramenta tecnológica, não consultoria jurídica. Se necessário, consultarei um advogado de imigração.
               </label>
             </div>
             
