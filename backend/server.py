@@ -8960,6 +8960,193 @@ async def get_visa_package_info(visa_code: str, voucher_code: Optional[str] = No
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================================================
+# EMAIL SERVICE - Resend Integration
+# ============================================================================
+
+import resend
+from fastapi.responses import FileResponse
+
+# Configure Resend
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
+SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'noreply@iaimmigration.com')
+
+if RESEND_API_KEY:
+    resend.api_key = RESEND_API_KEY
+    logger.info(f"✅ Resend configured with sender: {SENDER_EMAIL}")
+else:
+    logger.warning("⚠️ RESEND_API_KEY not configured")
+
+class SendPackageEmailRequest(BaseModel):
+    """Request model for sending package via email"""
+    user_email: EmailStr
+    user_name: str
+    package_filename: str
+    application_type: str = "I-539"
+    case_id: str
+
+@api_router.post("/email/send-package")
+async def send_package_email(request: SendPackageEmailRequest):
+    """
+    Envia o pacote de aplicação por email usando Resend.com
+    """
+    try:
+        if not RESEND_API_KEY:
+            raise HTTPException(
+                status_code=500,
+                detail="Email service not configured. Please contact support."
+            )
+        
+        # Verificar se o arquivo existe
+        file_path = f"/app/{request.package_filename}"
+        if not os.path.exists(file_path):
+            raise HTTPException(
+                status_code=404,
+                detail=f"Package file not found: {request.package_filename}"
+            )
+        
+        # Ler arquivo e converter para Base64
+        with open(file_path, "rb") as f:
+            file_content = f.read()
+        
+        file_base64 = base64.b64encode(file_content).decode("utf-8")
+        
+        # Template de email em HTML
+        html_content = f"""
+        <html>
+            <head>
+                <style>
+                    body {{
+                        font-family: Arial, sans-serif;
+                        line-height: 1.6;
+                        color: #333;
+                        max-width: 600px;
+                        margin: 0 auto;
+                    }}
+                    .header {{
+                        background-color: #2563eb;
+                        color: white;
+                        padding: 20px;
+                        text-align: center;
+                    }}
+                    .content {{
+                        padding: 30px 20px;
+                        background-color: #f9fafb;
+                    }}
+                    .info-box {{
+                        background-color: white;
+                        border-left: 4px solid #2563eb;
+                        padding: 15px;
+                        margin: 20px 0;
+                    }}
+                    .footer {{
+                        background-color: #1f2937;
+                        color: #9ca3af;
+                        padding: 20px;
+                        text-align: center;
+                        font-size: 12px;
+                    }}
+                    .button {{
+                        display: inline-block;
+                        padding: 12px 24px;
+                        background-color: #2563eb;
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 5px;
+                        margin: 20px 0;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>Seu Pacote de Aplicação Está Pronto!</h1>
+                </div>
+                
+                <div class="content">
+                    <p>Olá <strong>{request.user_name}</strong>,</p>
+                    
+                    <p>Seu pacote de aplicação para <strong>{request.application_type}</strong> foi gerado com sucesso e está anexado a este email.</p>
+                    
+                    <div class="info-box">
+                        <p><strong>📋 Informações do Seu Caso:</strong></p>
+                        <p>
+                            <strong>Case ID:</strong> {request.case_id}<br>
+                            <strong>Tipo de Aplicação:</strong> {request.application_type}<br>
+                            <strong>Nome do Arquivo:</strong> {request.package_filename}
+                        </p>
+                    </div>
+                    
+                    <h3>📦 O que está incluído no pacote:</h3>
+                    <ul>
+                        <li>Carta de apresentação profissional</li>
+                        <li>Formulário USCIS preenchido</li>
+                        <li>Documentos de suporte organizados</li>
+                        <li>Instruções para submissão</li>
+                    </ul>
+                    
+                    <h3>📝 Próximos Passos:</h3>
+                    <ol>
+                        <li>Baixe e revise todos os documentos cuidadosamente</li>
+                        <li>Imprima os formulários em papel branco</li>
+                        <li>Assine onde indicado</li>
+                        <li>Envie ao USCIS conforme as instruções incluídas</li>
+                    </ol>
+                    
+                    <p><strong>⚠️ Aviso Importante:</strong><br>
+                    Este pacote foi gerado automaticamente. Por favor, revise todas as informações para garantir precisão antes de submeter ao USCIS. Para questões complexas, recomendamos consultar um advogado de imigração.</p>
+                    
+                    <p>Se você tiver alguma dúvida, por favor responda a este email ou entre em contato com nossa equipe de suporte.</p>
+                    
+                    <p>Boa sorte com sua aplicação!</p>
+                    
+                    <p>Atenciosamente,<br>
+                    <strong>Equipe OSPREY Immigration</strong></p>
+                </div>
+                
+                <div class="footer">
+                    <p>OSPREY Immigration System<br>
+                    Este é um email automático. Por favor não responda.</p>
+                    <p>© 2025 IA Immigration. Todos os direitos reservados.</p>
+                </div>
+            </body>
+        </html>
+        """
+        
+        # Enviar email com anexo
+        params: resend.Emails.SendParams = {
+            "from": SENDER_EMAIL,
+            "to": [request.user_email],
+            "subject": f"Seu Pacote de Aplicação {request.application_type} - Case ID: {request.case_id}",
+            "html": html_content,
+            "attachments": [
+                {
+                    "content": file_base64,
+                    "filename": request.package_filename,
+                }
+            ]
+        }
+        
+        logger.info(f"Enviando pacote por email para {request.user_email}")
+        email_response = resend.Emails.send(params)
+        
+        logger.info(f"Email enviado com sucesso. Email ID: {email_response.get('id')}")
+        
+        return {
+            "success": True,
+            "email_id": email_response.get("id"),
+            "message": f"Pacote enviado para {request.user_email}",
+            "recipient": request.user_email
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Erro ao enviar email: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao enviar email: {str(e)}"
+        )
+
+# ============================================================================
 # DOWNLOAD ENDPOINTS - Para arquivos gerados (pacotes, relatórios)
 # ============================================================================
 
