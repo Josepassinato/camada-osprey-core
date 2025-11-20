@@ -237,10 +237,15 @@ class H1BApplicationData:
         if self.beneficiary['total_experience_years'] != expected_exp:
             errors.append(f"AVISO: Experiência total ({self.beneficiary['total_experience_years']} anos) não bate com soma dos empregos ({expected_exp} anos)")
         
-        # 4. Verificar idade vs data de nascimento
+        # 4. Verificar idade vs data de nascimento (nasceu em Agosto 1990)
         birth_year = 1990
         current_year = datetime.now().year
-        expected_age = current_year - birth_year
+        current_month = datetime.now().month
+        # Se ainda não fez aniversário este ano (antes de agosto), idade é current_year - birth_year - 1
+        if current_month < 8:
+            expected_age = current_year - birth_year - 1
+        else:
+            expected_age = current_year - birth_year
         if self.beneficiary['age'] != expected_age:
             errors.append(f"ERRO: Idade ({self.beneficiary['age']}) não bate com data de nascimento (deveria ser {expected_age})")
         
