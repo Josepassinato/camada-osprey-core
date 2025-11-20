@@ -104,9 +104,9 @@ def create_final_complete_package():
     print("   ✅ Cover Page")
     print("   ✅ Table of Contents")
     print("   ✅ Cover Letter (10 páginas únicas)")
-    print("   ✅ Form I-129 OFICIAL DO USCIS (20 páginas)")
+    print("   ✅ Form I-129 OFICIAL DO USCIS (20 páginas - do repositório)")
     print("   ✅ H-1B Supplement")
-    print("   ✅ LCA Certificado (com imagem)")
+    print("   ✅ LCA Certificado (com imagem + formulário oficial disponível)")
     print("   ✅ Company Support Letter")
     print("   ✅ Job Description")
     print("   ✅ Organizational Chart")
@@ -119,6 +119,11 @@ def create_final_complete_package():
     print("   ✅ Professional Certifications")
     print("   ✅ Additional Evidence")
     print("\n💡 Este é o pacote COMPLETO que será entregue ao usuário!")
+    print("\n🗄️ FORMULÁRIOS OFICIAIS:")
+    print(f"   • Fonte: Repositório local (/app/official_forms/uscis_forms/)")
+    print(f"   • I-129: Baixado do USCIS e armazenado localmente")
+    print(f"   • LCA (ETA-9035): Baixado do DOL e armazenado localmente")
+    print(f"   • Velocidade: Instantânea (sem necessidade de download repetido)")
     print("="*80)
     
     return final_package
