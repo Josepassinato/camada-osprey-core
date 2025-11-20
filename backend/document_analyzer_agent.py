@@ -21,12 +21,24 @@ class DocumentAnalyzerAgent:
     - Detecção de informações chave
     """
     
-    def __init__(self):
+    def __init__(self, knowledge_base_path: str = "/app/knowledge_base_documents.json"):
         self.supported_documents = [
             'passport', 'driver_license', 'birth_certificate',
             'i20', 'i94', 'visa', 'bank_statement', 'transcript'
         ]
-        logger.info("✅ Document Analyzer Agent inicializado")
+        self.knowledge_base = self._load_knowledge_base(knowledge_base_path)
+        logger.info(f"✅ Document Analyzer Agent inicializado com {len(self.knowledge_base.get('documents', []))} documentos de referência")
+    
+    def _load_knowledge_base(self, kb_path: str) -> Dict:
+        """Carrega a base de conhecimento"""
+        try:
+            if os.path.exists(kb_path):
+                with open(kb_path, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            return {'documents': []}
+        except Exception as e:
+            logger.error(f"Erro ao carregar KB: {str(e)}")
+            return {'documents': []}
     
     def analyze_document(self, file_content: bytes, document_type: str, filename: str) -> Dict:
         """
