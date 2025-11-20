@@ -92,7 +92,7 @@ class EnhancedPackageGenerator:
         # Substituir placeholders com dados reais
         cover_letter = template.replace("[Beneficiary Name]", self.h1b_data.beneficiary['full_name'])
         cover_letter = cover_letter.replace("[Full Name]", self.h1b_data.beneficiary['full_name'])
-        cover_letter = cover_letter.replace("[DOB]", self.h1b_data.beneficiary['date_of_birth'])
+        cover_letter = cover_letter.replace("[DOB]", self.h1b_data.beneficiary['dob_formatted'])
         cover_letter = cover_letter.replace("[Company Name]", self.h1b_data.employer['legal_name'])
         cover_letter = cover_letter.replace("[Job Title]", self.h1b_data.position['title'])
         cover_letter = cover_letter.replace("[Field]", "Computer Science and Software Engineering")
