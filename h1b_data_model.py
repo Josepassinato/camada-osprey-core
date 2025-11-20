@@ -56,8 +56,9 @@ class H1BApplicationData:
             "bachelors_honors": "Magna Cum Laude",
             
             # Professional Experience - TOTAL ÚNICO
+            # Jun 2015 - Feb 2018 (2y 9m) + Mar 2018 - Dec 2021 (3y 10m) + Jan 2022 - Oct 2024 (2y 10m) = 9y 5m
             "total_experience_years": 9,
-            "total_experience_months": 4,  # 9 anos e 4 meses = exatamente de Jun 2015 a Out 2024
+            "total_experience_months": 5,
             
             # Professional Experience - Job 1 (MAIS RECENTE)
             "job1_title": "Technical Lead",
