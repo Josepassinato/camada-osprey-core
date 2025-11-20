@@ -588,58 +588,48 @@ or labor laws.
         """Gera LCA Certificado - 12 páginas"""
         story = []
         
-        story.append(Paragraph("TAB D: LABOR CONDITION APPLICATION - CERTIFIED", self.tab_style))
+        story.append(Paragraph("TAB D: LABOR CONDITION APPLICATION - CERTIFIED BY DOL", self.tab_style))
+        story.append(Spacer(1, 0.2*inch))
         
-        lca_content = f"""
-<b>LABOR CONDITION APPLICATION</b><br/>
-<b>CERTIFIED BY U.S. DEPARTMENT OF LABOR</b><br/>
+        lca_intro = f"""
+<b>CERTIFIED LABOR CONDITION APPLICATION</b><br/>
+<b>U.S. Department of Labor - Employment and Training Administration</b><br/>
 <br/>
-<b>CERTIFICATION INFORMATION:</b><br/>
-Certification Number: {self.h1b_data.lca['certification_number']}<br/>
-Certification Date: {self.h1b_data.lca['certification_date']}<br/>
-Valid From: {self.h1b_data.lca['validity_start']}<br/>
-Valid Through: {self.h1b_data.lca['validity_end']}<br/>
-Status: <b>CERTIFIED</b><br/>
-Certifying Officer: {self.h1b_data.lca['certifying_officer']}<br/>
-Title: {self.h1b_data.lca['certifying_officer_title']}<br/>
+This Labor Condition Application (LCA) was CERTIFIED by the U.S. Department of Labor on
+{self.h1b_data.lca['certification_date']}. Certification Number: {self.h1b_data.lca['certification_number']}.<br/>
 <br/>
-<b>EMPLOYER INFORMATION:</b><br/>
-Legal Business Name: {self.h1b_data.employer['legal_name']}<br/>
-EIN: {self.h1b_data.employer['ein']}<br/>
-Address: {self.h1b_data.employer['address']}<br/>
-City: {self.h1b_data.employer['city']}<br/>
-State: {self.h1b_data.employer['state']}<br/>
-ZIP: {self.h1b_data.employer['zip']}<br/>
-<br/>
-<b>WORKSITE INFORMATION:</b><br/>
-Address: {self.h1b_data.position['work_address']}<br/>
-City: San Jose<br/>
-State: California<br/>
-ZIP: 95134<br/>
-<br/>
-<b>WAGE INFORMATION:</b><br/>
-Job Title: {self.h1b_data.position['title']}<br/>
-SOC Code: {self.h1b_data.position['soc_code']}<br/>
-SOC Title: {self.h1b_data.position['soc_title']}<br/>
-Wage Level: {self.h1b_data.lca['wage_level']}<br/>
-Wage Source: {self.h1b_data.lca['wage_source']}<br/>
-Prevailing Wage: {self.h1b_data.lca['prevailing_wage']} per year<br/>
-Wage Offered: {self.h1b_data.lca['wage_offered']} per year<br/>
-Wage Rate: {self.h1b_data.position['salary_hourly']} per hour<br/>
-<br/>
-The wage offered exceeds the prevailing wage by ${self.h1b_data.lca['wage_offered_numeric'] - self.h1b_data.lca['prevailing_wage_numeric']:,}, 
-representing a {((self.h1b_data.lca['wage_offered_numeric'] / self.h1b_data.lca['prevailing_wage_numeric'] - 1) * 100):.1f}% premium.
+The LCA confirms that the employer will pay the prevailing wage or higher and maintain proper
+working conditions for the H-1B worker.
 """
-        story.append(Paragraph(lca_content, self.normal_style))
+        story.append(Paragraph(lca_intro, self.normal_style))
+        story.append(Spacer(1, 0.3*inch))
+        
+        # Inserir imagem do LCA certificado
+        if 'lca' in self.document_images:
+            img = RLImage(self.document_images['lca'], width=5.5*inch, height=7.1*inch)
+            story.append(img)
+        
         story.append(PageBreak())
         
-        for page in range(2, 13):
-            story.append(Paragraph(f"TAB D: LCA CERTIFIED (Page {page} of 12)", self.tab_style))
-            story.append(Paragraph(
-                f"LCA documentation continued - Page {page}<br/>"
-                f"Includes wage determination, posting notices, and compliance attestations",
-                self.normal_style
-            ))
+        # Páginas adicionais com detalhes do LCA
+        lca_pages = [
+            (2, "LCA Section A - Employer Information", "Complete employer details including legal name, EIN, and contact information."),
+            (3, "LCA Section B - Job Opportunity Information", f"Position: {self.h1b_data.position['title']}, SOC Code: {self.h1b_data.position['soc_code']}"),
+            (4, "LCA Section C - Wage Information", f"Wage Offered: {self.h1b_data.lca['wage_offered']} | Prevailing Wage: {self.h1b_data.lca['prevailing_wage']}"),
+            (5, "LCA Section D - Worksite Information", f"Address: {self.h1b_data.position['work_address']}, San Jose, CA 95134"),
+            (6, "LCA Section E - Employer Attestations", "All required employer attestations regarding working conditions and wages."),
+            (7, "LCA Section F - Public Access File", "Documentation of LCA posting and public access file maintenance."),
+            (8, "LCA Posting Notices - Page 1", "Copy of notice posted at worksite for 10 business days."),
+            (9, "LCA Posting Notices - Page 2", "Electronic posting confirmation and employee notification."),
+            (10, "Prevailing Wage Determination", f"OES wage data for {self.h1b_data.position['soc_code']} in San Jose-Sunnyvale-Santa Clara, CA MSA."),
+            (11, "DOL Certification Letter", f"Official certification letter from {self.h1b_data.lca['certifying_officer']}, {self.h1b_data.lca['certifying_officer_title']}."),
+            (12, "LCA Validity Documentation", f"Valid from {self.h1b_data.lca['validity_start']} through {self.h1b_data.lca['validity_end']}.")
+        ]
+        
+        for page_num, page_title, page_desc in lca_pages:
+            story.append(Paragraph(f"TAB D: LCA CERTIFIED (Page {page_num} of 12)", self.tab_style))
+            story.append(Paragraph(f"<b>{page_title}</b>", self.heading_style))
+            story.append(Paragraph(page_desc, self.normal_style))
             story.append(PageBreak())
         
         self.included_sections.add('LCA Certified')
