@@ -9832,6 +9832,11 @@ async def list_downloads():
 # Include all API routes
 app.include_router(api_router)
 
+# Include Visa API router (multi-agent architecture)
+if VISA_API_AVAILABLE:
+    app.include_router(visa_router)
+    print("✅ Visa Multi-Agent API registered")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     """Shutdown event to close connections"""
