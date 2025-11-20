@@ -38,6 +38,7 @@ class SimulatedH1BCase:
             "bachelors_degree": "Bachelor of Science in Computer Engineering",
             "bachelors_institution": "Universidade Federal do Rio de Janeiro (UFRJ)",
             "bachelors_graduation_year": "2010",
+            "bachelors_graduation_date": "December 10, 2010",
             "bachelors_gpa": "3.8/4.0",
             "bachelors_honors": "Cum Laude",
             
