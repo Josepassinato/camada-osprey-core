@@ -9946,3 +9946,19 @@ async def get_complete_with_images():
     return HTMLResponse(content=html_content)
 
 
+@app.get("/api/final-complete-package", response_class=HTMLResponse)
+async def get_final_complete_package():
+    """
+    Serve the final complete package demo page
+    """
+    html_path = Path(__file__).parent.parent / "frontend" / "public" / "final-complete-package.html"
+    
+    if not html_path.exists():
+        raise HTTPException(status_code=404, detail="Final complete package page not found")
+    
+    with open(html_path, 'r', encoding='utf-8') as f:
+        html_content = f.read()
+    
+    return HTMLResponse(content=html_content)
+
+
