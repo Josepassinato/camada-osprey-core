@@ -1548,8 +1548,8 @@ class ProductionVerificationTester:
             if story_response.status_code == 200:
                 story_result = story_response.json()
                 case_data = story_result.get('case', story_result)
-                stored_story = case_data.get('user_story', '')
-                stored_responses = case_data.get('simplified_responses', {})
+                stored_story = case_data.get('user_story_text', '')
+                stored_responses = case_data.get('simplified_form_responses', {})
                 has_mit_story = 'MIT' in stored_story and 'OPT' in stored_story
                 has_techcorp = stored_responses.get('employment', '').find('TechCorp') != -1
                 correct_progress = case_data.get('progress_percentage') == 70
