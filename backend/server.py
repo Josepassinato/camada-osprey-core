@@ -10019,6 +10019,39 @@ async def get_simulated_package_pdf():
     if not pdf_path.exists():
         raise HTTPException(status_code=404, detail="Simulated package PDF not found")
     
+    return FileResponse(
+        path=str(pdf_path),
+        media_type="application/pdf",
+        filename="SIMULATED_H1B_COMPLETE_PACKAGE.pdf"
+    )
+
+
+@app.get("/api/b2-extension-demo", response_class=HTMLResponse)
+async def get_b2_extension_demo():
+    """
+    Serve the B-2 extension demo page
+    """
+    html_path = Path(__file__).parent.parent / "frontend" / "public" / "b2-extension-demo.html"
+    
+    if not html_path.exists():
+        raise HTTPException(status_code=404, detail="B-2 extension demo page not found")
+    
+    with open(html_path, 'r', encoding='utf-8') as f:
+        html_content = f.read()
+    
+    return HTMLResponse(content=html_content)
+
+
+@app.get("/MARIA_HELENA_B2_EXTENSION_COMPLETE_PACKAGE.pdf")
+async def get_b2_extension_package_pdf():
+    """
+    Serve the B-2 extension package PDF
+    """
+    pdf_path = Path(__file__).parent.parent / "frontend" / "public" / "MARIA_HELENA_B2_EXTENSION_COMPLETE_PACKAGE.pdf"
+    
+    if not pdf_path.exists():
+        raise HTTPException(status_code=404, detail="B-2 extension package PDF not found")
+    
     return FileResponse(pdf_path, media_type="application/pdf", filename="SIMULATED_H1B_COMPLETE_PACKAGE.pdf")
 
 
