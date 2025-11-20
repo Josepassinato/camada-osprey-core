@@ -135,17 +135,17 @@ def debug_case_data_persistence():
             print(f"\n🔍 Data Fields Present:")
             print(f"Basic data: {'✓' if case_data.get('basic_data') else '✗'}")
             print(f"EAD data: {'✓' if case_data.get('ead_data') else '✗'}")
-            print(f"User story: {'✓' if case_data.get('user_story') else '✗'}")
-            print(f"Simplified responses: {'✓' if case_data.get('simplified_responses') else '✗'}")
+            print(f"User story: {'✓' if case_data.get('user_story_text') else '✗'}")
+            print(f"Simplified responses: {'✓' if case_data.get('simplified_form_responses') else '✗'}")
             
-            if case_data.get('user_story'):
-                story = case_data.get('user_story', '')
+            if case_data.get('user_story_text'):
+                story = case_data.get('user_story_text', '')
                 print(f"Story contains MIT: {'✓' if 'MIT' in story else '✗'}")
                 print(f"Story contains OPT: {'✓' if 'OPT' in story else '✗'}")
                 print(f"Story contains TechCorp: {'✓' if 'TechCorp' in story else '✗'}")
             
-            if case_data.get('simplified_responses'):
-                responses = case_data.get('simplified_responses', {})
+            if case_data.get('simplified_form_responses'):
+                responses = case_data.get('simplified_form_responses', {})
                 employment = responses.get('employment', '')
                 print(f"Employment contains TechCorp: {'✓' if 'TechCorp' in employment else '✗'}")
         
