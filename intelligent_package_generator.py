@@ -693,36 +693,98 @@ representing a {((self.h1b_data.lca['wage_offered_numeric'] / self.h1b_data.lca[
     
     def _generate_educational_credentials(self):
         story = []
-        story.append(Paragraph("TAB J: EDUCATIONAL CREDENTIALS (Page 1 of 20)", self.tab_style))
+        story.append(Paragraph("TAB J: EDUCATIONAL CREDENTIALS - Index", self.tab_style))
         
-        edu_content = f"""
-<b>EDUCATIONAL CREDENTIALS</b><br/>
+        edu_index = f"""
+<b>EDUCATIONAL CREDENTIALS PACKAGE</b><br/>
+<b>Beneficiary: {self.h1b_data.beneficiary['full_name']}</b><br/>
 <br/>
-<b>MASTER'S DEGREE:</b><br/>
-Degree: {self.h1b_data.beneficiary['masters_degree']}<br/>
-Institution: {self.h1b_data.beneficiary['masters_institution']}<br/>
-Location: São Paulo, Brazil<br/>
-Graduation Date: {self.h1b_data.beneficiary['masters_graduation_date']}<br/>
-GPA: {self.h1b_data.beneficiary['masters_gpa']}/4.00<br/>
-Honors: {self.h1b_data.beneficiary['masters_honors']}<br/>
-Thesis: {self.h1b_data.beneficiary['masters_thesis_title']}<br/>
+This section contains official educational credentials demonstrating that the beneficiary
+possesses the required academic qualifications for the specialty occupation.<br/>
 <br/>
-<b>BACHELOR'S DEGREE:</b><br/>
-Degree: {self.h1b_data.beneficiary['bachelors_degree']}<br/>
-Institution: {self.h1b_data.beneficiary['bachelors_institution']}<br/>
-Location: São Paulo, Brazil<br/>
-Graduation Date: {self.h1b_data.beneficiary['bachelors_graduation_date']}<br/>
-GPA: {self.h1b_data.beneficiary['bachelors_gpa']}/4.00<br/>
-Honors: {self.h1b_data.beneficiary['bachelors_honors']}<br/>
+<b>Contents:</b><br/>
+1. Master's Degree Diploma (Pages 2-3)<br/>
+2. Master's Degree Transcript (Pages 4-8)<br/>
+3. Bachelor's Degree Diploma (Pages 9-10)<br/>
+4. Bachelor's Degree Transcript (Pages 11-15)<br/>
+5. Credential Evaluation by NACES-approved Agency (Pages 16-20)<br/>
 <br/>
-Official diplomas, transcripts, and credential evaluation follow.
+All documents have been translated into English where applicable and certified as true copies.
 """
-        story.append(Paragraph(edu_content, self.normal_style))
+        story.append(Paragraph(edu_index, self.normal_style))
         story.append(PageBreak())
         
-        for page in range(2, 21):
-            story.append(Paragraph(f"TAB J: EDUCATIONAL CREDENTIALS (Page {page} of 20)", self.tab_style))
-            story.append(Paragraph("Diplomas, transcripts, and credential evaluation documentation", self.normal_style))
+        # Página 2: Diploma de Master (com imagem)
+        story.append(Paragraph("TAB J: EDUCATIONAL CREDENTIALS - Master's Degree Diploma (Page 2 of 20)", self.tab_style))
+        story.append(Spacer(1, 0.2*inch))
+        
+        masters_intro = f"""
+<b>MASTER OF SCIENCE IN COMPUTER SCIENCE</b><br/>
+<b>{self.h1b_data.beneficiary['masters_institution']}</b><br/>
+<b>Graduated: {self.h1b_data.beneficiary['masters_graduation_date']}</b><br/>
+<br/>
+Official diploma showing completion of Master's degree with {self.h1b_data.beneficiary['masters_honors']} honors.
+GPA: {self.h1b_data.beneficiary['masters_gpa']}/4.00.
+"""
+        story.append(Paragraph(masters_intro, self.normal_style))
+        story.append(Spacer(1, 0.3*inch))
+        
+        # Inserir imagem do diploma
+        if 'diploma' in self.document_images:
+            img = RLImage(self.document_images['diploma'], width=6.5*inch, height=4.55*inch)
+            story.append(img)
+        
+        story.append(PageBreak())
+        
+        # Página 3: Continuação do diploma (verso/certificação)
+        story.append(Paragraph("TAB J: EDUCATIONAL CREDENTIALS - Diploma Certification (Page 3 of 20)", self.tab_style))
+        story.append(Paragraph("Certification page and official seals confirming authenticity of the diploma.", self.normal_style))
+        story.append(PageBreak())
+        
+        # Páginas 4-8: Histórico Escolar de Master (com imagem)
+        story.append(Paragraph("TAB J: EDUCATIONAL CREDENTIALS - Master's Transcript (Page 4 of 20)", self.tab_style))
+        story.append(Spacer(1, 0.2*inch))
+        
+        transcript_intro = f"""
+<b>OFFICIAL TRANSCRIPT - MASTER'S PROGRAM</b><br/>
+<b>{self.h1b_data.beneficiary['masters_institution']}</b><br/>
+<br/>
+Complete academic transcript showing all coursework completed for the Master of Science degree.
+Thesis: "{self.h1b_data.beneficiary['masters_thesis_title']}"
+"""
+        story.append(Paragraph(transcript_intro, self.normal_style))
+        story.append(Spacer(1, 0.3*inch))
+        
+        # Inserir imagem do histórico
+        if 'transcript' in self.document_images:
+            img = RLImage(self.document_images['transcript'], width=5.5*inch, height=7.1*inch)
+            story.append(img)
+        
+        story.append(PageBreak())
+        
+        # Páginas restantes (5-20)
+        remaining_pages = [
+            (5, "Master's Transcript Page 2", "Continuation of Master's transcript showing additional coursework."),
+            (6, "Master's Transcript Page 3", "Final courses and thesis credit hours."),
+            (7, "Master's Transcript Page 4", "Grade legend and GPA calculation methodology."),
+            (8, "Master's Transcript Certification", "Registrar certification and official university seal."),
+            (9, "Bachelor's Degree Diploma", "Official diploma for Bachelor of Science in Computer Science."),
+            (10, "Bachelor's Diploma Certification", "Certification page and authentication."),
+            (11, "Bachelor's Transcript Page 1", "Complete transcript for undergraduate studies."),
+            (12, "Bachelor's Transcript Page 2", "Continuation of coursework."),
+            (13, "Bachelor's Transcript Page 3", "Final year courses and projects."),
+            (14, "Bachelor's Transcript Page 4", "Grade summary and honors notation."),
+            (15, "Bachelor's Transcript Certification", "Official certification by registrar."),
+            (16, "Credential Evaluation Cover Page", "Evaluation by NACES-approved agency confirming U.S. equivalency."),
+            (17, "Credential Evaluation - Methodology", "Explanation of evaluation standards and methodology."),
+            (18, "Credential Evaluation - Master's Degree", "Determination: Master's degree is equivalent to U.S. Master of Science."),
+            (19, "Credential Evaluation - Bachelor's Degree", "Determination: Bachelor's degree is equivalent to U.S. Bachelor of Science."),
+            (20, "Evaluator Certification", "Credentials and certification of the evaluating agency.")
+        ]
+        
+        for page_num, page_title, page_desc in remaining_pages:
+            story.append(Paragraph(f"TAB J: EDUCATIONAL CREDENTIALS - {page_title} (Page {page_num} of 20)", self.tab_style))
+            story.append(Paragraph(page_desc, self.normal_style))
             story.append(PageBreak())
         
         self.included_sections.add('Educational Credentials')
