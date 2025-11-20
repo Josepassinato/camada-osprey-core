@@ -1,0 +1,148 @@
+{
+  "forms_and_templates": [
+    {
+      "filename": "Immigration_Client_Intake_Form.pdf",
+      "original": "Immigration_Client_Intake_Form.docx",
+      "path": "forms_and_templates/Immigration_Client_Intake_Form.pdf",
+      "type": "PDF (convertido de DOCX)"
+    },
+    {
+      "filename": "Immigration_Forms_Master_Index_Bordered_Table.pdf",
+      "original": "Immigration_Forms_Master_Index_Bordered_Table.docx",
+      "path": "forms_and_templates/Immigration_Forms_Master_Index_Bordered_Table.pdf",
+      "type": "PDF (convertido de DOCX)"
+    },
+    {
+      "filename": "Immigration_Form_Filing_Flowchart_Bonus.pdf",
+      "original": "Immigration_Form_Filing_Flowchart_Bonus.docx",
+      "path": "forms_and_templates/Immigration_Form_Filing_Flowchart_Bonus.pdf",
+      "type": "PDF (convertido de DOCX)"
+    }
+  ],
+  "completion_guides": [
+    {
+      "filename": "I-864_Completion_Guide_and_Checklist.pdf",
+      "original": "I-864_Completion_Guide_and_Checklist.docx",
+      "path": "completion_guides/I-864_Completion_Guide_and_Checklist.pdf",
+      "type": "PDF (convertido de DOCX)"
+    },
+    {
+      "filename": "I-130_Completion_Guide_and_Checklist.pdf",
+      "original": "I-130_Completion_Guide_and_Checklist.docx",
+      "path": "completion_guides/I-130_Completion_Guide_and_Checklist.pdf",
+      "type": "PDF (convertido de DOCX)"
+    },
+    {
+      "filename": "G-28_Notice_of_Appearance_Guide_and_Checklist.pdf",
+      "original": "G-28_Notice_of_Appearance_Guide_and_Checklist.docx",
+      "path": "completion_guides/G-28_Notice_of_Appearance_Guide_and_Checklist.pdf",
+      "type": "PDF (convertido de DOCX)"
+    },
+    {
+      "filename": "I-601_I-601A_Waiver_Guide_and_Checklist.pdf",
+      "original": "I-601_I-601A_Waiver_Guide_and_Checklist.docx",
+      "path": "completion_guides/I-601_I-601A_Waiver_Guide_and_Checklist.pdf",
+      "type": "PDF (convertido de DOCX)"
+    },
+    {
+      "filename": "N-400_Naturalization_Guide_and_Checklist.pdf",
+      "original": "N-400_Naturalization_Guide_and_Checklist.docx",
+      "path": "completion_guides/N-400_Naturalization_Guide_and_Checklist.pdf",
+      "type": "PDF (convertido de DOCX)"
+    },
+    {
+      "filename": "I-589_Asylum_Application_Guide_and_Checklist.pdf",
+      "original": "I-589_Asylum_Application_Guide_and_Checklist.docx",
+      "path": "completion_guides/I-589_Asylum_Application_Guide_and_Checklist.pdf",
+      "type": "PDF (convertido de DOCX)"
+    },
+    {
+      "filename": "I-765_Completion_Guide_and_Checklist.pdf",
+      "original": "I-765_Completion_Guide_and_Checklist.docx",
+      "path": "completion_guides/I-765_Completion_Guide_and_Checklist.pdf",
+      "type": "PDF (convertido de DOCX)"
+    },
+    {
+      "filename": "I-485_Completion_Guide_and_Checklist.pdf",
+      "original": "I-485_Completion_Guide_and_Checklist.docx",
+      "path": "completion_guides/I-485_Completion_Guide_and_Checklist.pdf",
+      "type": "PDF (convertido de DOCX)"
+    },
+    {
+      "filename": "I-131_Completion_Guide_and_Checklist.pdf",
+      "original": "I-131_Completion_Guide_and_Checklist.docx",
+      "path": "completion_guides/I-131_Completion_Guide_and_Checklist.pdf",
+      "type": "PDF (convertido de DOCX)"
+    }
+  ],
+  "checklists_and_trackers": [
+    {
+      "filename": "Immigration_Fee_and_Payment_Tracker.pdf",
+      "original": "Immigration_Fee_and_Payment_Tracker.docx",
+      "path": "checklists_and_trackers/Immigration_Fee_and_Payment_Tracker.pdf",
+      "type": "PDF (convertido de DOCX)"
+    },
+    {
+      "filename": "Immigration_Case_Timeline_Tracker.pdf",
+      "original": "Immigration_Case_Timeline_Tracker.docx",
+      "path": "checklists_and_trackers/Immigration_Case_Timeline_Tracker.pdf",
+      "type": "PDF (convertido de DOCX)"
+    },
+    {
+      "filename": "Supporting_Document_Checklist.pdf",
+      "original": "Supporting_Document_Checklist.docx",
+      "path": "checklists_and_trackers/Supporting_Document_Checklist.pdf",
+      "type": "PDF (convertido de DOCX)"
+    },
+    {
+      "filename": "USCIS_Communication_Tracker.pdf",
+      "original": "USCIS_Communication_Tracker.docx",
+      "path": "checklists_and_trackers/USCIS_Communication_Tracker.pdf",
+      "type": "PDF (convertido de DOCX)"
+    },
+    {
+      "filename": "Immigration_Mailing_Log.pdf",
+      "original": "Immigration_Mailing_Log.docx",
+      "path": "checklists_and_trackers/Immigration_Mailing_Log.pdf",
+      "type": "PDF (convertido de DOCX)"
+    },
+    {
+      "filename": "RFEs_&_Interview_Prep_Checklist.pdf",
+      "original": "RFEs_&_Interview_Prep_Checklist.docx",
+      "path": "checklists_and_trackers/RFEs_&_Interview_Prep_Checklist.pdf",
+      "type": "PDF (convertido de DOCX)"
+    },
+    {
+      "filename": "USCIS_Form_Filing_Checklist.pdf",
+      "original": "USCIS_Form_Filing_Checklist.docx",
+      "path": "checklists_and_trackers/USCIS_Form_Filing_Checklist.pdf",
+      "type": "PDF (convertido de DOCX)"
+    },
+    {
+      "filename": "Immigration_Client_Communication_Log.pdf",
+      "original": "Immigration_Client_Communication_Log.docx",
+      "path": "checklists_and_trackers/Immigration_Client_Communication_Log.pdf",
+      "type": "PDF (convertido de DOCX)"
+    }
+  ],
+  "letter_templates": [
+    {
+      "filename": "Affidavit_of_Support_(I-864)_Prep_Sheet.pdf",
+      "original": "Affidavit_of_Support_(I-864)_Prep_Sheet.docx",
+      "path": "letter_templates/Affidavit_of_Support_(I-864)_Prep_Sheet.pdf",
+      "type": "PDF (convertido de DOCX)"
+    }
+  ],
+  "official_forms": [
+    {
+      "filename": "i-129.pdf",
+      "path": "official_forms_pdf/i-129.pdf",
+      "type": "PDF (oficial)"
+    },
+    {
+      "filename": "eta-9035-lca.pdf",
+      "path": "official_forms_pdf/eta-9035-lca.pdf",
+      "type": "PDF (oficial)"
+    }
+  ]
+}
