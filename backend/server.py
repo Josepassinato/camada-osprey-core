@@ -8508,14 +8508,35 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Import Oracle Consultant after logger is defined
+# Import All AI Agents after logger is defined
 try:
     from oracle_consultant import consult_oracle, oracle
-    logger.info("✅ Oráculo Jurídico carregado com sucesso")
+    logger.info("✅ Oráculo Jurídico carregado")
 except Exception as e:
     logger.warning(f"⚠️ Oráculo não disponível: {str(e)}")
     oracle = None
     consult_oracle = None
+
+try:
+    from document_analyzer_agent import document_analyzer, analyze_uploaded_document
+    logger.info("✅ Document Analyzer Agent carregado")
+except Exception as e:
+    logger.warning(f"⚠️ Document Analyzer não disponível: {str(e)}")
+    document_analyzer = None
+
+try:
+    from form_filler_agent import form_filler, fill_form_automatically
+    logger.info("✅ Form Filler Agent carregado")
+except Exception as e:
+    logger.warning(f"⚠️ Form Filler não disponível: {str(e)}")
+    form_filler = None
+
+try:
+    from translation_agent import translator, translate_text
+    logger.info("✅ Translation Agent carregado")
+except Exception as e:
+    logger.warning(f"⚠️ Translation Agent não disponível: {str(e)}")
+    translator = None
 
 @app.on_event("startup")
 async def startup_db_client():
