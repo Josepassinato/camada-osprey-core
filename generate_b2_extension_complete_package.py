@@ -230,11 +230,11 @@ class B2ExtensionPackageGenerator:
             info_style
         ))
         elements.append(Paragraph(
-            f"<b>Current Status:</b> {self.data.applicant['current_status']}",
+            f"<b>Current Status:</b> {self.data.current_status['visa_type']}",
             info_style
         ))
         elements.append(Paragraph(
-            f"<b>Current Status Expires:</b> {self.data.applicant['current_status_expires']}",
+            f"<b>Current Status Expires:</b> {self.data.current_status['current_status_expires']}",
             info_style
         ))
         elements.append(Paragraph(
