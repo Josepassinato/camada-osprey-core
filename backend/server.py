@@ -359,6 +359,8 @@ class CaseUpdate(BaseModel):
     simplified_form_responses: Optional[Dict[str, Any]] = None
     progress_percentage: Optional[int] = None
     current_step: Optional[str] = None
+    # I-765 EAD specific fields
+    ead_data: Optional[Dict[str, Any]] = None
 
 # Document Models (keeping existing ones)
 class UserDocument(BaseModel):
