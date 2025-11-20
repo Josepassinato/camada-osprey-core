@@ -363,10 +363,12 @@ def test_reviewer():
     
     # Importar modelo de dados
     try:
+        import sys
+        sys.path.insert(0, '/app')
         from h1b_data_model import h1b_data
         print("✅ Modelo de dados H-1B carregado")
-    except ImportError:
-        print("⚠️ Modelo de dados não encontrado")
+    except ImportError as e:
+        print(f"⚠️ Modelo de dados não encontrado: {e}")
         h1b_data = None
     
     # Criar instância do revisor
