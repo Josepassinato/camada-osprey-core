@@ -9885,7 +9885,9 @@ async def download_file(filename: str):
         "instructions_iteration_",
         "simulation_results.json",
         "PROFESSIONAL_H1B_",
-        "CONSISTENT_H1B_"
+        "CONSISTENT_H1B_",
+        "FINAL_COMPLETE_",
+        "final_test_result"
     ]
     
     if not any(filename.startswith(pattern) for pattern in allowed_patterns):
@@ -9907,5 +9909,21 @@ async def download_file(filename: str):
         media_type = "application/octet-stream"
     
     return FileResponse(file_path, media_type=media_type, filename=filename)
+
+
+@app.get("/api/final-demo", response_class=HTMLResponse)
+async def get_final_demo():
+    """
+    Serve the final demo page
+    """
+    html_path = Path(__file__).parent.parent / "frontend" / "public" / "final-demo.html"
+    
+    if not html_path.exists():
+        raise HTTPException(status_code=404, detail="Final demo page not found")
+    
+    with open(html_path, 'r', encoding='utf-8') as f:
+        html_content = f.read()
+    
+    return HTMLResponse(content=html_content)
 
 
