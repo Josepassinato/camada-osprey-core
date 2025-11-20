@@ -9841,3 +9841,36 @@ async def shutdown_db_client():
     logger.info("✅ MongoDB connection closed")
 
 
+# ============================================================================
+# SIMULATION RESULTS PAGE
+# ============================================================================
+
+@app.get("/api/simulation-results", response_class=HTMLResponse)
+async def get_simulation_results():
+    """
+    Serve the simulation results HTML page
+    """
+    html_path = Path(__file__).parent.parent / "frontend" / "public" / "simulation-results.html"
+    
+    if not html_path.exists():
+        raise HTTPException(status_code=404, detail="Simulation results page not found")
+    
+    with open(html_path, 'r', encoding='utf-8') as f:
+        html_content = f.read()
+    
+    return HTMLResponse(content=html_content)
+
+
+@app.get("/api/simulation-data")
+async def get_simulation_data():
+    """
+    Get simulation results JSON data
+    """
+    json_path = Path(__file__).parent.parent / "simulation_results.json"
+    
+    if not json_path.exists():
+        raise HTTPException(status_code=404, detail="Simulation data not found")
+    
+    return FileResponse(json_path, media_type="application/json")
+
+
