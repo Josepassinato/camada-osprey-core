@@ -24,6 +24,14 @@ from pydantic import BaseModel, Field, EmailStr
 import pydantic
 from typing import List, Optional, Dict, Any
 
+# Import visa API router
+try:
+    from visa_api import router as visa_router
+    VISA_API_AVAILABLE = True
+except ImportError:
+    VISA_API_AVAILABLE = False
+    print("⚠️  Visa API not available")
+
 # Configure JSON encoder for ObjectId (Pydantic v2 compatible)
 # pydantic.json.ENCODERS_BY_TYPE[ObjectId] = str  # This is for Pydantic v1
 
