@@ -5833,7 +5833,7 @@ async def check_data_consistency_ai(case, friendly_form_data, basic_data):
     try:
         from emergentintegrations import EmergentLLM
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt
-from oracle_consultant import consult_oracle, oracle
+        from oracle_consultant import consult_oracle, oracle
         
         # Use OpenAI directly or fallback to EmergentLLM
         openai_key = os.environ.get('OPENAI_API_KEY')
@@ -5900,7 +5900,7 @@ async def translate_data_ai(case, friendly_form_data):
     try:
         from emergentintegrations import EmergentLLM
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt
-from oracle_consultant import consult_oracle, oracle
+        from oracle_consultant import consult_oracle, oracle
         
         # Use OpenAI directly or fallback to EmergentLLM
         openai_key = os.environ.get('OPENAI_API_KEY')
