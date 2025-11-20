@@ -694,7 +694,7 @@ representing a {((self.h1b_data.lca['wage_offered_numeric'] / self.h1b_data.lca[
 <b>MASTER'S DEGREE:</b><br/>
 Degree: {self.h1b_data.beneficiary['masters_degree']}<br/>
 Institution: {self.h1b_data.beneficiary['masters_institution']}<br/>
-Location: {self.h1b_data.beneficiary['masters_location']}<br/>
+Location: São Paulo, Brazil<br/>
 Graduation Date: {self.h1b_data.beneficiary['masters_graduation_date']}<br/>
 GPA: {self.h1b_data.beneficiary['masters_gpa']}/4.00<br/>
 Honors: {self.h1b_data.beneficiary['masters_honors']}<br/>
@@ -703,7 +703,7 @@ Thesis: {self.h1b_data.beneficiary['masters_thesis_title']}<br/>
 <b>BACHELOR'S DEGREE:</b><br/>
 Degree: {self.h1b_data.beneficiary['bachelors_degree']}<br/>
 Institution: {self.h1b_data.beneficiary['bachelors_institution']}<br/>
-Location: {self.h1b_data.beneficiary['bachelors_location']}<br/>
+Location: São Paulo, Brazil<br/>
 Graduation Date: {self.h1b_data.beneficiary['bachelors_graduation_date']}<br/>
 GPA: {self.h1b_data.beneficiary['bachelors_gpa']}/4.00<br/>
 Honors: {self.h1b_data.beneficiary['bachelors_honors']}<br/>
