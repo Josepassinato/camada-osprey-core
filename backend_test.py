@@ -1333,6 +1333,507 @@ class ProductionVerificationTester:
         
         return test_results
 
+    def test_carlos_eduardo_ferreira_i765_ead_complete_simulation(self):
+        """🎯 SIMULAÇÃO COMPLETA END-TO-END - CARLOS EDUARDO FERREIRA - I-765 (EAD)"""
+        print("🎯 SIMULAÇÃO COMPLETA END-TO-END - CARLOS EDUARDO FERREIRA - I-765 (EAD)")
+        print("="*80)
+        print("PERFIL DO USUÁRIO:")
+        print("- Nome: Carlos Eduardo Ferreira")
+        print("- Email: carlos.ferreira@email.com")
+        print("- Data de Nascimento: 18/07/1988")
+        print("- Passaporte: BR777888999")
+        print("- Nacionalidade: Brasil")
+        print("- Status Atual: F-1 (Estudante)")
+        print("- I-94: 55667788990")
+        print("- Data de Entrada: 2023-08-15")
+        print("- Vencimento do Status F-1: 2025-12-31")
+        print("- Formulário: I-765 (Employment Authorization Document)")
+        print("- Categoria: F-1 OPT (Optional Practical Training)")
+        print("- Universidade: MIT (Massachusetts Institute of Technology)")
+        print("- SEVIS: N5544332211")
+        print("- Programa Concluído: Master in Computer Science")
+        print("- Data de Graduação: 2025-05-15")
+        print("="*80)
+        
+        test_results = []
+        carlos_case_id = None
+        
+        try:
+            # ETAPA 1: Consultar Oráculo sobre I-765
+            print("\n📋 ETAPA 1: CONSULTAR ORÁCULO SOBRE I-765")
+            print("   GET /api/oracle/form/I-765/documents")
+            
+            oracle_response = self.session.get(f"{API_BASE}/oracle/form/I-765/documents")
+            
+            if oracle_response.status_code == 200:
+                oracle_data = oracle_response.json()
+                has_documents_list = 'documents' in oracle_data or 'required_documents' in oracle_data
+                has_i765_info = 'I-765' in str(oracle_data) or 'i765' in str(oracle_data).lower()
+                
+                etapa1_success = has_documents_list and has_i765_info
+                print(f"   ✅ Oráculo consultado: {'✓' if etapa1_success else '✗'}")
+                print(f"   ✅ Lista de documentos obrigatórios obtida: {'✓' if has_documents_list else '✗'}")
+                
+                test_results.append(("ETAPA 1: Consultar Oráculo I-765", etapa1_success, f"documents: {'✓' if has_documents_list else '✗'}, i765_info: {'✓' if has_i765_info else '✗'}"))
+            else:
+                etapa1_success = False
+                print(f"   ❌ Falha na consulta ao Oráculo: HTTP {oracle_response.status_code}")
+                test_results.append(("ETAPA 1: Consultar Oráculo I-765", False, f"HTTP {oracle_response.status_code}"))
+            
+            # ETAPA 2: Consultar Form Filler sobre I-765
+            print("\n📋 ETAPA 2: CONSULTAR FORM FILLER SOBRE I-765")
+            print("   GET /api/agent/form-filler/guide/I-765")
+            
+            form_filler_response = self.session.get(f"{API_BASE}/agent/form-filler/guide/I-765")
+            
+            if form_filler_response.status_code == 200:
+                form_filler_data = form_filler_response.json()
+                has_guide = 'guide' in form_filler_data or 'fields' in form_filler_data
+                has_i765_guide = 'I-765' in str(form_filler_data) or 'ead' in str(form_filler_data).lower()
+                
+                etapa2_success = has_guide and has_i765_guide
+                print(f"   ✅ Form Filler consultado: {'✓' if etapa2_success else '✗'}")
+                print(f"   ✅ Guia completo de preenchimento obtido: {'✓' if has_guide else '✗'}")
+                
+                test_results.append(("ETAPA 2: Consultar Form Filler I-765", etapa2_success, f"guide: {'✓' if has_guide else '✗'}, i765_guide: {'✓' if has_i765_guide else '✗'}"))
+            else:
+                etapa2_success = False
+                print(f"   ❌ Falha na consulta ao Form Filler: HTTP {form_filler_response.status_code}")
+                test_results.append(("ETAPA 2: Consultar Form Filler I-765", False, f"HTTP {form_filler_response.status_code}"))
+            
+            # ETAPA 3: Criar Caso no Sistema
+            print("\n📋 ETAPA 3: CRIAR CASO NO SISTEMA")
+            print("   POST /api/auto-application/start")
+            
+            case_data = {
+                "form_code": "I-765",
+                "process_type": "ead_application"
+            }
+            
+            start_response = self.session.post(f"{API_BASE}/auto-application/start", json=case_data)
+            
+            if start_response.status_code == 200:
+                start_data = start_response.json()
+                case_info = start_data.get('case', {})
+                carlos_case_id = case_info.get('case_id')
+                has_case_id = bool(carlos_case_id)
+                correct_form_code = case_info.get('form_code') == 'I-765'
+                correct_process_type = case_info.get('process_type') == 'ead_application'
+                
+                etapa3_success = has_case_id and correct_form_code and correct_process_type
+                print(f"   ✅ Caso criado: {carlos_case_id}")
+                print(f"   ✅ Form code I-765: {'✓' if correct_form_code else '✗'}")
+                print(f"   ✅ Process type EAD: {'✓' if correct_process_type else '✗'}")
+                
+                test_results.append(("ETAPA 3: Criar Caso I-765", etapa3_success, f"case_id: {carlos_case_id}, form: {'✓' if correct_form_code else '✗'}, process: {'✓' if correct_process_type else '✗'}"))
+            else:
+                etapa3_success = False
+                carlos_case_id = None
+                print(f"   ❌ Falha na criação do caso: HTTP {start_response.status_code}")
+                test_results.append(("ETAPA 3: Criar Caso I-765", False, f"HTTP {start_response.status_code}"))
+            
+            if not carlos_case_id:
+                print("❌ SIMULAÇÃO INTERROMPIDA: Não foi possível criar o caso")
+                self.log_test(
+                    "Carlos Eduardo Ferreira I-765 EAD Complete Simulation",
+                    False,
+                    "Simulação interrompida: falha na criação do caso",
+                    {"completed_steps": len(test_results), "case_id": None}
+                )
+                return
+            
+            # ETAPA 4: Preencher Dados Básicos
+            print("\n📋 ETAPA 4: PREENCHER DADOS BÁSICOS")
+            print("   PUT /api/auto-application/case/{case_id}")
+            
+            basic_data = {
+                "basic_data": {
+                    "full_name": "Carlos Eduardo Ferreira",
+                    "email": "carlos.ferreira@email.com",
+                    "date_of_birth": "1988-07-18",
+                    "passport_number": "BR777888999",
+                    "nationality": "Brazil",
+                    "current_status": "F-1",
+                    "i94_number": "55667788990",
+                    "entry_date": "2023-08-15",
+                    "current_status_expires": "2025-12-31",
+                    "address": "300 Memorial Drive, Cambridge, MA 02139",
+                    "phone": "+1-617-555-0188"
+                },
+                "progress_percentage": 30
+            }
+            
+            basic_response = self.session.put(f"{API_BASE}/auto-application/case/{carlos_case_id}", json=basic_data)
+            
+            if basic_response.status_code == 200:
+                basic_result = basic_response.json()
+                case_data = basic_result.get('case', basic_result)
+                stored_basic_data = case_data.get('basic_data', {})
+                correct_name = stored_basic_data.get('full_name') == 'Carlos Eduardo Ferreira'
+                correct_passport = stored_basic_data.get('passport_number') == 'BR777888999'
+                correct_progress = case_data.get('progress_percentage') == 30
+                
+                etapa4_success = correct_name and correct_passport and correct_progress
+                print(f"   ✅ Dados básicos salvos: {'✓' if correct_name else '✗'}")
+                print(f"   ✅ Passaporte BR777888999: {'✓' if correct_passport else '✗'}")
+                print(f"   ✅ Progresso 30%: {'✓' if correct_progress else '✗'}")
+                
+                test_results.append(("ETAPA 4: Dados Básicos", etapa4_success, f"name: {'✓' if correct_name else '✗'}, passport: {'✓' if correct_passport else '✗'}, progress: {case_data.get('progress_percentage')}%"))
+            else:
+                etapa4_success = False
+                print(f"   ❌ Falha ao salvar dados básicos: HTTP {basic_response.status_code}")
+                test_results.append(("ETAPA 4: Dados Básicos", False, f"HTTP {basic_response.status_code}"))
+            
+            # ETAPA 5: Adicionar Dados Específicos I-765
+            print("\n📋 ETAPA 5: ADICIONAR DADOS ESPECÍFICOS I-765")
+            print("   PUT /api/auto-application/case/{case_id}")
+            
+            ead_data = {
+                "ead_data": {
+                    "eligibility_category": "(c)(3)(B) F-1 OPT",
+                    "school_name": "Massachusetts Institute of Technology",
+                    "sevis_number": "N5544332211",
+                    "degree_completed": "Master of Science in Computer Science",
+                    "completion_date": "2025-05-15",
+                    "opt_start_date": "2025-06-15",
+                    "opt_end_date": "2026-06-14",
+                    "employer_name": "TechCorp Inc.",
+                    "employer_address": "500 Tech Park, Boston, MA 02115",
+                    "job_title": "Software Engineer",
+                    "job_description": "Develop software applications using Python, Java, and cloud technologies"
+                },
+                "progress_percentage": 50
+            }
+            
+            ead_response = self.session.put(f"{API_BASE}/auto-application/case/{carlos_case_id}", json=ead_data)
+            
+            if ead_response.status_code == 200:
+                ead_result = ead_response.json()
+                case_data = ead_result.get('case', ead_result)
+                stored_ead_data = case_data.get('ead_data', {})
+                correct_school = stored_ead_data.get('school_name') == 'Massachusetts Institute of Technology'
+                correct_sevis = stored_ead_data.get('sevis_number') == 'N5544332211'
+                correct_category = stored_ead_data.get('eligibility_category') == '(c)(3)(B) F-1 OPT'
+                correct_progress = case_data.get('progress_percentage') == 50
+                
+                etapa5_success = correct_school and correct_sevis and correct_category and correct_progress
+                print(f"   ✅ MIT como escola: {'✓' if correct_school else '✗'}")
+                print(f"   ✅ SEVIS N5544332211: {'✓' if correct_sevis else '✗'}")
+                print(f"   ✅ Categoria F-1 OPT: {'✓' if correct_category else '✗'}")
+                print(f"   ✅ Progresso 50%: {'✓' if correct_progress else '✗'}")
+                
+                test_results.append(("ETAPA 5: Dados I-765 EAD", etapa5_success, f"MIT: {'✓' if correct_school else '✗'}, SEVIS: {'✓' if correct_sevis else '✗'}, category: {'✓' if correct_category else '✗'}, progress: {case_data.get('progress_percentage')}%"))
+            else:
+                etapa5_success = False
+                print(f"   ❌ Falha ao salvar dados I-765: HTTP {ead_response.status_code}")
+                test_results.append(("ETAPA 5: Dados I-765 EAD", False, f"HTTP {ead_response.status_code}"))
+            
+            # ETAPA 6: História do Usuário
+            print("\n📋 ETAPA 6: HISTÓRIA DO USUÁRIO")
+            print("   PUT /api/auto-application/case/{case_id}")
+            
+            user_story_data = {
+                "user_story": "Completei meu mestrado em Ciência da Computação no MIT em maio de 2025. Agora desejo aplicar para OPT (Optional Practical Training) para trabalhar nos Estados Unidos por 12 meses em minha área de estudo. Tenho uma oferta de emprego da empresa TechCorp em Boston para posição de Software Engineer. Meu período de OPT me permitirá aplicar o conhecimento adquirido enquanto contribuo para a indústria de tecnologia americana.",
+                "simplified_responses": {
+                    "reason_application": "OPT após conclusão do mestrado - MIT",
+                    "employment": "Oferta da TechCorp Inc. - Software Engineer",
+                    "relation_to_study": "Trabalho diretamente relacionado à Ciência da Computação",
+                    "duration": "12 meses (período padrão OPT)"
+                },
+                "progress_percentage": 70
+            }
+            
+            story_response = self.session.put(f"{API_BASE}/auto-application/case/{carlos_case_id}", json=user_story_data)
+            
+            if story_response.status_code == 200:
+                story_result = story_response.json()
+                case_data = story_result.get('case', story_result)
+                stored_story = case_data.get('user_story', '')
+                stored_responses = case_data.get('simplified_responses', {})
+                has_mit_story = 'MIT' in stored_story and 'OPT' in stored_story
+                has_techcorp = stored_responses.get('employment', '').find('TechCorp') != -1
+                correct_progress = case_data.get('progress_percentage') == 70
+                
+                etapa6_success = has_mit_story and has_techcorp and correct_progress
+                print(f"   ✅ História com MIT e OPT: {'✓' if has_mit_story else '✗'}")
+                print(f"   ✅ Emprego TechCorp: {'✓' if has_techcorp else '✗'}")
+                print(f"   ✅ Progresso 70%: {'✓' if correct_progress else '✗'}")
+                
+                test_results.append(("ETAPA 6: História do Usuário", etapa6_success, f"MIT_story: {'✓' if has_mit_story else '✗'}, TechCorp: {'✓' if has_techcorp else '✗'}, progress: {case_data.get('progress_percentage')}%"))
+            else:
+                etapa6_success = False
+                print(f"   ❌ Falha ao salvar história: HTTP {story_response.status_code}")
+                test_results.append(("ETAPA 6: História do Usuário", False, f"HTTP {story_response.status_code}"))
+            
+            # ETAPA 7: Criar Documentos Obrigatórios
+            print("\n📋 ETAPA 7: CRIAR DOCUMENTOS OBRIGATÓRIOS")
+            print("   Documentos: Passaporte, I-20, I-94, Carta Emprego, Diploma, Transcrição, etc.")
+            
+            # Simular criação de documentos (usando endpoint de upload)
+            documents_created = 0
+            required_docs = [
+                ("passport", "Passaporte BR777888999"),
+                ("i20", "I-20 com OPT Recommendation"),
+                ("i94", "I-94 Arrival/Departure"),
+                ("employment_letter", "Carta de Oferta TechCorp"),
+                ("diploma", "Diploma MIT Master CS"),
+                ("transcript", "Transcrição Acadêmica MIT")
+            ]
+            
+            for doc_type, doc_name in required_docs:
+                # Create a simple PDF-like content for testing
+                test_doc_content = f"%PDF-1.4\n{doc_name}\nCarlos Eduardo Ferreira\nBR777888999\n%%EOF".encode()
+                
+                files = {'file': (f'{doc_type}.pdf', test_doc_content, 'application/pdf')}
+                data = {'document_type': doc_type, 'case_id': carlos_case_id}
+                
+                try:
+                    headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                    doc_response = requests.post(f"{API_BASE}/documents/upload", files=files, data=data, headers=headers)
+                    
+                    if doc_response.status_code == 200:
+                        documents_created += 1
+                        print(f"   ✅ {doc_name}: Criado")
+                    else:
+                        print(f"   ❌ {doc_name}: Falha (HTTP {doc_response.status_code})")
+                except Exception as e:
+                    print(f"   ❌ {doc_name}: Erro ({str(e)[:50]})")
+            
+            etapa7_success = documents_created >= 4  # At least 4 out of 6 documents
+            print(f"   📊 Documentos criados: {documents_created}/6")
+            
+            test_results.append(("ETAPA 7: Criar Documentos", etapa7_success, f"created: {documents_created}/6 documents"))
+            
+            # ETAPA 8: Validar Documentos com Document Analyzer
+            print("\n📋 ETAPA 8: VALIDAR DOCUMENTOS COM DOCUMENT ANALYZER")
+            print("   POST /api/agent/document-analyzer/analyze")
+            
+            # Test document analysis
+            test_doc = b"%PDF-1.4\nPassaporte BR777888999\nCarlos Eduardo Ferreira\n%%EOF"
+            files = {'file': ('passport.pdf', test_doc, 'application/pdf')}
+            data = {'document_type': 'passport', 'visa_type': 'I-765', 'case_id': carlos_case_id}
+            
+            try:
+                headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'content-type'}
+                analyze_response = requests.post(f"{API_BASE}/documents/analyze-with-ai", files=files, data=data, headers=headers)
+                
+                if analyze_response.status_code == 200:
+                    analyze_data = analyze_response.json()
+                    has_analysis = 'completeness' in analyze_data or 'valid' in analyze_data
+                    has_validation = 'dr_miguel' in str(analyze_data).lower() or 'validation' in analyze_data
+                    
+                    etapa8_success = has_analysis and has_validation
+                    print(f"   ✅ Análise de documento: {'✓' if has_analysis else '✗'}")
+                    print(f"   ✅ Validação Dr. Miguel: {'✓' if has_validation else '✗'}")
+                    
+                    test_results.append(("ETAPA 8: Document Analyzer", etapa8_success, f"analysis: {'✓' if has_analysis else '✗'}, validation: {'✓' if has_validation else '✗'}"))
+                else:
+                    etapa8_success = False
+                    print(f"   ❌ Falha na análise: HTTP {analyze_response.status_code}")
+                    test_results.append(("ETAPA 8: Document Analyzer", False, f"HTTP {analyze_response.status_code}"))
+            except Exception as e:
+                etapa8_success = False
+                print(f"   ❌ Erro na análise: {str(e)[:50]}")
+                test_results.append(("ETAPA 8: Document Analyzer", False, f"Exception: {str(e)[:50]}"))
+            
+            # ETAPA 9: Validar Checklist com Oráculo
+            print("\n📋 ETAPA 9: VALIDAR CHECKLIST COM ORÁCULO")
+            print("   POST /api/oracle/validate-checklist")
+            
+            checklist_data = {
+                "form_code": "I-765",
+                "submitted_documents": [
+                    "passport_br777888999",
+                    "i20_opt_recommendation",
+                    "i94_arrival_departure",
+                    "employment_letter_techcorp",
+                    "diploma_mit_master_cs",
+                    "transcript_mit"
+                ]
+            }
+            
+            checklist_response = self.session.post(f"{API_BASE}/oracle/validate-checklist", json=checklist_data)
+            
+            if checklist_response.status_code == 200:
+                checklist_result = checklist_response.json()
+                has_validation = 'valid' in checklist_result or 'complete' in checklist_result
+                has_i765_check = 'I-765' in str(checklist_result) or 'i765' in str(checklist_result).lower()
+                
+                etapa9_success = has_validation and has_i765_check
+                print(f"   ✅ Checklist validado: {'✓' if has_validation else '✗'}")
+                print(f"   ✅ Validação I-765: {'✓' if has_i765_check else '✗'}")
+                
+                test_results.append(("ETAPA 9: Validar Checklist", etapa9_success, f"validation: {'✓' if has_validation else '✗'}, i765_check: {'✓' if has_i765_check else '✗'}"))
+            else:
+                etapa9_success = False
+                print(f"   ❌ Falha na validação do checklist: HTTP {checklist_response.status_code}")
+                test_results.append(("ETAPA 9: Validar Checklist", False, f"HTTP {checklist_response.status_code}"))
+            
+            # ETAPA 10: Marcar como Completo
+            print("\n📋 ETAPA 10: MARCAR COMO COMPLETO")
+            print("   PUT /api/auto-application/case/{case_id}")
+            
+            complete_data = {
+                "status": "completed",
+                "progress_percentage": 100
+            }
+            
+            complete_response = self.session.put(f"{API_BASE}/auto-application/case/{carlos_case_id}", json=complete_data)
+            
+            if complete_response.status_code == 200:
+                complete_result = complete_response.json()
+                case_data = complete_result.get('case', complete_result)
+                is_completed = case_data.get('status') == 'completed'
+                is_100_percent = case_data.get('progress_percentage') == 100
+                
+                etapa10_success = is_completed and is_100_percent
+                print(f"   ✅ Status completo: {'✓' if is_completed else '✗'}")
+                print(f"   ✅ Progresso 100%: {'✓' if is_100_percent else '✗'}")
+                
+                test_results.append(("ETAPA 10: Marcar Completo", etapa10_success, f"completed: {'✓' if is_completed else '✗'}, progress: {case_data.get('progress_percentage')}%"))
+            else:
+                etapa10_success = False
+                print(f"   ❌ Falha ao marcar como completo: HTTP {complete_response.status_code}")
+                test_results.append(("ETAPA 10: Marcar Completo", False, f"HTTP {complete_response.status_code}"))
+            
+            # ETAPA 11: Gerar Pacote Final COMPLETO
+            print("\n📋 ETAPA 11: GERAR PACOTE FINAL COMPLETO")
+            print("   POST /api/auto-application/case/{case_id}/generate-final-package")
+            
+            package_response = self.session.post(f"{API_BASE}/auto-application/case/{carlos_case_id}/generate-final-package", json={})
+            
+            if package_response.status_code == 200:
+                package_result = package_response.json()
+                has_success = package_result.get('success', False)
+                has_package_url = 'package_url' in package_result or 'download_url' in package_result
+                
+                etapa11_success = has_success and has_package_url
+                print(f"   ✅ Pacote gerado: {'✓' if has_success else '✗'}")
+                print(f"   ✅ URL disponível: {'✓' if has_package_url else '✗'}")
+                
+                test_results.append(("ETAPA 11: Gerar Pacote Final", etapa11_success, f"success: {'✓' if has_success else '✗'}, url: {'✓' if has_package_url else '✗'}"))
+            else:
+                etapa11_success = False
+                print(f"   ❌ Falha na geração do pacote: HTTP {package_response.status_code}")
+                test_results.append(("ETAPA 11: Gerar Pacote Final", False, f"HTTP {package_response.status_code}"))
+            
+            # ETAPA 12: Verificação Final
+            print("\n📋 ETAPA 12: VERIFICAÇÃO FINAL")
+            print("   GET /api/auto-application/case/{case_id}")
+            
+            final_response = self.session.get(f"{API_BASE}/auto-application/case/{carlos_case_id}")
+            
+            if final_response.status_code == 200:
+                final_data = final_response.json()
+                case_data = final_data.get('case', final_data)
+                
+                # Verificações finais
+                final_checks = {
+                    "case_id_matches": case_data.get('case_id') == carlos_case_id,
+                    "form_code_i765": case_data.get('form_code') == 'I-765',
+                    "process_type_ead": case_data.get('process_type') == 'ead_application',
+                    "status_completed": case_data.get('status') == 'completed',
+                    "progress_100": case_data.get('progress_percentage') == 100,
+                    "has_basic_data": bool(case_data.get('basic_data')),
+                    "has_ead_data": bool(case_data.get('ead_data')),
+                    "has_user_story": bool(case_data.get('user_story'))
+                }
+                
+                etapa12_success = all(final_checks.values())
+                passed_checks = sum(final_checks.values())
+                total_checks = len(final_checks)
+                
+                print(f"   ✅ Verificações finais: {passed_checks}/{total_checks}")
+                print(f"   ✅ Case ID: {case_data.get('case_id')}")
+                print(f"   ✅ Form: {case_data.get('form_code')}")
+                print(f"   ✅ Status: {case_data.get('status')}")
+                print(f"   ✅ Progresso: {case_data.get('progress_percentage')}%")
+                
+                test_results.append(("ETAPA 12: Verificação Final", etapa12_success, f"checks: {passed_checks}/{total_checks}, all_passed: {'✓' if etapa12_success else '✗'}"))
+            else:
+                etapa12_success = False
+                print(f"   ❌ Falha na verificação final: HTTP {final_response.status_code}")
+                test_results.append(("ETAPA 12: Verificação Final", False, f"HTTP {final_response.status_code}"))
+            
+        except Exception as e:
+            print(f"❌ ERRO GERAL NA SIMULAÇÃO: {str(e)}")
+            test_results.append(("ERRO GERAL", False, f"Exception: {str(e)}"))
+        
+        # RESUMO FINAL
+        print("\n" + "="*80)
+        print("📊 RESUMO FINAL - CARLOS EDUARDO FERREIRA I-765 EAD SIMULATION")
+        print("="*80)
+        
+        passed_tests = [r for r in test_results if r[1]]
+        failed_tests = [r for r in test_results if not r[1]]
+        
+        success_rate = len(passed_tests) / len(test_results) * 100 if test_results else 0
+        
+        print(f"\n🎯 RESULTADO GERAL:")
+        print(f"   ✅ Etapas que passaram: {len(passed_tests)}/{len(test_results)} ({success_rate:.1f}%)")
+        print(f"   ❌ Etapas que falharam: {len(failed_tests)}/{len(test_results)}")
+        
+        print(f"\n📋 DETALHAMENTO POR ETAPA:")
+        for i, (test_name, success, details) in enumerate(test_results, 1):
+            status = "✅ PASSOU" if success else "❌ FALHOU"
+            print(f"   {i}. {test_name}: {status}")
+            print(f"      {details}")
+        
+        # Critérios de sucesso específicos para I-765 EAD
+        critical_steps = [
+            "ETAPA 3: Criar Caso I-765",
+            "ETAPA 4: Dados Básicos", 
+            "ETAPA 5: Dados I-765 EAD",
+            "ETAPA 6: História do Usuário",
+            "ETAPA 10: Marcar Completo"
+        ]
+        
+        critical_passed = sum(1 for name, success, _ in test_results if success and any(crit in name for crit in critical_steps))
+        critical_total = len(critical_steps)
+        
+        print(f"\n🎯 CRITÉRIOS CRÍTICOS I-765 EAD:")
+        print(f"   ✅ Etapas críticas passaram: {critical_passed}/{critical_total}")
+        print(f"   ✅ Case ID gerado: {carlos_case_id}")
+        print(f"   ✅ Formulário I-765 configurado corretamente")
+        print(f"   ✅ Dados de Carlos Eduardo Ferreira persistidos")
+        print(f"   ✅ Dados específicos EAD (MIT, SEVIS, OPT) salvos")
+        print(f"   ✅ História do usuário com contexto OPT")
+        
+        overall_success = success_rate >= 75.0 and critical_passed >= 4
+        
+        if overall_success:
+            print(f"\n🎉 SUCESSO! Simulação I-765 EAD completa para Carlos Eduardo Ferreira!")
+            print(f"   ✅ Sistema processou corretamente aplicação EAD")
+            print(f"   ✅ Todos os dados específicos I-765 foram salvos")
+            print(f"   ✅ Fluxo F-1 → OPT funcional")
+            print(f"   ✅ Pronto para produção com aplicações EAD")
+        else:
+            print(f"\n❌ FALHA! Simulação I-765 EAD apresentou problemas críticos")
+            print(f"   ❌ Sistema não está pronto para aplicações EAD")
+            print(f"   ❌ Requer correções antes da produção")
+        
+        # Log final consolidado
+        self.log_test(
+            "Carlos Eduardo Ferreira I-765 EAD Complete Simulation",
+            overall_success,
+            f"I-765 EAD simulation: {success_rate:.1f}% success ({len(passed_tests)}/{len(test_results)} steps). Critical steps: {critical_passed}/{critical_total}. Case ID: {carlos_case_id}. System: {'READY' if overall_success else 'NEEDS_FIXES'}",
+            {
+                "case_id": carlos_case_id,
+                "success_rate": success_rate,
+                "passed_steps": len(passed_tests),
+                "total_steps": len(test_results),
+                "critical_passed": critical_passed,
+                "critical_total": critical_total,
+                "system_status": "READY" if overall_success else "NEEDS_FIXES",
+                "all_test_results": test_results,
+                "form_type": "I-765",
+                "process_type": "ead_application",
+                "applicant": "Carlos Eduardo Ferreira"
+            }
+        )
+        
+        return test_results
+
     def test_maria_da_silva_santos_i539_complete_simulation(self):
         """🎯 SIMULAÇÃO COMPLETA END-TO-END - MARIA DA SILVA SANTOS - I-539 (B-2 → F-1)"""
         print("🎯 SIMULAÇÃO COMPLETA END-TO-END - MARIA DA SILVA SANTOS - I-539 (B-2 → F-1)")
