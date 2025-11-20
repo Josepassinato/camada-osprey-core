@@ -1,0 +1,75 @@
+
+================================================================================
+                    PACOTE COMPLETO - APLICAÇÃO H-1B
+================================================================================
+
+INFORMAÇÕES DO CANDIDATO
+------------------------
+Nome Completo: Fernanda Oliveira Santos
+Data de Nascimento: 15/08/1990
+Local de Nascimento: São Paulo, SP, Brasil
+Nacionalidade: Brasileira
+Passaporte: BR789456123 (Validade: 31/12/2028)
+
+INFORMAÇÕES PROFISSIONAIS
+--------------------------
+Cargo Atual: Senior Software Engineer
+Empresa: Google LLC
+Salário Anual: $145,000
+Formação: Mestrado em Ciência da Computação
+
+ENDEREÇOS
+---------
+Endereço no Brasil:
+Rua Augusta, 1234, Apt 56
+São Paulo, SP, 01305-100
+Brasil
+
+Endereço nos EUA:
+2700 Campus Drive
+San Jose, CA 95134
+
+HISTÓRICO DE IMIGRAÇÃO
+----------------------
+Viagens Anteriores aos EUA: Sim, turismo em 2019 e conferência em 2022
+Violações de Imigração: Não, nunca tive violações
+
+FORMULÁRIO USCIS
+----------------
+Formulário: I-129 (Petition for a Nonimmigrant Worker)
+Status: Gerado com sucesso
+Session ID: owl_session_OWL-1763658405-5b8b8062_20251120_170645
+Data de Geração: 20/11/2025 17:06:46
+
+CAMPOS PREENCHIDOS
+------------------
+Total de campos necessários: 13
+Campos preenchidos: 13
+Taxa de completude: 100.0%
+
+PRÓXIMOS PASSOS
+---------------
+1. ✅ Revisar todas as informações acima
+2. ✅ Baixar o formulário I-129 gerado
+3. 📋 Coletar documentos de suporte:
+   - Cópia do passaporte
+   - Diploma de mestrado
+   - Carta oferta da Google LLC
+   - Evidências de qualificação profissional
+   - Comprovante de endereço nos EUA
+4. 💼 Submeter ao USCIS com taxa de $460 + $500 (anti-fraud fee)
+5. 📬 Aguardar recibo do USCIS (2-4 semanas)
+6. ⏳ Aguardar decisão (3-6 meses, ou 15 dias com premium processing)
+
+OBSERVAÇÕES IMPORTANTES
+------------------------
+• Este formulário foi gerado pelo Agente Coruja da Osprey
+• Revise cuidadosamente todas as informações antes de submeter
+• Consulte um advogado de imigração se necessário
+• Mantenha cópias de todos os documentos
+• Osprey não armazena seus dados após o download
+
+================================================================================
+                        Gerado pela Osprey Immigration
+                    https://immi-flow.preview.emergentagent.com
+================================================================================
