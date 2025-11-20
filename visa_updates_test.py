@@ -11,7 +11,7 @@ from datetime import datetime
 import os
 
 # Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://immi-flow.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://visapro.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 print(f"🤖 AUTOMATED VISA UPDATES SYSTEM TESTING")

@@ -17,7 +17,7 @@ import hashlib
 import io
 
 # Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://immi-flow.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://visapro.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 print(f"🌐 PRODUCTION VERIFICATION TARGET: {BACKEND_URL}")
@@ -3290,7 +3290,7 @@ for accuracy before submission. For legal advice, consult with an
 immigration attorney.
 
 OSPREY Immigration System
-https://immi-flow.preview.emergentagent.com
+https://visapro.preview.emergentagent.com
             """
             zip_file.writestr("README.txt", readme.encode())
         

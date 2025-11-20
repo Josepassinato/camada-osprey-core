@@ -29,7 +29,7 @@ export const OwlPaymentSuccessPage: React.FC = () => {
   const [downloading, setDownloading] = useState(false);
 
   const getBackendUrl = () => {
-    return import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://immi-flow.preview.emergentagent.com' || '';
+    return import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://visapro.preview.emergentagent.com' || '';
   };
 
   useEffect(() => {
