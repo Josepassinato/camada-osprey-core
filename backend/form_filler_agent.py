@@ -19,9 +19,21 @@ class FormFillerAgent:
     - Detecta campos obrigatórios faltantes
     """
     
-    def __init__(self):
+    def __init__(self, knowledge_base_path: str = "/app/knowledge_base_documents.json"):
         self.form_mappings = self._load_form_mappings()
-        logger.info("✅ Form Filler Agent inicializado")
+        self.knowledge_base = self._load_knowledge_base(knowledge_base_path)
+        logger.info(f"✅ Form Filler Agent inicializado com {len(self.knowledge_base.get('documents', []))} documentos de referência")
+    
+    def _load_knowledge_base(self, kb_path: str) -> Dict:
+        """Carrega a base de conhecimento"""
+        try:
+            if os.path.exists(kb_path):
+                with open(kb_path, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            return {'documents': []}
+        except Exception as e:
+            logger.error(f"Erro ao carregar KB: {str(e)}")
+            return {'documents': []}
     
     def _load_form_mappings(self) -> Dict:
         """
