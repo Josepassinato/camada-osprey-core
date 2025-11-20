@@ -879,10 +879,47 @@ the requested H-1B validity period.
     
     def _generate_letters_of_recommendation(self):
         story = []
-        for page in range(1, 11):
-            story.append(Paragraph(f"TAB M: LETTERS OF RECOMMENDATION (Page {page} of 10)", self.tab_style))
-            story.append(Paragraph("Professional references from supervisors and colleagues", self.normal_style))
+        
+        # Primeira carta (Páginas 1-3)
+        story.append(Paragraph("TAB M: LETTERS OF RECOMMENDATION - Letter #1 (Page 1 of 10)", self.tab_style))
+        story.append(Spacer(1, 0.2*inch))
+        
+        letter1_intro = f"""
+<b>LETTER OF RECOMMENDATION #1</b><br/>
+<b>From: Dr. Paulo Roberto Silva, Chief Technology Officer</b><br/>
+<b>Brazilian Startup Accelerator</b><br/>
+<br/>
+Professional reference letter from direct supervisor at current employer.
+"""
+        story.append(Paragraph(letter1_intro, self.normal_style))
+        story.append(Spacer(1, 0.2*inch))
+        
+        # Inserir imagem da carta de recomendação
+        if 'recommendation' in self.document_images:
+            img = RLImage(self.document_images['recommendation'], width=5.5*inch, height=7.1*inch)
+            story.append(img)
+        
+        story.append(PageBreak())
+        
+        # Páginas restantes
+        remaining_pages = [
+            (2, "Letter #1 (continued)", "Continuation of first recommendation letter."),
+            (3, "Letter #1 - Recommender Credentials", "CV and credentials of Dr. Paulo Roberto Silva."),
+            (4, "Letter of Recommendation #2", "Second letter from Professor at Universidade de São Paulo."),
+            (5, "Letter #2 (continued)", "Continuation highlighting academic achievements."),
+            (6, "Letter #2 - Academic Credentials", "Professor's credentials and position."),
+            (7, "Letter of Recommendation #3", "Third letter from previous employer / client."),
+            (8, "Letter #3 (continued)", "Specific project achievements and technical contributions."),
+            (9, "Letter #3 - Contact Information", "Recommender's contact details for verification."),
+            (10, "Summary of Recommendations", "Summary of all three professional references."),
+        ]
+        
+        for page_num, page_title, page_desc in remaining_pages:
+            story.append(Paragraph(f"TAB M: LETTERS OF RECOMMENDATION (Page {page_num} of 10)", self.tab_style))
+            story.append(Paragraph(f"<b>{page_title}</b>", self.heading_style))
+            story.append(Paragraph(page_desc, self.normal_style))
             story.append(PageBreak())
+        
         self.included_sections.add('Letters of Recommendation')
         return story
     
