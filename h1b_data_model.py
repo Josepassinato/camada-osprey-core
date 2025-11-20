@@ -18,7 +18,7 @@ class H1BApplicationData:
             "maiden_name": "OLIVEIRA",
             "dob": "August 15, 1990",
             "dob_formatted": "08/15/1990",
-            "age": 34,  # Ela nasceu em Ago 1990, ainda não fez aniversário em 2024
+            "age": 34,  # Ela nasceu em Ago 1990, já fez aniversário em Ago 2024 (2024-1990=34)
             "pob_city": "São Paulo",
             "pob_state": "São Paulo",
             "pob_country": "Brazil",
