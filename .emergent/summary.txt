@@ -1,482 +1,79 @@
-<analysis>**original_problem_statement:**
-The user's primary goal is to build a comprehensive, high-quality application for managing immigration processes. The application must handle the entire user journey, from visa selection and payment to the generation of a complete, professional, lawyer-grade PDF package ready for submission. The user has consistently emphasized that the quality and realism of this final package are the most critical requirements. To this end, they have requested the creation of specialized AI agents, including a highly rigorous AI Reviewer Agent to act as a quality gate, the inclusion of official government forms, and the use of fictitious but realistic document images (passports, diplomas, etc.) within the generated package. Most recently, the user has asked to process and utilize document templates and checklists they previously provided in ZIP files to serve as a knowledge base for the AI agents.
+<analysis>Here is the summary of the previous session:
+
+**original_problem_statement:**
+The user's primary goal is to build a high-quality application for managing immigration processes. The application must generate a complete, professional, lawyer-grade PDF package ready for submission.
+
+Initially, the focus was on creating a comprehensive H-1B visa package. This involved:
+1.  Processing user-provided DOCX/PDF templates from ZIP files into a structured knowledge base.
+2.  Generating a multi-page PDF package including cover letters, support letters, and evidence sections.
+3.  Programmatically generating realistic fictitious document images (passports, diplomas).
+4.  Downloading and merging official, fillable government forms (I-129, LCA).
+5.  Iteratively refining the package based on detailed user feedback regarding content, formatting, and completeness, which led to multiple versions and fixes.
+6.  Refactoring the codebase to archive dozens of redundant generator scripts.
+7.  Implementing a list of 9 advanced features to improve the quality of the generated text and add compliance checks.
+
+After the user approved the final H-1B package, they provided a new request: to create another complete, simulated process for a **B-2 tourist visa extension**.
 
 **User's preferred language**: Portuguese. The next agent MUST respond in Portuguese.
 
 **what currently exists?**
-The project is a full-stack application with a React frontend and a FastAPI backend. However, most of the recent development has occurred in a series of standalone Python scripts that simulate the core logic.
+The project consists of a collection of Python scripts that handle the logic for data modeling, knowledge base integration, image generation, and PDF package creation. The FastAPI backend () primarily serves as a router to expose static HTML demo pages and the generated PDF files.
 
-Key components are:
-- A sophisticated PDF generation pipeline consisting of multiple scripts (, , , ) that can produce a multi-hundred-page PDF package. This package includes fictitious document images (passports, diplomas) and the official, programmatically-filled USCIS I-129 form.
-- A rigorous  agent that inspects generated PDFs for data consistency, content repetition, and the presence of required sections and documents.
-- An  that downloads and manages official USCIS forms.
-- An  that simulates a feedback loop where the reviewer agent teaches the generator agent how to improve the package.
-- The backend  has been modified to include numerous endpoints that serve static HTML demo pages (, etc.) and the associated PDF/JSON assets. This was done to provide the user with working demo links after they reported 404 errors.
-- The latest script created is , designed to process the user's ZIP files.
+-   **Core Logic:** A set of refined Python scripts in the  root directory are responsible for the generation process. The last major generator created was , which incorporates the 9 advanced features requested by the user.
+-   **Knowledge Base:** A structured knowledge base exists at , containing templates and guides processed from user-provided files.
+-   **Official Forms:** A repository of official USCIS forms is maintained in .
+-   **Archived Code:** A significant number of old, redundant generator scripts and test files have been moved to the  directory to clean up the workspace.
+-   **Demo Endpoint:** The primary user-facing link is served via the  route in , which points to the latest generated H-1B package.
 
 **Last working item**:
--   **Last item agent was working:** The user requested that two ZIP files they had previously uploaded (, ) be processed. The goal is to extract all the contents, convert any DOCX files into PDFs, and organize them into a knowledge base that the AI agents can consult for templates and guidance. The agent created the script  to perform this task.
--   **Status:** IN PROGRESS
+-   **Last item agent was working:** The user requested the creation of a completely new simulated process for a B-2 tourist visa extension, including all necessary hypothetical data and the final PDF package. The agent acknowledged the request and was about to start development.
+-   **Status:** NOT STARTED
 -   **Agent Testing Done:** N
--   **Which testing method agent to use?** Manual testing. The agent needs to execute the script 
-================================================================================
-📦 EXTRAINDO E ORGANIZANDO TODOS OS RECURSOS
-================================================================================
-
-📄 Total de arquivos encontrados: 23
-
-🔄 Convertendo: Affidavit_of_Support_(I-864)_Prep_Sheet.docx
-   ✅ PDF criado: Affidavit_of_Support_(I-864)_Prep_Sheet.pdf
-
-🔄 Convertendo: I-864_Completion_Guide_and_Checklist.docx
-   ✅ PDF criado: I-864_Completion_Guide_and_Checklist.pdf
-
-🔄 Convertendo: Immigration_Fee_and_Payment_Tracker.docx
-   ✅ PDF criado: Immigration_Fee_and_Payment_Tracker.pdf
-
-🔄 Convertendo: Immigration_Case_Timeline_Tracker.docx
-   ✅ PDF criado: Immigration_Case_Timeline_Tracker.pdf
-
-🔄 Convertendo: Supporting_Document_Checklist.docx
-   ✅ PDF criado: Supporting_Document_Checklist.pdf
-
-🔄 Convertendo: I-130_Completion_Guide_and_Checklist.docx
-   ✅ PDF criado: I-130_Completion_Guide_and_Checklist.pdf
-
-🔄 Convertendo: USCIS_Communication_Tracker.docx
-   ✅ PDF criado: USCIS_Communication_Tracker.pdf
-
-🔄 Convertendo: Immigration_Mailing_Log.docx
-   ✅ PDF criado: Immigration_Mailing_Log.pdf
-
-🔄 Convertendo: RFEs_&_Interview_Prep_Checklist.docx
-   ✅ PDF criado: RFEs_&_Interview_Prep_Checklist.pdf
-
-🔄 Convertendo: G-28_Notice_of_Appearance_Guide_and_Checklist.docx
-   ✅ PDF criado: G-28_Notice_of_Appearance_Guide_and_Checklist.pdf
-
-🔄 Convertendo: Immigration_Client_Intake_Form.docx
-   ✅ PDF criado: Immigration_Client_Intake_Form.pdf
-
-🔄 Convertendo: I-601_I-601A_Waiver_Guide_and_Checklist.docx
-   ✅ PDF criado: I-601_I-601A_Waiver_Guide_and_Checklist.pdf
-
-🔄 Convertendo: Immigration_Forms_Master_Index_Bordered_Table.docx
-   ✅ PDF criado: Immigration_Forms_Master_Index_Bordered_Table.pdf
-
-🔄 Convertendo: USCIS_Form_Filing_Checklist.docx
-   ✅ PDF criado: USCIS_Form_Filing_Checklist.pdf
-
-🔄 Convertendo: Immigration_Client_Communication_Log.docx
-   ✅ PDF criado: Immigration_Client_Communication_Log.pdf
-
-🔄 Convertendo: N-400_Naturalization_Guide_and_Checklist.docx
-   ✅ PDF criado: N-400_Naturalization_Guide_and_Checklist.pdf
-
-🔄 Convertendo: I-589_Asylum_Application_Guide_and_Checklist.docx
-   ✅ PDF criado: I-589_Asylum_Application_Guide_and_Checklist.pdf
-
-🔄 Convertendo: I-765_Completion_Guide_and_Checklist.docx
-   ✅ PDF criado: I-765_Completion_Guide_and_Checklist.pdf
-
-🔄 Convertendo: I-485_Completion_Guide_and_Checklist.docx
-   ✅ PDF criado: I-485_Completion_Guide_and_Checklist.pdf
-
-🔄 Convertendo: Immigration_Form_Filing_Flowchart_Bonus.docx
-   ✅ PDF criado: Immigration_Form_Filing_Flowchart_Bonus.pdf
-
-🔄 Convertendo: I-131_Completion_Guide_and_Checklist.docx
-   ✅ PDF criado: I-131_Completion_Guide_and_Checklist.pdf
-   ✅ Copiado: i-129.pdf
-   ✅ Copiado: eta-9035-lca.pdf
-
-================================================================================
-✅ ORGANIZAÇÃO CONCLUÍDA!
-================================================================================
-📊 Estatísticas:
-   • DOCXs convertidos para PDF: 21
-   • PDFs copiados: 2
-   • Total de recursos: 23
-
-📁 Estrutura criada:
-   • Forms & Templates: 3 arquivos
-   • Completion Guides: 9 arquivos
-   • Checklists & Trackers: 8 arquivos
-   • Letter Templates: 1 arquivos
-   • Official Forms: 2 arquivos
-
-📖 Catálogo salvo: /app/immigration_resources/catalog.json
-================================================================================
-
-✅ Índice master criado: /app/immigration_resources/MASTER_INDEX.pdf
-   Total de seções: 5
-   Total de recursos indexados: 23
-
-🎉 TUDO PRONTO!
-
-📚 Recursos disponíveis em: /app/immigration_resources/
-📖 Consulte o MASTER_INDEX.pdf para navegação completa and then use Ana_Paula_Costa_I539_COMPLETE_PACKAGE.zip
-COMPLETE_H1B_PACKAGE_FERNANDA_SANTOS.pdf
-COMPLETE_H1B_PETITION_PACKAGE_FERNANDA_SANTOS.pdf
-COMPLETE_WITH_IMAGES.pdf
-CONSISTENT_H1B_PACKAGE_FERNANDA_SANTOS.pdf
-Carlos_Eduardo_Ferreira_I765_EAD_COMPLETE_PACKAGE.pdf
-FERNANDA_SANTOS_H1B_COMPLETE_APPLICATION_20251120_170646.txt
-FERNANDA_SANTOS_H1B_COMPLETE_USCIS_PACKAGE.pdf
-FINAL_COMPLETE_164_PAGES.pdf
-FINAL_COMPLETE_H1B_PACKAGE_FERNANDA_SANTOS.pdf
-FINAL_H1B_PACKAGE_COMPLETE.pdf
-FORMULARIOS_OFICIAIS_README.md
-H1B_PACKAGE_ITERATION_1.pdf
-H1B_PACKAGE_ITERATION_2.pdf
-I-129_FILLED_OFFICIAL.pdf
-INTELLIGENT_H1B_COMPLETE_PACKAGE.pdf
-Maria_Santos_I539_PACOTE_COMPLETO_USCIS.pdf
-Maria_da_Silva_Santos_PACOTE_COMPLETO_DETALHADO.pdf
-PROFESSIONAL_H1B_PACKAGE_FERNANDA_SANTOS.pdf
-README.md
-REAL_COMPLETE_H1B_PACKAGE_FERNANDA_SANTOS.pdf
-RELATORIO_ROBERTO_SILVA_MENDES.md
-RELATORIO_SIMULACAO_ANA_PAULA_COSTA.md
-Roberto_Silva_Mendes_I539_COMPLETE_PACKAGE.pdf
-Roberto_Silva_Mendes_I539_F1_COMPLETE_PACKAGE.zip
-Roberto_Silva_Mendes_PACOTE_COMPLETO_DETALHADO.pdf
-SAMPLE_CORRECTION_INSTRUCTIONS.txt
-ULTRA_COMPLETE_H1B_PACKAGE_FERNANDA_SANTOS.pdf
-__pycache__
-ai_integration_test.py
-backend
-backend_integration_test.py
-backend_remaining_tests.py
-backend_test.py
-carlos_test.py
-case_corrections_test.py
-case_finalizer_test.py
-case_finalizer_test_results.json
-check_env.py
-compare_packages.py
-comprehensive_api_test.py
-comprehensive_form_code_test.py
-comprehensive_immigration_api_test_report.json
-comprehensive_regression_test.py
-corrected_api_test.py
-corrected_immigration_api_test_report.json
-debug_approve.py
-debug_form_code_test.py
-debug_i765_test.py
-debug_reject.py
-debug_response.py
-debug_test.py
-deployment_readiness_test.py
-detailed_test.py
-document_image_generator.py
-document_security_investigation.py
-document_security_test.py
-dr_miguel_enhanced_prompt_test.py
-dr_miguel_forensic_test.py
-dr_paula_test.py
-dr_paula_test_results.log
-ecosystem_validation_results.json
-education_test.py
-emergent_llm_test.py
-emergent_llm_test_fixed.py
-extract_and_organize_all.py
-fill_official_i129.py
-final_comprehensive_test.py
-final_education_test.py
-final_test_fixed.py
-final_test_result.json
-form_code_bug_test.py
-form_code_investigation_results.json
-form_code_investigation_test.py
-frontend
-frontend_flow_simulation.py
-generate_complete_h1b_package.py
-generate_consistent_h1b_package.py
-generate_final_complete_package.py
-generate_full_h1b_package.py
-generate_professional_h1b_package.py
-generate_real_h1b_package.py
-generate_ultra_complete_h1b.py
-get_endpoint_test.py
-google_vision_test.py
-google_vision_test_results.log
-h1b_data_model.py
-i539_simple_test.py
-i539_test.py
-immigration_lessons_h_1b.json
-immigration_resources
-instructions_iteration_1.txt
-instructions_iteration_2.txt
-instructions_iteration_3.txt
-intelligent_package_generator.py
-interview_debug_test.py
-investigate_case_issue.py
-knowledge_base_documents.json
-maria-pacote.pdf
-official_forms
-official_forms_repository.py
-owl_agent_complete_test.py
-owl_agent_extended_test.py
-owl_agent_test.py
-owl_auth_test.py
-payment_test.py
-priority_test.py
-regression_test.py
-run_complete_simulation.py
-run_final_complete_test.py
-save_continue_test.py
-security_health_check.py
-simulation_results.json
-test_all_problems.py
-test_carlos_silva.py
-test_correct_visa_types.py
-test_dr_miguel_direct.py
-test_dr_paula_review_letter.py
-test_fase1_scenarios.py
-test_generate_directives.py
-test_google_direct.py
-test_google_vision_api.py
-test_output.log
-test_policy_engine.py
-test_result.md
-test_results.log
-test_simple_case.py
-tests
-visa_updates_test.py
-yarn.lock to verify that the files have been correctly extracted and converted into a new  directory.
+-   **Which testing method agent to use?** Manual testing. The agent will need to create a new generation script, execute it with , and then manually verify the content, page count, and formatting of the resulting PDF file before presenting it to the user.
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   Issue 1: Complete the creation of the knowledge base from the user's ZIP files (P0)
--   Issue 2: Integrate the new knowledge base into the package generation logic (P1)
--   Issue 3: Consolidate the demo into a single, final, user-approved package (P2)
--   Issue 4: Integrate the generation scripts into the main application flow (P3)
-
-**Issues Detail:**
--   **Issue 1: Complete the creation of the knowledge base from the user's ZIP files (P0)**
-    -   **Attempted fixes:** The agent correctly identified the need for a new script, installed the usage: docx2pdf [-h] [--keep-active] [--version] input [output]
-
-Example Usage:
-
-Convert single docx file in-place from myfile.docx to myfile.pdf:
-    docx2pdf myfile.docx
-
-Batch convert docx folder in-place. Output PDFs will go in the same folder:
-    docx2pdf myfolder/
-
-Convert single docx file with explicit output filepath:
-    docx2pdf input.docx output.docx
-
-Convert single docx file and output to a different explicit folder:
-    docx2pdf input.docx output_dir/
-
-Batch convert docx folder. Output PDFs will go to a different explicit folder:
-    docx2pdf input_dir/ output_dir/
-
-positional arguments:
-  input          input file or folder. batch converts entire folder or convert
-                 single file
-  output         output file or folder
-
-options:
-  -h, --help     show this help message and exit
-  --keep-active  prevent closing word after conversion
-  --version      display version and exit dependency, and created .
-    -   **Next debug checklist:**
-        1.  Execute the script: 
-================================================================================
-📦 EXTRAINDO E ORGANIZANDO TODOS OS RECURSOS
-================================================================================
-
-📄 Total de arquivos encontrados: 23
-
-🔄 Convertendo: Affidavit_of_Support_(I-864)_Prep_Sheet.docx
-   ✅ PDF criado: Affidavit_of_Support_(I-864)_Prep_Sheet.pdf
-
-🔄 Convertendo: I-864_Completion_Guide_and_Checklist.docx
-   ✅ PDF criado: I-864_Completion_Guide_and_Checklist.pdf
-
-🔄 Convertendo: Immigration_Fee_and_Payment_Tracker.docx
-   ✅ PDF criado: Immigration_Fee_and_Payment_Tracker.pdf
-
-🔄 Convertendo: Immigration_Case_Timeline_Tracker.docx
-   ✅ PDF criado: Immigration_Case_Timeline_Tracker.pdf
-
-🔄 Convertendo: Supporting_Document_Checklist.docx
-   ✅ PDF criado: Supporting_Document_Checklist.pdf
-
-🔄 Convertendo: I-130_Completion_Guide_and_Checklist.docx
-   ✅ PDF criado: I-130_Completion_Guide_and_Checklist.pdf
-
-🔄 Convertendo: USCIS_Communication_Tracker.docx
-   ✅ PDF criado: USCIS_Communication_Tracker.pdf
-
-🔄 Convertendo: Immigration_Mailing_Log.docx
-   ✅ PDF criado: Immigration_Mailing_Log.pdf
-
-🔄 Convertendo: RFEs_&_Interview_Prep_Checklist.docx
-   ✅ PDF criado: RFEs_&_Interview_Prep_Checklist.pdf
-
-🔄 Convertendo: G-28_Notice_of_Appearance_Guide_and_Checklist.docx
-   ✅ PDF criado: G-28_Notice_of_Appearance_Guide_and_Checklist.pdf
-
-🔄 Convertendo: Immigration_Client_Intake_Form.docx
-   ✅ PDF criado: Immigration_Client_Intake_Form.pdf
-
-🔄 Convertendo: I-601_I-601A_Waiver_Guide_and_Checklist.docx
-   ✅ PDF criado: I-601_I-601A_Waiver_Guide_and_Checklist.pdf
-
-🔄 Convertendo: Immigration_Forms_Master_Index_Bordered_Table.docx
-   ✅ PDF criado: Immigration_Forms_Master_Index_Bordered_Table.pdf
-
-🔄 Convertendo: USCIS_Form_Filing_Checklist.docx
-   ✅ PDF criado: USCIS_Form_Filing_Checklist.pdf
-
-🔄 Convertendo: Immigration_Client_Communication_Log.docx
-   ✅ PDF criado: Immigration_Client_Communication_Log.pdf
-
-🔄 Convertendo: N-400_Naturalization_Guide_and_Checklist.docx
-   ✅ PDF criado: N-400_Naturalization_Guide_and_Checklist.pdf
-
-🔄 Convertendo: I-589_Asylum_Application_Guide_and_Checklist.docx
-   ✅ PDF criado: I-589_Asylum_Application_Guide_and_Checklist.pdf
-
-🔄 Convertendo: I-765_Completion_Guide_and_Checklist.docx
-   ✅ PDF criado: I-765_Completion_Guide_and_Checklist.pdf
-
-🔄 Convertendo: I-485_Completion_Guide_and_Checklist.docx
-   ✅ PDF criado: I-485_Completion_Guide_and_Checklist.pdf
-
-🔄 Convertendo: Immigration_Form_Filing_Flowchart_Bonus.docx
-   ✅ PDF criado: Immigration_Form_Filing_Flowchart_Bonus.pdf
-
-🔄 Convertendo: I-131_Completion_Guide_and_Checklist.docx
-   ✅ PDF criado: I-131_Completion_Guide_and_Checklist.pdf
-   ✅ Copiado: i-129.pdf
-   ✅ Copiado: eta-9035-lca.pdf
-
-================================================================================
-✅ ORGANIZAÇÃO CONCLUÍDA!
-================================================================================
-📊 Estatísticas:
-   • DOCXs convertidos para PDF: 21
-   • PDFs copiados: 2
-   • Total de recursos: 23
-
-📁 Estrutura criada:
-   • Forms & Templates: 3 arquivos
-   • Completion Guides: 9 arquivos
-   • Checklists & Trackers: 8 arquivos
-   • Letter Templates: 1 arquivos
-   • Official Forms: 2 arquivos
-
-📖 Catálogo salvo: /app/immigration_resources/catalog.json
-================================================================================
-
-✅ Índice master criado: /app/immigration_resources/MASTER_INDEX.pdf
-   Total de seções: 5
-   Total de recursos indexados: 23
-
-🎉 TUDO PRONTO!
-
-📚 Recursos disponíveis em: /app/immigration_resources/
-📖 Consulte o MASTER_INDEX.pdf para navegação completa.
-        2.  Verify the output by listing the contents of the target directory (e.g., ).
-        3.  Confirm that DOCX files have been converted to PDF and all files from the ZIP archives are present.
-    -   **Why fix this issue and what will be achieved with the fix?** This is a direct user request to make their provided assets usable by the system, which is crucial for improving the quality of generated content.
-    -   **Status:** IN PROGRESS
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Backend (verifying file system).
-    -   **Blocked on other issue:** None.
-
--   **Issue 2: Integrate the new knowledge base into the package generation logic (P1)**
-    -   **Description:** After the knowledge base is created, the package generation scripts (e.g., ) must be updated to use the templates (e.g., for cover letters, support letters) from this new knowledge base instead of using hardcoded text.
-    -   **Attempted fixes:** None.
-    -   **Next debug checklist:**
-        1.  Modify .
-        2.  Add functions to search and read content from the  directory.
-        3.  Replace hardcoded text sections with content dynamically loaded from the appropriate template files.
-    -   **Why fix this issue and what will be achieved with the fix?** This will significantly enhance the quality and realism of the generated package, moving closer to the user's lawyer-grade standard.
-    -   **Status:** NOT STARTED
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Backend.
-    -   **Blocked on other issue:** Issue 1.
-
--   **Issue 3: Consolidate the demo into a single, final, user-approved package (P2)**
-    -   **Description:** The agent has created multiple demo pages and packages in response to iterative feedback. The next step should be to produce one definitive package that incorporates all requested features (official forms, images, knowledge base content) and get the user's final sign-off on it.
-    -   **Status:** NOT STARTED
-    -   **Is recurring issue?** Y (The user keeps asking for more refinements).
-
--   **Issue 4: Integrate the generation scripts into the main application flow (P3)**
-    -   **Description:** The entire package generation and review process is currently happening via standalone scripts and served on temporary demo pages. This functionality needs to be integrated into the main FastAPI backend and triggered from the React frontend.
-    -   **Status:** NOT STARTED
-    -   **Is recurring issue?** N
+There are no outstanding bugs or issues. The work is focused on new feature development.
 
 **In progress Task List**:
--   **Task 1: Process user-provided ZIP files (P0)**
-    -   **Where to resume:** Execute the script .
-    -   **What will be achieved with this?** A  directory will be populated with PDF versions of the user's documents, ready for the AI agents to use.
-    -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** Backend
+-   **Task 1: Generate a B-2 Tourist Visa Extension Package (P0)**
+    -   **Where to resume:** This is a new task. The agent should start by:
+        1.  Defining a Pydantic data model for a B-2 extension case (similar to ). This would include details like the reason for extension, financial support, ties to home country, etc.
+        2.  Identifying the correct official form (Form I-539).
+        3.  Creating a new generator script (e.g., ) that builds the complete package, including support letters and the filled I-539 form.
+        4.  Creating a new demo page and backend route to serve the final B-2 package.
+    -   **What will be achieved with this?** A new, complete, and user-verifiable immigration package for a different visa type, demonstrating the system's flexibility.
+    -   **Status:** NOT STARTED
+    -   **Should Test frontend/backend/both after fix?** Backend (file generation and serving).
     -   **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
-- **Upcoming Tasks:**
-    - (P0) Integrate the newly created knowledge base into the main package generator () to use real templates.
-    - (P1) Generate a final, consolidated PDF package that includes all features requested to date and present it for user approval.
-- **Future Tasks:**
-    - (P1) Refactor the backend to integrate the PDF generation scripts into the main API, removing the reliance on manual execution.
-    - (P2) Connect the frontend to the new backend endpoints to create a seamless end-to-end user experience.
-    - (P3) Address the non-production status of the Resend.com email integration (currently blocked on user action).
+-   **Upcoming Tasks:**
+    -   (P1) **Verify and Solidify Advanced Features:** The 9 advanced features (e.g., natural language variation, storytelling, legal citations) were implemented very quickly in . This implementation should be reviewed for robustness and depth.
+-   **Future Tasks:**
+    -   (P2) **Full Code Refactoring (Option 3):** Consolidate all generation logic into a single, unified, and configurable generator class instead of separate scripts. This would eliminate remaining code duplication and make the system more maintainable.
+    -   (P3) **Refactor :** The backend server file is bloated with hardcoded routes for each demo. This should be refactored to handle package generation and serving dynamically.
+    -   (P4) **Integrate into Main Application:** The entire generation process is still driven by standalone scripts. This functionality needs to be integrated into the main FastAPI application, callable via API endpoints from the React frontend.
 
 **Completed work in this session**
-- **Advanced AI Reviewer & Learning System:** Built and refined a sophisticated AI reviewer that checks for data consistency, content repetition, and legal requirements. Also created a simulation of an iterative learning loop based on the reviewer's feedback.
-- **Realistic PDF Package Generation:**
-  - Implemented a document image generator () to create and embed fictitious but realistic images of passports, diplomas, etc., into the PDF.
-  - Implemented a system to download, manage, and programmatically fill the official USCIS I-129 form (, ).
-  - Iteratively created a final package generator () that combines all elements, producing a comprehensive document.
-- **Demo Pages & Bug Fixes:** Resolved multiple 404 errors reported by the user by creating several static HTML demo pages and adding corresponding routes in  to serve them and their assets correctly.
+-   **H-1B Package Generation:** Successfully created and iteratively refined a complete 66-page H-1B petition package based on extensive user feedback. This included generating realistic document images, filling official forms, and ensuring all sections were present and correctly formatted.
+-   **Knowledge Base Creation:** Processed user-provided ZIP files, converted DOCX to PDF, and organized them into a structured knowledge base in .
+-   **Implementation of 9 Advanced Features:** Added functionalities for more natural language in legal texts, storytelling in the beneficiary's history, a personal statement section, LCA posting notice generation, and more, as requested by the user.
+-   **Code Cleanup and Refactoring:** Performed a Quick Cleanup by archiving over 60 redundant generator scripts and test files into an  directory, significantly decluttering the workspace.
+-   **User Approval:** Received explicit user approval for the final H-1B package and the code cleanup initiative.
+
+**Earlier issues found/mentioned but not fixed**
+-   None. All issues raised by the user during the session were addressed, even if it required multiple attempts.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Backend:** FastAPI
-- **Frontend:** React (though largely unused in this session)
-- **Database:** MongoDB
-- **PDF Manipulation:**  (creation), usage: pdfplumber [-h] [--structure | --structure-text]
-                  [--format {csv,json,text}] [--types TYPES [TYPES ...]]
-                  [--include-attrs INCLUDE_ATTRS [INCLUDE_ATTRS ...]]
-                  [--exclude-attrs EXCLUDE_ATTRS [EXCLUDE_ATTRS ...]]
-                  [--laparams LAPARAMS] [--precision PRECISION]
-                  [--pages PAGES [PAGES ...]] [--indent INDENT]
-                  [infile]
-
-positional arguments:
-  infile
-
-options:
-  -h, --help            show this help message and exit
-  --structure           Write the structure tree as JSON. All other arguments
-                        except --pages, --laparams, and --indent will be
-                        ignored
-  --structure-text      Write the structure tree as JSON including text
-                        contents. All other arguments except --pages,
-                        --laparams, and --indent will be ignored
-  --format {csv,json,text}
-  --types TYPES [TYPES ...]
-  --include-attrs INCLUDE_ATTRS [INCLUDE_ATTRS ...]
-                        Include *only* these object attributes in output.
-  --exclude-attrs EXCLUDE_ATTRS [EXCLUDE_ATTRS ...]
-                        Exclude these object attributes from output.
-  --laparams LAPARAMS
-  --precision PRECISION
-  --pages PAGES [PAGES ...]
-  --indent INDENT       Indent level for JSON pretty-printing. (text extraction),  (form filling)
-- **Content Analysis:**  for text similarity.
-- **Image Generation:** 
-- **Document Conversion:** usage: docx2pdf [-h] [--keep-active] [--version] input [output]
+-   **Backend:** FastAPI
+-   **PDF Generation:** 
+-   **PDF Manipulation:**  (implied for merging),  (form filling)
+-   **Image Generation:** 
+-   **Document Conversion:** usage: docx2pdf [-h] [--keep-active] [--version] input [output]
 
 Example Usage:
 
@@ -504,36 +101,51 @@ options:
   -h, --help     show this help message and exit
   --keep-active  prevent closing word after conversion
   --version      display version and exit
+-   **Data Modeling:** 
 
 **All files**
-- **Created in this session:**
-    - : The main quality assurance agent.
-    - : Simulates agent learning.
-    - : Generates images for the PDF.
-    - : Fills the official government form.
-    - : Manages a local repository of official forms.
-    - : The main script for creating the final package.
-    - : The script for processing user-provided documents.
-    -  (and other demo pages): Static pages to show progress to the user.
-- **Updated in this session:**
-    - : Heavily modified to add multiple routes for serving the static demo pages and their PDF/JSON assets.
+-   **Key functional files created/heavily modified in this session:**
+    -   : Created and executed to build the knowledge base (now archived).
+    -   : The script that produced the 66-page H-1B package that finally met user approval.
+    -   : The latest generator, which adds 9 advanced features on top of the approved package structure.
+    -   : A module containing the logic for the 9 new features.
+    -   : The data model and instance for the approved H-1B case.
+    -   : Heavily modified to add multiple static routes for demo pages and PDF downloads.
+-   **Important structural additions:**
+    -   : Created to hold dozens of legacy scripts.
+    -   : Created to store the knowledge base.
+
+**Areas that need refactoring**
+-   **Generator Proliferation:** While a cleanup was done, the pattern of creating a new script for each variation (, etc.) should be stopped. The next step (B-2 visa) should aim to reuse existing logic and lead towards a single, configurable generator.
+-   **Bloated :** The backend server file contains many hardcoded routes for demos. This is not scalable and should be replaced with a dynamic routing or service layer.
+-   **Superficial Feature Implementation:** The 9 advanced features in  and  were implemented very quickly and are likely placeholders. They need to be refactored into robust, production-ready functions.
+
+**key api endpoints**
+-   : Serves the HTML page for the final, user-approved H-1B package.
+-   : The direct (now fixed) endpoint to download the final PDF.
 
 **Critical Info for New Agent**
-- **The user's highest priority is the quality and realism of the final PDF.** They are very detail-oriented and will reject anything that looks unprofessional.
-- **The current workflow is a simulation.** PDF generation is triggered by manually running Python scripts. The main application flow is not yet connected to this logic.
-- **The immediate next task is to process the user's ZIP files.** The script  has been created but not executed. This is the first thing you must do.
-- **You must verify your own work.** The user has explicitly requested that you open links and view generated documents to check for quality before sending them for review.
+1.  **The User's Standard is Extremely High:** The user is very detail-oriented and will meticulously check every detail of the generated PDF. You **must** verify the package yourself (page count, content, formatting, no blank pages) before sending any link.
+2.  **The Immediate Task is NEW:** You are not fixing an old package. You are creating a brand new one for a **B-2 Tourist Visa Extension**. Start by defining the data model and finding the correct form (I-539).
+3.  **Follow the Established Pattern (but improve it):** Use the existing successful scripts (like  and a generator script) as a template, but avoid creating yet another one-off script if possible. Try to make the logic more generic.
+4.  **Language is Portuguese:** All communication with the user must be in Portuguese.
 
 **Last 5 User Messages and any pending user messages**
-1.  **User:** Requests that pages with only headers be improved to have specific titles and include fictitious images of the documents they represent (e.g., a passport photo). **Status: Completed.**
-2.  **User:** Asks for the official, fillable USCIS form to be included and filled out as part of the package. **Status: Completed.**
-3.  **User:** Mentions that the official forms are in the knowledge base they provided. **Status: Partially Addressed.** The agent discovered the provided files were DOCX guides, not fillable PDFs, and correctly pivoted to downloading fresh official forms.
-4.  **User:** Asks the agent to extract everything from the two provided ZIP files, convert DOCX to PDF, and make them available for the AI agents to use as a knowledge base. **Status: IN PROGRESS.** This is the current, highest-priority task.
-5.  **User:** Asks the agent to verify its own work by opening links and checking documents for quality before sending them for user review. **Status: Acknowledged.** This is a standing instruction.
+1.  **User:** Approved the final 66-page H-1B package and asked the agent to check the code for refactoring opportunities. **Status: Completed.**
+2.  **User:** Agreed to the agent's proposal for a Quick Cleanup (Option 1) of the codebase. **Status: Completed.**
+3.  **User:** Provided a detailed list of 9 advanced features to improve the system's quality, such as more natural language, storytelling, and legal citations. **Status: Completed (First Pass).**
+4.  **User:** Requested the creation of a new, complete process for a B-2 tourist visa extension with hypothetical data. **Status: IN PROGRESS (Just Started).**
+5.  **Agent's last response:** Acknowledged the B-2 visa request and promised to work on it and test it thoroughly before sending the final link.
 
 **Project Health Check:**
-- **Broken:** The primary application flow is disconnected. The advanced PDF generation logic exists only in standalone scripts and is not integrated with the frontend/backend API that a real user would interact with.
-- **Mocked:** The entire generation/review cycle is a simulation. Document content (images, filled forms) is programmatically faked. The AI learning is a scripted simulation, not actual model training.
+-   **Broken:** Nothing is currently broken. The approved H-1B flow is functional.
+-   **Mocked:** The entire application is a simulation. It generates documents based on hardcoded Pydantic models; it does not yet have a user-facing UI for data input or a persistent database for cases.
+
+**Testing status**
+-   **Testing agent used after significant changes:** NO.
+-   **Troubleshoot agent used after agent stuck in loop:** NO.
+-   **Test files created:** Numerous test scripts were created during development but have since been moved to .
+-   **Known regressions:** None.
 
 **What agent forgot to execute**
-- The agent created the script  as the final step but never executed it to complete the user's request of processing the ZIP files.</analysis>
+-   The agent did not forget to execute any tasks. The current request for a B-2 visa package is the next task in the queue after completing all previous requests.</analysis>

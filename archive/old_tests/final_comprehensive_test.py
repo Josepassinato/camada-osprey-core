@@ -14,7 +14,7 @@ from typing import Dict, Any
 import base64
 
 # Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://immivisa.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://immigration-helper-2.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 print(f"🎯 TESTE FINAL COMPLETO DE CONFIABILIDADE DO SISTEMA")
