@@ -230,12 +230,19 @@ class H1BApplicationData:
         if self.lca['validity_end'] != self.position['end_date']:
             errors.append(f"ERRO: Data fim LCA ({self.lca['validity_end']}) diferente de data fim emprego ({self.position['end_date']})")
         
-        # 3. Verificar experiência total
-        expected_exp = (self.beneficiary['job1_duration_years'] + 
-                       self.beneficiary['job2_duration_years'] + 
-                       self.beneficiary['job3_duration_years'])
-        if self.beneficiary['total_experience_years'] != expected_exp:
-            errors.append(f"AVISO: Experiência total ({self.beneficiary['total_experience_years']} anos) não bate com soma dos empregos ({expected_exp} anos)")
+        # 3. Verificar experiência total (aproximado - arredondando meses)
+        expected_exp_years = (self.beneficiary['job1_duration_years'] + 
+                             self.beneficiary['job2_duration_years'] + 
+                             self.beneficiary['job3_duration_years'])
+        expected_exp_months = (self.beneficiary['job1_duration_months'] + 
+                              self.beneficiary['job2_duration_months'] + 
+                              self.beneficiary['job3_duration_months'])
+        total_exp_months = expected_exp_years * 12 + expected_exp_months
+        calculated_years = total_exp_months // 12
+        calculated_months = total_exp_months % 12
+        
+        if self.beneficiary['total_experience_years'] != calculated_years:
+            errors.append(f"AVISO: Experiência total ({self.beneficiary['total_experience_years']}y {self.beneficiary['total_experience_months']}m) não bate com soma ({calculated_years}y {calculated_months}m)")
         
         # 4. Verificar idade vs data de nascimento (nasceu em Agosto 1990)
         birth_year = 1990
