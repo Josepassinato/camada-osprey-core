@@ -9928,3 +9928,19 @@ async def get_final_demo():
     return HTMLResponse(content=html_content)
 
 
+@app.get("/api/complete-with-images", response_class=HTMLResponse)
+async def get_complete_with_images():
+    """
+    Serve the complete package with images demo page
+    """
+    html_path = Path(__file__).parent.parent / "frontend" / "public" / "complete-with-images.html"
+    
+    if not html_path.exists():
+        raise HTTPException(status_code=404, detail="Complete with images page not found")
+    
+    with open(html_path, 'r', encoding='utf-8') as f:
+        html_content = f.read()
+    
+    return HTMLResponse(content=html_content)
+
+
