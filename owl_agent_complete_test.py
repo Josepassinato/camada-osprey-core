@@ -559,7 +559,8 @@ class OwlAgentCompleteTester:
                 
                 if session_response.status_code == 200:
                     session_result = session_response.json()
-                    self.owl_session_id = session_result.get('session_id')
+                    session_data = session_result.get('session', {})
+                    self.owl_session_id = session_data.get('session_id')
                     print(f"      ✅ Sessão criada para pagamento: {self.owl_session_id}")
                 else:
                     self.log_test("Payment Integration - Step 1", False, f"Failed to create session: {session_response.status_code}", session_response.text[:200])
