@@ -5742,7 +5742,8 @@ async def validate_form_data_ai(case, friendly_form_data, basic_data):
     """sistema validation of form data completeness and accuracy"""
     try:
         from emergentintegrations import EmergentLLM
-        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
+        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt
+from oracle_consultant import consult_oracle, oracle, get_visa_knowledge
         
         # Use OpenAI directly or fallback to EmergentLLM
         openai_key = os.environ.get('OPENAI_API_KEY')
@@ -5832,6 +5833,7 @@ async def check_data_consistency_ai(case, friendly_form_data, basic_data):
     try:
         from emergentintegrations import EmergentLLM
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt
+from oracle_consultant import consult_oracle, oracle
         
         # Use OpenAI directly or fallback to EmergentLLM
         openai_key = os.environ.get('OPENAI_API_KEY')
@@ -5898,6 +5900,7 @@ async def translate_data_ai(case, friendly_form_data):
     try:
         from emergentintegrations import EmergentLLM
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt
+from oracle_consultant import consult_oracle, oracle
         
         # Use OpenAI directly or fallback to EmergentLLM
         openai_key = os.environ.get('OPENAI_API_KEY')
@@ -5965,7 +5968,8 @@ async def generate_uscis_form_ai(case, friendly_form_data, basic_data):
     """sistema generation of official USCIS form from friendly data"""
     try:
         from emergentintegrations import EmergentLLM
-        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
+        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt
+from oracle_consultant import consult_oracle, oracle, get_visa_knowledge
         
         # Use OpenAI directly or fallback to EmergentLLM
         openai_key = os.environ.get('OPENAI_API_KEY')
@@ -6050,7 +6054,8 @@ async def final_review_ai(case):
     """Final sistema review of the complete USCIS form"""
     try:
         from emergentintegrations import EmergentLLM
-        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
+        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt
+from oracle_consultant import consult_oracle, oracle, get_visa_knowledge
         
         # Use OpenAI directly or fallback to EmergentLLM
         openai_key = os.environ.get('OPENAI_API_KEY')
