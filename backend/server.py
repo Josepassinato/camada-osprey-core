@@ -8508,6 +8508,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Import Oracle Consultant after logger is defined
+try:
+    from oracle_consultant import consult_oracle, oracle
+    logger.info("✅ Oráculo Jurídico carregado com sucesso")
+except Exception as e:
+    logger.warning(f"⚠️ Oráculo não disponível: {str(e)}")
+    oracle = None
+    consult_oracle = None
+
 @app.on_event("startup")
 async def startup_db_client():
     """Startup event to connect to MongoDB with optimized indexes"""
