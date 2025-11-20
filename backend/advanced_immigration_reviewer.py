@@ -255,6 +255,63 @@ class AdvancedImmigrationReviewerAgent:
         # Retornar apenas hashes que aparecem mais de uma vez
         return {h: pages for h, pages in hash_to_pages.items() if len(pages) > 1}
     
+    def _find_similar_pages(self, pages_text: List[str], similarity_threshold: float = 0.85) -> List[Tuple[List[int], float]]:
+        """
+        Encontra páginas com conteúdo muito similar (mas não idêntico)
+        Útil para detectar páginas que são quase iguais com pequenas variações
+        
+        Returns:
+            Lista de tuplas: (lista de páginas similares, % de similaridade)
+        """
+        similar_groups = []
+        checked_pairs = set()
+        
+        # Normalizar textos: remover números de página e espaços extras
+        normalized_texts = []
+        for text in pages_text:
+            # Remover padrões comuns de numeração de página
+            normalized = re.sub(r'Page \d+', '', text)
+            normalized = re.sub(r'- Page \d+', '', normalized)
+            normalized = re.sub(r'\d+\s+of\s+\d+', '', normalized)
+            # Remover espaços múltiplos
+            normalized = re.sub(r'\s+', ' ', normalized).strip()
+            normalized_texts.append(normalized)
+        
+        # Comparar cada par de páginas
+        for i in range(len(normalized_texts)):
+            for j in range(i + 1, len(normalized_texts)):
+                pair_key = (i, j)
+                if pair_key in checked_pairs:
+                    continue
+                
+                checked_pairs.add(pair_key)
+                
+                # Calcular similaridade usando Jaccard similarity (words)
+                text1 = normalized_texts[i]
+                text2 = normalized_texts[j]
+                
+                if len(text1) < 50 or len(text2) < 50:
+                    # Ignorar páginas muito curtas
+                    continue
+                
+                # Dividir em palavras
+                words1 = set(text1.lower().split())
+                words2 = set(text2.lower().split())
+                
+                if not words1 or not words2:
+                    continue
+                
+                # Calcular Jaccard similarity
+                intersection = len(words1 & words2)
+                union = len(words1 | words2)
+                similarity = intersection / union if union > 0 else 0
+                
+                # Se similaridade for alta, marcar como problema
+                if similarity >= similarity_threshold:
+                    similar_groups.append(([i + 1, j + 1], similarity * 100))
+        
+        return similar_groups
+    
     def _find_generic_content(self, pages_text: List[str]) -> Dict[int, List[str]]:
         """Encontra páginas com texto genérico ou placeholder"""
         generic_pages = {}
