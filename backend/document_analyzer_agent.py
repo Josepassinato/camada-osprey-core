@@ -263,6 +263,31 @@ class DocumentAnalyzerAgent:
             'confidence': 95,
             'requires_manual_review': len(indicators) > 0
         }
+    
+    def consult_kb_for_document(self, document_type: str) -> Dict:
+        """
+        Consulta a base de conhecimento sobre um tipo de documento
+        Retorna guidelines e requisitos
+        """
+        relevant_docs = []
+        
+        for doc in self.knowledge_base.get('documents', []):
+            doc_text = doc.get('text', '').lower()
+            doc_name = doc.get('filename', '').lower()
+            
+            # Buscar menções ao tipo de documento
+            if document_type.lower() in doc_text or document_type.lower() in doc_name:
+                relevant_docs.append({
+                    'filename': doc['filename'],
+                    'category': doc['category'],
+                    'excerpt': doc['text'][:300] + '...'
+                })
+        
+        return {
+            'document_type': document_type,
+            'kb_references_found': len(relevant_docs),
+            'references': relevant_docs[:3]  # Top 3
+        }
 
 
 # Instância global
