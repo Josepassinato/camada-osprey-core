@@ -85,7 +85,7 @@ export const OwlSessionProvider: React.FC<OwlSessionProviderProps> = ({ children
   const [state, dispatch] = useReducer(owlSessionReducer, initialState);
 
   const getBackendUrl = () => {
-    return import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://visapro.preview.emergentagent.com';
+    return import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://immivisa.preview.emergentagent.com';
   };
 
   const startSession = async (visaType: string, language: string) => {
