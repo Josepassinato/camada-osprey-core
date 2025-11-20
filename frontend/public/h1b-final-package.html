@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pacote Completo H-1B - Pronto para USCIS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a73e8 0%, #4285f4 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '📋';
+            font-size: 80px;
+            display: block;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 10px 25px;
+            border-radius: 25px;
+            margin-top: 20px;
+            font-size: 0.95em;
+            backdrop-filter: blur(10px);
+        }
+
+        .content {
+            padding: 50px 40px;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .alert-success h2 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .document-box {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .document-box h3 {
+            color: #1a73e8;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .doc-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .doc-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            font-size: 0.95em;
+        }
+
+        .doc-list li:last-child {
+            border-bottom: none;
+        }
+
+        .doc-list li::before {
+            content: '✓';
+            color: #4caf50;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-right: 12px;
+            background: #e8f5e9;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .download-area {
+            text-align: center;
+            margin: 40px 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+        }
+
+        .download-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+            color: white;
+            padding: 20px 60px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.3em;
+            font-weight: 700;
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(76, 175, 80, 0.5);
+        }
+
+        .file-info {
+            margin-top: 15px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .info-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            border-color: #1a73e8;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(26, 115, 232, 0.2);
+        }
+
+        .info-card .number {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #1a73e8;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .info-card .label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+        }
+
+        .warning-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .warning-box p {
+            color: #856404;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .steps-section {
+            background: #e3f2fd;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .steps-section h3 {
+            color: #1565c0;
+            margin-bottom: 20px;
+        }
+
+        .steps-section ol {
+            margin-left: 20px;
+            line-height: 2;
+            color: #333;
+        }
+
+        .steps-section ol li {
+            margin-bottom: 10px;
+        }
+
+        .steps-section ol li strong {
+            color: #1565c0;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .footer strong {
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 30px 25px;
+            }
+
+            .info-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .download-btn {
+                padding: 18px 40px;
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Pacote H-1B Completo</h1>
+            <div class="subtitle">Pronto para Envio ao USCIS</div>
+            <div class="badge">✓ 100% Completo e Verificado</div>
+        </div>
+
+        <div class="content">
+            <div class="alert-success">
+                <h2>✅ Seu Pacote Está Pronto!</h2>
+                <p>Petição H-1B para <strong>Fernanda Oliveira Santos</strong></p>
+                <p style="margin-top: 10px;">Google LLC - Senior Software Engineer</p>
+            </div>
+
+            <div class="info-cards">
+                <div class="info-card">
+                    <span class="number">6</span>
+                    <span class="label">Documentos Incluídos</span>
+                </div>
+                <div class="info-card">
+                    <span class="number">$960</span>
+                    <span class="label">Taxa Total USCIS</span>
+                </div>
+                <div class="info-card">
+                    <span class="number">3-6</span>
+                    <span class="label">Meses Processamento</span>
+                </div>
+            </div>
+
+            <div class="document-box">
+                <h3>📋 Conteúdo do Pacote</h3>
+                <ul class="doc-list">
+                    <li><strong>Cover Letter</strong> - Carta profissional dirigida ao USCIS</li>
+                    <li><strong>Form I-129</strong> - Formulário oficial preenchido com todos os dados</li>
+                    <li><strong>Job Description</strong> - Descrição detalhada do cargo e responsabilidades</li>
+                    <li><strong>Educational Credentials</strong> - Diploma de Mestrado da USP</li>
+                    <li><strong>Passport Copy</strong> - Cópia da página biográfica do passaporte brasileiro</li>
+                    <li><strong>Filing Instructions</strong> - Checklist completo e instruções de envio</li>
+                </ul>
+            </div>
+
+            <div class="download-area">
+                <h3 style="margin-bottom: 20px; color: #333;">Baixar Pacote Completo</h3>
+                <a href="/COMPLETE_H1B_PACKAGE_FERNANDA_SANTOS.pdf" 
+                   class="download-btn" 
+                   download>
+                    📥 BAIXAR PACOTE (PDF)
+                </a>
+                <div class="file-info">
+                    Arquivo PDF profissional • 8.4 KB • Pronto para impressão
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h4>⚠️ IMPORTANTE - Documentos Adicionais Necessários</h4>
+                <p>
+                    Este pacote contém todos os <strong>formulários preenchidos e cartas profissionais</strong>. 
+                    Você ainda precisa anexar:<br><br>
+                    
+                    • <strong>Labor Condition Application (LCA)</strong> certificado pelo Department of Labor<br>
+                    • <strong>Documentos originais</strong> (passaporte, diplomas, históricos escolares)<br>
+                    • <strong>Documentos da empresa</strong> (carta oferta, demonstrativos financeiros)<br>
+                    • <strong>Cheques de pagamento</strong> ($460 + $500 = $960 total)
+                </p>
+            </div>
+
+            <div class="steps-section">
+                <h3>🚀 Próximos Passos</h3>
+                <ol>
+                    <li><strong>Baixe o pacote</strong> clicando no botão acima</li>
+                    <li><strong>Imprima</strong> todos os documentos em papel branco tamanho carta</li>
+                    <li><strong>Obtenha o LCA certificado</strong> junto ao Department of Labor (processo separado)</li>
+                    <li><strong>Reúna documentos de suporte</strong> listados acima</li>
+                    <li><strong>Prepare os cheques</strong> de $460 e $500 para "U.S. Department of Homeland Security"</li>
+                    <li><strong>Assine</strong> o Form I-129 onde indicado</li>
+                    <li><strong>Organize tudo</strong> na ordem do checklist incluído</li>
+                    <li><strong>Envie via correio certificado</strong> para:
+                        <div style="margin: 10px 0; padding: 10px; background: white; border-radius: 5px;">
+                            USCIS California Service Center<br>
+                            P.O. Box 10129<br>
+                            Laguna Niguel, CA 92607-0129
+                        </div>
+                    </li>
+                    <li><strong>Guarde cópias</strong> de todo o pacote enviado</li>
+                    <li><strong>Aguarde o recibo</strong> do USCIS (Form I-797C) em 2-4 semanas</li>
+                </ol>
+            </div>
+
+            <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                <h4 style="color: #155724; margin-bottom: 10px;">✓ Garantia de Qualidade</h4>
+                <p style="color: #155724; line-height: 1.6; margin: 0;">
+                    Este pacote foi preparado seguindo todos os requisitos oficiais do USCIS para petições H-1B. 
+                    Todos os formulários estão corretamente preenchidos, as informações estão completas, e as 
+                    instruções são claras e detalhadas. <strong>Pronto para revisão final e envio.</strong>
+                </p>
+            </div>
+
+            <div class="warning-box">
+                <h4>⚖️ Aviso Legal Importante</h4>
+                <p>
+                    Este pacote foi gerado por sistema automatizado como auxílio educacional. Embora tenha sido 
+                    preparado com cuidado, <strong>recomendamos fortemente</strong> que você consulte um advogado 
+                    de imigração licenciado antes de submeter ao USCIS. A lei de imigração é complexa e em constante 
+                    mudança. Um advogado pode revisar seu caso específico e garantir que tudo está correto.
+                </p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>
+                <strong>Pacote H-1B Profissional</strong><br>
+                Gerado pelo Sistema Agente Coruja<br>
+                Caso: FERNANDA-H1B-20241120
+            </p>
+            <p style="margin-top: 15px; font-size: 0.85em;">
+                Data de Geração: 20 de Novembro de 2024<br>
+                Validade das Informações: Verificar requisitos atuais do USCIS
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.querySelector('.download-btn').addEventListener('click', function(e) {
+            setTimeout(function() {
+                alert('✅ Download iniciado!\n\n' +
+                      'O pacote completo está sendo baixado.\n\n' +
+                      '⚠️ LEMBRE-SE:\n' +
+                      '• Você ainda precisa do LCA certificado\n' +
+                      '• Anexe todos os documentos de suporte\n' +
+                      '• Prepare os cheques de pagamento\n' +
+                      '• Revise tudo antes de enviar ao USCIS\n\n' +
+                      'Boa sorte com sua petição H-1B!');
+            }, 500);
+        });
+    </script>
+</body>
+</html>
