@@ -9485,6 +9485,63 @@ async def get_supported_languages():
         "supported_languages": translator.supported_languages
     }
 
+@api_router.get("/agent/document-analyzer/consult-kb/{document_type}")
+async def consult_kb_for_document(document_type: str):
+    """
+    Consulta a base de conhecimento sobre um tipo de documento
+    """
+    try:
+        if not document_analyzer:
+            raise HTTPException(status_code=503, detail="Document Analyzer not available")
+        
+        result = document_analyzer.consult_kb_for_document(document_type)
+        
+        return {
+            "success": True,
+            "consultation": result
+        }
+    except Exception as e:
+        logger.error(f"Erro ao consultar KB: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/agent/form-filler/guide/{form_code}")
+async def get_form_guide(form_code: str):
+    """
+    Busca o guia completo de preenchimento do formulário na KB
+    """
+    try:
+        if not form_filler:
+            raise HTTPException(status_code=503, detail="Form Filler not available")
+        
+        result = form_filler.get_form_guide_from_kb(form_code)
+        
+        return {
+            "success": True,
+            "guide": result
+        }
+    except Exception as e:
+        logger.error(f"Erro ao buscar guia: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/agent/form-filler/field-instructions/{form_code}/{field_name}")
+async def get_field_instructions(form_code: str, field_name: str):
+    """
+    Busca instruções específicas para um campo
+    """
+    try:
+        if not form_filler:
+            raise HTTPException(status_code=503, detail="Form Filler not available")
+        
+        result = form_filler.get_field_instructions(form_code, field_name)
+        
+        return {
+            "success": True,
+            "instructions": result
+        }
+    except Exception as e:
+        logger.error(f"Erro ao buscar instruções: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/agents/status")
 async def get_all_agents_status():
     """
