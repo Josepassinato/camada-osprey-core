@@ -295,6 +295,66 @@ class FormFillerAgent:
             suggestions = ['B-2', 'F-1', 'H-1B', 'L-1']
         
         return suggestions
+    
+    def get_form_guide_from_kb(self, form_code: str) -> Dict:
+        """
+        Busca o guia completo de preenchimento do formulário na KB
+        """
+        form_guides = []
+        
+        for doc in self.knowledge_base.get('documents', []):
+            if form_code in doc.get('filename', ''):
+                form_guides.append({
+                    'filename': doc['filename'],
+                    'category': doc['category'],
+                    'guide_text': doc['text'],
+                    'full_length': doc.get('full_length', 0)
+                })
+        
+        if form_guides:
+            return {
+                'form_code': form_code,
+                'guides_found': len(form_guides),
+                'primary_guide': form_guides[0],
+                'all_guides': form_guides
+            }
+        
+        return {
+            'form_code': form_code,
+            'guides_found': 0,
+            'message': f'Nenhum guia encontrado para {form_code} na base de conhecimento'
+        }
+    
+    def get_field_instructions(self, form_code: str, field_name: str) -> Dict:
+        """
+        Busca instruções específicas para um campo do formulário
+        """
+        guide = self.get_form_guide_from_kb(form_code)
+        
+        if guide.get('guides_found', 0) > 0:
+            guide_text = guide['primary_guide']['guide_text']
+            
+            # Buscar menções ao campo no guia
+            instructions = []
+            lines = guide_text.split('\n')
+            for i, line in enumerate(lines):
+                if field_name.lower() in line.lower():
+                    # Pegar contexto (linha anterior, atual e próxima)
+                    context_lines = lines[max(0, i-1):min(len(lines), i+2)]
+                    instructions.append('\n'.join(context_lines))
+            
+            return {
+                'field_name': field_name,
+                'form_code': form_code,
+                'instructions_found': len(instructions),
+                'instructions': instructions[:2]  # Top 2
+            }
+        
+        return {
+            'field_name': field_name,
+            'form_code': form_code,
+            'instructions_found': 0
+        }
 
 
 # Instância global
