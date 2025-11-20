@@ -371,22 +371,31 @@ class AdvancedImmigrationReviewerAgent:
                 # Valores críticos devem aparecer múltiplas vezes em um documento completo
                 errors.append(f"Dado crítico aparece poucas vezes ({count}x): {field_name} = {expected_value}")
         
-        # Verificar se há números DIFERENTES onde deveria ter o MESMO número
-        # Por exemplo, se encontrar "8 engineers" e também "12 engineers" no mesmo documento
-        engineer_pattern = r'(\d+)\s+engineers?'
-        engineer_matches = re.findall(engineer_pattern, full_text, re.IGNORECASE)
+        # Verificar se há referências ao time size liderado
+        # O número correto é job1_team_size (Technical Lead role)
+        # Outros números podem aparecer para outras posições (job2, job3) e isso é ESPERADO
+        expected_team_size = str(self.h1b_data.beneficiary['job1_team_size'])
+        led_pattern = r'(led|manage[sd]?|mentor[ed]*|supervise[sd]*|oversee[s]*)\s+.*?(\d+)\s+engineers?'
+        led_matches = re.findall(led_pattern, full_text, re.IGNORECASE)
         
-        if engineer_matches:
-            unique_counts = set(engineer_matches)
-            if len(unique_counts) > 1:
-                expected = str(self.h1b_data.beneficiary['job1_team_size'])
-                if expected in unique_counts:
-                    # Há o número correto, mas TAMBÉM há números incorretos
-                    wrong_numbers = unique_counts - {expected}
-                    errors.append(
-                        f"INCONSISTÊNCIA: Número de engenheiros varia no documento. "
-                        f"Esperado: {expected}, mas também encontrado: {', '.join(wrong_numbers)}"
-                    )
+        if led_matches:
+            # Extrair apenas os números quando o contexto é sobre LIDERANÇA
+            team_sizes_led = [match[1] for match in led_matches]
+            unique_led_counts = set(team_sizes_led)
+            
+            # Verificar se o número correto aparece
+            if expected_team_size not in unique_led_counts:
+                errors.append(
+                    f"INCONSISTÊNCIA: Número de engenheiros LIDERADOS não encontrado. "
+                    f"Esperado: {expected_team_size}, encontrado em contexto de liderança: {', '.join(unique_led_counts)}"
+                )
+            elif len(unique_led_counts) > 1:
+                # Há múltiplos números em contexto de liderança
+                wrong_numbers = unique_led_counts - {expected_team_size}
+                errors.append(
+                    f"AVISO: Múltiplos tamanhos de equipe mencionados em contexto de liderança. "
+                    f"Esperado: {expected_team_size}, também encontrado: {', '.join(wrong_numbers)}"
+                )
         
         return errors
     
