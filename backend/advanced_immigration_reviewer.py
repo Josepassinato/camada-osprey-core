@@ -126,12 +126,12 @@ class AdvancedImmigrationReviewerAgent:
                 
                 print(f"   ✅ Todas as {num_pages} páginas processadas")
                 
-                # 3. Detectar páginas duplicadas
-                print(f"\n🔎 Detectando páginas duplicadas...")
+                # 3. Detectar páginas duplicadas (exatas)
+                print(f"\n🔎 Detectando páginas duplicadas exatas...")
                 duplicate_pages = self._find_duplicate_pages(pages_hashes)
                 duplicate_percentage = (len(duplicate_pages) / num_pages) * 100
                 
-                print(f"   📊 Páginas duplicadas: {len(duplicate_pages)} ({duplicate_percentage:.1f}%)")
+                print(f"   📊 Páginas duplicadas exatas: {len(duplicate_pages)} ({duplicate_percentage:.1f}%)")
                 
                 if duplicate_percentage > (self.max_duplicate_threshold * 100):
                     errors.append(
@@ -141,6 +141,22 @@ class AdvancedImmigrationReviewerAgent:
                     # Listar algumas páginas duplicadas
                     for dup_set in list(duplicate_pages.values())[:3]:  # Mostrar até 3 exemplos
                         errors.append(f"   → Páginas idênticas: {', '.join(map(str, sorted(dup_set)))}")
+                
+                # 3.5. Detectar páginas SIMILARES (conteúdo repetitivo com pequenas variações)
+                print(f"\n🔍 Detectando páginas com conteúdo SIMILAR (repetitivo)...")
+                similar_pages = self._find_similar_pages(pages_text)
+                similar_percentage = (len(similar_pages) / num_pages) * 100
+                
+                print(f"   📊 Páginas similares/repetitivas: {len(similar_pages)} ({similar_percentage:.1f}%)")
+                
+                if similar_percentage > (self.max_duplicate_threshold * 100):
+                    errors.append(
+                        f"❌ CONTEÚDO REPETITIVO DETECTADO: {len(similar_pages)} páginas ({similar_percentage:.1f}%) "
+                        f"têm conteúdo muito similar. Máximo aceitável: {self.max_duplicate_threshold * 100}%"
+                    )
+                    # Listar exemplos de páginas similares
+                    for i, (page_nums, similarity) in enumerate(similar_pages[:5]):  # Mostrar até 5 exemplos
+                        errors.append(f"   → Páginas {', '.join(map(str, page_nums))} são {similarity:.0f}% similares")
                 
                 # 4. Detectar texto genérico ou placeholder
                 print(f"\n🔍 Detectando texto genérico ou placeholder...")
