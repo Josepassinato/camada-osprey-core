@@ -555,14 +555,61 @@ or labor laws.
         """Gera Form I-129 completo - 25 páginas"""
         story = []
         
-        for page in range(1, 26):
-            story.append(Paragraph(f"TAB B: FORM I-129 (Page {page} of 25)", self.tab_style))
-            story.append(Paragraph(
-                f"Official USCIS Form I-129 - Petition for a Nonimmigrant Worker<br/>"
-                f"OMB No. 1615-0009; Expires 12/31/2026<br/><br/>"
-                f"<b>Part {((page-1)//3)+1}: {['Information About the Employer', 'Information About This Petition', 'Beneficiary Information', 'Processing Information', 'Basic Information About the Proposed Employment'][min(((page-1)//3), 4)]}</b>",
-                self.normal_style
-            ))
+        # Página 1 com imagem do formulário
+        story.append(Paragraph("TAB B: FORM I-129 - Petition for a Nonimmigrant Worker (Page 1 of 25)", self.tab_style))
+        story.append(Spacer(1, 0.2*inch))
+        
+        i129_intro = f"""
+<b>USCIS FORM I-129</b><br/>
+<b>Petition for a Nonimmigrant Worker</b><br/>
+<b>OMB No. 1615-0009; Expires 12/31/2026</b><br/>
+<br/>
+Complete Form I-129 for H-1B classification.<br/>
+Petitioner: {self.h1b_data.employer['legal_name']}<br/>
+Beneficiary: {self.h1b_data.beneficiary['full_name']}
+"""
+        story.append(Paragraph(i129_intro, self.normal_style))
+        story.append(Spacer(1, 0.2*inch))
+        
+        # Inserir imagem do formulário
+        if 'i129' in self.document_images:
+            img = RLImage(self.document_images['i129'], width=5.5*inch, height=7.1*inch)
+            story.append(img)
+        
+        story.append(PageBreak())
+        
+        # Páginas 2-25 com seções específicas do formulário
+        form_sections = [
+            (2, "Part 1: Information About the Employer", f"Legal Name: {self.h1b_data.employer['legal_name']}, EIN: {self.h1b_data.employer['ein']}"),
+            (3, "Part 1 (continued): Employer Address", f"{self.h1b_data.employer['address']}, {self.h1b_data.employer['city']}, {self.h1b_data.employer['state']} {self.h1b_data.employer['zip']}"),
+            (4, "Part 1 (continued): Employer Contact", f"Phone: {self.h1b_data.employer['phone']}"),
+            (5, "Part 2: Information About This Petition", "Classification Sought: H-1B Specialty Occupation"),
+            (6, "Part 2 (continued): Petition Details", f"Requested validity: {self.h1b_data.position['start_date']} to {self.h1b_data.position['end_date']}"),
+            (7, "Part 3: Petitioner Information", "Information about the person/organization filing the petition."),
+            (8, "Part 4: Information About the Beneficiary", f"Name: {self.h1b_data.beneficiary['full_name']}, DOB: {self.h1b_data.beneficiary['dob']}"),
+            (9, "Part 4 (continued): Beneficiary Address", "Current residence and contact information."),
+            (10, "Part 4 (continued): Immigration History", f"Nationality: {self.h1b_data.beneficiary['nationality']}, Passport: {self.h1b_data.beneficiary['passport_number']}"),
+            (11, "Part 5: Basic Information About Proposed Employment", f"Position: {self.h1b_data.position['title']}"),
+            (12, "Part 5 (continued): Job Description Summary", f"Specialty occupation requiring {h1b_data.beneficiary['masters_degree']}"),
+            (13, "Part 5 (continued): Wage Information", f"Annual Salary: {self.h1b_data.position['salary_annual']}"),
+            (14, "Part 6: Dates of Intended Employment", f"Start: {self.h1b_data.position['start_date']}, End: {self.h1b_data.position['end_date']}"),
+            (15, "Part 7: Processing Information", "Request for standard processing."),
+            (16, "Part 8: Beneficiary's Last Address Abroad", "Address in Brazil before U.S. entry."),
+            (17, "Part 9: Beneficiary's Statement", "Beneficiary's acknowledgment and authorization."),
+            (18, "Part 10: Petitioner's Certification", "Petitioner certifies all information is true and correct."),
+            (19, "Part 11: Signature of Person Preparing Form", f"Prepared by: {self.h1b_data.case_info['prepared_by']}"),
+            (20, "Supplement A: Additional Information", "Additional details as required."),
+            (21, "Supplement B: Fee Payment Information", "Filing fee and payment confirmation."),
+            (22, "Supplement C: Supporting Documentation List", "Index of all supporting documents."),
+            (23, "Form Completion - Final Review", "Final review and cross-check of all fields."),
+            (24, "Signature Page - Authorized Representative", f"Signed by authorized officer of {self.h1b_data.employer['legal_name']}."),
+            (25, "Certification and Date", f"Petition dated: {self.h1b_data.case_info['petition_date']}")
+        ]
+        
+        for page_num, section_title, section_desc in form_sections:
+            story.append(Paragraph(f"TAB B: FORM I-129 (Page {page_num} of 25)", self.tab_style))
+            story.append(Paragraph(f"<b>{section_title}</b>", self.heading_style))
+            story.append(Paragraph(section_desc, self.normal_style))
             story.append(PageBreak())
         
         self.included_sections.add('Form I-129')
