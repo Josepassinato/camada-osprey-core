@@ -492,7 +492,7 @@ Sincerely,<br/>
             ('BOX', (0, 0), (-1, -1), 1, colors.grey),
         ]))
         
-        story.append(org_table))
+        story.append(org_table)
         story.append(Spacer(1, 0.4*inch))
         
         story.append(Paragraph(
