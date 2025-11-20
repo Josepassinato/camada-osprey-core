@@ -10009,4 +10009,17 @@ async def get_simulated_case_demo():
     return HTMLResponse(content=html_content)
 
 
+@app.get("/SIMULATED_H1B_COMPLETE_PACKAGE.pdf")
+async def get_simulated_package_pdf():
+    """
+    Serve the simulated H-1B package PDF
+    """
+    pdf_path = Path(__file__).parent.parent / "frontend" / "public" / "SIMULATED_H1B_COMPLETE_PACKAGE.pdf"
+    
+    if not pdf_path.exists():
+        raise HTTPException(status_code=404, detail="Simulated package PDF not found")
+    
+    return FileResponse(pdf_path, media_type="application/pdf", filename="SIMULATED_H1B_COMPLETE_PACKAGE.pdf")
+
+
 
