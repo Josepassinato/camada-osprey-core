@@ -45,7 +45,7 @@ def generate_complete_package():
     
     # Create PDF
     output_path = "/app/COMPLETE_H1B_PACKAGE_FERNANDA_SANTOS.pdf"
-    doc = SimpleDocTemplate(output_path, pagesize=letter, topMargin=0.5*inch, bottom Margin=0.5*inch)
+    doc = SimpleDocTemplate(output_path, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
     story = []
     styles = getSampleStyleSheet()
     
