@@ -2,7 +2,8 @@
 """
 Gerador FINAL do Pacote H-1B Completo
 Inclui:
-- Formulário I-129 OFICIAL do USCIS
+- Formulário I-129 OFICIAL do USCIS (do repositório)
+- Formulário LCA OFICIAL (do repositório)  
 - Imagens de documentos geradas
 - Conteúdo profissional único
 - Tudo pronto para download do usuário
@@ -15,6 +16,7 @@ from PyPDF2 import PdfReader, PdfWriter
 sys.path.insert(0, '/app')
 from intelligent_package_generator import IntelligentH1BGenerator
 from fill_official_i129 import fill_i129_form
+from official_forms_repository import OfficialFormsRepository
 
 def create_final_complete_package():
     """Cria o pacote FINAL completo para o usuário"""
