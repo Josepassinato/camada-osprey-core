@@ -9993,4 +9993,20 @@ async def get_ultimate_package_demo():
     return HTMLResponse(content=html_content)
 
 
+@app.get("/api/simulated-case-demo", response_class=HTMLResponse)
+async def get_simulated_case_demo():
+    """
+    Serve the simulated case demo page - complete test case
+    """
+    html_path = Path(__file__).parent.parent / "frontend" / "public" / "simulated-case-demo.html"
+    
+    if not html_path.exists():
+        raise HTTPException(status_code=404, detail="Simulated case demo page not found")
+    
+    with open(html_path, 'r', encoding='utf-8') as f:
+        html_content = f.read()
+    
+    return HTMLResponse(content=html_content)
+
+
 
