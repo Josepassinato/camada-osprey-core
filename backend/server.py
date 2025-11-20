@@ -9866,11 +9866,46 @@ async def get_simulation_data():
     """
     Get simulation results JSON data
     """
-    json_path = Path(__file__).parent.parent / "simulation_results.json"
+    json_path = Path(__file__).parent.parent / "frontend" / "public" / "simulation_results.json"
     
     if not json_path.exists():
         raise HTTPException(status_code=404, detail="Simulation data not found")
     
     return FileResponse(json_path, media_type="application/json")
+
+
+@app.get("/api/download/{filename}")
+async def download_file(filename: str):
+    """
+    Download generated files (PDFs, instructions, etc)
+    """
+    # Security: only allow specific file patterns
+    allowed_patterns = [
+        "H1B_PACKAGE_ITERATION_",
+        "instructions_iteration_",
+        "simulation_results.json",
+        "PROFESSIONAL_H1B_",
+        "CONSISTENT_H1B_"
+    ]
+    
+    if not any(filename.startswith(pattern) for pattern in allowed_patterns):
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    file_path = Path(__file__).parent.parent / "frontend" / "public" / filename
+    
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail=f"File not found: {filename}")
+    
+    # Determine media type
+    if filename.endswith('.pdf'):
+        media_type = "application/pdf"
+    elif filename.endswith('.txt'):
+        media_type = "text/plain"
+    elif filename.endswith('.json'):
+        media_type = "application/json"
+    else:
+        media_type = "application/octet-stream"
+    
+    return FileResponse(file_path, media_type=media_type, filename=filename)
 
 
