@@ -124,7 +124,7 @@ toc_table.setStyle(TableStyle([
     ('ALIGN', (0,0), (0,-1), 'CENTER'),
     ('ALIGN', (2,0), (2,-1), 'CENTER'),
 ]))
-story.append(toc_table))
+story.append(toc_table)
 story.append(Spacer(1, 0.2*inch))
 story.append(Paragraph(f"<b>Total Pages:</b> 130 pages", normal_style))
 story.append(PageBreak())
