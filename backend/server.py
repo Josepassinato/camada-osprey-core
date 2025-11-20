@@ -1977,6 +1977,16 @@ async def update_case_anonymous(case_id: str, case_update: CaseUpdate, session_t
         update_data = case_update.dict(exclude_none=True)
         update_data["updated_at"] = datetime.utcnow()
         
+        # Auto-calculate progress if current_step is provided but progress_percentage is not
+        if "current_step" in update_data and "progress_percentage" not in update_data:
+            update_data["progress_percentage"] = get_progress_percentage(update_data["current_step"])
+        
+        # If form_code is provided and status is still created, update status and progress
+        if "form_code" in update_data and case.get("status") == "created":
+            update_data["status"] = "form_selected"
+            if "progress_percentage" not in update_data:
+                update_data["progress_percentage"] = 20
+        
         await db.auto_cases.update_one(
             {"case_id": case_id},
             {"$set": update_data}
