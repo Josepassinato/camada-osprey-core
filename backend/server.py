@@ -7828,6 +7828,7 @@ async def validate_field_input(request: dict):
         return {
             "success": True,
             "validation": validation_result,
+            "score": validation_result.get("overall_score", 0),  # Add score at root level for easier access
             "field_id": field_id,
             "session_id": session_id,
             "timestamp": datetime.utcnow().isoformat()
