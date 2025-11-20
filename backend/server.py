@@ -23,15 +23,6 @@ from pydantic import BaseModel, Field, EmailStr
 import pydantic
 from typing import List, Optional, Dict, Any
 
-# Import Oracle Consultant
-try:
-    from oracle_consultant import consult_oracle, oracle
-    logger.info("✅ Oráculo Jurídico carregado com sucesso")
-except Exception as e:
-    logger.warning(f"⚠️ Oráculo não disponível: {str(e)}")
-    oracle = None
-    consult_oracle = None
-
 # Configure JSON encoder for ObjectId (Pydantic v2 compatible)
 # pydantic.json.ENCODERS_BY_TYPE[ObjectId] = str  # This is for Pydantic v1
 
