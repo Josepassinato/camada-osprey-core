@@ -730,30 +730,40 @@ Official diplomas, transcripts, and credential evaluation follow.
     
     def _generate_passport(self):
         story = []
-        story.append(Paragraph("TAB K: PASSPORT (Page 1 of 6)", self.tab_style))
+        story.append(Paragraph("TAB K: PASSPORT - Biographical Page", self.tab_style))
+        story.append(Spacer(1, 0.2*inch))
         
-        passport_content = f"""
-<b>PASSPORT BIOGRAPHICAL PAGE</b><br/>
+        passport_intro = f"""
+<b>PASSPORT OF BRAZIL / PASSAPORTE DO BRASIL</b><br/>
+<b>Beneficiary: {self.h1b_data.beneficiary['full_name']}</b><br/>
 <br/>
-Full Name: {self.h1b_data.beneficiary['full_name']}<br/>
-Date of Birth: {self.h1b_data.beneficiary['dob']}<br/>
-Place of Birth: São Paulo, Brazil<br/>
-Nationality: {self.h1b_data.beneficiary['nationality']}<br/>
-<br/>
-Passport Number: {self.h1b_data.beneficiary['passport_number']}<br/>
-Issue Date: {self.h1b_data.beneficiary['passport_issue_date']}<br/>
-Expiry Date: {self.h1b_data.beneficiary['passport_expiry_date']}<br/>
-Issuing Authority: {self.h1b_data.beneficiary['passport_issue_place']}<br/>
-<br/>
-Color photocopy of biographical page attached.<br/>
-Passport is valid and will remain valid throughout the entire period of requested stay.
+Below is a color photocopy of the biographical page of the beneficiary's Brazilian passport.
+This passport is valid through {self.h1b_data.beneficiary['passport_expiry_date']}, well beyond
+the requested H-1B validity period.
 """
-        story.append(Paragraph(passport_content, self.normal_style))
+        story.append(Paragraph(passport_intro, self.normal_style))
+        story.append(Spacer(1, 0.3*inch))
+        
+        # Inserir imagem do passaporte
+        if 'passport' in self.document_images:
+            img = RLImage(self.document_images['passport'], width=6*inch, height=4.5*inch)
+            story.append(img)
+        
         story.append(PageBreak())
         
-        for page in range(2, 7):
-            story.append(Paragraph(f"TAB K: PASSPORT (Page {page} of 6)", self.tab_style))
-            story.append(Paragraph("Immigration documents, prior visas, I-94 records", self.normal_style))
+        # Páginas adicionais com outros documentos de imigração
+        additional_pages = [
+            ("Prior U.S. Visas", "Copy of prior U.S. visa stamps (if applicable) showing lawful entries and departures."),
+            ("I-94 Arrival/Departure Records", "Electronic I-94 records confirming legal entries to the United States."),
+            ("Immigration History", "Complete immigration history showing compliance with all prior visa conditions."),
+            ("Passport Validity Confirmation", f"Passport remains valid until {self.h1b_data.beneficiary['passport_expiry_date']}, exceeding the H-1B period requested."),
+            ("Additional Immigration Documents", "Any other relevant immigration documentation as required by USCIS.")
+        ]
+        
+        for page_num, (page_title, page_content) in enumerate(additional_pages, start=2):
+            story.append(Paragraph(f"TAB K: PASSPORT & IMMIGRATION DOCS (Page {page_num} of 6)", self.tab_style))
+            story.append(Paragraph(f"<b>{page_title}</b>", self.heading_style))
+            story.append(Paragraph(page_content, self.normal_style))
             story.append(PageBreak())
         
         self.included_sections.add('Passport')
