@@ -1,0 +1,26 @@
+{
+  "visa_type": "F-1 Student",
+  "required_forms": [
+    "I-20",
+    "I-539 (if changing status)"
+  ],
+  "required_documents": [
+    "I-20 from School",
+    "Acceptance Letter",
+    "Transcript",
+    "Academic Records",
+    "Financial Support Evidence",
+    "Bank Statements",
+    "Sponsor Affidavit (if applicable)",
+    "English Proficiency Test (TOEFL/IELTS)",
+    "Ties to Home Country",
+    "Intent to Return",
+    "Passport Copy"
+  ],
+  "forbidden_documents": [
+    "I-129",
+    "LCA",
+    "Employment Authorization (unless OPT/CPT)",
+    "Work Visa Documentation"
+  ]
+}

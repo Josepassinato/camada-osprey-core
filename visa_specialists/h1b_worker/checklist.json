@@ -1,0 +1,28 @@
+{
+  "visa_type": "H-1B Worker",
+  "required_forms": [
+    "I-129",
+    "I-129H",
+    "LCA (ETA-9035)"
+  ],
+  "required_documents": [
+    "Cover Letter",
+    "Support Letter",
+    "Form I-129 (Completed)",
+    "Form I-129H Supplement",
+    "LCA (Certified)",
+    "LCA Posting Notice",
+    "Company Evidence",
+    "Job Description",
+    "Beneficiary Resume/CV",
+    "Educational Credentials",
+    "Degree Evaluation (if foreign degree)",
+    "Proof of Specialty Occupation",
+    "Employer-Employee Relationship Evidence"
+  ],
+  "forbidden_documents": [
+    "I-20",
+    "I-539",
+    "Tourist Documentation"
+  ]
+}

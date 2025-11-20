@@ -1,0 +1,46 @@
+{
+  "visa_type": "B-2 Extension",
+  "required_forms": [
+    "I-539"
+  ],
+  "required_documents": [
+    "Cover Letter",
+    "Personal Statement",
+    "Form I-539 (Completed)",
+    "Current I-94 Record",
+    "Passport Copy",
+    "Financial Evidence",
+    "Bank Statements",
+    "Ties to Home Country",
+    "Travel History",
+    "Compliance Documentation",
+    "Reason for Extension"
+  ],
+  "forbidden_documents": [
+    "I-20",
+    "I-129",
+    "LCA",
+    "ETA-9035",
+    "Transcript",
+    "Diploma",
+    "Employment Authorization",
+    "I-140",
+    "I-485"
+  ],
+  "optional_documents": [
+    "Medical Documentation (if medical reason)",
+    "Doctor's Letter",
+    "Treatment Plan",
+    "Family Emergency Documentation",
+    "Property Deeds",
+    "Tax Returns",
+    "Pension Statements"
+  ],
+  "common_reasons_for_extension": [
+    "Medical Emergency",
+    "Family Emergency",
+    "Pending Legal Matter",
+    "Natural Disaster",
+    "Other Humanitarian Reasons"
+  ]
+}
