@@ -9961,4 +9961,20 @@ async def get_final_complete_package():
     
     return HTMLResponse(content=html_content)
 
+@app.get("/api/enhanced-package-demo", response_class=HTMLResponse)
+async def get_enhanced_package_demo():
+    """
+    Serve the enhanced package demo page with knowledge base integration
+    """
+    html_path = Path(__file__).parent.parent / "frontend" / "public" / "enhanced-package-demo.html"
+    
+    if not html_path.exists():
+        raise HTTPException(status_code=404, detail="Enhanced package demo page not found")
+    
+    with open(html_path, 'r', encoding='utf-8') as f:
+        html_content = f.read()
+    
+    return HTMLResponse(content=html_content)
+
+
 
