@@ -9888,7 +9888,9 @@ async def download_file(filename: str):
         "CONSISTENT_H1B_",
         "FINAL_COMPLETE_",
         "final_test_result",
-        "COMPLETE_WITH_IMAGES"
+        "COMPLETE_WITH_IMAGES",
+        "FINAL_H1B_PACKAGE_COMPLETE",
+        "I-129_FILLED_OFFICIAL"
     ]
     
     if not any(filename.startswith(pattern) for pattern in allowed_patterns):
