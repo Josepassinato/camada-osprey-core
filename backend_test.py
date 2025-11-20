@@ -62,14 +62,14 @@ class ProductionVerificationTester:
         print()
     
     def run_production_verification(self):
-        """Execute MARIA DA SILVA SANTOS I-539 COMPLETE SIMULATION"""
-        print("🎯 MARIA DA SILVA SANTOS I-539 COMPLETE SIMULATION")
-        print("🎯 OBJETIVO: Simular usuário real passando por TODO o processo de aplicação de visto")
+        """Execute CARLOS EDUARDO FERREIRA I-765 EAD COMPLETE SIMULATION"""
+        print("🎯 CARLOS EDUARDO FERREIRA I-765 EAD COMPLETE SIMULATION")
+        print("🎯 OBJETIVO: Simular usuário real passando por TODO o processo de aplicação EAD")
         print("="*80)
         
-        # MARIA DA SILVA SANTOS I-539 SIMULATION
-        print("\n🇧🇷 MARIA DA SILVA SANTOS I-539 - SIMULAÇÃO COMPLETA END-TO-END")
-        self.test_maria_da_silva_santos_i539_complete_simulation()
+        # CARLOS EDUARDO FERREIRA I-765 EAD SIMULATION
+        print("\n🇧🇷 CARLOS EDUARDO FERREIRA I-765 EAD - SIMULAÇÃO COMPLETA END-TO-END")
+        self.test_carlos_eduardo_ferreira_i765_ead_complete_simulation()
         
         # Final Summary
         self.print_production_verification_summary()
