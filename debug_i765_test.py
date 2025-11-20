@@ -102,8 +102,8 @@ def debug_case_data_persistence():
         # Step 4: Test user story
         print(f"\n🔍 STEP 4: Add user story to case {case_id}")
         story_data = {
-            "user_story": "Completei meu mestrado em Ciência da Computação no MIT em maio de 2025. Agora desejo aplicar para OPT (Optional Practical Training) para trabalhar nos Estados Unidos por 12 meses em minha área de estudo. Tenho uma oferta de emprego da empresa TechCorp em Boston para posição de Software Engineer.",
-            "simplified_responses": {
+            "user_story_text": "Completei meu mestrado em Ciência da Computação no MIT em maio de 2025. Agora desejo aplicar para OPT (Optional Practical Training) para trabalhar nos Estados Unidos por 12 meses em minha área de estudo. Tenho uma oferta de emprego da empresa TechCorp em Boston para posição de Software Engineer.",
+            "simplified_form_responses": {
                 "reason_application": "OPT após conclusão do mestrado - MIT",
                 "employment": "Oferta da TechCorp Inc. - Software Engineer",
                 "relation_to_study": "Trabalho diretamente relacionado à Ciência da Computação",
