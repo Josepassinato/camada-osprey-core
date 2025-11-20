@@ -44,6 +44,7 @@ class SimulatedH1BCase:
             "masters_degree": "Master of Science in Artificial Intelligence",
             "masters_institution": "Stanford University",
             "masters_graduation_year": "2013",
+            "masters_graduation_date": "June 15, 2013",
             "masters_gpa": "3.9/4.0",
             "masters_honors": "With Distinction",
             
