@@ -1,0 +1,84 @@
+================================================================================
+🔴 ERROS CRÍTICOS - CORREÇÃO OBRIGATÓRIA:
+================================================================================
+
+1. ❌ FORMULÁRIO OBRIGATÓRIO AUSENTE: H-1B Data Collection and Filing Fee Exemption Supplement
+   INSTRUÇÃO: Adicione o formulário H-1B Data Collection and Filing Fee Exemption Supplement. Consulte o site oficial do USCIS para obter a versão mais recente e preencha TODOS os campos obrigatórios.
+
+2. ❌ FORMULÁRIO OBRIGATÓRIO AUSENTE: H Classification Supplement
+   INSTRUÇÃO: Adicione o H Classification Supplement to Form I-129 (páginas 8-9 do formulário oficial). Este suplemento DEVE incluir: (1) Tipo de classificação H (H-1B), (2) Informações sobre emprego anterior nos EUA, (3) Detalhes sobre o empregador e posição, (4) Qualificações do beneficiário. Localize o formulário oficial em: https://www.uscis.gov/i-129
+
+3. ❌ LCA - Campo obrigatório ausente ou incompleto: Validity Period
+   INSTRUÇÃO: No LCA, preencha o campo: Validity Period. Este é um campo obrigatório.
+
+4. ❌ LCA - Campo obrigatório ausente ou incompleto: Employer Name and Address
+   INSTRUÇÃO: Na seção LCA, adicione CLARAMENTE: Nome legal completo do employer, endereço completo (rua, cidade, estado, ZIP), EIN (Employer Identification Number). Estes dados DEVEM ser IDÊNTICOS aos do Form I-129 Part 1.
+
+5. ❌ LCA - Campo obrigatório ausente ou incompleto: Worksite Address
+   INSTRUÇÃO: Na seção LCA, especifique o endereço EXATO onde o beneficiário trabalhará. Se for diferente do endereço principal do employer, isso DEVE estar documentado. Inclua: rua, número, cidade, estado, ZIP code. Este endereço determina o prevailing wage aplicável.
+
+6. ❌ DOCUMENTO CRÍTICO AUSENTE: Labor Condition Application (LCA) - CERTIFIED
+   INSTRUÇÃO: Adicione o LCA CERTIFICADO pelo Department of Labor. O LCA DEVE: (1) Ter número de certificação válido (formato: I-200-XXXXX-XXXXXX), (2) Mostrar status 'CERTIFIED' claramente, (3) Incluir wage determination mostrando prevailing wage, (4) Ter data de certificação anterior à data de filing do I-129, (5) Incluir cópia do posting notice (se aplicável). Posicione o LCA certificado na seção TAB D do pacote.
+
+7. ❌ DOCUMENTO CRÍTICO AUSENTE: Educational Credentials (Diploma and Transcripts)
+   INSTRUÇÃO: Adicione cópias LEGÍVEIS dos diplomas e transcripts do beneficiário. DEVE incluir: (1) Diploma de Bachelor's degree (frente e verso se houver informações), (2) Diploma de Master's degree (se aplicável), (3) Transcripts oficiais completos de TODAS as instituições, (4) Se diploma estrangeiro: adicionar credential evaluation de agência NACES/AICE-approved, (5) Traduções juramentadas se documentos não estiverem em inglês. Organize na seção TAB J com identificação clara de cada documento.
+
+8. ❌ DOCUMENTO CRÍTICO AUSENTE: Passport Biographical Page
+   INSTRUÇÃO: Adicione cópia COLORIDA e LEGÍVEL da página biográfica do passaporte do beneficiário. DEVE mostrar: (1) Nome completo (EXATAMENTE como em outros documentos), (2) Data de nascimento, (3) Número do passaporte, (4) Data de emissão, (5) Data de EXPIRAÇÃO (deve ser válida por >6 meses), (6) País de emissão. Posicione na seção TAB K.
+
+================================================================================
+🟡 ERROS MAIORES - CORREÇÃO RECOMENDADA:
+================================================================================
+
+1. ⚠️ Documento obrigatório ausente: Company Support Letter
+   INSTRUÇÃO: Adicione o documento: Company Support Letter. Certifique-se de que o documento é legível, completo e relevante para a aplicação.
+
+2. ⚠️ Documento obrigatório ausente: Detailed Job Description
+   INSTRUÇÃO: Adicione o documento: Detailed Job Description. Certifique-se de que o documento é legível, completo e relevante para a aplicação.
+
+3. ⚠️ Documento obrigatório ausente: Organizational Chart
+   INSTRUÇÃO: Adicione o documento: Organizational Chart. Certifique-se de que o documento é legível, completo e relevante para a aplicação.
+
+4. ⚠️ Documento obrigatório ausente: Financial Evidence (Tax Returns, Annual Reports, or Audited Financial Statements)
+   INSTRUÇÃO: Adicione evidência financeira robusta do employer para demonstrar ability to pay. OPÇÕES (escolha as mais relevantes): (1) Tax Returns (Form 1120) dos últimos 2 anos, (2) Audited Financial Statements com parecer de CPA, (3) Annual Reports (para empresas públicas), (4) Bank statements mostrando fundos suficientes. A evidência DEVE demonstrar que o employer pode pagar o salário oferecido de ${salary}. Posicione na seção TAB H com análise financeira explicativa.
+
+5. ⚠️ Documento obrigatório ausente: Beneficiary Resume/CV
+   INSTRUÇÃO: Adicione o documento: Beneficiary Resume/CV. Certifique-se de que o documento é legível, completo e relevante para a aplicação.
+
+6. ⚠️ Documento obrigatório ausente: Credential Evaluation (if foreign degree)
+   INSTRUÇÃO: Adicione o documento: Credential Evaluation (if foreign degree). Certifique-se de que o documento é legível, completo e relevante para a aplicação.
+
+7. ⚠️ Documento obrigatório ausente: Prior U.S. Visas (if applicable)
+   INSTRUÇÃO: Adicione o documento: Prior U.S. Visas (if applicable). Certifique-se de que o documento é legível, completo e relevante para a aplicação.
+
+8. ⚠️ Documento obrigatório ausente: I-94 Arrival/Departure Record (if applicable)
+   INSTRUÇÃO: Adicione o documento: I-94 Arrival/Departure Record (if applicable). Certifique-se de que o documento é legível, completo e relevante para a aplicação.
+
+9. ⚠️ Documento obrigatório ausente: Employment Verification Letters (all positions)
+   INSTRUÇÃO: Adicione o documento: Employment Verification Letters (all positions). Certifique-se de que o documento é legível, completo e relevante para a aplicação.
+
+10. ⚠️ Documento obrigatório ausente: Pay Stubs or Tax Documents (current employer)
+   INSTRUÇÃO: Adicione o documento: Pay Stubs or Tax Documents (current employer). Certifique-se de que o documento é legível, completo e relevante para a aplicação.
+
+11. ⚠️ Documento obrigatório ausente: Letters of Recommendation (at least 2)
+   INSTRUÇÃO: Adicione pelo menos 2 cartas de recomendação profissional. Cada carta DEVE: (1) Ser escrita por supervisor direto ou líder técnico, (2) Estar em papel timbrado da empresa, (3) Incluir nome completo, título e informações de contato do autor, (4) Descrever relacionamento profissional com o beneficiário, (5) Detalhar contribuições técnicas específicas e realizações, (6) Estar assinada e datada. Posicione na seção TAB M.
+
+12. ⚠️ Requisito legal não verificado: Proffered wage must meet or exceed prevailing wage
+
+13. ⚠️ Dado crítico aparece poucas vezes (1x): Nome do beneficiário
+
+14. ⚠️ Dado crítico aparece poucas vezes (2x): Salário anual
+
+15. ⚠️ Dado crítico aparece poucas vezes (1x): Posição
+
+16. ⚠️ Múltiplos valores de salário encontrados: $282,836, $138,000, $145,000, $59,972, $402,392
+
+================================================================================
+📋 RESUMO DE AÇÕES NECESSÁRIAS:
+================================================================================
+
+✓ Corrigir 8 erros críticos (OBRIGATÓRIO)
+✓ Corrigir 16 erros maiores (RECOMENDADO)
+✓ Score atual: 0/100
+✓ Score necessário: 95/100
+✓ Após correções, executar revisão novamente
