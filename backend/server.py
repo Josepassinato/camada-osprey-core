@@ -330,6 +330,9 @@ class AutoApplicationCase(BaseModel):
     official_form_data: Optional[Dict[str, Any]] = None
     uscis_form_generated: bool = False
     
+    # I-765 EAD specific data
+    ead_data: Optional[Dict[str, Any]] = None
+    
     # AI Processing Tracking
     ai_processing: Optional[Dict[str, Any]] = None
     
