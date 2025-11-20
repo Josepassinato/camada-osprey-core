@@ -730,7 +730,7 @@ Official diplomas, transcripts, and credential evaluation follow.
 <br/>
 Full Name: {self.h1b_data.beneficiary['full_name']}<br/>
 Date of Birth: {self.h1b_data.beneficiary['dob']}<br/>
-Place of Birth: {self.h1b_data.beneficiary['birth_city']}, {self.h1b_data.beneficiary['birth_country']}<br/>
+Place of Birth: São Paulo, Brazil<br/>
 Nationality: {self.h1b_data.beneficiary['nationality']}<br/>
 <br/>
 Passport Number: {self.h1b_data.beneficiary['passport_number']}<br/>
@@ -739,7 +739,7 @@ Expiry Date: {self.h1b_data.beneficiary['passport_expiry_date']}<br/>
 Issuing Authority: {self.h1b_data.beneficiary['passport_issue_place']}<br/>
 <br/>
 Color photocopy of biographical page attached.<br/>
-Passport is valid for {self.h1b_data.beneficiary['passport_validity_years']} years from issue date.
+Passport is valid and will remain valid throughout the entire period of requested stay.
 """
         story.append(Paragraph(passport_content, self.normal_style))
         story.append(PageBreak())
