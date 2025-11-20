@@ -22,7 +22,7 @@ from pathlib import Path
 import io
 
 # Importar dados do caso B-2
-from b2_extension_data_model import b2_extension_data
+from b2_extension_data_model import b2_extension_case as b2_extension_data
 
 # Importar repositório de formulários
 from official_forms_repository import OfficialFormsRepository
