@@ -162,7 +162,8 @@ class OwlAgentCompleteTester:
                 return
             
             session_result = session_response.json()
-            self.owl_session_id = session_result.get('session_id')
+            session_data = session_result.get('session', {})
+            self.owl_session_id = session_data.get('session_id')
             
             if not self.owl_session_id:
                 self.log_test("H-1B Complete Flow - Step 1", False, "No session_id returned", session_result)
