@@ -34,6 +34,12 @@ class IntelligentH1BGenerator:
         self.included_sections = set()
         self.missing_items = []
         
+        # Gerar imagens de documentos
+        print("🎨 Gerando imagens de documentos...")
+        doc_generator = DocumentImageGenerator()
+        self.document_images = doc_generator.generate_all_documents(h1b_data)
+        print(f"✅ {len(self.document_images)} imagens geradas")
+        
     def _setup_styles(self):
         """Configura estilos profissionais"""
         self.title_style = ParagraphStyle(
