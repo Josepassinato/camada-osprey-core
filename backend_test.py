@@ -1736,7 +1736,7 @@ class ProductionVerificationTester:
                     "progress_100": case_data.get('progress_percentage') == 100,
                     "has_basic_data": bool(case_data.get('basic_data')),
                     "has_ead_data": bool(case_data.get('ead_data')),
-                    "has_user_story": bool(case_data.get('user_story'))
+                    "has_user_story": bool(case_data.get('user_story_text'))
                 }
                 
                 etapa12_success = all(final_checks.values())
