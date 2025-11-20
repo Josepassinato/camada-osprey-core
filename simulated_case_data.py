@@ -5,16 +5,13 @@ Caso hipotético para demonstração do sistema
 """
 
 from datetime import datetime
-from pydantic import BaseModel, Field
 from typing import Dict, List
 
 
-class SimulatedH1BCase(BaseModel):
+class SimulatedH1BCase:
     """Modelo de dados para caso simulado de H-1B"""
     
     def __init__(self):
-        super().__init__()
-        
         # Informações do Beneficiário
         self.beneficiary = {
             "full_name": "RICARDO ANTONIO SILVA MENDES",
