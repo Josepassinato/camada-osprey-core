@@ -31,15 +31,31 @@ def create_final_complete_package():
     base_package = "/tmp/base_package_with_images.pdf"
     generator.generate_complete_package(base_package, iteration=1)
     
-    # Passo 2: Preparar formulário I-129 oficial
-    print("\n📝 Passo 2: Preparando formulário I-129 OFICIAL do USCIS...")
-    official_i129 = "/tmp/i-129-official.pdf"
-    filled_i129 = "/app/I-129_FILLED_OFFICIAL.pdf"
+    # Passo 2: Buscar formulários oficiais do repositório
+    print("\n📝 Passo 2: Buscando formulários OFICIAIS do repositório...")
+    repo = OfficialFormsRepository()
     
-    if os.path.exists(official_i129):
-        fill_i129_form(official_i129, filled_i129)
-    else:
-        print("   ⚠️ Formulário oficial não encontrado, usando versão gerada")
+    try:
+        # Buscar I-129 oficial
+        official_i129 = repo.get_form("H-1B", "I-129")
+        filled_i129 = "/app/I-129_FILLED_OFFICIAL.pdf"
+        
+        if official_i129 and os.path.exists(official_i129):
+            fill_i129_form(official_i129, filled_i129)
+        else:
+            print("   ⚠️ I-129 não encontrado no repositório")
+            filled_i129 = None
+        
+        # Buscar LCA oficial (opcional - já temos imagem gerada)
+        try:
+            official_lca = repo.get_form("H-1B", "LCA")
+            if official_lca:
+                print(f"   ✅ LCA oficial também disponível: {official_lca}")
+        except:
+            pass
+            
+    except Exception as e:
+        print(f"   ⚠️ Erro ao buscar formulários: {e}")
         filled_i129 = None
     
     # Passo 3: Mesclar tudo em um único pacote
