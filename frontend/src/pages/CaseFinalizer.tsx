@@ -13,7 +13,8 @@ import {
   Package,
   ClipboardList,
   Shield,
-  ExternalLink
+  ExternalLink,
+  Clock
 } from "lucide-react";
 
 interface FinalizationJob {
