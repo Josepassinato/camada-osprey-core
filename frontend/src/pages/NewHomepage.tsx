@@ -666,63 +666,6 @@ const NewHomepage = () => {
       </section>
 
       {/* Testimonials */}
-      <section id="depoimentos" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              O Que Nossos Clientes Dizem
-            </h2>
-            <p className="text-xl text-gray-600">
-              Milhares de pessoas já realizaram o sonho americano com a Osprey
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Maria Silva",
-                role: "Visto F-1 Aprovado",
-                avatar: "👩🏻‍💼",
-                text: "Economizei mais de $8.000 comparado aos serviços tradicionais. O processo foi tão simples que consegui fazer sozinha em um fim de semana. Recomendo demais!",
-                rating: 5
-              },
-              {
-                name: "Carlos Santos",
-                role: "Green Card EB-2 NIW",
-                avatar: "👨🏽‍💻",
-                text: "A plataforma me guiou em cada passo do caminho. O sistema preencheu tudo perfeitamente e o suporte foi excepcional. Meu Green Card foi aprovado!",
-                rating: 5
-              },
-              {
-                name: "Ana Rodrigues",
-                role: "Extensão B-1/B-2",
-                avatar: "👩🏻‍🎓",
-                text: "Estava preocupada com a complexidade, mas a Osprey tornou tudo tão fácil. Em 15 minutos tinha tudo pronto. Valeu cada centavo!",
-                rating: 5
-              }
-            ].map((testimonial, idx) => (
-              <div key={idx} className="bg-gradient-to-br from-purple-50 to-white rounded-2xl p-8 border border-purple-100 hover:shadow-xl transition-all">
-                <div className="flex items-center gap-2 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <span key={i} className="text-yellow-400 text-xl">⭐</span>
-                  ))}
-                </div>
-                <p className="text-gray-700 mb-6 italic leading-relaxed">
-                  "{testimonial.text}"
-                </p>
-                <div className="flex items-center gap-3">
-                  <span className="text-4xl">{testimonial.avatar}</span>
-                  <div>
-                    <p className="font-bold text-gray-900">{testimonial.name}</p>
-                    <p className="text-sm text-gray-600">{testimonial.role}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Legal Disclaimer Before CTA */}
       <section className="py-12 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
