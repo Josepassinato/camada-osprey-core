@@ -281,9 +281,9 @@ const SelectForm = () => {
           
           // Verify the update was successful
           if (updateData.case && updateData.case.form_code === formCode) {
-            // Redirect to payment page
-            const paymentUrl = `/payment?visa_code=${formCode}&case_id=${existingCaseId}`;
-            navigate(paymentUrl);
+            // Redirect to visa preview page
+            const previewUrl = `/auto-application/visa-preview?visa_code=${formCode}&case_id=${existingCaseId}`;
+            navigate(previewUrl);
             return;
           } else {
             console.log('⚠️ Form code mismatch after update, creating new case');
