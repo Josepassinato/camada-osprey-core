@@ -112,10 +112,11 @@ def test_visa_generate_endpoint():
     print("\n📋 TESTE 2: Geração de Pacote H-1B")
     print("-" * 40)
     
+    # Test with the format specified in the review request
     h1b_payload = {
-        "user_input": "Preciso preparar meu pacote H-1B para trabalhar como Software Engineer",
-        "applicant_data": {},
-        "enable_qa": True
+        "visa_type": "H-1B",
+        "user_request": "Preciso preparar meu pacote H-1B para trabalhar como Software Engineer",
+        "applicant_data": {}
     }
     
     try:
