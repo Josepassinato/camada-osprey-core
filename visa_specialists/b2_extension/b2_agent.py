@@ -122,11 +122,16 @@ Este arquivo registra erros cometidos e correções aplicadas para melhorar cont
         # Importar gerador existente
         try:
             # Aqui chamamos o gerador que já criamos
+            print("🔄 Chamando gerador de pacote B-2...")
             result = self._generate_b2_package(applicant_data)
+            print(f"📦 Resultado do gerador: {result}")
             
             # Validar resultado
             documents = self._extract_document_list(result)
+            print(f"📋 Documentos extraídos: {documents}")
+            
             validation = self.validate_package(documents)
+            print(f"✅ Validação: {validation}")
             
             if not validation['is_valid']:
                 print("\n⚠️  AVISO: Pacote gerado tem problemas de validação")
@@ -139,7 +144,7 @@ Este arquivo registra erros cometidos e correções aplicadas para melhorar cont
                         "Documento Proibido"
                     )
             
-            return {
+            final_result = {
                 'success': True,
                 'package_path': result.get('package_path'),
                 'documents': documents,
@@ -148,8 +153,13 @@ Este arquivo registra erros cometidos e correções aplicadas para melhorar cont
                 'validation': validation
             }
             
+            print(f"🎯 Resultado final do B-2 agent: {final_result}")
+            return final_result
+            
         except Exception as e:
             print(f"\n❌ ERRO ao gerar pacote: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return {
                 'success': False,
                 'error': str(e)
