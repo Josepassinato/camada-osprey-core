@@ -84,25 +84,24 @@ const Footer = () => {
               Transformando sonhos em realidade desde 2020.
             </p>
 
-            {/* Trust badges */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
+            {/* Contact info */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 text-muted-foreground">
+                <span className="text-lg">📧</span>
+                <a 
+                  href="mailto:contact@goosprey.com"
+                  className="hover:text-foreground transition-colors"
+                >
+                  contact@goosprey.com
+                </a>
+              </div>
+              
+              <div className="flex items-center gap-4 mt-4">
                 <div className="px-3 py-1 bg-success/10 text-success text-xs font-medium rounded-full">
                   SOC 2 Certified
                 </div>
                 <div className="px-3 py-1 bg-black/10 text-black text-xs font-medium rounded-full">
                   USCIS Approved
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
-                  <span>5.000+ Aprovações</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-black rounded-full animate-pulse delay-300"></div>
-                  <span>98% Taxa de Sucesso</span>
                 </div>
               </div>
             </div>
