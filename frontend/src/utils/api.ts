@@ -16,7 +16,7 @@ export const getBackendUrl = (): string => {
     
     // Preview environment detection
     if (hostname.includes('preview.emergentagent.com')) {
-      return 'https://doculegal.preview.emergentagent.com';
+      return 'https://formcraft-43.preview.emergentagent.com';
     }
     
     // Production environment - use production URL
@@ -31,7 +31,7 @@ export const getBackendUrl = (): string => {
   }
   
   // Final fallback for development
-  return 'https://doculegal.preview.emergentagent.com';
+  return 'https://formcraft-43.preview.emergentagent.com';
 };
 
 export const getApiUrl = (endpoint: string): string => {

@@ -40,7 +40,7 @@ export const OwlPaymentPage: React.FC = () => {
   });
 
   const getBackendUrl = () => {
-    return import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://doculegal.preview.emergentagent.com' || '';
+    return import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://formcraft-43.preview.emergentagent.com' || '';
   };
 
   useEffect(() => {

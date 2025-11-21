@@ -6,7 +6,7 @@ Simple test for the visa API endpoint to debug the issue
 import requests
 import json
 
-BACKEND_URL = "https://doculegal.preview.emergentagent.com"
+BACKEND_URL = "https://formcraft-43.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_simple():
