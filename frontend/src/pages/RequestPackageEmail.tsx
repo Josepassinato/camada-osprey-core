@@ -1,113 +1,41 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 const RequestPackageEmail: React.FC = () => {
   const { caseId } = useParams<{ caseId: string }>();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleDownload = async () => {
     setLoading(true);
     setError('');
 
     try {
       const backendUrl = import.meta.env.VITE_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
       
-      const response = await axios.post(
-        `${backendUrl}/api/auto-application/case/${caseId}/send-email`,
-        {
-          case_id: caseId,
-          user_email: email
-        }
-      );
-
-      if (response.data.success) {
-        setSuccess(true);
-      }
+      // Criar um link temporário para fazer o download
+      const downloadUrl = `${backendUrl}/api/auto-application/case/${caseId}/download-package`;
+      
+      // Abrir em nova aba ou fazer download direto
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `Pacote_Completo_${caseId}.pdf`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Aguardar um pouco para dar feedback visual
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+      
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Erro ao enviar email. Tente novamente.');
-    } finally {
+      setError('Erro ao baixar o pacote. Tente novamente.');
       setLoading(false);
     }
   };
-
-  if (success) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        padding: '20px'
-      }}>
-        <div style={{
-          background: 'white',
-          borderRadius: '16px',
-          padding: '48px',
-          maxWidth: '500px',
-          width: '100%',
-          textAlign: 'center',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
-        }}>
-          <div style={{ fontSize: '64px', marginBottom: '24px' }}>✅</div>
-          <h2 style={{ color: '#10b981', marginBottom: '16px', fontSize: '28px' }}>
-            Email Enviado com Sucesso!
-          </h2>
-          <p style={{ color: '#6b7280', marginBottom: '32px', fontSize: '16px' }}>
-            Seu pacote completo foi enviado para:
-          </p>
-          <p style={{ 
-            color: '#1f2937', 
-            fontWeight: 'bold', 
-            fontSize: '18px',
-            marginBottom: '32px',
-            background: '#f3f4f6',
-            padding: '12px',
-            borderRadius: '8px'
-          }}>
-            {email}
-          </p>
-          <div style={{
-            background: '#fef3c7',
-            border: '1px solid #f59e0b',
-            borderRadius: '8px',
-            padding: '16px',
-            marginBottom: '32px',
-            textAlign: 'left'
-          }}>
-            <p style={{ margin: 0, color: '#92400e', fontSize: '14px' }}>
-              <strong>📧 Verifique sua caixa de entrada</strong><br/>
-              O email pode levar alguns minutos para chegar. Não esqueça de verificar a pasta de spam.
-            </p>
-          </div>
-          <button
-            onClick={() => navigate('/')}
-            style={{
-              background: '#667eea',
-              color: 'white',
-              border: 'none',
-              padding: '12px 32px',
-              borderRadius: '8px',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              transition: 'all 0.3s'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.background = '#5568d3'}
-            onMouseOut={(e) => e.currentTarget.style.background = '#667eea'}
-          >
-            Voltar ao Início
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div style={{
