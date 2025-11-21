@@ -2579,6 +2579,69 @@ async def run_ai_processing_step(case_id: str, request: dict):
         logger.error(f"Error in AI processing step: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.post("/auto-application/case/{case_id}/professional-qa-review")
+async def run_professional_qa_review(case_id: str):
+    """
+    Executar revisão profissional de qualidade usando agente treinado com requisitos USCIS
+    Este endpoint garante que nenhum processo incompleto seja liberado
+    """
+    try:
+        # Buscar caso completo
+        case = await db.auto_cases.find_one({"case_id": case_id})
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        # Obter agente de QA
+        qa_agent = get_qa_agent()
+        
+        # Executar revisão profissional completa
+        logger.info(f"🔍 Iniciando revisão profissional QA para case {case_id}")
+        qa_report = qa_agent.comprehensive_review(case)
+        
+        # Salvar relatório no banco
+        await db.auto_cases.update_one(
+            {"case_id": case_id},
+            {
+                "$set": {
+                    "qa_review": qa_report,
+                    "qa_approved": qa_report['approval']['approved'],
+                    "qa_score": qa_report['overall_score'],
+                    "qa_review_date": datetime.utcnow(),
+                    "updated_at": datetime.utcnow()
+                }
+            }
+        )
+        
+        # Se aprovado, atualizar status
+        if qa_report['approval']['approved']:
+            await db.auto_cases.update_one(
+                {"case_id": case_id},
+                {
+                    "$set": {
+                        "status": "qa_approved",
+                        "progress_percentage": 95,
+                        "ai_processing_status": "approved"
+                    }
+                }
+            )
+            logger.info(f"✅ Case {case_id} APROVADO na revisão QA (score: {qa_report['overall_score']:.1%})")
+        else:
+            logger.warning(f"❌ Case {case_id} REJEITADO na revisão QA: {qa_report['approval']['reason']}")
+        
+        return {
+            "success": True,
+            "qa_report": qa_report,
+            "approved": qa_report['approval']['approved'],
+            "score": qa_report['overall_score'],
+            "message": qa_report['approval']['reason']
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Erro na revisão QA: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error in QA review: {str(e)}")
+
 @api_router.post("/auto-application/case/{case_id}/generate-form")
 async def generate_uscis_form_for_case(case_id: str):
     """Generate USCIS form for a specific case"""
