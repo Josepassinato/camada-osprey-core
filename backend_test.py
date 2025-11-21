@@ -88,12 +88,13 @@ def test_visa_generate_endpoint():
             pdf_size_kb = package_result.get("size_kb", 0)
             pdf_has_images = package_result.get("has_images", False)
             qa_score = qa_report.get("overall_score", 0) if qa_report else 0
+            qa_score_percent = qa_score * 100  # Convert to percentage
             
             validations = {
                 "1_pdf_20_plus_pages": pdf_pages >= 20,
                 "2_pdf_500_plus_kb": pdf_size_kb >= 500,
                 "3_pdf_has_images": pdf_has_images == True,
-                "4_qa_score_80_plus": qa_score >= 80,
+                "4_qa_score_80_plus": qa_score >= 0.80,
                 "5_success_true": response_data.get("success") == True,
                 "6_visa_type_f1": response_data.get("visa_type") == "F-1",
                 "7_package_result_present": package_result is not None and len(package_result) > 0,
