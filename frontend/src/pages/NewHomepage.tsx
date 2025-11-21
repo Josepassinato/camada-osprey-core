@@ -488,8 +488,8 @@ const NewHomepage = () => {
               },
               {
                 icon: <Zap className="h-8 w-8" />,
-                title: "Inteligência Artificial",
-                description: "IA treinada em milhares de casos aprovados pelo USCIS."
+                title: "Sistema Inteligente",
+                description: "Sistema treinado em milhares de casos aprovados pelo USCIS."
               },
               {
                 icon: <Users className="h-8 w-8" />,
