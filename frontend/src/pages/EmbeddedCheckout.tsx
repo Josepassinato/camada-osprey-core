@@ -379,8 +379,9 @@ const EmbeddedCheckout = () => {
                   />
                 </Elements>
               )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
