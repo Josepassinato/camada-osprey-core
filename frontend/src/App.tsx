@@ -91,9 +91,17 @@ const App = () => (
           <Route path="/owl-agent/questionnaire" element={<OwlQuestionnairePage />} />
           <Route path="/owl-agent/payment" element={<OwlPaymentPage />} />
           <Route path="/owl-agent/payment-success" element={<OwlPaymentSuccessPage />} />
-          {/* Admin Panel Routes */}
-          <Route path="/admin/visa-updates" element={<AdminVisaUpdatesPanel />} />
-          <Route path="/admin/knowledge-base" element={<AdminKnowledgeBase />} />
+          {/* Admin Panel Routes - PROTECTED */}
+          <Route path="/admin/visa-updates" element={
+            <ProtectedAdminRoute>
+              <AdminVisaUpdatesPanel />
+            </ProtectedAdminRoute>
+          } />
+          <Route path="/admin/knowledge-base" element={
+            <ProtectedAdminRoute>
+              <AdminKnowledgeBase />
+            </ProtectedAdminRoute>
+          } />
           
           {/* Request Package Email */}
           <Route path="/request-package-email/:caseId" element={<RequestPackageEmail />} />
