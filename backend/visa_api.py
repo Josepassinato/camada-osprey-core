@@ -40,7 +40,8 @@ metrics = MetricsTracker()
 
 class VisaRequest(BaseModel):
     """Request model para geração de pacote"""
-    user_input: str
+    visa_type: str
+    user_request: str
     applicant_data: Optional[Dict[str, Any]] = None
     enable_qa: bool = True
 
