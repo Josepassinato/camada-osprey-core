@@ -593,13 +593,75 @@ document for F-1 visa application and must be presented at the consular intervie
     story.append(i20_table)
     
     story.append(Spacer(1, 0.3*inch))
-    story.append(Paragraph('<b>IMPORTANT:</b> Original Form I-20 signed by DSO is included with this package. '
-                          'Student must present original I-20 at port of entry.', body_style))
+    story.append(Paragraph('<b>IMPORTANT:</b> Original Form I-20 signed by DSO must be presented at consular interview and port of entry.', body_style))
+    story.append(PageBreak())
+    page_count += 1
+    
+    # ===== SECTION III: ACADEMIC DOCUMENTS WITH IMAGES =====
+    print(f'   Pages {page_count}-{page_count+2}: Academic Documents')
+    story.append(Paragraph('SECTION III - ACADEMIC DOCUMENTS', section_style))
+    story.append(Spacer(1, 0.2*inch))
+    
+    # Transcript
+    story.append(Paragraph('<b>OFFICIAL TRANSCRIPT</b>', subsection_style))
+    story.append(Paragraph('Complete academic transcript from Universidade de São Paulo (USP) showing all coursework and grades:', body_style))
+    story.append(Spacer(1, 0.2*inch))
+    
+    transcript_img = RLImage(str(transcript_image), width=6.5*inch, height=8.4*inch)
+    story.append(transcript_img)
     story.append(PageBreak())
     page_count += 2
     
-    # Continue with more sections...
-    # For brevity, I'll add a final checklist
+    # ===== SECTION IV: FINANCIAL DOCUMENTS WITH IMAGES =====
+    print(f'   Pages {page_count}-{page_count+5}: Financial Documents')
+    story.append(Paragraph('SECTION IV - FINANCIAL SUPPORT EVIDENCE', section_style))
+    story.append(Spacer(1, 0.2*inch))
+    
+    financial_intro = f'''This section contains comprehensive financial documentation demonstrating availability of 
+{data.financial_support['total_required']} to cover all expenses during the program. Financial support comes from three sources: 
+personal savings ({data.financial_support['sources']['personal_savings']['percentage']}), 
+parental support ({data.financial_support['sources']['parental_support']['percentage']}), and 
+university scholarship ({data.financial_support['sources']['scholarship']['percentage']}).'''
+    story.append(Paragraph(financial_intro, body_style))
+    story.append(Spacer(1, 0.3*inch))
+    
+    # Bank statements
+    story.append(Paragraph('<b>PERSONAL BANK STATEMENTS (6 months)</b>', subsection_style))
+    story.append(Paragraph(f'Bank: {data.financial_support["student_bank"]["bank_name"]} | Account: {data.financial_support["student_bank"]["account_number"]} | Current Balance: {data.financial_support["student_bank"]["current_balance"]}', body_style))
+    story.append(Spacer(1, 0.2*inch))
+    
+    for i, stmt_path in enumerate(bank_statements):
+        story.append(Paragraph(f'<b>Statement {i+1}: {stmt_path.stem.replace("f1_bank_statement_", "").replace("_", " ")}</b>', subsection_style))
+        stmt_img = RLImage(str(stmt_path), width=6.5*inch, height=8.4*inch)
+        story.append(stmt_img)
+        story.append(PageBreak())
+    page_count += 6
+    
+    # ===== SECTION V: PASSPORT & IDENTIFICATION =====
+    print(f'   Pages {page_count}-{page_count+2}: Passport & Photos')
+    story.append(Paragraph('SECTION V - PASSPORT DOCUMENTATION & PHOTOGRAPHS', section_style))
+    story.append(Spacer(1, 0.2*inch))
+    
+    # Passport biopage
+    story.append(Paragraph('<b>PASSPORT BIOGRAPHICAL PAGE</b>', subsection_style))
+    story.append(Paragraph('Certified copy of Brazilian passport biographical page:', body_style))
+    story.append(Spacer(1, 0.2*inch))
+    
+    biopage_img = RLImage(str(passport_biopage), width=6*inch, height=4*inch)
+    story.append(biopage_img)
+    story.append(Spacer(1, 0.3*inch))
+    
+    # Passport photos
+    story.append(Paragraph('<b>PASSPORT-STYLE PHOTOGRAPHS (2)</b>', subsection_style))
+    story.append(Paragraph('Two identical passport-style photos meeting visa requirements (2x2 inches, white background, recent):', body_style))
+    story.append(Spacer(1, 0.2*inch))
+    
+    photo_img = RLImage(str(passport_photo), width=2*inch, height=2*inch)
+    story.append(photo_img)
+    story.append(Spacer(1, 0.3*inch))
+    story.append(photo_img)  # Second photo
+    story.append(PageBreak())
+    page_count += 3
     
     # ===== FINAL SECTION: DOCUMENT CHECKLIST =====
     print(f'   Page {page_count}: Document Checklist')
