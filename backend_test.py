@@ -239,14 +239,15 @@ def test_o1_visa_complete_flow():
             response_data = response.json()
             print(f"📄 Response: {json.dumps(response_data, indent=2)}")
             
-            # Extract case_id for subsequent requests
-            case_id = response_data.get("case_id")
+            # Extract case_id for subsequent requests - check nested structure
+            case_data = response_data.get("case", {})
+            case_id = case_data.get("case_id") or response_data.get("case_id")
             
             validations = {
                 "1_case_created": case_id is not None,
                 "2_case_id_format": case_id.startswith("OSP-") if case_id else False,
-                "3_visa_code_correct": response_data.get("form_code") == "O-1",
-                "4_status_created": response_data.get("status") == "created"
+                "3_visa_code_correct": case_data.get("form_code") == "O-1" or response_data.get("form_code") == "O-1",
+                "4_status_created": case_data.get("status") == "created" or response_data.get("status") == "created"
             }
             
             results["etapa_3_start_application"]["validations"] = validations
