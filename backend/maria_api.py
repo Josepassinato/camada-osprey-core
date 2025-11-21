@@ -170,7 +170,7 @@ async def get_conversation_history(conversation_id: str, limit: int = 50):
     Retorna histórico de uma conversa específica
     """
     try:
-        if not db:
+        if db is None:
             raise HTTPException(status_code=500, detail="Database not initialized")
         
         messages = await db.maria_conversations.find({
@@ -209,7 +209,7 @@ async def get_maria_analytics():
     Analytics da Maria - para admin
     """
     try:
-        if not db:
+        if db is None:
             raise HTTPException(status_code=500, detail="Database not initialized")
         
         # Total de conversas
@@ -340,7 +340,7 @@ async def send_welcome_whatsapp(user_id: str):
     Chamado automaticamente após signup/pagamento
     """
     try:
-        if not db:
+        if db is None:
             raise HTTPException(status_code=500, detail="Database not initialized")
         
         # Buscar usuário
