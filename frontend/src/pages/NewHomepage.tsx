@@ -390,7 +390,7 @@ const NewHomepage = () => {
                 {[
                   { icon: <DollarSign className="h-6 w-6" />, text: "De $149 a $3.000 (até 95% mais barato)" },
                   { icon: <Zap className="h-6 w-6" />, text: "Comece hoje mesmo, em 15 minutos" },
-                  { icon: <FileText className="h-6 w-6" />, text: "IA preenche formulários automaticamente" },
+                  { icon: <FileText className="h-6 w-6" />, text: "Sistema preenche formulários automaticamente" },
                   { icon: <CheckCircle className="h-6 w-6" />, text: "Sistema verifica erros antes de enviar" }
                 ].map((item, idx) => (
                   <li key={idx} className="flex items-start gap-3">
