@@ -627,6 +627,79 @@ class QAFeedbackOrchestrator:
                 "error": str(e)
             }
     
+    async def _apply_preventive_corrections(self, case_data: Dict[str, Any]):
+        """
+        🧠 APLICA CORREÇÕES PREVENTIVAS BASEADAS EM APRENDIZADO
+        Antes mesmo da primeira revisão, aplica lições aprendidas
+        """
+        if not self.learning_system:
+            return
+        
+        case_id = case_data.get('case_id')
+        form_code = case_data.get('form_code')
+        
+        logger.info(f"🧠 Aplicando correções preventivas baseadas em aprendizado...")
+        
+        # Para cada agente, buscar recomendações preventivas
+        for agent_name in ['document_analyzer', 'form_filler', 'translation_agent', 'specialized_agent']:
+            try:
+                recommendations = await self.learning_system.get_preventive_recommendations(
+                    agent_name,
+                    form_code,
+                    case_data
+                )
+                
+                if recommendations:
+                    logger.info(
+                        f"💡 {len(recommendations)} recomendações preventivas "
+                        f"para {agent_name}"
+                    )
+                    
+                    # Aplicar correções de alta prioridade
+                    for rec in recommendations:
+                        if rec['priority'] == 'high':
+                            logger.info(
+                                f"🔧 Prevenindo: {rec['problem_type']} "
+                                f"(Risk: {rec['risk_score']:.0%})"
+                            )
+            
+            except Exception as e:
+                logger.warning(f"⚠️  Erro ao aplicar correções preventivas para {agent_name}: {e}")
+    
+    async def _record_correction_lesson(
+        self,
+        agent_name: str,
+        case_id: str,
+        problem: Dict[str, Any],
+        correction: Dict[str, Any],
+        success: bool,
+        form_code: str
+    ):
+        """
+        📚 REGISTRA LIÇÃO APRENDIDA APÓS CORREÇÃO
+        """
+        if not self.learning_system:
+            return
+        
+        try:
+            problem_with_context = {
+                **problem,
+                'form_code': form_code
+            }
+            
+            await self.learning_system.record_lesson(
+                agent_name=agent_name,
+                case_id=case_id,
+                problem=problem_with_context,
+                correction=correction,
+                success=success
+            )
+            
+            logger.info(f"📚 Lição registrada: {agent_name} - {problem.get('type')}")
+        
+        except Exception as e:
+            logger.error(f"❌ Erro ao registrar lição: {e}")
+    
     async def _save_final_result(
         self,
         db,
@@ -636,6 +709,14 @@ class QAFeedbackOrchestrator:
         final_status: str
     ):
         """Salva resultado final do ciclo de QA"""
+        # Obter estatísticas de aprendizado
+        learning_stats = None
+        if self.learning_system:
+            try:
+                learning_stats = await self.learning_system.get_learning_statistics(days=30)
+            except Exception as e:
+                logger.warning(f"⚠️  Não foi possível obter estatísticas: {e}")
+        
         await db.auto_cases.update_one(
             {"case_id": case_id},
             {
@@ -646,7 +727,8 @@ class QAFeedbackOrchestrator:
                     "qa_review_date": datetime.utcnow(),
                     "qa_iteration_history": iteration_history,
                     "qa_final_status": final_status,
-                    "qa_total_iterations": len(iteration_history)
+                    "qa_total_iterations": len(iteration_history),
+                    "learning_stats": learning_stats
                 }
             }
         )
