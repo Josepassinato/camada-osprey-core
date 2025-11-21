@@ -47,6 +47,15 @@ const Footer = () => {
         { name: "Segurança", href: "#" },
         { name: "GDPR", href: "#" }
       ]
+    },
+    {
+      title: "Contato",
+      links: [
+        { name: "📧 Email", href: "mailto:contact@goosprey.com" },
+        { name: "💬 Chat de Suporte", href: "#" },
+        { name: "📞 Agendar Ligação", href: "#" },
+        { name: "❓ FAQ", href: "#" }
+      ]
     }
   ];
 
