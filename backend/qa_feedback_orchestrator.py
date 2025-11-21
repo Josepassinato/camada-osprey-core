@@ -58,7 +58,7 @@ class QAFeedbackOrchestrator:
             "compliance_issue": "specialized_agent"
         }
         
-        logger.info("✅ QA Feedback Orchestrator inicializado")
+        logger.info("✅ QA Feedback Orchestrator inicializado com Sistema de Aprendizado")
     
     async def orchestrate_qa_cycle(
         self, 
