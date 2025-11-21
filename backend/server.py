@@ -8647,6 +8647,10 @@ async def startup_db_client():
         maria_api.init_db(db)
         logger.info("✅ Maria - Assistente Virtual initialized!")
         
+        # Initialize Admin Security module with connected db
+        init_admin_security_db(db)
+        logger.info("✅ Admin Security (RBAC) initialized!")
+        
         # Create optimized indexes for better performance
         try:
             # Auto-application cases indexes
