@@ -107,6 +107,15 @@ from admin_security import (
     AuditAction,
     init_db as init_admin_security_db
 )
+from admin_products import (
+    initialize_products_in_db,
+    get_all_products,
+    get_product,
+    update_product_price,
+    sync_product_to_stripe,
+    sync_all_products_to_stripe,
+    get_product_for_checkout
+)
 
 # Maria - Assistente Virtual
 import maria_api
