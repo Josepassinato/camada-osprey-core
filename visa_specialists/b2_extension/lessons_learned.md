@@ -37,3 +37,12 @@ Este arquivo registra erros cometidos e correções aplicadas para melhorar cont
 
 ---
 
+
+## [Validação Automática] 2025-11-21 00:12:15
+
+**❌ Erro:** Tentativa de incluir I-20 (documento de F-1) em pacote B-2
+
+**✅ Correção:** Sistema de validação detectou e bloqueou automaticamente
+
+---
+
