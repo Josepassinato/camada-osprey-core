@@ -8977,8 +8977,8 @@ async def list_knowledge_documents(skip: int = 0, limit: int = 50, admin = Depen
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/admin/knowledge-base/categories")
-async def get_knowledge_categories():
-    """Retorna categorias disponíveis"""
+async def get_knowledge_categories(admin = Depends(require_admin)):
+    """Retorna categorias disponíveis - PROTECTED"""
     from knowledge_base_manager import KNOWLEDGE_BASE_CATEGORIES, SUPPORTED_FORM_TYPES
     return {
         "categories": KNOWLEDGE_BASE_CATEGORIES,
