@@ -25,10 +25,12 @@ class QAFeedbackOrchestrator:
     Gerencia o ciclo: Revisão → Identificação de Problemas → Correção → Nova Revisão
     """
     
-    def __init__(self):
+    def __init__(self, db=None):
         """Inicializa o orquestrador com limites e configurações"""
         self.max_iterations = 5  # Máximo de iterações para evitar loops infinitos
         self.minimum_improvement = 0.05  # Melhoria mínima de 5% entre iterações
+        self.db = db
+        self.learning_system = None  # Será inicializado quando necessário
         
         # Mapeamento de tipos de problemas para agentes responsáveis
         self.problem_agent_mapping = {
