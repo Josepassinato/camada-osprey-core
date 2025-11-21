@@ -441,7 +441,7 @@ const NewHomepage = () => {
                 step: "03",
                 icon: <Award className="h-8 w-8" />,
                 title: "Baixe e Envie",
-                description: "Receba todos os documentos organizados, revisados e prontos para submissão ao USCIS. Com instruções passo a passo.",
+                description: "Receba todos os documentos organizados, revisados e prontos para submissão ao USCIS. Com instruções passo a passo. Após 24 horas o link de download expira.",
                 color: "from-blue-500 to-blue-600"
               }
             ].map((item, idx) => (
