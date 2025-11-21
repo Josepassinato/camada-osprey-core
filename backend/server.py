@@ -9042,8 +9042,8 @@ async def get_knowledge_stats(admin = Depends(require_admin)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/admin/knowledge-base/search")
-async def search_knowledge_base(q: str):
-    """Busca na base de conhecimento"""
+async def search_knowledge_base(q: str, admin = Depends(require_admin)):
+    """Busca na base de conhecimento - PROTECTED"""
     try:
         from knowledge_base_manager import KnowledgeBaseManager
         kb_manager = KnowledgeBaseManager(db)
