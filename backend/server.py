@@ -5070,8 +5070,8 @@ async def run_manual_visa_scan(admin = Depends(require_admin)):
         raise HTTPException(status_code=500, detail=f"Failed to run manual scan: {str(e)}")
 
 @api_router.get("/admin/visa-updates/history")
-async def get_visa_update_history(skip: int = 0, limit: int = 50):
-    """Get history of all visa updates"""
+async def get_visa_update_history(skip: int = 0, limit: int = 50, admin = Depends(require_admin)):
+    """Get history of all visa updates - PROTECTED"""
     try:
         cursor = db.visa_updates.find({}).sort("created_at", -1).skip(skip).limit(limit)
         updates = await cursor.to_list(length=None)
