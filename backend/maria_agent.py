@@ -254,8 +254,9 @@ Status do Caso: {user_context.get('case_status', 'Iniciando')}
             )
             
             if not gemini_result.get("success"):
-                # Fallback para mensagem padrão se Gemini falhar
-                maria_response = "Desculpe, tive um probleminha técnico 😅 Pode tentar novamente?"
+                # Fallback inteligente se Gemini falhar
+                print(f"⚠️ Gemini falhou: {gemini_result.get('error')}")
+                maria_response = self._generate_fallback_response(user_message, user_context)
             else:
                 maria_response = gemini_result["response"]
             
