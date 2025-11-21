@@ -251,7 +251,9 @@ const SelectForm = () => {
     try {
       console.log('💳 Creating Stripe checkout session...');
       
-      const backendUrl = import.meta.env.VITE_BACKEND_URL;
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || '';
+      console.log('🔍 Backend URL:', backendUrl);
+      
       const response = await fetch(`${backendUrl}/api/payment/create-checkout`, {
         method: 'POST',
         headers: {
