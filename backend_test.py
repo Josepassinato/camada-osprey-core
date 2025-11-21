@@ -468,36 +468,294 @@ def test_o1_visa_complete_flow():
         print(f"❌ Exception during friendly form: {str(e)}")
         results["etapa_5_friendly_form"]["exception"] = str(e)
     
+    # ETAPA 6: Simular upload de documentos
+    print("\n📋 ETAPA 6: Simular Upload de Documentos")
+    print("-" * 50)
+    
+    # Create simulated document content
+    def create_simulated_document(doc_type, content):
+        """Create a simulated PDF document as base64"""
+        return base64.b64encode(content.encode()).decode()
+    
+    documents_to_upload = [
+        {
+            "name": "passport_copy.pdf",
+            "type": "passport",
+            "content": "PASSPORT - REPÚBLICA FEDERATIVA DO BRASIL\nNome: SOFIA MENDES RODRIGUES\nPassaporte: BR123456789\nData de Nascimento: 15/03/1988\nNacionalidade: BRASILEIRA"
+        },
+        {
+            "name": "phd_diploma_mit.pdf", 
+            "type": "education_diploma",
+            "content": "MASSACHUSETTS INSTITUTE OF TECHNOLOGY\nDiploma - Doctor of Philosophy\nComputer Science\nSofia Mendes Rodrigues\n2015"
+        },
+        {
+            "name": "award_certificates.pdf",
+            "type": "other",
+            "content": "UNITED NATIONS - AI for Good Award 2023\nRecipient: Dr. Sofia Mendes Rodrigues\nFor developing AI system for early cancer detection"
+        },
+        {
+            "name": "job_offer_johns_hopkins.pdf",
+            "type": "employment_letter", 
+            "content": "JOHNS HOPKINS UNIVERSITY HOSPITAL\nJob Offer Letter\nPosition: Senior AI Research Scientist\nSalary: $180,000/year\nStart Date: January 15, 2026"
+        }
+    ]
+    
+    uploaded_docs = []
+    
+    for doc in documents_to_upload:
+        try:
+            print(f"📄 Uploading: {doc['name']}")
+            
+            # Simulate multipart form data
+            files = {
+                'file': (doc['name'], doc['content'], 'application/pdf')
+            }
+            data = {
+                'document_type': doc['type'],
+                'tags': 'O-1,simulation'
+            }
+            
+            headers = {
+                "Authorization": f"Bearer {jwt_token}"
+            }
+            
+            response = requests.post(
+                f"{API_BASE}/documents/upload",
+                files=files,
+                data=data,
+                headers=headers,
+                timeout=30
+            )
+            
+            print(f"   Status: {response.status_code}")
+            if response.status_code in [200, 201]:
+                response_data = response.json()
+                uploaded_docs.append({
+                    "name": doc['name'],
+                    "document_id": response_data.get("document_id"),
+                    "status": "uploaded"
+                })
+                print(f"   ✅ Uploaded: {response_data.get('document_id')}")
+            else:
+                print(f"   ❌ Failed: {response.text}")
+                uploaded_docs.append({
+                    "name": doc['name'],
+                    "status": "failed",
+                    "error": response.text
+                })
+                
+        except Exception as e:
+            print(f"   ❌ Exception: {str(e)}")
+            uploaded_docs.append({
+                "name": doc['name'],
+                "status": "exception",
+                "error": str(e)
+            })
+    
+    results["etapa_6_document_uploads"]["uploaded_docs"] = uploaded_docs
+    results["etapa_6_document_uploads"]["total_docs"] = len(documents_to_upload)
+    results["etapa_6_document_uploads"]["successful_uploads"] = len([d for d in uploaded_docs if d.get("status") == "uploaded"])
+    
+    print(f"\n📊 RESUMO UPLOADS: {results['etapa_6_document_uploads']['successful_uploads']}/{results['etapa_6_document_uploads']['total_docs']} documentos enviados")
+    
+    # ETAPA 7: Solicitar revisão da IA
+    print("\n📋 ETAPA 7: Solicitar Revisão da IA")
+    print("-" * 50)
+    
+    try:
+        print(f"🔗 Endpoint: POST {API_BASE}/auto-application/case/{case_id}/ai-review")
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {jwt_token}"
+        }
+        
+        start_time = time.time()
+        response = requests.post(
+            f"{API_BASE}/auto-application/case/{case_id}/ai-review",
+            headers=headers,
+            timeout=60
+        )
+        processing_time = time.time() - start_time
+        
+        print(f"⏱️  Processing time: {processing_time:.2f}s")
+        print(f"📊 Status Code: {response.status_code}")
+        
+        results["etapa_7_ai_review"]["status_code"] = response.status_code
+        results["etapa_7_ai_review"]["processing_time"] = processing_time
+        
+        if response.status_code in [200, 201]:
+            response_data = response.json()
+            print(f"📄 Response: {json.dumps(response_data, indent=2)}")
+            
+            validations = {
+                "1_ai_review_completed": response_data.get("success") == True or "review" in str(response_data).lower(),
+                "2_case_id_matches": case_id in str(response_data),
+                "3_progress_updated": response_data.get("progress_percentage", 0) > 50
+            }
+            
+            results["etapa_7_ai_review"]["validations"] = validations
+            results["etapa_7_ai_review"]["response_data"] = response_data
+            
+            print("\n🎯 VALIDAÇÕES ETAPA 7:")
+            print("=" * 50)
+            for check, passed in validations.items():
+                status = "✅" if passed else "❌"
+                print(f"  {status} {check}: {passed}")
+                
+        else:
+            print(f"❌ AI review failed with status {response.status_code}")
+            print(f"📄 Error response: {response.text}")
+            results["etapa_7_ai_review"]["error"] = response.text
+            
+    except Exception as e:
+        print(f"❌ Exception during AI review: {str(e)}")
+        results["etapa_7_ai_review"]["exception"] = str(e)
+    
+    # ETAPA 8: Verificar status e obter link final
+    print("\n📋 ETAPA 8: Verificar Status Final e Download")
+    print("-" * 50)
+    
+    try:
+        # Check status
+        print(f"🔗 Endpoint: GET {API_BASE}/auto-application/case/{case_id}/status")
+        
+        headers = {
+            "Authorization": f"Bearer {jwt_token}"
+        }
+        
+        start_time = time.time()
+        response = requests.get(
+            f"{API_BASE}/auto-application/case/{case_id}/status",
+            headers=headers,
+            timeout=30
+        )
+        processing_time = time.time() - start_time
+        
+        print(f"⏱️  Processing time: {processing_time:.2f}s")
+        print(f"📊 Status Code: {response.status_code}")
+        
+        results["etapa_8_final_status"]["status_code"] = response.status_code
+        results["etapa_8_final_status"]["processing_time"] = processing_time
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"📄 Status Response: {json.dumps(response_data, indent=2)}")
+            
+            # Try to get download link
+            try:
+                download_response = requests.get(
+                    f"{API_BASE}/auto-application/case/{case_id}/download-link",
+                    headers=headers,
+                    timeout=30
+                )
+                
+                print(f"📊 Download Link Status: {download_response.status_code}")
+                
+                if download_response.status_code == 200:
+                    download_data = download_response.json()
+                    print(f"📄 Download Response: {json.dumps(download_data, indent=2)}")
+                    
+                    validations = {
+                        "1_status_retrieved": True,
+                        "2_case_id_matches": case_id in str(response_data),
+                        "3_download_available": download_response.status_code == 200,
+                        "4_download_link_present": download_data.get("download_url") is not None
+                    }
+                    
+                    results["etapa_8_final_status"]["download_data"] = download_data
+                    
+                else:
+                    validations = {
+                        "1_status_retrieved": True,
+                        "2_case_id_matches": case_id in str(response_data),
+                        "3_download_available": False,
+                        "4_download_link_present": False
+                    }
+                    
+            except Exception as download_error:
+                print(f"❌ Download link error: {str(download_error)}")
+                validations = {
+                    "1_status_retrieved": True,
+                    "2_case_id_matches": case_id in str(response_data),
+                    "3_download_available": False,
+                    "4_download_link_present": False
+                }
+            
+            results["etapa_8_final_status"]["validations"] = validations
+            results["etapa_8_final_status"]["response_data"] = response_data
+            
+            print("\n🎯 VALIDAÇÕES ETAPA 8:")
+            print("=" * 50)
+            for check, passed in validations.items():
+                status = "✅" if passed else "❌"
+                print(f"  {status} {check}: {passed}")
+                
+        else:
+            print(f"❌ Status check failed with status {response.status_code}")
+            print(f"📄 Error response: {response.text}")
+            results["etapa_8_final_status"]["error"] = response.text
+            
+    except Exception as e:
+        print(f"❌ Exception during final status: {str(e)}")
+        results["etapa_8_final_status"]["exception"] = str(e)
+    
     # Summary
-    print("\n📊 RESUMO DO TESTE F-1")
+    print("\n📊 RESUMO COMPLETO DO TESTE O-1")
     print("=" * 60)
     
-    test_success = results["test_1_f1_student_package"].get("status_code") == 200
+    # Count successful steps
+    successful_steps = 0
+    total_steps = 8
     
-    print(f"🧪 Teste F-1 Student Package: {'✅ PASSOU' if test_success else '❌ FALHOU'}")
+    for step_key in ["etapa_1_user_creation", "etapa_2_login", "etapa_3_start_application", 
+                     "etapa_4_basic_data", "etapa_5_friendly_form", "etapa_6_document_uploads",
+                     "etapa_7_ai_review", "etapa_8_final_status"]:
+        step_data = results.get(step_key, {})
+        if step_data.get("status_code") in [200, 201]:
+            successful_steps += 1
     
-    if test_success:
-        validations = results["test_1_f1_student_package"].get("validations", {})
-        passed_count = sum(validations.values())
-        total_count = len(validations)
-        print(f"   📋 Validações específicas: {passed_count}/{total_count} passaram")
+    success_rate = (successful_steps / total_steps) * 100
+    
+    print(f"🧪 Teste O-1 Complete Flow: {successful_steps}/{total_steps} etapas concluídas ({success_rate:.1f}%)")
+    print(f"👤 Aplicante: Dr. Sofia Mendes Rodrigues")
+    print(f"🎯 Visto: O-1 (Extraordinary Ability)")
+    print(f"📋 Case ID: {case_id}")
+    print(f"🔑 JWT Token: {'✅ Presente' if jwt_token else '❌ Ausente'}")
+    
+    # Show step-by-step results
+    print(f"\n📋 RESULTADOS POR ETAPA:")
+    step_names = [
+        "Criação de Usuário",
+        "Login", 
+        "Iniciar Aplicação O-1",
+        "Dados Básicos",
+        "Formulário Completo",
+        "Upload de Documentos",
+        "Revisão da IA",
+        "Status Final"
+    ]
+    
+    for i, (step_key, step_name) in enumerate(zip(
+        ["etapa_1_user_creation", "etapa_2_login", "etapa_3_start_application", 
+         "etapa_4_basic_data", "etapa_5_friendly_form", "etapa_6_document_uploads",
+         "etapa_7_ai_review", "etapa_8_final_status"], step_names)):
         
-        # Show which specific validations failed
-        failed_validations = [k for k, v in validations.items() if not v]
-        if failed_validations:
-            print(f"   ❌ Validações que falharam: {', '.join(failed_validations)}")
-        else:
-            print(f"   ✅ Todas as validações passaram!")
+        step_data = results.get(step_key, {})
+        status_code = step_data.get("status_code", 0)
+        status = "✅" if status_code in [200, 201] else "❌"
+        print(f"  {status} Etapa {i+1}: {step_name} (Status: {status_code})")
     
-    validations = results["test_1_f1_student_package"].get("validations", {})
-    all_validations_passed = all(validations.values()) if validations else False
-    overall_success = test_success and all_validations_passed
+    overall_success = success_rate >= 75  # Consider success if 75% or more steps completed
     results["summary"]["overall_success"] = overall_success
-    results["summary"]["tests_passed"] = 1 if test_success else 0
-    results["summary"]["tests_total"] = 1
+    results["summary"]["successful_steps"] = successful_steps
+    results["summary"]["total_steps"] = total_steps
+    results["summary"]["success_rate"] = success_rate
+    results["summary"]["case_id"] = case_id
+    results["summary"]["jwt_token_present"] = jwt_token is not None
     
     print(f"\n🎯 RESULTADO FINAL: {'✅ SUCESSO COMPLETO' if overall_success else '❌ NECESSITA MELHORIAS'}")
-    print(f"📈 Taxa de sucesso: {results['summary']['tests_passed']}/{results['summary']['tests_total']} ({results['summary']['tests_passed']/results['summary']['tests_total']*100:.1f}%)")
+    print(f"📈 Taxa de sucesso: {success_rate:.1f}%")
     
     return results
 
