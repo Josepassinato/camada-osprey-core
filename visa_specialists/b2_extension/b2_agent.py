@@ -90,6 +90,7 @@ class B2ExtensionAgent(BaseVisaAgent):
         gerar um pacote personalizado para cada aplicante.
         """
         from reportlab.lib.pagesizes import letter
+        from reportlab.lib.units import inch
         from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
         from reportlab.lib.styles import getSampleStyleSheet
         from reportlab.lib.enums import TA_CENTER, TA_LEFT
