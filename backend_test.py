@@ -19,36 +19,43 @@ def test_visa_generate_endpoint():
     Test the new multi-agent architecture endpoint POST /api/visa/generate
     
     SPECIFIC TEST REQUESTED IN REVIEW:
-    - B-2 visa extension with complete package
-    - Expected: 30+ pages, 90%+ QA score, valid PDF generation
+    - F-1 Student Visa with complete package for Rafael Santos Oliveira
+    - Expected: 10+ pages, PDF generation, validation, QA report
     
     Expected validations:
     1. ✅ Status 200
     2. ✅ success: true
-    3. ✅ package_result.pages >= 30 páginas
-    4. ✅ qa_report.overall_score >= 90%
-    5. ✅ qa_report.passed = true
-    6. ✅ validation.is_valid = true
-    7. ✅ Arquivo PDF gerado: B2_COMPLETE_PACKAGE_60PLUS_PAGES.pdf
+    3. ✅ visa_type = "F-1"
+    4. ✅ package_result with PDF info
+    5. ✅ PDF generated: "F1_STUDENT_COMPLETE_PACKAGE_RAFAEL_OLIVEIRA.pdf"
+    6. ✅ PDF has 10+ pages
+    7. ✅ validation with checklist
+    8. ✅ qa_report with scores
     """
     
-    print("🧪 TESTING MULTI-AGENT VISA ARCHITECTURE ENDPOINT")
+    print("🧪 TESTING F-1 STUDENT VISA MULTI-AGENT ARCHITECTURE")
     print("=" * 60)
     
     results = {
-        "test_1_b2_complete_package": {},
+        "test_1_f1_student_package": {},
         "summary": {}
     }
     
-    # Test 1: B-2 Complete Package (as requested in review)
-    print("\n📋 TESTE FINAL: Geração de Pacote B-2 Completo")
+    # Test 1: F-1 Student Package (as requested in review)
+    print("\n📋 TESTE F-1: Geração de Pacote F-1 Student Visa")
     print("-" * 50)
     
     # Test with the EXACT format specified in the review request
-    b2_payload = {
-        "visa_type": "B-2",
-        "user_request": "Preciso estender meu visto de turista B-2 por 6 meses devido a emergência médica. Quero um pacote completo e profissional.",
-        "applicant_data": {}
+    f1_payload = {
+        "visa_type": "F-1",
+        "user_request": "Preciso de ajuda para preparar minha aplicação de visto F-1 de estudante. Fui aceito no programa de mestrado em Ciência da Computação na Boston University e preciso de um pacote completo e profissional para minha entrevista no consulado.",
+        "applicant_data": {
+            "full_name": "Rafael Santos Oliveira",
+            "nationality": "Brazilian",
+            "program": "Master of Science in Computer Science",
+            "school": "Boston University",
+            "start_date": "September 3, 2025"
+        }
     }
     
     try:
