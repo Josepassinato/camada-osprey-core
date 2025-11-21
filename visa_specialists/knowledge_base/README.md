@@ -4,7 +4,7 @@
 
 Este diretório contém a base de conhecimento organizada por tipo de visto/procedimento de imigração. Cada agente especialista tem acesso à documentação oficial do USCIS relevante para sua área.
 
-## 📁 Estrutura
+## 📁 Estrutura Atualizada
 
 ```
 knowledge_base/
@@ -26,11 +26,22 @@ knowledge_base/
 │   ├── I-129F_Form.pdf (724 KB)
 │   └── I-129F_Instructions.pdf (458 KB)
 │
+├── i765_ead/ ✅ COMPLETO - NOVO
+│   ├── I-765_Form.pdf (468 KB)
+│   ├── I-765_Instructions.pdf (391 KB)
+│   └── uscis_requirements.md (18,000+ palavras)
+│
+├── i90_greencard/ ✅ FORMS DOWNLOADED - NOVO
+│   ├── I-90_Form.pdf (497 KB)
+│   └── I-90_Instructions.pdf (428 KB)
+│
+├── eb2_niw/ ✅ FORMS DOWNLOADED
+│   └── I-140_Form.pdf (513 KB)
+│
+├── eb1a_extraordinary/ ✅ FORMS DOWNLOADED
+│   └── I-140_Form.pdf (513 KB)
+│
 ├── h1b_worker/ ⏸️ PENDENTE
-├── i765_ead/ ⏸️ PENDENTE
-├── i90_greencard/ ⏸️ PENDENTE
-├── eb2_niw/ ⏸️ PENDENTE
-├── eb1a_extraordinary/ ⏸️ PENDENTE
 └── i589_asylum/ ⏸️ PENDENTE
 ```
 
@@ -38,125 +49,162 @@ knowledge_base/
 
 ### 1. B-2 Extension Agent
 - **Arquivo:** `b2_extension/uscis_requirements.md`
-- **Conteúdo:** 
-  - Requisitos de elegibilidade
-  - Documentação obrigatória
-  - Documentos proibidos
-  - Timing crítico (quando aplicar)
-  - Armadilhas comuns (8 erros fatais)
-  - Razões de negação
-  - Evidências financeiras
-  - Vínculos com país de origem
-  - Casos médicos (template de carta médica)
-  - Red flags
-  - Best practices
-  - Checklist completo
+- **Status:** ✅ COMPLETO + Gerador Funcional (96.5% QA Score)
+- **Conteúdo:** 15,000+ palavras
 
 ### 2. F-1 Student Agent
 - **Arquivo:** `f1_student/uscis_requirements.md`
-- **Conteúdo:**
-  - Requisitos de elegibilidade
-  - Form I-20
-  - SEVIS system
-  - CPT (Curricular Practical Training)
-  - OPT (Optional Practical Training)
-  - STEM OPT Extension
-  - Maintaining F-1 status
-  - Grace periods
-  - Dependents (F-2)
-  - Common mistakes
-  - Interview tips
-  - Post-graduation options
+- **Status:** ✅ COMPLETO (gerador pendente)
+- **Conteúdo:** 12,000+ palavras
+- **Inclui:** I-20, SEVIS, CPT, OPT, STEM OPT
 
 ### 3. I-130 Family Petition Agent
 - **Arquivo:** `i130_family/uscis_requirements.md`
-- **Conteúdo:**
-  - Quem pode peticionar
-  - Relações familiares qualificantes
-  - Immediate relatives vs Preference categories
-  - Documentação obrigatória por tipo de relacionamento
-  - Evidências de bona fide marriage (casamento genuíno)
-  - Requisitos de tradução
-  - Taxas e filing
-  - Timing e processamento
-  - Armadilhas comuns (8 erros fatais)
-  - Razões de negação
-  - Entrevista (perguntas comuns)
-  - Tipos especiais de casamento
-  - Conditional permanent residence
-  - Appeals & denials
-  - Checklist final organizado
+- **Status:** ✅ COMPLETO (gerador pendente)
+- **Conteúdo:** 20,000+ palavras
+- **Inclui:** Bona fide marriage evidence, entrevistas, conditional residence
 
-## 📖 Como os Agentes Usam o Knowledge Base
-
-Cada agente especialista:
-1. **Carrega automaticamente** seu knowledge base ao iniciar
-2. **Valida documentação** contra requisitos do USCIS
-3. **Identifica armadilhas comuns** e alerta usuário
-4. **Gera pacotes completos** seguindo best practices
-5. **Registra lições aprendidas** para melhorar continuamente
+### 4. I-765 EAD Agent ⭐ NOVO
+- **Arquivo:** `i765_ead/uscis_requirements.md`
+- **Status:** ✅ COMPLETO (gerador pendente)
+- **Conteúdo:** 18,000+ palavras
+- **Inclui:** 
+  - 40+ categorias elegíveis detalhadas
+  - F-1 OPT (Pre, Post, STEM)
+  - H-4 EAD
+  - Asylum pending
+  - Adjustment pending (c)(9))
+  - J-2, L-2 dependents
+  - Compelling circumstances (c)(35))
+  - Auto-extensão (180 dias)
+  - Timing crítico por categoria
+  - Checklists específicos
 
 ## 📋 Documentos Oficiais Armazenados
 
-### USCIS Policy Manual
-- **Arquivo:** `USCIS_Policy_Manual.pdf`
-- **Tamanho:** 36.5 MB
-- **Conteúdo:** Manual completo de políticas do USCIS
+### ✅ Completos (Forms + Instructions + Knowledge Base)
+1. **I-130** - Family Petition (3 PDFs + MD)
+2. **I-765** - Employment Authorization (2 PDFs + MD)
 
-### Form I-130 (Family Petition)
-- **Form I-130:** Formulário oficial (716 KB)
-- **Instructions:** Instruções detalhadas (284 KB)
-- **Checklist:** Checklist oficial (386 KB)
+### ✅ Forms Downloaded (Aguardando Knowledge Base)
+3. **I-90** - Green Card Renewal (2 PDFs)
+4. **I-129F** - Fiancé Petition (2 PDFs)
+5. **I-140** - Immigrant Worker Petition (1 PDF)
 
-### Form I-129F (Fiancé Petition)
-- **Form I-129F:** Formulário oficial (724 KB)
-- **Instructions:** Instruções detalhadas (458 KB)
+### 📚 Manual Geral
+- **USCIS Policy Manual** - 36.5 MB
 
-## 🎯 Próximos Passos
+---
 
-### Knowledge Bases Pendentes:
-1. **H-1B Worker** (I-129)
-2. **I-765 (EAD)** - Employment Authorization
-3. **I-90** - Green Card Renewal
-4. **EB-2 NIW** - National Interest Waiver
-5. **EB-1A** - Extraordinary Ability
-6. **I-589** - Asylum Application
+## 🎯 Cobertura dos Vistos do Aplicativo
 
-## 💡 Benefícios
+### ✅ IMPLEMENTADO (7 ativos na aplicação):
 
-✅ **Para os Agentes:**
-- Acesso imediato a informações oficiais do USCIS
-- Redução de erros comuns
-- Validação automática contra requisitos
-- Geração de pacotes compliant
+1. **I-539 (B-2 Extension)** ✅ 
+   - Knowledge: COMPLETO
+   - Gerador: FUNCIONAL (96.5% QA)
+   - Forms: Disponível
 
-✅ **Para os Usuários:**
-- Pacotes profissionais e precisos
-- Redução de RFEs (Request for Evidence)
-- Maior chance de aprovação
-- Economia de tempo e dinheiro
+2. **F-1 (Student)** ✅
+   - Knowledge: COMPLETO
+   - Gerador: PENDENTE
+   - Forms: Referenciado
 
-✅ **Para o Sistema:**
-- Escalável para novos tipos de visto
-- Fácil manutenção e atualização
-- Consistência entre agentes
-- Auditável e rastreável
+3. **I-130 (Family Petition)** ✅
+   - Knowledge: COMPLETO
+   - Gerador: PENDENTE  
+   - Forms: 3 PDFs
 
-## 📊 Estatísticas
+4. **I-765 (EAD)** ✅
+   - Knowledge: COMPLETO
+   - Gerador: PENDENTE
+   - Forms: 2 PDFs
 
-- **Total de Documentos:** 8 PDFs oficiais
-- **Total de Knowledge Bases:** 3 completos, 6 pendentes
-- **Total de Palavras:** 47,000+ palavras de documentação
-- **Tamanho Total:** ~40 MB
+5. **I-90 (Green Card Renewal)** ⏸️
+   - Knowledge: PENDENTE
+   - Gerador: PENDENTE
+   - Forms: 2 PDFs
 
-## 🔄 Atualizações
+6. **EB-2 NIW** ⏸️
+   - Knowledge: PENDENTE
+   - Gerador: PENDENTE
+   - Forms: I-140 (1 PDF)
 
-- **2025-01:** Base inicial criada
-- **B-2 Extension:** Conhecimento completo + gerador funcional (96.5% QA)
-- **F-1 Student:** Conhecimento completo (gerador pendente)
-- **I-130 Family:** Conhecimento completo (gerador pendente)
+7. **EB-1A (Extraordinary Ability)** ⏸️
+   - Knowledge: PENDENTE
+   - Gerador: PENDENTE
+   - Forms: I-140 (1 PDF)
+
+### ⚠️ SOB CONSULTA:
+8. **I-589 (Asylum)** ⏸️
+
+---
+
+## 📊 Estatísticas Totais
+
+**Documentos Oficiais:**
+- 13 PDFs do USCIS (~42 MB)
+- 4 Knowledge bases completas (65,000+ palavras)
+- 1 Manual completo (36.5 MB)
+
+**Agentes Prontos:**
+1. ✅ B-2 Extension - FUNCIONAL
+2. ⏸️ F-1 Student - Knowledge pronta
+3. ⏸️ I-130 Family - Knowledge pronta
+4. ⏸️ I-765 EAD - Knowledge pronta
+
+**Pendentes:**
+- I-90 (Green Card Renewal)
+- H-1B Worker
+- EB-2 NIW
+- EB-1A
+- I-589 (Asylum)
+
+---
+
+## 💡 Destaques do I-765 (EAD) Knowledge Base
+
+### Categorias Mais Importantes Cobertas:
+
+1. **F-1 OPT (c)(3))**
+   - Pre-completion OPT
+   - Post-completion OPT (12 meses)
+   - STEM OPT Extension (24 meses adicionais)
+   - Timing crítico (90 dias antes até 60 após)
+   - CPT restrictions
+
+2. **H-4 EAD (a)(26))**
+   - Cônjuges de H-1B
+   - Requisitos: I-140 aprovado OU H-1B 6+ anos
+   - Documentação completa
+
+3. **Asylum Pending (c)(8))**
+   - 150 dias de espera obrigatória
+   - Auto-extensão 180 dias
+   - Fee waiver para inicial
+
+4. **Adjustment Pending (c)(9))**
+   - Com I-485 pendente
+   - Concurrent filing
+   - Validade típica
+
+5. **Compelling Circumstances (c)(35)/(c)(36))**
+   - Para I-140 aprovado
+   - Status E-3, H-1B, O-1, L-1
+   - Dependents elegíveis
+
+---
+
+## 🔄 Atualizações Recentes
+
+- **2025-01-21:** 
+  - ✅ I-765 EAD knowledge base criada (18,000+ palavras)
+  - ✅ I-90 forms downloaded (2 PDFs)
+  - ✅ I-140 form downloaded para EB-2 NIW e EB-1A
+  - ✅ Total: 13 PDFs oficiais armazenados
 
 ---
 
 **Última atualização:** November 21, 2025
 **Mantido por:** Multi-Agent Visa System
+**Total de palavras:** 65,000+ (4 knowledge bases completas)
