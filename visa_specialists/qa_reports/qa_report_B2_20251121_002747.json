@@ -1,0 +1,76 @@
+{
+  "timestamp": "2025-11-21T00:27:47.782080",
+  "visa_type": "B-2",
+  "overall_score": 0.475,
+  "category_scores": {
+    "completeness": 0.0,
+    "accuracy": 0.6499999999999999,
+    "professionalism": 0.8,
+    "compliance": 0.6
+  },
+  "issues": [
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Personal Statement"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Form I-539 (Completed)"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Current I-94 Record"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Financial Evidence"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Bank Statements"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Ties to Home Country"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Travel History"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Compliance Documentation"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Reason for Extension"
+    },
+    {
+      "severity": "critical",
+      "category": "compliance",
+      "description": "Forbidden document included: I-20"
+    },
+    {
+      "severity": "medium",
+      "category": "compliance",
+      "description": "\u26a0\ufe0f ERRO CR\u00cdTICO: I-20 n\u00e3o deve ser inclu\u00eddo em pacote B-2 Extension"
+    }
+  ],
+  "recommendations": [
+    "Add missing required documents to improve completeness",
+    "Review data accuracy and consistency across documents",
+    "Improve formatting and professional presentation",
+    "Ensure all USCIS requirements are met",
+    "\u26a0\ufe0f Package needs significant improvements before submission"
+  ],
+  "passed": false
+}
