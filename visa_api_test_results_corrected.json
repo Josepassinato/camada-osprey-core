@@ -1,0 +1,170 @@
+{
+  "main_results": {
+    "test_1_b2_extension": {
+      "status_code": 200,
+      "processing_time": 0.08811020851135254,
+      "validations": {
+        "success_true": true,
+        "visa_type_identified": true,
+        "has_package_result": true,
+        "has_validation": true,
+        "has_qa_report": true,
+        "processing_time_present": true
+      },
+      "response_data": {
+        "success": true,
+        "visa_type": "B-2",
+        "package_result": {
+          "success": true,
+          "package_path": null,
+          "documents": [
+            "Form I-539",
+            "Cover Letter",
+            "Personal Statement",
+            "Current I-94",
+            "Passport Copy",
+            "Bank Statements",
+            "Financial Evidence",
+            "Ties to Home Country",
+            "Travel History",
+            "Medical Documentation",
+            "Supporting Letters"
+          ],
+          "pages": 0,
+          "size_kb": 0,
+          "validation": {
+            "is_valid": false,
+            "missing_items": [
+              "Form I-539 (Completed)",
+              "Current I-94 Record",
+              "Compliance Documentation",
+              "Reason for Extension"
+            ],
+            "forbidden_items_found": [],
+            "warnings": []
+          }
+        },
+        "validation": {
+          "is_valid": false,
+          "missing_items": [
+            "Form I-539 (Completed)",
+            "Current I-94 Record",
+            "Compliance Documentation",
+            "Reason for Extension"
+          ],
+          "forbidden_items_found": [],
+          "warnings": []
+        },
+        "qa_report": {
+          "timestamp": "2025-11-21T00:18:09.291540",
+          "visa_type": null,
+          "overall_score": 0.745,
+          "category_scores": {
+            "completeness": 0.6,
+            "accuracy": 0.95,
+            "professionalism": 0.8,
+            "compliance": 0.6
+          },
+          "issues": [
+            {
+              "severity": "high",
+              "category": "completeness",
+              "description": "Missing required document: Form I-539 (Completed)"
+            },
+            {
+              "severity": "high",
+              "category": "completeness",
+              "description": "Missing required document: Current I-94 Record"
+            },
+            {
+              "severity": "high",
+              "category": "completeness",
+              "description": "Missing required document: Compliance Documentation"
+            },
+            {
+              "severity": "high",
+              "category": "completeness",
+              "description": "Missing required document: Reason for Extension"
+            }
+          ],
+          "recommendations": [
+            "Add missing required documents to improve completeness",
+            "Improve formatting and professional presentation",
+            "Ensure all USCIS requirements are met",
+            "\u26a0\ufe0f Package needs significant improvements before submission"
+          ],
+          "passed": false
+        },
+        "processing_time": 0.024884462356567383,
+        "error": null
+      }
+    },
+    "test_2_h1b_preparation": {
+      "status_code": 200,
+      "processing_time": 0.0244143009185791,
+      "validations": {
+        "success_true": true,
+        "visa_type_identified": true,
+        "has_package_result": true,
+        "has_validation": true,
+        "has_qa_report": true,
+        "processing_time_present": true
+      },
+      "response_data": {
+        "success": true,
+        "visa_type": "H-1B",
+        "package_result": {
+          "success": true,
+          "message": "H-1B generator will be implemented",
+          "documents": [
+            "Cover Letter",
+            "Support Letter",
+            "Form I-129 (Completed)",
+            "Form I-129H Supplement",
+            "LCA (Certified)",
+            "LCA Posting Notice",
+            "Company Evidence",
+            "Job Description",
+            "Beneficiary Resume/CV",
+            "Educational Credentials",
+            "Degree Evaluation (if foreign degree)",
+            "Proof of Specialty Occupation",
+            "Employer-Employee Relationship Evidence"
+          ]
+        },
+        "validation": {
+          "is_valid": true,
+          "missing_items": [],
+          "forbidden_items_found": [],
+          "warnings": []
+        },
+        "qa_report": {
+          "timestamp": "2025-11-21T00:18:09.316233",
+          "visa_type": null,
+          "overall_score": 0.9450000000000001,
+          "category_scores": {
+            "completeness": 1.0,
+            "accuracy": 0.95,
+            "professionalism": 0.8,
+            "compliance": 1.0
+          },
+          "issues": [],
+          "recommendations": [
+            "Improve formatting and professional presentation",
+            "\u2705 Package meets high quality standards"
+          ],
+          "passed": true
+        },
+        "processing_time": 0.0004928112030029297,
+        "error": null
+      }
+    },
+    "summary": {
+      "overall_success": true,
+      "tests_passed": 2,
+      "tests_total": 2
+    },
+    "pdf_files_found": 16
+  },
+  "timestamp": 1763684289.3216293
+}
