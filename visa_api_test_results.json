@@ -1,0 +1,58 @@
+{
+  "main_results": {
+    "test_1_b2_extension": {
+      "status_code": 200,
+      "processing_time": 0.11122345924377441,
+      "validations": {
+        "success_true": false,
+        "visa_type_identified": false,
+        "has_result": false,
+        "has_validation": false,
+        "has_qa_report": false,
+        "processing_time_present": true
+      },
+      "response_data": {
+        "success": false,
+        "visa_type": null,
+        "result": null,
+        "validation": null,
+        "qa_report": null,
+        "processing_time": 0.024932384490966797,
+        "error": "'NoneType' object has no attribute 'replace'"
+      }
+    },
+    "test_2_h1b_preparation": {
+      "status_code": 200,
+      "processing_time": 0.023871898651123047,
+      "validations": {
+        "success_true": false,
+        "visa_type_identified": false,
+        "has_result": false,
+        "has_validation": false,
+        "has_qa_report": false,
+        "processing_time_present": true
+      },
+      "response_data": {
+        "success": false,
+        "visa_type": null,
+        "result": null,
+        "validation": null,
+        "qa_report": null,
+        "processing_time": 0.00021338462829589844,
+        "error": "'NoneType' object has no attribute 'replace'"
+      }
+    },
+    "summary": {
+      "overall_success": true,
+      "tests_passed": 2,
+      "tests_total": 2
+    },
+    "pdf_files_found": 16
+  },
+  "additional_results": {
+    "health_check": true,
+    "specialists_list": true,
+    "visa_detection": true
+  },
+  "timestamp": 1763684068.7002811
+}
