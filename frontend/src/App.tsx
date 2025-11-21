@@ -105,6 +105,11 @@ const App = () => (
               <AdminKnowledgeBase />
             </ProtectedAdminRoute>
           } />
+          <Route path="/admin/products" element={
+            <ProtectedAdminRoute>
+              <AdminProductManagement />
+            </ProtectedAdminRoute>
+          } />
           
           {/* Request Package Email */}
           <Route path="/request-package-email/:caseId" element={<RequestPackageEmail />} />
