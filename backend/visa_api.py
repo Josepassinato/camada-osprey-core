@@ -161,6 +161,67 @@ def transform_case_data_for_agent(case_data: Dict[str, Any]) -> Dict[str, Any]:
             'sponsor_info': simplified_responses.get('sponsor_info', {}),
         }
     
+    elif visa_type == 'I-130':
+        # I-130 Family-based specific data
+        applicant_data['relationship_info'] = {
+            'relationship_type': simplified_responses.get('relationship_type', ''),
+            'petitioner_role': simplified_responses.get('petitioner_role', ''),
+        }
+        applicant_data['petitioner_info'] = {
+            'full_name': simplified_responses.get('petitioner_name', ''),
+            'status': simplified_responses.get('petitioner_status', 'U.S. Citizen'),
+        }
+    
+    elif visa_type == 'I-765':
+        # I-765 EAD specific data
+        applicant_data['ead_data'] = {
+            'category': simplified_responses.get('ead_category', '(c)(9)'),
+            'category_description': simplified_responses.get('category_description', ''),
+            'reason': simplified_responses.get('ead_reason', ''),
+            'application_type': simplified_responses.get('application_type', 'Initial'),
+        }
+    
+    elif visa_type == 'I-90':
+        # I-90 Green Card specific data
+        applicant_data['greencard_info'] = {
+            'alien_number': immigration.get('alien_number', ''),
+            'card_number': simplified_responses.get('card_number', ''),
+            'expiration_date': simplified_responses.get('card_expiration', ''),
+            'date_became_pr': simplified_responses.get('pr_date', ''),
+            'reason': simplified_responses.get('replacement_reason', 'renewal'),
+            'detailed_reason': simplified_responses.get('detailed_reason', ''),
+        }
+    
+    elif visa_type == 'EB-2 NIW':
+        # EB-2 NIW specific data
+        applicant_data['professional_info'] = {
+            'field': simplified_responses.get('field_of_expertise', ''),
+            'years_experience': simplified_responses.get('years_experience', '10+'),
+            'publications': simplified_responses.get('publications_count', '0'),
+            'citations': simplified_responses.get('citations_count', '0'),
+            'patents': simplified_responses.get('patents_count', '0'),
+            'impact_evidence': simplified_responses.get('impact_description', ''),
+        }
+        applicant_data['education_info'] = {
+            'highest_degree': simplified_responses.get('highest_degree', ''),
+            'field_of_study': simplified_responses.get('field_of_study', ''),
+            'institution': simplified_responses.get('institution', ''),
+        }
+    
+    elif visa_type == 'EB-1A':
+        # EB-1A Extraordinary Ability specific data
+        applicant_data['professional_info'] = {
+            'field': simplified_responses.get('field_of_expertise', ''),
+            'years_experience': simplified_responses.get('years_experience', ''),
+        }
+        applicant_data['achievements'] = {
+            'awards': simplified_responses.get('awards_count', '0'),
+            'publications': simplified_responses.get('publications_count', '0'),
+            'citations': simplified_responses.get('citations_count', '0'),
+            'judging': simplified_responses.get('judging_instances', '0'),
+            'organizations': simplified_responses.get('organizations', ''),
+        }
+    
     return {
         'visa_type': visa_type,
         'applicant_data': applicant_data,
