@@ -654,6 +654,9 @@ const NewHomepage = () => {
           <p className="text-center text-gray-600 mt-12">
             💳 Pagamento seguro via Stripe • 🔒 Garantia de satisfação • 🎟️ Use o cupom <strong>LANCAMENTO50</strong> no checkout
           </p>
+          <p className="text-center text-sm text-amber-600 mt-4 font-medium">
+            ⏱️ <strong>Importante:</strong> Após a conclusão, o link de download do seu pacote expira em 24 horas
+          </p>
         </div>
       </section>
 
