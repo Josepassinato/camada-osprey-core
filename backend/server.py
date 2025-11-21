@@ -1071,6 +1071,7 @@ async def signup(user_data: UserCreate):
             "first_name": user_data.first_name,
             "last_name": user_data.last_name,
             "phone": user_data.phone,
+            "role": user_data.role if user_data.role in ["user", "admin", "superadmin"] else "user",  # Default to "user"
             "country_of_birth": None,
             "current_country": None,
             "date_of_birth": None,
