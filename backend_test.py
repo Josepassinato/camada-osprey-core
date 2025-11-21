@@ -18,37 +18,36 @@ def test_visa_generate_endpoint():
     """
     Test the new multi-agent architecture endpoint POST /api/visa/generate
     
-    Tests requested:
-    1. B-2 visa extension test
-    2. H-1B visa preparation test
+    SPECIFIC TEST REQUESTED IN REVIEW:
+    - B-2 visa extension with complete package
+    - Expected: 30+ pages, 90%+ QA score, valid PDF generation
     
     Expected validations:
-    - Status 200
-    - Response contains success: true
-    - Response has visa_type identified
-    - Response has package_result with PDF info
-    - Response has validation with checklist
-    - Response has qa_report with scores
-    - PDF should be generated in /frontend/public/
+    1. ✅ Status 200
+    2. ✅ success: true
+    3. ✅ package_result.pages >= 30 páginas
+    4. ✅ qa_report.overall_score >= 90%
+    5. ✅ qa_report.passed = true
+    6. ✅ validation.is_valid = true
+    7. ✅ Arquivo PDF gerado: B2_COMPLETE_PACKAGE_60PLUS_PAGES.pdf
     """
     
     print("🧪 TESTING MULTI-AGENT VISA ARCHITECTURE ENDPOINT")
     print("=" * 60)
     
     results = {
-        "test_1_b2_extension": {},
-        "test_2_h1b_preparation": {},
+        "test_1_b2_complete_package": {},
         "summary": {}
     }
     
-    # Test 1: B-2 Visa Extension
-    print("\n📋 TESTE 1: Geração de Pacote B-2")
-    print("-" * 40)
+    # Test 1: B-2 Complete Package (as requested in review)
+    print("\n📋 TESTE FINAL: Geração de Pacote B-2 Completo")
+    print("-" * 50)
     
-    # Test with the format specified in the review request
+    # Test with the EXACT format specified in the review request
     b2_payload = {
         "visa_type": "B-2",
-        "user_request": "Preciso estender meu visto de turista B-2 por 6 meses devido a emergência médica",
+        "user_request": "Preciso estender meu visto de turista B-2 por 6 meses devido a emergência médica. Quero um pacote completo e profissional.",
         "applicant_data": {}
     }
     
