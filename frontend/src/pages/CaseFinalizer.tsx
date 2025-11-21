@@ -468,6 +468,18 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
                 </div>
               </div>
 
+              <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <div className="flex items-start space-x-3">
+                  <Clock className="h-5 w-5 text-amber-600 mt-0.5" />
+                  <div className="text-amber-800">
+                    <h4 className="font-medium">⏱️ Importante: Link de Download</h4>
+                    <p className="text-sm mt-1">
+                      <strong>Após 24 horas o link de download expira.</strong> Faça o download de todos os documentos agora e guarde-os em um local seguro.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div className="mt-4 flex space-x-3">
                 <Button
                   variant="outline"
