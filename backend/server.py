@@ -97,6 +97,17 @@ from payment_packages import get_visa_package, get_all_packages, calculate_final
 from voucher_system import validate_voucher, get_all_active_vouchers
 from stripe_integration import create_checkout_session, verify_payment_status, handle_stripe_webhook
 
+# Admin Security
+from admin_security import (
+    require_admin, 
+    require_superadmin, 
+    log_admin_action, 
+    get_admin_audit_log,
+    check_admin_rate_limit,
+    AuditAction,
+    init_db as init_admin_security_db
+)
+
 # MongoDB connection - initialized in startup event
 client = None
 db = None
