@@ -1,0 +1,80 @@
+{
+  "timestamp": "2025-11-21T04:56:56.660595",
+  "visa_type": null,
+  "overall_score": 0.565,
+  "category_scores": {
+    "completeness": 0.0,
+    "accuracy": 0.95,
+    "professionalism": 0.8,
+    "compliance": 0.6
+  },
+  "issues": [
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Form I-20"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: I-20 from School"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Acceptance Letter"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Transcript"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Academic Records"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Financial Support Evidence"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Bank Statements"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Sponsor Affidavit (if applicable)"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: English Proficiency Test (TOEFL/IELTS)"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Ties to Home Country"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Intent to Return"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Passport Copy"
+    }
+  ],
+  "recommendations": [
+    "Add missing required documents to improve completeness",
+    "Improve formatting and professional presentation",
+    "Ensure all USCIS requirements are met",
+    "\u26a0\ufe0f Package needs significant improvements before submission"
+  ],
+  "passed": false
+}
