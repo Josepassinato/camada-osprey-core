@@ -30,6 +30,17 @@ const NewHomepage = () => {
       return;
     }
 
+    // Check if user is logged in
+    const token = localStorage.getItem('osprey_token');
+    const user = localStorage.getItem('osprey_user');
+    
+    if (!token || !user) {
+      // User not logged in, redirect to signup
+      localStorage.setItem('osprey_redirect_after_login', '/auto-application/select-form');
+      navigate('/signup');
+      return;
+    }
+
     setIsCreating(true);
     
     try {
