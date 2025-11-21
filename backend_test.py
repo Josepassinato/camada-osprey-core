@@ -112,16 +112,19 @@ def test_visa_generate_endpoint():
             # Detailed metrics
             print(f"\n📊 MÉTRICAS DETALHADAS:")
             print(f"  📄 Visa Type: {response_data.get('visa_type', 'N/A')}")
-            print(f"  📄 Páginas: {package_result.get('pages', 0)} (target: ≥10)")
+            print(f"  📄 Páginas: {pdf_pages} (target: ≥20)")
+            print(f"  💾 Tamanho: {pdf_size_kb} KB (target: ≥500 KB)")
+            print(f"  🖼️  Imagens: {'✅ Sim' if pdf_has_images else '❌ Não'}")
+            print(f"  🎯 QA Score: {qa_score}% (target: ≥80%)")
             print(f"  📋 Package Result: {package_result}")
             print(f"  ✅ Validation: {validation}")
             print(f"  🎯 QA Report: {qa_report}")
             
-            if package_result.get("pdf_path") or package_result.get("package_path"):
-                pdf_path = package_result.get("pdf_path") or package_result.get("package_path")
-                print(f"  📁 PDF Path: {pdf_path}")
+            if package_result.get("pdf_url") or package_result.get("download_url"):
+                pdf_url = package_result.get("pdf_url") or package_result.get("download_url")
+                print(f"  🔗 PDF URL: {pdf_url}")
             else:
-                print(f"  ❌ No PDF path found")
+                print(f"  ❌ No PDF URL found")
                 
         else:
             print(f"❌ Request failed with status {response.status_code}")
