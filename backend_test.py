@@ -343,20 +343,130 @@ def test_o1_visa_complete_flow():
         print(f"❌ Exception during basic data: {str(e)}")
         results["etapa_4_basic_data"]["exception"] = str(e)
     
-    # Check for PDF generation in /frontend/public/
-    print("\n📁 VERIFICAÇÃO DE PDFs GERADOS:")
-    print("-" * 40)
+    # ETAPA 5: Preencher formulário completo (friendly-form)
+    print("\n📋 ETAPA 5: Preencher Formulário Completo (Friendly-Form)")
+    print("-" * 50)
     
-    frontend_public_path = Path("/app/frontend/public")
-    if frontend_public_path.exists():
-        pdf_files = list(frontend_public_path.glob("*.pdf"))
-        print(f"📄 PDFs encontrados em /frontend/public/: {len(pdf_files)}")
-        for pdf in pdf_files[-5:]:  # Show last 5 PDFs
-            print(f"  📄 {pdf.name} ({pdf.stat().st_size} bytes)")
-        results["pdf_files_found"] = len(pdf_files)
-    else:
-        print("❌ Diretório /frontend/public/ não encontrado")
-        results["pdf_files_found"] = 0
+    friendly_form_data = {
+        "personal_info": {
+            "full_name": "Sofia Mendes Rodrigues",
+            "title": "Dr.",
+            "field_of_expertise": "Artificial Intelligence and Machine Learning in Healthcare",
+            "years_of_experience": 15
+        },
+        "professional_background": {
+            "current_position": "Senior AI Research Scientist",
+            "current_employer": "Johns Hopkins University Hospital",
+            "job_start_date": "2026-01-15",
+            "annual_salary": 180000,
+            "job_description": "Leading research in AI-powered early cancer detection systems. Developing machine learning models for medical image analysis and predictive diagnostics."
+        },
+        "education": [
+            {
+                "degree": "PhD in Computer Science",
+                "institution": "Massachusetts Institute of Technology (MIT)",
+                "year": "2015",
+                "field": "Artificial Intelligence and Machine Learning"
+            },
+            {
+                "degree": "Master in Computer Science",
+                "institution": "University of São Paulo",
+                "year": "2010",
+                "field": "Data Science"
+            }
+        ],
+        "achievements": [
+            {
+                "title": "AI for Good Award",
+                "organization": "United Nations",
+                "year": "2023",
+                "description": "Recognized for developing AI system that detects early-stage cancer with 95% accuracy"
+            },
+            {
+                "title": "Best Paper Award",
+                "organization": "International Conference on Medical AI",
+                "year": "2022",
+                "description": "Research on deep learning for medical image analysis"
+            }
+        ],
+        "publications": {
+            "total": 52,
+            "citations": 2100,
+            "h_index": 28,
+            "notable_papers": [
+                "Deep Learning for Early Cancer Detection: A Comprehensive Study",
+                "AI-Powered Diagnostic Systems in Healthcare",
+                "Machine Learning Applications in Medical Imaging"
+            ]
+        },
+        "media_coverage": [
+            {
+                "title": "Brazilian Scientist Revolutionizes Cancer Detection with AI",
+                "outlet": "TechCrunch",
+                "date": "2023-06-15",
+                "url": "https://techcrunch.com/example"
+            }
+        ],
+        "speaking_engagements": [
+            {
+                "title": "AI in Medicine: The Future is Now",
+                "event": "TEDx São Paulo",
+                "date": "2023-09-20"
+            }
+        ]
+    }
+    
+    try:
+        print(f"🔗 Endpoint: POST {API_BASE}/auto-application/case/{case_id}/friendly-form")
+        print(f"📤 Payload: {json.dumps(friendly_form_data, indent=2)}")
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {jwt_token}"
+        }
+        
+        start_time = time.time()
+        response = requests.post(
+            f"{API_BASE}/auto-application/case/{case_id}/friendly-form",
+            json=friendly_form_data,
+            headers=headers,
+            timeout=30
+        )
+        processing_time = time.time() - start_time
+        
+        print(f"⏱️  Processing time: {processing_time:.2f}s")
+        print(f"📊 Status Code: {response.status_code}")
+        
+        results["etapa_5_friendly_form"]["status_code"] = response.status_code
+        results["etapa_5_friendly_form"]["processing_time"] = processing_time
+        
+        if response.status_code in [200, 201]:
+            response_data = response.json()
+            print(f"📄 Response: {json.dumps(response_data, indent=2)}")
+            
+            validations = {
+                "1_form_saved": response_data.get("success") == True or "saved" in str(response_data).lower(),
+                "2_case_id_matches": case_id in str(response_data),
+                "3_progress_updated": response_data.get("progress_percentage", 0) > 20
+            }
+            
+            results["etapa_5_friendly_form"]["validations"] = validations
+            results["etapa_5_friendly_form"]["response_data"] = response_data
+            
+            print("\n🎯 VALIDAÇÕES ETAPA 5:")
+            print("=" * 50)
+            for check, passed in validations.items():
+                status = "✅" if passed else "❌"
+                print(f"  {status} {check}: {passed}")
+                
+        else:
+            print(f"❌ Friendly form failed with status {response.status_code}")
+            print(f"📄 Error response: {response.text}")
+            results["etapa_5_friendly_form"]["error"] = response.text
+            
+    except Exception as e:
+        print(f"❌ Exception during friendly form: {str(e)}")
+        results["etapa_5_friendly_form"]["exception"] = str(e)
     
     # Summary
     print("\n📊 RESUMO DO TESTE F-1")
