@@ -822,56 +822,114 @@ def test_additional_o1_endpoints():
     return additional_results
 
 if __name__ == "__main__":
-    print("🚀 INICIANDO TESTE ESPECÍFICO DA REVIEW - F-1 STUDENT VISA")
+    print("🚀 INICIANDO TESTE COMPLETO O-1 VISA - DR. SOFIA MENDES RODRIGUES")
     print(f"🌐 Backend URL: {BACKEND_URL}")
     print(f"🔗 API Base: {API_BASE}")
+    print(f"⏰ Timestamp: {datetime.now().isoformat()}")
     
-    # Main test - F-1 Student Package as requested
-    main_results = test_visa_generate_endpoint()
+    # Main test - O-1 Complete Flow as requested
+    main_results = test_o1_visa_complete_flow()
     
     # Additional tests for context
-    additional_results = test_additional_endpoints()
+    additional_results = test_additional_o1_endpoints()
     
     # Final summary
     print("\n" + "=" * 80)
-    print("🎯 RELATÓRIO FINAL - TESTE F-1 STUDENT VISA")
+    print("🎯 RELATÓRIO FINAL - TESTE COMPLETO O-1 VISA")
     print("=" * 80)
     
-    print(f"✅ Endpoint testado: POST /api/visa/generate")
-    print(f"📊 Teste principal: {main_results['summary']['tests_passed']}/{main_results['summary']['tests_total']}")
+    print(f"👤 Aplicante: Dr. Sofia Mendes Rodrigues")
+    print(f"🎯 Visto: O-1 (Extraordinary Ability)")
+    print(f"📊 Teste principal: {main_results['summary']['successful_steps']}/{main_results['summary']['total_steps']} etapas")
+    print(f"📈 Taxa de sucesso: {main_results['summary']['success_rate']:.1f}%")
     print(f"🔍 Testes adicionais: {sum(additional_results.values())}/{len(additional_results)}")
     
-    # Detailed analysis of F-1 test results
-    f1_results = main_results.get("test_1_f1_student_package", {})
-    validations = f1_results.get("validations", {})
+    # Show case details if available
+    if main_results['summary'].get('case_id'):
+        print(f"📋 Case ID: {main_results['summary']['case_id']}")
     
-    print(f"\n📋 ANÁLISE DETALHADA DAS VALIDAÇÕES:")
-    for validation, passed in validations.items():
-        status = "✅" if passed else "❌"
-        print(f"  {status} {validation}")
+    if main_results['summary'].get('jwt_token_present'):
+        print(f"🔑 JWT Token: ✅ Presente")
+    
+    # Detailed analysis of each step
+    print(f"\n📋 ANÁLISE DETALHADA POR ETAPA:")
+    step_names = [
+        "Criação de Usuário",
+        "Login", 
+        "Iniciar Aplicação O-1",
+        "Dados Básicos",
+        "Formulário Completo",
+        "Upload de Documentos",
+        "Revisão da IA",
+        "Status Final"
+    ]
+    
+    for i, (step_key, step_name) in enumerate(zip(
+        ["etapa_1_user_creation", "etapa_2_login", "etapa_3_start_application", 
+         "etapa_4_basic_data", "etapa_5_friendly_form", "etapa_6_document_uploads",
+         "etapa_7_ai_review", "etapa_8_final_status"], step_names)):
+        
+        step_data = main_results.get(step_key, {})
+        status_code = step_data.get("status_code", 0)
+        processing_time = step_data.get("processing_time", 0)
+        validations = step_data.get("validations", {})
+        
+        status = "✅" if status_code in [200, 201] else "❌"
+        validation_count = f"{sum(validations.values())}/{len(validations)}" if validations else "N/A"
+        
+        print(f"  {status} Etapa {i+1}: {step_name}")
+        print(f"      Status: {status_code} | Tempo: {processing_time:.2f}s | Validações: {validation_count}")
+        
+        if step_data.get("error"):
+            print(f"      ❌ Erro: {step_data['error'][:100]}...")
     
     if main_results["summary"]["overall_success"]:
-        print("\n🎉 CONCLUSÃO: F-1 Student Visa endpoint está FUNCIONAL!")
-        print("✅ Todas as validações críticas foram atendidas")
-        print("✅ Sistema multi-agente operacional")
+        print("\n🎉 CONCLUSÃO: O-1 Visa Complete Flow está FUNCIONAL!")
+        print("✅ Fluxo completo executado com sucesso")
+        print("✅ Sistema de aplicação O-1 operacional")
         
-        # Show PDF download link if available
-        f1_response = f1_results.get("response_data", {})
-        package_result = f1_response.get("package_result", {})
-        if package_result.get("download_url"):
-            print(f"📁 Link para download: {package_result['download_url']}")
+        # Show final results
+        final_status = main_results.get("etapa_8_final_status", {})
+        if final_status.get("download_data"):
+            download_data = final_status["download_data"]
+            if download_data.get("download_url"):
+                print(f"📁 Link para download: {download_data['download_url']}")
     else:
-        print("\n⚠️  CONCLUSÃO: F-1 Student Visa precisa de melhorias")
-        failed_validations = [k for k, v in validations.items() if not v]
-        print(f"❌ Validações que falharam: {', '.join(failed_validations)}")
+        print("\n⚠️  CONCLUSÃO: O-1 Visa Flow precisa de melhorias")
+        
+        # Show failed steps
+        failed_steps = []
+        for step_key in ["etapa_1_user_creation", "etapa_2_login", "etapa_3_start_application", 
+                         "etapa_4_basic_data", "etapa_5_friendly_form", "etapa_6_document_uploads",
+                         "etapa_7_ai_review", "etapa_8_final_status"]:
+            step_data = main_results.get(step_key, {})
+            if step_data.get("status_code") not in [200, 201]:
+                failed_steps.append(step_key.replace("etapa_", "").replace("_", " ").title())
+        
+        if failed_steps:
+            print(f"❌ Etapas que falharam: {', '.join(failed_steps)}")
         
     # Save results to file
-    with open("/app/f1_student_visa_test_results.json", "w") as f:
+    with open("/app/o1_visa_complete_test_results.json", "w") as f:
         json.dump({
             "main_results": main_results,
             "additional_results": additional_results,
             "timestamp": time.time(),
-            "test_focus": "F-1 Student Visa as requested in review"
+            "test_focus": "O-1 Visa Complete End-to-End Flow for Dr. Sofia Mendes Rodrigues",
+            "applicant": {
+                "name": "Dr. Sofia Mendes Rodrigues",
+                "email": "sofia.mendes.test@example.com",
+                "visa_type": "O-1",
+                "field": "AI Research and Machine Learning in Healthcare"
+            }
         }, f, indent=2)
     
-    print(f"\n💾 Resultados salvos em: /app/f1_student_visa_test_results.json")
+    print(f"\n💾 Resultados salvos em: /app/o1_visa_complete_test_results.json")
+    
+    # Final recommendation
+    if main_results["summary"]["success_rate"] >= 75:
+        print("\n✅ RECOMENDAÇÃO: Sistema pronto para aplicações O-1 reais")
+    elif main_results["summary"]["success_rate"] >= 50:
+        print("\n⚠️  RECOMENDAÇÃO: Sistema parcialmente funcional, melhorias necessárias")
+    else:
+        print("\n❌ RECOMENDAÇÃO: Sistema precisa de correções significativas")
