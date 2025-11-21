@@ -71,6 +71,7 @@ const App = () => (
           <Route path="/auto-application/start" element={<NewHomepage />} />
           <Route path="/" element={<NewHomepage />} />
           <Route path="/auto-application/select-form" element={<SelectForm />} />
+          <Route path="/auto-application/visa-preview" element={<VisaPreview />} />
           <Route path="/auto-application/case/:caseId/basic-data" element={<BasicData />} />
           <Route path="/auto-application/case/:caseId/friendly-form" element={<FriendlyForm />} />
           <Route path="/auto-application/case/:caseId/ai-review" element={<SystemReviewAndTranslation />} />
