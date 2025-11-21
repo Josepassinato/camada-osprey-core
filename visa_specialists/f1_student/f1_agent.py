@@ -99,7 +99,7 @@ class F1StudentAgent(BaseVisaAgent):
         if generator_script.exists():
             print("✅ Usando gerador F-1 completo profissional...")
             result = subprocess.run(
-                ['python3', str(generator_script)],
+                ['/root/.venv/bin/python3', str(generator_script)],
                 capture_output=True,
                 text=True
             )
