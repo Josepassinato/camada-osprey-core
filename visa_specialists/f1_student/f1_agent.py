@@ -160,6 +160,7 @@ class F1StudentAgent(BaseVisaAgent):
         Gera pacote F-1 usando dados reais do usuário.
         """
         from reportlab.lib.pagesizes import letter
+        from reportlab.lib.units import inch
         from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
         from reportlab.lib.styles import getSampleStyleSheet
         from datetime import datetime
