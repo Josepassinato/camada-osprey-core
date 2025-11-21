@@ -118,6 +118,7 @@ class F1StudentAgent(BaseVisaAgent):
                         'package_path': str(pdf_path),
                         'pages': pages,
                         'size_kb': size_kb,
+                        'has_images': True,  # F-1 package includes passport photos, I-20, transcripts, bank statements
                         'documents': self.REQUIRED_DOCUMENTS
                     }
             
