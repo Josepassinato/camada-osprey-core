@@ -83,14 +83,20 @@ def test_visa_generate_endpoint():
             qa_report = response_data.get("qa_report", {})
             validation = response_data.get("validation", {})
             
+            # Extract PDF info
+            pdf_pages = package_result.get("pages", 0)
+            pdf_size_kb = package_result.get("size_kb", 0)
+            pdf_has_images = package_result.get("has_images", False)
+            qa_score = qa_report.get("overall_score", 0) if qa_report else 0
+            
             validations = {
-                "1_status_200": response.status_code == 200,
-                "2_success_true": response_data.get("success") == True,
-                "3_visa_type_f1": response_data.get("visa_type") == "F-1",
-                "4_package_result_present": package_result is not None and len(package_result) > 0,
-                "5_pdf_name_correct": "F1_STUDENT_COMPLETE_PACKAGE_RAFAEL_OLIVEIRA.pdf" in str(package_result),
-                "6_pdf_pages_10_plus": package_result.get("pages", 0) >= 10,
-                "7_validation_present": validation is not None and len(validation) > 0,
+                "1_pdf_20_plus_pages": pdf_pages >= 20,
+                "2_pdf_500_plus_kb": pdf_size_kb >= 500,
+                "3_pdf_has_images": pdf_has_images == True,
+                "4_qa_score_80_plus": qa_score >= 80,
+                "5_success_true": response_data.get("success") == True,
+                "6_visa_type_f1": response_data.get("visa_type") == "F-1",
+                "7_package_result_present": package_result is not None and len(package_result) > 0,
                 "8_qa_report_present": qa_report is not None and len(qa_report) > 0
             }
             
