@@ -541,12 +541,21 @@ def test_o1_visa_complete_flow():
     
     print(f"\n📊 RESUMO UPLOADS: {results['etapa_6_document_uploads']['successful_uploads']}/{results['etapa_6_document_uploads']['total_docs']} documentos enviados")
     
-    # ETAPA 7: Solicitar revisão da IA
-    print("\n📋 ETAPA 7: Solicitar Revisão da IA")
+    # ETAPA 7: Processar com IA
+    print("\n📋 ETAPA 7: Processar com IA")
     print("-" * 50)
     
     try:
-        print(f"🔗 Endpoint: POST {API_BASE}/auto-application/case/{case_id}/ai-review")
+        print(f"🔗 Endpoint: POST {API_BASE}/auto-application/case/{case_id}/ai-processing")
+        
+        ai_processing_data = {
+            "step": "validation",
+            "data": {
+                "visa_type": "O-1",
+                "applicant_field": "AI Research",
+                "extraordinary_ability": True
+            }
+        }
         
         headers = {
             "Content-Type": "application/json",
@@ -555,7 +564,8 @@ def test_o1_visa_complete_flow():
         
         start_time = time.time()
         response = requests.post(
-            f"{API_BASE}/auto-application/case/{case_id}/ai-review",
+            f"{API_BASE}/auto-application/case/{case_id}/ai-processing",
+            json=ai_processing_data,
             headers=headers,
             timeout=60
         )
@@ -572,8 +582,8 @@ def test_o1_visa_complete_flow():
             print(f"📄 Response: {json.dumps(response_data, indent=2)}")
             
             validations = {
-                "1_ai_review_completed": response_data.get("success") == True or "review" in str(response_data).lower(),
-                "2_case_id_matches": case_id in str(response_data),
+                "1_ai_processing_completed": response_data.get("success") == True,
+                "2_step_id_present": response_data.get("step_id") is not None,
                 "3_progress_updated": response_data.get("progress_percentage", 0) > 50
             }
             
@@ -587,12 +597,12 @@ def test_o1_visa_complete_flow():
                 print(f"  {status} {check}: {passed}")
                 
         else:
-            print(f"❌ AI review failed with status {response.status_code}")
+            print(f"❌ AI processing failed with status {response.status_code}")
             print(f"📄 Error response: {response.text}")
             results["etapa_7_ai_review"]["error"] = response.text
             
     except Exception as e:
-        print(f"❌ Exception during AI review: {str(e)}")
+        print(f"❌ Exception during AI processing: {str(e)}")
         results["etapa_7_ai_review"]["exception"] = str(e)
     
     # ETAPA 8: Verificar status e obter link final
