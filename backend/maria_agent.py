@@ -7,10 +7,9 @@ import os
 import json
 from typing import Dict, List, Any, Optional
 from datetime import datetime
-from openai import OpenAI
 
-# Initialize OpenAI client
-client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY', 'sk-emergent-key'))
+# Import Gemini chat
+from maria_gemini_chat import maria_gemini
 
 class MariaAgent:
     """
