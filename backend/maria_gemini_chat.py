@@ -21,7 +21,8 @@ class MariaGeminiChat:
     """
     
     def __init__(self):
-        self.model = genai.GenerativeModel('gemini-pro')
+        # Use gemini-2.5-flash (latest and fastest) para chat
+        self.model = genai.GenerativeModel('gemini-2.5-flash')
         self.available = GEMINI_API_KEY is not None
         
         if not self.available:
