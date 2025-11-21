@@ -1,26 +1,175 @@
 {
   "main_results": {
     "test_1_b2_extension": {
-      "status_code": 422,
-      "processing_time": 0.06500768661499023,
-      "error": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"user_input\"],\"msg\":\"Field required\",\"input\":{\"visa_type\":\"B-2\",\"user_request\":\"Preciso estender meu visto de turista B-2 por 6 meses devido a emerg\u00eancia m\u00e9dica\",\"applicant_data\":{}},\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"}]}"
+      "status_code": 200,
+      "processing_time": 0.0858621597290039,
+      "validations": {
+        "success_true": true,
+        "visa_type_identified": true,
+        "has_result": false,
+        "has_validation": true,
+        "has_qa_report": true,
+        "processing_time_present": true
+      },
+      "response_data": {
+        "success": true,
+        "visa_type": "B-2",
+        "package_result": {
+          "success": true,
+          "package_path": null,
+          "documents": [
+            "Form I-539",
+            "Cover Letter",
+            "Personal Statement",
+            "Current I-94",
+            "Passport Copy",
+            "Bank Statements",
+            "Financial Evidence",
+            "Ties to Home Country",
+            "Travel History",
+            "Medical Documentation",
+            "Supporting Letters"
+          ],
+          "pages": 0,
+          "size_kb": 0,
+          "validation": {
+            "is_valid": false,
+            "missing_items": [
+              "Form I-539 (Completed)",
+              "Current I-94 Record",
+              "Compliance Documentation",
+              "Reason for Extension"
+            ],
+            "forbidden_items_found": [],
+            "warnings": []
+          }
+        },
+        "validation": {
+          "is_valid": false,
+          "missing_items": [
+            "Form I-539 (Completed)",
+            "Current I-94 Record",
+            "Compliance Documentation",
+            "Reason for Extension"
+          ],
+          "forbidden_items_found": [],
+          "warnings": []
+        },
+        "qa_report": {
+          "timestamp": "2025-11-21T00:28:46.883619",
+          "visa_type": null,
+          "overall_score": 0.745,
+          "category_scores": {
+            "completeness": 0.6,
+            "accuracy": 0.95,
+            "professionalism": 0.8,
+            "compliance": 0.6
+          },
+          "issues": [
+            {
+              "severity": "high",
+              "category": "completeness",
+              "description": "Missing required document: Form I-539 (Completed)"
+            },
+            {
+              "severity": "high",
+              "category": "completeness",
+              "description": "Missing required document: Current I-94 Record"
+            },
+            {
+              "severity": "high",
+              "category": "completeness",
+              "description": "Missing required document: Compliance Documentation"
+            },
+            {
+              "severity": "high",
+              "category": "completeness",
+              "description": "Missing required document: Reason for Extension"
+            }
+          ],
+          "recommendations": [
+            "Add missing required documents to improve completeness",
+            "Improve formatting and professional presentation",
+            "Ensure all USCIS requirements are met",
+            "\u26a0\ufe0f Package needs significant improvements before submission"
+          ],
+          "passed": false
+        },
+        "processing_time": 0.022840261459350586,
+        "error": null
+      }
     },
     "test_2_h1b_preparation": {
-      "status_code": 422,
-      "processing_time": 0.024075746536254883,
-      "error": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"user_input\"],\"msg\":\"Field required\",\"input\":{\"visa_type\":\"H-1B\",\"user_request\":\"Preciso preparar meu pacote H-1B para trabalhar como Software Engineer\",\"applicant_data\":{}},\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"}]}"
+      "status_code": 200,
+      "processing_time": 0.024293899536132812,
+      "validations": {
+        "success_true": true,
+        "visa_type_identified": true,
+        "has_result": false,
+        "has_validation": true,
+        "has_qa_report": true,
+        "processing_time_present": true
+      },
+      "response_data": {
+        "success": true,
+        "visa_type": "H-1B",
+        "package_result": {
+          "success": true,
+          "message": "H-1B generator will be implemented",
+          "documents": [
+            "Cover Letter",
+            "Support Letter",
+            "Form I-129 (Completed)",
+            "Form I-129H Supplement",
+            "LCA (Certified)",
+            "LCA Posting Notice",
+            "Company Evidence",
+            "Job Description",
+            "Beneficiary Resume/CV",
+            "Educational Credentials",
+            "Degree Evaluation (if foreign degree)",
+            "Proof of Specialty Occupation",
+            "Employer-Employee Relationship Evidence"
+          ]
+        },
+        "validation": {
+          "is_valid": true,
+          "missing_items": [],
+          "forbidden_items_found": [],
+          "warnings": []
+        },
+        "qa_report": {
+          "timestamp": "2025-11-21T00:28:46.907548",
+          "visa_type": null,
+          "overall_score": 0.9450000000000001,
+          "category_scores": {
+            "completeness": 1.0,
+            "accuracy": 0.95,
+            "professionalism": 0.8,
+            "compliance": 1.0
+          },
+          "issues": [],
+          "recommendations": [
+            "Improve formatting and professional presentation",
+            "\u2705 Package meets high quality standards"
+          ],
+          "passed": true
+        },
+        "processing_time": 0.0004169940948486328,
+        "error": null
+      }
     },
     "summary": {
-      "overall_success": false,
-      "tests_passed": 0,
+      "overall_success": true,
+      "tests_passed": 2,
       "tests_total": 2
     },
-    "pdf_files_found": 16
+    "pdf_files_found": 17
   },
   "additional_results": {
     "health_check": true,
     "specialists_list": true,
     "visa_detection": true
   },
-  "timestamp": 1763684166.5237932
+  "timestamp": 1763684927.0083795
 }
