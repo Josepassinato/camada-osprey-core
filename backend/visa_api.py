@@ -414,3 +414,53 @@ async def health_check():
         'qa_agent': 'active',
         'metrics_tracker': 'active'
     }
+
+
+@router.post("/generate-from-case")
+async def generate_from_case_endpoint(case_data: Dict[str, Any], enable_qa: bool = True):
+    """
+    Endpoint para gerar pacote a partir dos dados do caso.
+    Usado pelo case_finalizer_complete.
+    
+    Args:
+        case_data: Dados completos do caso do MongoDB
+        enable_qa: Se deve executar QA review
+    """
+    try:
+        result = generate_package_from_case(case_data, enable_qa)
+        return result
+    except Exception as e:
+        return {
+            'success': False,
+            'error': str(e)
+        }
+
+
+@router.get("/supported-forms")
+async def get_supported_forms():
+    """
+    Retorna lista de formulários suportados e seus agentes correspondentes
+    """
+    supported = []
+    not_supported = []
+    
+    for form_code, visa_type in FORM_CODE_TO_VISA_TYPE.items():
+        status = {
+            'form_code': form_code,
+            'visa_type': visa_type,
+            'has_agent': visa_type in supervisor.specialists,
+            'agent_status': 'active' if visa_type in supervisor.specialists else 'pending_implementation'
+        }
+        
+        if status['has_agent']:
+            supported.append(status)
+        else:
+            not_supported.append(status)
+    
+    return {
+        'success': True,
+        'total_forms': len(FORM_CODE_TO_VISA_TYPE),
+        'supported_count': len(supported),
+        'supported_forms': supported,
+        'not_yet_supported': not_supported
+    }
