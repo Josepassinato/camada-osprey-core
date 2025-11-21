@@ -682,7 +682,7 @@ const NewHomepage = () => {
                 name: "Carlos Santos",
                 role: "Green Card EB-2 NIW",
                 avatar: "👨🏽‍💻",
-                text: "A plataforma me guiou em cada passo do caminho. A IA preencheu tudo perfeitamente e o suporte foi excepcional. Meu Green Card foi aprovado!",
+                text: "A plataforma me guiou em cada passo do caminho. O sistema preencheu tudo perfeitamente e o suporte foi excepcional. Meu Green Card foi aprovado!",
                 rating: 5
               },
               {
