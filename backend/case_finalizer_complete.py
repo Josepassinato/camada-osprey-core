@@ -21,6 +21,17 @@ import base64
 
 logger = logging.getLogger(__name__)
 
+# Import visa agents for intelligent package generation
+try:
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from backend.visa_api import generate_package_from_case, FORM_CODE_TO_VISA_TYPE
+    AGENTS_AVAILABLE = True
+    logger.info("✅ Visa agents loaded successfully for case finalizer")
+except Exception as e:
+    AGENTS_AVAILABLE = False
+    logger.warning(f"⚠️ Visa agents not available: {e}")
+
 class CaseFinalizerComplete:
     """
     Case Finalizer Completo - Versão Full com todas as funcionalidades
