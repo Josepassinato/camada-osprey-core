@@ -34,7 +34,7 @@ class MariaGeminiChat:
         conversation_history: List[Dict] = None
     ) -> Dict[str, Any]:
         """
-        Chat com Gemini
+        Chat com Gemini via Emergent LLM Key
         
         Args:
             user_message: Mensagem do usuário
@@ -47,49 +47,40 @@ class MariaGeminiChat:
         if not self.available:
             return {
                 "success": False,
-                "error": "Gemini API not configured"
+                "error": "Emergent LLM Key not configured"
             }
         
         try:
-            # Gemini não tem "system" message separado
-            # Vamos incluir o system prompt no início do contexto
+            # Criar nova instância de LlmChat para cada conversa
+            import uuid
+            session_id = f"maria_chat_{uuid.uuid4().hex[:8]}"
             
-            # Construir histórico para Gemini
-            chat_history = []
+            chat = LlmChat(
+                api_key=self.api_key,
+                session_id=session_id,
+                system_message=system_prompt
+            ).with_model("gemini", "gemini-2.0-flash")
             
-            if conversation_history:
-                for msg in conversation_history:
-                    role = "user" if msg["role"] == "user" else "model"
-                    chat_history.append({
-                        "role": role,
-                        "parts": [msg["content"]]
-                    })
+            # Se houver histórico, adicionar ao contexto
+            # (A biblioteca gerencia o histórico internamente)
             
-            # Iniciar chat com histórico
-            chat = self.model.start_chat(history=chat_history)
+            # Criar mensagem do usuário
+            user_msg = UserMessage(text=user_message)
             
-            # Adicionar system prompt ao primeiro user message se não houver histórico
-            if not conversation_history:
-                full_message = f"{system_prompt}\n\n---\n\nUsuário: {user_message}"
-            else:
-                full_message = user_message
-            
-            # Enviar mensagem
-            response = chat.send_message(
-                full_message,
-                generation_config=self.generation_config,
-                safety_settings=self.safety_settings
-            )
+            # Enviar mensagem e obter resposta
+            response_text = await chat.send_message(user_msg)
             
             return {
                 "success": True,
-                "response": response.text,
-                "model": "gemini-pro",
+                "response": response_text,
+                "model": "gemini-2.0-flash",
                 "timestamp": datetime.utcnow().isoformat()
             }
             
         except Exception as e:
-            print(f"❌ Erro no chat Gemini: {e}")
+            print(f"❌ Erro no chat Gemini (Emergent): {e}")
+            import traceback
+            traceback.print_exc()
             return {
                 "success": False,
                 "error": str(e),
