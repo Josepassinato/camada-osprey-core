@@ -250,11 +250,20 @@ const SelectForm = () => {
   const createStripeCheckout = async (visaCode: string, caseId: string) => {
     try {
       console.log('💳 Creating Stripe checkout session...');
+      console.log('📋 Visa Code:', visaCode);
+      console.log('📋 Case ID:', caseId);
       
       const backendUrl = import.meta.env.VITE_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || '';
       console.log('🔍 Backend URL:', backendUrl);
       
-      const response = await fetch(`${backendUrl}/api/payment/create-checkout`, {
+      if (!backendUrl) {
+        throw new Error('Backend URL não configurada');
+      }
+      
+      const url = `${backendUrl}/api/payment/create-checkout`;
+      console.log('🔗 Full URL:', url);
+      
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -265,21 +274,40 @@ const SelectForm = () => {
         }),
       });
 
+      console.log('📡 Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Response error:', errorText);
+        throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
+      }
+
       const data = await response.json();
       console.log('📦 Response data:', data);
       
       if (data.success && data.checkout_url) {
-        console.log('✅ Stripe checkout created, redirecting to:', data.checkout_url);
-        // Redirect to Stripe Checkout
-        window.location.href = data.checkout_url;
+        console.log('✅ Stripe checkout created!');
+        console.log('🔗 Redirecting to:', data.checkout_url);
+        
+        // Mostrar mensagem antes de redirecionar
+        setError('');
+        
+        // Redirecionar para Stripe
+        setTimeout(() => {
+          window.location.href = data.checkout_url;
+        }, 100);
       } else {
         console.error('❌ No checkout URL in response:', data);
-        throw new Error(data.error || 'Erro ao criar sessão de pagamento');
+        throw new Error(data.error || 'Erro ao criar sessão de pagamento - URL não retornada');
       }
     } catch (error: any) {
-      console.error('❌ Erro ao criar checkout Stripe:', error);
-      setError(error.message || 'Erro ao processar pagamento. Tente novamente.');
+      console.error('❌ Erro completo ao criar checkout Stripe:', error);
+      const errorMsg = error.message || 'Erro ao processar pagamento. Tente novamente.';
+      setError(`Erro ao criar checkout: ${errorMsg}`);
       setIsLoading(false);
+      
+      // Mostrar alerta também
+      alert(`Erro ao redirecionar para pagamento:\n\n${errorMsg}\n\nVerifique o console para mais detalhes.`);
     }
   };
 
