@@ -128,5 +128,6 @@ class F1StudentAgent(BaseVisaAgent):
             'package_path': None,
             'pages': 0,
             'size_kb': 0,
+            'has_images': False,
             'documents': self.REQUIRED_DOCUMENTS
         }
