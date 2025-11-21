@@ -8711,7 +8711,8 @@ async def startup_db_client():
             await db.owl_users.create_index("created_at")
             
             # Owl Agent payment and download indexes
-            await db.payment_transactions.create_index("stripe_session_id", unique=True)
+            # Use sparse=True para permitir múltiplos documentos sem stripe_session_id
+            await db.payment_transactions.create_index("stripe_session_id", unique=True, sparse=True)
             await db.payment_transactions.create_index("owl_session_id")
             await db.payment_transactions.create_index("user_email")
             await db.payment_transactions.create_index("payment_status")
