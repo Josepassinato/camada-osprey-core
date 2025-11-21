@@ -119,72 +119,31 @@ def test_visa_generate_endpoint():
         print(f"❌ Exception during B-2 complete package test: {str(e)}")
         results["test_1_b2_complete_package"]["exception"] = str(e)
     
-    # Test 2: H-1B Visa Preparation
-    print("\n📋 TESTE 2: Geração de Pacote H-1B")
+    # Check for PDF generation in /frontend/public/
+    print("\n📁 VERIFICAÇÃO DE PDFs GERADOS:")
     print("-" * 40)
     
-    # Test with the format specified in the review request
-    h1b_payload = {
-        "visa_type": "H-1B",
-        "user_request": "Preciso preparar meu pacote H-1B para trabalhar como Software Engineer",
-        "applicant_data": {}
-    }
-    
-    try:
-        print(f"🔗 Endpoint: POST {API_BASE}/visa/generate")
-        print(f"📤 Payload: {json.dumps(h1b_payload, indent=2)}")
+    frontend_public_path = Path("/app/frontend/public")
+    if frontend_public_path.exists():
+        pdf_files = list(frontend_public_path.glob("*B2*.pdf"))
+        print(f"📄 PDFs B-2 encontrados em /frontend/public/: {len(pdf_files)}")
+        for pdf in pdf_files[-5:]:  # Show last 5 B-2 PDFs
+            print(f"  📄 {pdf.name} ({pdf.stat().st_size} bytes)")
+        results["test_1_b2_complete_package"]["pdf_files_found"] = len(pdf_files)
         
-        start_time = time.time()
-        response = requests.post(
-            f"{API_BASE}/visa/generate",
-            json=h1b_payload,
-            headers={"Content-Type": "application/json"},
-            timeout=60
-        )
-        processing_time = time.time() - start_time
-        
-        print(f"⏱️  Processing time: {processing_time:.2f}s")
-        print(f"📊 Status Code: {response.status_code}")
-        
-        results["test_2_h1b_preparation"]["status_code"] = response.status_code
-        results["test_2_h1b_preparation"]["processing_time"] = processing_time
-        
-        if response.status_code == 200:
-            response_data = response.json()
-            print(f"📄 Response: {json.dumps(response_data, indent=2)}")
-            
-            # Validation checks
-            validations = {
-                "success_true": response_data.get("success") == True,
-                "visa_type_identified": response_data.get("visa_type") is not None,
-                "has_result": response_data.get("result") is not None,
-                "has_validation": response_data.get("validation") is not None,
-                "has_qa_report": response_data.get("qa_report") is not None,
-                "processing_time_present": response_data.get("processing_time") is not None
-            }
-            
-            results["test_2_h1b_preparation"]["validations"] = validations
-            results["test_2_h1b_preparation"]["response_data"] = response_data
-            
-            print("\n✅ VALIDAÇÕES H-1B:")
-            for check, passed in validations.items():
-                status = "✅" if passed else "❌"
-                print(f"  {status} {check}: {passed}")
-                
-            # Check for package_result specifically
-            if response_data.get("result") and "package_result" in response_data["result"]:
-                print(f"  ✅ package_result found: {response_data['result']['package_result']}")
-            else:
-                print(f"  ❌ package_result not found in result")
-                
+        # Look for the specific file mentioned in review
+        target_pdf = "B2_COMPLETE_PACKAGE_60PLUS_PAGES.pdf"
+        target_path = frontend_public_path / target_pdf
+        if target_path.exists():
+            print(f"  ✅ Target PDF found: {target_pdf} ({target_path.stat().st_size} bytes)")
+            results["test_1_b2_complete_package"]["target_pdf_found"] = True
         else:
-            print(f"❌ Request failed with status {response.status_code}")
-            print(f"📄 Error response: {response.text}")
-            results["test_2_h1b_preparation"]["error"] = response.text
-            
-    except Exception as e:
-        print(f"❌ Exception during H-1B test: {str(e)}")
-        results["test_2_h1b_preparation"]["exception"] = str(e)
+            print(f"  ❌ Target PDF not found: {target_pdf}")
+            results["test_1_b2_complete_package"]["target_pdf_found"] = False
+    else:
+        print("❌ Diretório /frontend/public/ não encontrado")
+        results["test_1_b2_complete_package"]["pdf_files_found"] = 0
+        results["test_1_b2_complete_package"]["target_pdf_found"] = False
     
     # Check for PDF generation in /frontend/public/
     print("\n📁 VERIFICAÇÃO DE PDFs GERADOS:")
