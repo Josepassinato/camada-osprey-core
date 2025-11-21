@@ -96,31 +96,20 @@ def test_o1_visa_complete_flow():
             response_data = response.json()
             print(f"📄 Response: {json.dumps(response_data, indent=2)}")
             
-            # SPECIFIC VALIDATIONS FROM REVIEW REQUEST
-            package_result = response_data.get("package_result", {})
-            qa_report = response_data.get("qa_report", {})
-            validation = response_data.get("validation", {})
-            
-            # Extract PDF info
-            pdf_pages = package_result.get("pages", 0)
-            pdf_size_kb = package_result.get("size_kb", 0)
-            pdf_has_images = package_result.get("has_images", False)
-            qa_score = qa_report.get("overall_score", 0) if qa_report else 0
-            qa_score_percent = qa_score * 100  # Convert to percentage
+            # Extract JWT token for subsequent requests
+            jwt_token = response_data.get("token")
+            user_info = response_data.get("user", {})
             
             validations = {
-                "1_pdf_20_plus_pages": pdf_pages >= 20,
-                "2_pdf_500_plus_kb": pdf_size_kb >= 500,
-                "3_pdf_has_images": pdf_has_images == True,
-                "4_qa_score_80_plus": qa_score >= 0.80,
-                "5_success_true": response_data.get("success") == True,
-                "6_visa_type_f1": response_data.get("visa_type") == "F-1",
-                "7_package_result_present": package_result is not None and len(package_result) > 0,
-                "8_qa_report_present": qa_report is not None and len(qa_report) > 0
+                "1_user_created": response_data.get("message") == "User created successfully",
+                "2_token_present": jwt_token is not None,
+                "3_user_email_correct": user_info.get("email") == "sofia.mendes.test@example.com",
+                "4_user_name_correct": user_info.get("first_name") == "Sofia"
             }
             
-            results["test_1_f1_student_package"]["validations"] = validations
-            results["test_1_f1_student_package"]["response_data"] = response_data
+            results["etapa_1_user_creation"]["validations"] = validations
+            results["etapa_1_user_creation"]["response_data"] = response_data
+            results["etapa_1_user_creation"]["jwt_token"] = jwt_token
             
             print("\n🎯 VALIDAÇÕES ESPECÍFICAS DA REVIEW:")
             print("=" * 50)
