@@ -481,6 +481,18 @@ Ao prosseguir, você assume total responsabilidade pelo uso das informações ge
                 </div>
               </div>
 
+              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start space-x-3">
+                  <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div className="text-blue-800">
+                    <h4 className="font-medium">🔒 Privacidade e Segurança</h4>
+                    <p className="text-sm mt-1">
+                      <strong>Nós não guardamos suas informações.</strong> Após o download, todos os seus dados pessoais são automaticamente deletados dos nossos servidores. Após 24 horas, o link de download também expira e todos os arquivos são permanentemente removidos.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div className="mt-4 flex space-x-3">
                 <Button
                   variant="outline"
