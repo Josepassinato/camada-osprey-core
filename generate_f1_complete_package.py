@@ -526,14 +526,24 @@ Date: {datetime.now().strftime("%B %d, %Y")}'''
     story.append(PageBreak())
     page_count += 1
     
-    # ===== SECTION II: FORM I-20 SIMULATION =====
+    # ===== SECTION II: FORM I-20 OFFICIAL IMAGE =====
     print(f'   Page {page_count}: I-20 Certificate')
     story.append(Paragraph('SECTION II - FORM I-20 (CERTIFICATE OF ELIGIBILITY)', section_style))
     story.append(Spacer(1, 0.2*inch))
     
-    i20_notice = '''<b>NOTE:</b> Form I-20 is issued by the educational institution (SEVIS-approved school) and is the most critical 
-document for F-1 visa application. Below is a detailed summary of the I-20 information:'''
+    i20_notice = '''<b>OFFICIAL FORM I-20:</b> Below is the official Form I-20 issued by Boston University. This is the most critical 
+document for F-1 visa application and must be presented at the consular interview and at port of entry.'''
     story.append(Paragraph(i20_notice, body_style))
+    story.append(Spacer(1, 0.3*inch))
+    
+    # Add I-20 image (full page)
+    i20_img = RLImage(str(i20_form_image), width=6.5*inch, height=8.4*inch)
+    story.append(i20_img)
+    story.append(PageBreak())
+    page_count += 2
+    
+    # Add detailed I-20 information table
+    story.append(Paragraph('I-20 KEY INFORMATION SUMMARY', subsection_style))
     story.append(Spacer(1, 0.2*inch))
     
     i20_data = [
