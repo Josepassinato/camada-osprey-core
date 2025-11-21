@@ -111,28 +111,21 @@ def test_o1_visa_complete_flow():
             results["etapa_1_user_creation"]["response_data"] = response_data
             results["etapa_1_user_creation"]["jwt_token"] = jwt_token
             
-            print("\n🎯 VALIDAÇÕES ESPECÍFICAS DA REVIEW:")
+            print("\n🎯 VALIDAÇÕES ETAPA 1:")
             print("=" * 50)
             for check, passed in validations.items():
                 status = "✅" if passed else "❌"
                 print(f"  {status} {check}: {passed}")
             
-            # Detailed metrics
-            print(f"\n📊 MÉTRICAS DETALHADAS:")
-            print(f"  📄 Visa Type: {response_data.get('visa_type', 'N/A')}")
-            print(f"  📄 Páginas: {pdf_pages} (target: ≥20)")
-            print(f"  💾 Tamanho: {pdf_size_kb} KB (target: ≥500 KB)")
-            print(f"  🖼️  Imagens: {'✅ Sim' if pdf_has_images else '❌ Não'}")
-            print(f"  🎯 QA Score: {qa_score_percent:.1f}% (target: ≥80%)")
-            print(f"  📋 Package Result: {package_result}")
-            print(f"  ✅ Validation: {validation}")
-            print(f"  🎯 QA Report: {qa_report}")
+            print(f"\n📊 DADOS DO USUÁRIO CRIADO:")
+            print(f"  👤 Nome: {user_info.get('first_name')} {user_info.get('last_name')}")
+            print(f"  📧 Email: {user_info.get('email')}")
+            print(f"  🔑 Token JWT: {'✅ Presente' if jwt_token else '❌ Ausente'}")
             
-            if package_result.get("pdf_url") or package_result.get("download_url"):
-                pdf_url = package_result.get("pdf_url") or package_result.get("download_url")
-                print(f"  🔗 PDF URL: {pdf_url}")
+            if jwt_token:
+                print(f"  🔑 Token (primeiros 50 chars): {jwt_token[:50]}...")
             else:
-                print(f"  ❌ No PDF URL found")
+                print(f"  ❌ No JWT token found")
                 
         else:
             print(f"❌ Request failed with status {response.status_code}")
