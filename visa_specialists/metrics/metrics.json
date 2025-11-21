@@ -1,11 +1,11 @@
 {
-  "total_requests": 7,
-  "successful_generations": 7,
+  "total_requests": 8,
+  "successful_generations": 8,
   "failed_generations": 0,
   "by_visa_type": {
     "B-2": {
-      "count": 5,
-      "success": 5,
+      "count": 6,
+      "success": 6,
       "failed": 0,
       "avg_processing_time": 0
     },
@@ -65,6 +65,13 @@
       "missing_items_count": 4,
       "forbidden_items_count": 0,
       "timestamp": "2025-11-21T00:31:40.993700"
+    },
+    {
+      "visa_type": "B-2",
+      "is_valid": true,
+      "missing_items_count": 0,
+      "forbidden_items_count": 0,
+      "timestamp": "2025-11-21T00:32:49.283597"
     }
   ],
   "qa_scores": [
@@ -102,6 +109,11 @@
       "visa_type": "B-2",
       "score": 0.745,
       "timestamp": "2025-11-21T00:31:40.993702"
+    },
+    {
+      "visa_type": "B-2",
+      "score": 0.9650000000000001,
+      "timestamp": "2025-11-21T00:32:49.283599"
     }
   ],
   "processing_times": [
@@ -139,6 +151,11 @@
       "visa_type": "B-2",
       "time": 0.023087024688720703,
       "timestamp": "2025-11-21T00:31:40.993694"
+    },
+    {
+      "visa_type": "B-2",
+      "time": 0.028430938720703125,
+      "timestamp": "2025-11-21T00:32:49.283590"
     }
   ],
   "start_date": "2025-11-21T00:12:14.901162"

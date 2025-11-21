@@ -2,101 +2,76 @@
   "main_results": {
     "test_1_b2_complete_package": {
       "status_code": 200,
-      "processing_time": 0.08875536918640137,
+      "processing_time": 0.09991312026977539,
       "validations": {
         "1_status_200": true,
         "2_success_true": true,
-        "3_pages_30_plus": false,
-        "4_qa_score_90_plus": false,
-        "5_qa_passed_true": false,
-        "6_validation_valid": false,
-        "7_pdf_generated": false
+        "3_pages_30_plus": true,
+        "4_qa_score_90_plus": true,
+        "5_qa_passed_true": true,
+        "6_validation_valid": true,
+        "7_pdf_generated": true
       },
       "response_data": {
         "success": true,
         "visa_type": "B-2",
         "package_result": {
           "success": true,
-          "package_path": null,
+          "package_path": "/app/frontend/public/B2_COMPLETE_PACKAGE_60PLUS_PAGES.pdf",
           "documents": [
-            "Form I-539",
+            "Form I-539 (Completed)",
             "Cover Letter",
             "Personal Statement",
-            "Current I-94",
-            "Passport Copy",
-            "Bank Statements",
+            "Form I-94 (Current I-94 Record)",
+            "Medical Documentation",
+            "Doctor Letters from Cardiologist",
+            "Bank Statements (3 months)",
+            "Property Deed",
+            "Pension Income Statements",
+            "Passport Copy (Biographical Page)",
+            "Passport Photos (2)",
+            "U.S. Visa Copy",
             "Financial Evidence",
             "Ties to Home Country",
             "Travel History",
-            "Medical Documentation",
-            "Supporting Letters"
+            "Compliance Documentation",
+            "Supporting Letters",
+            "Reason for Extension",
+            "Health Insurance Policy",
+            "Document Checklist"
           ],
-          "pages": 0,
-          "size_kb": 0,
+          "pages": 32,
+          "size_kb": 688.615234375,
           "validation": {
-            "is_valid": false,
-            "missing_items": [
-              "Form I-539 (Completed)",
-              "Current I-94 Record",
-              "Compliance Documentation",
-              "Reason for Extension"
-            ],
+            "is_valid": true,
+            "missing_items": [],
             "forbidden_items_found": [],
             "warnings": []
           }
         },
         "validation": {
-          "is_valid": false,
-          "missing_items": [
-            "Form I-539 (Completed)",
-            "Current I-94 Record",
-            "Compliance Documentation",
-            "Reason for Extension"
-          ],
+          "is_valid": true,
+          "missing_items": [],
           "forbidden_items_found": [],
           "warnings": []
         },
         "qa_report": {
-          "timestamp": "2025-11-21T00:31:40.993372",
+          "timestamp": "2025-11-21T00:32:49.283309",
           "visa_type": null,
-          "overall_score": 0.745,
+          "overall_score": 0.9650000000000001,
           "category_scores": {
-            "completeness": 0.6,
+            "completeness": 1.0,
             "accuracy": 0.95,
-            "professionalism": 0.8,
-            "compliance": 0.6
+            "professionalism": 0.9,
+            "compliance": 1.0
           },
-          "issues": [
-            {
-              "severity": "high",
-              "category": "completeness",
-              "description": "Missing required document: Form I-539 (Completed)"
-            },
-            {
-              "severity": "high",
-              "category": "completeness",
-              "description": "Missing required document: Current I-94 Record"
-            },
-            {
-              "severity": "high",
-              "category": "completeness",
-              "description": "Missing required document: Compliance Documentation"
-            },
-            {
-              "severity": "high",
-              "category": "completeness",
-              "description": "Missing required document: Reason for Extension"
-            }
-          ],
+          "issues": [],
           "recommendations": [
-            "Add missing required documents to improve completeness",
-            "Improve formatting and professional presentation",
-            "Ensure all USCIS requirements are met",
-            "\u26a0\ufe0f Package needs significant improvements before submission"
+            "\u2705 Package meets high quality standards"
           ],
-          "passed": false
+          "passed": true
         },
-        "processing_time": 0.023087024688720703,
+        "processing_time": 0.028430938720703125,
         "error": null
       },
       "pdf_files_found": 2,
@@ -114,6 +89,6 @@
     "specialists_list": true,
     "visa_detection": true
   },
-  "timestamp": 1763685101.1002095,
+  "timestamp": 1763685169.3564672,
   "test_focus": "B-2 Complete Package as requested in review"
 }

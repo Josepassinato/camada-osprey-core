@@ -1,0 +1,16 @@
+{
+  "timestamp": "2025-11-21T00:32:49.283309",
+  "visa_type": null,
+  "overall_score": 0.9650000000000001,
+  "category_scores": {
+    "completeness": 1.0,
+    "accuracy": 0.95,
+    "professionalism": 0.9,
+    "compliance": 1.0
+  },
+  "issues": [],
+  "recommendations": [
+    "\u2705 Package meets high quality standards"
+  ],
+  "passed": true
+}
