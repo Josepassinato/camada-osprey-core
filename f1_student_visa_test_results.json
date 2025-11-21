@@ -2,15 +2,15 @@
   "main_results": {
     "test_1_f1_student_package": {
       "status_code": 200,
-      "processing_time": 0.06942367553710938,
+      "processing_time": 0.11044836044311523,
       "validations": {
-        "1_status_200": true,
-        "2_success_true": true,
-        "3_visa_type_f1": true,
-        "4_package_result_present": true,
-        "5_pdf_name_correct": false,
-        "6_pdf_pages_10_plus": false,
-        "7_validation_present": true,
+        "1_pdf_20_plus_pages": false,
+        "2_pdf_500_plus_kb": false,
+        "3_pdf_has_images": false,
+        "4_qa_score_80_plus": false,
+        "5_success_true": true,
+        "6_visa_type_f1": true,
+        "7_package_result_present": true,
         "8_qa_report_present": true
       },
       "response_data": {
@@ -42,7 +42,7 @@
           "warnings": []
         },
         "qa_report": {
-          "timestamp": "2025-11-21T01:56:12.338351",
+          "timestamp": "2025-11-21T02:15:20.431750",
           "visa_type": null,
           "overall_score": 0.835,
           "category_scores": {
@@ -65,16 +65,16 @@
           ],
           "passed": true
         },
-        "processing_time": 0.0013577938079833984,
+        "processing_time": 0.0004911422729492188,
         "error": null
       },
       "pdf_files_found": 1,
       "target_pdf_found": true,
-      "target_pdf_size": 22695,
+      "target_pdf_size": 834670,
       "pdf_size_adequate": true
     },
     "summary": {
-      "overall_success": true,
+      "overall_success": false,
       "tests_passed": 1,
       "tests_total": 1
     },
@@ -85,6 +85,6 @@
     "specialists_list": true,
     "visa_detection": true
   },
-  "timestamp": 1763690172.4050121,
+  "timestamp": 1763691320.5003686,
   "test_focus": "F-1 Student Visa as requested in review"
 }
