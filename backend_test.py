@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """
-Backend Testing Suite for Multi-Agent Visa Architecture
-Testing the new POST /api/visa/generate endpoint as requested
+Backend Testing Suite - O-1 Visa Complete End-to-End Testing
+Testing complete O-1 visa application flow for Dr. Sofia Mendes Rodrigues
 """
 
 import requests
 import json
 import time
 import os
+import base64
 from pathlib import Path
+from datetime import datetime
 
 # Get backend URL from frontend .env
 BACKEND_URL = "https://apply-wizard-18.preview.emergentagent.com"
