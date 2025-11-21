@@ -1,0 +1,40 @@
+{
+  "timestamp": "2025-11-21T00:30:25.349272",
+  "visa_type": null,
+  "overall_score": 0.745,
+  "category_scores": {
+    "completeness": 0.6,
+    "accuracy": 0.95,
+    "professionalism": 0.8,
+    "compliance": 0.6
+  },
+  "issues": [
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Form I-539 (Completed)"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Current I-94 Record"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Compliance Documentation"
+    },
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Reason for Extension"
+    }
+  ],
+  "recommendations": [
+    "Add missing required documents to improve completeness",
+    "Improve formatting and professional presentation",
+    "Ensure all USCIS requirements are met",
+    "\u26a0\ufe0f Package needs significant improvements before submission"
+  ],
+  "passed": false
+}
