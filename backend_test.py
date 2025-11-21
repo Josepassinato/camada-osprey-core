@@ -45,10 +45,11 @@ def test_visa_generate_endpoint():
     print("\n📋 TESTE 1: Geração de Pacote B-2")
     print("-" * 40)
     
+    # Test with the format specified in the review request
     b2_payload = {
-        "user_input": "Preciso estender meu visto de turista B-2 por 6 meses devido a emergência médica",
-        "applicant_data": {},
-        "enable_qa": True
+        "visa_type": "B-2",
+        "user_request": "Preciso estender meu visto de turista B-2 por 6 meses devido a emergência médica",
+        "applicant_data": {}
     }
     
     try:
