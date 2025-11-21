@@ -60,9 +60,27 @@ class B2ExtensionAgent(BaseVisaAgent):
         agent_dir = Path(__file__).parent
         super().__init__(agent_dir)
         
+        # Load USCIS knowledge base
+        self.knowledge_base_dir = Path(__file__).parent.parent / 'knowledge_base' / 'b2_extension'
+        self.uscis_requirements = self._load_knowledge_base()
+        
         # Registrar lições específicas de B-2 se arquivo não existe
         if not self.lessons_file.exists():
             self._initialize_lessons()
+    
+    def _load_knowledge_base(self) -> Dict[str, str]:
+        """Load USCIS knowledge base for B-2 extensions"""
+        knowledge = {}
+        
+        if self.knowledge_base_dir.exists():
+            # Load requirements file
+            req_file = self.knowledge_base_dir / 'uscis_requirements.md'
+            if req_file.exists():
+                with open(req_file, 'r', encoding='utf-8') as f:
+                    knowledge['requirements'] = f.read()
+                print(f"📚 Loaded USCIS requirements knowledge base ({len(knowledge['requirements'])} chars)")
+        
+        return knowledge
     
     def _initialize_lessons(self):
         """Inicializa arquivo de lições com erros conhecidos"""
