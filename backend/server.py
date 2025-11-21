@@ -8643,6 +8643,10 @@ async def startup_db_client():
         alert_system = ProactiveAlertSystem(db)
         logger.info("Proactive Alert System initialized!")
         
+        # Initialize Maria API with connected db
+        maria_api.init_db(db)
+        logger.info("✅ Maria - Assistente Virtual initialized!")
+        
         # Create optimized indexes for better performance
         try:
             # Auto-application cases indexes
