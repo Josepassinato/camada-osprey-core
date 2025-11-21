@@ -2,7 +2,7 @@
   "main_results": {
     "test_1_b2_complete_package": {
       "status_code": 200,
-      "processing_time": 0.0892338752746582,
+      "processing_time": 0.08875536918640137,
       "validations": {
         "1_status_200": true,
         "2_success_true": true,
@@ -57,7 +57,7 @@
           "warnings": []
         },
         "qa_report": {
-          "timestamp": "2025-11-21T00:30:25.349272",
+          "timestamp": "2025-11-21T00:31:40.993372",
           "visa_type": null,
           "overall_score": 0.745,
           "category_scores": {
@@ -96,7 +96,7 @@
           ],
           "passed": false
         },
-        "processing_time": 0.024377107620239258,
+        "processing_time": 0.023087024688720703,
         "error": null
       },
       "pdf_files_found": 2,
@@ -114,6 +114,6 @@
     "specialists_list": true,
     "visa_detection": true
   },
-  "timestamp": 1763685025.417825,
+  "timestamp": 1763685101.1002095,
   "test_focus": "B-2 Complete Package as requested in review"
 }
