@@ -62,6 +62,131 @@ PREDEFINED_VOUCHERS = {
         "active": False,  # Ativar apenas durante Black Friday
         "categories": None,
         "visa_codes": None
+    },
+    
+    # ========================================
+    # VOUCHERS DE GRATUIDADE - BETA TESTERS
+    # 100% de desconto para testes
+    # ========================================
+    "BETA-FREE-001": {
+        "code": "BETA-FREE-001",
+        "discount_percentage": 100.0,
+        "description": "🎁 Voucher de Gratuidade BETA - Testador #1",
+        "valid_from": datetime(2024, 11, 21),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,  # 1 uso por voucher
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
+    },
+    "BETA-FREE-002": {
+        "code": "BETA-FREE-002",
+        "discount_percentage": 100.0,
+        "description": "🎁 Voucher de Gratuidade BETA - Testador #2",
+        "valid_from": datetime(2024, 11, 21),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
+    },
+    "BETA-FREE-003": {
+        "code": "BETA-FREE-003",
+        "discount_percentage": 100.0,
+        "description": "🎁 Voucher de Gratuidade BETA - Testador #3",
+        "valid_from": datetime(2024, 11, 21),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
+    },
+    "BETA-FREE-004": {
+        "code": "BETA-FREE-004",
+        "discount_percentage": 100.0,
+        "description": "🎁 Voucher de Gratuidade BETA - Testador #4",
+        "valid_from": datetime(2024, 11, 21),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
+    },
+    "BETA-FREE-005": {
+        "code": "BETA-FREE-005",
+        "discount_percentage": 100.0,
+        "description": "🎁 Voucher de Gratuidade BETA - Testador #5",
+        "valid_from": datetime(2024, 11, 21),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
+    },
+    "BETA-FREE-006": {
+        "code": "BETA-FREE-006",
+        "discount_percentage": 100.0,
+        "description": "🎁 Voucher de Gratuidade BETA - Testador #6",
+        "valid_from": datetime(2024, 11, 21),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
+    },
+    "BETA-FREE-007": {
+        "code": "BETA-FREE-007",
+        "discount_percentage": 100.0,
+        "description": "🎁 Voucher de Gratuidade BETA - Testador #7",
+        "valid_from": datetime(2024, 11, 21),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
+    },
+    "BETA-FREE-008": {
+        "code": "BETA-FREE-008",
+        "discount_percentage": 100.0,
+        "description": "🎁 Voucher de Gratuidade BETA - Testador #8",
+        "valid_from": datetime(2024, 11, 21),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
+    },
+    "BETA-FREE-009": {
+        "code": "BETA-FREE-009",
+        "discount_percentage": 100.0,
+        "description": "🎁 Voucher de Gratuidade BETA - Testador #9",
+        "valid_from": datetime(2024, 11, 21),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
+    },
+    "BETA-FREE-010": {
+        "code": "BETA-FREE-010",
+        "discount_percentage": 100.0,
+        "description": "🎁 Voucher de Gratuidade BETA - Testador #10",
+        "valid_from": datetime(2024, 11, 21),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
     }
 }
 
