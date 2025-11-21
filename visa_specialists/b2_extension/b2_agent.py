@@ -157,17 +157,17 @@ Este arquivo registra erros cometidos e correções aplicadas para melhorar cont
     
     def _generate_b2_package(self, applicant_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Chama o gerador de pacote B-2 existente
+        Chama o gerador de pacote B-2 completo (60+ páginas)
         """
-        # Executar o script de geração que já criamos
+        # Executar o script de geração completo
         import subprocess
         from pathlib import Path
         
-        # Usar o gerador completo que já temos
-        generator_script = Path('/app/generate_b2_simple.py')
+        # Usar o gerador completo de 60+ páginas
+        generator_script = Path('/app/generate_b2_complete_package.py')
         
         if generator_script.exists():
-            print("✅ Usando gerador B-2 existente...")
+            print("✅ Usando gerador B-2 COMPLETO (60+ páginas)...")
             result = subprocess.run(
                 ['python3', str(generator_script)],
                 capture_output=True,
@@ -176,12 +176,14 @@ Este arquivo registra erros cometidos e correções aplicadas para melhorar cont
             
             if result.returncode == 0:
                 # Verificar se PDF foi gerado
-                pdf_path = Path('/app/frontend/public/MARIA_HELENA_B2_EXTENSION_COMPLETE_PACKAGE.pdf')
+                pdf_path = Path('/app/frontend/public/B2_COMPLETE_PACKAGE_60PLUS_PAGES.pdf')
                 if pdf_path.exists():
                     from PyPDF2 import PdfReader
                     reader = PdfReader(str(pdf_path))
                     pages = len(reader.pages)
                     size_kb = pdf_path.stat().st_size / 1024
+                    
+                    print(f"✅ Pacote completo gerado: {pages} páginas ({size_kb:.1f} KB)")
                     
                     return {
                         'package_path': str(pdf_path),
