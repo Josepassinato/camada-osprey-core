@@ -8,5 +8,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^7.0.0-rc.8",
+    "express": "^5.1.0",
+    "qrcode-terminal": "^0.12.0"
+  }
 }
