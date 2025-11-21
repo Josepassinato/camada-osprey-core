@@ -246,20 +246,18 @@ Status do Caso: {user_context.get('case_status', 'Iniciando')}
             if conversation_history:
                 messages.extend(conversation_history[-10:])  # Últimas 10 mensagens
             
-            # Adicionar mensagem atual
-            messages.append({"role": "user", "content": user_message})
-            
-            # Chamar OpenAI
-            response = client.chat.completions.create(
-                model="gpt-4",
-                messages=messages,
-                temperature=0.8,  # Mais criativa e empática
-                max_tokens=800,
-                presence_penalty=0.6,
-                frequency_penalty=0.3
+            # Chamar Gemini (mais natural que OpenAI)
+            gemini_result = await maria_gemini.chat(
+                user_message=user_message,
+                system_prompt=self.get_system_prompt() + (context_msg if user_context else ""),
+                conversation_history=conversation_history[-10:] if conversation_history else None
             )
             
-            maria_response = response.choices[0].message.content
+            if not gemini_result.get("success"):
+                # Fallback para mensagem padrão se Gemini falhar
+                maria_response = "Desculpe, tive um probleminha técnico 😅 Pode tentar novamente?"
+            else:
+                maria_response = gemini_result["response"]
             
             # Detectar se precisa de disclaimer adicional
             needs_legal_disclaimer = self._detect_legal_question(user_message)
