@@ -9032,8 +9032,8 @@ async def delete_knowledge_document(document_id: str, admin = Depends(require_ad
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/admin/knowledge-base/stats/overview")
-async def get_knowledge_stats():
-    """Estatísticas da base de conhecimento"""
+async def get_knowledge_stats(admin = Depends(require_admin)):
+    """Estatísticas da base de conhecimento - PROTECTED"""
     try:
         from knowledge_base_manager import KnowledgeBaseManager
         kb_manager = KnowledgeBaseManager(db)
