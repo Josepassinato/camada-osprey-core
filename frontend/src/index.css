@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Ajuste para o banner BETA fixo no topo */
+body {
+  padding-top: 48px !important; /* Espaço para o banner */
+}
+
 /* Remove any blue borders and backgrounds that might be applied by development tools */
 /* Force removal of any yellow/orange backgrounds */
 *, body, html {
@@ -9,7 +14,7 @@
 }
 
 /* Explicitly prevent yellow/orange backgrounds */
-body, html, #root, .app {
+html, #root, .app {
   background-color: white !important;
 }
 
