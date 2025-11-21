@@ -44,9 +44,19 @@ e preciso de um pacote completo e profissional para minha entrevista no consulad
     print(f'   Instituição: {applicant_data["school"]}')
     print(f'   Início: {applicant_data["start_date"]}')
     
-    # Inicializar Supervisor
+    # Inicializar Supervisor e Especialistas
     print(f'\n🎯 INICIANDO SUPERVISOR AGENT...')
     supervisor = SupervisorAgent()
+    
+    # Registrar especialistas
+    from visa_specialists.f1_student.f1_agent import F1StudentAgent
+    from visa_specialists.b2_extension.b2_agent import B2ExtensionAgent
+    
+    f1_agent = F1StudentAgent()
+    b2_agent = B2ExtensionAgent()
+    
+    supervisor.register_specialist('F-1', f1_agent)
+    supervisor.register_specialist('B-2', b2_agent)
     
     # Processar requisição
     print(f'\n⚙️  PROCESSANDO REQUISIÇÃO...')
