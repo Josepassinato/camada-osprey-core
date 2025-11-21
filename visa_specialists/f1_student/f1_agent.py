@@ -104,23 +104,35 @@ class F1StudentAgent(BaseVisaAgent):
                 text=True
             )
             
+            print(f"🔍 Subprocess return code: {result.returncode}")
+            print(f"🔍 Subprocess stdout: {result.stdout}")
+            print(f"🔍 Subprocess stderr: {result.stderr}")
+            
             if result.returncode == 0:
                 pdf_path = Path('/app/frontend/public/F1_STUDENT_COMPLETE_PACKAGE_RAFAEL_OLIVEIRA.pdf')
+                print(f"🔍 Checking PDF path: {pdf_path}")
+                print(f"🔍 PDF exists: {pdf_path.exists()}")
+                
                 if pdf_path.exists():
-                    from PyPDF2 import PdfReader
-                    reader = PdfReader(str(pdf_path))
-                    pages = len(reader.pages)
-                    size_kb = pdf_path.stat().st_size / 1024
-                    
-                    print(f"✅ Pacote F-1 completo gerado: {pages} páginas ({size_kb:.1f} KB)")
-                    
-                    return {
-                        'package_path': str(pdf_path),
-                        'pages': pages,
-                        'size_kb': size_kb,
-                        'has_images': True,  # F-1 package includes passport photos, I-20, transcripts, bank statements
-                        'documents': self.REQUIRED_DOCUMENTS
-                    }
+                    try:
+                        from PyPDF2 import PdfReader
+                        reader = PdfReader(str(pdf_path))
+                        pages = len(reader.pages)
+                        size_kb = pdf_path.stat().st_size / 1024
+                        
+                        print(f"✅ Pacote F-1 completo gerado: {pages} páginas ({size_kb:.1f} KB)")
+                        
+                        return {
+                            'package_path': str(pdf_path),
+                            'pages': pages,
+                            'size_kb': size_kb,
+                            'has_images': True,  # F-1 package includes passport photos, I-20, transcripts, bank statements
+                            'documents': self.REQUIRED_DOCUMENTS
+                        }
+                    except Exception as e:
+                        print(f"❌ Error reading PDF: {e}")
+                else:
+                    print(f"❌ PDF file not found at {pdf_path}")
             
             print(f"⚠️  Gerador retornou erro: {result.stderr}")
         
