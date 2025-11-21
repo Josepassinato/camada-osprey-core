@@ -227,7 +227,9 @@ class QualityAssuranceAgent:
     def _save_report(self, qa_report: Dict[str, Any]):
         """Salva relatório de QA"""
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        visa_type = qa_report['visa_type'].replace(' ', '_').replace('-', '')
+        visa_type = qa_report.get('visa_type', 'unknown')
+        if visa_type and visa_type != 'unknown':
+            visa_type = visa_type.replace(' ', '_').replace('-', '')
         filename = f"qa_report_{visa_type}_{timestamp}.json"
         
         report_path = self.qa_dir / filename
