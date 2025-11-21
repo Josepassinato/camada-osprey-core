@@ -90,9 +90,42 @@ class F1StudentAgent(BaseVisaAgent):
         print(f"🎯 F-1 STUDENT AGENT - GERANDO PACOTE")
         print(f"{'='*80}\n")
         
-        # TODO: Implementar gerador F-1
+        # Executar gerador F-1
+        import subprocess
+        from pathlib import Path
+        
+        generator_script = Path('/app/generate_f1_complete_package.py')
+        
+        if generator_script.exists():
+            print("✅ Usando gerador F-1 completo profissional...")
+            result = subprocess.run(
+                ['python3', str(generator_script)],
+                capture_output=True,
+                text=True
+            )
+            
+            if result.returncode == 0:
+                pdf_path = Path('/app/frontend/public/F1_STUDENT_COMPLETE_PACKAGE_RAFAEL_OLIVEIRA.pdf')
+                if pdf_path.exists():
+                    from PyPDF2 import PdfReader
+                    reader = PdfReader(str(pdf_path))
+                    pages = len(reader.pages)
+                    size_kb = pdf_path.stat().st_size / 1024
+                    
+                    print(f"✅ Pacote F-1 completo gerado: {pages} páginas ({size_kb:.1f} KB)")
+                    
+                    return {
+                        'package_path': str(pdf_path),
+                        'pages': pages,
+                        'size_kb': size_kb,
+                        'documents': self.REQUIRED_DOCUMENTS
+                    }
+            
+            print(f"⚠️  Gerador retornou erro: {result.stderr}")
+        
         return {
-            'success': True,
-            'message': 'F-1 generator will be implemented',
+            'package_path': None,
+            'pages': 0,
+            'size_kb': 0,
             'documents': self.REQUIRED_DOCUMENTS
         }
