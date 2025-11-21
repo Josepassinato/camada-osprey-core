@@ -29,6 +29,39 @@ def generate_f1_student_package():
     output_dir.mkdir(parents=True, exist_ok=True)
     output_file = output_dir / 'F1_STUDENT_COMPLETE_PACKAGE_RAFAEL_OLIVEIRA.pdf'
     
+    # Generate images first
+    print('\n📸 STEP 1: Generating simulated images...')
+    image_gen = F1ImageGenerator()
+    
+    passport_photo = image_gen.create_passport_photo(data.applicant)
+    print(f'   ✅ Passport photo: {passport_photo.name}')
+    
+    passport_biopage = image_gen.create_passport_biopage(data.applicant)
+    print(f'   ✅ Passport biopage: {passport_biopage.name}')
+    
+    i20_form_image = image_gen.create_i20_form(data.applicant, data.i20, data.us_program)
+    print(f'   ✅ I-20 form: {i20_form_image.name}')
+    
+    transcript_image = image_gen.create_transcript(data.applicant, data.education)
+    print(f'   ✅ Transcript: {transcript_image.name}')
+    
+    # Generate bank statements (3 months)
+    bank_statements = []
+    for month in ['January 2025', 'February 2025', 'March 2025']:
+        bank_data = {
+            'account_number': '12345-6',
+            'account_type': 'Savings Account',
+            'opening_balance': '225,000.00',
+            'credits': '8,500.00',
+            'debits': '4,000.00',
+            'closing_balance': '229,500.00'
+        }
+        stmt = image_gen.create_bank_statement(data.applicant, bank_data, month)
+        bank_statements.append(stmt)
+        print(f'   ✅ Bank statement: {stmt.name}')
+    
+    print(f'\n📄 STEP 2: Creating PDF document...')
+    
     # Create PDF
     doc = SimpleDocTemplate(
         str(output_file),
