@@ -77,7 +77,6 @@ const NewHomepage = () => {
           <nav className="hidden md:flex items-center space-x-8">
             <a href="#como-funciona" className="text-gray-700 hover:text-purple-600 transition-colors font-medium">Como Funciona</a>
             <a href="#precos" className="text-gray-700 hover:text-purple-600 transition-colors font-medium">Preços</a>
-            <a href="#depoimentos" className="text-gray-700 hover:text-purple-600 transition-colors font-medium">Depoimentos</a>
             <Button variant="outline" className="border-purple-600 text-purple-600 hover:bg-purple-50">
               Entrar
             </Button>
