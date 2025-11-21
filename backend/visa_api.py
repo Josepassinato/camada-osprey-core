@@ -118,7 +118,7 @@ async def generate_visa_package(request: VisaRequest):
         return VisaResponse(
             success=True,
             visa_type=result['visa_type'],
-            result=result['result'],
+            package_result=result['result'],
             validation=result['validation'],
             qa_report=qa_report,
             processing_time=processing_time
