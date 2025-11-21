@@ -4927,8 +4927,8 @@ def get_step_by_step_guide(form_code: str) -> list:
     }
 # Visa Auto-Update System
 @api_router.get("/admin/visa-updates/pending")
-async def get_pending_visa_updates(skip: int = 0, limit: int = 20):
-    """Get all pending visa updates for admin review"""
+async def get_pending_visa_updates(skip: int = 0, limit: int = 20, admin = Depends(require_admin)):
+    """Get all pending visa updates for admin review - PROTECTED"""
     try:
         cursor = db.visa_updates.find({"status": "pending"}).sort("created_at", -1).skip(skip).limit(limit)
         updates = await cursor.to_list(length=None)
