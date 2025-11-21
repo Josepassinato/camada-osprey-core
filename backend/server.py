@@ -5163,8 +5163,8 @@ async def get_admin_notifications(admin = Depends(require_admin)):
         raise HTTPException(status_code=500, detail="Failed to retrieve notifications")
 
 @api_router.put("/admin/notifications/{notification_id}/read")
-async def mark_notification_read(notification_id: str):
-    """Mark notification as read"""
+async def mark_notification_read(notification_id: str, admin = Depends(require_admin)):
+    """Mark notification as read - PROTECTED"""
     try:
         await db.admin_notifications.update_one(
             {"id": notification_id},
