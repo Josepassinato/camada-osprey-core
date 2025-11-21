@@ -381,8 +381,8 @@ const SelectForm = () => {
           console.log('✅ Form code verified:', data.case.form_code);
           // Store case ID for anonymous access
           localStorage.setItem('osprey_current_case_id', data.case.case_id);
-          // Create Stripe checkout session and redirect directly
-          await createStripeCheckout(formCode, data.case.case_id);
+          // Redirect to embedded checkout
+          navigate(`/checkout?visa_code=${formCode}&case_id=${data.case.case_id}`);
         } else {
           console.error('❌ Form code mismatch!', {
             expected: formCode,
