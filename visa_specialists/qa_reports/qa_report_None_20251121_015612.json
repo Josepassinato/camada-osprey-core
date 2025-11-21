@@ -1,0 +1,24 @@
+{
+  "timestamp": "2025-11-21T01:56:12.338351",
+  "visa_type": null,
+  "overall_score": 0.835,
+  "category_scores": {
+    "completeness": 0.9,
+    "accuracy": 0.95,
+    "professionalism": 0.8,
+    "compliance": 0.6
+  },
+  "issues": [
+    {
+      "severity": "high",
+      "category": "completeness",
+      "description": "Missing required document: Form I-539"
+    }
+  ],
+  "recommendations": [
+    "Improve formatting and professional presentation",
+    "Ensure all USCIS requirements are met",
+    "Package is acceptable but could be improved"
+  ],
+  "passed": true
+}

@@ -1,0 +1,90 @@
+{
+  "main_results": {
+    "test_1_f1_student_package": {
+      "status_code": 200,
+      "processing_time": 0.06942367553710938,
+      "validations": {
+        "1_status_200": true,
+        "2_success_true": true,
+        "3_visa_type_f1": true,
+        "4_package_result_present": true,
+        "5_pdf_name_correct": false,
+        "6_pdf_pages_10_plus": false,
+        "7_validation_present": true,
+        "8_qa_report_present": true
+      },
+      "response_data": {
+        "success": true,
+        "visa_type": "F-1",
+        "package_result": {
+          "success": true,
+          "message": "F-1 generator will be implemented",
+          "documents": [
+            "I-20 from School",
+            "Acceptance Letter",
+            "Transcript",
+            "Academic Records",
+            "Financial Support Evidence",
+            "Bank Statements",
+            "Sponsor Affidavit (if applicable)",
+            "English Proficiency Test (TOEFL/IELTS)",
+            "Ties to Home Country",
+            "Intent to Return",
+            "Passport Copy"
+          ]
+        },
+        "validation": {
+          "is_valid": false,
+          "missing_items": [
+            "Form I-539"
+          ],
+          "forbidden_items_found": [],
+          "warnings": []
+        },
+        "qa_report": {
+          "timestamp": "2025-11-21T01:56:12.338351",
+          "visa_type": null,
+          "overall_score": 0.835,
+          "category_scores": {
+            "completeness": 0.9,
+            "accuracy": 0.95,
+            "professionalism": 0.8,
+            "compliance": 0.6
+          },
+          "issues": [
+            {
+              "severity": "high",
+              "category": "completeness",
+              "description": "Missing required document: Form I-539"
+            }
+          ],
+          "recommendations": [
+            "Improve formatting and professional presentation",
+            "Ensure all USCIS requirements are met",
+            "Package is acceptable but could be improved"
+          ],
+          "passed": true
+        },
+        "processing_time": 0.0013577938079833984,
+        "error": null
+      },
+      "pdf_files_found": 1,
+      "target_pdf_found": true,
+      "target_pdf_size": 22695,
+      "pdf_size_adequate": true
+    },
+    "summary": {
+      "overall_success": true,
+      "tests_passed": 1,
+      "tests_total": 1
+    },
+    "pdf_files_found": 18
+  },
+  "additional_results": {
+    "health_check": true,
+    "specialists_list": true,
+    "visa_detection": true
+  },
+  "timestamp": 1763690172.4050121,
+  "test_focus": "F-1 Student Visa as requested in review"
+}
