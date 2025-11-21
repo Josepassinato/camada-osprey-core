@@ -2643,6 +2643,39 @@ async def run_professional_qa_review(case_id: str):
         logger.error(f"❌ Erro na revisão QA: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error in QA review: {str(e)}")
 
+@api_router.get("/qa-system/learning-statistics")
+async def get_qa_learning_statistics(agent_name: Optional[str] = None, days: int = 30):
+    """
+    📊 Obtém estatísticas do sistema de aprendizado dos agentes
+    
+    Query Parameters:
+    - agent_name (opcional): Nome do agente específico
+    - days (padrão: 30): Período em dias
+    
+    Retorna estatísticas sobre:
+    - Total de lições aprendidas
+    - Taxa de sucesso
+    - Problemas mais comuns
+    - Performance por agente
+    """
+    try:
+        from agent_learning_system import get_learning_system
+        
+        learning_system = await get_learning_system(db)
+        stats = await learning_system.get_learning_statistics(
+            agent_name=agent_name,
+            days=days
+        )
+        
+        return {
+            "success": True,
+            "statistics": stats
+        }
+    
+    except Exception as e:
+        logger.error(f"❌ Erro ao obter estatísticas: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/auto-application/case/{case_id}/qa-cycle-with-feedback")
 async def run_qa_cycle_with_feedback(case_id: str, request: dict = None):
     """
