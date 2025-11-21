@@ -8702,6 +8702,12 @@ async def startup_db_client():
             await db.owl_downloads.create_index("download_id", unique=True)
             await db.owl_downloads.create_index("stripe_session_id")
             await db.owl_downloads.create_index("owl_session_id")
+            
+            # Maria conversations indexes
+            await db.maria_conversations.create_index("conversation_id")
+            await db.maria_conversations.create_index("user_id")
+            await db.maria_conversations.create_index("timestamp")
+            await db.maria_conversations.create_index([("conversation_id", 1), ("timestamp", 1)])
             await db.owl_downloads.create_index("expires_at")
             
             logger.info("Database indexes created successfully for optimized performance!")
