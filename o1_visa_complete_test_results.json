@@ -2,12 +2,12 @@
   "main_results": {
     "etapa_1_user_creation": {
       "status_code": 500,
-      "processing_time": 0.04557299613952637,
+      "processing_time": 0.06025433540344238,
       "error": "{\"detail\":\"Error creating user: 400: Email already registered\"}"
     },
     "etapa_2_login": {
       "status_code": 200,
-      "processing_time": 0.26028990745544434,
+      "processing_time": 0.2841498851776123,
       "validations": {
         "1_login_successful": true,
         "2_token_present": true,
@@ -16,7 +16,7 @@
       },
       "response_data": {
         "message": "Login successful",
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNmYxYzc0YmQtZDE4Ni00NjRmLWJkZjktZThkYzVmNWM0N2U5IiwiZW1haWwiOiJzb2ZpYS5tZW5kZXMudGVzdEBleGFtcGxlLmNvbSIsImV4cCI6MTc2NjMxMTg3NX0.jvrrWs0aHd5j-QXl2acJkXdT59GfzBFjaPLe1Gsy1SE",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNmYxYzc0YmQtZDE4Ni00NjRmLWJkZjktZThkYzVmNWM0N2U5IiwiZW1haWwiOiJzb2ZpYS5tZW5kZXMudGVzdEBleGFtcGxlLmNvbSIsImV4cCI6MTc2NjMxMjA2N30.n3cbnPVP7yNHrlhbD9Azdn_inumUb3X_mTpFx48WEng",
         "user": {
           "id": "6f1c74bd-d186-464f-bdf9-e8dc5f5c47e9",
           "email": "sofia.mendes.test@example.com",
@@ -24,11 +24,11 @@
           "last_name": "Mendes Rodrigues"
         }
       },
-      "jwt_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNmYxYzc0YmQtZDE4Ni00NjRmLWJkZjktZThkYzVmNWM0N2U5IiwiZW1haWwiOiJzb2ZpYS5tZW5kZXMudGVzdEBleGFtcGxlLmNvbSIsImV4cCI6MTc2NjMxMTg3NX0.jvrrWs0aHd5j-QXl2acJkXdT59GfzBFjaPLe1Gsy1SE"
+      "jwt_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNmYxYzc0YmQtZDE4Ni00NjRmLWJkZjktZThkYzVmNWM0N2U5IiwiZW1haWwiOiJzb2ZpYS5tZW5kZXMudGVzdEBleGFtcGxlLmNvbSIsImV4cCI6MTc2NjMxMjA2N30.n3cbnPVP7yNHrlhbD9Azdn_inumUb3X_mTpFx48WEng"
     },
     "etapa_3_start_application": {
       "status_code": 200,
-      "processing_time": 0.019292831420898438,
+      "processing_time": 0.0299832820892334,
       "validations": {
         "1_case_created": true,
         "2_case_id_format": true,
@@ -38,7 +38,7 @@
       "response_data": {
         "message": "Auto-application case created successfully",
         "case": {
-          "case_id": "OSP-DAC63435",
+          "case_id": "OSP-8D48855B",
           "user_id": "6f1c74bd-d186-464f-bdf9-e8dc5f5c47e9",
           "session_token": null,
           "form_code": null,
@@ -62,43 +62,164 @@
           "final_package_generated": false,
           "final_package_url": null,
           "completed_at": null,
-          "created_at": "2025-11-21T10:11:15.272413",
-          "updated_at": "2025-11-21T10:11:15.272414",
-          "expires_at": "2025-12-21T10:11:15.272356"
+          "created_at": "2025-11-21T10:14:27.911479",
+          "updated_at": "2025-11-21T10:14:27.911479",
+          "expires_at": "2025-12-21T10:14:27.911419"
         }
       },
-      "case_id": "OSP-DAC63435"
+      "case_id": "OSP-8D48855B"
     },
     "etapa_4_basic_data": {
-      "status_code": 404,
-      "processing_time": 0.022234678268432617,
-      "error": "{\"detail\":\"Not Found\"}"
+      "status_code": 200,
+      "processing_time": 0.03140997886657715,
+      "validations": {
+        "1_case_updated": true,
+        "2_form_code_set": true,
+        "3_basic_data_saved": true,
+        "4_progress_updated": true
+      },
+      "response_data": {
+        "message": "Case updated successfully",
+        "case": {
+          "case_id": "OSP-8D48855B",
+          "user_id": "6f1c74bd-d186-464f-bdf9-e8dc5f5c47e9",
+          "session_token": null,
+          "form_code": "O-1",
+          "status": "form_selected",
+          "process_type": "consular",
+          "progress_percentage": 30,
+          "current_step": "basic-data",
+          "basic_data": {
+            "full_name": "Sofia Mendes Rodrigues",
+            "date_of_birth": "1988-03-15",
+            "country_of_birth": "Brazil",
+            "passport_number": "BR123456789",
+            "passport_expiry": "2029-12-31",
+            "phone": "+5511987654321",
+            "email": "sofia.mendes.test@example.com",
+            "current_address": "Rua das Flores 123, S\u00e3o Paulo, SP, Brazil",
+            "marital_status": "single"
+          },
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-11-21T10:14:27.911000",
+          "updated_at": "2025-11-21T10:14:27.942000",
+          "expires_at": "2025-12-21T10:14:27.911000"
+        }
+      }
     },
     "etapa_5_friendly_form": {
-      "status_code": 404,
-      "processing_time": 0.018456220626831055,
-      "error": "{\"detail\":\"Not Found\"}"
+      "status_code": 200,
+      "processing_time": 0.025908470153808594,
+      "validations": {
+        "1_case_updated": true,
+        "2_professional_data_saved": true,
+        "3_progress_updated": true,
+        "4_current_step_updated": true
+      },
+      "response_data": {
+        "message": "Case updated successfully",
+        "case": {
+          "case_id": "OSP-8D48855B",
+          "user_id": "6f1c74bd-d186-464f-bdf9-e8dc5f5c47e9",
+          "session_token": null,
+          "form_code": "O-1",
+          "status": "form_selected",
+          "process_type": "consular",
+          "progress_percentage": 40,
+          "current_step": "friendly-form",
+          "basic_data": {
+            "full_name": "Sofia Mendes Rodrigues",
+            "date_of_birth": "1988-03-15",
+            "country_of_birth": "Brazil",
+            "passport_number": "BR123456789",
+            "passport_expiry": "2029-12-31",
+            "phone": "+5511987654321",
+            "email": "sofia.mendes.test@example.com",
+            "current_address": "Rua das Flores 123, S\u00e3o Paulo, SP, Brazil",
+            "marital_status": "single"
+          },
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": {
+            "personal_info": {
+              "full_name": "Sofia Mendes Rodrigues",
+              "title": "Dr.",
+              "field_of_expertise": "Artificial Intelligence and Machine Learning in Healthcare",
+              "years_of_experience": 15
+            },
+            "professional_background": {
+              "current_position": "Senior AI Research Scientist",
+              "current_employer": "Johns Hopkins University Hospital",
+              "job_start_date": "2026-01-15",
+              "annual_salary": 180000,
+              "job_description": "Leading research in AI-powered early cancer detection systems."
+            },
+            "achievements": [
+              {
+                "title": "AI for Good Award",
+                "organization": "United Nations",
+                "year": "2023",
+                "description": "Recognized for developing AI system that detects early-stage cancer with 95% accuracy"
+              }
+            ],
+            "publications": {
+              "total": 52,
+              "citations": 2100,
+              "h_index": 28
+            }
+          },
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-11-21T10:14:27.911000",
+          "updated_at": "2025-11-21T10:14:27.969000",
+          "expires_at": "2025-12-21T10:14:27.911000"
+        }
+      }
     },
     "etapa_6_document_uploads": {
       "uploaded_docs": [
         {
           "name": "passport_copy.pdf",
-          "document_id": "ec81abf1-b092-41d4-a15e-7601ad9f4dd1",
+          "document_id": "1fd6351a-0c52-4785-92da-0088987962ad",
           "status": "uploaded"
         },
         {
           "name": "phd_diploma_mit.pdf",
-          "document_id": "41f506e3-b4c7-49b8-a043-1e6b18677280",
+          "document_id": "4c68726f-5683-4c6b-bcf7-3cfc68704596",
           "status": "uploaded"
         },
         {
           "name": "award_certificates.pdf",
-          "document_id": "7ebde36c-306e-4c98-9349-2551011ca795",
+          "document_id": "4565c177-877c-426e-b261-aa8a69a40314",
           "status": "uploaded"
         },
         {
           "name": "job_offer_johns_hopkins.pdf",
-          "document_id": "be5c95e6-2c3f-4ac2-b895-07b99ffce637",
+          "document_id": "d747a122-db26-47c6-a121-23ffd18c35d5",
           "status": "uploaded"
         }
       ],
@@ -106,21 +227,107 @@
       "successful_uploads": 4
     },
     "etapa_7_ai_review": {
-      "status_code": 404,
-      "processing_time": 0.08213996887207031,
-      "error": "{\"detail\":\"Not Found\"}"
+      "status_code": 200,
+      "processing_time": 0.04997897148132324,
+      "validations": {
+        "1_ai_processing_completed": true,
+        "2_step_id_present": true,
+        "3_progress_updated": false
+      },
+      "response_data": {
+        "success": true,
+        "step": "validation",
+        "step_id": "validation",
+        "progress": 65,
+        "message": "Step validation completed successfully"
+      }
     },
     "etapa_8_final_status": {
-      "status_code": 404,
-      "processing_time": 0.0235595703125,
-      "error": "{\"detail\":\"Not Found\"}"
+      "status_code": 200,
+      "processing_time": 0.021446704864501953,
+      "validations": {
+        "1_status_retrieved": true,
+        "2_case_id_matches": true,
+        "3_package_generated": false,
+        "4_package_data_present": false
+      },
+      "response_data": {
+        "case": {
+          "case_id": "OSP-8D48855B",
+          "user_id": "6f1c74bd-d186-464f-bdf9-e8dc5f5c47e9",
+          "session_token": null,
+          "form_code": "O-1",
+          "status": "form_selected",
+          "process_type": "consular",
+          "progress_percentage": 65,
+          "current_step": "friendly-form",
+          "basic_data": {
+            "full_name": "Sofia Mendes Rodrigues",
+            "date_of_birth": "1988-03-15",
+            "country_of_birth": "Brazil",
+            "passport_number": "BR123456789",
+            "passport_expiry": "2029-12-31",
+            "phone": "+5511987654321",
+            "email": "sofia.mendes.test@example.com",
+            "current_address": "Rua das Flores 123, S\u00e3o Paulo, SP, Brazil",
+            "marital_status": "single"
+          },
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": {
+            "personal_info": {
+              "full_name": "Sofia Mendes Rodrigues",
+              "title": "Dr.",
+              "field_of_expertise": "Artificial Intelligence and Machine Learning in Healthcare",
+              "years_of_experience": 15
+            },
+            "professional_background": {
+              "current_position": "Senior AI Research Scientist",
+              "current_employer": "Johns Hopkins University Hospital",
+              "job_start_date": "2026-01-15",
+              "annual_salary": 180000,
+              "job_description": "Leading research in AI-powered early cancer detection systems."
+            },
+            "achievements": [
+              {
+                "title": "AI for Good Award",
+                "organization": "United Nations",
+                "year": "2023",
+                "description": "Recognized for developing AI system that detects early-stage cancer with 95% accuracy"
+              }
+            ],
+            "publications": {
+              "total": 52,
+              "citations": 2100,
+              "h_index": 28
+            }
+          },
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": {
+            "validation": "completed"
+          },
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-11-21T10:14:27.911000",
+          "updated_at": "2025-11-21T10:15:47.336000",
+          "expires_at": "2025-12-21T10:14:27.911000"
+        }
+      }
     },
     "summary": {
-      "overall_success": false,
-      "successful_steps": 2,
+      "overall_success": true,
+      "successful_steps": 6,
       "total_steps": 8,
-      "success_rate": 25.0,
-      "case_id": "OSP-DAC63435",
+      "success_rate": 75.0,
+      "case_id": "OSP-8D48855B",
       "jwt_token_present": true
     }
   },
@@ -129,7 +336,7 @@
     "o1_documents": false,
     "owl_agent": true
   },
-  "timestamp": 1763719937.0645678,
+  "timestamp": 1763720147.4403226,
   "test_focus": "O-1 Visa Complete End-to-End Flow for Dr. Sofia Mendes Rodrigues",
   "applicant": {
     "name": "Dr. Sofia Mendes Rodrigues",
