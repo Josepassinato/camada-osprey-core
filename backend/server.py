@@ -5145,8 +5145,8 @@ async def trigger_manual_scheduler_update(admin = Depends(require_admin)):
 
 
 @api_router.get("/admin/notifications")
-async def get_admin_notifications():
-    """Get admin notifications"""
+async def get_admin_notifications(admin = Depends(require_admin)):
+    """Get admin notifications - PROTECTED"""
     try:
         cursor = db.admin_notifications.find({"read": False}).sort("created_at", -1).limit(10)
         notifications = await cursor.to_list(length=None)
