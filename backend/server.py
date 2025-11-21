@@ -5122,8 +5122,8 @@ async def get_scheduler_status(admin = Depends(require_admin)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/admin/visa-updates/scheduler/trigger")
-async def trigger_manual_scheduler_update():
-    """Manually trigger visa update scan (outside of schedule)"""
+async def trigger_manual_scheduler_update(admin = Depends(require_admin)):
+    """Manually trigger visa update scan (outside of schedule) - PROTECTED"""
     try:
         global visa_scheduler
         
