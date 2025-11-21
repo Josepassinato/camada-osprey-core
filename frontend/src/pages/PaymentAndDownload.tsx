@@ -449,7 +449,7 @@ const PaymentAndDownload = () => {
                         <div className="space-y-2">
                           <Button variant="outline" className="w-full">
                             <Mail className="h-4 w-4 mr-2" />
-                            support@osprey.com
+                            contact@goosprey.com
                           </Button>
                           <Button variant="outline" className="w-full">
                             <Phone className="h-4 w-4 mr-2" />
