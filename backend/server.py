@@ -96,6 +96,7 @@ from specialized_agents import (
 from payment_packages import get_visa_package, get_all_packages, calculate_final_price
 from voucher_system import validate_voucher, get_all_active_vouchers
 from stripe_integration import create_checkout_session, verify_payment_status, handle_stripe_webhook
+import stripe
 
 # Admin Security
 from admin_security import (
