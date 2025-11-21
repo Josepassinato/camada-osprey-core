@@ -123,6 +123,7 @@ import maria_api
 
 # Professional QA Agent - Quality Assurance System
 from professional_qa_agent import get_qa_agent
+from qa_feedback_orchestrator import get_qa_orchestrator
 
 # MongoDB connection - initialized in startup event
 client = None
