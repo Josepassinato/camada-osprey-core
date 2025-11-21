@@ -26,7 +26,7 @@ export const OwlFieldGuide: React.FC<OwlFieldGuideProps> = ({ fieldId, className
   const [error, setError] = useState<string | null>(null);
 
   const getBackendUrl = () => {
-    return import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://immigration-helper-2.preview.emergentagent.com';
+    return import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://doculegal.preview.emergentagent.com';
   };
 
   useEffect(() => {
