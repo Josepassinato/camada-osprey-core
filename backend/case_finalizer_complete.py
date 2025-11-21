@@ -344,15 +344,47 @@ class CaseFinalizerComplete:
         self.temp_dir = Path("/tmp/case_finalizer")
         self.temp_dir.mkdir(exist_ok=True)
     
-    def start_finalization(self, case_id: str, scenario_key: str, postage: str, language: str) -> Dict[str, Any]:
+    def start_finalization(self, case_id: str, scenario_key: str, postage: str, language: str, 
+                          case_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
-        Inicia processo de finalização completo
+        Inicia processo de finalização completo com integração dos agentes especializados.
+        
+        Args:
+            case_id: ID do caso
+            scenario_key: Chave do cenário (pode ser auto-detectado do case_data)
+            postage: Tipo de postagem
+            language: Idioma
+            case_data: Dados completos do caso (do MongoDB) - NOVO
         """
         try:
             job_id = str(uuid.uuid4())
             
-            # Validar parâmetros
-            if scenario_key not in self.supported_scenarios:
+            # Se case_data foi fornecido, tentar usar agentes especializados
+            agent_package_result = None
+            if case_data and AGENTS_AVAILABLE:
+                form_code = case_data.get('form_code')
+                
+                # Verificar se temos agente para este formulário
+                if form_code in FORM_CODE_TO_VISA_TYPE:
+                    logger.info(f"🤖 Tentando gerar pacote com agente especializado para {form_code}")
+                    
+                    try:
+                        agent_package_result = generate_package_from_case(case_data, enable_qa=True)
+                        
+                        if agent_package_result.get('success'):
+                            logger.info(f"✅ Pacote gerado com sucesso pelo agente {agent_package_result['visa_type']}")
+                            logger.info(f"📊 QA Score: {agent_package_result.get('qa_report', {}).get('overall_score', 'N/A')}")
+                        else:
+                            logger.warning(f"⚠️ Agente falhou: {agent_package_result.get('error')}")
+                            logger.info("📝 Continuando com método tradicional")
+                            agent_package_result = None
+                    except Exception as e:
+                        logger.error(f"❌ Erro ao usar agente: {e}")
+                        logger.info("📝 Continuando com método tradicional")
+                        agent_package_result = None
+            
+            # Validar parâmetros (apenas se não usamos agente)
+            if not agent_package_result and scenario_key not in self.supported_scenarios:
                 return {
                     "success": False,
                     "error": f"Cenário não suportado: {scenario_key}",
@@ -370,13 +402,39 @@ class CaseFinalizerComplete:
                 "created_at": datetime.now(timezone.utc).isoformat(),
                 "issues": [],
                 "links": {},
-                "estimated_timeline": self.supported_scenarios[scenario_key].get("estimated_timeline"),
-                "filing_location": self.supported_scenarios[scenario_key].get("filing_location")
+                "estimated_timeline": self.supported_scenarios.get(scenario_key, {}).get("estimated_timeline", "Variable"),
+                "filing_location": self.supported_scenarios.get(scenario_key, {}).get("filing_location", "Check USCIS"),
+                "agent_used": bool(agent_package_result),  # Track if agent was used
             }
             
             self.jobs[job_id] = job_data
             
             logger.info(f"🚀 Case Finalizer Complete iniciado: job_id={job_id}, case_id={case_id}, scenario={scenario_key}")
+            
+            # Se temos resultado do agente, usar diretamente
+            if agent_package_result:
+                # Extrair informações do resultado do agente
+                package_result = agent_package_result.get('package_result', {})
+                qa_report = agent_package_result.get('qa_report', {})
+                
+                job_data.update({
+                    "status": "completed",
+                    "agent_result": agent_package_result,
+                    "qa_score": qa_report.get('overall_score', 0),
+                    "package_path": package_result.get('output_pdf', ''),
+                    "validation": agent_package_result.get('validation', {}),
+                    "links": {
+                        "package": package_result.get('output_pdf', ''),
+                        "qa_report": f"/api/visa/qa-report/{job_id}"
+                    }
+                })
+                
+                logger.info(f"✅ Case Finalizer Complete (Agent) concluído: job_id={job_id}, QA={qa_report.get('overall_score')}")
+                
+                return {"success": True, "job_id": job_id, "status": "completed", "used_agent": True}
+            
+            # Método tradicional (fallback)
+            logger.info(f"📝 Usando método tradicional de finalização")
             
             # Executar auditoria avançada
             audit_result = self._audit_case_advanced(case_id, scenario_key)
@@ -407,12 +465,14 @@ class CaseFinalizerComplete:
                 }
             })
             
-            logger.info(f"✅ Case Finalizer Complete concluído: job_id={job_id}")
+            logger.info(f"✅ Case Finalizer Complete (Traditional) concluído: job_id={job_id}")
             
-            return {"success": True, "job_id": job_id, "status": "completed"}
+            return {"success": True, "job_id": job_id, "status": "completed", "used_agent": False}
             
         except Exception as e:
             logger.error(f"❌ Erro no Case Finalizer Complete: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             return {"success": False, "error": str(e)}
     
     def _audit_case_advanced(self, case_id: str, scenario_key: str) -> Dict[str, Any]:
