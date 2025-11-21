@@ -121,6 +121,9 @@ from admin_products import (
 # Maria - Assistente Virtual
 import maria_api
 
+# Professional QA Agent - Quality Assurance System
+from professional_qa_agent import get_qa_agent
+
 # MongoDB connection - initialized in startup event
 client = None
 db = None
