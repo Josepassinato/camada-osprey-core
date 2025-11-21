@@ -23,7 +23,7 @@ class F1StudentAgent(BaseVisaAgent):
     def REQUIRED_FORMS(self) -> List[str]:
         return [
             "I-20",      # Certificate of Eligibility (issued by school)
-            "I-539",     # If changing from another status
+            # Note: I-539 only required for status changes, not new F-1 applications
         ]
     
     @property
