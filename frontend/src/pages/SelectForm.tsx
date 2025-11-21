@@ -290,8 +290,9 @@ const SelectForm = () => {
         console.log('✅ Stripe checkout created!');
         console.log('🔗 Redirecting to:', data.checkout_url);
         
-        // Mostrar mensagem antes de redirecionar
+        // Mostrar mensagem de redirecionamento
         setError('');
+        setRedirectingToStripe(true);
         
         // Redirecionar para Stripe
         setTimeout(() => {
