@@ -8660,6 +8660,10 @@ async def startup_db_client():
         init_admin_security_db(db)
         logger.info("✅ Admin Security (RBAC) initialized!")
         
+        # Initialize Products in MongoDB
+        await initialize_products_in_db(db)
+        logger.info("✅ Products initialized in MongoDB!")
+        
         # Create optimized indexes for better performance
         try:
             # Auto-application cases indexes
