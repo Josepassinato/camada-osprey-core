@@ -9100,7 +9100,10 @@ async def create_payment_intent_endpoint(request: Request):
             "transaction_id": payment_intent.id,
             "case_id": case_id,
             "visa_code": visa_code,
-            "amount": product['price'],
+            "amount": final_price,
+            "original_amount": original_price,
+            "discount_percentage": discount_percentage,
+            "voucher_code": voucher_applied,
             "currency": "usd",
             "status": "pending",
             "payment_method": "card",
@@ -9108,13 +9111,23 @@ async def create_payment_intent_endpoint(request: Request):
         }
         await db.payment_transactions.insert_one(transaction)
         
-        logger.info(f"✅ PaymentIntent criado: {payment_intent.id} - ${product['price']}")
+        logger.info(
+            f"✅ PaymentIntent criado: {payment_intent.id} - "
+            f"${final_price:.2f} (Original: ${original_price:.2f}, "
+            f"Desconto: {discount_percentage}%)"
+        )
         
         return {
             "success": True,
             "client_secret": payment_intent.client_secret,
             "payment_intent_id": payment_intent.id,
-            "package": product
+            "package": product,
+            "pricing": {
+                "original_price": original_price,
+                "discount_percentage": discount_percentage,
+                "final_price": final_price,
+                "voucher_code": voucher_applied
+            }
         }
         
     except stripe.error.StripeError as e:
