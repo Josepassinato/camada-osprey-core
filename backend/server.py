@@ -8967,8 +8967,8 @@ async def upload_knowledge_document(
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/admin/knowledge-base/list")
-async def list_knowledge_documents(skip: int = 0, limit: int = 50):
-    """Lista todos os documentos da base de conhecimento"""
+async def list_knowledge_documents(skip: int = 0, limit: int = 50, admin = Depends(require_admin)):
+    """Lista todos os documentos da base de conhecimento - PROTECTED"""
     try:
         from knowledge_base_manager import KnowledgeBaseManager
         kb_manager = KnowledgeBaseManager(db)
