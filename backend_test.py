@@ -759,56 +759,65 @@ def test_o1_visa_complete_flow():
     
     return results
 
-def test_additional_endpoints():
-    """Test additional visa API endpoints for completeness"""
+def test_additional_o1_endpoints():
+    """Test additional O-1 related endpoints for completeness"""
     
-    print("\n🔍 TESTES ADICIONAIS - ENDPOINTS RELACIONADOS")
+    print("\n🔍 TESTES ADICIONAIS - ENDPOINTS O-1 RELACIONADOS")
     print("=" * 60)
     
     additional_results = {}
     
-    # Test health check
+    # Test visa detailed info for O-1
     try:
-        print("\n🏥 Health Check:")
-        response = requests.get(f"{API_BASE}/visa/health", timeout=10)
+        print("\n📋 O-1 Visa Detailed Info:")
+        response = requests.get(f"{API_BASE}/visa-detailed-info/O-1?process_type=consular", timeout=10)
         print(f"   Status: {response.status_code}")
         if response.status_code == 200:
-            health_data = response.json()
-            print(f"   Response: {json.dumps(health_data, indent=4)}")
-        additional_results["health_check"] = response.status_code == 200
+            visa_info = response.json()
+            print(f"   Response: {json.dumps(visa_info, indent=4)}")
+        additional_results["o1_visa_info"] = response.status_code == 200
     except Exception as e:
-        print(f"   ❌ Health check failed: {str(e)}")
-        additional_results["health_check"] = False
+        print(f"   ❌ O-1 visa info failed: {str(e)}")
+        additional_results["o1_visa_info"] = False
     
-    # Test specialists list
+    # Test document requirements for O-1
     try:
-        print("\n👥 Specialists List:")
-        response = requests.get(f"{API_BASE}/visa/specialists", timeout=10)
+        print("\n📄 O-1 Document Requirements:")
+        response = requests.get(f"{API_BASE}/visa/O-1/documents", timeout=10)
         print(f"   Status: {response.status_code}")
         if response.status_code == 200:
-            specialists_data = response.json()
-            print(f"   Response: {json.dumps(specialists_data, indent=4)}")
-        additional_results["specialists_list"] = response.status_code == 200
+            doc_requirements = response.json()
+            print(f"   Response: {json.dumps(doc_requirements, indent=4)}")
+        additional_results["o1_documents"] = response.status_code == 200
     except Exception as e:
-        print(f"   ❌ Specialists list failed: {str(e)}")
-        additional_results["specialists_list"] = False
+        print(f"   ❌ O-1 document requirements failed: {str(e)}")
+        additional_results["o1_documents"] = False
     
-    # Test visa type detection
+    # Test Owl Agent endpoints (if available)
     try:
-        print("\n🔍 Visa Type Detection:")
-        response = requests.get(
-            f"{API_BASE}/visa/detect-type",
-            params={"user_input": "I need to extend my tourist visa"},
+        print("\n🦉 Owl Agent Session Start:")
+        owl_data = {
+            "visa_type": "O-1",
+            "language": "pt",
+            "user_profile": {
+                "name": "Sofia Mendes Rodrigues",
+                "field": "AI Research"
+            }
+        }
+        response = requests.post(
+            f"{API_BASE}/owl-agent/start-session",
+            json=owl_data,
+            headers={"Content-Type": "application/json"},
             timeout=10
         )
         print(f"   Status: {response.status_code}")
-        if response.status_code == 200:
-            detection_data = response.json()
-            print(f"   Response: {json.dumps(detection_data, indent=4)}")
-        additional_results["visa_detection"] = response.status_code == 200
+        if response.status_code in [200, 201]:
+            owl_session = response.json()
+            print(f"   Response: {json.dumps(owl_session, indent=4)}")
+        additional_results["owl_agent"] = response.status_code in [200, 201]
     except Exception as e:
-        print(f"   ❌ Visa detection failed: {str(e)}")
-        additional_results["visa_detection"] = False
+        print(f"   ❌ Owl Agent failed: {str(e)}")
+        additional_results["owl_agent"] = False
     
     return additional_results
 
