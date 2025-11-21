@@ -3335,6 +3335,50 @@ async def start_case_finalization(case_id: str, request: dict):
                 # Serializar para remover ObjectId e tornar JSON-safe
                 case_data = serialize_doc(case)
                 logger.info(f"📦 Dados do caso {case_id} carregados: form_code={case_data.get('form_code')}")
+                
+                # 🔍 REVISÃO QA OBRIGATÓRIA ANTES DE FINALIZAR
+                qa_approved = case_data.get('qa_approved', False)
+                
+                if not qa_approved:
+                    logger.warning(f"⚠️ Case {case_id} não passou pela revisão QA ou foi reprovado")
+                    
+                    # Executar revisão QA automaticamente
+                    qa_agent = get_qa_agent()
+                    qa_report = qa_agent.comprehensive_review(case_data)
+                    
+                    # Salvar resultado da revisão
+                    await db.auto_cases.update_one(
+                        {"case_id": case_id},
+                        {
+                            "$set": {
+                                "qa_review": qa_report,
+                                "qa_approved": qa_report['approval']['approved'],
+                                "qa_score": qa_report['overall_score'],
+                                "qa_review_date": datetime.utcnow()
+                            }
+                        }
+                    )
+                    
+                    # Se não foi aprovado, bloquear finalização
+                    if not qa_report['approval']['approved']:
+                        return {
+                            "success": False,
+                            "error": "quality_check_failed",
+                            "message": "❌ Aplicação não passou na revisão de qualidade",
+                            "qa_report": {
+                                "approved": False,
+                                "score": qa_report['overall_score'],
+                                "reason": qa_report['approval']['reason'],
+                                "missing_items": qa_report.get('missing_items', []),
+                                "required_actions": qa_report['approval']['required_actions'],
+                                "recommendations": qa_report.get('recommendations', [])
+                            }
+                        }
+                    else:
+                        logger.info(f"✅ Case {case_id} aprovado na revisão QA automática")
+                else:
+                    logger.info(f"✅ Case {case_id} já aprovado em revisão QA anterior")
+                
             else:
                 logger.warning(f"⚠️ Caso {case_id} não encontrado no MongoDB")
         except Exception as db_error:
