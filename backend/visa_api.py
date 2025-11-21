@@ -75,7 +75,7 @@ async def generate_visa_package(request: VisaRequest):
     try:
         # Process request
         result = supervisor.process_request(
-            request.user_input,
+            request.user_request,
             request.applicant_data or {}
         )
         
