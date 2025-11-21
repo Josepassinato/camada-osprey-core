@@ -2677,9 +2677,9 @@ async def run_qa_cycle_with_feedback(case_id: str, request: dict = None):
         logger.info(f"🔄 Iniciando ciclo de QA com feedback loop para case {case_id}")
         logger.info(f"   Max iterações: {max_iterations}, Auto-fix: {auto_fix}")
         
-        # Obter agente de QA e orquestrador
+        # Obter agente de QA e orquestrador com sistema de aprendizado
         qa_agent = get_qa_agent()
-        orchestrator = get_qa_orchestrator()
+        orchestrator = get_qa_orchestrator(db)
         
         # Executar ciclo completo
         result = await orchestrator.orchestrate_qa_cycle(
