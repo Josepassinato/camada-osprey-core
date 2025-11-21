@@ -10,6 +10,8 @@ from datetime import datetime
 import uuid
 
 from maria_agent import maria
+from maria_whatsapp import maria_whatsapp
+from maria_voice import maria_voice
 
 router = APIRouter(prefix="/api/maria", tags=["maria"])
 
