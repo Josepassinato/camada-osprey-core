@@ -605,13 +605,13 @@ def test_o1_visa_complete_flow():
         print(f"❌ Exception during AI processing: {str(e)}")
         results["etapa_7_ai_review"]["exception"] = str(e)
     
-    # ETAPA 8: Verificar status e obter link final
-    print("\n📋 ETAPA 8: Verificar Status Final e Download")
+    # ETAPA 8: Verificar status final e gerar pacote
+    print("\n📋 ETAPA 8: Verificar Status Final e Gerar Pacote")
     print("-" * 50)
     
     try:
-        # Check status
-        print(f"🔗 Endpoint: GET {API_BASE}/auto-application/case/{case_id}/status")
+        # Check current case status
+        print(f"🔗 Endpoint: GET {API_BASE}/auto-application/case/{case_id}")
         
         headers = {
             "Authorization": f"Bearer {jwt_token}"
@@ -619,7 +619,7 @@ def test_o1_visa_complete_flow():
         
         start_time = time.time()
         response = requests.get(
-            f"{API_BASE}/auto-application/case/{case_id}/status",
+            f"{API_BASE}/auto-application/case/{case_id}",
             headers=headers,
             timeout=30
         )
@@ -633,46 +633,48 @@ def test_o1_visa_complete_flow():
         
         if response.status_code == 200:
             response_data = response.json()
-            print(f"📄 Status Response: {json.dumps(response_data, indent=2)}")
+            print(f"📄 Case Status Response: {json.dumps(response_data, indent=2)}")
             
-            # Try to get download link
+            # Try to generate package
             try:
-                download_response = requests.get(
-                    f"{API_BASE}/auto-application/case/{case_id}/download-link",
+                print(f"\n🔗 Trying to generate package...")
+                package_response = requests.get(
+                    f"{API_BASE}/auto-application/case/{case_id}/generate-package",
                     headers=headers,
-                    timeout=30
+                    timeout=60
                 )
                 
-                print(f"📊 Download Link Status: {download_response.status_code}")
+                print(f"📊 Package Generation Status: {package_response.status_code}")
                 
-                if download_response.status_code == 200:
-                    download_data = download_response.json()
-                    print(f"📄 Download Response: {json.dumps(download_data, indent=2)}")
+                if package_response.status_code == 200:
+                    package_data = package_response.json()
+                    print(f"📄 Package Response: {json.dumps(package_data, indent=2)}")
                     
                     validations = {
                         "1_status_retrieved": True,
                         "2_case_id_matches": case_id in str(response_data),
-                        "3_download_available": download_response.status_code == 200,
-                        "4_download_link_present": download_data.get("download_url") is not None
+                        "3_package_generated": package_response.status_code == 200,
+                        "4_package_data_present": len(package_data) > 0
                     }
                     
-                    results["etapa_8_final_status"]["download_data"] = download_data
+                    results["etapa_8_final_status"]["package_data"] = package_data
                     
                 else:
+                    print(f"📄 Package Error: {package_response.text}")
                     validations = {
                         "1_status_retrieved": True,
                         "2_case_id_matches": case_id in str(response_data),
-                        "3_download_available": False,
-                        "4_download_link_present": False
+                        "3_package_generated": False,
+                        "4_package_data_present": False
                     }
                     
-            except Exception as download_error:
-                print(f"❌ Download link error: {str(download_error)}")
+            except Exception as package_error:
+                print(f"❌ Package generation error: {str(package_error)}")
                 validations = {
                     "1_status_retrieved": True,
                     "2_case_id_matches": case_id in str(response_data),
-                    "3_download_available": False,
-                    "4_download_link_present": False
+                    "3_package_generated": False,
+                    "4_package_data_present": False
                 }
             
             results["etapa_8_final_status"]["validations"] = validations
