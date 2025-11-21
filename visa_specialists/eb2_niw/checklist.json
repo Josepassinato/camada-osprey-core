@@ -1,0 +1,25 @@
+{
+  "required_forms": [
+    "I-140"
+  ],
+  "required_documents": [
+    "Form I-140 (Completed)",
+    "Cover Letter",
+    "Personal Statement",
+    "Curriculum Vitae (CV/Resume)",
+    "Educational Credentials (Degrees, Transcripts)",
+    "Evidence of Advanced Degree or Exceptional Ability",
+    "Evidence of National Interest",
+    "Letters of Recommendation (5-8)",
+    "Publications and Citations",
+    "Patent Documentation",
+    "Awards and Recognition",
+    "Professional Memberships",
+    "Evidence of Impact in Field",
+    "Media Coverage",
+    "Expert Opinion Letters"
+  ],
+  "forbidden_documents": [
+    "Labor Certification (PERM) - NIW waives this requirement"
+  ]
+}

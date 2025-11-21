@@ -1,0 +1,17 @@
+{
+  "required_forms": [
+    "I-90"
+  ],
+  "required_documents": [
+    "Form I-90 (Completed)",
+    "Cover Letter",
+    "Copy of Current/Expired Green Card (front and back)",
+    "Two Passport Photos",
+    "Copy of Passport (biographical page)",
+    "Evidence for Replacement Reason",
+    "Filing Fee Payment"
+  ],
+  "forbidden_documents": [
+    "Citizenship documents (N-400 is separate)"
+  ]
+}

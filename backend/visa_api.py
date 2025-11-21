@@ -61,14 +61,14 @@ print(f"✅ {len(supervisor.specialists)} agentes especializados registrados no 
 
 # Mapping between frontend form codes and agent visa types
 FORM_CODE_TO_VISA_TYPE = {
-    'I-539': 'B-2',  # Tourist visa extension
-    'F-1': 'F-1',    # Student visa
-    'I-130': 'I-130',  # Family-based (not yet implemented)
-    'I-765': 'I-765',  # EAD (not yet implemented)
-    'I-90': 'I-90',    # Green card renewal (not yet implemented)
-    'EB-2 NIW': 'EB-2 NIW',  # National Interest Waiver (not yet implemented)
-    'EB-1A': 'EB-1A',  # Extraordinary Ability (not yet implemented)
-    'H-1B': 'H-1B',    # Work visa
+    'I-539': 'B-2',        # Tourist visa extension ✅ IMPLEMENTED
+    'F-1': 'F-1',          # Student visa ✅ IMPLEMENTED
+    'I-130': 'I-130',      # Family-based ✅ IMPLEMENTED
+    'I-765': 'I-765',      # EAD ✅ IMPLEMENTED
+    'I-90': 'I-90',        # Green card renewal ✅ IMPLEMENTED
+    'EB-2 NIW': 'EB-2 NIW',  # National Interest Waiver ✅ IMPLEMENTED
+    'EB-1A': 'EB-1A',      # Extraordinary Ability ✅ IMPLEMENTED
+    'H-1B': 'H-1B',        # Work visa ✅ IMPLEMENTED
 }
 
 

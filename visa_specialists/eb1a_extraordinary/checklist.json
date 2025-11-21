@@ -1,0 +1,28 @@
+{
+  "required_forms": [
+    "I-140"
+  ],
+  "required_documents": [
+    "Form I-140 (Completed)",
+    "Cover Letter",
+    "Personal Statement",
+    "Comprehensive CV/Resume",
+    "Evidence of One-Time Achievement OR 3+ of 10 Criteria",
+    "Major International Award Evidence (if applicable)",
+    "Membership in Associations",
+    "Published Material About You",
+    "Judging Work of Others",
+    "Original Contributions of Major Significance",
+    "Scholarly Articles",
+    "Work Displayed at Exhibitions",
+    "Leading/Critical Role Evidence",
+    "High Salary/Remuneration",
+    "Commercial Success Evidence",
+    "Expert Opinion Letters",
+    "Letters of Recommendation (8-10)"
+  ],
+  "forbidden_documents": [
+    "Labor Certification (not required for EB-1A)",
+    "Job Offer (not required for EB-1A)"
+  ]
+}

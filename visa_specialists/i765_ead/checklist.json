@@ -1,0 +1,19 @@
+{
+  "required_forms": [
+    "I-765"
+  ],
+  "required_documents": [
+    "Form I-765 (Completed)",
+    "Cover Letter",
+    "Two Passport Photos",
+    "Copy of I-94 (Arrival/Departure Record)",
+    "Copy of Passport (biographical page)",
+    "Copy of Previous EAD (if renewal)",
+    "Evidence of Eligible Category",
+    "Supporting Documents for Category",
+    "Filing Fee Payment"
+  ],
+  "forbidden_documents": [
+    "Documents unrelated to employment authorization"
+  ]
+}

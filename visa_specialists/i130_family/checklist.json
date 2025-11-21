@@ -1,0 +1,24 @@
+{
+  "required_forms": [
+    "I-130"
+  ],
+  "required_documents": [
+    "Form I-130 (Completed)",
+    "Cover Letter",
+    "Petitioner's Proof of Status (US Citizen or Green Card)",
+    "Birth Certificate (Beneficiary)",
+    "Marriage Certificate (if spouse)",
+    "Divorce/Death Certificates (if applicable)",
+    "Passport Copies",
+    "Two Passport Photos (each person)",
+    "Proof of Relationship",
+    "Financial Support Evidence (I-864)",
+    "Police Clearance Certificates",
+    "Medical Examination"
+  ],
+  "forbidden_documents": [
+    "Employment Authorization (unless concurrent filing)",
+    "Work Visa Documents",
+    "Student Visa Documents"
+  ]
+}
