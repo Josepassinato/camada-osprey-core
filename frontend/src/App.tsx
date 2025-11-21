@@ -24,6 +24,7 @@ import AdminKnowledgeBase from "./pages/AdminKnowledgeBase";
 import RequestPackageEmail from "./pages/RequestPackageEmail";
 import SelectForm from "./pages/SelectForm";
 import VisaPreview from "./pages/VisaPreview";
+import EmbeddedCheckout from "./pages/EmbeddedCheckout";
 import BasicData from "./pages/BasicData";
 import DocumentUploadAuto from "./pages/DocumentUploadAuto";
 import USCISFormFilling from "./pages/USCISFormFilling";
