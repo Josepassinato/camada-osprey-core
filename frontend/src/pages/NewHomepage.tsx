@@ -417,7 +417,7 @@ const NewHomepage = () => {
               3 Passos Simples Para Seu Visto
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Nossa IA guia você do início ao fim. Sem burocracia, sem complicação.
+              Nosso sistema guia você do início ao fim. Sem burocracia, sem complicação.
             </p>
           </div>
 
