@@ -116,7 +116,7 @@ def test_visa_generate_endpoint():
             print(f"  📄 Páginas: {pdf_pages} (target: ≥20)")
             print(f"  💾 Tamanho: {pdf_size_kb} KB (target: ≥500 KB)")
             print(f"  🖼️  Imagens: {'✅ Sim' if pdf_has_images else '❌ Não'}")
-            print(f"  🎯 QA Score: {qa_score}% (target: ≥80%)")
+            print(f"  🎯 QA Score: {qa_score_percent:.1f}% (target: ≥80%)")
             print(f"  📋 Package Result: {package_result}")
             print(f"  ✅ Validation: {validation}")
             print(f"  🎯 QA Report: {qa_report}")
