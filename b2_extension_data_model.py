@@ -114,6 +114,10 @@ class B2ExtensionCase:
         
         # Informações Financeiras
         self.financial_support = {
+            # Simplified access fields
+            "bank_balance": "$120,000",
+            "pension_amount": "$2,500/month",
+            
             "source": "Personal savings and family support",
             "bank_name": "Banco do Brasil",
             "account_balance": "R$ 485,000 (~$97,000 USD)",
