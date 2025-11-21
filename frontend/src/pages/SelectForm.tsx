@@ -46,6 +46,7 @@ const SelectForm = () => {
   const [selectedForm, setSelectedForm] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [redirectingToStripe, setRedirectingToStripe] = useState(false);
   const [showRequirements, setShowRequirements] = useState(false);
   const [selectedVisaType, setSelectedVisaType] = useState("");
   const [visaDetailsMap, setVisaDetailsMap] = useState<Record<string, any>>({});
