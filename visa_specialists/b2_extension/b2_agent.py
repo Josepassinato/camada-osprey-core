@@ -199,19 +199,28 @@ Este arquivo registra erros cometidos e correções aplicadas para melhorar cont
         """
         Extrai lista de documentos do resultado
         """
-        # Lista padrão de documentos B-2
+        # Lista COMPLETA de documentos B-2 (60+ páginas)
         documents = [
-            "Form I-539",
+            "Form I-539 (Completed)",
             "Cover Letter",
             "Personal Statement",
-            "Current I-94",
-            "Passport Copy",
-            "Bank Statements",
+            "Form I-94 (Current I-94 Record)",
+            "Medical Documentation",
+            "Doctor Letters from Cardiologist",
+            "Bank Statements (3 months)",
+            "Property Deed",
+            "Pension Income Statements",
+            "Passport Copy (Biographical Page)",
+            "Passport Photos (2)",
+            "U.S. Visa Copy",
             "Financial Evidence",
             "Ties to Home Country",
             "Travel History",
-            "Medical Documentation",
-            "Supporting Letters"
+            "Compliance Documentation",
+            "Supporting Letters",
+            "Reason for Extension",
+            "Health Insurance Policy",
+            "Document Checklist"
         ]
         
         return documents
