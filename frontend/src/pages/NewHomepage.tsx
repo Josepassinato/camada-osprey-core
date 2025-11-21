@@ -88,7 +88,7 @@ const NewHomepage = () => {
             
             {/* Main Headline */}
             <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-              Faça Seu Visto Americano
+              Faça <span className="text-purple-600">Você</span> Seu Visto Americano
               <span className="block bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
                 10x Mais Rápido
               </span>
