@@ -2,6 +2,11 @@
 QA Feedback Orchestrator
 Sistema de feedback loop que encaminha problemas detectados pelo QA Agent
 para os agentes construtores apropriados realizarem correções automáticas
+
+AGORA COM SISTEMA DE APRENDIZADO CONTÍNUO:
+- Agentes aprendem com cada correção
+- Evitam repetir os mesmos erros
+- Aplicam correções preventivas baseadas em histórico
 """
 
 import os
