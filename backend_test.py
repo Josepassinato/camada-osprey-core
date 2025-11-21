@@ -48,13 +48,10 @@ def test_visa_generate_endpoint():
     # Test with the EXACT format specified in the review request
     f1_payload = {
         "visa_type": "F-1",
-        "user_request": "Preciso de ajuda para preparar minha aplicação de visto F-1 de estudante. Fui aceito no programa de mestrado em Ciência da Computação na Boston University e preciso de um pacote completo e profissional para minha entrevista no consulado.",
+        "user_request": "Preciso de um pacote COMPLETO para visto F-1 de estudante incluindo TODOS os documentos oficiais com imagens simuladas (passaporte, I-20, transcripts, extratos bancários). Fui aceito na Boston University para mestrado.",
         "applicant_data": {
             "full_name": "Rafael Santos Oliveira",
-            "nationality": "Brazilian",
-            "program": "Master of Science in Computer Science",
-            "school": "Boston University",
-            "start_date": "September 3, 2025"
+            "nationality": "Brazilian"
         }
     }
     
