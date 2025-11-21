@@ -8757,6 +8757,67 @@ async def startup_db_client():
 # PAYMENT ENDPOINTS - STRIPE INTEGRATION
 # ============================================================================
 
+@api_router.post("/payment/create-payment-intent")
+async def create_payment_intent_endpoint(request: Request):
+    """Cria PaymentIntent para checkout integrado (Stripe Elements)"""
+    try:
+        body = await request.json()
+        visa_code = body.get("visa_code")
+        case_id = body.get("case_id")
+        
+        if not visa_code or not case_id:
+            raise HTTPException(status_code=400, detail="visa_code e case_id são obrigatórios")
+        
+        # Buscar informações do produto
+        product = await get_product_for_checkout(db, visa_code)
+        
+        if not product:
+            raise HTTPException(status_code=404, detail=f"Produto {visa_code} não encontrado")
+        
+        # Criar PaymentIntent
+        import stripe
+        stripe.api_key = os.environ.get('STRIPE_API_KEY')
+        
+        payment_intent = stripe.PaymentIntent.create(
+            amount=int(product['price'] * 100),  # Converter para centavos
+            currency='usd',
+            metadata={
+                'visa_code': visa_code,
+                'case_id': case_id
+            },
+            description=f"{product['name']} - {visa_code}"
+        )
+        
+        # Salvar transação no banco
+        transaction = {
+            "transaction_id": payment_intent.id,
+            "case_id": case_id,
+            "visa_code": visa_code,
+            "amount": product['price'],
+            "currency": "usd",
+            "status": "pending",
+            "payment_method": "card",
+            "created_at": datetime.utcnow()
+        }
+        await db.payment_transactions.insert_one(transaction)
+        
+        logger.info(f"✅ PaymentIntent criado: {payment_intent.id} - ${product['price']}")
+        
+        return {
+            "success": True,
+            "client_secret": payment_intent.client_secret,
+            "payment_intent_id": payment_intent.id,
+            "package": product
+        }
+        
+    except stripe.error.StripeError as e:
+        logger.error(f"❌ Erro Stripe: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.error(f"❌ Erro ao criar PaymentIntent: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.post("/payment/create-checkout")
 async def create_payment_checkout(request: Request):
     """
