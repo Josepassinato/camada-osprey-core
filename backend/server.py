@@ -9885,6 +9885,9 @@ if VISA_API_AVAILABLE:
     app.include_router(visa_router)
     print("✅ Visa Multi-Agent API registered")
 
+# Include Maria router
+app.include_router(maria_api.router)
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     """Shutdown event to close connections"""
