@@ -8986,8 +8986,8 @@ async def get_knowledge_categories(admin = Depends(require_admin)):
     }
 
 @api_router.get("/admin/knowledge-base/{document_id}")
-async def get_knowledge_document(document_id: str):
-    """Busca documento específico por ID"""
+async def get_knowledge_document(document_id: str, admin = Depends(require_admin)):
+    """Busca documento específico por ID - PROTECTED"""
     try:
         from knowledge_base_manager import KnowledgeBaseManager
         kb_manager = KnowledgeBaseManager(db)
