@@ -50,7 +50,7 @@ class VisaResponse(BaseModel):
     """Response model"""
     success: bool
     visa_type: Optional[str] = None
-    result: Optional[Dict[str, Any]] = None
+    package_result: Optional[Dict[str, Any]] = None
     validation: Optional[Dict[str, Any]] = None
     qa_report: Optional[Dict[str, Any]] = None
     processing_time: float
