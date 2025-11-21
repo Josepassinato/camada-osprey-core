@@ -63,7 +63,7 @@ async def chat_with_maria(chat_msg: ChatMessage):
         user_context = None
         conversation_history = []
         
-        if chat_msg.user_id and db:
+        if chat_msg.user_id and db is not None:
             # Buscar informações do usuário
             user = await db.users.find_one({"id": chat_msg.user_id})
             
@@ -82,15 +82,14 @@ async def chat_with_maria(chat_msg: ChatMessage):
                 }
             
             # Buscar histórico da conversa
-            if db:
-                history = await db.maria_conversations.find({
-                    "conversation_id": conversation_id
-                }).sort("timestamp", 1).to_list(length=10)
-                
-                conversation_history = []
-                for msg in history:
-                    conversation_history.append({"role": "user", "content": msg.get("user_message")})
-                    conversation_history.append({"role": "assistant", "content": msg.get("maria_response")})
+            history = await db.maria_conversations.find({
+                "conversation_id": conversation_id
+            }).sort("timestamp", 1).to_list(length=10)
+            
+            conversation_history = []
+            for msg in history:
+                conversation_history.append({"role": "user", "content": msg.get("user_message")})
+                conversation_history.append({"role": "assistant", "content": msg.get("maria_response")})
         
         # Processar mensagem com Maria
         result = await maria.chat(
