@@ -225,6 +225,17 @@ class B2ExtensionCase:
         
         # Histórico de Viagens
         self.travel_history = {
+            # Simplified access fields
+            "total_previous_visits": 2,
+            "total_time_in_us": "83 days (prior visits)",
+            "overstay_record": "None - Perfect compliance",
+            "visit_1_entry": "07/10/2023",
+            "visit_1_exit": "09/05/2023",
+            "visit_1_duration": "57 days",
+            "visit_2_entry": "12/20/2022",
+            "visit_2_exit": "01/15/2023",
+            "visit_2_duration": "26 days",
+            
             "us_visits": [
                 {
                     "year": "2024-2025",
