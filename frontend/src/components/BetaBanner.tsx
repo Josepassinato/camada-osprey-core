@@ -66,7 +66,7 @@ const BetaBanner: React.FC = () => {
 
         {/* Link de Feedback (opcional) */}
         <a
-          href="mailto:feedback@example.com"
+          href="mailto:contact@goosprey.com"
           style={{
             color: 'white',
             textDecoration: 'none',
