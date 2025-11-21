@@ -265,11 +265,11 @@ def test_additional_endpoints():
     return additional_results
 
 if __name__ == "__main__":
-    print("🚀 INICIANDO TESTE ESPECÍFICO DA REVIEW - B-2 COMPLETE PACKAGE")
+    print("🚀 INICIANDO TESTE ESPECÍFICO DA REVIEW - F-1 STUDENT VISA")
     print(f"🌐 Backend URL: {BACKEND_URL}")
     print(f"🔗 API Base: {API_BASE}")
     
-    # Main test - B-2 Complete Package as requested
+    # Main test - F-1 Student Package as requested
     main_results = test_visa_generate_endpoint()
     
     # Additional tests for context
@@ -277,16 +277,16 @@ if __name__ == "__main__":
     
     # Final summary
     print("\n" + "=" * 80)
-    print("🎯 RELATÓRIO FINAL - TESTE B-2 COMPLETE PACKAGE")
+    print("🎯 RELATÓRIO FINAL - TESTE F-1 STUDENT VISA")
     print("=" * 80)
     
     print(f"✅ Endpoint testado: POST /api/visa/generate")
     print(f"📊 Teste principal: {main_results['summary']['tests_passed']}/{main_results['summary']['tests_total']}")
     print(f"🔍 Testes adicionais: {sum(additional_results.values())}/{len(additional_results)}")
     
-    # Detailed analysis of B-2 test results
-    b2_results = main_results.get("test_1_b2_complete_package", {})
-    validations = b2_results.get("validations", {})
+    # Detailed analysis of F-1 test results
+    f1_results = main_results.get("test_1_f1_student_package", {})
+    validations = f1_results.get("validations", {})
     
     print(f"\n📋 ANÁLISE DETALHADA DAS VALIDAÇÕES:")
     for validation, passed in validations.items():
@@ -294,21 +294,27 @@ if __name__ == "__main__":
         print(f"  {status} {validation}")
     
     if main_results["summary"]["overall_success"]:
-        print("\n🎉 CONCLUSÃO: B-2 Complete Package endpoint está FUNCIONAL!")
+        print("\n🎉 CONCLUSÃO: F-1 Student Visa endpoint está FUNCIONAL!")
         print("✅ Todas as validações críticas foram atendidas")
         print("✅ Sistema multi-agente operacional")
+        
+        # Show PDF download link if available
+        f1_response = f1_results.get("response_data", {})
+        package_result = f1_response.get("package_result", {})
+        if package_result.get("download_url"):
+            print(f"📁 Link para download: {package_result['download_url']}")
     else:
-        print("\n⚠️  CONCLUSÃO: B-2 Complete Package precisa de melhorias")
+        print("\n⚠️  CONCLUSÃO: F-1 Student Visa precisa de melhorias")
         failed_validations = [k for k, v in validations.items() if not v]
         print(f"❌ Validações que falharam: {', '.join(failed_validations)}")
         
     # Save results to file
-    with open("/app/b2_complete_package_test_results.json", "w") as f:
+    with open("/app/f1_student_visa_test_results.json", "w") as f:
         json.dump({
             "main_results": main_results,
             "additional_results": additional_results,
             "timestamp": time.time(),
-            "test_focus": "B-2 Complete Package as requested in review"
+            "test_focus": "F-1 Student Visa as requested in review"
         }, f, indent=2)
     
-    print(f"\n💾 Resultados salvos em: /app/b2_complete_package_test_results.json")
+    print(f"\n💾 Resultados salvos em: /app/f1_student_visa_test_results.json")
