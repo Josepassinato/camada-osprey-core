@@ -91,23 +91,6 @@ const Hero = () => {
               </Button>
             </div>
 
-            {/* Social proof */}
-            <div className="flex items-center gap-8 pt-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-foreground">5.000+</div>
-                <div className="text-sm text-muted-foreground">Aprovações</div>
-              </div>
-              <div className="w-px h-12 bg-gray-300"></div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-foreground">98%</div>
-                <div className="text-sm text-muted-foreground">Taxa de Sucesso</div>
-              </div>
-              <div className="w-px h-12 bg-gray-300"></div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-foreground">24/7</div>
-                <div className="text-sm text-muted-foreground">Suporte Expert</div>
-              </div>
-            </div>
           </div>
 
           {/* Visual */}
