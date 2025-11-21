@@ -125,6 +125,7 @@ const App = () => (
     </TooltipProvider>
     </ProcessTypeProvider>
     </LanguageProvider>
+    </LocaleProvider>
   </QueryClientProvider>
 );
 
