@@ -9001,8 +9001,8 @@ async def get_knowledge_document(document_id: str, admin = Depends(require_admin
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/admin/knowledge-base/{document_id}/download")
-async def download_knowledge_document(document_id: str):
-    """Download do arquivo PDF"""
+async def download_knowledge_document(document_id: str, admin = Depends(require_admin)):
+    """Download do arquivo PDF - PROTECTED"""
     try:
         from knowledge_base_manager import KnowledgeBaseManager
         from fastapi.responses import Response
