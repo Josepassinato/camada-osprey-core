@@ -59,9 +59,17 @@ const Signup = () => {
         localStorage.setItem('osprey_token', data.token);
         localStorage.setItem('osprey_user', JSON.stringify(data.user));
         
-        // Redirect to dashboard after success message
+        // Check if there's a redirect URL saved
+        const redirectUrl = localStorage.getItem('osprey_redirect_after_login');
+        
+        // Redirect after success message
         setTimeout(() => {
-          navigate('/dashboard');
+          if (redirectUrl) {
+            localStorage.removeItem('osprey_redirect_after_login');
+            navigate(redirectUrl);
+          } else {
+            navigate('/dashboard');
+          }
         }, 2000);
       } else {
         setError(data.detail || 'Erro ao criar conta. Tente novamente.');
