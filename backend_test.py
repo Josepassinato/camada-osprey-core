@@ -130,11 +130,146 @@ def test_o1_visa_complete_flow():
         else:
             print(f"❌ Request failed with status {response.status_code}")
             print(f"📄 Error response: {response.text}")
-            results["test_1_f1_student_package"]["error"] = response.text
+            results["etapa_1_user_creation"]["error"] = response.text
             
     except Exception as e:
-        print(f"❌ Exception during F-1 student package test: {str(e)}")
-        results["test_1_f1_student_package"]["exception"] = str(e)
+        print(f"❌ Exception during user creation: {str(e)}")
+        results["etapa_1_user_creation"]["exception"] = str(e)
+    
+    # ETAPA 2: Login
+    print("\n📋 ETAPA 2: Login do Usuário")
+    print("-" * 50)
+    
+    login_data = {
+        "email": "sofia.mendes.test@example.com",
+        "password": "TestPassword123!"
+    }
+    
+    try:
+        print(f"🔗 Endpoint: POST {API_BASE}/auth/login")
+        print(f"📤 Payload: {json.dumps(login_data, indent=2)}")
+        
+        start_time = time.time()
+        response = requests.post(
+            f"{API_BASE}/auth/login",
+            json=login_data,
+            headers={"Content-Type": "application/json"},
+            timeout=30
+        )
+        processing_time = time.time() - start_time
+        
+        print(f"⏱️  Processing time: {processing_time:.2f}s")
+        print(f"📊 Status Code: {response.status_code}")
+        
+        results["etapa_2_login"]["status_code"] = response.status_code
+        results["etapa_2_login"]["processing_time"] = processing_time
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"📄 Response: {json.dumps(response_data, indent=2)}")
+            
+            # Update JWT token from login
+            jwt_token = response_data.get("token")
+            user_info = response_data.get("user", {})
+            
+            validations = {
+                "1_login_successful": response_data.get("message") == "Login successful",
+                "2_token_present": jwt_token is not None,
+                "3_user_email_correct": user_info.get("email") == "sofia.mendes.test@example.com",
+                "4_user_name_correct": user_info.get("first_name") == "Sofia"
+            }
+            
+            results["etapa_2_login"]["validations"] = validations
+            results["etapa_2_login"]["response_data"] = response_data
+            results["etapa_2_login"]["jwt_token"] = jwt_token
+            
+            print("\n🎯 VALIDAÇÕES ETAPA 2:")
+            print("=" * 50)
+            for check, passed in validations.items():
+                status = "✅" if passed else "❌"
+                print(f"  {status} {check}: {passed}")
+                
+        else:
+            print(f"❌ Login failed with status {response.status_code}")
+            print(f"📄 Error response: {response.text}")
+            results["etapa_2_login"]["error"] = response.text
+            
+    except Exception as e:
+        print(f"❌ Exception during login: {str(e)}")
+        results["etapa_2_login"]["exception"] = str(e)
+    
+    # ETAPA 3: Iniciar aplicação O-1
+    print("\n📋 ETAPA 3: Iniciar Aplicação O-1")
+    print("-" * 50)
+    
+    if not jwt_token:
+        print("❌ Cannot proceed without JWT token")
+        return results
+    
+    start_application_data = {
+        "visa_code": "O-1",
+        "user_email": "sofia.mendes.test@example.com"
+    }
+    
+    try:
+        print(f"🔗 Endpoint: POST {API_BASE}/auto-application/start")
+        print(f"📤 Payload: {json.dumps(start_application_data, indent=2)}")
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {jwt_token}"
+        }
+        
+        start_time = time.time()
+        response = requests.post(
+            f"{API_BASE}/auto-application/start",
+            json=start_application_data,
+            headers=headers,
+            timeout=30
+        )
+        processing_time = time.time() - start_time
+        
+        print(f"⏱️  Processing time: {processing_time:.2f}s")
+        print(f"📊 Status Code: {response.status_code}")
+        
+        results["etapa_3_start_application"]["status_code"] = response.status_code
+        results["etapa_3_start_application"]["processing_time"] = processing_time
+        
+        if response.status_code in [200, 201]:
+            response_data = response.json()
+            print(f"📄 Response: {json.dumps(response_data, indent=2)}")
+            
+            # Extract case_id for subsequent requests
+            case_id = response_data.get("case_id")
+            
+            validations = {
+                "1_case_created": case_id is not None,
+                "2_case_id_format": case_id.startswith("OSP-") if case_id else False,
+                "3_visa_code_correct": response_data.get("form_code") == "O-1",
+                "4_status_created": response_data.get("status") == "created"
+            }
+            
+            results["etapa_3_start_application"]["validations"] = validations
+            results["etapa_3_start_application"]["response_data"] = response_data
+            results["etapa_3_start_application"]["case_id"] = case_id
+            
+            print("\n🎯 VALIDAÇÕES ETAPA 3:")
+            print("=" * 50)
+            for check, passed in validations.items():
+                status = "✅" if passed else "❌"
+                print(f"  {status} {check}: {passed}")
+            
+            if case_id:
+                print(f"\n📋 CASE ID GERADO: {case_id}")
+                
+        else:
+            print(f"❌ Application start failed with status {response.status_code}")
+            print(f"📄 Error response: {response.text}")
+            results["etapa_3_start_application"]["error"] = response.text
+            
+    except Exception as e:
+        print(f"❌ Exception during application start: {str(e)}")
+        results["etapa_3_start_application"]["exception"] = str(e)
     
     # Check for PDF generation in /frontend/public/
     print("\n📁 VERIFICAÇÃO DE PDFs GERADOS:")
