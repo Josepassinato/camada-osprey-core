@@ -335,6 +335,7 @@ const EmbeddedCheckout = () => {
               )}
             </CardContent>
           </Card>
+          </div>
 
           {/* Payment Form - 3 cols */}
           <div className="md:col-span-3">
