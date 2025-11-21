@@ -140,30 +140,7 @@ const Benefits = () => {
           })}
         </div>
 
-        {/* Trust indicators */}
-        <div className="mt-20 text-center">
-          <div className="inline-flex items-center gap-12 p-8 glass rounded-2xl border border-black/10">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-gradient mb-1">5.000+</div>
-              <div className="text-sm text-muted-foreground">Clientes Aprovados</div>
-            </div>
-            <div className="w-px h-12 bg-border"></div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-gradient mb-1">98%</div>
-              <div className="text-sm text-muted-foreground">Taxa de Sucesso</div>
-            </div>
-            <div className="w-px h-12 bg-border"></div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-gradient mb-1">30</div>
-              <div className="text-sm text-muted-foreground">Dias Médios</div>
-            </div>
-            <div className="w-px h-12 bg-border"></div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-gradient mb-1">24/7</div>
-              <div className="text-sm text-muted-foreground">Suporte Premium</div>
-            </div>
-          </div>
-        </div>
+        {/* Trust indicators removed */}
       </div>
     </section>
   );
