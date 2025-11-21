@@ -2,11 +2,11 @@
   "main_results": {
     "test_1_f1_student_package": {
       "status_code": 200,
-      "processing_time": 0.08621644973754883,
+      "processing_time": 3.6483585834503174,
       "validations": {
-        "1_pdf_20_plus_pages": false,
-        "2_pdf_500_plus_kb": false,
-        "3_pdf_has_images": false,
+        "1_pdf_20_plus_pages": true,
+        "2_pdf_500_plus_kb": true,
+        "3_pdf_has_images": true,
         "4_qa_score_80_plus": false,
         "5_success_true": true,
         "6_visa_type_f1": true,
@@ -17,10 +17,10 @@
         "success": true,
         "visa_type": "F-1",
         "package_result": {
-          "package_path": null,
-          "pages": 0,
-          "size_kb": 0,
-          "has_images": false,
+          "package_path": "/app/frontend/public/F1_STUDENT_COMPLETE_PACKAGE_RAFAEL_OLIVEIRA.pdf",
+          "pages": 23,
+          "size_kb": 815.107421875,
+          "has_images": true,
           "documents": [
             "I-20 from School",
             "Acceptance Letter",
@@ -44,13 +44,13 @@
           "warnings": []
         },
         "qa_report": {
-          "timestamp": "2025-11-21T02:17:56.122281",
+          "timestamp": "2025-11-21T02:20:29.512774",
           "visa_type": null,
-          "overall_score": 0.745,
+          "overall_score": 0.765,
           "category_scores": {
             "completeness": 0.9,
             "accuracy": 0.6499999999999999,
-            "professionalism": 0.8,
+            "professionalism": 0.9,
             "compliance": 0.6
           },
           "issues": [
@@ -62,13 +62,12 @@
           ],
           "recommendations": [
             "Review data accuracy and consistency across documents",
-            "Improve formatting and professional presentation",
             "Ensure all USCIS requirements are met",
             "\u26a0\ufe0f Package needs significant improvements before submission"
           ],
           "passed": false
         },
-        "processing_time": 0.02622056007385254,
+        "processing_time": 3.5994465351104736,
         "error": null
       },
       "pdf_files_found": 1,
@@ -88,6 +87,6 @@
     "specialists_list": true,
     "visa_detection": true
   },
-  "timestamp": 1763691476.1913679,
+  "timestamp": 1763691629.6254604,
   "test_focus": "F-1 Student Visa as requested in review"
 }
