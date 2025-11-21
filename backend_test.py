@@ -245,39 +245,50 @@ def test_additional_endpoints():
     return additional_results
 
 if __name__ == "__main__":
-    print("🚀 INICIANDO TESTES DO ENDPOINT MULTI-AGENTE")
+    print("🚀 INICIANDO TESTE ESPECÍFICO DA REVIEW - B-2 COMPLETE PACKAGE")
     print(f"🌐 Backend URL: {BACKEND_URL}")
     print(f"🔗 API Base: {API_BASE}")
     
-    # Main tests
+    # Main test - B-2 Complete Package as requested
     main_results = test_visa_generate_endpoint()
     
-    # Additional tests
+    # Additional tests for context
     additional_results = test_additional_endpoints()
     
     # Final summary
     print("\n" + "=" * 80)
-    print("🎯 RELATÓRIO FINAL DE TESTES")
+    print("🎯 RELATÓRIO FINAL - TESTE B-2 COMPLETE PACKAGE")
     print("=" * 80)
     
-    print(f"✅ Endpoint principal testado: POST /api/visa/generate")
-    print(f"📊 Testes principais: {main_results['summary']['tests_passed']}/{main_results['summary']['tests_total']}")
+    print(f"✅ Endpoint testado: POST /api/visa/generate")
+    print(f"📊 Teste principal: {main_results['summary']['tests_passed']}/{main_results['summary']['tests_total']}")
     print(f"🔍 Testes adicionais: {sum(additional_results.values())}/{len(additional_results)}")
     
+    # Detailed analysis of B-2 test results
+    b2_results = main_results.get("test_1_b2_complete_package", {})
+    validations = b2_results.get("validations", {})
+    
+    print(f"\n📋 ANÁLISE DETALHADA DAS VALIDAÇÕES:")
+    for validation, passed in validations.items():
+        status = "✅" if passed else "❌"
+        print(f"  {status} {validation}")
+    
     if main_results["summary"]["overall_success"]:
-        print("\n🎉 CONCLUSÃO: Multi-agent visa architecture endpoint está FUNCIONAL!")
-        print("✅ Ambos os testes (B-2 e H-1B) passaram com sucesso")
-        print("✅ Todas as validações esperadas foram atendidas")
+        print("\n🎉 CONCLUSÃO: B-2 Complete Package endpoint está FUNCIONAL!")
+        print("✅ Todas as validações críticas foram atendidas")
+        print("✅ Sistema multi-agente operacional")
     else:
-        print("\n⚠️  CONCLUSÃO: Endpoint precisa de correções")
-        print("❌ Nem todos os testes passaram")
+        print("\n⚠️  CONCLUSÃO: B-2 Complete Package precisa de melhorias")
+        failed_validations = [k for k, v in validations.items() if not v]
+        print(f"❌ Validações que falharam: {', '.join(failed_validations)}")
         
     # Save results to file
-    with open("/app/visa_api_test_results.json", "w") as f:
+    with open("/app/b2_complete_package_test_results.json", "w") as f:
         json.dump({
             "main_results": main_results,
             "additional_results": additional_results,
-            "timestamp": time.time()
+            "timestamp": time.time(),
+            "test_focus": "B-2 Complete Package as requested in review"
         }, f, indent=2)
     
-    print(f"\n💾 Resultados salvos em: /app/visa_api_test_results.json")
+    print(f"\n💾 Resultados salvos em: /app/b2_complete_package_test_results.json")
