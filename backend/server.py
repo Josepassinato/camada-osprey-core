@@ -5046,8 +5046,8 @@ async def reject_visa_update(update_id: str, request: Request, admin = Depends(r
         raise HTTPException(status_code=500, detail="Failed to reject update")
 
 @api_router.post("/admin/visa-updates/run-manual-scan")
-async def run_manual_visa_scan():
-    """Manually trigger visa information scan"""
+async def run_manual_visa_scan(admin = Depends(require_admin)):
+    """Manually trigger visa information scan - PROTECTED"""
     try:
         # Get EMERGENT_LLM_KEY from environment
         llm_key = os.environ.get('EMERGENT_LLM_KEY')
