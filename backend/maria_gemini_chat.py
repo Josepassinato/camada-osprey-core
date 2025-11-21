@@ -1,60 +1,31 @@
 """
-Maria Chat usando Google Gemini em vez de OpenAI
+Maria Chat usando Google Gemini via Emergent LLM Key
 Gemini oferece conversação mais natural
 """
 
 import os
-import google.generativeai as genai
 from typing import Dict, List, Any, Optional
 from datetime import datetime
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
-# Configurar Gemini
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY') or os.environ.get('GOOGLE_API_KEY')
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+# Configurar Emergent LLM Key
+EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
 
 
 class MariaGeminiChat:
     """
-    Chat da Maria usando Gemini Pro
+    Chat da Maria usando Gemini via Emergent LLM Key
     Mais natural e humanizado que GPT
     """
     
     def __init__(self):
-        # Use gemini-2.5-flash (latest and fastest) para chat
-        self.model = genai.GenerativeModel('gemini-2.5-flash')
-        self.available = GEMINI_API_KEY is not None
+        self.api_key = EMERGENT_LLM_KEY
+        self.available = EMERGENT_LLM_KEY is not None
         
         if not self.available:
-            print("⚠️ GEMINI_API_KEY não configurada")
-        
-        # Configurações de geração
-        self.generation_config = {
-            "temperature": 0.9,  # Mais criativa e variada
-            "top_p": 0.95,
-            "top_k": 40,
-            "max_output_tokens": 1024,
-        }
-        
-        # Safety settings (permitir conteúdo sobre imigração)
-        self.safety_settings = [
-            {
-                "category": "HARM_CATEGORY_HARASSMENT",
-                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-            },
-            {
-                "category": "HARM_CATEGORY_HATE_SPEECH",
-                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-            },
-            {
-                "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-            },
-            {
-                "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-                "threshold": "BLOCK_ONLY_HIGH"  # Permitir discussões sobre processos legais
-            },
-        ]
+            print("⚠️ EMERGENT_LLM_KEY não configurada")
+        else:
+            print("✅ Maria Gemini Chat configurado com Emergent LLM Key")
     
     async def chat(
         self,
