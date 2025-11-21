@@ -281,9 +281,8 @@ const SelectForm = () => {
           
           // Verify the update was successful
           if (updateData.case && updateData.case.form_code === formCode) {
-            // Redirect to visa preview page
-            const previewUrl = `/auto-application/visa-preview?visa_code=${formCode}&case_id=${existingCaseId}`;
-            navigate(previewUrl);
+            // Create Stripe checkout session and redirect directly
+            await createStripeCheckout(formCode, existingCaseId);
             return;
           } else {
             console.log('⚠️ Form code mismatch after update, creating new case');
