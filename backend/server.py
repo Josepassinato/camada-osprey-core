@@ -4949,12 +4949,26 @@ async def get_pending_visa_updates(skip: int = 0, limit: int = 20, admin = Depen
         raise HTTPException(status_code=500, detail="Failed to retrieve pending updates")
 
 @api_router.post("/admin/visa-updates/{update_id}/approve")
-async def approve_visa_update(update_id: str, request: Request):
-    """Approve a pending visa update and apply it to production"""
+async def approve_visa_update(update_id: str, request: Request, admin = Depends(require_admin)):
+    """Approve a pending visa update and apply it to production - PROTECTED"""
     try:
         body = await request.json()
         admin_notes = body.get("admin_notes", "")
-        admin_user = body.get("admin_user", "system")
+        admin_user_param = body.get("admin_user", "system")
+        
+        # Use authenticated admin info instead of body param
+        admin_user = admin.get('email', admin_user_param)
+        
+        # Log admin action
+        await log_admin_action(
+            admin_user=admin,
+            action=AuditAction.APPROVE_VISA_UPDATE,
+            resource_type="visa_update",
+            resource_id=update_id,
+            details={"admin_notes": admin_notes},
+            request=request,
+            success=True
+        )
         
         # Get the pending update
         update = await db.visa_updates.find_one({"id": update_id, "status": "pending"})
