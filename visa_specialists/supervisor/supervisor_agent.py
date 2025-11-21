@@ -15,6 +15,7 @@ class SupervisorAgent:
         self.visa_type_patterns = {
             'B-2': [
                 r'\bb-?2\b',
+                r'i-?539',
                 r'tourist',
                 r'turista',
                 r'visitor for pleasure',
@@ -42,6 +43,45 @@ class SupervisorAgent:
                 r'college',
                 r'transcript',
                 r'histórico escolar'
+            ],
+            'I-130': [
+                r'i-?130',
+                r'family.*based',
+                r'familiar',
+                r'spouse',
+                r'cônjuge',
+                r'marriage',
+                r'casamento',
+                r'petition.*relative'
+            ],
+            'I-765': [
+                r'i-?765',
+                r'ead',
+                r'employment authorization',
+                r'autorização.*trabalho',
+                r'work permit'
+            ],
+            'I-90': [
+                r'i-?90',
+                r'green card.*renew',
+                r'renov.*green',
+                r'replace.*green.*card',
+                r'permanent.*resident.*card'
+            ],
+            'EB-2 NIW': [
+                r'eb-?2',
+                r'niw',
+                r'national interest waiver',
+                r'interesse nacional',
+                r'advanced degree',
+                r'exceptional ability'
+            ],
+            'EB-1A': [
+                r'eb-?1a?',
+                r'extraordinary ability',
+                r'habilidade extraordinária',
+                r'outstanding',
+                r'exceptional achievements'
             ],
             'Green Card': [
                 r'green card',
