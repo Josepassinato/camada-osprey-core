@@ -8991,11 +8991,12 @@ async def startup_db_client():
 
 @api_router.post("/payment/create-payment-intent")
 async def create_payment_intent_endpoint(request: Request):
-    """Cria PaymentIntent para checkout integrado (Stripe Elements)"""
+    """Cria PaymentIntent para checkout integrado (Stripe Elements) com suporte a vouchers"""
     try:
         body = await request.json()
         visa_code = body.get("visa_code")
         case_id = body.get("case_id")
+        voucher_code = body.get("voucher_code")  # Opcional
         
         if not visa_code or not case_id:
             raise HTTPException(status_code=400, detail="visa_code e case_id são obrigatórios")
@@ -9006,17 +9007,92 @@ async def create_payment_intent_endpoint(request: Request):
         if not product:
             raise HTTPException(status_code=404, detail=f"Produto {visa_code} não encontrado")
         
-        # Criar PaymentIntent
+        original_price = product['price']
+        final_price = original_price
+        discount_percentage = 0.0
+        voucher_applied = None
+        
+        # Validar e aplicar voucher se fornecido
+        if voucher_code:
+            from voucher_system import validate_voucher, increment_voucher_usage
+            
+            validation_result = await validate_voucher(voucher_code, visa_code, db)
+            
+            if validation_result.valid:
+                discount_percentage = validation_result.discount_percentage
+                final_price = original_price * (1 - discount_percentage / 100)
+                voucher_applied = voucher_code
+                
+                # Incrementar uso do voucher
+                await increment_voucher_usage(voucher_code, db)
+                
+                logger.info(f"✅ Voucher {voucher_code} aplicado: {discount_percentage}% de desconto")
+            else:
+                logger.warning(f"⚠️  Voucher {voucher_code} inválido: {validation_result.message}")
+        
+        # Se o desconto é 100%, não criar PaymentIntent (gratuito)
+        if discount_percentage >= 100.0:
+            logger.info(f"🎁 GRATUIDADE TOTAL com voucher {voucher_code} - Pulando pagamento")
+            
+            # Marcar como pago diretamente
+            transaction = {
+                "transaction_id": f"FREE-{case_id}",
+                "case_id": case_id,
+                "visa_code": visa_code,
+                "amount": 0.0,
+                "original_amount": original_price,
+                "discount_percentage": 100.0,
+                "voucher_code": voucher_code,
+                "currency": "usd",
+                "status": "completed",
+                "payment_method": "voucher_100",
+                "created_at": datetime.utcnow()
+            }
+            await db.payment_transactions.insert_one(transaction)
+            
+            # Atualizar caso como pago
+            await db.auto_cases.update_one(
+                {"case_id": case_id},
+                {
+                    "$set": {
+                        "payment_status": "completed",
+                        "payment_info": {
+                            "amount": 0.0,
+                            "original_amount": original_price,
+                            "discount": 100.0,
+                            "voucher_code": voucher_code,
+                            "payment_date": datetime.utcnow(),
+                            "method": "free_voucher"
+                        }
+                    }
+                }
+            )
+            
+            return {
+                "success": True,
+                "free": True,
+                "message": "🎁 Voucher de gratuidade aplicado! Processo liberado sem custo.",
+                "voucher_code": voucher_code,
+                "original_price": original_price,
+                "final_price": 0.0,
+                "discount_percentage": 100.0,
+                "package": product
+            }
+        
+        # Criar PaymentIntent com valor (com ou sem desconto)
         stripe.api_key = os.environ.get('STRIPE_API_KEY')
         
         payment_intent = stripe.PaymentIntent.create(
-            amount=int(product['price'] * 100),  # Converter para centavos
+            amount=max(50, int(final_price * 100)),  # Mínimo 50 centavos para Stripe
             currency='usd',
             metadata={
                 'visa_code': visa_code,
-                'case_id': case_id
+                'case_id': case_id,
+                'voucher_code': voucher_code or '',
+                'discount_percentage': str(discount_percentage),
+                'original_price': str(original_price)
             },
-            description=f"{product['name']} - {visa_code}"
+            description=f"{product['name']} - {visa_code}" + (f" (Voucher: {voucher_code})" if voucher_code else "")
         )
         
         # Salvar transação no banco
