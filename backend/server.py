@@ -108,6 +108,9 @@ from admin_security import (
     init_db as init_admin_security_db
 )
 
+# Maria - Assistente Virtual
+import maria_api
+
 # MongoDB connection - initialized in startup event
 client = None
 db = None
