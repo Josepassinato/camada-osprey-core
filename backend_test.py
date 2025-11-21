@@ -272,8 +272,8 @@ def test_o1_visa_complete_flow():
         print(f"❌ Exception during application start: {str(e)}")
         results["etapa_3_start_application"]["exception"] = str(e)
     
-    # ETAPA 4: Preencher dados básicos
-    print("\n📋 ETAPA 4: Preencher Dados Básicos")
+    # ETAPA 4: Atualizar case com O-1 e dados básicos
+    print("\n📋 ETAPA 4: Atualizar Case com O-1 e Dados Básicos")
     print("-" * 50)
     
     if not case_id:
@@ -287,21 +287,27 @@ def test_o1_visa_complete_flow():
         results["summary"]["jwt_token_present"] = jwt_token is not None
         return results
     
-    basic_data = {
-        "full_name": "Sofia Mendes Rodrigues",
-        "date_of_birth": "1988-03-15",
-        "country_of_birth": "Brazil",
-        "passport_number": "BR123456789",
-        "passport_expiry": "2029-12-31",
-        "phone": "+5511987654321",
-        "email": "sofia.mendes.test@example.com",
-        "current_address": "Rua das Flores 123, São Paulo, SP, Brazil",
-        "marital_status": "single"
+    # First, set the form_code to O-1
+    case_update_data = {
+        "form_code": "O-1",
+        "process_type": "consular",
+        "basic_data": {
+            "full_name": "Sofia Mendes Rodrigues",
+            "date_of_birth": "1988-03-15",
+            "country_of_birth": "Brazil",
+            "passport_number": "BR123456789",
+            "passport_expiry": "2029-12-31",
+            "phone": "+5511987654321",
+            "email": "sofia.mendes.test@example.com",
+            "current_address": "Rua das Flores 123, São Paulo, SP, Brazil",
+            "marital_status": "single"
+        },
+        "current_step": "basic-data"
     }
     
     try:
-        print(f"🔗 Endpoint: POST {API_BASE}/auto-application/case/{case_id}/basic-data")
-        print(f"📤 Payload: {json.dumps(basic_data, indent=2)}")
+        print(f"🔗 Endpoint: PUT {API_BASE}/auto-application/case/{case_id}")
+        print(f"📤 Payload: {json.dumps(case_update_data, indent=2)}")
         
         headers = {
             "Content-Type": "application/json",
@@ -309,9 +315,9 @@ def test_o1_visa_complete_flow():
         }
         
         start_time = time.time()
-        response = requests.post(
-            f"{API_BASE}/auto-application/case/{case_id}/basic-data",
-            json=basic_data,
+        response = requests.put(
+            f"{API_BASE}/auto-application/case/{case_id}",
+            json=case_update_data,
             headers=headers,
             timeout=30
         )
@@ -327,10 +333,13 @@ def test_o1_visa_complete_flow():
             response_data = response.json()
             print(f"📄 Response: {json.dumps(response_data, indent=2)}")
             
+            case_data = response_data.get("case", {})
+            
             validations = {
-                "1_data_saved": response_data.get("success") == True or "saved" in str(response_data).lower(),
-                "2_case_id_matches": case_id in str(response_data),
-                "3_progress_updated": response_data.get("progress_percentage", 0) > 0
+                "1_case_updated": response_data.get("message") == "Case updated successfully",
+                "2_form_code_set": case_data.get("form_code") == "O-1",
+                "3_basic_data_saved": case_data.get("basic_data") is not None,
+                "4_progress_updated": case_data.get("progress_percentage", 0) > 0
             }
             
             results["etapa_4_basic_data"]["validations"] = validations
@@ -343,12 +352,12 @@ def test_o1_visa_complete_flow():
                 print(f"  {status} {check}: {passed}")
                 
         else:
-            print(f"❌ Basic data failed with status {response.status_code}")
+            print(f"❌ Case update failed with status {response.status_code}")
             print(f"📄 Error response: {response.text}")
             results["etapa_4_basic_data"]["error"] = response.text
             
     except Exception as e:
-        print(f"❌ Exception during basic data: {str(e)}")
+        print(f"❌ Exception during case update: {str(e)}")
         results["etapa_4_basic_data"]["exception"] = str(e)
     
     # ETAPA 5: Preencher formulário completo (friendly-form)
