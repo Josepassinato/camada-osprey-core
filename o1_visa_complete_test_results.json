@@ -1,0 +1,140 @@
+{
+  "main_results": {
+    "etapa_1_user_creation": {
+      "status_code": 500,
+      "processing_time": 0.04557299613952637,
+      "error": "{\"detail\":\"Error creating user: 400: Email already registered\"}"
+    },
+    "etapa_2_login": {
+      "status_code": 200,
+      "processing_time": 0.26028990745544434,
+      "validations": {
+        "1_login_successful": true,
+        "2_token_present": true,
+        "3_user_email_correct": true,
+        "4_user_name_correct": true
+      },
+      "response_data": {
+        "message": "Login successful",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNmYxYzc0YmQtZDE4Ni00NjRmLWJkZjktZThkYzVmNWM0N2U5IiwiZW1haWwiOiJzb2ZpYS5tZW5kZXMudGVzdEBleGFtcGxlLmNvbSIsImV4cCI6MTc2NjMxMTg3NX0.jvrrWs0aHd5j-QXl2acJkXdT59GfzBFjaPLe1Gsy1SE",
+        "user": {
+          "id": "6f1c74bd-d186-464f-bdf9-e8dc5f5c47e9",
+          "email": "sofia.mendes.test@example.com",
+          "first_name": "Sofia",
+          "last_name": "Mendes Rodrigues"
+        }
+      },
+      "jwt_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNmYxYzc0YmQtZDE4Ni00NjRmLWJkZjktZThkYzVmNWM0N2U5IiwiZW1haWwiOiJzb2ZpYS5tZW5kZXMudGVzdEBleGFtcGxlLmNvbSIsImV4cCI6MTc2NjMxMTg3NX0.jvrrWs0aHd5j-QXl2acJkXdT59GfzBFjaPLe1Gsy1SE"
+    },
+    "etapa_3_start_application": {
+      "status_code": 200,
+      "processing_time": 0.019292831420898438,
+      "validations": {
+        "1_case_created": true,
+        "2_case_id_format": true,
+        "3_visa_code_correct": false,
+        "4_status_created": true
+      },
+      "response_data": {
+        "message": "Auto-application case created successfully",
+        "case": {
+          "case_id": "OSP-DAC63435",
+          "user_id": "6f1c74bd-d186-464f-bdf9-e8dc5f5c47e9",
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "process_type": null,
+          "progress_percentage": 0,
+          "current_step": null,
+          "basic_data": null,
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-11-21T10:11:15.272413",
+          "updated_at": "2025-11-21T10:11:15.272414",
+          "expires_at": "2025-12-21T10:11:15.272356"
+        }
+      },
+      "case_id": "OSP-DAC63435"
+    },
+    "etapa_4_basic_data": {
+      "status_code": 404,
+      "processing_time": 0.022234678268432617,
+      "error": "{\"detail\":\"Not Found\"}"
+    },
+    "etapa_5_friendly_form": {
+      "status_code": 404,
+      "processing_time": 0.018456220626831055,
+      "error": "{\"detail\":\"Not Found\"}"
+    },
+    "etapa_6_document_uploads": {
+      "uploaded_docs": [
+        {
+          "name": "passport_copy.pdf",
+          "document_id": "ec81abf1-b092-41d4-a15e-7601ad9f4dd1",
+          "status": "uploaded"
+        },
+        {
+          "name": "phd_diploma_mit.pdf",
+          "document_id": "41f506e3-b4c7-49b8-a043-1e6b18677280",
+          "status": "uploaded"
+        },
+        {
+          "name": "award_certificates.pdf",
+          "document_id": "7ebde36c-306e-4c98-9349-2551011ca795",
+          "status": "uploaded"
+        },
+        {
+          "name": "job_offer_johns_hopkins.pdf",
+          "document_id": "be5c95e6-2c3f-4ac2-b895-07b99ffce637",
+          "status": "uploaded"
+        }
+      ],
+      "total_docs": 4,
+      "successful_uploads": 4
+    },
+    "etapa_7_ai_review": {
+      "status_code": 404,
+      "processing_time": 0.08213996887207031,
+      "error": "{\"detail\":\"Not Found\"}"
+    },
+    "etapa_8_final_status": {
+      "status_code": 404,
+      "processing_time": 0.0235595703125,
+      "error": "{\"detail\":\"Not Found\"}"
+    },
+    "summary": {
+      "overall_success": false,
+      "successful_steps": 2,
+      "total_steps": 8,
+      "success_rate": 25.0,
+      "case_id": "OSP-DAC63435",
+      "jwt_token_present": true
+    }
+  },
+  "additional_results": {
+    "o1_visa_info": true,
+    "o1_documents": false,
+    "owl_agent": true
+  },
+  "timestamp": 1763719937.0645678,
+  "test_focus": "O-1 Visa Complete End-to-End Flow for Dr. Sofia Mendes Rodrigues",
+  "applicant": {
+    "name": "Dr. Sofia Mendes Rodrigues",
+    "email": "sofia.mendes.test@example.com",
+    "visa_type": "O-1",
+    "field": "AI Research and Machine Learning in Healthcare"
+  }
+}
