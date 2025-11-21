@@ -2,7 +2,7 @@
   "main_results": {
     "test_1_f1_student_package": {
       "status_code": 200,
-      "processing_time": 3.7141664028167725,
+      "processing_time": 3.6520087718963623,
       "validations": {
         "1_pdf_20_plus_pages": true,
         "2_pdf_500_plus_kb": true,
@@ -42,7 +42,7 @@
           "warnings": []
         },
         "qa_report": {
-          "timestamp": "2025-11-21T02:21:56.351814",
+          "timestamp": "2025-11-21T02:22:12.912745",
           "visa_type": null,
           "overall_score": 0.875,
           "category_scores": {
@@ -58,7 +58,7 @@
           ],
           "passed": true
         },
-        "processing_time": 3.6436634063720703,
+        "processing_time": 3.6015124320983887,
         "error": null
       },
       "pdf_files_found": 1,
@@ -67,7 +67,7 @@
       "pdf_size_adequate": true
     },
     "summary": {
-      "overall_success": false,
+      "overall_success": true,
       "tests_passed": 1,
       "tests_total": 1
     },
@@ -78,6 +78,6 @@
     "specialists_list": true,
     "visa_detection": true
   },
-  "timestamp": 1763691716.5137463,
+  "timestamp": 1763691732.9913864,
   "test_focus": "F-1 Student Visa as requested in review"
 }
