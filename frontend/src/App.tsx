@@ -37,6 +37,7 @@ import { OwlQuestionnairePage } from "./pages/OwlQuestionnairePage";
 import { OwlPaymentPage } from "./pages/OwlPaymentPage";
 import { OwlPaymentSuccessPage } from "./pages/OwlPaymentSuccessPage";
 import AdminVisaUpdatesPanel from "./pages/AdminVisaUpdatesPanel";
+import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 // import AdaptiveFormExample from "./pages/AdaptiveFormExample"; // Temporariamente desabilitado
 import ProactiveAlertsDemo from "./pages/ProactiveAlertsDemo";
 import PaymentPage from "./pages/PaymentPage";
