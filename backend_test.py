@@ -74,23 +74,23 @@ def test_o1_visa_complete_flow():
     }
     
     try:
-        print(f"🔗 Endpoint: POST {API_BASE}/visa/generate")
-        print(f"📤 Payload: {json.dumps(f1_payload, indent=2)}")
+        print(f"🔗 Endpoint: POST {API_BASE}/auth/signup")
+        print(f"📤 Payload: {json.dumps(user_data, indent=2)}")
         
         start_time = time.time()
         response = requests.post(
-            f"{API_BASE}/visa/generate",
-            json=f1_payload,
+            f"{API_BASE}/auth/signup",
+            json=user_data,
             headers={"Content-Type": "application/json"},
-            timeout=60
+            timeout=30
         )
         processing_time = time.time() - start_time
         
         print(f"⏱️  Processing time: {processing_time:.2f}s")
         print(f"📊 Status Code: {response.status_code}")
         
-        results["test_1_f1_student_package"]["status_code"] = response.status_code
-        results["test_1_f1_student_package"]["processing_time"] = processing_time
+        results["etapa_1_user_creation"]["status_code"] = response.status_code
+        results["etapa_1_user_creation"]["processing_time"] = processing_time
         
         if response.status_code == 200:
             response_data = response.json()
