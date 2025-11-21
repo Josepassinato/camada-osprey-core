@@ -16,26 +16,33 @@ from datetime import datetime
 BACKEND_URL = "https://apply-wizard-18.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
-def test_visa_generate_endpoint():
+def test_o1_visa_complete_flow():
     """
-    Test the new multi-agent architecture endpoint POST /api/visa/generate
+    Test complete O-1 visa application flow for Dr. Sofia Mendes Rodrigues
     
     SPECIFIC TEST REQUESTED IN REVIEW:
-    - F-1 Student Visa with complete package for Rafael Santos Oliveira
-    - Expected: 10+ pages, PDF generation, validation, QA report
+    Complete end-to-end O-1 visa application including:
+    1. User creation and login
+    2. O-1 application start
+    3. Basic data filling
+    4. Friendly form completion
+    5. Document uploads (simulated)
+    6. AI review
+    7. Final status and download
     
     Expected validations:
-    1. ✅ Status 200
-    2. ✅ success: true
-    3. ✅ visa_type = "F-1"
-    4. ✅ package_result with PDF info
-    5. ✅ PDF generated: "F1_STUDENT_COMPLETE_PACKAGE_RAFAEL_OLIVEIRA.pdf"
-    6. ✅ PDF has 10+ pages
-    7. ✅ validation with checklist
-    8. ✅ qa_report with scores
+    1. ✅ User created successfully
+    2. ✅ Login successful with JWT token
+    3. ✅ O-1 case created
+    4. ✅ Basic data saved
+    5. ✅ Friendly form completed
+    6. ✅ Documents uploaded
+    7. ✅ AI review completed
+    8. ✅ Final package available
     """
     
-    print("🧪 TESTING F-1 STUDENT VISA MULTI-AGENT ARCHITECTURE")
+    print("🦅 TESTING O-1 VISA COMPLETE END-TO-END FLOW")
+    print("🧑‍⚕️ Applicant: Dr. Sofia Mendes Rodrigues")
     print("=" * 60)
     
     results = {
