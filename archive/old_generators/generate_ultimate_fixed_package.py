@@ -110,6 +110,6 @@ frontend_path = "/app/frontend/public/SIMULATED_H1B_COMPLETE_PACKAGE.pdf"
 shutil.copy(final_output, frontend_path)
 
 print(f"\n✅ Pacote copiado para frontend: {frontend_path}")
-print(f"🌐 Disponível em: https://formcraft-43.preview.emergentagent.com/api/simulated-case-demo")
+print(f"🌐 Disponível em: https://maria-support.preview.emergentagent.com/api/simulated-case-demo")
 print(f"\n🎉 PRONTO PARA TESTE!")
 print("="*80)

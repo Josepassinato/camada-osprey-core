@@ -238,7 +238,7 @@ def generate_package_with_all_improvements():
     frontend_path = "/app/frontend/public/SIMULATED_H1B_COMPLETE_PACKAGE.pdf"
     shutil.copy(final_output, frontend_path)
     print(f"\n✅ Pacote copiado para: {frontend_path}")
-    print("🌐 Disponível em: https://formcraft-43.preview.emergentagent.com/api/simulated-case-demo")
+    print("🌐 Disponível em: https://maria-support.preview.emergentagent.com/api/simulated-case-demo")
     
     return final_output
 

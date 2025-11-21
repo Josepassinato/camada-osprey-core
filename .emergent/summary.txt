@@ -1,102 +1,109 @@
 <analysis>**original_problem_statement:**
-The initial user request was to create a lawyer-grade B-2 tourist visa extension package. This evolved into a significant architectural refactor to a multi-agent system, featuring a **Supervisor Agent** delegating tasks to specialized visa agents (, , etc.). The user then directed the agent to build a comprehensive knowledge base by processing numerous USCIS documents and PDF forms they uploaded. After successfully creating and testing professional-grade packages for B-2 and F-1 visas using this new architecture, the user's latest and most critical instruction is to stop all simulated testing and integrate the multi-agent system into the **actual user journey of the live frontend application**.
+The user has two primary requests.
+1.  **Implement a new AI Assistant named Maria**: This agent will serve as a customer-facing support and sales assistant.
+    *   **Personality**: Motivational, empathetic, uses positive psychology, and acts as a promoter for the Osprey system. She cannot give legal advice but should be knowledgeable about public USCIS information.
+    *   **Functionality**: Interact with users via web chat and voice. Proactively contact users on WhatsApp after they apply with a specific welcome message (Olá eu sou a Maria vou estar te ajudando na sua aplicação...).
+    *   **Technology Stack**: The user explicitly requested using **Gemini** for the LLM and voice (for its natural, human-like quality) and **Baileys** for the WhatsApp integration.
+2.  **Fix Critical Security Vulnerabilities**: The user approved an analysis of the Admin Panel and requested that the identified security holes be fixed. This involves implementing Role-Based Access Control (RBAC) to protect all administrative functions from unauthorized access.
 
 **User's preferred language**: Portuguese. The next agent MUST respond in Portuguese.
 
 **what currently exists?**
-A multi-agent architecture is in place, consisting of a  that correctly delegates tasks to specialist agents. Fully functional and tested generators for **B-2 Extension** and **F-1 Student** visas exist, capable of producing professional, multi-page PDF packages with simulated images. A comprehensive  has been built at , containing USCIS documents and markdown summaries for various visa types (B-2, F-1, I-130, I-765, etc.). The backend API endpoint  is functional and integrated with the supervisor. However, the entire system currently operates on hardcoded test data within Python scripts, completely disconnected from the live frontend user interface. The frontend () shows 7 active visa categories that users can select.
+The application has a fully functional multi-agent system for generating visa packages (B-2, F-1, I-130, etc.), which is integrated into the frontend user journey. The backend is FastAPI with MongoDB, and the frontend is React.
+
+For the Maria agent, the previous agent created the basic file structure and API wiring. This includes:
+*   Placeholder Python files: , , , , and .
+*   The  router has been added to , and a new MongoDB collection () is initialized on startup.
+
+For the Admin Panel security, a helper file  was created, and the  model in  was updated to include a  field. Some, but not all, admin endpoints have been protected.
 
 **Last working item**:
--   **Last item agent was working:** The user explicitly requested to stop simulated tests and adapt the agents to the actual user journey within the frontend application. The agent acknowledged this new direction but has not yet started the implementation.
--   **Status:** NOT STARTED
--   **Agent Testing Done:** N/A
--   **Which testing method agent to use?** This is a full-stack integration task. The agent must first analyze the frontend code (starting with ) to understand the data flow and payload structure submitted by the user. Then, it will require backend modifications () to adapt this data for the specialist agents. After implementation, both the backend testing agent and manual inspection of the frontend-to-backend flow will be necessary.
--   **User Testing Done:** N
+*   **Last item agent was working:** The agent was scaffolding the Maria agent. It created the necessary Python files, updated  to use the (empty) Gemini module, and added placeholder endpoints for chat, voice, and WhatsApp to .
+*   **Status:** IN PROGRESS
+*   **Agent Testing Done:** N
+*   **Which testing method agent to use?** Backend testing. The agent should use  or a temporary Python script to test the Maria API endpoints as they are developed, before moving to the backend testing agent for full validation.
+*   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Agent Integration with Frontend User Journey (P0)**
-    -   **Description**: The agents are currently driven by hardcoded Python dictionaries and tested via scripts. They are not connected to the data flow originating from the user filling out forms in the React frontend. The user's latest command is to bridge this gap and make the system work with real user input.
-    -   **Attempted fixes**: None. This is a new directive.
-    -   **Next debug checklist**:
-        1.  Analyze  to understand how a visa type is selected and passed on.
-        2.  Trace the user flow to subsequent data entry forms to see how user data is collected.
-        3.  Find the API call in the frontend code that submits the form data to the backend and inspect its payload structure.
-        4.  Compare the frontend's data payload with the data structures currently expected by the Python generator scripts (e.g., in , ).
-        5.  Implement a data transformation layer in  to map the incoming frontend data to the format required by the specialist agents.
-        6.  Modify the agents to accept this dynamic data instead of relying on hardcoded dictionaries.
-    -   **Why fix this issue?** This is the user's current highest-priority request, aiming to make the application functional for real users.
-    -   **Status**: NOT STARTED
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Both
+*   **Issue 1: Incomplete Security Implementation for Admin Panel (P1)**
+    *   **Description**: A previous analysis identified that admin endpoints and frontend routes are not protected, allowing any logged-in user to access sensitive administrative functions. The previous agent started implementing Role-Based Access Control (RBAC) but did not complete the work.
+    *   **Attempted fixes**: An  module was created with an  dependency. The user model was updated with a  field. The  dependency was added to a few admin endpoints in , but many remain unprotected. The frontend protection was not started.
+    *   **Next debug checklist**:
+        1.  Identify all remaining unprotected admin API endpoints in  (e.g., , , etc.).
+        2.  Apply the  dependency to every single one of them.
+        3.  In the frontend, create a new component: .
+        4.  Implement logic in this component to check the user's  from the authentication context. If the role is not 'admin', redirect the user away from the admin page.
+        5.  Wrap all admin pages (e.g., , ) in the new  component within the main router ().
+    *   **Why fix this issue?** This is a critical security flaw that exposes sensitive user data and administrative controls.
+    *   **Status**: IN PROGRESS
+    *   **Is recurring issue?** N
+    *   **Should Test frontend/backend/both after fix?** Both.
 
 **In progress Task List**:
--   None. The previous tasks were completed. The new work is defined in the issue above.
+*   **Task 1: Implement Maria - The Customer Support Agent (P0)**
+    *   **Description**: The user wants a new AI agent named Maria for customer support, sales, and emotional guidance. The foundational files exist, but the core logic needs to be implemented.
+    *   **Where to resume**: The implementation needs to happen within the placeholder files created by the last agent.
+        1.  **Implement Gemini Chat ():** Integrate with the Gemini API to generate responses. This is **BLOCKED** by the need for a Gemini API key.
+        2.  **Implement Voice Integration ():** Integrate with Google's Text-to-Speech API to convert Maria's text responses to voice. This may also require credentials.
+        3.  **Implement WhatsApp Integration ():** Set up the **Baileys** library to send proactive messages. This is a complex task and is **BLOCKED** by the need for user credentials and setup guidance.
+        4.  **Flesh out Agent Logic ():** Wire together the Gemini, Voice, and WhatsApp modules and manage conversation history with MongoDB.
+        5.  **Complete API Endpoints ():** Connect the API endpoints to the implementation logic.
+    *   **What will be achieved with this?** A new, user-facing AI assistant that improves user engagement and provides support, fulfilling a key user request.
+    *   **Status**: IN PROGRESS
+    *   **Should Test frontend/backend/both after fix?** Backend. A frontend UI task will follow.
+    *   **Blocked on something**: **API Keys and Credentials**. The agent cannot proceed without asking the user for the **Gemini API key** and **guidance/credentials for setting up Baileys/WhatsApp**.
 
 **Upcoming and Future Tasks**
--   **Upcoming Tasks:**
-    -   **(P1) Implement Generators for Remaining Visas:** Create package generators for the other visas listed in the frontend (, , , , ).
-    -   **(P2) Refactor H-1B Agent:** Migrate the logic from the old H-1B generator script into the new  class, consistent with the B-2 and F-1 implementations.
--   **Future Tasks:**
-    -   **(P3) Enhance QA and Learning:** Implement the actual logic for the  and the  to allow agents to read and apply .
+*   **Upcoming Tasks:**
+    *   **(P2) Build Frontend UI for Maria:** Create a new chat interface in the React application for users to interact with Maria.
+    *   **(P3) Create USCIS Website Scraper:** Develop a tool to periodically scrape public information from the USCIS website to keep Maria's knowledge base current.
+*   **Future Tasks:**
+    *   **(P4) Refine Maria's Personality:** Use prompt engineering and user feedback to fine-tune Maria's motivational and empathetic persona.
 
 **Completed work in this session**
--   **Built & Validated Multi-Agent Architecture:** The core Supervisor/Specialist system is functional and tested.
--   **Developed B-2 Package Generator:** Created a generator for a 32-page professional B-2 package (96.5% QA score) with simulated images.
--   **Developed F-1 Package Generator:** Created a generator for a 23-page professional F-1 package with simulated images of documents (I-20, passport, etc.).
--   **Established Comprehensive Knowledge Base:** Created and populated  with dozens of user-provided USCIS documents and created structured markdown summaries for multiple visa types.
--   **Trained Agents:** Updated agent scripts to load and reference their respective knowledge base files.
+- **Visa Agent Integration**: The core system of specialized visa agents (B-2, F-1, I-130, etc.) was fully integrated into the live user journey, replacing the old traditional method.
+- **Data Transformation Layer**: A system was built in  to convert data from the frontend/MongoDB into the format required by the Python-based agents.
+- **System Analysis and Documentation**: Created multiple detailed reports (, , ) in response to user queries about the system's state.
+- **Initiated Maria Agent**: Created the initial file structure, API endpoints, and database setup for the new customer support agent.
+- **Initiated Admin Security Fix**: Started implementing RBAC by updating the user model and protecting a subset of admin endpoints.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Backend:** FastAPI
--   **System Design:** Multi-Agent Architecture (Supervisor-Specialist Pattern)
--   **PDF Generation:** 
--   **Image Generation:** 
--   **Data Modeling:** 
+- **Backend:** FastAPI, Pydantic
+- **Frontend:** React, TypeScript
+- **Database:** MongoDB
+- **System Design:** Multi-Agent Architecture (Supervisor-Specialist)
+- **AI/LLM:**  (for visa agents), **** (for new 'Maria' agent)
+- **Communications:** **** (planned for WhatsApp), **** (planned for voice)
+- **Security:** JWT Authentication, **RBAC** (Role-Based Access Control, in progress)
+
+**key DB schema**
+- :  (the  field is new and essential for the security fix).
+- :  (new collection for the Maria agent).
 
 **All files**
--   **Created/Updated in this session:**
-    -    / : To create the B-2 package.
-    -    / : To create the F-1 package.
-    -   : Data model for the F-1 visa.
-    -   : Entire directory created to house user-provided USCIS documents and agent-generated markdown summaries for various visa types.
-    -   Agent files (, , etc.) were updated to use the new generators and load knowledge base files.
-
-**Areas that need refactoring**:
--   **Generator Logic Encapsulation:** The generation logic in standalone scripts (, etc.) should be moved directly inside their respective agent classes for better object-oriented design, rather than being called as external scripts.
--   **Data Model Standardization:** Data structures are defined in multiple places (Pydantic models, hardcoded dicts). This should be standardized into a single, consistent approach, preferably driven by the data structure sent from the frontend.
-
-**key api endpoints**
--   **/api/visa/generate**: The primary endpoint for the multi-agent system. It successfully generates B-2 and F-1 packages but uses mocked data.
+- **Created:** , , , , , , and agent directories/files for , , , , . Also, several  analysis documents.
+- **Updated:**  (to add Maria's API, start security fixes),  (to add new visa data transformers),  (to integrate all agents),  (to register new agents), , and  (to accept dynamic data).
 
 **Critical Info for New Agent**
-1.  **NEW PRIORITY: FRONTEND INTEGRATION:** Your immediate and highest priority is to stop simulated testing and integrate the agent system with the **real frontend user journey**. The user explicitly directed this shift in focus.
-2.  **START WITH THE FRONTEND:** Begin by analyzing the React code, starting with , to understand how a user selects a visa and enters their data.
-3.  **EXPECT DATA MISMATCH:** The JSON payload from the frontend will not match the hardcoded Python dictionaries currently used by the agents. You must implement a data transformation/mapping layer, likely in , to resolve this.
-4.  **LANGUAGE:** All user communication MUST be in **Portuguese**.
+1.  **Language is Portuguese**: All user communication MUST be in Portuguese.
+2.  **BLOCKED on Credentials**: The highest priority task (implementing Maria) is blocked. Your first action must be to ask the user for the necessary **Gemini API Key** and for **credentials/setup instructions for the Baileys WhatsApp integration**.
+3.  **Two Concurrent Priorities**: Your work is divided into two main efforts: completing the **Maria agent (P0)** and finishing the **Admin Panel security fix (P1)**. You can work on the security fix while waiting for the credentials for Maria.
+4.  **Complete the Security Fix**: Resume the RBAC implementation. Protect all remaining backend admin endpoints in  and create the  component to secure the frontend routes.
 
 **documents created in this job**
--   Numerous markdown summary files () in subdirectories of .
--   An inventory file: .
+- 
+- 
+- 
+- 
+- 
+- 
 
 **Last 5 User Messages and any pending user messages**
-1.  **User:** Asked which visas are selected for the first phase. **Status: Addressed.**
-2.  **User:** Directed agent to check the frontend application to see the available visa options. **Status: Completed.**
-3.  **User:** Uploaded multiple USCIS documents and instructed the agent to store them in the knowledge base and train the agents. **Status: Completed.**
-4.  **User:** Requested a full, professional-grade simulated test for the F-1 student visa. **Status: Completed.**
-5.  **User:** Não vamos fazer mais testes simulados Visite a jornada do usuario do nosso sitema e adote os agentes para efetuar o passa (Let's not do any more simulated tests. Visit the user journey of our system and adapt the agents to perform the steps). **Status: Acknowledged, NOT STARTED. This is the current directive.**
-
-**Project Health Check:**
--   **Broken:** The integration between the frontend UI (where users enter data) and the backend agent system is non-existent.
--   **Mocked:** All data for PDF generation is currently mocked/hardcoded in Python scripts. Several specialist agents for visas listed in the frontend are still unimplemented placeholders.
-
-**Testing status**
--   **Testing agent used after significant changes:** YES (for backend API validation).
--   **Troubleshoot agent used after agent stuck in loop:** NO
--   **Test files created:** 
--   **Known regressions:** None.
-
-**What agent forgot to execute**
--   The user's final instruction to integrate the agents with the live user journey has been acknowledged but not yet started. This is the most critical pending action.</analysis>
+1.  **User**: Requested security fixes for the admin panel (Faça estes concertos e construção). **Status: IN PROGRESS**.
+2.  **User**: Asked to verify agent training with provided documents. **Status: COMPLETED**.
+3.  **User**: Pitched the idea for the Maria customer support agent. **Status: ACKNOWLEDGED**.
+4.  **User**: Provided more personality and functional details for Maria (sales, psychology, WhatsApp). **Status: ACKNOWLEDGED**.
+5.  **User**: Specified the technology for Maria: Baileys for WhatsApp and Gemini for voice/chat. **Status: IN PROGRESS** (this triggered the creation of the placeholder files).</analysis>

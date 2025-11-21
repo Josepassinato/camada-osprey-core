@@ -42,7 +42,7 @@ export const VoiceMic: React.FC<VoiceMicProps> = ({
   // Use the centralized API utility for consistent backend URL
   const backendUrl = import.meta.env.VITE_BACKEND_URL || 
     (typeof window !== 'undefined' && window.location.hostname.includes('preview.emergentagent.com')
-      ? 'https://formcraft-43.preview.emergentagent.com'
+      ? 'https://maria-support.preview.emergentagent.com'
       : 'https://www.iaimmigration.com');
   const wsUrl = `${backendUrl.replace('http', 'ws')}/ws/voice/${sessionId || 'default'}`;
 

@@ -26,7 +26,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
 
   const [texts, setTexts] = useState<Record<string, Record<string, string>>>({});
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://formcraft-43.preview.emergentagent.com';
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://maria-support.preview.emergentagent.com';
 
   // Save to localStorage whenever mode changes
   useEffect(() => {

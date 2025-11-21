@@ -32,7 +32,7 @@ export const OwlAuth: React.FC<OwlAuthProps> = ({ onLogin, onBack, mode }) => {
   });
 
   const getBackendUrl = () => {
-    return import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://formcraft-43.preview.emergentagent.com' || '';
+    return import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://maria-support.preview.emergentagent.com' || '';
   };
 
   const handleLogin = async (e: React.FormEvent) => {

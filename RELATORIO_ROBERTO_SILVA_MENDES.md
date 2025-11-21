@@ -403,17 +403,17 @@ Roberto_Silva_Mendes_I539_F1_COMPLETE_PACKAGE.zip
 
 **Pacote Completo (ZIP):**
 ```
-https://formcraft-43.preview.emergentagent.com/api/download/package/Roberto_Silva_Mendes_I539_F1_COMPLETE_PACKAGE.zip
+https://maria-support.preview.emergentagent.com/api/download/package/Roberto_Silva_Mendes_I539_F1_COMPLETE_PACKAGE.zip
 ```
 
 **Este Relatório (Markdown):**
 ```
-https://formcraft-43.preview.emergentagent.com/api/download/report/RELATORIO_ROBERTO_SILVA_MENDES.md
+https://maria-support.preview.emergentagent.com/api/download/report/RELATORIO_ROBERTO_SILVA_MENDES.md
 ```
 
 **Listar Todos os Downloads:**
 ```
-https://formcraft-43.preview.emergentagent.com/api/download/list
+https://maria-support.preview.emergentagent.com/api/download/list
 ```
 
 ---
@@ -423,7 +423,7 @@ https://formcraft-43.preview.emergentagent.com/api/download/list
 Para enviar este pacote por email (após verificação do domínio no Resend):
 
 ```bash
-curl -X POST https://formcraft-43.preview.emergentagent.com/api/email/send-package \
+curl -X POST https://maria-support.preview.emergentagent.com/api/email/send-package \
   -H "Content-Type: application/json" \
   -d '{
     "user_email": "roberto.mendes@email.com",
@@ -515,7 +515,7 @@ O sistema OSPREY Immigration demonstrou **excelente capacidade** para processar 
 **Case ID:** OSP-A2FB1C47  
 **Email de Suporte:** passinato@iaimmigration.com  
 **Sistema:** OSPREY Immigration System  
-**Website:** https://formcraft-43.preview.emergentagent.com
+**Website:** https://maria-support.preview.emergentagent.com
 
 ---
 

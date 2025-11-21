@@ -9157,7 +9157,7 @@ async def send_package_email(request: SendPackageEmailRequest):
         file_base64 = base64.b64encode(file_content).decode("utf-8")
         
         # Gerar link de download direto
-        backend_url = os.environ.get('BACKEND_URL', 'https://formcraft-43.preview.emergentagent.com')
+        backend_url = os.environ.get('BACKEND_URL', 'https://maria-support.preview.emergentagent.com')
         download_link = f"{backend_url}/api/download/package/{pdf_filename}"
         
         # Template de email em HTML

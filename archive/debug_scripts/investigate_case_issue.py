@@ -9,7 +9,7 @@ import json
 import uuid
 import os
 
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://formcraft-43.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://maria-support.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 print(f"🔍 INVESTIGANDO PROBLEMA DE PERSISTÊNCIA DE CASO")
