@@ -5093,8 +5093,8 @@ async def get_visa_update_history(skip: int = 0, limit: int = 50, admin = Depend
 
 
 @api_router.get("/admin/visa-updates/scheduler/status")
-async def get_scheduler_status():
-    """Get visa update scheduler status"""
+async def get_scheduler_status(admin = Depends(require_admin)):
+    """Get visa update scheduler status - PROTECTED"""
     try:
         global visa_scheduler
         
