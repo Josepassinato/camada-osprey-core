@@ -140,3 +140,7 @@ reportlab
 PyPDF2
 resend==2.17.0
 pdfplumber
+
+# Maria Voice Integration (Google Cloud TTS + STT)
+google-cloud-texttospeech==2.24.0
+google-cloud-speech==2.26.0
