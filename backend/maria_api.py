@@ -135,7 +135,7 @@ async def get_welcome_message(user_id: Optional[str] = None):
         user_name = None
         visa_type = None
         
-        if user_id and db:
+        if user_id and db is not None:
             user = await db.users.find_one({"id": user_id})
             if user:
                 user_name = user.get("first_name")
