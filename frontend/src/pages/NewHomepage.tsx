@@ -91,12 +91,6 @@ const NewHomepage = () => {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center max-w-5xl mx-auto">
-            {/* Social Proof Badge */}
-            <div className="inline-flex items-center px-4 py-2 bg-white rounded-full shadow-lg mb-8 border border-purple-100">
-              <Sparkles className="h-4 w-4 text-purple-600 mr-2" />
-              <span className="text-sm font-semibold text-gray-900">Já ajudamos +1.000 pessoas</span>
-            </div>
-            
             {/* Main Headline */}
             <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
               Faça <span className="text-purple-600">Você</span> Seu Visto Americano
