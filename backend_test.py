@@ -360,82 +360,45 @@ def test_o1_visa_complete_flow():
         print(f"❌ Exception during case update: {str(e)}")
         results["etapa_4_basic_data"]["exception"] = str(e)
     
-    # ETAPA 5: Preencher formulário completo (friendly-form)
-    print("\n📋 ETAPA 5: Preencher Formulário Completo (Friendly-Form)")
+    # ETAPA 5: Adicionar dados profissionais detalhados
+    print("\n📋 ETAPA 5: Adicionar Dados Profissionais Detalhados")
     print("-" * 50)
     
-    friendly_form_data = {
-        "personal_info": {
-            "full_name": "Sofia Mendes Rodrigues",
-            "title": "Dr.",
-            "field_of_expertise": "Artificial Intelligence and Machine Learning in Healthcare",
-            "years_of_experience": 15
-        },
-        "professional_background": {
-            "current_position": "Senior AI Research Scientist",
-            "current_employer": "Johns Hopkins University Hospital",
-            "job_start_date": "2026-01-15",
-            "annual_salary": 180000,
-            "job_description": "Leading research in AI-powered early cancer detection systems. Developing machine learning models for medical image analysis and predictive diagnostics."
-        },
-        "education": [
-            {
-                "degree": "PhD in Computer Science",
-                "institution": "Massachusetts Institute of Technology (MIT)",
-                "year": "2015",
-                "field": "Artificial Intelligence and Machine Learning"
+    professional_data = {
+        "simplified_form_responses": {
+            "personal_info": {
+                "full_name": "Sofia Mendes Rodrigues",
+                "title": "Dr.",
+                "field_of_expertise": "Artificial Intelligence and Machine Learning in Healthcare",
+                "years_of_experience": 15
             },
-            {
-                "degree": "Master in Computer Science",
-                "institution": "University of São Paulo",
-                "year": "2010",
-                "field": "Data Science"
-            }
-        ],
-        "achievements": [
-            {
-                "title": "AI for Good Award",
-                "organization": "United Nations",
-                "year": "2023",
-                "description": "Recognized for developing AI system that detects early-stage cancer with 95% accuracy"
+            "professional_background": {
+                "current_position": "Senior AI Research Scientist",
+                "current_employer": "Johns Hopkins University Hospital",
+                "job_start_date": "2026-01-15",
+                "annual_salary": 180000,
+                "job_description": "Leading research in AI-powered early cancer detection systems."
             },
-            {
-                "title": "Best Paper Award",
-                "organization": "International Conference on Medical AI",
-                "year": "2022",
-                "description": "Research on deep learning for medical image analysis"
+            "achievements": [
+                {
+                    "title": "AI for Good Award",
+                    "organization": "United Nations",
+                    "year": "2023",
+                    "description": "Recognized for developing AI system that detects early-stage cancer with 95% accuracy"
+                }
+            ],
+            "publications": {
+                "total": 52,
+                "citations": 2100,
+                "h_index": 28
             }
-        ],
-        "publications": {
-            "total": 52,
-            "citations": 2100,
-            "h_index": 28,
-            "notable_papers": [
-                "Deep Learning for Early Cancer Detection: A Comprehensive Study",
-                "AI-Powered Diagnostic Systems in Healthcare",
-                "Machine Learning Applications in Medical Imaging"
-            ]
         },
-        "media_coverage": [
-            {
-                "title": "Brazilian Scientist Revolutionizes Cancer Detection with AI",
-                "outlet": "TechCrunch",
-                "date": "2023-06-15",
-                "url": "https://techcrunch.com/example"
-            }
-        ],
-        "speaking_engagements": [
-            {
-                "title": "AI in Medicine: The Future is Now",
-                "event": "TEDx São Paulo",
-                "date": "2023-09-20"
-            }
-        ]
+        "current_step": "friendly-form"
     }
     
     try:
-        print(f"🔗 Endpoint: POST {API_BASE}/auto-application/case/{case_id}/friendly-form")
-        print(f"📤 Payload: {json.dumps(friendly_form_data, indent=2)}")
+        print(f"🔗 Endpoint: PUT {API_BASE}/auto-application/case/{case_id}")
+        print(f"📤 Payload: {json.dumps(professional_data, indent=2)}")
         
         headers = {
             "Content-Type": "application/json",
@@ -443,9 +406,9 @@ def test_o1_visa_complete_flow():
         }
         
         start_time = time.time()
-        response = requests.post(
-            f"{API_BASE}/auto-application/case/{case_id}/friendly-form",
-            json=friendly_form_data,
+        response = requests.put(
+            f"{API_BASE}/auto-application/case/{case_id}",
+            json=professional_data,
             headers=headers,
             timeout=30
         )
@@ -461,10 +424,13 @@ def test_o1_visa_complete_flow():
             response_data = response.json()
             print(f"📄 Response: {json.dumps(response_data, indent=2)}")
             
+            case_data = response_data.get("case", {})
+            
             validations = {
-                "1_form_saved": response_data.get("success") == True or "saved" in str(response_data).lower(),
-                "2_case_id_matches": case_id in str(response_data),
-                "3_progress_updated": response_data.get("progress_percentage", 0) > 20
+                "1_case_updated": response_data.get("message") == "Case updated successfully",
+                "2_professional_data_saved": case_data.get("simplified_form_responses") is not None,
+                "3_progress_updated": case_data.get("progress_percentage", 0) > 30,
+                "4_current_step_updated": case_data.get("current_step") == "friendly-form"
             }
             
             results["etapa_5_friendly_form"]["validations"] = validations
@@ -477,12 +443,12 @@ def test_o1_visa_complete_flow():
                 print(f"  {status} {check}: {passed}")
                 
         else:
-            print(f"❌ Friendly form failed with status {response.status_code}")
+            print(f"❌ Professional data update failed with status {response.status_code}")
             print(f"📄 Error response: {response.text}")
             results["etapa_5_friendly_form"]["error"] = response.text
             
     except Exception as e:
-        print(f"❌ Exception during friendly form: {str(e)}")
+        print(f"❌ Exception during professional data update: {str(e)}")
         results["etapa_5_friendly_form"]["exception"] = str(e)
     
     # ETAPA 6: Simular upload de documentos
