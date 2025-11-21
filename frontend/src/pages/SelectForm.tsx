@@ -247,6 +247,38 @@ const SelectForm = () => {
 
   // Forms are already filtered for change of status (no B-1/B-2)
 
+  const createStripeCheckout = async (visaCode: string, caseId: string) => {
+    try {
+      console.log('💳 Creating Stripe checkout session...');
+      
+      const backendUrl = import.meta.env.VITE_BACKEND_URL;
+      const response = await fetch(`${backendUrl}/api/payment/create-checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          visa_code: visaCode,
+          case_id: caseId
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success && data.checkout_url) {
+        console.log('✅ Stripe checkout created, redirecting...');
+        // Redirect to Stripe Checkout
+        window.location.href = data.checkout_url;
+      } else {
+        throw new Error(data.error || 'Erro ao criar sessão de pagamento');
+      }
+    } catch (error: any) {
+      console.error('❌ Erro ao criar checkout Stripe:', error);
+      setError(error.message || 'Erro ao processar pagamento. Tente novamente.');
+      setIsLoading(false);
+    }
+  };
+
   const createCase = async (formCode: string) => {
     setIsLoading(true);
     setError("");
