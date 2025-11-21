@@ -2,7 +2,7 @@
   "main_results": {
     "test_1_f1_student_package": {
       "status_code": 200,
-      "processing_time": 3.6483585834503174,
+      "processing_time": 3.6697580814361572,
       "validations": {
         "1_pdf_20_plus_pages": true,
         "2_pdf_500_plus_kb": true,
@@ -36,38 +36,29 @@
           ]
         },
         "validation": {
-          "is_valid": false,
-          "missing_items": [
-            "Form I-539"
-          ],
+          "is_valid": true,
+          "missing_items": [],
           "forbidden_items_found": [],
           "warnings": []
         },
         "qa_report": {
-          "timestamp": "2025-11-21T02:20:29.512774",
+          "timestamp": "2025-11-21T02:21:33.555588",
           "visa_type": null,
-          "overall_score": 0.765,
+          "overall_score": 0.875,
           "category_scores": {
-            "completeness": 0.9,
+            "completeness": 1.0,
             "accuracy": 0.6499999999999999,
             "professionalism": 0.9,
-            "compliance": 0.6
+            "compliance": 1.0
           },
-          "issues": [
-            {
-              "severity": "high",
-              "category": "completeness",
-              "description": "Missing required document: Form I-539"
-            }
-          ],
+          "issues": [],
           "recommendations": [
             "Review data accuracy and consistency across documents",
-            "Ensure all USCIS requirements are met",
-            "\u26a0\ufe0f Package needs significant improvements before submission"
+            "Package is acceptable but could be improved"
           ],
-          "passed": false
+          "passed": true
         },
-        "processing_time": 3.5994465351104736,
+        "processing_time": 3.627511978149414,
         "error": null
       },
       "pdf_files_found": 1,
@@ -87,6 +78,6 @@
     "specialists_list": true,
     "visa_detection": true
   },
-  "timestamp": 1763691629.6254604,
+  "timestamp": 1763691693.6569054,
   "test_focus": "F-1 Student Visa as requested in review"
 }

@@ -1,0 +1,17 @@
+{
+  "timestamp": "2025-11-21T02:21:33.555588",
+  "visa_type": null,
+  "overall_score": 0.875,
+  "category_scores": {
+    "completeness": 1.0,
+    "accuracy": 0.6499999999999999,
+    "professionalism": 0.9,
+    "compliance": 1.0
+  },
+  "issues": [],
+  "recommendations": [
+    "Review data accuracy and consistency across documents",
+    "Package is acceptable but could be improved"
+  ],
+  "passed": true
+}
