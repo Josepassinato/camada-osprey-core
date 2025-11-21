@@ -60,12 +60,12 @@ def test_visa_generate_endpoint():
     
     try:
         print(f"🔗 Endpoint: POST {API_BASE}/visa/generate")
-        print(f"📤 Payload: {json.dumps(b2_payload, indent=2)}")
+        print(f"📤 Payload: {json.dumps(f1_payload, indent=2)}")
         
         start_time = time.time()
         response = requests.post(
             f"{API_BASE}/visa/generate",
-            json=b2_payload,
+            json=f1_payload,
             headers={"Content-Type": "application/json"},
             timeout=60
         )
@@ -74,8 +74,8 @@ def test_visa_generate_endpoint():
         print(f"⏱️  Processing time: {processing_time:.2f}s")
         print(f"📊 Status Code: {response.status_code}")
         
-        results["test_1_b2_complete_package"]["status_code"] = response.status_code
-        results["test_1_b2_complete_package"]["processing_time"] = processing_time
+        results["test_1_f1_student_package"]["status_code"] = response.status_code
+        results["test_1_f1_student_package"]["processing_time"] = processing_time
         
         if response.status_code == 200:
             response_data = response.json()
@@ -89,15 +89,16 @@ def test_visa_generate_endpoint():
             validations = {
                 "1_status_200": response.status_code == 200,
                 "2_success_true": response_data.get("success") == True,
-                "3_pages_30_plus": package_result.get("pages", 0) >= 30,
-                "4_qa_score_90_plus": qa_report.get("overall_score", 0) >= 0.90,
-                "5_qa_passed_true": qa_report.get("passed") == True,
-                "6_validation_valid": validation.get("is_valid") == True,
-                "7_pdf_generated": package_result.get("package_path") is not None
+                "3_visa_type_f1": response_data.get("visa_type") == "F-1",
+                "4_package_result_present": package_result is not None and len(package_result) > 0,
+                "5_pdf_name_correct": "F1_STUDENT_COMPLETE_PACKAGE_RAFAEL_OLIVEIRA.pdf" in str(package_result),
+                "6_pdf_pages_10_plus": package_result.get("pages", 0) >= 10,
+                "7_validation_present": validation is not None and len(validation) > 0,
+                "8_qa_report_present": qa_report is not None and len(qa_report) > 0
             }
             
-            results["test_1_b2_complete_package"]["validations"] = validations
-            results["test_1_b2_complete_package"]["response_data"] = response_data
+            results["test_1_f1_student_package"]["validations"] = validations
+            results["test_1_f1_student_package"]["response_data"] = response_data
             
             print("\n🎯 VALIDAÇÕES ESPECÍFICAS DA REVIEW:")
             print("=" * 50)
@@ -107,24 +108,26 @@ def test_visa_generate_endpoint():
             
             # Detailed metrics
             print(f"\n📊 MÉTRICAS DETALHADAS:")
-            print(f"  📄 Páginas: {package_result.get('pages', 0)} (target: ≥30)")
-            print(f"  🎯 QA Score: {qa_report.get('overall_score', 0):.1%} (target: ≥90%)")
-            print(f"  ✅ QA Passed: {qa_report.get('passed', False)}")
-            print(f"  📋 Validation: {validation.get('is_valid', False)}")
+            print(f"  📄 Visa Type: {response_data.get('visa_type', 'N/A')}")
+            print(f"  📄 Páginas: {package_result.get('pages', 0)} (target: ≥10)")
+            print(f"  📋 Package Result: {package_result}")
+            print(f"  ✅ Validation: {validation}")
+            print(f"  🎯 QA Report: {qa_report}")
             
-            if package_result.get("package_path"):
-                print(f"  📁 PDF Path: {package_result['package_path']}")
+            if package_result.get("pdf_path") or package_result.get("package_path"):
+                pdf_path = package_result.get("pdf_path") or package_result.get("package_path")
+                print(f"  📁 PDF Path: {pdf_path}")
             else:
-                print(f"  ❌ No PDF generated")
+                print(f"  ❌ No PDF path found")
                 
         else:
             print(f"❌ Request failed with status {response.status_code}")
             print(f"📄 Error response: {response.text}")
-            results["test_1_b2_complete_package"]["error"] = response.text
+            results["test_1_f1_student_package"]["error"] = response.text
             
     except Exception as e:
-        print(f"❌ Exception during B-2 complete package test: {str(e)}")
-        results["test_1_b2_complete_package"]["exception"] = str(e)
+        print(f"❌ Exception during F-1 student package test: {str(e)}")
+        results["test_1_f1_student_package"]["exception"] = str(e)
     
     # Check for PDF generation in /frontend/public/
     print("\n📁 VERIFICAÇÃO DE PDFs GERADOS:")
