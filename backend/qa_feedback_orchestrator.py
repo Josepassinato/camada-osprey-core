@@ -401,11 +401,27 @@ class QAFeedbackOrchestrator:
             
             logger.info(f"✅ Document Analyzer processou {len(problems)} problemas")
             
+            # 📚 REGISTRAR LIÇÕES APRENDIDAS
+            for problem in problems:
+                await self._record_correction_lesson(
+                    agent_name="document_analyzer",
+                    case_id=case_id,
+                    problem=problem,
+                    correction={
+                        "action": "document_analysis",
+                        "details": analysis_result,
+                        "status": "completed"
+                    },
+                    success=True,
+                    form_code=case_data.get('form_code', 'unknown')
+                )
+            
             return {
                 "agent": "document_analyzer",
                 "status": "completed",
                 "problems_addressed": len(problems),
-                "recommendations": analysis_result
+                "recommendations": analysis_result,
+                "lessons_recorded": len(problems)
             }
             
         except Exception as e:
