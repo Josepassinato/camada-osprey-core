@@ -266,12 +266,14 @@ const SelectForm = () => {
       });
 
       const data = await response.json();
+      console.log('📦 Response data:', data);
       
       if (data.success && data.checkout_url) {
-        console.log('✅ Stripe checkout created, redirecting...');
+        console.log('✅ Stripe checkout created, redirecting to:', data.checkout_url);
         // Redirect to Stripe Checkout
         window.location.href = data.checkout_url;
       } else {
+        console.error('❌ No checkout URL in response:', data);
         throw new Error(data.error || 'Erro ao criar sessão de pagamento');
       }
     } catch (error: any) {
