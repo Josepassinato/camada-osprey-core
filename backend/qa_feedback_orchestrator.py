@@ -68,7 +68,7 @@ class QAFeedbackOrchestrator:
         max_iterations: Optional[int] = None
     ) -> Dict[str, Any]:
         """
-        Orquestra o ciclo completo de QA com feedback loop
+        Orquestra o ciclo completo de QA com feedback loop + APRENDIZADO CONTÍNUO
         
         Args:
             case_data: Dados completos do caso
@@ -82,7 +82,15 @@ class QAFeedbackOrchestrator:
         case_id = case_data.get('case_id')
         max_iter = max_iterations or self.max_iterations
         
-        logger.info(f"🔄 Iniciando ciclo de QA para case {case_id}")
+        # Inicializar sistema de aprendizado
+        if not self.learning_system:
+            from agent_learning_system import get_learning_system
+            self.learning_system = await get_learning_system(db)
+        
+        logger.info(f"🔄 Iniciando ciclo de QA com Aprendizado Contínuo para case {case_id}")
+        
+        # 🧠 APLICAR CORREÇÕES PREVENTIVAS BASEADAS EM APRENDIZADO
+        await self._apply_preventive_corrections(case_data)
         
         # Histórico de iterações
         iteration_history = []
