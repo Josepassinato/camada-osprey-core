@@ -181,15 +181,15 @@ def test_visa_generate_endpoint():
         results["pdf_files_found"] = 0
     
     # Summary
-    print("\n📊 RESUMO DO TESTE FINAL")
+    print("\n📊 RESUMO DO TESTE F-1")
     print("=" * 60)
     
-    test_success = results["test_1_b2_complete_package"].get("status_code") == 200
+    test_success = results["test_1_f1_student_package"].get("status_code") == 200
     
-    print(f"🧪 Teste B-2 Complete Package: {'✅ PASSOU' if test_success else '❌ FALHOU'}")
+    print(f"🧪 Teste F-1 Student Package: {'✅ PASSOU' if test_success else '❌ FALHOU'}")
     
     if test_success:
-        validations = results["test_1_b2_complete_package"].get("validations", {})
+        validations = results["test_1_f1_student_package"].get("validations", {})
         passed_count = sum(validations.values())
         total_count = len(validations)
         print(f"   📋 Validações específicas: {passed_count}/{total_count} passaram")
@@ -201,7 +201,7 @@ def test_visa_generate_endpoint():
         else:
             print(f"   ✅ Todas as validações passaram!")
     
-    overall_success = test_success and results["test_1_b2_complete_package"].get("validations", {}).get("2_success_true", False)
+    overall_success = test_success and results["test_1_f1_student_package"].get("validations", {}).get("2_success_true", False)
     results["summary"]["overall_success"] = overall_success
     results["summary"]["tests_passed"] = 1 if test_success else 0
     results["summary"]["tests_total"] = 1
