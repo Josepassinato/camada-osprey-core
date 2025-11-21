@@ -2643,6 +2643,92 @@ async def run_professional_qa_review(case_id: str):
         logger.error(f"❌ Erro na revisão QA: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error in QA review: {str(e)}")
 
+@api_router.post("/auto-application/case/{case_id}/qa-cycle-with-feedback")
+async def run_qa_cycle_with_feedback(case_id: str, request: dict = None):
+    """
+    🔄 CICLO COMPLETO DE QA COM FEEDBACK LOOP AUTOMÁTICO
+    
+    Executa ciclo iterativo de revisão → correção → revisão até aprovação
+    ou até atingir máximo de iterações.
+    
+    O QA Agent identifica problemas e encaminha automaticamente para os
+    agentes construtores apropriados (Document Analyzer, Form Filler, 
+    Translation Agent, Specialized Agents) que fazem as correções necessárias.
+    
+    Parâmetros opcionais:
+    - max_iterations: Número máximo de iterações (padrão: 5)
+    - auto_fix: Se True, tenta correções automáticas (padrão: True)
+    """
+    try:
+        # Buscar caso completo
+        case = await db.auto_cases.find_one({"case_id": case_id})
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        # Remover _id do MongoDB
+        if '_id' in case:
+            case['_id'] = str(case['_id'])
+        
+        # Obter configurações
+        request_data = request or {}
+        max_iterations = request_data.get('max_iterations', 5)
+        auto_fix = request_data.get('auto_fix', True)
+        
+        logger.info(f"🔄 Iniciando ciclo de QA com feedback loop para case {case_id}")
+        logger.info(f"   Max iterações: {max_iterations}, Auto-fix: {auto_fix}")
+        
+        # Obter agente de QA e orquestrador
+        qa_agent = get_qa_agent()
+        orchestrator = get_qa_orchestrator()
+        
+        # Executar ciclo completo
+        result = await orchestrator.orchestrate_qa_cycle(
+            case_data=case,
+            qa_agent=qa_agent,
+            db=db,
+            max_iterations=max_iterations
+        )
+        
+        # Se aprovado, atualizar status final
+        if result['status'] == 'approved':
+            await db.auto_cases.update_one(
+                {"case_id": case_id},
+                {
+                    "$set": {
+                        "status": "qa_approved",
+                        "progress_percentage": 95,
+                        "ai_processing_status": "approved",
+                        "updated_at": datetime.utcnow()
+                    }
+                }
+            )
+            logger.info(f"✅ Case {case_id} APROVADO após {result['iterations']} iteração(ões)")
+        else:
+            logger.warning(
+                f"⚠️  Case {case_id} não foi aprovado: {result['status']} "
+                f"(Score final: {result['final_score']:.1%})"
+            )
+        
+        return {
+            "success": result['success'],
+            "case_id": case_id,
+            "status": result['status'],
+            "iterations": result['iterations'],
+            "final_score": result['final_score'],
+            "approved": result['status'] == 'approved',
+            "qa_report": result.get('qa_report'),
+            "iteration_history": result.get('iteration_history', []),
+            "message": result['message']
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Erro no ciclo de QA com feedback: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Error in QA cycle: {str(e)}")
+
 @api_router.post("/auto-application/case/{case_id}/generate-form")
 async def generate_uscis_form_for_case(case_id: str):
     """Generate USCIS form for a specific case"""
