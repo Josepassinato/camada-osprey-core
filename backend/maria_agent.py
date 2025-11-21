@@ -322,6 +322,81 @@ Status do Caso: {user_context.get('case_status', 'Iniciando')}
         
         return None
     
+    def _generate_fallback_response(self, user_message: str, user_context: Dict = None) -> str:
+        """Gera resposta inteligente quando Gemini não está disponível"""
+        message_lower = user_message.lower()
+        
+        # Saudações
+        if any(word in message_lower for word in ["olá", "oi", "hello", "hi", "bom dia", "boa tarde", "boa noite"]):
+            name = user_context.get("name", "amigo(a)") if user_context else "amigo(a)"
+            return f"""Olá {name}! 👋 Que bom te ver aqui!
+
+Sou a Maria, sua assistente virtual da Osprey. Estou aqui para te ajudar com sua jornada de imigração! 🌟
+
+Como posso te ajudar hoje? Posso:
+✅ Explicar processos do USCIS
+✅ Responder dúvidas sobre documentação
+✅ Te motivar durante o processo
+✅ Explicar os benefícios da Osprey
+
+É só me perguntar! 😊"""
+        
+        # Ansiedade/Preocupação
+        if any(word in message_lower for word in ["ansioso", "nervoso", "preocupado", "medo", "anxious"]):
+            return """Entendo completamente como você se sente 😊 A ansiedade é uma reação totalmente normal durante o processo de imigração.
+
+Algumas dicas que podem ajudar:
+🧘 **Respire fundo**: inspire por 4s, segure 4s, expire 4s
+📋 **Foque no controlável**: prepare seus documentos com cuidado
+🎯 **Celebre o progresso**: você já deu o primeiro passo!
+
+Lembre-se: você não está sozinho nessa jornada! Estou aqui para te apoiar. 💙
+
+Quer conversar sobre alguma etapa específica que te preocupa?"""
+        
+        # Perguntas sobre processo
+        if "quanto tempo" in message_lower or "prazo" in message_lower or "demora" in message_lower:
+            return """Os prazos de processamento variam bastante por tipo de visto:
+
+⏱️ **Timelines estimados**:
+- I-539 (B-2): 4-8 meses
+- F-1: Varia (consulado)
+- I-130: 10-24 meses  
+- I-765: 3-8 meses
+
+⚠️ Importante: Esses são prazos gerais. Cada caso é único e pode variar.
+
+Quer saber mais sobre algum visto específico?"""
+        
+        # Perguntas sobre Osprey
+        if "osprey" in message_lower or "preço" in message_lower or "custo" in message_lower:
+            return """A Osprey é uma plataforma incrível que te ajuda com imigração! 🦅
+
+💰 **Preço**: $299 - $3,000 (vs $5,000 - $15,000 de advogado)
+🤖 **Tecnologia**: 8 agentes de IA especializados
+✅ **Qualidade**: Pacotes "lawyer-grade" (QA 85-96%)
+⚡ **Rapidez**: Sistema guiado passo a passo
+👥 **Suporte**: Eu estou sempre aqui para te ajudar!
+
+Muito mais acessível que contratar um advogado, com qualidade profissional!
+
+Posso te explicar mais sobre como funciona?"""
+        
+        # Resposta padrão motivacional
+        return f"""Obrigada por sua mensagem! 😊
+
+⚠️ *Importante*: Estou com uma limitação técnica temporária, mas continuo aqui para ajudar!
+
+📞 **Como posso ajudar:**
+- Informações gerais sobre processos USCIS
+- Explicar benefícios da Osprey
+- Motivação e apoio emocional
+- Dúvidas sobre documentação
+
+{self.disclaimers['initial']}
+
+Pode me fazer suas perguntas! Vou fazer o meu melhor para te ajudar. 💙"""
+    
     def get_welcome_message(self, user_name: str = None, visa_type: str = None) -> str:
         """Gera mensagem de boas-vindas personalizada"""
         name = user_name if user_name else "amigo(a)"
