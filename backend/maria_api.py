@@ -254,19 +254,177 @@ async def get_maria_analytics():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/voice/text-to-speech")
+async def text_to_speech(request: dict):
+    """
+    Converte texto em áudio (voz da Maria)
+    Usa Gemini/Google Cloud TTS para vozes naturais
+    """
+    try:
+        text = request.get("text")
+        language = request.get("language", "pt-BR")
+        
+        if not text:
+            raise HTTPException(status_code=400, detail="Text is required")
+        
+        result = await maria_voice.text_to_speech(
+            text=text,
+            language=language,
+            voice_gender="female",
+            speaking_rate=1.0,
+            pitch=0.0
+        )
+        
+        return result
+        
+    except Exception as e:
+        print(f"❌ Erro no TTS: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/voice/speech-to-text")
+async def speech_to_text(request: dict):
+    """
+    Converte áudio em texto
+    Usa Gemini/Google Cloud Speech-to-Text
+    """
+    try:
+        import base64
+        
+        audio_base64 = request.get("audio")
+        language = request.get("language", "pt-BR")
+        
+        if not audio_base64:
+            raise HTTPException(status_code=400, detail="Audio is required")
+        
+        # Decodificar base64
+        audio_data = base64.b64decode(audio_base64)
+        
+        result = await maria_voice.speech_to_text(
+            audio_data=audio_data,
+            language=language
+        )
+        
+        return result
+        
+    except Exception as e:
+        print(f"❌ Erro no STT: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/whatsapp/send")
+async def send_whatsapp(request: dict):
+    """
+    Envia mensagem do WhatsApp via Baileys
+    Apenas para admins/sistema interno
+    """
+    try:
+        phone = request.get("phone")
+        message = request.get("message")
+        
+        if not phone or not message:
+            raise HTTPException(status_code=400, detail="Phone and message are required")
+        
+        result = await maria_whatsapp.send_message(phone, message)
+        
+        return result
+        
+    except Exception as e:
+        print(f"❌ Erro ao enviar WhatsApp: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/whatsapp/welcome/{user_id}")
+async def send_welcome_whatsapp(user_id: str):
+    """
+    Envia mensagem de boas-vindas da Maria via WhatsApp
+    Chamado automaticamente após signup/pagamento
+    """
+    try:
+        if not db:
+            raise HTTPException(status_code=500, detail="Database not initialized")
+        
+        # Buscar usuário
+        user = await db.users.find_one({"id": user_id})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Buscar caso ativo
+        case = await db.auto_cases.find_one({
+            "user_id": user_id,
+            "status": {"$in": ["in_progress", "not_started"]}
+        })
+        
+        phone = user.get("phone")
+        if not phone:
+            return {
+                "success": False,
+                "error": "User has no phone number"
+            }
+        
+        user_name = user.get("first_name", "Usuário")
+        visa_type = case.get("form_code", "seu visto") if case else "seu visto"
+        
+        result = await maria_whatsapp.send_welcome_message(
+            phone_number=phone,
+            user_name=user_name,
+            visa_type=visa_type
+        )
+        
+        # Salvar no log
+        if result.get("success") and db:
+            await db.maria_whatsapp_log.insert_one({
+                "user_id": user_id,
+                "phone": phone,
+                "message_type": "welcome",
+                "success": True,
+                "message_id": result.get("message_id"),
+                "timestamp": datetime.utcnow()
+            })
+        
+        return result
+        
+    except Exception as e:
+        print(f"❌ Erro ao enviar boas-vindas WhatsApp: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/whatsapp/status")
+async def whatsapp_status():
+    """
+    Verifica status da conexão WhatsApp (Baileys)
+    """
+    try:
+        status = await maria_whatsapp.check_connection_status()
+        return status
+        
+    except Exception as e:
+        return {
+            "connected": False,
+            "error": str(e)
+        }
+
+
 @router.get("/health")
 async def maria_health_check():
     """Health check do serviço da Maria"""
+    whatsapp_status = await maria_whatsapp.check_connection_status()
+    
     return {
         "service": "Maria - Assistente Virtual Osprey",
         "status": "active",
         "personality": maria.personality["name"],
         "version": "1.0",
-        "capabilities": [
-            "chat",
-            "emotional_support",
-            "uscis_information",
-            "sales",
-            "whatsapp_integration"
-        ]
+        "capabilities": {
+            "chat": True,
+            "emotional_support": True,
+            "uscis_information": True,
+            "sales": True,
+            "voice": maria_voice.available,
+            "whatsapp": whatsapp_status.get("connected", False)
+        },
+        "integrations": {
+            "gemini": maria_voice.available,
+            "baileys": whatsapp_status.get("connected", False)
+        }
     }
