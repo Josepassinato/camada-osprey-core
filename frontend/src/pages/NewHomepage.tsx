@@ -819,6 +819,9 @@ const NewHomepage = () => {
           </div>
         </div>
       </footer>
+
+      {/* Maria Chat Widget */}
+      <MariaChatWidget />
     </div>
   );
 };
