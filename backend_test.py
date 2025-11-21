@@ -161,33 +161,32 @@ def test_visa_generate_endpoint():
         results["pdf_files_found"] = 0
     
     # Summary
-    print("\n📊 RESUMO DOS TESTES")
+    print("\n📊 RESUMO DO TESTE FINAL")
     print("=" * 60)
     
-    test1_success = results["test_1_b2_extension"].get("status_code") == 200
-    test2_success = results["test_2_h1b_preparation"].get("status_code") == 200
+    test_success = results["test_1_b2_complete_package"].get("status_code") == 200
     
-    print(f"🧪 Teste 1 (B-2): {'✅ PASSOU' if test1_success else '❌ FALHOU'}")
-    print(f"🧪 Teste 2 (H-1B): {'✅ PASSOU' if test2_success else '❌ FALHOU'}")
+    print(f"🧪 Teste B-2 Complete Package: {'✅ PASSOU' if test_success else '❌ FALHOU'}")
     
-    if test1_success:
-        b2_validations = results["test_1_b2_extension"].get("validations", {})
-        b2_passed = sum(b2_validations.values())
-        b2_total = len(b2_validations)
-        print(f"   📋 Validações B-2: {b2_passed}/{b2_total} passaram")
+    if test_success:
+        validations = results["test_1_b2_complete_package"].get("validations", {})
+        passed_count = sum(validations.values())
+        total_count = len(validations)
+        print(f"   📋 Validações específicas: {passed_count}/{total_count} passaram")
+        
+        # Show which specific validations failed
+        failed_validations = [k for k, v in validations.items() if not v]
+        if failed_validations:
+            print(f"   ❌ Validações que falharam: {', '.join(failed_validations)}")
+        else:
+            print(f"   ✅ Todas as validações passaram!")
     
-    if test2_success:
-        h1b_validations = results["test_2_h1b_preparation"].get("validations", {})
-        h1b_passed = sum(h1b_validations.values())
-        h1b_total = len(h1b_validations)
-        print(f"   📋 Validações H-1B: {h1b_passed}/{h1b_total} passaram")
-    
-    overall_success = test1_success and test2_success
+    overall_success = test_success and results["test_1_b2_complete_package"].get("validations", {}).get("2_success_true", False)
     results["summary"]["overall_success"] = overall_success
-    results["summary"]["tests_passed"] = sum([test1_success, test2_success])
-    results["summary"]["tests_total"] = 2
+    results["summary"]["tests_passed"] = 1 if test_success else 0
+    results["summary"]["tests_total"] = 1
     
-    print(f"\n🎯 RESULTADO GERAL: {'✅ SUCESSO' if overall_success else '❌ FALHA'}")
+    print(f"\n🎯 RESULTADO FINAL: {'✅ SUCESSO COMPLETO' if overall_success else '❌ NECESSITA MELHORIAS'}")
     print(f"📈 Taxa de sucesso: {results['summary']['tests_passed']}/{results['summary']['tests_total']} ({results['summary']['tests_passed']/results['summary']['tests_total']*100:.1f}%)")
     
     return results
