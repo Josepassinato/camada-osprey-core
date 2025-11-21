@@ -271,41 +271,77 @@ def test_o1_visa_complete_flow():
         print(f"❌ Exception during application start: {str(e)}")
         results["etapa_3_start_application"]["exception"] = str(e)
     
-    # Check for PDF generation in /frontend/public/
-    print("\n📁 VERIFICAÇÃO DE PDFs GERADOS:")
-    print("-" * 40)
+    # ETAPA 4: Preencher dados básicos
+    print("\n📋 ETAPA 4: Preencher Dados Básicos")
+    print("-" * 50)
     
-    frontend_public_path = Path("/app/frontend/public")
-    if frontend_public_path.exists():
-        pdf_files = list(frontend_public_path.glob("*F1*.pdf"))
-        print(f"📄 PDFs F-1 encontrados em /frontend/public/: {len(pdf_files)}")
-        for pdf in pdf_files[-5:]:  # Show last 5 F-1 PDFs
-            print(f"  📄 {pdf.name} ({pdf.stat().st_size} bytes)")
-        results["test_1_f1_student_package"]["pdf_files_found"] = len(pdf_files)
+    if not case_id:
+        print("❌ Cannot proceed without case_id")
+        return results
+    
+    basic_data = {
+        "full_name": "Sofia Mendes Rodrigues",
+        "date_of_birth": "1988-03-15",
+        "country_of_birth": "Brazil",
+        "passport_number": "BR123456789",
+        "passport_expiry": "2029-12-31",
+        "phone": "+5511987654321",
+        "email": "sofia.mendes.test@example.com",
+        "current_address": "Rua das Flores 123, São Paulo, SP, Brazil",
+        "marital_status": "single"
+    }
+    
+    try:
+        print(f"🔗 Endpoint: POST {API_BASE}/auto-application/case/{case_id}/basic-data")
+        print(f"📤 Payload: {json.dumps(basic_data, indent=2)}")
         
-        # Look for the specific file mentioned in review
-        target_pdf = "F1_STUDENT_COMPLETE_PACKAGE_RAFAEL_OLIVEIRA.pdf"
-        target_path = frontend_public_path / target_pdf
-        if target_path.exists():
-            file_size = target_path.stat().st_size
-            print(f"  ✅ Target PDF found: {target_pdf} ({file_size} bytes)")
-            results["test_1_f1_student_package"]["target_pdf_found"] = True
-            results["test_1_f1_student_package"]["target_pdf_size"] = file_size
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {jwt_token}"
+        }
+        
+        start_time = time.time()
+        response = requests.post(
+            f"{API_BASE}/auto-application/case/{case_id}/basic-data",
+            json=basic_data,
+            headers=headers,
+            timeout=30
+        )
+        processing_time = time.time() - start_time
+        
+        print(f"⏱️  Processing time: {processing_time:.2f}s")
+        print(f"📊 Status Code: {response.status_code}")
+        
+        results["etapa_4_basic_data"]["status_code"] = response.status_code
+        results["etapa_4_basic_data"]["processing_time"] = processing_time
+        
+        if response.status_code in [200, 201]:
+            response_data = response.json()
+            print(f"📄 Response: {json.dumps(response_data, indent=2)}")
             
-            # Check if file size is reasonable (> 15 KB as mentioned in review)
-            if file_size > 15 * 1024:
-                print(f"  ✅ PDF size is adequate: {file_size} bytes (> 15 KB)")
-                results["test_1_f1_student_package"]["pdf_size_adequate"] = True
-            else:
-                print(f"  ⚠️  PDF size is small: {file_size} bytes (< 15 KB)")
-                results["test_1_f1_student_package"]["pdf_size_adequate"] = False
+            validations = {
+                "1_data_saved": response_data.get("success") == True or "saved" in str(response_data).lower(),
+                "2_case_id_matches": case_id in str(response_data),
+                "3_progress_updated": response_data.get("progress_percentage", 0) > 0
+            }
+            
+            results["etapa_4_basic_data"]["validations"] = validations
+            results["etapa_4_basic_data"]["response_data"] = response_data
+            
+            print("\n🎯 VALIDAÇÕES ETAPA 4:")
+            print("=" * 50)
+            for check, passed in validations.items():
+                status = "✅" if passed else "❌"
+                print(f"  {status} {check}: {passed}")
+                
         else:
-            print(f"  ❌ Target PDF not found: {target_pdf}")
-            results["test_1_f1_student_package"]["target_pdf_found"] = False
-    else:
-        print("❌ Diretório /frontend/public/ não encontrado")
-        results["test_1_f1_student_package"]["pdf_files_found"] = 0
-        results["test_1_f1_student_package"]["target_pdf_found"] = False
+            print(f"❌ Basic data failed with status {response.status_code}")
+            print(f"📄 Error response: {response.text}")
+            results["etapa_4_basic_data"]["error"] = response.text
+            
+    except Exception as e:
+        print(f"❌ Exception during basic data: {str(e)}")
+        results["etapa_4_basic_data"]["exception"] = str(e)
     
     # Check for PDF generation in /frontend/public/
     print("\n📁 VERIFICAÇÃO DE PDFs GERADOS:")
