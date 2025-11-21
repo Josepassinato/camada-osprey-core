@@ -135,25 +135,35 @@ def test_visa_generate_endpoint():
     
     frontend_public_path = Path("/app/frontend/public")
     if frontend_public_path.exists():
-        pdf_files = list(frontend_public_path.glob("*B2*.pdf"))
-        print(f"📄 PDFs B-2 encontrados em /frontend/public/: {len(pdf_files)}")
-        for pdf in pdf_files[-5:]:  # Show last 5 B-2 PDFs
+        pdf_files = list(frontend_public_path.glob("*F1*.pdf"))
+        print(f"📄 PDFs F-1 encontrados em /frontend/public/: {len(pdf_files)}")
+        for pdf in pdf_files[-5:]:  # Show last 5 F-1 PDFs
             print(f"  📄 {pdf.name} ({pdf.stat().st_size} bytes)")
-        results["test_1_b2_complete_package"]["pdf_files_found"] = len(pdf_files)
+        results["test_1_f1_student_package"]["pdf_files_found"] = len(pdf_files)
         
         # Look for the specific file mentioned in review
-        target_pdf = "B2_COMPLETE_PACKAGE_60PLUS_PAGES.pdf"
+        target_pdf = "F1_STUDENT_COMPLETE_PACKAGE_RAFAEL_OLIVEIRA.pdf"
         target_path = frontend_public_path / target_pdf
         if target_path.exists():
-            print(f"  ✅ Target PDF found: {target_pdf} ({target_path.stat().st_size} bytes)")
-            results["test_1_b2_complete_package"]["target_pdf_found"] = True
+            file_size = target_path.stat().st_size
+            print(f"  ✅ Target PDF found: {target_pdf} ({file_size} bytes)")
+            results["test_1_f1_student_package"]["target_pdf_found"] = True
+            results["test_1_f1_student_package"]["target_pdf_size"] = file_size
+            
+            # Check if file size is reasonable (> 15 KB as mentioned in review)
+            if file_size > 15 * 1024:
+                print(f"  ✅ PDF size is adequate: {file_size} bytes (> 15 KB)")
+                results["test_1_f1_student_package"]["pdf_size_adequate"] = True
+            else:
+                print(f"  ⚠️  PDF size is small: {file_size} bytes (< 15 KB)")
+                results["test_1_f1_student_package"]["pdf_size_adequate"] = False
         else:
             print(f"  ❌ Target PDF not found: {target_pdf}")
-            results["test_1_b2_complete_package"]["target_pdf_found"] = False
+            results["test_1_f1_student_package"]["target_pdf_found"] = False
     else:
         print("❌ Diretório /frontend/public/ não encontrado")
-        results["test_1_b2_complete_package"]["pdf_files_found"] = 0
-        results["test_1_b2_complete_package"]["target_pdf_found"] = False
+        results["test_1_f1_student_package"]["pdf_files_found"] = 0
+        results["test_1_f1_student_package"]["target_pdf_found"] = False
     
     # Check for PDF generation in /frontend/public/
     print("\n📁 VERIFICAÇÃO DE PDFs GERADOS:")
