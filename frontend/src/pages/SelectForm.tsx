@@ -678,6 +678,24 @@ const SelectForm = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Loading Modal - Redirecting to Stripe */}
+      {redirectingToStripe && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md mx-4 text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-purple-600 mx-auto mb-4"></div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Redirecionando para Pagamento
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Você será redirecionado para o Stripe em instantes...
+            </p>
+            <p className="text-sm text-gray-500">
+              💳 Processamento seguro via Stripe
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
