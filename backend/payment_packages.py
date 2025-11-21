@@ -83,10 +83,10 @@ VISA_PACKAGES = {
         ]
     },
     
-    # Categoria Intermediária - $980.00
+    # Categoria Intermediária - $460.00
     "F-1": {
         "name": "Visto de Estudante",
-        "price": 980.00,
+        "price": 460.00,
         "category": "intermediate",
         "category_name": "Intermediária",
         "description": "Formulário para mudança de status para F-1",
