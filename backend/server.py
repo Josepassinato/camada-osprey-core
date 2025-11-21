@@ -8931,11 +8931,12 @@ async def upload_knowledge_document(
     subcategory: str = Form(...),
     form_types: str = Form(...),  # Comma-separated
     description: str = Form(...),
-    uploaded_by: str = Form("admin")
+    uploaded_by: str = Form("admin"),
+    admin = Depends(require_admin)
 ):
     """
     Upload documento para a base de conhecimento interna
-    ADMIN ONLY - Não exposto ao usuário final
+    ADMIN ONLY - Não exposto ao usuário final - PROTECTED
     """
     try:
         from knowledge_base_manager import KnowledgeBaseManager
