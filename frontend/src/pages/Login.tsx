@@ -48,9 +48,17 @@ const Login = () => {
         
         setSuccess(`Bem-vindo de volta, ${data.user.name}! Redirecionando...`);
         
-        // Small delay to show success message, then redirect to dashboard
+        // Check if there's a redirect URL saved
+        const redirectUrl = localStorage.getItem('osprey_redirect_after_login');
+        
+        // Small delay to show success message, then redirect
         setTimeout(() => {
-          navigate('/dashboard');
+          if (redirectUrl) {
+            localStorage.removeItem('osprey_redirect_after_login');
+            navigate(redirectUrl);
+          } else {
+            navigate('/dashboard');
+          }
         }, 1500);
       } else {
         setError(data.detail || 'Erro ao fazer login. Verifique suas credenciais.');
