@@ -803,9 +803,11 @@ class QAFeedbackOrchestrator:
 # Singleton instance
 _orchestrator = None
 
-def get_qa_orchestrator() -> QAFeedbackOrchestrator:
+def get_qa_orchestrator(db=None) -> QAFeedbackOrchestrator:
     """Retorna instância singleton do Orchestrator"""
     global _orchestrator
     if _orchestrator is None:
-        _orchestrator = QAFeedbackOrchestrator()
+        _orchestrator = QAFeedbackOrchestrator(db)
+    elif db and not _orchestrator.db:
+        _orchestrator.db = db
     return _orchestrator
