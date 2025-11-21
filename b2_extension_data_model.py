@@ -164,6 +164,16 @@ class B2ExtensionCase:
         
         # Vínculos com o Brasil (ties to home country)
         self.home_country_ties = {
+            # Simplified access fields
+            "spouse_name": "João Carlos Rodrigues Costa",
+            "spouse_age": 62,
+            "spouse_occupation": "Retired Engineer",
+            "children_count": 2,
+            "children_names": ["Ana Paula Costa", "Lucas Rodrigues Costa"],
+            "property_value": "$240,000 USD",
+            "years_married": "35 years",
+            "years_in_home": "30+ years",
+            
             "property": {
                 "owns_home": True,
                 "property_address": "Rua das Flores, 245, Apto 801, Belo Horizonte, MG",
