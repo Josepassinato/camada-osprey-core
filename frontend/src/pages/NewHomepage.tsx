@@ -693,7 +693,7 @@ const NewHomepage = () => {
             Pronto Para Realizar Seu Sonho Americano?
           </h2>
           <p className="text-xl mb-8 opacity-90">
-            Junte-se a milhares de pessoas que já simplificaram seu processo de imigração
+            Simplifique seu processo de imigração com nossa plataforma inteligente
           </p>
           
           <div className="flex flex-col items-center gap-4">
