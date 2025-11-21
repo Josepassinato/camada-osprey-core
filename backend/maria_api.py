@@ -99,7 +99,7 @@ async def chat_with_maria(chat_msg: ChatMessage):
         )
         
         # Salvar conversa no MongoDB
-        if db:
+        if db is not None:
             await db.maria_conversations.insert_one({
                 "conversation_id": conversation_id,
                 "user_id": chat_msg.user_id,
