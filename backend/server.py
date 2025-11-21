@@ -8776,7 +8776,6 @@ async def create_payment_intent_endpoint(request: Request):
             raise HTTPException(status_code=404, detail=f"Produto {visa_code} não encontrado")
         
         # Criar PaymentIntent
-        import stripe
         stripe.api_key = os.environ.get('STRIPE_API_KEY')
         
         payment_intent = stripe.PaymentIntent.create(
