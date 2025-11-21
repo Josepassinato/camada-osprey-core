@@ -274,6 +274,7 @@ class UserProfile(BaseModel):
     first_name: str
     last_name: str
     phone: Optional[str] = None
+    role: str = "user"  # "user" | "admin" | "superadmin"
     country_of_birth: Optional[str] = None
     current_country: Optional[str] = None
     date_of_birth: Optional[str] = None
