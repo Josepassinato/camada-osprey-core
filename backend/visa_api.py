@@ -17,6 +17,11 @@ from visa_specialists.supervisor.supervisor_agent import SupervisorAgent
 from visa_specialists.b2_extension.b2_agent import B2ExtensionAgent
 from visa_specialists.h1b_worker.h1b_agent import H1BWorkerAgent
 from visa_specialists.f1_student.f1_agent import F1StudentAgent
+from visa_specialists.i130_family.i130_agent import I130FamilyAgent
+from visa_specialists.i765_ead.i765_agent import I765EADAgent
+from visa_specialists.i90_greencard.i90_agent import I90GreenCardAgent
+from visa_specialists.eb2_niw.eb2_niw_agent import EB2NIWAgent
+from visa_specialists.eb1a_extraordinary.eb1a_agent import EB1AAgent
 from visa_specialists.qa_agent import QualityAssuranceAgent
 from visa_specialists.metrics_tracker import MetricsTracker
 
@@ -27,15 +32,27 @@ supervisor = SupervisorAgent()
 b2_agent = B2ExtensionAgent()
 h1b_agent = H1BWorkerAgent()
 f1_agent = F1StudentAgent()
+i130_agent = I130FamilyAgent()
+i765_agent = I765EADAgent()
+i90_agent = I90GreenCardAgent()
+eb2_niw_agent = EB2NIWAgent()
+eb1a_agent = EB1AAgent()
 
 # Register specialists
 supervisor.register_specialist('B-2', b2_agent)
 supervisor.register_specialist('H-1B', h1b_agent)
 supervisor.register_specialist('F-1', f1_agent)
+supervisor.register_specialist('I-130', i130_agent)
+supervisor.register_specialist('I-765', i765_agent)
+supervisor.register_specialist('I-90', i90_agent)
+supervisor.register_specialist('EB-2 NIW', eb2_niw_agent)
+supervisor.register_specialist('EB-1A', eb1a_agent)
 
 # Initialize QA and Metrics
 qa_agent = QualityAssuranceAgent()
 metrics = MetricsTracker()
+
+print(f"✅ {len(supervisor.specialists)} agentes especializados registrados no supervisor")
 
 
 # ============================================================================
