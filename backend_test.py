@@ -46,22 +46,31 @@ def test_o1_visa_complete_flow():
     print("=" * 60)
     
     results = {
-        "test_1_f1_student_package": {},
+        "etapa_1_user_creation": {},
+        "etapa_2_login": {},
+        "etapa_3_start_application": {},
+        "etapa_4_basic_data": {},
+        "etapa_5_friendly_form": {},
+        "etapa_6_document_uploads": {},
+        "etapa_7_ai_review": {},
+        "etapa_8_final_status": {},
         "summary": {}
     }
     
-    # Test 1: F-1 Student Package (as requested in review)
-    print("\n📋 TESTE F-1: Geração de Pacote F-1 Student Visa")
+    # Global variables for the flow
+    jwt_token = None
+    case_id = None
+    
+    # ETAPA 1: Criar usuário
+    print("\n📋 ETAPA 1: Criação de Usuário")
     print("-" * 50)
     
-    # Test with the EXACT format specified in the review request
-    f1_payload = {
-        "visa_type": "F-1",
-        "user_request": "Preciso de um pacote COMPLETO para visto F-1 de estudante incluindo TODOS os documentos oficiais com imagens simuladas (passaporte, I-20, transcripts, extratos bancários). Fui aceito na Boston University para mestrado.",
-        "applicant_data": {
-            "full_name": "Rafael Santos Oliveira",
-            "nationality": "Brazilian"
-        }
+    user_data = {
+        "email": "sofia.mendes.test@example.com",
+        "password": "TestPassword123!",
+        "first_name": "Sofia",
+        "last_name": "Mendes Rodrigues",
+        "phone": "+5511987654321"
     }
     
     try:
