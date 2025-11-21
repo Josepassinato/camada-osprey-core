@@ -278,6 +278,13 @@ def test_o1_visa_complete_flow():
     
     if not case_id:
         print("❌ Cannot proceed without case_id")
+        # Set default values for summary to avoid KeyError
+        results["summary"]["overall_success"] = False
+        results["summary"]["successful_steps"] = 3  # Only first 3 steps completed
+        results["summary"]["total_steps"] = 8
+        results["summary"]["success_rate"] = 37.5
+        results["summary"]["case_id"] = None
+        results["summary"]["jwt_token_present"] = jwt_token is not None
         return results
     
     basic_data = {
