@@ -50,7 +50,7 @@ e preciso de um pacote completo e profissional para minha entrevista no consulad
     
     # Processar requisição
     print(f'\n⚙️  PROCESSANDO REQUISIÇÃO...')
-    result = supervisor.process_visa_request(
+    result = supervisor.process_request(
         user_request=user_request,
         applicant_data=applicant_data
     )
