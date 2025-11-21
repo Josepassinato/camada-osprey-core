@@ -7,7 +7,7 @@ import requests
 import json
 
 # Get backend URL
-API_BASE = "https://maria-support.preview.emergentagent.com/api"
+API_BASE = "https://apply-wizard-18.preview.emergentagent.com/api"
 
 # Get a pending update ID
 response = requests.get(f"{API_BASE}/admin/visa-updates/pending")

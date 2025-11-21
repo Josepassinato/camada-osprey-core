@@ -263,8 +263,8 @@ Plataforma web completa que automatiza a criação de pacotes de visto para imig
 ### **Ambiente**
 - **Plataforma**: Kubernetes
 - **URLs**:
-  - Frontend: `https://maria-support.preview.emergentagent.com`
-  - Backend: `https://maria-support.preview.emergentagent.com/api`
+  - Frontend: `https://apply-wizard-18.preview.emergentagent.com`
+  - Backend: `https://apply-wizard-18.preview.emergentagent.com/api`
 - **Process Manager**: Supervisord
 
 ### **Comandos**

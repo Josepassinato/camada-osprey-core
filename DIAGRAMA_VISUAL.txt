@@ -264,8 +264,8 @@
     
     URLs:
     ────
-    • Frontend: https://maria-support.preview.emergentagent.com
-    • Backend:  https://maria-support.preview.emergentagent.com/api
+    • Frontend: https://apply-wizard-18.preview.emergentagent.com
+    • Backend:  https://apply-wizard-18.preview.emergentagent.com/api
     • MongoDB:  mongodb://localhost:27017
     
     PORTS:
