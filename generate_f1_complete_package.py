@@ -8,12 +8,13 @@ Versão: Professional Package
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle, Image as RLImage
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT, TA_RIGHT
 from datetime import datetime
 from pathlib import Path
 from f1_student_data_model import f1_student_case as data
+from f1_image_generator import F1ImageGenerator
 
 def generate_f1_student_package():
     """
