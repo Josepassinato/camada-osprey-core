@@ -1,50 +1,18 @@
 {
   "main_results": {
     "test_1_b2_extension": {
-      "status_code": 200,
-      "processing_time": 0.11122345924377441,
-      "validations": {
-        "success_true": false,
-        "visa_type_identified": false,
-        "has_result": false,
-        "has_validation": false,
-        "has_qa_report": false,
-        "processing_time_present": true
-      },
-      "response_data": {
-        "success": false,
-        "visa_type": null,
-        "result": null,
-        "validation": null,
-        "qa_report": null,
-        "processing_time": 0.024932384490966797,
-        "error": "'NoneType' object has no attribute 'replace'"
-      }
+      "status_code": 422,
+      "processing_time": 0.06500768661499023,
+      "error": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"user_input\"],\"msg\":\"Field required\",\"input\":{\"visa_type\":\"B-2\",\"user_request\":\"Preciso estender meu visto de turista B-2 por 6 meses devido a emerg\u00eancia m\u00e9dica\",\"applicant_data\":{}},\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"}]}"
     },
     "test_2_h1b_preparation": {
-      "status_code": 200,
-      "processing_time": 0.023871898651123047,
-      "validations": {
-        "success_true": false,
-        "visa_type_identified": false,
-        "has_result": false,
-        "has_validation": false,
-        "has_qa_report": false,
-        "processing_time_present": true
-      },
-      "response_data": {
-        "success": false,
-        "visa_type": null,
-        "result": null,
-        "validation": null,
-        "qa_report": null,
-        "processing_time": 0.00021338462829589844,
-        "error": "'NoneType' object has no attribute 'replace'"
-      }
+      "status_code": 422,
+      "processing_time": 0.024075746536254883,
+      "error": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"user_input\"],\"msg\":\"Field required\",\"input\":{\"visa_type\":\"H-1B\",\"user_request\":\"Preciso preparar meu pacote H-1B para trabalhar como Software Engineer\",\"applicant_data\":{}},\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"}]}"
     },
     "summary": {
-      "overall_success": true,
-      "tests_passed": 2,
+      "overall_success": false,
+      "tests_passed": 0,
       "tests_total": 2
     },
     "pdf_files_found": 16
@@ -54,5 +22,5 @@
     "specialists_list": true,
     "visa_detection": true
   },
-  "timestamp": 1763684068.7002811
+  "timestamp": 1763684166.5237932
 }
