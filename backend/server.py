@@ -10144,6 +10144,124 @@ async def request_package_by_email(case_id: str, request: RequestPackageEmailReq
 # DOWNLOAD ENDPOINTS - Para arquivos gerados (pacotes, relatórios)
 # ============================================================================
 
+@api_router.get("/auto-application/case/{case_id}/download-package")
+async def download_package_by_case_id(case_id: str):
+    """
+    Download do pacote completo por Case ID
+    Busca o pacote gerado para o case específico e retorna para download
+    """
+    try:
+        from fastapi.responses import FileResponse
+        import os
+        import glob
+        
+        # Buscar caso no banco
+        case = await db.auto_cases.find_one({"case_id": case_id})
+        if not case:
+            raise HTTPException(status_code=404, detail="Case não encontrado")
+        
+        # Tentar encontrar o arquivo PDF gerado
+        # Padrão de busca: qualquer PDF que contenha o case_id
+        search_patterns = [
+            f"/app/*{case_id}*.pdf",
+            f"/app/output/*{case_id}*.pdf",
+            f"/app/packages/*{case_id}*.pdf",
+            f"/app/*PACOTE*.pdf",  # Fallback para pacotes gerais
+        ]
+        
+        file_path = None
+        for pattern in search_patterns:
+            matches = glob.glob(pattern)
+            if matches:
+                file_path = matches[0]  # Pegar o primeiro match
+                break
+        
+        # Se não encontrou arquivo, gerar um PDF simples com informações do caso
+        if not file_path or not os.path.exists(file_path):
+            logger.warning(f"Arquivo do pacote não encontrado para case {case_id}. Gerando PDF básico.")
+            
+            # Importar ReportLab para gerar PDF
+            try:
+                from reportlab.lib.pagesizes import letter
+                from reportlab.pdfgen import canvas
+                from reportlab.lib.units import inch
+                
+                # Criar PDF temporário
+                temp_pdf_path = f"/app/Pacote_Completo_{case_id}.pdf"
+                c = canvas.Canvas(temp_pdf_path, pagesize=letter)
+                
+                # Título
+                c.setFont("Helvetica-Bold", 20)
+                c.drawString(1*inch, 10*inch, f"Pacote Completo - Case {case_id}")
+                
+                # Informações do caso
+                c.setFont("Helvetica", 12)
+                y_position = 9*inch
+                
+                c.drawString(1*inch, y_position, f"Case ID: {case_id}")
+                y_position -= 0.5*inch
+                
+                form_code = case.get('form_code', 'N/A')
+                c.drawString(1*inch, y_position, f"Tipo de Visto: {form_code}")
+                y_position -= 0.5*inch
+                
+                status = case.get('status', 'N/A')
+                c.drawString(1*inch, y_position, f"Status: {status}")
+                y_position -= 0.5*inch
+                
+                # Dados básicos
+                basic_data = case.get('basic_data', {})
+                if basic_data:
+                    y_position -= 0.5*inch
+                    c.setFont("Helvetica-Bold", 14)
+                    c.drawString(1*inch, y_position, "Dados do Aplicante:")
+                    y_position -= 0.3*inch
+                    
+                    c.setFont("Helvetica", 11)
+                    if basic_data.get('full_name'):
+                        c.drawString(1.2*inch, y_position, f"Nome: {basic_data['full_name']}")
+                        y_position -= 0.25*inch
+                    if basic_data.get('email'):
+                        c.drawString(1.2*inch, y_position, f"Email: {basic_data['email']}")
+                        y_position -= 0.25*inch
+                    if basic_data.get('country_of_birth'):
+                        c.drawString(1.2*inch, y_position, f"País: {basic_data['country_of_birth']}")
+                
+                # Nota de rodapé
+                c.setFont("Helvetica-Oblique", 9)
+                c.drawString(1*inch, 1*inch, "Este é um documento gerado automaticamente.")
+                c.drawString(1*inch, 0.7*inch, "Para o pacote completo, aguarde a finalização do processo.")
+                
+                c.save()
+                file_path = temp_pdf_path
+                
+            except ImportError:
+                # Se ReportLab não estiver disponível, retornar erro
+                raise HTTPException(
+                    status_code=404, 
+                    detail="Pacote ainda não foi gerado. Complete o processo de finalização primeiro."
+                )
+        
+        # Retornar arquivo para download
+        filename = os.path.basename(file_path)
+        return FileResponse(
+            path=file_path,
+            media_type="application/pdf",
+            filename=filename,
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}",
+                "X-Case-ID": case_id
+            }
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Erro ao fazer download do pacote para case {case_id}: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Erro ao processar download: {str(e)}")
+
 @api_router.get("/download/package/{filename}")
 async def download_package(filename: str):
     """
