@@ -208,7 +208,9 @@ def test_visa_generate_endpoint():
         else:
             print(f"   ✅ Todas as validações passaram!")
     
-    overall_success = test_success and results["test_1_f1_student_package"].get("validations", {}).get("2_success_true", False)
+    validations = results["test_1_f1_student_package"].get("validations", {})
+    all_validations_passed = all(validations.values()) if validations else False
+    overall_success = test_success and all_validations_passed
     results["summary"]["overall_success"] = overall_success
     results["summary"]["tests_passed"] = 1 if test_success else 0
     results["summary"]["tests_total"] = 1
