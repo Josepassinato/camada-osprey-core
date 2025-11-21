@@ -209,6 +209,15 @@ class B2ExtensionCase:
         
         # Informações Médicas
         self.medical_information = {
+            # Simplified access fields
+            "condition": "Coronary Artery Disease requiring treatment",
+            "condition_details": "Patient diagnosed with CAD requiring cardiac catheterization and stent placement. Currently undergoing post-procedure monitoring and cardiac rehabilitation.",
+            "treating_hospital": "Mount Sinai Medical Center",
+            "treating_doctor": "Dr. Robert Martinez, MD, FACC",
+            "diagnosis_date": "March 10, 2025",
+            "treatment_duration": "6 months (March 2025 - September 2025)",
+            "expected_completion": "September 2025",
+            
             "diagnosis": "Coronary Artery Disease (CAD)",
             "procedure": "Percutaneous Coronary Intervention (PCI) with stent placement",
             "procedure_date": "March 12, 2025",
