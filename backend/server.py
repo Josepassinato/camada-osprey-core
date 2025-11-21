@@ -3228,26 +3228,41 @@ async def specialized_immigration_letter_writing(request: dict):
 
 @api_router.post("/cases/{case_id}/finalize/start")
 async def start_case_finalization(case_id: str, request: dict):
-    """Inicia processo de finalização do caso"""
+    """Inicia processo de finalização do caso com integração dos agentes especializados"""
     try:
-        # Importação movida para o topo
-        
         scenario_key = request.get("scenario_key", "H-1B_basic")
         postage = request.get("postage", "USPS")
         language = request.get("language", "pt")
         
+        # 🆕 Buscar dados completos do caso do MongoDB
+        case_data = None
+        try:
+            case = await db.auto_cases.find_one({"case_id": case_id})
+            if case:
+                # Serializar para remover ObjectId e tornar JSON-safe
+                case_data = serialize_doc(case)
+                logger.info(f"📦 Dados do caso {case_id} carregados: form_code={case_data.get('form_code')}")
+            else:
+                logger.warning(f"⚠️ Caso {case_id} não encontrado no MongoDB")
+        except Exception as db_error:
+            logger.error(f"❌ Erro ao buscar caso do MongoDB: {db_error}")
+        
+        # Chamar finalizer com ou sem dados do caso
         result = case_finalizer_complete.start_finalization(
             case_id=case_id,
             scenario_key=scenario_key,
             postage=postage,
-            language=language
+            language=language,
+            case_data=case_data  # 🆕 Passar dados do caso
         )
         
         if result["success"]:
             return {
                 "job_id": result["job_id"],
                 "status": result["status"],
-                "message": "Finalização iniciada com sucesso"
+                "message": "Finalização iniciada com sucesso",
+                "used_agent": result.get("used_agent", False),  # 🆕 Indicar se usou agente
+                "agent_available": case_data is not None
             }
         else:
             return {
@@ -3257,6 +3272,8 @@ async def start_case_finalization(case_id: str, request: dict):
             
     except Exception as e:
         logger.error(f"Error starting finalization: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
         return {
             "error": "Erro interno do servidor",
             "timestamp": datetime.utcnow().isoformat()
