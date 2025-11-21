@@ -67,45 +67,57 @@ def test_visa_generate_endpoint():
         print(f"⏱️  Processing time: {processing_time:.2f}s")
         print(f"📊 Status Code: {response.status_code}")
         
-        results["test_1_b2_extension"]["status_code"] = response.status_code
-        results["test_1_b2_extension"]["processing_time"] = processing_time
+        results["test_1_b2_complete_package"]["status_code"] = response.status_code
+        results["test_1_b2_complete_package"]["processing_time"] = processing_time
         
         if response.status_code == 200:
             response_data = response.json()
             print(f"📄 Response: {json.dumps(response_data, indent=2)}")
             
-            # Validation checks
+            # SPECIFIC VALIDATIONS FROM REVIEW REQUEST
+            package_result = response_data.get("package_result", {})
+            qa_report = response_data.get("qa_report", {})
+            validation = response_data.get("validation", {})
+            
             validations = {
-                "success_true": response_data.get("success") == True,
-                "visa_type_identified": response_data.get("visa_type") is not None,
-                "has_result": response_data.get("result") is not None,
-                "has_validation": response_data.get("validation") is not None,
-                "has_qa_report": response_data.get("qa_report") is not None,
-                "processing_time_present": response_data.get("processing_time") is not None
+                "1_status_200": response.status_code == 200,
+                "2_success_true": response_data.get("success") == True,
+                "3_pages_30_plus": package_result.get("pages", 0) >= 30,
+                "4_qa_score_90_plus": qa_report.get("overall_score", 0) >= 0.90,
+                "5_qa_passed_true": qa_report.get("passed") == True,
+                "6_validation_valid": validation.get("is_valid") == True,
+                "7_pdf_generated": package_result.get("package_path") is not None
             }
             
-            results["test_1_b2_extension"]["validations"] = validations
-            results["test_1_b2_extension"]["response_data"] = response_data
+            results["test_1_b2_complete_package"]["validations"] = validations
+            results["test_1_b2_complete_package"]["response_data"] = response_data
             
-            print("\n✅ VALIDAÇÕES B-2:")
+            print("\n🎯 VALIDAÇÕES ESPECÍFICAS DA REVIEW:")
+            print("=" * 50)
             for check, passed in validations.items():
                 status = "✅" if passed else "❌"
                 print(f"  {status} {check}: {passed}")
-                
-            # Check for package_result specifically
-            if response_data.get("result") and "package_result" in response_data["result"]:
-                print(f"  ✅ package_result found: {response_data['result']['package_result']}")
+            
+            # Detailed metrics
+            print(f"\n📊 MÉTRICAS DETALHADAS:")
+            print(f"  📄 Páginas: {package_result.get('pages', 0)} (target: ≥30)")
+            print(f"  🎯 QA Score: {qa_report.get('overall_score', 0):.1%} (target: ≥90%)")
+            print(f"  ✅ QA Passed: {qa_report.get('passed', False)}")
+            print(f"  📋 Validation: {validation.get('is_valid', False)}")
+            
+            if package_result.get("package_path"):
+                print(f"  📁 PDF Path: {package_result['package_path']}")
             else:
-                print(f"  ❌ package_result not found in result")
+                print(f"  ❌ No PDF generated")
                 
         else:
             print(f"❌ Request failed with status {response.status_code}")
             print(f"📄 Error response: {response.text}")
-            results["test_1_b2_extension"]["error"] = response.text
+            results["test_1_b2_complete_package"]["error"] = response.text
             
     except Exception as e:
-        print(f"❌ Exception during B-2 test: {str(e)}")
-        results["test_1_b2_extension"]["exception"] = str(e)
+        print(f"❌ Exception during B-2 complete package test: {str(e)}")
+        results["test_1_b2_complete_package"]["exception"] = str(e)
     
     # Test 2: H-1B Visa Preparation
     print("\n📋 TESTE 2: Geração de Pacote H-1B")
