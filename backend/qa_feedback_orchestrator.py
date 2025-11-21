@@ -487,11 +487,27 @@ class QAFeedbackOrchestrator:
             
             logger.info(f"✅ Form Filler processou {len(problems)} problemas")
             
+            # 📚 REGISTRAR LIÇÕES APRENDIDAS
+            for idx, problem in enumerate(problems):
+                await self._record_correction_lesson(
+                    agent_name="form_filler",
+                    case_id=case_id,
+                    problem=problem,
+                    correction={
+                        "action": "form_filling",
+                        "details": fixes_applied[idx] if idx < len(fixes_applied) else "No details",
+                        "status": "completed"
+                    },
+                    success=len(fixes_applied) > 0,
+                    form_code=case_data.get('form_code', 'unknown')
+                )
+            
             return {
                 "agent": "form_filler",
                 "status": "completed",
                 "problems_addressed": len(problems),
-                "fixes_applied": fixes_applied
+                "fixes_applied": fixes_applied,
+                "lessons_recorded": len(problems)
             }
             
         except Exception as e:
