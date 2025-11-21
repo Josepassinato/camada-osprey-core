@@ -9022,8 +9022,8 @@ async def download_knowledge_document(document_id: str, admin = Depends(require_
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.delete("/admin/knowledge-base/{document_id}")
-async def delete_knowledge_document(document_id: str):
-    """Deleta documento da base"""
+async def delete_knowledge_document(document_id: str, admin = Depends(require_admin)):
+    """Deleta documento da base - PROTECTED"""
     try:
         from knowledge_base_manager import KnowledgeBaseManager
         kb_manager = KnowledgeBaseManager(db)
