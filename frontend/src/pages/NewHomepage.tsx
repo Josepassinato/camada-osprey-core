@@ -433,8 +433,8 @@ const NewHomepage = () => {
               {
                 step: "02",
                 icon: <Sparkles className="h-8 w-8" />,
-                title: "IA Preenche Tudo",
-                description: "Responda perguntas simples em português. Nossa IA traduz e preenche automaticamente os formulários oficiais do USCIS.",
+                title: "Sistema Preenche Tudo",
+                description: "Responda perguntas simples em português. Nosso sistema traduz e preenche automaticamente os formulários oficiais do USCIS.",
                 color: "from-indigo-500 to-indigo-600"
               },
               {
