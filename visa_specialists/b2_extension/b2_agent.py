@@ -185,17 +185,34 @@ Este arquivo registra erros cometidos e correções aplicadas para melhorar cont
     
     def _generate_b2_package(self, applicant_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Chama o gerador de pacote B-2 completo (60+ páginas)
+        Gera pacote B-2 completo usando dados dinâmicos do usuário.
+        
+        Args:
+            applicant_data: Dados completos do aplicante incluindo:
+                - personal_info: Nome, data de nascimento, endereço, etc.
+                - immigration_info: Status atual, A-number, etc.
+                - extension_details: Razão, duração, etc.
         """
-        # Executar o script de geração completo
+        print(f"📝 Gerando pacote B-2 com dados do usuário...")
+        print(f"   Nome: {applicant_data.get('personal_info', {}).get('full_name', 'N/A')}")
+        print(f"   País: {applicant_data.get('personal_info', {}).get('country_of_birth', 'N/A')}")
+        
+        # Primeiro, tentar usar gerador completo com dados dinâmicos
+        try:
+            result = self._generate_with_dynamic_data(applicant_data)
+            if result:
+                return result
+        except Exception as e:
+            print(f"⚠️ Erro ao gerar com dados dinâmicos: {e}")
+        
+        # Fallback: usar o script existente
         import subprocess
         from pathlib import Path
         
-        # Usar o gerador completo de 60+ páginas
         generator_script = Path('/app/generate_b2_complete_package.py')
         
         if generator_script.exists():
-            print("✅ Usando gerador B-2 COMPLETO (60+ páginas)...")
+            print("✅ Usando gerador B-2 COMPLETO (60+ páginas - modo fallback)...")
             result = subprocess.run(
                 ['python3', str(generator_script)],
                 capture_output=True,
