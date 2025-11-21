@@ -51,12 +51,22 @@ e preciso de um pacote completo e profissional para minha entrevista no consulad
     # Registrar especialistas
     from visa_specialists.f1_student.f1_agent import F1StudentAgent
     from visa_specialists.b2_extension.b2_agent import B2ExtensionAgent
+    from visa_specialists.qa_agent import QualityAssuranceAgent
+    from visa_specialists.metrics_tracker import MetricsTracker
     
     f1_agent = F1StudentAgent()
     b2_agent = B2ExtensionAgent()
+    qa_agent = QualityAssuranceAgent()
+    metrics = MetricsTracker()
     
     supervisor.register_specialist('F-1', f1_agent)
     supervisor.register_specialist('B-2', b2_agent)
+    
+    # Registrar QA e metrics no supervisor (se houver método)
+    if hasattr(supervisor, 'set_qa_agent'):
+        supervisor.set_qa_agent(qa_agent)
+    if hasattr(supervisor, 'set_metrics'):
+        supervisor.set_metrics(metrics)
     
     # Processar requisição
     print(f'\n⚙️  PROCESSANDO REQUISIÇÃO...')
