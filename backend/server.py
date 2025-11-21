@@ -262,6 +262,7 @@ class UserCreate(BaseModel):
     first_name: str
     last_name: str
     phone: Optional[str] = None
+    role: str = "user"  # "user" | "admin" | "superadmin"
 
 class UserLogin(BaseModel):
     email: EmailStr
