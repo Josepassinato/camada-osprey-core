@@ -9015,6 +9015,23 @@ async def startup_db_client():
         except Exception as scheduler_error:
             logger.error(f"❌ Failed to start visa update scheduler: {str(scheduler_error)}")
         
+        # Initialize and start MongoDB Backup Scheduler
+        try:
+            from mongodb_backup import mongodb_backup
+            # Start background backup task
+            asyncio.create_task(mongodb_backup.schedule_daily_backup())
+            logger.info("✅ MongoDB Backup Scheduler started (daily at 3AM UTC)")
+        except Exception as backup_error:
+            logger.warning(f"⚠️ MongoDB Backup Scheduler not started: {str(backup_error)}")
+        
+        # Start rate limiter cleanup task
+        try:
+            from rate_limiter import rate_limiter
+            asyncio.create_task(rate_limiter.cleanup_old_entries())
+            logger.info("✅ Rate Limiter cleanup task started")
+        except Exception as rate_limiter_error:
+            logger.warning(f"⚠️ Rate Limiter cleanup not started: {str(rate_limiter_error)}")
+        
     except Exception as e:
         logger.error(f"Error connecting to MongoDB: {str(e)}")
         raise e
