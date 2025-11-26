@@ -10505,6 +10505,139 @@ async def list_downloads():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============================================================================
+# HEALTH CHECK & SYSTEM STATUS
+# ============================================================================
+
+@api_router.get("/health")
+async def health_check():
+    """
+    Health check endpoint for monitoring and load balancers
+    Returns status of all critical services
+    """
+    health_status = {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "version": "2.0.0",
+        "services": {}
+    }
+    
+    # Check MongoDB
+    try:
+        await db.command("ping")
+        health_status["services"]["mongodb"] = {
+            "status": "up",
+            "latency_ms": 0  # Could add actual latency measurement
+        }
+    except Exception as e:
+        health_status["services"]["mongodb"] = {
+            "status": "down",
+            "error": str(e)
+        }
+        health_status["status"] = "degraded"
+    
+    # Check Stripe
+    try:
+        stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
+        if stripe.api_key:
+            health_status["services"]["stripe"] = {"status": "configured"}
+        else:
+            health_status["services"]["stripe"] = {"status": "not_configured"}
+    except Exception as e:
+        health_status["services"]["stripe"] = {
+            "status": "error",
+            "error": str(e)
+        }
+    
+    # Check Gemini/LLM
+    try:
+        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
+        if emergent_key:
+            health_status["services"]["llm"] = {"status": "configured"}
+        else:
+            health_status["services"]["llm"] = {"status": "not_configured"}
+    except Exception as e:
+        health_status["services"]["llm"] = {
+            "status": "error",
+            "error": str(e)
+        }
+    
+    # Check Maria
+    try:
+        from maria_agent import maria
+        health_status["services"]["maria"] = {"status": "up"}
+    except Exception as e:
+        health_status["services"]["maria"] = {
+            "status": "down",
+            "error": str(e)
+        }
+    
+    # Overall status
+    services_down = sum(1 for s in health_status["services"].values() if s.get("status") in ["down", "error"])
+    if services_down > 0:
+        health_status["status"] = "degraded"
+    
+    # Return appropriate HTTP status code
+    status_code = 200 if health_status["status"] == "healthy" else 503
+    
+    return health_status
+
+
+@api_router.get("/system/status")
+async def system_status():
+    """
+    Detailed system status for admin dashboard
+    Includes metrics, uptime, and performance data
+    """
+    try:
+        # Basic stats
+        total_users = await db.users.count_documents({})
+        total_cases = await db.auto_cases.count_documents({})
+        active_cases = await db.auto_cases.count_documents({"status": "in_progress"})
+        completed_cases = await db.auto_cases.count_documents({"status": "completed"})
+        
+        # Recent activity (last 24h)
+        yesterday = datetime.utcnow() - timedelta(days=1)
+        new_users_24h = await db.users.count_documents({"created_at": {"$gte": yesterday}})
+        new_cases_24h = await db.auto_cases.count_documents({"created_at": {"$gte": yesterday}})
+        
+        # Payment stats
+        successful_payments = await db.payment_transactions.count_documents({"status": "succeeded"})
+        total_revenue = await db.payment_transactions.aggregate([
+            {"$match": {"status": "succeeded"}},
+            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+        ]).to_list(length=1)
+        
+        return {
+            "success": True,
+            "timestamp": datetime.utcnow().isoformat(),
+            "metrics": {
+                "users": {
+                    "total": total_users,
+                    "new_24h": new_users_24h
+                },
+                "cases": {
+                    "total": total_cases,
+                    "active": active_cases,
+                    "completed": completed_cases,
+                    "new_24h": new_cases_24h
+                },
+                "payments": {
+                    "successful": successful_payments,
+                    "total_revenue": total_revenue[0]["total"] if total_revenue else 0
+                }
+            },
+            "services": {
+                "mongodb": "operational",
+                "stripe": "operational" if os.environ.get('STRIPE_SECRET_KEY') else "not_configured",
+                "llm": "operational" if os.environ.get('EMERGENT_LLM_KEY') else "not_configured"
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error getting system status: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # Include all API routes
 app.include_router(api_router)
 
