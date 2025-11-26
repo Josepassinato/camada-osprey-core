@@ -363,15 +363,107 @@ const EmbeddedCheckout = () => {
                 </p>
               </div>
 
+              {/* Voucher Section */}
+              <div className="border-t pt-4">
+                <p className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <Tag className="h-4 w-4 text-blue-600" />
+                  Tem um código de desconto?
+                </p>
+                
+                {!appliedVoucher ? (
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Input
+                        type="text"
+                        placeholder="Digite o código"
+                        value={voucherCode}
+                        onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                        className="flex-1 text-sm"
+                        disabled={isValidatingVoucher}
+                      />
+                      <Button
+                        onClick={handleApplyVoucher}
+                        disabled={isValidatingVoucher || !voucherCode.trim()}
+                        variant="outline"
+                        size="sm"
+                        className="whitespace-nowrap"
+                      >
+                        {isValidatingVoucher ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                            Validando...
+                          </>
+                        ) : (
+                          'Aplicar'
+                        )}
+                      </Button>
+                    </div>
+                    {voucherError && (
+                      <p className="text-xs text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {voucherError}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-green-600" />
+                        <div>
+                          <p className="text-sm font-semibold text-green-900">
+                            {appliedVoucher.code}
+                          </p>
+                          <p className="text-xs text-green-700">
+                            {appliedVoucher.discount_percentage}% de desconto aplicado
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={handleRemoveVoucher}
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs text-red-600 hover:text-red-700"
+                      >
+                        Remover
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="border-t pt-4">
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-600">Subtotal</span>
                   <span className="text-gray-900">${packageInfo?.price?.toFixed(2)}</span>
                 </div>
+                
+                {appliedVoucher && (
+                  <div className="flex justify-between mb-2 text-green-600">
+                    <span className="text-sm">Desconto ({appliedVoucher.discount_percentage}%)</span>
+                    <span className="text-sm font-semibold">
+                      -${((packageInfo?.price * appliedVoucher.discount_percentage) / 100).toFixed(2)}
+                    </span>
+                  </div>
+                )}
+                
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total</span>
-                  <span className="text-purple-600">${packageInfo?.price?.toFixed(2)}</span>
+                  <span className="text-purple-600">
+                    ${appliedVoucher 
+                      ? (packageInfo?.price - (packageInfo?.price * appliedVoucher.discount_percentage / 100)).toFixed(2)
+                      : packageInfo?.price?.toFixed(2)
+                    }
+                  </span>
                 </div>
+                
+                {appliedVoucher?.discount_percentage === 100 && (
+                  <div className="mt-3 bg-green-50 border border-green-200 rounded-lg p-2">
+                    <p className="text-xs text-green-800 text-center font-semibold">
+                      🎉 Gratuito! Você não será cobrado.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {packageInfo?.includes && (
