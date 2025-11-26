@@ -1,0 +1,323 @@
+{
+  "visa_type": "O-1",
+  "form": "I-129",
+  "checklist_sections": [
+    {
+      "section": "Formulários Principais",
+      "items": [
+        {
+          "item": "Form I-129 (Petition for Nonimmigrant Worker)",
+          "required": true,
+          "notes": "Incluir O/P Supplement"
+        },
+        {
+          "item": "Filing Fee: $460",
+          "required": true,
+          "notes": "Check ou money order"
+        },
+        {
+          "item": "Anti-Fraud Detection Fee: $500",
+          "required": true,
+          "notes": "Para primeira petição O-1"
+        },
+        {
+          "item": "Premium Processing Fee: $2,500",
+          "required": false,
+          "notes": "Opcional - Processamento em 15 dias"
+        }
+      ]
+    },
+    {
+      "section": "Documentação de Identidade",
+      "items": [
+        {
+          "item": "Cópia do Passaporte (página de identificação)",
+          "required": true,
+          "notes": "Válido por pelo menos 6 meses"
+        },
+        {
+          "item": "Cópia do visto atual (se aplicável)",
+          "required": false,
+          "notes": "Se já estiver nos EUA"
+        },
+        {
+          "item": "Cópia do I-94 (Arrival/Departure Record)",
+          "required": false,
+          "notes": "Se já estiver nos EUA"
+        },
+        {
+          "item": "CV/Resume completo",
+          "required": true,
+          "notes": "Detalhado com todas as conquistas"
+        }
+      ]
+    },
+    {
+      "section": "Evidências de Habilidade Extraordinária (mínimo 3 de 8 critérios)",
+      "items": [
+        {
+          "item": "Critério 1: Prêmios e Reconhecimentos",
+          "required": false,
+          "notes": "Certificados de prêmios + descrição da importância + lista de ganhadores anteriores",
+          "evidence_needed": [
+            "Certificados originais ou cópias autenticadas",
+            "Descrição oficial do prêmio",
+            "Critérios de seleção",
+            "Lista de ganhadores anteriores (mostrar prestígio)",
+            "Cobertura de mídia sobre o prêmio"
+          ]
+        },
+        {
+          "item": "Critério 2: Membership em Associações Seletivas",
+          "required": false,
+          "notes": "Que requerem conquistas excepcionais",
+          "evidence_needed": [
+            "Carta de membership",
+            "Estatutos da associação (mostrando requisitos)",
+            "Número total de membros",
+            "Processo de seleção",
+            "Carta explicando seletividade"
+          ]
+        },
+        {
+          "item": "Critério 3: Material Publicado SOBRE Você",
+          "required": false,
+          "notes": "Em publicações profissionais ou major media",
+          "evidence_needed": [
+            "Cópias das publicações",
+            "Traduções certificadas (se não em inglês)",
+            "Informações sobre circulação da publicação",
+            "Relevância da mídia",
+            "Highlight das seções sobre você"
+          ]
+        },
+        {
+          "item": "Critério 4: Participação como Juiz",
+          "required": false,
+          "notes": "Julgar trabalho de outros na sua área",
+          "evidence_needed": [
+            "Cartas de convite para ser juiz",
+            "Lista de trabalhos/artigos revisados",
+            "Certificados de participação",
+            "Emails/correspondência",
+            "Descrição do processo de revisão"
+          ]
+        },
+        {
+          "item": "Critério 5: Contribuições Originais de Grande Importância",
+          "required": false,
+          "notes": "De significância major para a área",
+          "evidence_needed": [
+            "Descrição detalhada da contribuição",
+            "Cartas de experts explicando impacto",
+            "Dados de citação ou uso",
+            "Prêmios relacionados",
+            "Cobertura na mídia",
+            "Patentes (se aplicável)"
+          ]
+        },
+        {
+          "item": "Critério 6: Artigos Acadêmicos Escritos por Você",
+          "required": false,
+          "notes": "Em journals profissionais",
+          "evidence_needed": [
+            "Cópias dos artigos",
+            "Dados de citação (Google Scholar)",
+            "Impact factor do journal",
+            "Lista de co-autores renomados",
+            "Resumo do impacto"
+          ]
+        },
+        {
+          "item": "Critério 7: Papel de Liderança ou Crítico",
+          "required": false,
+          "notes": "Em organizações de reputação distinta",
+          "evidence_needed": [
+            "Carta da organização descrevendo seu papel",
+            "Organograma mostrando posição",
+            "Descrição da reputação da organização",
+            "Conquistas sob sua liderança",
+            "Testemunhos de colegas"
+          ]
+        },
+        {
+          "item": "Critério 8: Salário Alto ou Remuneração Significativa",
+          "required": false,
+          "notes": "Acima da média da área",
+          "evidence_needed": [
+            "Oferta de trabalho/contrato",
+            "Pay stubs",
+            "Dados salariais da indústria (BLS)",
+            "Pesquisas salariais da área",
+            "Comparação com colegas"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "Cartas de Recomendação (CRÍTICO)",
+      "items": [
+        {
+          "item": "6-10 Cartas de Experts Reconhecidos",
+          "required": true,
+          "notes": "De diferentes instituições/países",
+          "guidelines": [
+            "De experts verdadeiros (com credenciais comprovadas)",
+            "De diferentes instituições/países (mostrar reconhecimento amplo)",
+            "Detalhadas e específicas (não genéricas)",
+            "Explicando POR QUÊ você é extraordinário",
+            "Incluindo CV dos signatários",
+            "Em papel timbrado",
+            "Assinadas originalmente"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "Consultation Letter (OBRIGATÓRIO)",
+      "items": [
+        {
+          "item": "Advisory Opinion de Peer Group ou Labor Union",
+          "required": true,
+          "notes": "Requerido por USCIS - pode fazer ou quebrar a petição",
+          "how_to_obtain": [
+            "Identificar peer group apropriado para sua área",
+            "Contactar com antecedência (pode levar semanas)",
+            "Fornecer CV e evidências",
+            "Explicar natureza do trabalho proposto",
+            "Carta deve apoiar a petição"
+          ],
+          "examples": [
+            "Screen Actors Guild (SAG) - para atores",
+            "Writers Guild of America - para escritores",
+            "American Federation of Musicians - para músicos",
+            "Peer group reconhecido na sua área específica"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "Empregador/Agente nos EUA",
+      "items": [
+        {
+          "item": "Contrato de Trabalho ou Oferta",
+          "required": true,
+          "notes": "Do empregador/agente nos EUA",
+          "must_include": [
+            "Descrição detalhada do trabalho",
+            "Duração do trabalho",
+            "Compensação",
+            "Localização do trabalho",
+            "Por que você é necessário"
+          ]
+        },
+        {
+          "item": "Informações sobre o Empregador",
+          "required": true,
+          "notes": "Estabelecer credibilidade",
+          "documents": [
+            "Carta explicando natureza do negócio",
+            "Website ou materiais de marketing",
+            "Prova de capacidade financeira",
+            "Estrutura da empresa"
+          ]
+        },
+        {
+          "item": "Itinerário de Trabalho",
+          "required": true,
+          "notes": "Para O-1B (artes) especialmente",
+          "must_include": [
+            "Agenda de eventos/performances",
+            "Locais e datas",
+            "Natureza do trabalho em cada evento",
+            "Contratos ou acordos"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "Statement Pessoal",
+      "items": [
+        {
+          "item": "Declaração Pessoal Detalhada",
+          "required": true,
+          "notes": "Conta sua história",
+          "should_include": [
+            "Trajetória profissional",
+            "Principais conquistas",
+            "Contribuições significativas",
+            "Planos de trabalho nos EUA",
+            "Como seu trabalho beneficia os EUA",
+            "Por que você é extraordinário na sua área"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "Organização Final",
+      "items": [
+        {
+          "item": "Cover Letter",
+          "required": true,
+          "notes": "Resumo executivo da petição"
+        },
+        {
+          "item": "Índice/Table of Contents",
+          "required": true,
+          "notes": "Facilitar navegação do oficial USCIS"
+        },
+        {
+          "item": "Tab Dividers",
+          "required": false,
+          "notes": "Para cada seção principal"
+        },
+        {
+          "item": "Traduções Certificadas",
+          "required": true,
+          "notes": "Para qualquer documento não em inglês"
+        },
+        {
+          "item": "Cópia Completa para Seus Registros",
+          "required": true,
+          "notes": "Antes de enviar"
+        }
+      ]
+    }
+  ],
+  "submission_info": {
+    "where_to_file": "USCIS California Service Center or Vermont Service Center (dependendo da localização do empregador)",
+    "processing_time": "2-4 meses (regular) ou 15 dias (premium processing)",
+    "validity": "Até 3 anos (inicial), extensões de 1-3 anos cada",
+    "extensions": "Ilimitadas - pode renovar indefinidamente"
+  },
+  "common_mistakes": [
+    {
+      "mistake": "Evidências fracas ou genéricas",
+      "solution": "Cada evidência deve ser substancial e específica"
+    },
+    {
+      "mistake": "Cartas de recomendação de pessoas não reconhecidas",
+      "solution": "Garantir que signatários sejam experts verdadeiros com credenciais"
+    },
+    {
+      "mistake": "Não obter consultation letter",
+      "solution": "Contactar peer group com antecedência - é obrigatório"
+    },
+    {
+      "mistake": "Tentar qualificar em 4-5 critérios de forma fraca",
+      "solution": "Melhor 3 critérios MUITO FORTES que 5 fracos"
+    },
+    {
+      "mistake": "Documentação mal organizada",
+      "solution": "Usar índice, tabs, e organização clara"
+    }
+  ],
+  "tips_for_success": [
+    "Qualidade > Quantidade em todos os aspectos",
+    "Cartas de recomendação são o coração da petição",
+    "Conte uma história coerente de extraordinariedade",
+    "Mostre comparação com padrão da área",
+    "Consultation letter pode fazer ou quebrar - não negligencie",
+    "Se possível, use Premium Processing para resposta rápida"
+  ]
+}
