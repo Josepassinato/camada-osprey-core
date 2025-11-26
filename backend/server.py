@@ -8824,10 +8824,45 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configure logging
+# Configure structured logging (JSON format)
+import json as json_logging
+import sys
+
+class JSONFormatter(logging.Formatter):
+    """Custom JSON formatter for structured logging"""
+    def format(self, record):
+        log_data = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "level": record.levelname,
+            "logger": record.name,
+            "message": record.getMessage(),
+            "module": record.module,
+            "function": record.funcName,
+            "line": record.lineno
+        }
+        
+        # Add exception info if present
+        if record.exc_info:
+            log_data["exception"] = self.formatException(record.exc_info)
+        
+        # Add extra fields if present
+        if hasattr(record, 'user_id'):
+            log_data["user_id"] = record.user_id
+        if hasattr(record, 'case_id'):
+            log_data["case_id"] = record.case_id
+        if hasattr(record, 'request_id'):
+            log_data["request_id"] = record.request_id
+        
+        return json_logging.dumps(log_data)
+
+# Setup handler
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(JSONFormatter())
+
+# Configure root logger
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    handlers=[handler]
 )
 logger = logging.getLogger(__name__)
 
