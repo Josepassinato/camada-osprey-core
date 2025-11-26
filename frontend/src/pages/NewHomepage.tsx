@@ -92,9 +92,9 @@ const NewHomepage = () => {
           <div className="text-center max-w-5xl mx-auto">
             {/* Main Headline */}
             <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-              Faça <span className="text-purple-600">Você</span> Seu Visto Americano
+              Aplique para seu <span className="text-purple-600">visto americano</span>
               <span className="block bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                10x Mais Rápido
+                10x mais rápido
               </span>
             </h1>
             
