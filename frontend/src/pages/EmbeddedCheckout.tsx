@@ -26,7 +26,7 @@ interface CheckoutFormProps {
   finalAmount: number;
 }
 
-const CheckoutForm: React.FC<CheckoutFormProps> = ({ visaCode, caseId, clientSecret, amount, packageInfo }) => {
+const CheckoutForm: React.FC<CheckoutFormProps> = ({ visaCode, caseId, clientSecret, amount, packageInfo, appliedVoucher, finalAmount }) => {
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
