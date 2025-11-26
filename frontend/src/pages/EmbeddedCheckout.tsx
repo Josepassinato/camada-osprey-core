@@ -531,6 +531,12 @@ const EmbeddedCheckout = () => {
                     clientSecret={clientSecret}
                     amount={packageInfo?.price || 0}
                     packageInfo={packageInfo}
+                    appliedVoucher={appliedVoucher}
+                    finalAmount={
+                      appliedVoucher 
+                        ? (packageInfo?.price - (packageInfo?.price * appliedVoucher.discount_percentage / 100))
+                        : (packageInfo?.price || 0)
+                    }
                   />
                 </Elements>
               )}
