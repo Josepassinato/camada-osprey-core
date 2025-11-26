@@ -378,13 +378,13 @@ Quer saber mais sobre algum visto específico?"""
         if "osprey" in message_lower or "preço" in message_lower or "custo" in message_lower:
             return """A Osprey é uma plataforma incrível que te ajuda com imigração! 🦅
 
-💰 **Preço**: $299 - $3,000 (vs $5,000 - $15,000 de advogado)
+💰 **Preço**: $299 - $3,000 (vs $5,000 - $15,000 de outras formas convencionais)
 🤖 **Tecnologia**: 8 agentes de IA especializados
-✅ **Qualidade**: Pacotes "lawyer-grade" (QA 85-96%)
+✅ **Qualidade**: Pacotes profissionais de alto nível (QA 85-96%)
 ⚡ **Rapidez**: Sistema guiado passo a passo
 👥 **Suporte**: Eu estou sempre aqui para te ajudar!
 
-Muito mais acessível que contratar um advogado, com qualidade profissional!
+Muito mais acessível que outras formas convencionais, com qualidade profissional!
 
 Posso te explicar mais sobre como funciona?"""
         
