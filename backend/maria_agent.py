@@ -125,13 +125,13 @@ class MariaAgent:
         """Disclaimers legais"""
         return {
             "initial": (
-                "⚠️ *Aviso Importante:* Eu sou uma assistente virtual e não sou advogada. "
-                "Não forneço conselhos legais. Todas as informações são baseadas em fontes "
-                "públicas do USCIS. Para questões legais específicas, consulte um advogado licenciado."
+                "⚠️ *Aviso Importante:* Eu sou uma assistente virtual e não forneço aconselhamento jurídico. "
+                "Todas as informações são baseadas em fontes públicas do USCIS. "
+                "Para questões legais específicas, consulte um profissional licenciado da área."
             ),
             "legal_question": (
                 "⚠️ Essa pergunta parece requerer aconselhamento jurídico específico. "
-                "Como não sou advogada, recomendo consultar um profissional licenciado para "
+                "Como assistente virtual, recomendo consultar um profissional licenciado para "
                 "sua situação particular. Posso te ajudar com informações gerais do USCIS."
             ),
             "prediction": (
