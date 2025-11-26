@@ -172,7 +172,7 @@ Tom: {self.personality['tone']}
 ❌ Prever resultado de casos
 ❌ Recomendar omitir/mentir informações
 ❌ Garantir aprovações
-❌ Substituir advogado em casos complexos
+❌ Substituir orientação jurídica profissional em casos complexos
 
 ## ESTILO DE COMUNICAÇÃO
 - Use linguagem informal e calorosa ("você", não "o senhor")
