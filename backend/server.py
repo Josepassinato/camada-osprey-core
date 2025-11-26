@@ -10673,6 +10673,109 @@ async def system_status():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@api_router.get("/system/dashboard")
+async def system_dashboard():
+    """
+    Simple dashboard with key metrics
+    For startup monitoring
+    """
+    try:
+        # Get core metrics
+        total_users = await db.users.count_documents({})
+        total_cases = await db.auto_cases.count_documents({})
+        active_cases = await db.auto_cases.count_documents({"status": "in_progress"})
+        
+        # Revenue (last 30 days)
+        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+        revenue_30d = await db.payment_transactions.aggregate([
+            {"$match": {"status": "succeeded", "created_at": {"$gte": thirty_days_ago}}},
+            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+        ]).to_list(length=1)
+        
+        # Conversion rate
+        signups_30d = await db.users.count_documents({"created_at": {"$gte": thirty_days_ago}})
+        payments_30d = await db.payment_transactions.count_documents({
+            "status": "succeeded", 
+            "created_at": {"$gte": thirty_days_ago}
+        })
+        conversion_rate = (payments_30d / signups_30d * 100) if signups_30d > 0 else 0
+        
+        # Growth (compare to previous 30 days)
+        sixty_days_ago = datetime.utcnow() - timedelta(days=60)
+        signups_prev_30d = await db.users.count_documents({
+            "created_at": {"$gte": sixty_days_ago, "$lt": thirty_days_ago}
+        })
+        growth_rate = ((signups_30d - signups_prev_30d) / signups_prev_30d * 100) if signups_prev_30d > 0 else 0
+        
+        return {
+            "success": True,
+            "timestamp": datetime.utcnow().isoformat(),
+            "kpis": {
+                "total_users": total_users,
+                "total_cases": total_cases,
+                "active_cases": active_cases,
+                "revenue_30d": revenue_30d[0]["total"] / 100 if revenue_30d else 0,  # Convert cents to dollars
+                "conversion_rate": round(conversion_rate, 2),
+                "growth_rate": round(growth_rate, 2),
+                "signups_30d": signups_30d,
+                "payments_30d": payments_30d
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error getting dashboard: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/system/backup/create")
+async def create_backup():
+    """
+    Create manual MongoDB backup
+    Admin only
+    """
+    try:
+        from mongodb_backup import mongodb_backup
+        result = await mongodb_backup.create_backup()
+        return result
+    except Exception as e:
+        logger.error(f"Error creating backup: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/system/backup/list")
+async def list_backups():
+    """
+    List all available backups
+    Admin only
+    """
+    try:
+        from mongodb_backup import mongodb_backup
+        backups = mongodb_backup.list_backups()
+        return {
+            "success": True,
+            "backups": backups,
+            "total": len(backups)
+        }
+    except Exception as e:
+        logger.error(f"Error listing backups: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/system/backup/restore/{backup_name}")
+async def restore_backup(backup_name: str):
+    """
+    Restore from backup
+    ⚠️ DANGER: This will replace current database
+    Admin only
+    """
+    try:
+        from mongodb_backup import mongodb_backup
+        result = await mongodb_backup.restore_backup(backup_name)
+        return result
+    except Exception as e:
+        logger.error(f"Error restoring backup: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # Include all API routes
 app.include_router(api_router)
 
