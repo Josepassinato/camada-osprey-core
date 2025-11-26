@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { makeApiCall } from "@/utils/api";
 import MariaChatWidget from "@/components/MariaChatWidget";
+import BetaBanner from "@/components/BetaBanner";
 import { 
   ArrowRight,
   CheckCircle,
