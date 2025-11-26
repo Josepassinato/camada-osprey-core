@@ -9016,11 +9016,17 @@ async def startup_db_client():
             logger.error(f"❌ Failed to start visa update scheduler: {str(scheduler_error)}")
         
         # Initialize and start MongoDB Backup Scheduler
+        # DEPLOYMENT FIX: Skip backup in production (Atlas has native backups)
         try:
-            from mongodb_backup import mongodb_backup
-            # Start background backup task
-            asyncio.create_task(mongodb_backup.schedule_daily_backup())
-            logger.info("✅ MongoDB Backup Scheduler started (daily at 3AM UTC)")
+            # Only enable backup for local MongoDB (not Atlas)
+            mongo_url = os.environ.get('MONGO_URL', '')
+            if 'localhost' in mongo_url or '127.0.0.1' in mongo_url:
+                from mongodb_backup import mongodb_backup
+                # Start background backup task
+                asyncio.create_task(mongodb_backup.schedule_daily_backup())
+                logger.info("✅ MongoDB Backup Scheduler started (daily at 3AM UTC)")
+            else:
+                logger.info("ℹ️ MongoDB Backup Scheduler skipped (using managed MongoDB Atlas)")
         except Exception as backup_error:
             logger.warning(f"⚠️ MongoDB Backup Scheduler not started: {str(backup_error)}")
         
