@@ -220,18 +220,30 @@ const EmbeddedCheckout = () => {
     createPaymentIntent();
   }, [visaCode, caseId]);
 
-  const createPaymentIntent = async () => {
+  const createPaymentIntent = async (voucherCodeToApply?: string) => {
     try {
       setLoading(true);
       
-      const data = await makeApiCall('/payment/create-payment-intent', 'POST', {
+      const requestBody: any = {
         visa_code: visaCode,
         case_id: caseId
-      });
+      };
+      
+      // Adicionar voucher se fornecido
+      if (voucherCodeToApply) {
+        requestBody.voucher_code = voucherCodeToApply;
+      }
+      
+      const data = await makeApiCall('/payment/create-payment-intent', 'POST', requestBody);
 
       if (data.success) {
         setClientSecret(data.client_secret);
         setPackageInfo(data.package);
+        
+        // Se voucher aplicado, atualizar estado
+        if (data.voucher_applied) {
+          setAppliedVoucher(data.voucher_applied);
+        }
       } else {
         setError(data.error || 'Erro ao criar pagamento');
       }
@@ -240,6 +252,43 @@ const EmbeddedCheckout = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleApplyVoucher = async () => {
+    if (!voucherCode.trim()) {
+      setVoucherError('Digite um código de voucher');
+      return;
+    }
+
+    try {
+      setIsValidatingVoucher(true);
+      setVoucherError('');
+
+      // Validar voucher com o backend
+      const data = await makeApiCall(`/vouchers/validate/${voucherCode}?visa_code=${visaCode}`, 'GET');
+
+      if (data.valid) {
+        // Recriar payment intent com voucher
+        await createPaymentIntent(voucherCode);
+        setVoucherError('');
+      } else {
+        setVoucherError(data.error || 'Voucher inválido');
+        setAppliedVoucher(null);
+      }
+    } catch (error: any) {
+      setVoucherError(error.message || 'Erro ao validar voucher');
+      setAppliedVoucher(null);
+    } finally {
+      setIsValidatingVoucher(false);
+    }
+  };
+
+  const handleRemoveVoucher = async () => {
+    setVoucherCode('');
+    setAppliedVoucher(null);
+    setVoucherError('');
+    // Recriar payment intent sem voucher
+    await createPaymentIntent();
   };
 
   if (loading) {
