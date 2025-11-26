@@ -203,6 +203,12 @@ const EmbeddedCheckout = () => {
   const [clientSecret, setClientSecret] = useState('');
   const [packageInfo, setPackageInfo] = useState<any>(null);
   const [error, setError] = useState('');
+  
+  // Voucher states
+  const [voucherCode, setVoucherCode] = useState('');
+  const [appliedVoucher, setAppliedVoucher] = useState<any>(null);
+  const [voucherError, setVoucherError] = useState('');
+  const [isValidatingVoucher, setIsValidatingVoucher] = useState(false);
 
   useEffect(() => {
     if (!visaCode || !caseId) {
