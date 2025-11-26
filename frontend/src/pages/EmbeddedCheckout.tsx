@@ -9,7 +9,8 @@ import {
 } from '@stripe/react-stripe-js';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, CheckCircle, CreditCard, Shield, Lock, AlertCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Loader2, CheckCircle, CreditCard, Shield, Lock, AlertCircle, Tag, Check } from 'lucide-react';
 import { makeApiCall } from '@/utils/api';
 
 // Configurar Stripe (usar chave pública)
