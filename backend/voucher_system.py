@@ -187,6 +187,143 @@ PREDEFINED_VOUCHERS = {
         "active": True,
         "categories": None,
         "visa_codes": None
+    },
+    
+    # ========================================
+    # VOUCHERS HUMANITÁRIOS - PRÓ-BONO
+    # 100% de desconto para casos humanitários
+    # ========================================
+    "HUMANITARIO-2024": {
+        "code": "HUMANITARIO-2024",
+        "discount_percentage": 100.0,
+        "description": "❤️ Pró-Bono Humanitário - Acesso Gratuito Total",
+        "valid_from": datetime(2024, 11, 26),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 50,  # 50 usos disponíveis
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
+    },
+    "AJUDA-HUMANITARIA-01": {
+        "code": "AJUDA-HUMANITARIA-01",
+        "discount_percentage": 100.0,
+        "description": "❤️ Voucher Humanitário Individual #1",
+        "valid_from": datetime(2024, 11, 26),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
+    },
+    "AJUDA-HUMANITARIA-02": {
+        "code": "AJUDA-HUMANITARIA-02",
+        "discount_percentage": 100.0,
+        "description": "❤️ Voucher Humanitário Individual #2",
+        "valid_from": datetime(2024, 11, 26),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
+    },
+    "AJUDA-HUMANITARIA-03": {
+        "code": "AJUDA-HUMANITARIA-03",
+        "discount_percentage": 100.0,
+        "description": "❤️ Voucher Humanitário Individual #3",
+        "valid_from": datetime(2024, 11, 26),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
+    },
+    "AJUDA-HUMANITARIA-04": {
+        "code": "AJUDA-HUMANITARIA-04",
+        "discount_percentage": 100.0,
+        "description": "❤️ Voucher Humanitário Individual #4",
+        "valid_from": datetime(2024, 11, 26),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
+    },
+    "AJUDA-HUMANITARIA-05": {
+        "code": "AJUDA-HUMANITARIA-05",
+        "discount_percentage": 100.0,
+        "description": "❤️ Voucher Humanitário Individual #5",
+        "valid_from": datetime(2024, 11, 26),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
+    },
+    "AJUDA-HUMANITARIA-06": {
+        "code": "AJUDA-HUMANITARIA-06",
+        "discount_percentage": 100.0,
+        "description": "❤️ Voucher Humanitário Individual #6",
+        "valid_from": datetime(2024, 11, 26),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
+    },
+    "AJUDA-HUMANITARIA-07": {
+        "code": "AJUDA-HUMANITARIA-07",
+        "discount_percentage": 100.0,
+        "description": "❤️ Voucher Humanitário Individual #7",
+        "valid_from": datetime(2024, 11, 26),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
+    },
+    "AJUDA-HUMANITARIA-08": {
+        "code": "AJUDA-HUMANITARIA-08",
+        "discount_percentage": 100.0,
+        "description": "❤️ Voucher Humanitário Individual #8",
+        "valid_from": datetime(2024, 11, 26),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
+    },
+    "AJUDA-HUMANITARIA-09": {
+        "code": "AJUDA-HUMANITARIA-09",
+        "discount_percentage": 100.0,
+        "description": "❤️ Voucher Humanitário Individual #9",
+        "valid_from": datetime(2024, 11, 26),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
+    },
+    "AJUDA-HUMANITARIA-10": {
+        "code": "AJUDA-HUMANITARIA-10",
+        "discount_percentage": 100.0,
+        "description": "❤️ Voucher Humanitário Individual #10",
+        "valid_from": datetime(2024, 11, 26),
+        "valid_until": datetime(2025, 12, 31),
+        "max_uses": 1,
+        "current_uses": 0,
+        "active": True,
+        "categories": None,
+        "visa_codes": None
     }
 }
 
