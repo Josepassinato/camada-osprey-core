@@ -16,7 +16,7 @@ export const getBackendUrl = (): string => {
     
     // Preview environment detection
     if (hostname.includes('preview.emergentagent.com')) {
-      return 'https://apply-wizard-18.preview.emergentagent.com';
+      return 'https://visa-ai-portal.preview.emergentagent.com';
     }
     
     // Production environment - use production URL
@@ -31,7 +31,7 @@ export const getBackendUrl = (): string => {
   }
   
   // Final fallback for development
-  return 'https://apply-wizard-18.preview.emergentagent.com';
+  return 'https://visa-ai-portal.preview.emergentagent.com';
 };
 
 export const getApiUrl = (endpoint: string): string => {

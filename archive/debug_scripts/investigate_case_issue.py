@@ -9,7 +9,7 @@ import json
 import uuid
 import os
 
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://apply-wizard-18.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://visa-ai-portal.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 print(f"🔍 INVESTIGANDO PROBLEMA DE PERSISTÊNCIA DE CASO")

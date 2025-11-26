@@ -13,7 +13,7 @@ from pathlib import Path
 from datetime import datetime
 
 # Get backend URL from frontend .env
-BACKEND_URL = "https://apply-wizard-18.preview.emergentagent.com"
+BACKEND_URL = "https://visa-ai-portal.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_o1_visa_complete_flow():
