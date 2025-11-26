@@ -4,34 +4,9 @@
  */
 
 export const getBackendUrl = (): string => {
-  // Always prioritize environment variable first
-  const envBackendUrl = import.meta.env.VITE_BACKEND_URL;
-  if (envBackendUrl) {
-    return envBackendUrl;
-  }
-  
-  // Browser environment detection as fallback
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    
-    // Preview environment detection
-    if (hostname.includes('preview.emergentagent.com')) {
-      return 'https://visa-ai-portal.preview.emergentagent.com';
-    }
-    
-    // Production environment - use production URL
-    if (hostname.includes('emergentagent.com') && !hostname.includes('preview')) {
-      return 'https://www.iaimmigration.com';
-    }
-    
-    // Custom domain detection
-    if (hostname === 'www.iaimmigration.com' || hostname === 'iaimmigration.com') {
-      return 'https://www.iaimmigration.com';
-    }
-  }
-  
-  // Final fallback for development
-  return 'https://visa-ai-portal.preview.emergentagent.com';
+  // DEPLOYMENT FIX: Read from environment variable only
+  // Emergent will inject the correct backend URL automatically
+  return import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001';
 };
 
 export const getApiUrl = (endpoint: string): string => {
