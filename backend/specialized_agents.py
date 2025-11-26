@@ -66,9 +66,28 @@ class BaseSpecializedAgent:
         self.use_openai_direct = bool(self.openai_key)
         self.api_key = self.openai_key or self.emergent_key
     
-    async def _call_agent(self, prompt: str, session_id: str) -> str:
-        """Base method to call the specialized agent with Dra. Paula's knowledge"""
+    async def _get_knowledge_base_context(self, form_type: str, agent_role: str = "general") -> str:
+        """Get relevant context from knowledge base for this agent"""
         try:
+            if not self.db:
+                return ""
+            
+            from agent_knowledge_helper import get_knowledge_helper
+            helper = get_knowledge_helper(self.db)
+            
+            context = await helper.get_context_for_agent(form_type, agent_role)
+            return context
+            
+        except Exception as e:
+            logger.warning(f"Could not fetch knowledge base context: {e}")
+            return ""
+    
+    async def _call_agent(self, prompt: str, session_id: str, form_type: str = "general", agent_role: str = "general") -> str:
+        """Base method to call the specialized agent with Dra. Paula's knowledge + Knowledge Base"""
+        try:
+            # Get knowledge base context
+            kb_context = await self._get_knowledge_base_context(form_type, agent_role)
+            
             # Use system prompt and enhanced user prompt
             system_message = f"""
             {self.get_system_prompt()}
@@ -83,7 +102,9 @@ class BaseSpecializedAgent:
             - Precedentes e casos práticos
             - Documentação obrigatória por tipo de visto
             
-            Combine sua especialização com o conhecimento da Dra. Paula para dar a resposta mais precisa possível.
+            {kb_context}
+            
+            Combine sua especialização com o conhecimento da Dra. Paula e a base de documentos para dar a resposta mais precisa possível.
             """
             
             if self.use_openai_direct and self.openai_key:
