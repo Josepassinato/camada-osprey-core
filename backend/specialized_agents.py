@@ -45,13 +45,15 @@ class BaseSpecializedAgent:
                  specialization: str,
                  provider: str = "openai", 
                  model: str = "gpt-4o",
-                 use_dra_paula_knowledge: bool = True):
+                 use_dra_paula_knowledge: bool = True,
+                 db=None):
         self.agent_name = agent_name
         self.specialization = specialization
         self.provider = provider
         self.model = model
         self.use_dra_paula_knowledge = use_dra_paula_knowledge
         self.dra_paula_assistant_id = "asst_kkyn65SQFfkloH4SalOZfwwh"  # Dra. Paula Official Assistant ID
+        self.db = db  # MongoDB connection for knowledge base access
         
         # Use OpenAI directly instead of EMERGENT_LLM_KEY
         self.openai_key = os.environ.get('OPENAI_API_KEY')
