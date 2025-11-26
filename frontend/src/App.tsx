@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { LocaleProvider } from "./contexts/LocaleContext";
 import { ProcessTypeProvider } from "./contexts/ProcessTypeContext";
-import BetaBanner from "./components/BetaBanner";
+// BetaBanner moved to homepage only
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
