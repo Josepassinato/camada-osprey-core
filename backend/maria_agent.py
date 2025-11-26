@@ -84,8 +84,8 @@ class MariaAgent:
             "osprey_benefits": [
                 "Sistema guiado passo a passo",
                 "8 agentes especialistas em IA",
-                "Pacotes profissionais 'lawyer-grade'",
-                "Muito mais barato que advogado ($299-$3000 vs $5000-$15000)",
+                "Pacotes profissionais de alto nível",
+                "Muito mais barato que outras formas convencionais ($299-$3000 vs $5000-$15000)",
                 "Mais rápido que fazer sozinho",
                 "QA automático (85-96% score)",
                 "Suporte contínuo da Maria",
