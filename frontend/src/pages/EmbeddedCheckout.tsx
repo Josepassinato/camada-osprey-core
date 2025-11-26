@@ -137,10 +137,15 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ visaCode, caseId, clientSec
             <Loader2 className="h-5 w-5 animate-spin mr-2" />
             Processando pagamento...
           </>
+        ) : finalAmount === 0 ? (
+          <>
+            <CheckCircle className="h-5 w-5 mr-2" />
+            Confirmar (Gratuito)
+          </>
         ) : (
           <>
             <Lock className="h-5 w-5 mr-2" />
-            Pagar ${amount.toFixed(2)}
+            Pagar ${finalAmount.toFixed(2)}
           </>
         )}
       </Button>
