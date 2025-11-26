@@ -22,6 +22,8 @@ interface CheckoutFormProps {
   clientSecret: string;
   amount: number;
   packageInfo: any;
+  appliedVoucher?: any;
+  finalAmount: number;
 }
 
 const CheckoutForm: React.FC<CheckoutFormProps> = ({ visaCode, caseId, clientSecret, amount, packageInfo }) => {
