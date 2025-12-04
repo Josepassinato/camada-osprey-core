@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Download, ArrowLeft, FileText, Lock } from 'lucide-react';
 
 const RequestPackageEmail: React.FC = () => {
   const { caseId } = useParams<{ caseId: string }>();
