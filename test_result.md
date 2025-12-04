@@ -1288,7 +1288,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Admin Knowledge Base System - Comprehensive Testing"
+    - "Test Mode Automatic Redirect After Payment Bypass"
   stuck_tasks:
     - "Agente Coruja - Frontend Implementation"
   test_all: false
