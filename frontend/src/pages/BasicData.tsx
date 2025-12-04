@@ -257,6 +257,17 @@ const BasicData = () => {
            formData.currentAddress && formData.city && formData.zipCode;
   };
 
+  const getMissingFields = () => {
+    const missing = [];
+    if (!formData.firstName) missing.push('Nome');
+    if (!formData.lastName) missing.push('Sobrenome');
+    if (!formData.dateOfBirth) missing.push('Data de Nascimento');
+    if (!formData.currentAddress) missing.push('Endereço');
+    if (!formData.city) missing.push('Cidade');
+    if (!formData.zipCode) missing.push('CEP/Código Postal');
+    return missing;
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
