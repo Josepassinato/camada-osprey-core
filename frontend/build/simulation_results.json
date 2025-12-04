@@ -1,0 +1,38 @@
+{
+  "start_time": "2025-11-20T19:17:53.021917",
+  "iterations": [
+    {
+      "iteration": 1,
+      "pdf_path": "/app/PROFESSIONAL_H1B_PACKAGE_FERNANDA_SANTOS.pdf",
+      "status": "REJECTED",
+      "score": 0,
+      "critical_errors": 6,
+      "major_errors": 9,
+      "warnings": 1,
+      "instructions_file": "/app/instructions_iteration_1.txt"
+    },
+    {
+      "iteration": 2,
+      "pdf_path": "/app/H1B_PACKAGE_ITERATION_1.pdf",
+      "status": "REJECTED",
+      "score": 0,
+      "critical_errors": 6,
+      "major_errors": 16,
+      "warnings": 1,
+      "instructions_file": "/app/instructions_iteration_2.txt"
+    },
+    {
+      "iteration": 3,
+      "pdf_path": "/app/H1B_PACKAGE_ITERATION_2.pdf",
+      "status": "REJECTED",
+      "score": 0,
+      "critical_errors": 8,
+      "major_errors": 16,
+      "warnings": 1,
+      "instructions_file": "/app/instructions_iteration_3.txt"
+    }
+  ],
+  "final_status": "MAX_ITERATIONS_REACHED",
+  "final_pdf": "/app/H1B_PACKAGE_ITERATION_2.pdf",
+  "end_time": "2025-11-20T19:17:56.183907"
+}

@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B-2 Extension Demo - Immigration Helper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+            margin-bottom: 5px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .info-box {
+            background: #f5f5f5;
+            border-left: 4px solid #1a237e;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+        }
+
+        .info-box h2 {
+            color: #1a237e;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .info-box p {
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .info-card {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: #1a237e;
+        }
+
+        .info-card h3 {
+            color: #1a237e;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .info-card .icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        .info-card p {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .download-section {
+            background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .download-section h2 {
+            color: #1a237e;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        .download-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+            color: white;
+            padding: 18px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.2em;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(26, 35, 126, 0.3);
+        }
+
+        .download-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(26, 35, 126, 0.4);
+        }
+
+        .download-button:active {
+            transform: translateY(-1px);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #1a237e;
+            display: block;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+
+        .features {
+            margin: 30px 0;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: start;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .feature-item .check {
+            color: #4caf50;
+            font-size: 1.5em;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .feature-item .text {
+            flex: 1;
+        }
+
+        .feature-item h4 {
+            color: #1a237e;
+            margin-bottom: 5px;
+        }
+
+        .feature-item p {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .footer {
+            background: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛂 B-2 Tourist Visa Extension</h1>
+            <p>Pacote Completo de Extensão de Visto</p>
+            <p><strong>Maria Helena Rodrigues Costa</strong></p>
+            <span class="badge">Form I-539 • Demonstração Completa</span>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                <h2>📋 Sobre Este Pacote</h2>
+                <p>
+                    Este é um pacote <strong>completo e profissional</strong> de extensão de visto B-2 (turista), 
+                    criado para demonstrar como o sistema gera documentação pronta para submissão ao USCIS.
+                </p>
+                <p>
+                    O pacote contém <strong>todos os documentos necessários</strong> para uma aplicação de extensão 
+                    devido a circunstâncias médicas inesperadas, incluindo formulários oficiais, cartas de suporte, 
+                    evidências financeiras e documentação médica.
+                </p>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3><span class="icon">👤</span> Aplicante</h3>
+                    <p><strong>Nome:</strong> Maria Helena Rodrigues Costa</p>
+                    <p><strong>Idade:</strong> 59 anos</p>
+                    <p><strong>Nacionalidade:</strong> Brasileira</p>
+                    <p><strong>Origem:</strong> Belo Horizonte, MG</p>
+                </div>
+
+                <div class="info-card">
+                    <h3><span class="icon">📄</span> Status Atual</h3>
+                    <p><strong>Visto:</strong> B-2 (Turista)</p>
+                    <p><strong>Entrada:</strong> 15/12/2024</p>
+                    <p><strong>Expira:</strong> 13/06/2025</p>
+                    <p><strong>I-94:</strong> 94123456789012</p>
+                </div>
+
+                <div class="info-card">
+                    <h3><span class="icon">⏰</span> Extensão</h3>
+                    <p><strong>Solicitada até:</strong> 13/12/2025</p>
+                    <p><strong>Período:</strong> 6 meses adicionais</p>
+                    <p><strong>Razão:</strong> Tratamento Médico</p>
+                    <p><strong>Status:</strong> Aplicado a tempo ✓</p>
+                </div>
+
+                <div class="info-card">
+                    <h3><span class="icon">💰</span> Financeiro</h3>
+                    <p><strong>Poupança:</strong> $120,000+</p>
+                    <p><strong>Propriedade:</strong> $180,000</p>
+                    <p><strong>Pensão:</strong> $2,500/mês</p>
+                    <p><strong>Status:</strong> Auto-suficiente ✓</p>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-number">~22</span>
+                    <span class="stat-label">Páginas</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">9</span>
+                    <span class="stat-label">Seções (TABs)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">15+</span>
+                    <span class="stat-label">Documentos</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">Completo</span>
+                </div>
+            </div>
+
+            <div class="features">
+                <h2 style="color: #1a237e; margin-bottom: 20px;">✨ O Que Está Incluído</h2>
+
+                <div class="feature-item">
+                    <span class="check">✓</span>
+                    <div class="text">
+                        <h4>Cover Letter Profissional</h4>
+                        <p>Carta de apresentação detalhada dirigida ao USCIS, explicando claramente a situação, 
+                        razões para extensão, e vínculos com o Brasil.</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <span class="check">✓</span>
+                    <div class="text">
+                        <h4>Personal Statement Completo</h4>
+                        <p>Declaração pessoal detalhada explicando as circunstâncias médicas inesperadas e 
+                        compromisso de retorno ao Brasil.</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <span class="check">✓</span>
+                    <div class="text">
+                        <h4>Documentação Médica</h4>
+                        <p>Evidências médicas completas incluindo condição, plano de tratamento, e necessidade 
+                        de permanecer nos EUA até conclusão do tratamento.</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <span class="check">✓</span>
+                    <div class="text">
+                        <h4>Evidência Financeira Robusta</h4>
+                        <p>Demonstração de recursos financeiros substanciais ($300,000+ em ativos) provando 
+                        capacidade de auto-sustento sem emprego ou benefícios públicos.</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <span class="check">✓</span>
+                    <div class="text">
+                        <h4>Fortes Vínculos com Brasil</h4>
+                        <p>Documentação extensa de vínculos familiares, propriedade, pensão, e 59 anos de 
+                        vida no Brasil, garantindo retorno.</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <span class="check">✓</span>
+                    <div class="text">
+                        <h4>Histórico de Compliance Perfeito</h4>
+                        <p>Histórico completo de viagens anteriores aos EUA, demonstrando partidas pontuais 
+                        e zero violações de imigração.</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <span class="check">✓</span>
+                    <div class="text">
+                        <h4>Cartas de Suporte</h4>
+                        <p>Carta do cônjuge no Brasil confirmando vínculos familiares e aguardando retorno.</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <span class="check">✓</span>
+                    <div class="text">
+                        <h4>Passaporte e I-94</h4>
+                        <p>Cópias de documentos de identidade e registro de entrada/saída (I-94) demonstrando 
+                        status legal atual.</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <span class="check">✓</span>
+                    <div class="text">
+                        <h4>Checklist Completo</h4>
+                        <p>Lista detalhada de todos os documentos incluídos no pacote, com certificação do 
+                        aplicante sobre veracidade das informações.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="download-section">
+                <h2>📥 Baixar Pacote Completo</h2>
+                <p style="color: #555; margin-bottom: 20px;">
+                    Clique no botão abaixo para fazer o download do pacote completo em PDF
+                </p>
+                <a href="/MARIA_HELENA_B2_EXTENSION_COMPLETE_PACKAGE.pdf" class="download-button" download>
+                    📄 Baixar PDF (13 KB)
+                </a>
+            </div>
+
+            <div class="info-box" style="background: #e8f5e9; border-left-color: #4caf50;">
+                <h2 style="color: #2e7d32;">💡 Características do Sistema</h2>
+                <p>
+                    Este pacote foi gerado automaticamente pelo sistema de geração de documentos de imigração. 
+                    O sistema cria pacotes profissionais e completos para diversos tipos de processos de imigração, 
+                    incluindo:
+                </p>
+                <ul style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
+                    <li>✓ Extensões de visto (B-2, F-1, etc.)</li>
+                    <li>✓ Mudanças de status (B-2 para F-1, etc.)</li>
+                    <li>✓ Aplicações de visto de trabalho (H-1B, L-1, O-1)</li>
+                    <li>✓ Processos de Green Card (EB-2, EB-3, I-130)</li>
+                    <li>✓ Geração de cartas profissionais e formulários oficiais</li>
+                </ul>
+            </div>
+
+            <div class="info-box" style="background: #fff3e0; border-left-color: #f57c00;">
+                <h2 style="color: #e65100;">⚠️ Importante</h2>
+                <p>
+                    Este é um <strong>caso simulado para demonstração</strong>. Todos os dados, nomes, e 
+                    documentos são fictícios e criados apenas para ilustrar as capacidades do sistema.
+                </p>
+                <p>
+                    Em um caso real, o sistema utilizaria os dados fornecidos pelo usuário para gerar 
+                    documentação personalizada e autêntica.
+                </p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Immigration Helper - B-2 Extension Package Generator</p>
+            <p>Gerado automaticamente em <?php echo date('F d, Y'); ?> <?php echo date('Y-m-d'); ?></p>
+        </div>
+    </div>
+
+    <script>
+        // Update footer with current date
+        document.addEventListener('DOMContentLoaded', function() {
+            const footer = document.querySelector('.footer p:last-child');
+            const today = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const dateStr = today.toLocaleDateString('pt-BR', options);
+            footer.textContent = `Gerado automaticamente em ${dateStr}`;
+        });
+    </script>
+</body>
+</html>
