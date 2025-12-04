@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 
 # Get backend URL from frontend .env
-BACKEND_URL = "https://visa-ai-portal.preview.emergentagent.com"
+BACKEND_URL = "https://visa-ai-assistant.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_visa_generate_endpoint():

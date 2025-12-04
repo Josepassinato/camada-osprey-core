@@ -6,7 +6,7 @@ Simple test for the visa API endpoint to debug the issue
 import requests
 import json
 
-BACKEND_URL = "https://visa-ai-portal.preview.emergentagent.com"
+BACKEND_URL = "https://visa-ai-assistant.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_simple():

@@ -15,7 +15,7 @@ from typing import Dict, Any
 import base64
 
 # Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://visa-ai-portal.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://visa-ai-assistant.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 print(f"🔍 TESTE DE REGRESSÃO CRÍTICO - SUBSTITUIÇÃO 'IA' → 'SISTEMA'")

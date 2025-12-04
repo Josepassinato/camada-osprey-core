@@ -263,8 +263,8 @@ Plataforma web completa que automatiza a criação de pacotes de visto para imig
 ### **Ambiente**
 - **Plataforma**: Kubernetes
 - **URLs**:
-  - Frontend: `https://visa-ai-portal.preview.emergentagent.com`
-  - Backend: `https://visa-ai-portal.preview.emergentagent.com/api`
+  - Frontend: `https://visa-ai-assistant.preview.emergentagent.com`
+  - Backend: `https://visa-ai-assistant.preview.emergentagent.com/api`
 - **Process Manager**: Supervisord
 
 ### **Comandos**

@@ -29,7 +29,7 @@ export const OwlPaymentSuccessPage: React.FC = () => {
   const [downloading, setDownloading] = useState(false);
 
   const getBackendUrl = () => {
-    return import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://visa-ai-portal.preview.emergentagent.com' || '';
+    return import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://visa-ai-assistant.preview.emergentagent.com' || '';
   };
 
   useEffect(() => {

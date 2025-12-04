@@ -93,7 +93,7 @@ try:
     import shutil
     shutil.copy(final_output, frontend_path)
     print(f"\n✅ Pacote copiado para frontend: {frontend_path}")
-    print(f"🌐 Disponível em: https://visa-ai-portal.preview.emergentagent.com/api/simulated-case-demo")
+    print(f"🌐 Disponível em: https://visa-ai-assistant.preview.emergentagent.com/api/simulated-case-demo")
     
 except Exception as e:
     print(f"\n❌ Erro: {e}")

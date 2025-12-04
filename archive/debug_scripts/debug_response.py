@@ -7,7 +7,7 @@ import requests
 import json
 import os
 
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://visa-ai-portal.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://visa-ai-assistant.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 def debug_response_structure():
