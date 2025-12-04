@@ -322,6 +322,55 @@ const EmbeddedCheckout = () => {
     );
   }
 
+  // TESTING MODE: Show redirect screen
+  if (testModeRedirect) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50">
+        <Card className="max-w-lg w-full mx-4 shadow-xl border-green-200">
+          <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-100">
+            <div className="bg-green-100 border border-green-200 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="h-12 w-12 text-green-600" />
+            </div>
+            <CardTitle className="text-2xl font-bold text-center text-gray-900">
+              🧪 Modo de Teste Ativo
+            </CardTitle>
+            <CardDescription className="text-center text-base mt-2">
+              Pagamento bypassed para fins de teste
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6 text-center space-y-4">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-sm text-yellow-800 font-semibold mb-1">
+                ⚠️ Ambiente de Testes
+              </p>
+              <p className="text-xs text-yellow-700">
+                Nenhuma cobrança será realizada. Esta aplicação está no modo TEST_MODE.
+              </p>
+            </div>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 inline-flex items-center gap-3">
+              <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+              <div className="text-left">
+                <p className="text-blue-900 font-semibold text-sm">
+                  Redirecionando para sua aplicação...
+                </p>
+                <p className="text-blue-700 text-xs">
+                  Você será redirecionado em instantes
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t">
+              <p className="text-xs text-gray-500">
+                Caso ID: <span className="font-mono font-semibold">{caseId}</span>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
