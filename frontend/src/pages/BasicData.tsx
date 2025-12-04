@@ -16,6 +16,7 @@ import {
   ArrowRight,
   FileText,
   AlertTriangle,
+  AlertCircle,
   CheckCircle,
   User,
   MapPin,
