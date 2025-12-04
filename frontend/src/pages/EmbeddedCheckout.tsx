@@ -244,6 +244,16 @@ const EmbeddedCheckout = () => {
       const data = await makeApiCall('/payment/create-payment-intent', 'POST', requestBody);
 
       if (data.success) {
+        // TESTING MODE: Se o backend retorna testing_mode: true, redirecionar automaticamente
+        if (data.testing_mode === true) {
+          setPackageInfo(data.package);
+          // Aguardar um breve momento para mostrar mensagem e redirecionar
+          setTimeout(() => {
+            navigate(`/auto-application/case/${caseId}/basic-data`);
+          }, 1500);
+          return;
+        }
+        
         setClientSecret(data.client_secret);
         setPackageInfo(data.package);
         
