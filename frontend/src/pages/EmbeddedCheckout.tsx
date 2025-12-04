@@ -210,6 +210,7 @@ const EmbeddedCheckout = () => {
   const [clientSecret, setClientSecret] = useState('');
   const [packageInfo, setPackageInfo] = useState<any>(null);
   const [error, setError] = useState('');
+  const [testModeRedirect, setTestModeRedirect] = useState(false);
   
   // Voucher states
   const [voucherCode, setVoucherCode] = useState('');
