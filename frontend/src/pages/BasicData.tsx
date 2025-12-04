@@ -717,6 +717,27 @@ const BasicData = () => {
                 Voltar
               </Button>
 
+              {/* Missing Fields Alert */}
+              {!isFormValid() && getMissingFields().length > 0 && (
+                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <AlertCircle className="h-5 w-5 text-yellow-400" />
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm font-medium text-yellow-800">
+                        Preencha os campos obrigatórios para continuar:
+                      </p>
+                      <ul className="mt-2 text-sm text-yellow-700 list-disc list-inside">
+                        {getMissingFields().map((field, index) => (
+                          <li key={index}>{field}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button
                   variant="outline"
@@ -740,7 +761,8 @@ const BasicData = () => {
                 <Button 
                   onClick={continueToNextStep}
                   disabled={!isFormValid() || isSaving}
-                  className="bg-black text-white hover:bg-gray-800 flex items-center gap-2"
+                  className="bg-black text-white hover:bg-gray-800 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title={!isFormValid() ? 'Preencha todos os campos obrigatórios para continuar' : 'Continuar para a próxima etapa'}
                 >
                   Continuar para Carta de Apresentação
                   <ArrowRight className="h-4 w-4" />
