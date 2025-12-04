@@ -1317,7 +1317,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Test Mode Automatic Redirect After Payment Bypass"
+    - "Basic Data Required Fields Validation System"
   stuck_tasks:
     - "Agente Coruja - Frontend Implementation"
   test_all: false
