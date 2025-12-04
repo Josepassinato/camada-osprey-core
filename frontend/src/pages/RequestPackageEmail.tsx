@@ -114,64 +114,39 @@ const RequestPackageEmail: React.FC = () => {
           </div>
         )}
 
-        <button
+        <Button
           onClick={handleDownload}
           disabled={loading}
+          className="w-full h-14 text-lg font-semibold mb-4"
+          size="lg"
           style={{
-            width: '100%',
             background: loading ? '#9ca3af' : '#10b981',
-            color: 'white',
-            border: 'none',
-            padding: '16px 24px',
-            borderRadius: '8px',
-            fontSize: '18px',
-            fontWeight: '600',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            transition: 'all 0.3s',
-            marginBottom: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '12px',
-            minHeight: '56px',
-            boxSizing: 'border-box'
-          }}
-          onMouseOver={(e) => {
-            if (!loading) e.currentTarget.style.background = '#059669';
-          }}
-          onMouseOut={(e) => {
-            if (!loading) e.currentTarget.style.background = '#10b981';
+            color: 'white'
           }}
         >
-          {loading ? '⏳ Preparando Download...' : '⬇️ Baixar Pacote Completo (PDF)'}
-        </button>
+          {loading ? (
+            <>
+              <Download className="mr-2 h-5 w-5 animate-spin" />
+              Preparando Download...
+            </>
+          ) : (
+            <>
+              <Download className="mr-2 h-5 w-5" />
+              Baixar Pacote Completo (PDF)
+            </>
+          )}
+        </Button>
 
-        <button
+        <Button
           type="button"
           onClick={() => navigate(-1)}
-          style={{
-            width: '100%',
-            background: 'transparent',
-            color: '#6b7280',
-            border: '2px solid #e5e7eb',
-            padding: '12px',
-            borderRadius: '8px',
-            fontSize: '14px',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            transition: 'all 0.3s'
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.borderColor = '#9ca3af';
-            e.currentTarget.style.color = '#374151';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.borderColor = '#e5e7eb';
-            e.currentTarget.style.color = '#6b7280';
-          }}
+          variant="outline"
+          className="w-full h-12"
+          size="lg"
         >
-          ← Voltar
-        </button>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Voltar
+        </Button>
 
         <div style={{
           marginTop: '32px',
