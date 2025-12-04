@@ -248,10 +248,12 @@ const EmbeddedCheckout = () => {
         // TESTING MODE: Se o backend retorna testing_mode: true, redirecionar automaticamente
         if (data.testing_mode === true) {
           setPackageInfo(data.package);
+          setTestModeRedirect(true);
+          setLoading(false);
           // Aguardar um breve momento para mostrar mensagem e redirecionar
           setTimeout(() => {
             navigate(`/auto-application/case/${caseId}/basic-data`);
-          }, 1500);
+          }, 2000);
           return;
         }
         
