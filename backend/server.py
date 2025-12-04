@@ -9059,6 +9059,61 @@ async def create_payment_intent_endpoint(request: Request):
         if not visa_code or not case_id:
             raise HTTPException(status_code=400, detail="visa_code e case_id são obrigatórios")
         
+        # TESTING MODE: Skip payment if enabled
+        skip_payment = os.environ.get('SKIP_PAYMENT_FOR_TESTING', 'FALSE').upper() == 'TRUE'
+        
+        if skip_payment:
+            logger.info(f"🧪 TESTING MODE: Skipping payment for {visa_code} - {case_id}")
+            
+            # Get product info for display
+            product = await get_product_for_checkout(db, visa_code)
+            original_price = product['price'] if product else 0
+            
+            # Mark as paid directly (testing mode)
+            transaction = {
+                "transaction_id": f"TEST-{case_id}",
+                "case_id": case_id,
+                "visa_code": visa_code,
+                "amount": 0.0,
+                "original_amount": original_price,
+                "discount_percentage": 100.0,
+                "voucher_code": "TESTING_MODE",
+                "currency": "usd",
+                "status": "completed",
+                "payment_method": "testing_mode",
+                "created_at": datetime.utcnow()
+            }
+            await db.payment_transactions.insert_one(transaction)
+            
+            # Update case as paid
+            await db.auto_cases.update_one(
+                {"case_id": case_id},
+                {
+                    "$set": {
+                        "payment_status": "completed",
+                        "payment_info": {
+                            "amount": 0.0,
+                            "original_amount": original_price,
+                            "discount": 100.0,
+                            "voucher_code": "TESTING_MODE",
+                            "payment_date": datetime.utcnow(),
+                            "method": "testing_bypass"
+                        }
+                    }
+                }
+            )
+            
+            return {
+                "success": True,
+                "free": True,
+                "testing_mode": True,
+                "message": "🧪 TESTING MODE: Payment skipped for testing purposes",
+                "original_price": original_price,
+                "final_price": 0.0,
+                "discount_percentage": 100.0,
+                "package": product
+            }
+        
         # Buscar informações do produto
         product = await get_product_for_checkout(db, visa_code)
         
