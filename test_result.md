@@ -105,6 +105,18 @@
 user_problem_statement: "IMPLEMENTAR AGENTE CORUJA - SISTEMA INTELIGENTE DE QUESTIONÁRIOS: Desenvolver o novo recurso 'Agente Coruja' que conduz usuários através de questionários inteligentes em tempo real, valida respostas usando Google APIs e OpenAI GPT-5, e gera formulários USCIS oficiais automaticamente preenchidos. Sistema multi-idioma (português/inglês) com orientação contextual e validação em tempo real."
 
 frontend:
+  - task: "Test Mode Automatic Redirect After Payment Bypass"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/EmbeddedCheckout.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "✅ IMPLEMENTED: Test Mode automatic redirect feature. When TEST_MODE is active in backend (SKIP_PAYMENT_FOR_TESTING=TRUE), the frontend now: 1) Detects testing_mode: true in the API response, 2) Shows a friendly TEST_MODE screen with visual feedback, 3) Automatically redirects to /auto-application/case/{caseId}/basic-data after 2 seconds. Added new state 'testModeRedirect' and dedicated UI component showing testing status. Ready for frontend testing."
+
   - task: "Admin Knowledge Base Frontend - Comprehensive Testing"
     implemented: true
     working: true
