@@ -9270,6 +9270,67 @@ async def create_payment_checkout(request: Request):
         if not visa_code or not case_id:
             raise HTTPException(status_code=400, detail="visa_code e case_id são obrigatórios")
         
+        # TESTING MODE: Skip payment if enabled
+        skip_payment = os.environ.get('SKIP_PAYMENT_FOR_TESTING', 'FALSE').upper() == 'TRUE'
+        
+        if skip_payment:
+            logger.info(f"🧪 TESTING MODE: Skipping checkout for {visa_code} - {case_id}")
+            
+            # Get product info
+            product = await get_product_for_checkout(db, visa_code)
+            original_price = product['price'] if product else 0
+            
+            # Generate fake session ID for testing
+            fake_session_id = f"test_session_{case_id}_{datetime.utcnow().timestamp()}"
+            
+            # Mark as paid
+            transaction = {
+                "transaction_id": f"TEST-CHECKOUT-{case_id}",
+                "stripe_session_id": fake_session_id,
+                "case_id": case_id,
+                "visa_code": visa_code,
+                "amount": 0.0,
+                "original_amount": original_price,
+                "discount_percentage": 100.0,
+                "voucher_code": "TESTING_MODE",
+                "currency": "usd",
+                "status": "completed",
+                "payment_method": "testing_mode",
+                "created_at": datetime.utcnow()
+            }
+            await db.payment_transactions.insert_one(transaction)
+            
+            # Update case
+            await db.auto_cases.update_one(
+                {"case_id": case_id},
+                {
+                    "$set": {
+                        "payment_status": "completed",
+                        "payment_info": {
+                            "amount": 0.0,
+                            "original_amount": original_price,
+                            "discount": 100.0,
+                            "voucher_code": "TESTING_MODE",
+                            "payment_date": datetime.utcnow(),
+                            "method": "testing_bypass",
+                            "session_id": fake_session_id
+                        }
+                    }
+                }
+            )
+            
+            # Return success URL (skip actual checkout)
+            frontend_url = os.environ.get('REACT_APP_BACKEND_URL', 'http://localhost:3000')
+            
+            return {
+                "success": True,
+                "testing_mode": True,
+                "message": "🧪 Payment skipped for testing",
+                "session_id": fake_session_id,
+                "redirect_url": f"{frontend_url}/payment/success?session_id={fake_session_id}&case_id={case_id}",
+                "skip_checkout": True
+            }
+        
         # URLs de redirecionamento
         frontend_url = os.environ.get('REACT_APP_BACKEND_URL', 'http://localhost:3000')
         success_url = f"{frontend_url}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&case_id={case_id}"
