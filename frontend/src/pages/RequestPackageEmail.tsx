@@ -120,17 +120,19 @@ const RequestPackageEmail: React.FC = () => {
             background: loading ? '#9ca3af' : '#10b981',
             color: 'white',
             border: 'none',
-            padding: '16px',
+            padding: '16px 24px',
             borderRadius: '8px',
-            fontSize: '16px',
-            fontWeight: 'bold',
+            fontSize: '18px',
+            fontWeight: '600',
             cursor: loading ? 'not-allowed' : 'pointer',
             transition: 'all 0.3s',
             marginBottom: '16px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '8px'
+            gap: '12px',
+            minHeight: '56px',
+            boxSizing: 'border-box'
           }}
           onMouseOver={(e) => {
             if (!loading) e.currentTarget.style.background = '#059669';
@@ -139,17 +141,7 @@ const RequestPackageEmail: React.FC = () => {
             if (!loading) e.currentTarget.style.background = '#10b981';
           }}
         >
-          {loading ? (
-            <>
-              <span>⏳</span>
-              <span>Preparando Download...</span>
-            </>
-          ) : (
-            <>
-              <span>⬇️</span>
-              <span>Baixar Pacote Completo (PDF)</span>
-            </>
-          )}
+          {loading ? '⏳ Preparando Download...' : '⬇️ Baixar Pacote Completo (PDF)'}
         </button>
 
         <button
