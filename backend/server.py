@@ -1318,10 +1318,13 @@ async def generate_uscis_form(case_id: str):
     Returns the filled PDF ready for submission to USCIS
     """
     try:
-        # Get case
+        # Get case and determine which collection it's in
         case = await db.application_cases.find_one({"case_id": case_id})
+        case_collection = "application_cases"
+        
         if not case:
             case = await db.auto_cases.find_one({"case_id": case_id})
+            case_collection = "auto_cases"
         
         if not case:
             raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
