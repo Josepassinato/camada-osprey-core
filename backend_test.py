@@ -16,33 +16,37 @@ from datetime import datetime
 BACKEND_URL = "https://visa-ai-assistant.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
-def test_o1_visa_complete_flow():
+def test_i539_ai_review_system():
     """
-    Test complete O-1 visa application flow for Dr. Sofia Mendes Rodrigues
+    🎯 ANÁLISE DA IA DE REVISÃO FINAL - PROCESSO I-539 EXTENSION OF STAY
+    
+    Testing complete I-539 AI review system for Carlos Eduardo Silva Mendes
     
     SPECIFIC TEST REQUESTED IN REVIEW:
-    Complete end-to-end O-1 visa application including:
-    1. User creation and login
-    2. O-1 application start
-    3. Basic data filling
-    4. Friendly form completion
-    5. Document uploads (simulated)
-    6. AI review
-    7. Final status and download
+    Complete I-539 Extension of Stay AI review including:
+    1. Case creation for I-539
+    2. Basic data completion
+    3. Document uploads (passport, I-20, financial proof, etc.)
+    4. AI review endpoints testing
+    5. Document validation analysis
+    6. Letter quality assessment
+    7. Form completion verification
+    8. USCIS compliance checking
     
     Expected validations:
-    1. ✅ User created successfully
-    2. ✅ Login successful with JWT token
-    3. ✅ O-1 case created
-    4. ✅ Basic data saved
-    5. ✅ Friendly form completed
-    6. ✅ Documents uploaded
-    7. ✅ AI review completed
-    8. ✅ Final package available
+    1. ✅ I-539 case created successfully
+    2. ✅ Basic data saved correctly
+    3. ✅ Documents uploaded and analyzed
+    4. ✅ AI review endpoints functional
+    5. ✅ Document validation working
+    6. ✅ Letter quality assessment working
+    7. ✅ Form completion verification working
+    8. ✅ USCIS compliance checking working
     """
     
-    print("🦅 TESTING O-1 VISA COMPLETE END-TO-END FLOW")
-    print("🧑‍⚕️ Applicant: Dr. Sofia Mendes Rodrigues")
+    print("🎯 TESTING I-539 EXTENSION OF STAY AI REVIEW SYSTEM")
+    print("👨‍🎓 Applicant: Carlos Eduardo Silva Mendes")
+    print("📋 Process: I-539 Extension of Stay")
     print("=" * 60)
     
     results = {
