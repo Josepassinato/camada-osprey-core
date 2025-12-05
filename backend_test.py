@@ -123,8 +123,8 @@ def test_eb1a_ai_review_after_corrections():
         print(f"❌ Exception during case verification: {str(e)}")
         results["case_verification"]["exception"] = str(e)
     
-    # FASE 2: Completar dados básicos do EB-1A
-    print("\n📋 FASE 2: Completar Dados Básicos EB-1A")
+    # STEP 2: Test AI Review After Corrections
+    print("\n📋 STEP 2: AI Review After EB-1A Corrections")
     print("-" * 50)
     
     if not case_id:
