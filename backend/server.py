@@ -2901,7 +2901,7 @@ Formulário Amigável: {json.dumps(friendly_form_data, indent=2, ensure_ascii=Fa
         }
 
 
-def get_required_fields_by_visa_type(visa_type: str) -> dict:
+def get_required_fields_by_visa_type_old(visa_type: str) -> dict:
     """
     Define required fields for each visa type
     Returns dict with field name, Portuguese label, and validation rules
