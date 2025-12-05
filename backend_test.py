@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-🎯 TESTE COMPLETO - SISTEMA DE GERAÇÃO DE FORMULÁRIOS USCIS
-Testing USCIS form generation system for 3 visa types as requested in review
+🎯 TESTE COMPLETO DA VALIDAÇÃO IA MELHORADA
+Testing the enhanced AI validation system with two-stage validation as requested in review
 """
 
 import requests
