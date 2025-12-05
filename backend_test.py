@@ -553,18 +553,23 @@ if __name__ == "__main__":
     # Execute main test
     test_results = test_uscis_form_generation_system()
     
-    # Final summary
-    print("\n" + "=" * 80)
-    print("🎯 RELATÓRIO FINAL - TESTE COMPLETO EB-1A EXTRAORDINARY ABILITY")
-    print("=" * 80)
+    # Save results to file
+    with open("/app/uscis_form_generation_test_results.json", "w") as f:
+        json.dump({
+            "test_results": test_results,
+            "timestamp": time.time(),
+            "test_focus": "USCIS Form Generation System Testing",
+            "test_cases": [
+                {"name": "I-539 Extension", "case_id": "OSP-BD2D8ED2"},
+                {"name": "I-589 Asylum", "case_id": "OSP-4899BE72"},
+                {"name": "EB-1A Extraordinary", "case_id": "OSP-8731E45D"}
+            ]
+        }, f, indent=2)
     
-    print(f"👩‍🔬 Aplicante: Dr. Sofia Martinez Chen")
-    print(f"🎯 Processo: EB-1A Extraordinary Ability")
-    # Safely get summary data with defaults
-    summary = main_results.get('summary', {})
-    successful_phases = summary.get('successful_phases', 0)
-    total_phases = summary.get('total_phases', 8)
-    success_rate = summary.get('success_rate', 0)
+    print(f"\n💾 Resultados salvos em: /app/uscis_form_generation_test_results.json")
+    
+    # Final recommendation
+    summary = test_results.get("summary", {})
     
     print(f"📊 Teste principal: {successful_phases}/{total_phases} fases")
     print(f"📈 Taxa de sucesso: {success_rate:.1f}%")
