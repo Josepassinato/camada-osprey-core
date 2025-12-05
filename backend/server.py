@@ -1318,9 +1318,6 @@ async def generate_uscis_form(case_id: str):
     Returns the filled PDF ready for submission to USCIS
     """
     try:
-        # Import form filler
-        from uscis_form_filler import form_filler
-        
         # Get case
         case = await db.application_cases.find_one({"case_id": case_id})
         if not case:
