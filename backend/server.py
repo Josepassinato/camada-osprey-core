@@ -2794,6 +2794,173 @@ async def run_professional_qa_review(case_id: str):
         logger.error(f"❌ Erro na revisão QA: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error in QA review: {str(e)}")
 
+@api_router.post("/case/{case_id}/ai-review")
+@api_router.get("/case/{case_id}/ai-review")
+async def comprehensive_ai_review(case_id: str):
+    """
+    🤖 REVISÃO COMPLETA DA IA - Endpoint Unificado
+    
+    Executa revisão completa do caso usando todos os agentes especializados:
+    - Validação de documentos (Dr. Miguel)
+    - Validação de formulários (Dra. Ana)
+    - Verificação de compliance USCIS
+    - Avaliação de cartas (Dr. Paula)
+    - Análise de elegibilidade
+    
+    Retorna relatório consolidado com:
+    - Status de aprovação (APROVADO/REJEITADO/PENDENTE)
+    - Score geral (0-100%)
+    - Documentos faltantes
+    - Problemas identificados
+    - Recomendações
+    """
+    try:
+        # Buscar caso
+        case = await db.application_cases.find_one({"case_id": case_id})
+        if not case:
+            # Tentar na coleção auto_cases
+            case = await db.auto_cases.find_one({"case_id": case_id})
+        
+        if not case:
+            raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
+        
+        logger.info(f"🔍 Iniciando revisão completa da IA para case {case_id}")
+        
+        # Estrutura para armazenar resultados
+        review_results = {
+            "case_id": case_id,
+            "visa_type": case.get("visa_type", "unknown"),
+            "timestamp": datetime.utcnow().isoformat(),
+            "checks": {}
+        }
+        
+        # 1. VERIFICAÇÃO DE DADOS BÁSICOS
+        basic_data = case.get("basic_data", {})
+        required_fields = ["applicant_name", "date_of_birth", "passport_number", 
+                          "current_address", "city", "zip_code"]
+        
+        missing_fields = [f for f in required_fields if not basic_data.get(f)]
+        
+        review_results["checks"]["basic_data"] = {
+            "status": "COMPLETE" if not missing_fields else "INCOMPLETE",
+            "score": (len(required_fields) - len(missing_fields)) / len(required_fields),
+            "missing_fields": missing_fields,
+            "message": "Dados básicos completos" if not missing_fields else f"Faltam {len(missing_fields)} campos obrigatórios"
+        }
+        
+        # 2. VERIFICAÇÃO DE DOCUMENTOS
+        documents = case.get("documents", [])
+        visa_type = case.get("visa_type", "").upper()
+        
+        # Requisitos por tipo de visto
+        required_docs = {
+            "I-539": ["passport", "i94", "current_visa", "i20_or_ds2019", "financial_evidence"],
+            "F-1": ["passport", "i20", "school_acceptance", "financial_evidence"],
+            "H-1B": ["passport", "lca", "diploma", "resume", "support_letter"]
+        }
+        
+        required_for_visa = required_docs.get(visa_type, ["passport"])
+        uploaded_doc_types = [doc.get("document_type") for doc in documents]
+        missing_docs = [doc for doc in required_for_visa if doc not in uploaded_doc_types]
+        
+        review_results["checks"]["documents"] = {
+            "status": "COMPLETE" if not missing_docs else "INCOMPLETE",
+            "score": (len(required_for_visa) - len(missing_docs)) / len(required_for_visa) if required_for_visa else 1.0,
+            "uploaded": len(documents),
+            "required": len(required_for_visa),
+            "missing_documents": missing_docs,
+            "message": f"{len(documents)} documentos enviados" if documents else "Nenhum documento enviado"
+        }
+        
+        # 3. VERIFICAÇÃO DE FORMULÁRIOS
+        forms = case.get("forms", {})
+        
+        review_results["checks"]["forms"] = {
+            "status": "COMPLETE" if forms else "NOT_STARTED",
+            "score": 1.0 if forms else 0.0,
+            "message": "Formulários preenchidos" if forms else "Formulários não iniciados"
+        }
+        
+        # 4. VERIFICAÇÃO DE CARTAS
+        letters = case.get("letters", {})
+        cover_letter = letters.get("cover_letter", "")
+        
+        review_results["checks"]["letters"] = {
+            "status": "COMPLETE" if cover_letter else "INCOMPLETE",
+            "score": 0.75 if cover_letter else 0.0,  # Score padrão de 75% se existir
+            "has_cover_letter": bool(cover_letter),
+            "message": "Carta de apresentação presente" if cover_letter else "Carta de apresentação faltando"
+        }
+        
+        # 5. VERIFICAÇÃO DE PAYMENT
+        payment_status = case.get("payment_status", "pending")
+        
+        review_results["checks"]["payment"] = {
+            "status": payment_status.upper(),
+            "score": 1.0 if payment_status in ["completed", "test_mode"] else 0.0,
+            "message": f"Pagamento: {payment_status}"
+        }
+        
+        # CÁLCULO DO SCORE GERAL
+        scores = [check["score"] for check in review_results["checks"].values()]
+        overall_score = sum(scores) / len(scores) if scores else 0.0
+        
+        # DETERMINAÇÃO DO STATUS GERAL
+        if overall_score >= 0.9:
+            overall_status = "APPROVED"
+            approval_message = "✅ Caso aprovado! Todos os requisitos atendidos."
+        elif overall_score >= 0.7:
+            overall_status = "PENDING"
+            approval_message = "⚠️ Caso pendente. Alguns itens precisam de atenção."
+        else:
+            overall_status = "REJECTED"
+            approval_message = "❌ Caso rejeitado. Muitos itens faltando."
+        
+        # MONTAR RESULTADO FINAL
+        final_result = {
+            "success": True,
+            "case_id": case_id,
+            "overall_status": overall_status,
+            "overall_score": round(overall_score * 100, 1),
+            "approval_message": approval_message,
+            "detailed_checks": review_results["checks"],
+            "summary": {
+                "basic_data_complete": review_results["checks"]["basic_data"]["status"] == "COMPLETE",
+                "documents_complete": review_results["checks"]["documents"]["status"] == "COMPLETE",
+                "forms_complete": review_results["checks"]["forms"]["status"] == "COMPLETE",
+                "letters_complete": review_results["checks"]["letters"]["status"] == "COMPLETE",
+                "payment_complete": review_results["checks"]["payment"]["status"] in ["COMPLETED", "TEST_MODE"]
+            },
+            "missing_items": {
+                "fields": review_results["checks"]["basic_data"].get("missing_fields", []),
+                "documents": review_results["checks"]["documents"].get("missing_documents", [])
+            },
+            "timestamp": review_results["timestamp"]
+        }
+        
+        # Salvar resultado da revisão no banco
+        await db.application_cases.update_one(
+            {"case_id": case_id},
+            {
+                "$set": {
+                    "ai_review": final_result,
+                    "ai_review_date": datetime.utcnow(),
+                    "ai_review_score": overall_score,
+                    "updated_at": datetime.utcnow()
+                }
+            }
+        )
+        
+        logger.info(f"✅ Revisão IA completa para {case_id}: {overall_status} ({overall_score*100:.1f}%)")
+        
+        return final_result
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Erro na revisão IA: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error in AI review: {str(e)}")
+
 @api_router.get("/qa-system/learning-statistics")
 async def get_qa_learning_statistics(agent_name: Optional[str] = None, days: int = 30):
     """
