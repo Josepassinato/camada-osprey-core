@@ -1,0 +1,131 @@
+{
+  "phase_1_available_visas": {
+    "success": true,
+    "status_code": 200,
+    "visas_count": 0,
+    "visas": [],
+    "checks": {
+      "returns_8_visa_types": false,
+      "each_has_code": true,
+      "each_has_name": true,
+      "each_has_category": true,
+      "each_has_description": true,
+      "each_has_estimated_time": true
+    },
+    "all_checks_passed": false
+  },
+  "phase_2_f1_complete": {
+    "structure": {
+      "success": true,
+      "status_code": 200,
+      "total_fields": 0,
+      "required_fields": 0,
+      "sections": 6,
+      "checks": {
+        "has_31_fields": false,
+        "has_26_required": false,
+        "has_6_sections": true,
+        "has_f1_specific_fields": false,
+        "has_mapping": false
+      },
+      "all_checks_passed": false
+    },
+    "case_creation": {
+      "success": true,
+      "status_code": 200,
+      "case_id": "OSP-0ACB4075",
+      "case_data": {
+        "case_id": "OSP-0ACB4075",
+        "user_id": null,
+        "session_token": null,
+        "form_code": "F-1",
+        "status": "created",
+        "process_type": "extension",
+        "progress_percentage": 0,
+        "current_step": null,
+        "basic_data": null,
+        "uploaded_documents": [],
+        "document_analysis": null,
+        "user_story_text": null,
+        "user_story_audio_url": null,
+        "ai_extracted_facts": null,
+        "simplified_form_responses": null,
+        "official_form_data": null,
+        "uscis_form_generated": false,
+        "ead_data": null,
+        "ai_processing": null,
+        "payment_status": null,
+        "payment_id": null,
+        "final_package_generated": false,
+        "final_package_url": null,
+        "completed_at": null,
+        "created_at": "2025-12-05T15:35:52.701284",
+        "updated_at": "2025-12-05T15:35:52.701285",
+        "expires_at": "2025-12-12T15:35:52.701204"
+      }
+    },
+    "friendly_form": {
+      "success": true,
+      "status_code": 200,
+      "validation_status": "approved",
+      "completion_percentage": 98,
+      "checks": {
+        "status_approved_or_needs_review": true,
+        "completion_above_90": true,
+        "data_saved_confirmation": true,
+        "case_id_matches": true
+      },
+      "all_checks_passed": true
+    },
+    "pdf_generation": {
+      "success": false,
+      "status_code": 404,
+      "error": "{\"detail\":\"Not Found\"}"
+    },
+    "pdf_download": {
+      "success": false,
+      "status_code": 404,
+      "error": "{\"detail\":\"Not Found\"}"
+    }
+  },
+  "phase_3_h1b_complete": {
+    "structure": {
+      "success": true,
+      "status_code": 200,
+      "total_fields": 0,
+      "required_fields": 0,
+      "checks": {
+        "has_32_fields": false,
+        "has_27_required": false,
+        "has_h1b_specific_fields": false
+      },
+      "all_checks_passed": false
+    },
+    "complete_flow": {
+      "success": false,
+      "error": "PDF generation failed"
+    }
+  },
+  "phase_4_incomplete_data": {
+    "success": false,
+    "error": "Case creation failed - status 422"
+  },
+  "phase_5_mapping_verification": {
+    "success": true,
+    "checks": {
+      "portuguese_fields_accepted": true,
+      "english_mapping_exists": true,
+      "pdf_contains_mapped_data": true
+    },
+    "all_checks_passed": true
+  },
+  "summary": {
+    "successful_phases": 1,
+    "total_phases": 5,
+    "success_rate": 20.0,
+    "criteria_passed": 8,
+    "total_criteria": 8,
+    "system_ready": false,
+    "timestamp": "2025-12-05T15:35:52.941787"
+  }
+}
