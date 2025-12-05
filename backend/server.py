@@ -3151,6 +3151,28 @@ def validate_fields_programmatically(friendly_form_data: dict, basic_data: dict,
     }
 
 
+def determine_overall_status(completion_percentage: int, validation_issues: list) -> str:
+    """
+    Determine overall validation status based on completion and issues
+    """
+    error_count = len([i for i in validation_issues if i.get("severity") == "error"])
+    
+    # If there are critical errors, cannot be approved
+    if error_count > 0:
+        if completion_percentage < 70:
+            return "rejected"
+        else:
+            return "needs_review"
+    
+    # No errors, check completion only
+    if completion_percentage >= 90:
+        return "approved"
+    elif completion_percentage >= 70:
+        return "needs_review"
+    else:
+        return "rejected"
+
+
 def get_validation_message_pt(status: str, completion: int) -> str:
     """Get user-friendly message in Portuguese based on validation status"""
     if status == "approved" and completion >= 90:
