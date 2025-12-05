@@ -16,32 +16,28 @@ from datetime import datetime
 BACKEND_URL = "https://visa-ai-assistant.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
-def test_eb1a_extraordinary_ability_system():
+def test_eb1a_ai_review_after_corrections():
     """
-    🎯 TESTE COMPLETO EB-1A - EXTRAORDINARY ABILITY VISA
+    🎯 TESTE EB-1A APÓS CORREÇÕES - VALIDAÇÃO FINAL
     
-    Testing complete EB-1A system for Dr. Sofia Martinez Chen
+    Testing specific case OSP-8731E45D after implementing EB-1A corrections
     
     SPECIFIC TEST REQUESTED IN REVIEW:
-    Complete EB-1A Extraordinary Ability visa testing including:
-    1. Case creation for EB-1A
-    2. Basic data completion with EB-1A specific fields
-    3. Document uploads (8 EB-1A specific documents)
-    4. Personal statement (cover letter)
-    5. EB-1A form completion with USCIS criteria
-    6. AI review that recognizes EB-1A specifics
-    7. Verification of persistence
-    8. System flexibility comparison with I-539/I-589
+    Test existing case OSP-8731E45D which already has:
+    - ✅ 8 EB-1A documents
+    - ✅ Personal statement (1592 characters)  
+    - ✅ EB-1A form with 7 criteria
     
-    Expected validations:
-    1. ✅ EB-1A case created successfully
-    2. ✅ Basic data with extraordinary ability field saved
-    3. ✅ 8 EB-1A documents uploaded (awards, publications, etc.)
-    4. ✅ Personal statement saved
-    5. ✅ EB-1A form with 7 criteria completed
-    6. ✅ AI review recognizes EB-1A and scores >85%
-    7. ✅ All data persisted correctly
-    8. ✅ System adapts to EB-1A vs I-539/I-589 requirements
+    FOCUS: AI Review After Corrections
+    Test: GET /api/case/OSP-8731E45D/ai-review
+    
+    VERIFY IMPROVEMENTS:
+    - ✅ System recognizes EB-1A specifically
+    - ✅ Score > 85% (before was 75%)
+    - ✅ Status = "APPROVED" (before was generic)
+    - ✅ Message contains EB-1A specific terminology
+    - ✅ Documents score = 1.0 (8/8 documents)
+    - ✅ Letters score = 0.90 (petition letter > 500 chars)
     """
     
     print("🎯 TESTE COMPLETO EB-1A - EXTRAORDINARY ABILITY VISA")
