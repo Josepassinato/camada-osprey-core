@@ -277,7 +277,7 @@ def test_i539_ai_review_system():
             }
             
             headers = {
-                "Authorization": f"Bearer {jwt_token}"
+                "Content-Type": "application/json"
             }
             
             response = requests.post(
