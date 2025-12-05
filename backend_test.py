@@ -542,8 +542,8 @@ Dr. Sofia Martinez Chen"""
         results["fase_5_eb1a_form"]["exception"] = str(e)
         results["fase_5_eb1a_form"]["working"] = False
     
-    # FASE 6: Análise de Qualidade de Cartas
-    print("\n📋 FASE 6: Análise de Qualidade de Cartas")
+    # FASE 6: AI Review EB-1A (CRÍTICO)
+    print("\n📋 FASE 6: AI Review EB-1A (CRÍTICO)")
     print("-" * 50)
     
     # Test letter quality assessment
