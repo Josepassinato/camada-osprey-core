@@ -357,116 +357,101 @@ def test_eb1a_extraordinary_ability_system():
     print("\n📋 FASE 4: Personal Statement EB-1A")
     print("-" * 50)
     
-    ai_review_endpoints = [
-        {
-            "name": "AI Case Review",
-            "endpoint": f"/api/case/{case_id}/ai-review",
-            "method": "POST",
-            "data": {"review_type": "comprehensive"}
-        },
-        {
-            "name": "Professional QA Review", 
-            "endpoint": f"/api/auto-application/case/{case_id}/professional-qa-review",
-            "method": "POST",
-            "data": {"review_level": "detailed"}
-        },
-        {
-            "name": "Document Validation",
-            "endpoint": "/api/specialized-agents/document-validation",
-            "method": "POST", 
-            "data": {
-                "document_type": "passport",
-                "document_content": "CARLOS EDUARDO SILVA MENDES passport content",
-                "case_context": {"applicant_name": "Carlos Eduardo Silva Mendes", "visa_type": "I-539"}
-            }
-        },
-        {
-            "name": "Form Validation",
-            "endpoint": "/api/specialized-agents/form-validation", 
-            "method": "POST",
-            "data": {
-                "form_data": basic_data,
-                "visa_type": "I-539",
-                "step_id": "basic_data"
-            }
-        },
-        {
-            "name": "Compliance Check",
-            "endpoint": "/api/specialized-agents/compliance-check",
-            "method": "POST",
-            "data": {
-                "complete_application": basic_data,
-                "documents": ["passport", "i20", "financial_documents"],
-                "visa_type": "I-539"
+    personal_statement_content = """To USCIS Officer,
+
+I am Dr. Sofia Martinez Chen, and I am applying for an EB-1A visa based on my extraordinary ability in the field of Artificial Intelligence research.
+
+I have achieved sustained national and international acclaim in AI research, specifically in machine learning and computer vision. My work has been recognized through:
+
+1. AWARDS: I am a 2023 Turing Award Finalist, received the 2022 NSF CAREER Award, and was named to MIT Technology Review 35 Under 35 in 2020.
+
+2. PUBLICATIONS: I have authored 45 peer-reviewed papers in top venues including Nature, Science, and ICML. My H-index is 28 with over 3,000 citations, demonstrating significant impact.
+
+3. MEMBERSHIP: I am a Fellow of ACM and serve on the Board of the AI Ethics Committee, positions reserved for those with outstanding achievements.
+
+4. EXPERT RECOGNITION: I have letters from Turing Award winners and leading professors at Stanford and MIT attesting to my extraordinary contributions.
+
+5. HIGH COMPENSATION: My current salary of $380,000/year places me in the top 1% of my field.
+
+6. PRESS COVERAGE: My research has been featured in major publications including Wired, TechCrunch, and MIT News.
+
+7. JUDGING: I serve as a reviewer for Nature and Science and as a panel judge for NSF grants, roles reserved for leading experts.
+
+My contributions have advanced the field of AI significantly. I am currently leading research at MIT that will benefit the United States through technological innovation and economic growth.
+
+I respectfully request approval of my EB-1A petition.
+
+Sincerely,
+Dr. Sofia Martinez Chen"""
+
+    try:
+        print("🔍 Saving EB-1A Personal Statement...")
+        
+        letters_data = {
+            "letters": {
+                "cover_letter": personal_statement_content
             }
         }
-    ]
-    
-    ai_review_results = {}
-    
-    for endpoint_test in ai_review_endpoints:
-        try:
-            print(f"\n🔍 Testing: {endpoint_test['name']}")
-            print(f"🔗 Endpoint: {endpoint_test['method']} {API_BASE}{endpoint_test['endpoint']}")
+        
+        print(f"🔗 Endpoint: PUT {API_BASE}/auto-application/case/{case_id}")
+        print(f"📤 Payload: Personal statement ({len(personal_statement_content)} characters)")
+        
+        start_time = time.time()
+        response = requests.put(
+            f"{API_BASE}/auto-application/case/{case_id}",
+            json=letters_data,
+            headers={"Content-Type": "application/json"},
+            timeout=30
+        )
+        processing_time = time.time() - start_time
+        
+        print(f"⏱️  Processing time: {processing_time:.2f}s")
+        print(f"📊 Status Code: {response.status_code}")
+        
+        results["fase_4_personal_statement"]["status_code"] = response.status_code
+        results["fase_4_personal_statement"]["processing_time"] = processing_time
+        
+        if response.status_code in [200, 201]:
+            response_data = response.json()
+            print(f"📄 Response: {json.dumps(response_data, indent=2)}")
             
-            start_time = time.time()
+            case_data = response_data.get("case", {})
+            letters_saved = case_data.get("letters", {})
             
-            if endpoint_test['method'] == 'POST':
-                response = requests.post(
-                    f"{API_BASE}{endpoint_test['endpoint']}",
-                    json=endpoint_test['data'],
-                    headers={"Content-Type": "application/json"},
-                    timeout=60
-                )
-            else:
-                response = requests.get(
-                    f"{API_BASE}{endpoint_test['endpoint']}",
-                    headers={"Content-Type": "application/json"},
-                    timeout=30
-                )
-            
-            processing_time = time.time() - start_time
-            
-            print(f"⏱️  Processing time: {processing_time:.2f}s")
-            print(f"📊 Status Code: {response.status_code}")
-            
-            ai_review_results[endpoint_test['name']] = {
-                "status_code": response.status_code,
-                "processing_time": processing_time,
-                "working": response.status_code in [200, 201]
+            validations = {
+                "1_personal_statement_saved": letters_saved.get("cover_letter") is not None,
+                "2_content_length_correct": len(letters_saved.get("cover_letter", "")) > 1000,
+                "3_eb1a_specific_content": "EB-1A" in letters_saved.get("cover_letter", ""),
+                "4_extraordinary_ability_mentioned": "extraordinary ability" in letters_saved.get("cover_letter", "").lower(),
+                "5_criteria_mentioned": "awards" in letters_saved.get("cover_letter", "").lower() and "publications" in letters_saved.get("cover_letter", "").lower()
             }
             
-            if response.status_code in [200, 201]:
-                response_data = response.json()
-                print(f"✅ {endpoint_test['name']}: SUCCESS")
-                print(f"📄 Response preview: {str(response_data)[:200]}...")
-                ai_review_results[endpoint_test['name']]["response_data"] = response_data
-            else:
-                print(f"❌ {endpoint_test['name']}: FAILED")
-                print(f"📄 Error: {response.text}")
-                ai_review_results[endpoint_test['name']]["error"] = response.text
+            results["fase_4_personal_statement"]["validations"] = validations
+            results["fase_4_personal_statement"]["response_data"] = response_data
+            results["fase_4_personal_statement"]["working"] = all(validations.values())
+            
+            print("\n🎯 VALIDAÇÕES FASE 4 - PERSONAL STATEMENT:")
+            print("=" * 50)
+            for check, passed in validations.items():
+                status = "✅" if passed else "❌"
+                print(f"  {status} {check}: {passed}")
+            
+            print(f"\n📊 PERSONAL STATEMENT EB-1A:")
+            print(f"  📝 Length: {len(letters_saved.get('cover_letter', ''))} characters")
+            print(f"  🎯 EB-1A Specific: {'✅' if validations['3_eb1a_specific_content'] else '❌'}")
+            print(f"  🏆 Extraordinary Ability: {'✅' if validations['4_extraordinary_ability_mentioned'] else '❌'}")
+            print(f"  📋 Criteria Mentioned: {'✅' if validations['5_criteria_mentioned'] else '❌'}")
                 
-        except Exception as e:
-            print(f"❌ Exception testing {endpoint_test['name']}: {str(e)}")
-            ai_review_results[endpoint_test['name']] = {
-                "status_code": 0,
-                "processing_time": 0,
-                "working": False,
-                "exception": str(e)
-            }
-    
-    results["fase_4_ai_review_endpoints"] = ai_review_results
-    
-    # Summary of AI Review endpoints
-    working_endpoints = sum(1 for result in ai_review_results.values() if result.get("working", False))
-    total_endpoints = len(ai_review_endpoints)
-    
-    print(f"\n📊 AI REVIEW ENDPOINTS SUMMARY:")
-    print(f"   Working: {working_endpoints}/{total_endpoints} ({working_endpoints/total_endpoints*100:.1f}%)")
-    
-    for name, result in ai_review_results.items():
-        status = "✅" if result.get("working", False) else "❌"
-        print(f"   {status} {name}: {result.get('status_code', 0)}")
+        else:
+            print(f"❌ Personal statement save failed with status {response.status_code}")
+            print(f"📄 Error response: {response.text}")
+            results["fase_4_personal_statement"]["error"] = response.text
+            results["fase_4_personal_statement"]["working"] = False
+            
+    except Exception as e:
+        print(f"❌ Exception during personal statement save: {str(e)}")
+        results["fase_4_personal_statement"]["exception"] = str(e)
+        results["fase_4_personal_statement"]["working"] = False
     
     # FASE 5: Análise de Validação de Documentos
     print("\n📋 FASE 5: Análise de Validação de Documentos")
