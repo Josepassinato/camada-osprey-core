@@ -2986,6 +2986,12 @@ async def comprehensive_ai_review(case_id: str):
             letter_message = "Personal statement presente e detalhado" if cover_letter and len(cover_letter) > 200 else \
                             ("Personal statement muito curto - precisa mais detalhes" if cover_letter else \
                              "Personal statement OBRIGATÓRIO para asilo - FALTANDO")
+        elif visa_type == "EB-1A":
+            # Para EB-1A, petition letter deve demonstrar extraordinary ability com evidências
+            letter_score = 0.90 if cover_letter and len(cover_letter) > 500 else (0.7 if cover_letter else 0.0)
+            letter_message = "Strong petition letter demonstrating extraordinary ability with evidence" if cover_letter and len(cover_letter) > 500 else \
+                            ("Petition letter present but should include more evidence of achievements" if cover_letter else \
+                             "EB-1A petition letter required - must demonstrate sustained acclaim")
         else:
             letter_score = 0.75 if cover_letter else 0.0
             letter_message = "Carta de apresentação presente" if cover_letter else "Carta de apresentação faltando"
