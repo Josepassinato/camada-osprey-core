@@ -653,7 +653,7 @@ def test_phase_4_incomplete_data():
     try:
         # Create B-2 case
         case_data = {
-            "form_code": "B-2",
+            "form_code": "I-539",
             "process_type": "extension"
         }
         
