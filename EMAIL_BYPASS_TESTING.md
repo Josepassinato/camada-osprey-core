@@ -63,7 +63,7 @@ POST /api/auth/signup
 ```json
 POST /api/auth/login
 {
-  "email": "usuario1@test.local",
+  "email": "usuario1@test.com",
   "password": "qualquer-senha-funciona"
 }
 ```
@@ -76,7 +76,7 @@ POST /api/auth/login
   "token": "eyJ...",
   "user": {
     "id": "...",
-    "email": "usuario1@test.local",
+    "email": "usuario1@test.com",
     "first_name": "Usuario",
     "last_name": "Teste"
   }
@@ -119,8 +119,8 @@ Usuários criados com email bypass têm:
 O sistema registra quando bypass está ativo:
 
 ```
-🧪 TEST MODE: Email bypass active for usuario1@test.local
-🧪 TEST MODE: Login bypass active for usuario1@test.local
+🧪 TEST MODE: Email bypass active for usuario1@test.com
+🧪 TEST MODE: Login bypass active for usuario1@test.com
 ```
 
 ## Exemplos de Teste
@@ -132,7 +132,7 @@ O sistema registra quando bypass está ativo:
 curl -X POST http://localhost:8001/api/auth/signup \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "teste@test.local",
+    "email": "teste@test.com",
     "password": "123456",
     "first_name": "Teste",
     "last_name": "Usuario"
@@ -142,7 +142,7 @@ curl -X POST http://localhost:8001/api/auth/signup \
 curl -X POST http://localhost:8001/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "teste@test.local",
+    "email": "teste@test.com",
     "password": "outra-senha"
   }'
 ```
@@ -154,7 +154,7 @@ curl -X POST http://localhost:8001/api/auth/login \
 curl -X POST http://localhost:8001/api/owl-agent/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "owl@test.local",
+    "email": "owl@test.com",
     "password": "123456",
     "name": "Owl Test User"
   }'
@@ -163,7 +163,7 @@ curl -X POST http://localhost:8001/api/owl-agent/auth/register \
 curl -X POST http://localhost:8001/api/owl-agent/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "owl@test.local",
+    "email": "owl@test.com",
     "password": "senha-diferente"
   }'
 ```
@@ -177,7 +177,7 @@ SKIP_PAYMENT_FOR_TESTING=TRUE
 ```
 
 ### 2. Criar Usuário de Teste
-- Email: `usuario@test.local`
+- Email: `usuario@test.com`
 - Senha: qualquer (ex: "123456")
 
 ### 3. Testar Fluxo Completo
@@ -191,12 +191,12 @@ SKIP_PAYMENT_FOR_TESTING=TRUE
 Use estes domínios para diferentes tipos de teste:
 
 ```
-usuario1@test.local
-maria.silva@test.local
-joao.teste@test.local
-admin@test.local
-owl.user@test.local
-visa.applicant@test.local
+usuario1@test.com
+maria.silva@test.com
+joao.teste@test.com
+admin@test.com
+owl.user@test.com
+visa.applicant@test.com
 ```
 
 ## Desativar Email Bypass
