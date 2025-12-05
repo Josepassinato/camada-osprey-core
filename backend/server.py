@@ -2687,7 +2687,12 @@ async def submit_friendly_form(case_id: str, request: dict, current_user = Depen
 
 async def validate_friendly_form_ai(case: dict, friendly_form_data: dict, basic_data: dict, visa_type: str):
     """
-    AI-powered validation of friendly form data.
+    Enhanced AI-powered validation of friendly form data.
+    
+    TWO-STAGE VALIDATION:
+    1. Programmatic validation (fast, rule-based)
+    2. AI validation (slow, intelligent analysis)
+    
     Checks for:
     - Completeness (all required fields filled)
     - Coherence (data makes sense and is consistent)
@@ -2695,17 +2700,46 @@ async def validate_friendly_form_ai(case: dict, friendly_form_data: dict, basic_
     - Visa-specific requirements
     """
     try:
-        from emergentintegrations import EmergentLLM
+        # STAGE 1: Programmatic Validation (Fast & Reliable)
+        logger.info(f"🔍 Stage 1: Programmatic validation for {visa_type}")
+        
+        programmatic_result = validate_fields_programmatically(
+            friendly_form_data=friendly_form_data,
+            basic_data=basic_data,
+            visa_type=visa_type
+        )
+        
+        validation_issues = programmatic_result["validation_issues"]
+        completion_percentage = programmatic_result["completion_percentage"]
+        missing_fields = programmatic_result["missing_fields"]
+        
+        logger.info(f"📊 Programmatic validation: {completion_percentage}% complete, {len(validation_issues)} issues found")
+        
+        # If completion is very low, skip AI validation (no point)
+        if completion_percentage < 30:
+            logger.info(f"⚠️ Completion too low ({completion_percentage}%), skipping AI validation")
+            return {
+                "validation_issues": validation_issues,
+                "overall_status": "rejected",
+                "completion_percentage": completion_percentage,
+                "missing_fields": missing_fields,
+                "message_to_user": f"Formulário muito incompleto. Preencha pelo menos os campos básicos obrigatórios."
+            }
+        
+        # STAGE 2: AI Validation (Intelligent Analysis)
+        logger.info(f"🤖 Stage 2: AI validation for enhanced analysis")
         
         # Use Emergent LLM key
         emergent_key = os.environ.get('EMERGENT_LLM_KEY')
         if not emergent_key:
-            logger.warning("EMERGENT_LLM_KEY not found, validation will be basic")
+            logger.warning("EMERGENT_LLM_KEY not found, using programmatic validation only")
+            overall_status = "approved" if completion_percentage >= 90 else "needs_review" if completion_percentage >= 70 else "rejected"
             return {
-                "validation_issues": [],
-                "overall_status": "approved",
-                "completion_percentage": 80,
-                "message": "Validação básica concluída"
+                "validation_issues": validation_issues,
+                "overall_status": overall_status,
+                "completion_percentage": completion_percentage,
+                "missing_fields": missing_fields,
+                "message_to_user": f"Validação programática concluída. {len(missing_fields)} campos obrigatórios faltando."
             }
         
         llm = EmergentLLM(api_key=emergent_key)
