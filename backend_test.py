@@ -625,66 +625,71 @@ Dr. Sofia Martinez Chen"""
     print("-" * 50)
     
     try:
-        print("🔍 Testing form completion verification...")
+        print("🔍 Verifying EB-1A data persistence...")
         
-        # Test form validation with I-539 specific requirements
-        form_validation_data = {
-            "form_data": basic_data,
-            "visa_type": "I-539",
-            "step_id": "form_completion_check"
-        }
+        print(f"🔗 Endpoint: GET {API_BASE}/auto-application/case/{case_id}")
         
-        response = requests.post(
-            f"{API_BASE}/specialized-agents/form-validation",
-            json=form_validation_data,
+        start_time = time.time()
+        response = requests.get(
+            f"{API_BASE}/auto-application/case/{case_id}",
             headers={"Content-Type": "application/json"},
             timeout=30
         )
+        processing_time = time.time() - start_time
         
-        print(f"📊 Status: {response.status_code}")
+        print(f"⏱️  Processing time: {processing_time:.2f}s")
+        print(f"📊 Status Code: {response.status_code}")
+        
+        results["fase_7_persistence_verification"]["status_code"] = response.status_code
+        results["fase_7_persistence_verification"]["processing_time"] = processing_time
         
         if response.status_code == 200:
-            form_validation = response.json()
-            print("✅ Form completion verification completed")
+            case_data = response.json()
+            print(f"📄 Case Data Retrieved: {json.dumps(case_data, indent=2)}")
             
-            # Check I-539 specific requirements
-            i539_requirements = {
-                "applicant_name_present": bool(basic_data.get("applicant_name")),
-                "current_visa_type_present": bool(basic_data.get("current_visa_type")),
-                "extension_reason_present": bool(basic_data.get("extension_reason")),
-                "i20_expiration_present": bool(basic_data.get("i20_expiration")),
-                "sevis_number_present": bool(basic_data.get("sevis_number")),
-                "university_present": bool(basic_data.get("university"))
+            case_info = case_data.get("case", {})
+            
+            # EB-1A persistence validations
+            persistence_checks = {
+                "1_basic_data_persisted": case_info.get("basic_data") is not None,
+                "2_documents_persisted": len(case_info.get("uploaded_documents", [])) >= 8,
+                "3_personal_statement_persisted": case_info.get("letters", {}).get("cover_letter") is not None,
+                "4_eb1a_form_persisted": case_info.get("forms", {}).get("eb1a") is not None,
+                "5_extraordinary_ability_field": case_info.get("basic_data", {}).get("field_of_extraordinary_ability") is not None,
+                "6_criteria_count_persisted": case_info.get("forms", {}).get("eb1a", {}).get("criteria_count", 0) >= 3,
+                "7_ai_review_persisted": case_info.get("ai_review") is not None,
+                "8_case_id_correct": case_info.get("case_id") == case_id
             }
             
-            results["fase_7_form_verification"] = {
-                "working": True,
-                "i539_requirements": i539_requirements,
-                "validation_result": form_validation,
-                "completion_rate": sum(i539_requirements.values()) / len(i539_requirements) * 100
-            }
+            results["fase_7_persistence_verification"]["validations"] = persistence_checks
+            results["fase_7_persistence_verification"]["response_data"] = case_data
+            results["fase_7_persistence_verification"]["working"] = all(persistence_checks.values())
             
-            print(f"   👤 Applicant Name: {i539_requirements['applicant_name_present']}")
-            print(f"   📋 Current Visa Type: {i539_requirements['current_visa_type_present']}")
-            print(f"   📝 Extension Reason: {i539_requirements['extension_reason_present']}")
-            print(f"   📅 I-20 Expiration: {i539_requirements['i20_expiration_present']}")
-            print(f"   🔢 SEVIS Number: {i539_requirements['sevis_number_present']}")
-            print(f"   🏫 University: {i539_requirements['university_present']}")
-            print(f"   📊 Completion Rate: {results['fase_7_form_verification']['completion_rate']:.1f}%")
+            print("\n🎯 VALIDAÇÕES FASE 7 - PERSISTÊNCIA EB-1A:")
+            print("=" * 50)
+            for check, passed in persistence_checks.items():
+                status = "✅" if passed else "❌"
+                print(f"  {status} {check}: {passed}")
             
+            print(f"\n📊 DADOS PERSISTIDOS EB-1A:")
+            print(f"  📋 Basic Data: {'✅' if case_info.get('basic_data') else '❌'}")
+            print(f"  📄 Documents: {len(case_info.get('uploaded_documents', []))}/8")
+            print(f"  📝 Personal Statement: {'✅' if case_info.get('letters', {}).get('cover_letter') else '❌'}")
+            print(f"  📋 EB-1A Form: {'✅' if case_info.get('forms', {}).get('eb1a') else '❌'}")
+            print(f"  🧬 Extraordinary Ability Field: {'✅' if case_info.get('basic_data', {}).get('field_of_extraordinary_ability') else '❌'}")
+            print(f"  🎯 Criteria Count: {case_info.get('forms', {}).get('eb1a', {}).get('criteria_count', 0)}")
+            print(f"  🤖 AI Review: {'✅' if case_info.get('ai_review') else '❌'}")
+                
         else:
-            print(f"❌ Form verification failed: {response.text}")
-            results["fase_7_form_verification"] = {
-                "working": False,
-                "error": response.text
-            }
+            print(f"❌ Persistence verification failed with status {response.status_code}")
+            print(f"📄 Error response: {response.text}")
+            results["fase_7_persistence_verification"]["error"] = response.text
+            results["fase_7_persistence_verification"]["working"] = False
             
     except Exception as e:
-        print(f"❌ Exception in form verification: {str(e)}")
-        results["fase_7_form_verification"] = {
-            "working": False,
-            "exception": str(e)
-        }
+        print(f"❌ Exception during persistence verification: {str(e)}")
+        results["fase_7_persistence_verification"]["exception"] = str(e)
+        results["fase_7_persistence_verification"]["working"] = False
     
     # FASE 8: Verificação de Conformidade USCIS
     print("\n📋 FASE 8: Verificação de Conformidade USCIS")
