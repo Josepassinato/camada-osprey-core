@@ -2906,7 +2906,7 @@ async def comprehensive_ai_review(case_id: str):
         # Estrutura para armazenar resultados
         review_results = {
             "case_id": case_id,
-            "visa_type": case.get("visa_type", "unknown"),
+            "visa_type": case.get("visa_type") or case.get("form_code") or "unknown",
             "timestamp": datetime.utcnow().isoformat(),
             "checks": {}
         }
