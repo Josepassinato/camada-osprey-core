@@ -457,73 +457,90 @@ Dr. Sofia Martinez Chen"""
     print("\n📋 FASE 5: EB-1A Form Completion")
     print("-" * 50)
     
-    document_validation_tests = []
-    
-    for doc in documents_to_upload:
-        if doc.get("status") == "uploaded":
-            try:
-                print(f"\n🔍 Validating: {doc['name']}")
-                
-                validation_data = {
-                    "document_type": doc["type"],
-                    "document_content": doc["content"],
-                    "applicant_name": "Carlos Eduardo Silva Mendes",
-                    "visa_type": "I-539"
+    try:
+        print("🔍 Completing EB-1A Form with USCIS Criteria...")
+        
+        eb1a_form_data = {
+            "forms": {
+                "eb1a": {
+                    "completed": True,
+                    "completion_date": "2024-12-04",
+                    "criteria_met": [
+                        "Awards - national/international prizes",
+                        "Membership in associations requiring outstanding achievements",
+                        "Published material about the applicant",
+                        "Judging the work of others",
+                        "Original contributions of major significance",
+                        "Scholarly articles",
+                        "High salary"
+                    ],
+                    "criteria_count": 7
                 }
+            }
+        }
+        
+        print(f"🔗 Endpoint: PUT {API_BASE}/auto-application/case/{case_id}")
+        print(f"📤 Payload: EB-1A form with {eb1a_form_data['forms']['eb1a']['criteria_count']} criteria")
+        
+        start_time = time.time()
+        response = requests.put(
+            f"{API_BASE}/auto-application/case/{case_id}",
+            json=eb1a_form_data,
+            headers={"Content-Type": "application/json"},
+            timeout=30
+        )
+        processing_time = time.time() - start_time
+        
+        print(f"⏱️  Processing time: {processing_time:.2f}s")
+        print(f"📊 Status Code: {response.status_code}")
+        
+        results["fase_5_eb1a_form"]["status_code"] = response.status_code
+        results["fase_5_eb1a_form"]["processing_time"] = processing_time
+        
+        if response.status_code in [200, 201]:
+            response_data = response.json()
+            print(f"📄 Response: {json.dumps(response_data, indent=2)}")
+            
+            case_data = response_data.get("case", {})
+            forms_saved = case_data.get("forms", {})
+            eb1a_form = forms_saved.get("eb1a", {})
+            
+            validations = {
+                "1_eb1a_form_saved": eb1a_form is not None,
+                "2_completion_status": eb1a_form.get("completed", False),
+                "3_criteria_count_correct": eb1a_form.get("criteria_count", 0) >= 3,  # Minimum 3 of 10 USCIS criteria
+                "4_criteria_list_present": len(eb1a_form.get("criteria_met", [])) >= 3,
+                "5_completion_date_present": eb1a_form.get("completion_date") is not None
+            }
+            
+            results["fase_5_eb1a_form"]["validations"] = validations
+            results["fase_5_eb1a_form"]["response_data"] = response_data
+            results["fase_5_eb1a_form"]["working"] = all(validations.values())
+            
+            print("\n🎯 VALIDAÇÕES FASE 5 - EB-1A FORM:")
+            print("=" * 50)
+            for check, passed in validations.items():
+                status = "✅" if passed else "❌"
+                print(f"  {status} {check}: {passed}")
+            
+            print(f"\n📊 EB-1A FORM COMPLETION:")
+            print(f"  📋 Completed: {eb1a_form.get('completed', False)}")
+            print(f"  🎯 Criteria Met: {eb1a_form.get('criteria_count', 0)}/10")
+            print(f"  📅 Completion Date: {eb1a_form.get('completion_date', 'N/A')}")
+            print(f"  📝 Criteria List:")
+            for criterion in eb1a_form.get("criteria_met", []):
+                print(f"    ✅ {criterion}")
                 
-                response = requests.post(
-                    f"{API_BASE}/test-document-validation",
-                    json=validation_data,
-                    headers={"Content-Type": "application/json"},
-                    timeout=30
-                )
-                
-                print(f"📊 Status: {response.status_code}")
-                
-                if response.status_code == 200:
-                    validation_result = response.json()
-                    print(f"✅ Validation completed")
-                    
-                    # Check key validation criteria
-                    validation_checks = {
-                        "document_type_correct": validation_result.get("document_type_correct", False),
-                        "belongs_to_applicant": validation_result.get("belongs_to_applicant", False),
-                        "uscis_acceptable": validation_result.get("uscis_acceptable", False),
-                        "completeness_score": validation_result.get("completeness_score", 0) >= 70
-                    }
-                    
-                    document_validation_tests.append({
-                        "document": doc["name"],
-                        "type": doc["type"],
-                        "validation_checks": validation_checks,
-                        "completeness_score": validation_result.get("completeness_score", 0),
-                        "working": all(validation_checks.values())
-                    })
-                    
-                    print(f"   📊 Completeness: {validation_result.get('completeness_score', 0)}%")
-                    print(f"   🎯 Type Correct: {validation_result.get('document_type_correct', False)}")
-                    print(f"   👤 Belongs to Applicant: {validation_result.get('belongs_to_applicant', False)}")
-                    print(f"   ✅ USCIS Acceptable: {validation_result.get('uscis_acceptable', False)}")
-                    
-                else:
-                    print(f"❌ Validation failed: {response.text}")
-                    document_validation_tests.append({
-                        "document": doc["name"],
-                        "type": doc["type"],
-                        "working": False,
-                        "error": response.text
-                    })
-                    
-            except Exception as e:
-                print(f"❌ Exception validating {doc['name']}: {str(e)}")
-                document_validation_tests.append({
-                    "document": doc["name"],
-                    "type": doc["type"],
-                    "working": False,
-                    "exception": str(e)
-                })
-    
-    results["fase_5_document_validation"] = document_validation_tests
+        else:
+            print(f"❌ EB-1A form save failed with status {response.status_code}")
+            print(f"📄 Error response: {response.text}")
+            results["fase_5_eb1a_form"]["error"] = response.text
+            results["fase_5_eb1a_form"]["working"] = False
+            
+    except Exception as e:
+        print(f"❌ Exception during EB-1A form completion: {str(e)}")
+        results["fase_5_eb1a_form"]["exception"] = str(e)
+        results["fase_5_eb1a_form"]["working"] = False
     
     # FASE 6: Análise de Qualidade de Cartas
     print("\n📋 FASE 6: Análise de Qualidade de Cartas")
