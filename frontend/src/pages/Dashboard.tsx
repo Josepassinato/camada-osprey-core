@@ -176,6 +176,11 @@ const Dashboard = () => {
     return labels[visaType as keyof typeof labels] || visaType.toUpperCase();
   };
 
+  // If processing Google OAuth, show the callback component
+  if (isGoogleAuth) {
+    return <GoogleAuthCallback />;
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
