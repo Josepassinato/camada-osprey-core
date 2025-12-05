@@ -76,12 +76,13 @@ def test_i539_ai_review_system():
     }
     
     try:
-        print(f"🔗 Endpoint: POST {API_BASE}/auto-application/create-case")
+        # Try the correct endpoint for case creation
+        print(f"🔗 Endpoint: POST {API_BASE}/auto-application/start")
         print(f"📤 Payload: {json.dumps(case_data, indent=2)}")
         
         start_time = time.time()
         response = requests.post(
-            f"{API_BASE}/auto-application/create-case",
+            f"{API_BASE}/auto-application/start",
             json=case_data,
             headers={"Content-Type": "application/json"},
             timeout=30
