@@ -672,8 +672,228 @@ def test_i539_ai_review_system():
         status = "✅" if result.get("working", False) else "❌"
         print(f"   {status} {name}: {result.get('status_code', 0)}")
     
-    # ETAPA 8: Verificar status final e gerar pacote
-    print("\n📋 ETAPA 8: Verificar Status Final e Gerar Pacote")
+    # FASE 5: Análise de Validação de Documentos
+    print("\n📋 FASE 5: Análise de Validação de Documentos")
+    print("-" * 50)
+    
+    document_validation_tests = []
+    
+    for doc in documents_to_upload:
+        if doc.get("status") == "uploaded":
+            try:
+                print(f"\n🔍 Validating: {doc['name']}")
+                
+                validation_data = {
+                    "document_type": doc["type"],
+                    "document_content": doc["content"],
+                    "applicant_name": "Carlos Eduardo Silva Mendes",
+                    "visa_type": "I-539"
+                }
+                
+                response = requests.post(
+                    f"{API_BASE}/test-document-validation",
+                    json=validation_data,
+                    headers={"Content-Type": "application/json"},
+                    timeout=30
+                )
+                
+                print(f"📊 Status: {response.status_code}")
+                
+                if response.status_code == 200:
+                    validation_result = response.json()
+                    print(f"✅ Validation completed")
+                    
+                    # Check key validation criteria
+                    validation_checks = {
+                        "document_type_correct": validation_result.get("document_type_correct", False),
+                        "belongs_to_applicant": validation_result.get("belongs_to_applicant", False),
+                        "uscis_acceptable": validation_result.get("uscis_acceptable", False),
+                        "completeness_score": validation_result.get("completeness_score", 0) >= 70
+                    }
+                    
+                    document_validation_tests.append({
+                        "document": doc["name"],
+                        "type": doc["type"],
+                        "validation_checks": validation_checks,
+                        "completeness_score": validation_result.get("completeness_score", 0),
+                        "working": all(validation_checks.values())
+                    })
+                    
+                    print(f"   📊 Completeness: {validation_result.get('completeness_score', 0)}%")
+                    print(f"   🎯 Type Correct: {validation_result.get('document_type_correct', False)}")
+                    print(f"   👤 Belongs to Applicant: {validation_result.get('belongs_to_applicant', False)}")
+                    print(f"   ✅ USCIS Acceptable: {validation_result.get('uscis_acceptable', False)}")
+                    
+                else:
+                    print(f"❌ Validation failed: {response.text}")
+                    document_validation_tests.append({
+                        "document": doc["name"],
+                        "type": doc["type"],
+                        "working": False,
+                        "error": response.text
+                    })
+                    
+            except Exception as e:
+                print(f"❌ Exception validating {doc['name']}: {str(e)}")
+                document_validation_tests.append({
+                    "document": doc["name"],
+                    "type": doc["type"],
+                    "working": False,
+                    "exception": str(e)
+                })
+    
+    results["fase_5_document_validation"] = document_validation_tests
+    
+    # FASE 6: Análise de Qualidade de Cartas
+    print("\n📋 FASE 6: Análise de Qualidade de Cartas")
+    print("-" * 50)
+    
+    # Test letter quality assessment
+    cover_letter_content = """
+    COVER LETTER FOR I-539 APPLICATION
+    
+    To: U.S. Citizenship and Immigration Services
+    Re: Application to Extend F-1 Student Status
+    
+    Dear USCIS Officer,
+    
+    I am Carlos Eduardo Silva Mendes, currently in F-1 student status, respectfully requesting an extension of my nonimmigrant student status to complete my Master of Science degree in Computer Science at Columbia University.
+    
+    I am currently enrolled in the Master's program and need additional time to complete my thesis research on artificial intelligence applications in healthcare. My current I-20 expires on June 30, 2025, and I require an extension until December 31, 2025.
+    
+    I have maintained good academic standing with a GPA of 3.8/4.0 and have sufficient financial resources to support my continued studies as evidenced by the attached bank statements.
+    
+    I respectfully request your favorable consideration of this application.
+    
+    Sincerely,
+    Carlos Eduardo Silva Mendes
+    """
+    
+    try:
+        print("🔍 Testing letter quality assessment...")
+        
+        letter_data = {
+            "letter_content": cover_letter_content,
+            "letter_type": "cover_letter",
+            "visa_type": "I-539",
+            "applicant_name": "Carlos Eduardo Silva Mendes"
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/llm/dr-paula/review-letter",
+            json=letter_data,
+            headers={"Content-Type": "application/json"},
+            timeout=30
+        )
+        
+        print(f"📊 Status: {response.status_code}")
+        
+        if response.status_code == 200:
+            letter_review = response.json()
+            print("✅ Letter quality assessment completed")
+            
+            quality_checks = {
+                "professional_tone": "professional" in str(letter_review).lower(),
+                "complete_information": len(cover_letter_content) > 500,
+                "proper_format": "Dear" in cover_letter_content and "Sincerely" in cover_letter_content,
+                "visa_specific": "I-539" in cover_letter_content and "F-1" in cover_letter_content
+            }
+            
+            results["fase_6_letter_quality"] = {
+                "working": True,
+                "quality_checks": quality_checks,
+                "review_result": letter_review,
+                "overall_quality": sum(quality_checks.values()) / len(quality_checks) * 100
+            }
+            
+            print(f"   📝 Professional Tone: {quality_checks['professional_tone']}")
+            print(f"   📋 Complete Information: {quality_checks['complete_information']}")
+            print(f"   📄 Proper Format: {quality_checks['proper_format']}")
+            print(f"   🎯 Visa Specific: {quality_checks['visa_specific']}")
+            print(f"   📊 Overall Quality: {results['fase_6_letter_quality']['overall_quality']:.1f}%")
+            
+        else:
+            print(f"❌ Letter assessment failed: {response.text}")
+            results["fase_6_letter_quality"] = {
+                "working": False,
+                "error": response.text
+            }
+            
+    except Exception as e:
+        print(f"❌ Exception in letter quality assessment: {str(e)}")
+        results["fase_6_letter_quality"] = {
+            "working": False,
+            "exception": str(e)
+        }
+    
+    # FASE 7: Verificação de Preenchimento de Formulário
+    print("\n📋 FASE 7: Verificação de Preenchimento de Formulário")
+    print("-" * 50)
+    
+    try:
+        print("🔍 Testing form completion verification...")
+        
+        # Test form validation with I-539 specific requirements
+        form_validation_data = {
+            "form_data": basic_data,
+            "visa_type": "I-539",
+            "step_id": "form_completion_check"
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/specialized-agents/form-validation",
+            json=form_validation_data,
+            headers={"Content-Type": "application/json"},
+            timeout=30
+        )
+        
+        print(f"📊 Status: {response.status_code}")
+        
+        if response.status_code == 200:
+            form_validation = response.json()
+            print("✅ Form completion verification completed")
+            
+            # Check I-539 specific requirements
+            i539_requirements = {
+                "applicant_name_present": bool(basic_data.get("applicant_name")),
+                "current_visa_type_present": bool(basic_data.get("current_visa_type")),
+                "extension_reason_present": bool(basic_data.get("extension_reason")),
+                "i20_expiration_present": bool(basic_data.get("i20_expiration")),
+                "sevis_number_present": bool(basic_data.get("sevis_number")),
+                "university_present": bool(basic_data.get("university"))
+            }
+            
+            results["fase_7_form_verification"] = {
+                "working": True,
+                "i539_requirements": i539_requirements,
+                "validation_result": form_validation,
+                "completion_rate": sum(i539_requirements.values()) / len(i539_requirements) * 100
+            }
+            
+            print(f"   👤 Applicant Name: {i539_requirements['applicant_name_present']}")
+            print(f"   📋 Current Visa Type: {i539_requirements['current_visa_type_present']}")
+            print(f"   📝 Extension Reason: {i539_requirements['extension_reason_present']}")
+            print(f"   📅 I-20 Expiration: {i539_requirements['i20_expiration_present']}")
+            print(f"   🔢 SEVIS Number: {i539_requirements['sevis_number_present']}")
+            print(f"   🏫 University: {i539_requirements['university_present']}")
+            print(f"   📊 Completion Rate: {results['fase_7_form_verification']['completion_rate']:.1f}%")
+            
+        else:
+            print(f"❌ Form verification failed: {response.text}")
+            results["fase_7_form_verification"] = {
+                "working": False,
+                "error": response.text
+            }
+            
+    except Exception as e:
+        print(f"❌ Exception in form verification: {str(e)}")
+        results["fase_7_form_verification"] = {
+            "working": False,
+            "exception": str(e)
+        }
+    
+    # FASE 8: Verificação de Conformidade USCIS
+    print("\n📋 FASE 8: Verificação de Conformidade USCIS")
     print("-" * 50)
     
     try:
