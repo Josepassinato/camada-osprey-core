@@ -1343,7 +1343,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Basic Data Required Fields Validation System"
+    - "Google OAuth Button Testing - Login and Signup Pages"
   stuck_tasks:
     - "Agente Coruja - Frontend Implementation"
   test_all: false
