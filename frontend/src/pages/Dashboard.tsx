@@ -66,9 +66,14 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Check if we're processing Google OAuth
+  const isGoogleAuth = window.location.hash.includes('session_id=');
+
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    if (!isGoogleAuth) {
+      fetchDashboardData();
+    }
+  }, [isGoogleAuth]);
 
   const fetchDashboardData = async () => {
     try {
