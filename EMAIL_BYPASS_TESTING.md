@@ -49,7 +49,7 @@ POST /api/auth/signup
   "token": "eyJ...",
   "user": {
     "id": "...",
-    "email": "usuario1@test.local",
+    "email": "usuario1@test.com",
     "first_name": "Usuario",
     "last_name": "Teste"
   }
