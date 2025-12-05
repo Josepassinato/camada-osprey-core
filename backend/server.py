@@ -3013,13 +3013,22 @@ async def comprehensive_ai_review(case_id: str):
         # DETERMINAÇÃO DO STATUS GERAL
         if overall_score >= 0.9:
             overall_status = "APPROVED"
-            approval_message = "✅ Caso aprovado! Todos os requisitos atendidos."
+            if visa_type == "I-589":
+                approval_message = "✅ Asylum application APPROVED! All requirements met. Case shows credible fear and sufficient evidence of persecution."
+            else:
+                approval_message = "✅ Caso aprovado! Todos os requisitos atendidos."
         elif overall_score >= 0.7:
             overall_status = "PENDING"
-            approval_message = "⚠️ Caso pendente. Alguns itens precisam de atenção."
+            if visa_type == "I-589":
+                approval_message = "⚠️ Asylum case PENDING. Additional evidence or documentation may strengthen the application."
+            else:
+                approval_message = "⚠️ Caso pendente. Alguns itens precisam de atenção."
         else:
             overall_status = "REJECTED"
-            approval_message = "❌ Caso rejeitado. Muitos itens faltando."
+            if visa_type == "I-589":
+                approval_message = "❌ Asylum application INCOMPLETE. Critical documents missing. Personal statement and evidence of persecution are required."
+            else:
+                approval_message = "❌ Caso rejeitado. Muitos itens faltando."
         
         # MONTAR RESULTADO FINAL
         final_result = {
