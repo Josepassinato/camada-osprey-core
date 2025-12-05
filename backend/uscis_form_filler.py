@@ -84,9 +84,13 @@ class USCISFormFiller:
     def fill_i589(self, case_data: Dict[str, Any]) -> bytes:
         """
         Fill Form I-589 (Application for Asylum)
+        NOW SUPPORTS DATA FROM FRIENDLY FORM (simplified_form_responses)
         
         Args:
             case_data: Dictionary with applicant and asylum information
+                       - basic_data: Basic applicant info
+                       - simplified_form_responses: Data from user-friendly form
+                       - letters: Cover letters and personal statements
             
         Returns:
             bytes: PDF file content
@@ -94,9 +98,13 @@ class USCISFormFiller:
         try:
             logger.info("🔧 Filling Form I-589...")
             
-            # Extract data
+            # Extract data from all sources
             basic_data = case_data.get("basic_data", {})
+            simplified_form = case_data.get("simplified_form_responses", {})
             letters = case_data.get("letters", {})
+            
+            logger.info(f"📝 Using basic_data: {len(basic_data)} fields")
+            logger.info(f"📝 Using simplified_form_responses: {len(simplified_form)} fields")
             
             # Read template
             template_path = os.path.join(self.forms_dir, "I-589.pdf")
