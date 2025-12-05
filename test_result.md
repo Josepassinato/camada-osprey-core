@@ -1643,10 +1643,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "I-589 Asylum Application AI Review System Testing"
+    - "Friendly Form to Official Form Flow - Complete Audit"
   stuck_tasks:
-    - "I-589 Personal Statement Persistence Issue"
-    - "I-589 Form Completion Data Not Saving"
+    - "Form Filler Does Not Use Simplified Form Responses"
   test_all: false
   test_priority: "high_first"
 
