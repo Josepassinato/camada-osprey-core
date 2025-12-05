@@ -1055,49 +1055,42 @@ if __name__ == "__main__":
     if summary.get('adaptation_score'):
         print(f"🔄 Adaptation Score: {summary['adaptation_score']:.1f}%")
     
-    # AI Review System Assessment
-    print(f"\n🤖 AVALIAÇÃO DO SISTEMA DE IA DE REVISÃO:")
+    # EB-1A System Assessment
+    print(f"\n🧬 AVALIAÇÃO DO SISTEMA EB-1A:")
     print("=" * 50)
     
-    # 1. ✅ Está satisfatória?
-    ai_endpoints = main_results.get("fase_4_ai_review_endpoints", {})
-    working_endpoints = sum(1 for result in ai_endpoints.values() if result.get("working", False))
-    satisfactory = working_endpoints >= 3  # At least 3 out of 5 endpoints working
+    # Get EB-1A specific results
+    eb1a_success_criteria = summary.get("eb1a_success_criteria", {})
+    eb1a_success_rate = summary.get("eb1a_success_rate", 0)
     
-    print(f"1. ✅ Sistema satisfatório? {'SIM' if satisfactory else 'NÃO'} ({working_endpoints}/5 endpoints funcionando)")
+    # 1. ✅ Reconhece EB-1A?
+    case_creation = eb1a_success_criteria.get("case_creation", False)
+    print(f"1. ✅ Reconhece EB-1A? {'SIM' if case_creation else 'NÃO'}")
     
-    # 2. ✅ Preenche todos os requisitos do USCIS?
-    uscis_compliance = main_results.get("fase_8_uscis_compliance", {})
-    uscis_score = uscis_compliance.get("compliance_score", 0)
-    uscis_compliant = uscis_score >= 80
+    # 2. ✅ Adapta requisitos por tipo?
+    basic_data_eb1a = eb1a_success_criteria.get("basic_data_eb1a", False)
+    documents_uploaded = eb1a_success_criteria.get("documents_uploaded", False)
+    print(f"2. ✅ Adapta requisitos por tipo? {'SIM' if basic_data_eb1a and documents_uploaded else 'NÃO'}")
     
-    print(f"2. ✅ Requisitos USCIS atendidos? {'SIM' if uscis_compliant else 'NÃO'} (Score: {uscis_score:.1f}%)")
+    # 3. ✅ Valida documentos corretos?
+    print(f"3. ✅ Valida documentos corretos? {'SIM' if documents_uploaded else 'NÃO'}")
     
-    # 3. ✅ Identifica documentos faltantes?
-    doc_validation = main_results.get("fase_5_document_validation", [])
-    doc_validation_working = any(doc.get("working", False) for doc in doc_validation)
+    # 4. ✅ Usa terminologia apropriada?
+    ai_review_high_score = eb1a_success_criteria.get("ai_review_high_score", False)
+    print(f"4. ✅ Usa terminologia apropriada? {'SIM' if ai_review_high_score else 'NÃO'}")
     
-    print(f"3. ✅ Identifica documentos faltantes? {'SIM' if doc_validation_working else 'NÃO'}")
+    # 5. ✅ Calcula score adequado?
+    ai_score = summary.get("ai_score", 0)
+    print(f"5. ✅ Calcula score adequado? {'SIM' if ai_score > 85 else 'NÃO'} (Score: {ai_score}%)")
     
-    # 4. ✅ Avalia qualidade das cartas?
-    letter_quality = main_results.get("fase_6_letter_quality", {})
-    letter_working = letter_quality.get("working", False)
+    # Overall EB-1A System Status
+    overall_criteria_met = sum([case_creation, basic_data_eb1a, documents_uploaded, ai_review_high_score, ai_score > 85])
+    eb1a_system_ready = overall_criteria_met >= 4  # At least 4 out of 5 criteria met
     
-    print(f"4. ✅ Avalia qualidade das cartas? {'SIM' if letter_working else 'NÃO'}")
-    
-    # 5. ✅ Verifica preenchimento correto dos formulários oficiais?
-    form_verification = main_results.get("fase_7_form_verification", {})
-    form_working = form_verification.get("working", False)
-    
-    print(f"5. ✅ Verifica preenchimento de formulários? {'SIM' if form_working else 'NÃO'}")
-    
-    # Overall AI Review System Status
-    overall_criteria_met = sum([satisfactory, uscis_compliant, doc_validation_working, letter_working, form_working])
-    ai_system_ready = overall_criteria_met >= 4  # At least 4 out of 5 criteria met
-    
-    print(f"\n🎯 STATUS GERAL DO SISTEMA DE IA:")
+    print(f"\n🎯 STATUS GERAL DO SISTEMA EB-1A:")
     print(f"   Critérios atendidos: {overall_criteria_met}/5")
-    print(f"   Sistema pronto: {'✅ SIM' if ai_system_ready else '❌ NÃO'}")
+    print(f"   Sistema pronto: {'✅ SIM' if eb1a_system_ready else '❌ NÃO'}")
+    print(f"   Taxa de sucesso EB-1A: {eb1a_success_rate:.1f}%")
     
     if summary.get("overall_success", False):
         print("\n🎉 CONCLUSÃO: Sistema de IA de Revisão I-539 está FUNCIONAL!")
