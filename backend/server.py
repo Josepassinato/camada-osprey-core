@@ -3133,12 +3133,13 @@ def validate_fields_programmatically(friendly_form_data: dict, basic_data: dict,
     # Calculate completion percentage with penalty for format errors
     base_completion = int((filled_count / total_required) * 100) if total_required > 0 else 0
     
-    # Penalize for errors: each error reduces completion
-    error_count = len([i for i in validation_issues if i.get("severity") == "error"])
-    warning_count = len([i for i in validation_issues if i.get("severity") == "warning"])
+    # Penalize for FORMAT errors only (not missing fields, those already reduce filled_count)
+    # Only count format/validation errors that occur on filled fields
+    format_errors = [i for i in validation_issues if i.get("severity") == "error" and i.get("issue") != "Campo obrigatório não preenchido"]
+    format_warnings = [i for i in validation_issues if i.get("severity") == "warning"]
     
-    # Each error reduces by 5%, each warning by 2%
-    penalty = (error_count * 5) + (warning_count * 2)
+    # Each format error reduces by 3%, each warning by 1%
+    penalty = (len(format_errors) * 3) + (len(format_warnings) * 1)
     completion_percentage = max(0, base_completion - penalty)
     
     return {
