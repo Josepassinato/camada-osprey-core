@@ -1253,10 +1253,10 @@ if __name__ == "__main__":
     print(f"🔍 Testes adicionais: {sum(additional_results.values())}/{len(additional_results)}")
     
     # Show case details if available
-    if main_results['summary'].get('case_id'):
-        print(f"📋 Case ID: {main_results['summary']['case_id']}")
+    if summary.get('case_id'):
+        print(f"📋 Case ID: {summary['case_id']}")
     
-    if main_results['summary'].get('ai_review_functional'):
+    if summary.get('ai_review_functional'):
         print(f"🤖 AI Review: ✅ Funcional")
     
     # AI Review System Assessment
