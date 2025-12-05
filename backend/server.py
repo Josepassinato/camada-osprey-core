@@ -1303,6 +1303,141 @@ async def google_auth_callback(request: dict):
         logger.error(f"Error in Google OAuth callback: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Authentication error: {str(e)}")
 
+@api_router.post("/case/{case_id}/generate-form")
+@api_router.get("/case/{case_id}/generate-form")
+async def generate_uscis_form(case_id: str):
+    """
+    🔧 Generate Filled USCIS Form
+    
+    Automatically fills the official USCIS form based on case type:
+    - I-539: Extension/Change of Status
+    - I-589: Asylum Application
+    - I-140: EB-1A Extraordinary Ability
+    
+    Returns the filled PDF ready for submission to USCIS
+    """
+    try:
+        # Import form filler
+        from uscis_form_filler import form_filler
+        
+        # Get case
+        case = await db.application_cases.find_one({"case_id": case_id})
+        if not case:
+            case = await db.auto_cases.find_one({"case_id": case_id})
+        
+        if not case:
+            raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
+        
+        # Determine form type
+        visa_type = case.get("visa_type") or case.get("form_code") or ""
+        visa_type = visa_type.upper()
+        
+        logger.info(f"📝 Generating form for case {case_id}, type: {visa_type}")
+        
+        # Generate appropriate form
+        if visa_type == "I-539":
+            pdf_bytes = form_filler.fill_i539(case)
+            filename = f"I-539_{case_id}.pdf"
+        elif visa_type == "I-589":
+            pdf_bytes = form_filler.fill_i589(case)
+            filename = f"I-589_{case_id}.pdf"
+        elif visa_type == "EB-1A" or visa_type == "EB1A":
+            pdf_bytes = form_filler.fill_i140(case)
+            filename = f"I-140_{case_id}.pdf"
+        else:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Form generation not supported for visa type: {visa_type}"
+            )
+        
+        # Save generated form to case
+        import base64
+        pdf_base64 = base64.b64encode(pdf_bytes).decode('utf-8')
+        
+        await db.application_cases.update_one(
+            {"case_id": case_id},
+            {
+                "$set": {
+                    "generated_form": {
+                        "filename": filename,
+                        "content_base64": pdf_base64,
+                        "generated_at": datetime.utcnow(),
+                        "form_type": visa_type,
+                        "file_size": len(pdf_bytes)
+                    },
+                    "updated_at": datetime.utcnow()
+                }
+            }
+        )
+        
+        logger.info(f"✅ Form generated: {filename} ({len(pdf_bytes)} bytes)")
+        
+        return {
+            "success": True,
+            "message": "USCIS form generated successfully",
+            "case_id": case_id,
+            "form_type": visa_type,
+            "filename": filename,
+            "file_size": len(pdf_bytes),
+            "download_url": f"/api/case/{case_id}/download-form"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error generating form: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating form: {str(e)}")
+
+@api_router.get("/case/{case_id}/download-form")
+async def download_uscis_form(case_id: str):
+    """
+    📥 Download Filled USCIS Form
+    
+    Downloads the pre-generated USCIS form PDF
+    """
+    try:
+        from fastapi.responses import Response
+        import base64
+        
+        # Get case
+        case = await db.application_cases.find_one({"case_id": case_id})
+        if not case:
+            case = await db.auto_cases.find_one({"case_id": case_id})
+        
+        if not case:
+            raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
+        
+        # Check if form was generated
+        generated_form = case.get("generated_form")
+        if not generated_form:
+            raise HTTPException(
+                status_code=404, 
+                detail="Form not generated yet. Please call /generate-form first."
+            )
+        
+        # Decode PDF
+        pdf_base64 = generated_form.get("content_base64")
+        pdf_bytes = base64.b64decode(pdf_base64)
+        filename = generated_form.get("filename", "form.pdf")
+        
+        logger.info(f"📥 Downloading form: {filename} ({len(pdf_bytes)} bytes)")
+        
+        # Return PDF
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}",
+                "Content-Length": str(len(pdf_bytes))
+            }
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error downloading form: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error downloading form: {str(e)}")
+
 # User profile routes (keeping existing ones)
 @api_router.get("/profile", response_model=UserProfile)
 async def get_profile(current_user = Depends(get_current_user)):
