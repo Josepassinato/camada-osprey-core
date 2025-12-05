@@ -3022,18 +3022,24 @@ async def comprehensive_ai_review(case_id: str):
             overall_status = "APPROVED"
             if visa_type == "I-589":
                 approval_message = "✅ Asylum application APPROVED! All requirements met. Case shows credible fear and sufficient evidence of persecution."
+            elif visa_type == "EB-1A":
+                approval_message = "✅ EB-1A petition APPROVED! Extraordinary ability demonstrated through sustained national and international acclaim. Evidence meets USCIS criteria for outstanding achievement."
             else:
                 approval_message = "✅ Caso aprovado! Todos os requisitos atendidos."
         elif overall_score >= 0.7:
             overall_status = "PENDING"
             if visa_type == "I-589":
                 approval_message = "⚠️ Asylum case PENDING. Additional evidence or documentation may strengthen the application."
+            elif visa_type == "EB-1A":
+                approval_message = "⚠️ EB-1A petition PENDING. Case shows extraordinary ability but additional evidence of sustained acclaim may strengthen the petition. Consider adding more documentation of achievements."
             else:
                 approval_message = "⚠️ Caso pendente. Alguns itens precisam de atenção."
         else:
             overall_status = "REJECTED"
             if visa_type == "I-589":
                 approval_message = "❌ Asylum application INCOMPLETE. Critical documents missing. Personal statement and evidence of persecution are required."
+            elif visa_type == "EB-1A":
+                approval_message = "❌ EB-1A petition INCOMPLETE. Must demonstrate extraordinary ability through evidence of sustained national/international acclaim. Minimum 3 of 10 USCIS criteria required."
             else:
                 approval_message = "❌ Caso rejeitado. Muitos itens faltando."
         
