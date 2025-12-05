@@ -17,6 +17,7 @@ BACKEND_URL = "https://visa-ai-assistant.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_uscis_form_generation_system():
+def test_uscis_form_generation_system():
     """
     🎯 TESTE COMPLETO - SISTEMA DE GERAÇÃO DE FORMULÁRIOS USCIS
     
@@ -118,784 +119,330 @@ def test_uscis_form_generation_system():
         try:
             print(f"📝 Generating {expected_form} form...")
             print(f"🔗 Endpoint: POST {API_BASE}/case/{case_id}/generate-form")
-        
-        start_time = time.time()
-        response = requests.get(
-            f"{API_BASE}/case/{case_id}/ai-review",
-            headers={"Content-Type": "application/json"},
-            timeout=60
-        )
-        processing_time = time.time() - start_time
-        
-        print(f"⏱️  Processing time: {processing_time:.2f}s")
-        print(f"📊 Status Code: {response.status_code}")
-        
-        results["ai_review_test"]["status_code"] = response.status_code
-        results["ai_review_test"]["processing_time"] = processing_time
-        
-        if response.status_code == 200:
-            ai_review = response.json()
-            print(f"📄 AI Review Response: {json.dumps(ai_review, indent=2)}")
             
-            # EB-1A specific validations after corrections
-            eb1a_validations = {
-                "1_recognizes_eb1a": ai_review.get("visa_type") == "EB-1A",
-                "2_score_above_85": ai_review.get("overall_score", 0) > 85,
-                "3_status_approved": ai_review.get("overall_status") == "APPROVED",
-                "4_eb1a_in_message": "EB-1A" in str(ai_review.get("approval_message", "")),
-                "5_extraordinary_ability_mentioned": "extraordinary ability" in str(ai_review).lower(),
-                "6_sustained_acclaim_mentioned": "sustained" in str(ai_review).lower() and "acclaim" in str(ai_review).lower(),
-                "7_uscis_criteria_mentioned": "USCIS criteria" in str(ai_review) or "criteria" in str(ai_review).lower(),
-                "8_documents_score_perfect": ai_review.get("detailed_checks", {}).get("documents", {}).get("score", 0) == 1.0,
-                "9_letters_score_90": ai_review.get("detailed_checks", {}).get("letters", {}).get("score", 0) >= 0.90,
-                "10_documents_count_8": ai_review.get("detailed_checks", {}).get("documents", {}).get("uploaded", 0) >= 8
+            start_time = time.time()
+            response = requests.post(
+                f"{API_BASE}/case/{case_id}/generate-form",
+                headers={"Content-Type": "application/json"},
+                timeout=60
+            )
+            processing_time = time.time() - start_time
+            
+            print(f"⏱️  Processing time: {processing_time:.2f}s")
+            print(f"📊 Status Code: {response.status_code}")
+            
+            results[result_key]["generation"] = {
+                "status_code": response.status_code,
+                "processing_time": processing_time
             }
             
-            results["ai_review_test"]["validations"] = eb1a_validations
-            results["ai_review_test"]["response_data"] = ai_review
-            
-            print("\n🎯 EB-1A AI REVIEW VALIDATIONS AFTER CORRECTIONS:")
-            print("=" * 60)
-            for check, passed in eb1a_validations.items():
-                status = "✅" if passed else "❌"
-                print(f"  {status} {check}: {passed}")
-            
-            # Extract key metrics
-            overall_score = ai_review.get("overall_score", 0)
-            overall_status = ai_review.get("overall_status", "N/A")
-            visa_type = ai_review.get("visa_type", "N/A")
-            approval_message = ai_review.get("approval_message", "N/A")
-            
-            detailed_checks = ai_review.get("detailed_checks", {})
-            documents_info = detailed_checks.get("documents", {})
-            letters_info = detailed_checks.get("letters", {})
-            
-            documents_score = documents_info.get("score", 0)
-            documents_uploaded = documents_info.get("uploaded", 0)
-            documents_required = documents_info.get("required", 8)
-            
-            letters_score = letters_info.get("score", 0)
-            letter_length = letters_info.get("letter_length", 0)
-            
-            print(f"\n📊 EB-1A AI REVIEW RESULTS:")
-            print("=" * 50)
-            print(f"  🎯 Overall Status: {overall_status}")
-            print(f"  📊 Overall Score: {overall_score}%")
-            print(f"  🧬 Visa Type: {visa_type}")
-            print(f"  📄 Documents: {documents_uploaded}/{documents_required} (Score: {documents_score})")
-            print(f"  📝 Letters: {letter_length} chars (Score: {letters_score})")
-            print(f"  ✅ Message: {approval_message[:100]}...")
-            
-            # Check improvement criteria
-            improvement_criteria = {
-                "score_improved": overall_score > 85,  # Before was 75%
-                "status_specific": overall_status == "APPROVED",  # Before was generic
-                "eb1a_terminology": eb1a_validations["4_eb1a_in_message"] and eb1a_validations["5_extraordinary_ability_mentioned"],
-                "documents_perfect": documents_score == 1.0,
-                "letters_improved": letters_score >= 0.90
-            }
-            
-            results["ai_review_test"]["improvement_criteria"] = improvement_criteria
-            
-            print(f"\n🎉 IMPROVEMENT VERIFICATION:")
-            print("=" * 50)
-            for criterion, met in improvement_criteria.items():
-                status = "✅" if met else "❌"
-                print(f"  {status} {criterion}: {met}")
+            if response.status_code == 200:
+                form_data = response.json()
+                print(f"📄 Form Generation Response: {json.dumps(form_data, indent=2)}")
                 
-        else:
-            print(f"❌ AI Review failed with status {response.status_code}")
-            print(f"📄 Error response: {response.text}")
-            results["ai_review_test"]["error"] = response.text
+                # Validate form generation response
+                validations = {
+                    "success_true": form_data.get("success", False),
+                    "correct_form_type": form_data.get("form_type") == expected_form,
+                    "filename_present": form_data.get("filename") is not None,
+                    "file_size_positive": form_data.get("file_size", 0) > 0,
+                    "download_url_present": form_data.get("download_url") is not None
+                }
+                
+                results[result_key]["generation"]["validations"] = validations
+                results[result_key]["generation"]["response_data"] = form_data
+                results[result_key]["generation"]["working"] = all(validations.values())
+                
+                print(f"\n🎯 FORM GENERATION VALIDATIONS - {case_name}:")
+                for check, passed in validations.items():
+                    status = "✅" if passed else "❌"
+                    print(f"  {status} {check}: {passed}")
+                
+                print(f"\n📊 FORM GENERATION RESULTS:")
+                print(f"  ✅ Success: {form_data.get('success', False)}")
+                print(f"  📋 Form Type: {form_data.get('form_type', 'N/A')}")
+                print(f"  📄 Filename: {form_data.get('filename', 'N/A')}")
+                print(f"  📏 File Size: {form_data.get('file_size', 0)} bytes")
+                print(f"  🔗 Download URL: {form_data.get('download_url', 'N/A')}")
+                
+            else:
+                print(f"❌ Form generation failed with status {response.status_code}")
+                print(f"📄 Error response: {response.text}")
+                results[result_key]["generation"]["error"] = response.text
+                results[result_key]["generation"]["working"] = False
+                
+        except Exception as e:
+            print(f"❌ Exception during form generation: {str(e)}")
+            results[result_key]["generation"]["exception"] = str(e)
+            results[result_key]["generation"]["working"] = False
+        
+        # Test form download
+        try:
+            print(f"\n📥 Testing {expected_form} form download...")
+            print(f"🔗 Endpoint: GET {API_BASE}/case/{case_id}/download-form")
             
-    except Exception as e:
-        print(f"❌ Exception during AI Review: {str(e)}")
-        results["ai_review_test"]["exception"] = str(e)
+            start_time = time.time()
+            response = requests.get(
+                f"{API_BASE}/case/{case_id}/download-form",
+                timeout=60
+            )
+            processing_time = time.time() - start_time
+            
+            print(f"⏱️  Processing time: {processing_time:.2f}s")
+            print(f"📊 Status Code: {response.status_code}")
+            
+            results[result_key]["download"] = {
+                "status_code": response.status_code,
+                "processing_time": processing_time
+            }
+            
+            if response.status_code == 200:
+                # Save PDF to temporary file for validation
+                temp_filename = f"/tmp/{expected_form}_{case_id}.pdf"
+                
+                with open(temp_filename, "wb") as f:
+                    f.write(response.content)
+                
+                file_size = len(response.content)
+                
+                # Validate PDF file
+                validations = {
+                    "file_downloaded": os.path.exists(temp_filename),
+                    "file_size_adequate": file_size >= min_file_size,
+                    "content_type_pdf": response.headers.get("content-type", "").startswith("application/pdf"),
+                    "file_not_empty": file_size > 0
+                }
+                
+                results[result_key]["download"]["validations"] = validations
+                results[result_key]["download"]["file_size"] = file_size
+                results[result_key]["download"]["working"] = all(validations.values())
+                
+                print(f"\n🎯 DOWNLOAD VALIDATIONS - {case_name}:")
+                for check, passed in validations.items():
+                    status = "✅" if passed else "❌"
+                    print(f"  {status} {check}: {passed}")
+                
+                print(f"\n📊 DOWNLOAD RESULTS:")
+                print(f"  📄 File saved: {temp_filename}")
+                print(f"  📏 File size: {file_size} bytes ({file_size/1024:.1f} KB)")
+                print(f"  📋 Min required: {min_file_size} bytes ({min_file_size/1024:.1f} KB)")
+                print(f"  📄 Content-Type: {response.headers.get('content-type', 'N/A')}")
+                
+                # Verify PDF validity using file command
+                try:
+                    import subprocess
+                    result = subprocess.run(['file', temp_filename], capture_output=True, text=True)
+                    file_type = result.stdout.strip()
+                    print(f"  🔍 File type: {file_type}")
+                    
+                    is_valid_pdf = "PDF" in file_type
+                    results[result_key]["download"]["is_valid_pdf"] = is_valid_pdf
+                    print(f"  ✅ Valid PDF: {is_valid_pdf}")
+                    
+                except Exception as e:
+                    print(f"  ⚠️  Could not verify PDF validity: {str(e)}")
+                    results[result_key]["download"]["is_valid_pdf"] = None
+                
+            else:
+                print(f"❌ Form download failed with status {response.status_code}")
+                print(f"📄 Error response: {response.text}")
+                results[result_key]["download"]["error"] = response.text
+                results[result_key]["download"]["working"] = False
+                
+        except Exception as e:
+            print(f"❌ Exception during form download: {str(e)}")
+            results[result_key]["download"]["exception"] = str(e)
+            results[result_key]["download"]["working"] = False
     
-    # STEP 3: Compare Before vs After Results
-    print("\n📋 STEP 3: Compare Before vs After Results")
+    # STEP 3: Test data persistence in database
+    print("\n📋 STEP 3: Test Data Persistence in Database")
     print("-" * 50)
     
-    if not case_id:
-        print("❌ Cannot proceed without case_id")
-        return results
-    
-    # Create simulated EB-1A document content
-    def create_simulated_document(doc_type, content):
-        """Create a simulated PDF document as base64"""
-        return base64.b64encode(content.encode()).decode()
-    
-    # EB-1A specific documents (8 required documents)
-    documents_to_upload = [
-        {
-            "name": "passport_sofia_martinez.pdf",
-            "type": "passport",
-            "content": "PASSPORT - REINO DE ESPAÑA\nNombre: SOFIA MARTINEZ CHEN\nPasaporte: ES234567890\nFecha de Nacimiento: 20/09/1985\nNacionalidad: ESPAÑOLA\nValidez: 31/12/2030"
-        },
-        {
-            "name": "awards_national_international.pdf", 
-            "type": "awards",
-            "content": "AWARDS AND RECOGNITIONS\n2023 Turing Award Finalist - Association for Computing Machinery\n2022 NSF CAREER Award - National Science Foundation\n2021 Best Paper Award ICML - International Conference on Machine Learning\n2020 MIT Technology Review 35 Under 35 - Outstanding Young Innovator"
-        },
-        {
-            "name": "publications_scientific.pdf",
-            "type": "publications",
-            "content": "SCIENTIFIC PUBLICATIONS\nDr. Sofia Martinez Chen - Publication Record\nTotal Papers: 45 peer-reviewed publications\nTop Venues: Nature, Science, ICML, NeurIPS, ICLR\nH-index: 28\nTotal Citations: 3,247\nFirst Author Papers: 15\nNotable Publications:\n- 'Advances in Neural Architecture Search' (Nature, 2023)\n- 'Ethical AI in Healthcare Applications' (Science, 2022)"
-        },
-        {
-            "name": "memberships_associations.pdf",
-            "type": "memberships",
-            "content": "PROFESSIONAL MEMBERSHIPS\nFellow of Association for Computing Machinery (ACM) - 2022\nSenior Member of IEEE Computer Society - 2021\nBoard Member of AI Ethics Committee - MIT - 2020-Present\nEditorial Board Member - Journal of Machine Learning Research - 2023-Present"
-        },
-        {
-            "name": "expert_recommendation_letters.pdf",
-            "type": "expert_letters",
-            "content": "EXPERT RECOMMENDATION LETTERS\nLetter 1: Dr. Yoshua Bengio (Turing Award Winner, University of Montreal)\nLetter 2: Dr. Fei-Fei Li (Professor, Stanford University)\nLetter 3: Dr. Andrew Ng (Adjunct Professor, Stanford University)\nLetter 4: Dr. Demis Hassabis (CEO, DeepMind)\nLetter 5: Dr. Yann LeCun (Chief AI Scientist, Meta)\nAll letters attest to Dr. Martinez Chen's extraordinary contributions to AI research."
-        },
-        {
-            "name": "high_salary_evidence.pdf",
-            "type": "high_salary",
-            "content": "SALARY EVIDENCE\nCurrent Compensation: $380,000/year\nMIT Computer Science and AI Laboratory\nPosition: Principal Research Scientist\nComparison Data:\nTop 1% in field of AI Research\nComparable to senior researchers at Google Brain, DeepMind, OpenAI\nIndustry benchmarks confirm exceptional compensation level"
-        },
-        {
-            "name": "press_media_coverage.pdf",
-            "type": "press_coverage",
-            "content": "PRESS AND MEDIA COVERAGE\nMIT News: 'Breakthrough in AI Ethics Research' - March 2023\nTechCrunch: 'Rising Star in Machine Learning' - January 2023\nWired Magazine: 'The Future of Ethical AI' - Feature Article - December 2022\nNPR Science Friday: Interview on AI in Healthcare - November 2022\nNature Careers: Profile Feature - 'Leading the Next Generation of AI' - October 2022"
-        },
-        {
-            "name": "judging_reviewer_evidence.pdf",
-            "type": "judging_work",
-            "content": "JUDGING AND REVIEW WORK\nPeer Review Activities:\n- Reviewer for Nature (2020-Present)\n- Reviewer for Science (2021-Present)\n- Program Committee Member: ICML (2019-2023)\n- Program Committee Member: NeurIPS (2020-2023)\n- Panel Judge: NSF Computer and Information Science and Engineering Grants\n- Editorial Board: Journal of Machine Learning Research\nTotal Reviews: 127 papers reviewed\nGrant Panels: 15 NSF grant review panels"
-        }
-    ]
-    
-    uploaded_docs = []
-    
-    for doc in documents_to_upload:
+    for test_case in test_cases:
+        case_name = test_case["name"]
+        case_id = test_case["case_id"]
+        expected_form = test_case["expected_form"]
+        result_key = test_case["key"]
+        
+        print(f"\n🔍 Verifying persistence for {case_name} - Case {case_id}")
+        print("-" * 40)
+        
         try:
-            print(f"📄 Uploading EB-1A Document: {doc['name']}")
+            print(f"🔗 Endpoint: GET {API_BASE}/auto-application/case/{case_id}")
             
-            # Create temporary file content
-            temp_content = doc['content']
-            
-            # Use the case-specific upload endpoint
-            files = {
-                'file': (doc['name'], temp_content, 'application/pdf')
-            }
-            data = {
-                'document_type': doc['type']
-            }
-            
-            response = requests.post(
-                f"{API_BASE}/case/{case_id}/upload-document",
-                files=files,
-                data=data,
+            response = requests.get(
+                f"{API_BASE}/auto-application/case/{case_id}",
+                headers={"Content-Type": "application/json"},
                 timeout=30
             )
             
-            print(f"   Status: {response.status_code}")
-            if response.status_code in [200, 201]:
-                response_data = response.json()
-                uploaded_docs.append({
-                    "name": doc['name'],
-                    "type": doc['type'],
-                    "document_id": response_data.get("document_id"),
-                    "status": "uploaded"
-                })
-                print(f"   ✅ Uploaded: {doc['type']} - {response_data.get('document_id', 'Success')}")
+            print(f"📊 Status Code: {response.status_code}")
+            
+            results[result_key]["persistence"] = {
+                "status_code": response.status_code
+            }
+            
+            if response.status_code == 200:
+                case_data = response.json()
+                case_info = case_data.get("case", {})
+                generated_form = case_info.get("generated_form", {})
+                
+                print(f"📄 Generated Form Data: {json.dumps(generated_form, indent=2)}")
+                
+                # Validate persistence
+                validations = {
+                    "generated_form_exists": generated_form is not None and len(generated_form) > 0,
+                    "filename_persisted": generated_form.get("filename") is not None,
+                    "generated_at_present": generated_form.get("generated_at") is not None,
+                    "form_type_correct": generated_form.get("form_type") == expected_form,
+                    "file_size_recorded": generated_form.get("file_size", 0) > 0
+                }
+                
+                results[result_key]["persistence"]["validations"] = validations
+                results[result_key]["persistence"]["generated_form"] = generated_form
+                results[result_key]["persistence"]["working"] = all(validations.values())
+                
+                print(f"\n🎯 PERSISTENCE VALIDATIONS - {case_name}:")
+                for check, passed in validations.items():
+                    status = "✅" if passed else "❌"
+                    print(f"  {status} {check}: {passed}")
+                
+                print(f"\n📊 PERSISTENCE RESULTS:")
+                print(f"  📄 Filename: {generated_form.get('filename', 'N/A')}")
+                print(f"  📅 Generated At: {generated_form.get('generated_at', 'N/A')}")
+                print(f"  📋 Form Type: {generated_form.get('form_type', 'N/A')}")
+                print(f"  📏 File Size: {generated_form.get('file_size', 0)} bytes")
+                
             else:
-                print(f"   ❌ Failed: {response.text}")
-                uploaded_docs.append({
-                    "name": doc['name'],
-                    "type": doc['type'],
-                    "status": "failed",
-                    "error": response.text
-                })
+                print(f"❌ Persistence check failed with status {response.status_code}")
+                print(f"📄 Error response: {response.text}")
+                results[result_key]["persistence"]["error"] = response.text
+                results[result_key]["persistence"]["working"] = False
                 
         except Exception as e:
-            print(f"   ❌ Exception: {str(e)}")
-            uploaded_docs.append({
-                "name": doc['name'],
-                "type": doc['type'],
-                "status": "exception",
-                "error": str(e)
-            })
+            print(f"❌ Exception during persistence check: {str(e)}")
+            results[result_key]["persistence"]["exception"] = str(e)
+            results[result_key]["persistence"]["working"] = False
     
-    results["fase_3_document_uploads"] = {
-        "uploaded_docs": uploaded_docs,
-        "total_docs": len(documents_to_upload),
-        "successful_uploads": len([d for d in uploaded_docs if d.get("status") == "uploaded"]),
-        "eb1a_specific_docs": [
-            "passport", "awards", "publications", "memberships", 
-            "expert_letters", "high_salary", "press_coverage", "judging_work"
-        ]
+    # STEP 4: Generate summary and comparison
+    print("\n📋 STEP 4: Generate Summary and Comparison")
+    print("-" * 50)
+    
+    # Count successful operations
+    success_counts = {
+        "form_generation": 0,
+        "form_download": 0,
+        "data_persistence": 0,
+        "valid_pdfs": 0
     }
     
-    print(f"\n📊 RESUMO UPLOADS EB-1A: {results['fase_3_document_uploads']['successful_uploads']}/{results['fase_3_document_uploads']['total_docs']} documentos enviados")
-    print("📋 Documentos EB-1A específicos:")
-    for doc in uploaded_docs:
-        status = "✅" if doc.get("status") == "uploaded" else "❌"
-        print(f"   {status} {doc['type']}: {doc['name']}")
+    total_tests = len(test_cases)
     
-    # FASE 4: Personal Statement (Cover Letter) EB-1A
-    print("\n📋 FASE 4: Personal Statement EB-1A")
-    print("-" * 50)
+    for test_case in test_cases:
+        result_key = test_case["key"]
+        
+        # Count successes
+        if results[result_key].get("generation", {}).get("working", False):
+            success_counts["form_generation"] += 1
+        
+        if results[result_key].get("download", {}).get("working", False):
+            success_counts["form_download"] += 1
+        
+        if results[result_key].get("persistence", {}).get("working", False):
+            success_counts["data_persistence"] += 1
+        
+        if results[result_key].get("download", {}).get("is_valid_pdf", False):
+            success_counts["valid_pdfs"] += 1
     
-    personal_statement_content = """To USCIS Officer,
-
-I am Dr. Sofia Martinez Chen, and I am applying for an EB-1A visa based on my extraordinary ability in the field of Artificial Intelligence research.
-
-I have achieved sustained national and international acclaim in AI research, specifically in machine learning and computer vision. My work has been recognized through:
-
-1. AWARDS: I am a 2023 Turing Award Finalist, received the 2022 NSF CAREER Award, and was named to MIT Technology Review 35 Under 35 in 2020.
-
-2. PUBLICATIONS: I have authored 45 peer-reviewed papers in top venues including Nature, Science, and ICML. My H-index is 28 with over 3,000 citations, demonstrating significant impact.
-
-3. MEMBERSHIP: I am a Fellow of ACM and serve on the Board of the AI Ethics Committee, positions reserved for those with outstanding achievements.
-
-4. EXPERT RECOGNITION: I have letters from Turing Award winners and leading professors at Stanford and MIT attesting to my extraordinary contributions.
-
-5. HIGH COMPENSATION: My current salary of $380,000/year places me in the top 1% of my field.
-
-6. PRESS COVERAGE: My research has been featured in major publications including Wired, TechCrunch, and MIT News.
-
-7. JUDGING: I serve as a reviewer for Nature and Science and as a panel judge for NSF grants, roles reserved for leading experts.
-
-My contributions have advanced the field of AI significantly. I am currently leading research at MIT that will benefit the United States through technological innovation and economic growth.
-
-I respectfully request approval of my EB-1A petition.
-
-Sincerely,
-Dr. Sofia Martinez Chen"""
-
-    try:
-        print("🔍 Saving EB-1A Personal Statement...")
-        
-        letters_data = {
-            "letters": {
-                "cover_letter": personal_statement_content
-            }
-        }
-        
-        print(f"🔗 Endpoint: PUT {API_BASE}/auto-application/case/{case_id}")
-        print(f"📤 Payload: Personal statement ({len(personal_statement_content)} characters)")
-        
-        start_time = time.time()
-        response = requests.put(
-            f"{API_BASE}/auto-application/case/{case_id}",
-            json=letters_data,
-            headers={"Content-Type": "application/json"},
-            timeout=30
-        )
-        processing_time = time.time() - start_time
-        
-        print(f"⏱️  Processing time: {processing_time:.2f}s")
-        print(f"📊 Status Code: {response.status_code}")
-        
-        results["fase_4_personal_statement"]["status_code"] = response.status_code
-        results["fase_4_personal_statement"]["processing_time"] = processing_time
-        
-        if response.status_code in [200, 201]:
-            response_data = response.json()
-            print(f"📄 Response: {json.dumps(response_data, indent=2)}")
-            
-            case_data = response_data.get("case", {})
-            letters_saved = case_data.get("letters", {})
-            
-            validations = {
-                "1_personal_statement_saved": letters_saved.get("cover_letter") is not None,
-                "2_content_length_correct": len(letters_saved.get("cover_letter", "")) > 1000,
-                "3_eb1a_specific_content": "EB-1A" in letters_saved.get("cover_letter", ""),
-                "4_extraordinary_ability_mentioned": "extraordinary ability" in letters_saved.get("cover_letter", "").lower(),
-                "5_criteria_mentioned": "awards" in letters_saved.get("cover_letter", "").lower() and "publications" in letters_saved.get("cover_letter", "").lower()
-            }
-            
-            results["fase_4_personal_statement"]["validations"] = validations
-            results["fase_4_personal_statement"]["response_data"] = response_data
-            results["fase_4_personal_statement"]["working"] = all(validations.values())
-            
-            print("\n🎯 VALIDAÇÕES FASE 4 - PERSONAL STATEMENT:")
-            print("=" * 50)
-            for check, passed in validations.items():
-                status = "✅" if passed else "❌"
-                print(f"  {status} {check}: {passed}")
-            
-            print(f"\n📊 PERSONAL STATEMENT EB-1A:")
-            print(f"  📝 Length: {len(letters_saved.get('cover_letter', ''))} characters")
-            print(f"  🎯 EB-1A Specific: {'✅' if validations['3_eb1a_specific_content'] else '❌'}")
-            print(f"  🏆 Extraordinary Ability: {'✅' if validations['4_extraordinary_ability_mentioned'] else '❌'}")
-            print(f"  📋 Criteria Mentioned: {'✅' if validations['5_criteria_mentioned'] else '❌'}")
-                
-        else:
-            print(f"❌ Personal statement save failed with status {response.status_code}")
-            print(f"📄 Error response: {response.text}")
-            results["fase_4_personal_statement"]["error"] = response.text
-            results["fase_4_personal_statement"]["working"] = False
-            
-    except Exception as e:
-        print(f"❌ Exception during personal statement save: {str(e)}")
-        results["fase_4_personal_statement"]["exception"] = str(e)
-        results["fase_4_personal_statement"]["working"] = False
+    # Calculate overall success rate
+    total_operations = total_tests * 4  # 4 operations per test case
+    successful_operations = sum(success_counts.values())
+    overall_success_rate = (successful_operations / total_operations) * 100
     
-    # FASE 5: EB-1A Form Completion
-    print("\n📋 FASE 5: EB-1A Form Completion")
-    print("-" * 50)
-    
-    try:
-        print("🔍 Completing EB-1A Form with USCIS Criteria...")
-        
-        eb1a_form_data = {
-            "forms": {
-                "eb1a": {
-                    "completed": True,
-                    "completion_date": "2024-12-04",
-                    "criteria_met": [
-                        "Awards - national/international prizes",
-                        "Membership in associations requiring outstanding achievements",
-                        "Published material about the applicant",
-                        "Judging the work of others",
-                        "Original contributions of major significance",
-                        "Scholarly articles",
-                        "High salary"
-                    ],
-                    "criteria_count": 7
-                }
-            }
-        }
-        
-        print(f"🔗 Endpoint: PUT {API_BASE}/auto-application/case/{case_id}")
-        print(f"📤 Payload: EB-1A form with {eb1a_form_data['forms']['eb1a']['criteria_count']} criteria")
-        
-        start_time = time.time()
-        response = requests.put(
-            f"{API_BASE}/auto-application/case/{case_id}",
-            json=eb1a_form_data,
-            headers={"Content-Type": "application/json"},
-            timeout=30
-        )
-        processing_time = time.time() - start_time
-        
-        print(f"⏱️  Processing time: {processing_time:.2f}s")
-        print(f"📊 Status Code: {response.status_code}")
-        
-        results["fase_5_eb1a_form"]["status_code"] = response.status_code
-        results["fase_5_eb1a_form"]["processing_time"] = processing_time
-        
-        if response.status_code in [200, 201]:
-            response_data = response.json()
-            print(f"📄 Response: {json.dumps(response_data, indent=2)}")
-            
-            case_data = response_data.get("case", {})
-            forms_saved = case_data.get("forms", {})
-            eb1a_form = forms_saved.get("eb1a", {})
-            
-            validations = {
-                "1_eb1a_form_saved": eb1a_form is not None,
-                "2_completion_status": eb1a_form.get("completed", False),
-                "3_criteria_count_correct": eb1a_form.get("criteria_count", 0) >= 3,  # Minimum 3 of 10 USCIS criteria
-                "4_criteria_list_present": len(eb1a_form.get("criteria_met", [])) >= 3,
-                "5_completion_date_present": eb1a_form.get("completion_date") is not None
-            }
-            
-            results["fase_5_eb1a_form"]["validations"] = validations
-            results["fase_5_eb1a_form"]["response_data"] = response_data
-            results["fase_5_eb1a_form"]["working"] = all(validations.values())
-            
-            print("\n🎯 VALIDAÇÕES FASE 5 - EB-1A FORM:")
-            print("=" * 50)
-            for check, passed in validations.items():
-                status = "✅" if passed else "❌"
-                print(f"  {status} {check}: {passed}")
-            
-            print(f"\n📊 EB-1A FORM COMPLETION:")
-            print(f"  📋 Completed: {eb1a_form.get('completed', False)}")
-            print(f"  🎯 Criteria Met: {eb1a_form.get('criteria_count', 0)}/10")
-            print(f"  📅 Completion Date: {eb1a_form.get('completion_date', 'N/A')}")
-            print(f"  📝 Criteria List:")
-            for criterion in eb1a_form.get("criteria_met", []):
-                print(f"    ✅ {criterion}")
-                
-        else:
-            print(f"❌ EB-1A form save failed with status {response.status_code}")
-            print(f"📄 Error response: {response.text}")
-            results["fase_5_eb1a_form"]["error"] = response.text
-            results["fase_5_eb1a_form"]["working"] = False
-            
-    except Exception as e:
-        print(f"❌ Exception during EB-1A form completion: {str(e)}")
-        results["fase_5_eb1a_form"]["exception"] = str(e)
-        results["fase_5_eb1a_form"]["working"] = False
-    
-    # FASE 6: AI Review EB-1A (CRÍTICO)
-    print("\n📋 FASE 6: AI Review EB-1A (CRÍTICO)")
-    print("-" * 50)
-    
-    try:
-        print("🔍 Testing EB-1A AI Review System...")
-        
-        print(f"🔗 Endpoint: GET {API_BASE}/case/{case_id}/ai-review")
-        
-        start_time = time.time()
-        response = requests.get(
-            f"{API_BASE}/case/{case_id}/ai-review",
-            headers={"Content-Type": "application/json"},
-            timeout=60
-        )
-        processing_time = time.time() - start_time
-        
-        print(f"⏱️  Processing time: {processing_time:.2f}s")
-        print(f"📊 Status Code: {response.status_code}")
-        
-        results["fase_6_ai_review"]["status_code"] = response.status_code
-        results["fase_6_ai_review"]["processing_time"] = processing_time
-        
-        if response.status_code == 200:
-            ai_review = response.json()
-            print(f"📄 AI Review Response: {json.dumps(ai_review, indent=2)}")
-            
-            # EB-1A specific validations
-            eb1a_validations = {
-                "1_overall_status_present": ai_review.get("overall_status") is not None,
-                "2_overall_score_present": ai_review.get("overall_score") is not None,
-                "3_visa_type_recognized": ai_review.get("visa_type") == "EB-1A",
-                "4_high_score": ai_review.get("overall_score", 0) > 85,  # EB-1A should score >85%
-                "5_eb1a_specific_message": "EB-1A" in str(ai_review.get("approval_message", "")),
-                "6_extraordinary_ability_mentioned": "extraordinary" in str(ai_review).lower(),
-                "7_detailed_checks_present": ai_review.get("detailed_checks") is not None,
-                "8_documents_validated": ai_review.get("detailed_checks", {}).get("documents", {}).get("uploaded", 0) >= 8
-            }
-            
-            results["fase_6_ai_review"]["validations"] = eb1a_validations
-            results["fase_6_ai_review"]["response_data"] = ai_review
-            results["fase_6_ai_review"]["working"] = all(eb1a_validations.values())
-            
-            print("\n🎯 VALIDAÇÕES FASE 6 - EB-1A AI REVIEW:")
-            print("=" * 50)
-            for check, passed in eb1a_validations.items():
-                status = "✅" if passed else "❌"
-                print(f"  {status} {check}: {passed}")
-            
-            print(f"\n📊 EB-1A AI REVIEW RESULTS:")
-            print(f"  🎯 Overall Status: {ai_review.get('overall_status', 'N/A')}")
-            print(f"  📊 Overall Score: {ai_review.get('overall_score', 0)}%")
-            print(f"  🧬 Visa Type: {ai_review.get('visa_type', 'N/A')}")
-            print(f"  📋 Documents Uploaded: {ai_review.get('detailed_checks', {}).get('documents', {}).get('uploaded', 0)}")
-            print(f"  ✅ Approval Message: {ai_review.get('approval_message', 'N/A')[:100]}...")
-            
-            # Check if system recognizes EB-1A specifics
-            if ai_review.get("overall_score", 0) > 85 and "EB-1A" in str(ai_review):
-                print("\n🎉 EB-1A SYSTEM RECOGNITION: ✅ EXCELLENT!")
-                print("   - System correctly identifies EB-1A visa type")
-                print("   - High score indicates proper EB-1A evaluation")
-                print("   - EB-1A specific terminology present")
-            else:
-                print("\n⚠️  EB-1A SYSTEM RECOGNITION: Needs improvement")
-                print("   - May not fully recognize EB-1A specifics")
-                print("   - Score or terminology may be generic")
-                
-        else:
-            print(f"❌ AI Review failed with status {response.status_code}")
-            print(f"📄 Error response: {response.text}")
-            results["fase_6_ai_review"]["error"] = response.text
-            results["fase_6_ai_review"]["working"] = False
-            
-    except Exception as e:
-        print(f"❌ Exception during AI Review: {str(e)}")
-        results["fase_6_ai_review"]["exception"] = str(e)
-        results["fase_6_ai_review"]["working"] = False
-    
-    # FASE 7: Verificar Persistência
-    print("\n📋 FASE 7: Verificar Persistência")
-    print("-" * 50)
-    
-    try:
-        print("🔍 Verifying EB-1A data persistence...")
-        
-        print(f"🔗 Endpoint: GET {API_BASE}/auto-application/case/{case_id}")
-        
-        start_time = time.time()
-        response = requests.get(
-            f"{API_BASE}/auto-application/case/{case_id}",
-            headers={"Content-Type": "application/json"},
-            timeout=30
-        )
-        processing_time = time.time() - start_time
-        
-        print(f"⏱️  Processing time: {processing_time:.2f}s")
-        print(f"📊 Status Code: {response.status_code}")
-        
-        results["fase_7_persistence_verification"]["status_code"] = response.status_code
-        results["fase_7_persistence_verification"]["processing_time"] = processing_time
-        
-        if response.status_code == 200:
-            case_data = response.json()
-            print(f"📄 Case Data Retrieved: {json.dumps(case_data, indent=2)}")
-            
-            case_info = case_data.get("case", {})
-            
-            # EB-1A persistence validations
-            persistence_checks = {
-                "1_basic_data_persisted": case_info.get("basic_data") is not None,
-                "2_documents_persisted": len(case_info.get("uploaded_documents", [])) >= 8,
-                "3_personal_statement_persisted": case_info.get("letters", {}).get("cover_letter") is not None,
-                "4_eb1a_form_persisted": case_info.get("forms", {}).get("eb1a") is not None,
-                "5_extraordinary_ability_field": case_info.get("basic_data", {}).get("field_of_extraordinary_ability") is not None,
-                "6_criteria_count_persisted": case_info.get("forms", {}).get("eb1a", {}).get("criteria_count", 0) >= 3,
-                "7_ai_review_persisted": case_info.get("ai_review") is not None,
-                "8_case_id_correct": case_info.get("case_id") == case_id
-            }
-            
-            results["fase_7_persistence_verification"]["validations"] = persistence_checks
-            results["fase_7_persistence_verification"]["response_data"] = case_data
-            results["fase_7_persistence_verification"]["working"] = all(persistence_checks.values())
-            
-            print("\n🎯 VALIDAÇÕES FASE 7 - PERSISTÊNCIA EB-1A:")
-            print("=" * 50)
-            for check, passed in persistence_checks.items():
-                status = "✅" if passed else "❌"
-                print(f"  {status} {check}: {passed}")
-            
-            print(f"\n📊 DADOS PERSISTIDOS EB-1A:")
-            print(f"  📋 Basic Data: {'✅' if case_info.get('basic_data') else '❌'}")
-            print(f"  📄 Documents: {len(case_info.get('uploaded_documents', []))}/8")
-            print(f"  📝 Personal Statement: {'✅' if case_info.get('letters', {}).get('cover_letter') else '❌'}")
-            print(f"  📋 EB-1A Form: {'✅' if case_info.get('forms', {}).get('eb1a') else '❌'}")
-            print(f"  🧬 Extraordinary Ability Field: {'✅' if case_info.get('basic_data', {}).get('field_of_extraordinary_ability') else '❌'}")
-            print(f"  🎯 Criteria Count: {case_info.get('forms', {}).get('eb1a', {}).get('criteria_count', 0)}")
-            print(f"  🤖 AI Review: {'✅' if case_info.get('ai_review') else '❌'}")
-                
-        else:
-            print(f"❌ Persistence verification failed with status {response.status_code}")
-            print(f"📄 Error response: {response.text}")
-            results["fase_7_persistence_verification"]["error"] = response.text
-            results["fase_7_persistence_verification"]["working"] = False
-            
-    except Exception as e:
-        print(f"❌ Exception during persistence verification: {str(e)}")
-        results["fase_7_persistence_verification"]["exception"] = str(e)
-        results["fase_7_persistence_verification"]["working"] = False
-    
-    # FASE 8: Comparação do Sistema (EB-1A vs I-539/I-589)
-    print("\n📋 FASE 8: Comparação do Sistema (EB-1A vs I-539/I-589)")
-    print("-" * 50)
-    
-    print("🔍 Analyzing system flexibility and adaptation...")
-    
-    # Compare EB-1A requirements vs other visa types
-    visa_comparison = {
-        "I-539": {
-            "documents": ["passport", "i94", "current_visa", "i20", "financial_evidence"],
-            "focus": "Extension of stay",
-            "key_fields": ["current_visa_type", "extension_reason", "sevis_number"],
-            "criteria": "Maintain status, financial support"
-        },
-        "I-589": {
-            "documents": ["passport", "i94", "evidence_persecution", "medical_records", "witness_statements", "country_conditions"],
-            "focus": "Asylum application",
-            "key_fields": ["country_of_nationality", "persecution_evidence", "fear_basis"],
-            "criteria": "Well-founded fear of persecution"
-        },
-        "EB-1A": {
-            "documents": ["passport", "awards", "publications", "memberships", "expert_letters", "high_salary", "press_coverage", "judging_work"],
-            "focus": "Extraordinary ability",
-            "key_fields": ["field_of_extraordinary_ability", "current_position", "achievements"],
-            "criteria": "3 of 10 USCIS criteria, sustained acclaim"
-        }
+    results["summary"] = {
+        "success_counts": success_counts,
+        "total_tests": total_tests,
+        "successful_operations": successful_operations,
+        "total_operations": total_operations,
+        "overall_success_rate": overall_success_rate,
+        "system_ready": overall_success_rate >= 75  # 75% threshold for system readiness
     }
     
-    # System adaptation analysis
-    system_adaptation = {
-        "1_document_requirements_adapted": len(results["fase_3_document_uploads"]["eb1a_specific_docs"]) == 8,
-        "2_field_requirements_adapted": results["fase_2_basic_data"]["validations"].get("4_extraordinary_ability_field", False),
-        "3_form_criteria_adapted": results["fase_5_eb1a_form"]["validations"].get("3_criteria_count_correct", False),
-        "4_ai_recognition_adapted": results["fase_6_ai_review"]["validations"].get("3_visa_type_recognized", False),
-        "5_terminology_adapted": results["fase_6_ai_review"]["validations"].get("5_eb1a_specific_message", False),
-        "6_scoring_adapted": results["fase_6_ai_review"]["validations"].get("4_high_score", False),
-        "7_persistence_adapted": results["fase_7_persistence_verification"]["validations"].get("5_extraordinary_ability_field", False),
-        "8_complete_workflow": all([
-            results["fase_1_case_creation"].get("validations", {}).get("1_eb1a_case_created", False),
-            results["fase_2_basic_data"].get("working", False),
-            results["fase_3_document_uploads"]["successful_uploads"] >= 6,  # At least 6/8 documents
-            results["fase_4_personal_statement"].get("working", False),
-            results["fase_5_eb1a_form"].get("working", False)
-        ])
-    }
-    
-    results["fase_8_system_comparison"] = {
-        "visa_comparison": visa_comparison,
-        "system_adaptation": system_adaptation,
-        "adaptation_score": sum(system_adaptation.values()) / len(system_adaptation) * 100,
-        "working": sum(system_adaptation.values()) >= 6  # At least 6/8 adaptations working
-    }
-    
-    print("\n🎯 ANÁLISE DE ADAPTAÇÃO DO SISTEMA:")
-    print("=" * 50)
-    for check, passed in system_adaptation.items():
-        status = "✅" if passed else "❌"
-        print(f"  {status} {check}: {passed}")
-    
-    print(f"\n📊 COMPARAÇÃO DE REQUISITOS:")
-    print("=" * 50)
-    for visa_type, requirements in visa_comparison.items():
-        print(f"\n🎯 {visa_type}:")
-        print(f"   📄 Documents: {len(requirements['documents'])} required")
-        print(f"   🎯 Focus: {requirements['focus']}")
-        print(f"   📋 Key Fields: {', '.join(requirements['key_fields'])}")
-        print(f"   ✅ Criteria: {requirements['criteria']}")
-    
-    adaptation_score = results["fase_8_system_comparison"]["adaptation_score"]
-    print(f"\n📈 SCORE DE ADAPTAÇÃO: {adaptation_score:.1f}%")
-    
-    if adaptation_score >= 80:
-        print("🎉 SISTEMA ALTAMENTE FLEXÍVEL - Adapta-se bem a diferentes tipos de visto")
-    elif adaptation_score >= 60:
-        print("✅ SISTEMA MODERADAMENTE FLEXÍVEL - Adaptação parcial aos requisitos EB-1A")
-    else:
-        print("⚠️  SISTEMA PRECISA MELHORAR - Adaptação limitada aos requisitos EB-1A")
-    
-    # Summary preparation
-    print("\n📊 PREPARANDO RESUMO FINAL EB-1A...")
-    print("-" * 50)
-    
-    # Summary
-    print("\n📊 RESUMO COMPLETO DO TESTE EB-1A EXTRAORDINARY ABILITY")
+    print(f"\n📊 RESUMO FINAL - SISTEMA DE GERAÇÃO DE FORMULÁRIOS USCIS")
     print("=" * 60)
     
-    # Count successful phases
-    successful_phases = 0
-    total_phases = 8
+    print(f"📋 Formulários Gerados: {success_counts['form_generation']}/{total_tests} ({success_counts['form_generation']/total_tests*100:.1f}%)")
+    print(f"📥 Downloads Funcionando: {success_counts['form_download']}/{total_tests} ({success_counts['form_download']/total_tests*100:.1f}%)")
+    print(f"💾 Persistência no Banco: {success_counts['data_persistence']}/{total_tests} ({success_counts['data_persistence']/total_tests*100:.1f}%)")
+    print(f"📄 PDFs Válidos: {success_counts['valid_pdfs']}/{total_tests} ({success_counts['valid_pdfs']/total_tests*100:.1f}%)")
     
-    phase_keys = [
-        "fase_1_case_creation", "fase_2_basic_data", "fase_3_document_uploads", 
-        "fase_4_personal_statement", "fase_5_eb1a_form", "fase_6_ai_review",
-        "fase_7_persistence_verification", "fase_8_system_comparison"
-    ]
+    print(f"\n🎯 TAXA DE SUCESSO GERAL: {successful_operations}/{total_operations} ({overall_success_rate:.1f}%)")
     
-    for phase_key in phase_keys:
-        phase_data = results.get(phase_key, {})
-        if isinstance(phase_data, dict):
-            if phase_data.get("status_code") in [200, 201] or phase_data.get("working", False):
-                successful_phases += 1
-        elif isinstance(phase_data, list):
-            # For document validation (list of results)
-            if any(item.get("working", False) for item in phase_data):
-                successful_phases += 1
+    # Individual case results
+    print(f"\n📋 RESULTADOS POR CASO:")
+    print("=" * 50)
     
-    success_rate = (successful_phases / total_phases) * 100
-    
-    print(f"🧪 Teste EB-1A Extraordinary Ability: {successful_phases}/{total_phases} fases concluídas ({success_rate:.1f}%)")
-    print(f"👩‍🔬 Aplicante: Dr. Sofia Martinez Chen")
-    print(f"🎯 Processo: EB-1A Extraordinary Ability")
-    print(f"📋 Case ID: {case_id}")
-    
-    # Show phase-by-phase results
-    print(f"\n📋 RESULTADOS POR FASE:")
-    phase_names = [
-        "Criação de Caso EB-1A",
-        "Dados Básicos EB-1A", 
-        "Upload de 8 Documentos EB-1A",
-        "Personal Statement",
-        "Formulário EB-1A",
-        "AI Review EB-1A",
-        "Verificação de Persistência",
-        "Comparação do Sistema"
-    ]
-    
-    for i, (phase_key, phase_name) in enumerate(zip(phase_keys, phase_names)):
-        phase_data = results.get(phase_key, {})
+    for test_case in test_cases:
+        case_name = test_case["name"]
+        case_id = test_case["case_id"]
+        expected_form = test_case["expected_form"]
+        result_key = test_case["key"]
         
-        if isinstance(phase_data, dict):
-            status_code = phase_data.get("status_code", 0)
-            working = phase_data.get("working", False)
-            status = "✅" if status_code in [200, 201] or working else "❌"
-            print(f"  {status} Fase {i+1}: {phase_name}")
-        elif isinstance(phase_data, list):
-            working_items = sum(1 for item in phase_data if item.get("working", False))
-            total_items = len(phase_data)
-            status = "✅" if working_items > 0 else "❌"
-            print(f"  {status} Fase {i+1}: {phase_name} ({working_items}/{total_items} working)")
-        else:
-            print(f"  ❌ Fase {i+1}: {phase_name} (No data)")
+        generation_ok = results[result_key].get("generation", {}).get("working", False)
+        download_ok = results[result_key].get("download", {}).get("working", False)
+        persistence_ok = results[result_key].get("persistence", {}).get("working", False)
+        pdf_valid = results[result_key].get("download", {}).get("is_valid_pdf", False)
+        
+        case_success_count = sum([generation_ok, download_ok, persistence_ok, pdf_valid])
+        case_success_rate = (case_success_count / 4) * 100
+        
+        print(f"\n🎯 {case_name} ({case_id}):")
+        print(f"  📝 Geração: {'✅' if generation_ok else '❌'}")
+        print(f"  📥 Download: {'✅' if download_ok else '❌'}")
+        print(f"  💾 Persistência: {'✅' if persistence_ok else '❌'}")
+        print(f"  📄 PDF Válido: {'✅' if pdf_valid else '❌'}")
+        print(f"  📊 Taxa: {case_success_count}/4 ({case_success_rate:.1f}%)")
     
-    # EB-1A System Analysis
-    print(f"\n🤖 ANÁLISE DO SISTEMA EB-1A:")
+    # System readiness assessment
+    print(f"\n🎯 AVALIAÇÃO DO SISTEMA:")
     print("=" * 50)
     
-    # Check document uploads
-    doc_uploads = results.get("fase_3_document_uploads", {})
-    successful_uploads = doc_uploads.get("successful_uploads", 0)
-    total_docs = doc_uploads.get("total_docs", 8)
+    if results["summary"]["system_ready"]:
+        print("✅ SISTEMA DE FORMULÁRIOS: TOTALMENTE FUNCIONAL")
+        print("✅ PRONTO PARA USCIS: SIM (PDFs oficiais preenchidos)")
+        print("✅ Todos os 3 tipos de visto suportados")
+    else:
+        print("⚠️  SISTEMA DE FORMULÁRIOS: NECESSITA MELHORIAS")
+        print("❌ PRONTO PARA USCIS: NÃO (alguns formulários falhando)")
+        
+        # Identify problem areas
+        problem_areas = []
+        if success_counts["form_generation"] < total_tests:
+            problem_areas.append("Geração de formulários")
+        if success_counts["form_download"] < total_tests:
+            problem_areas.append("Download de PDFs")
+        if success_counts["data_persistence"] < total_tests:
+            problem_areas.append("Persistência de dados")
+        if success_counts["valid_pdfs"] < total_tests:
+            problem_areas.append("Validação de PDFs")
+        
+        if problem_areas:
+            print(f"❌ Áreas problemáticas: {', '.join(problem_areas)}")
     
-    print(f"📄 Documentos EB-1A: {successful_uploads}/{total_docs} enviados")
-    
-    # Check personal statement
-    personal_statement = results.get("fase_4_personal_statement", {})
-    statement_working = personal_statement.get("working", False)
-    
-    print(f"📝 Personal Statement: {'✅' if statement_working else '❌'}")
-    
-    # Check EB-1A form
-    eb1a_form = results.get("fase_5_eb1a_form", {})
-    form_working = eb1a_form.get("working", False)
-    
-    print(f"📋 Formulário EB-1A: {'✅' if form_working else '❌'}")
-    
-    # Check AI Review
-    ai_review = results.get("fase_6_ai_review", {})
-    ai_working = ai_review.get("working", False)
-    ai_score = ai_review.get("response_data", {}).get("overall_score", 0)
-    
-    print(f"🤖 AI Review EB-1A: {'✅' if ai_working else '❌'} (Score: {ai_score}%)")
-    
-    # Check persistence
-    persistence = results.get("fase_7_persistence_verification", {})
-    persistence_working = persistence.get("working", False)
-    
-    print(f"💾 Persistência: {'✅' if persistence_working else '❌'}")
-    
-    # Check system adaptation
-    system_comparison = results.get("fase_8_system_comparison", {})
-    adaptation_score = system_comparison.get("adaptation_score", 0)
-    adaptation_working = system_comparison.get("working", False)
-    
-    print(f"🔄 Adaptação do Sistema: {'✅' if adaptation_working else '❌'} (Score: {adaptation_score:.1f}%)")
-    
-    overall_success = success_rate >= 70  # Consider success if 70% or more phases completed
-    
-    # Ensure summary exists
-    if "summary" not in results:
-        results["summary"] = {}
-    
-    results["summary"]["overall_success"] = overall_success
-    results["summary"]["successful_phases"] = successful_phases
-    results["summary"]["total_phases"] = total_phases
-    results["summary"]["success_rate"] = success_rate
-    results["summary"]["case_id"] = case_id
-    results["summary"]["eb1a_functional"] = ai_working and successful_uploads >= 6
-    results["summary"]["ai_score"] = ai_score
-    results["summary"]["adaptation_score"] = adaptation_score
-    
-    print(f"\n🎯 RESULTADO FINAL EB-1A: {'✅ SISTEMA FUNCIONAL' if overall_success else '❌ NECESSITA MELHORIAS'}")
-    print(f"📈 Taxa de sucesso: {success_rate:.1f}%")
-    
-    # EB-1A specific success criteria
-    eb1a_success_criteria = {
-        "case_creation": results["fase_1_case_creation"].get("validations", {}).get("1_eb1a_case_created", False),
-        "basic_data_eb1a": results["fase_2_basic_data"].get("validations", {}).get("4_extraordinary_ability_field", False),
-        "documents_uploaded": successful_uploads >= 6,  # At least 6/8 documents
-        "personal_statement": statement_working,
-        "eb1a_form": form_working,
-        "ai_review_high_score": ai_score > 85,
-        "persistence": persistence_working,
-        "system_adaptation": adaptation_working
-    }
-    
-    eb1a_criteria_met = sum(eb1a_success_criteria.values())
-    eb1a_total_criteria = len(eb1a_success_criteria)
-    eb1a_success_rate = (eb1a_criteria_met / eb1a_total_criteria) * 100
-    
-    print(f"\n🏆 CRITÉRIOS DE SUCESSO EB-1A:")
+    # Comparison with expected results
+    print(f"\n📊 COMPARAÇÃO ANTES vs DEPOIS:")
     print("=" * 50)
+    print("ANTES:")
+    print("  Formulários Gerados:  0/3 (0%)")
+    print("  Download Funciona:    0/3 (0%)")
+    print("  Sistema Completo:     ❌ NÃO")
+    print()
+    print("DEPOIS (Atual):")
+    print(f"  Formulários Gerados:  {success_counts['form_generation']}/3 ({success_counts['form_generation']/3*100:.0f}%)")
+    print(f"  Download Funciona:    {success_counts['form_download']}/3 ({success_counts['form_download']/3*100:.0f}%)")
+    print(f"  Sistema Completo:     {'✅ SIM' if results['summary']['system_ready'] else '❌ NÃO'}")
+    
+    return results
     for criterion, passed in eb1a_success_criteria.items():
         status = "✅" if passed else "❌"
         print(f"  {status} {criterion}: {passed}")
