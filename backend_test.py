@@ -45,11 +45,33 @@ def test_uscis_form_generation_system():
         "summary": {}
     }
     
-    # Use existing case ID from review request
-    case_id = "OSP-8731E45D"
+    # Test cases from review request
+    test_cases = [
+        {
+            "name": "I-539 Extension",
+            "case_id": "OSP-BD2D8ED2",
+            "expected_form": "I-539",
+            "min_file_size": 400 * 1024,  # 400KB
+            "key": "i539_extension"
+        },
+        {
+            "name": "I-589 Asylum", 
+            "case_id": "OSP-4899BE72",
+            "expected_form": "I-589",
+            "min_file_size": 800 * 1024,  # 800KB
+            "key": "i589_asylum"
+        },
+        {
+            "name": "EB-1A Extraordinary",
+            "case_id": "OSP-8731E45D", 
+            "expected_form": "I-140",
+            "min_file_size": 500 * 1024,  # 500KB
+            "key": "eb1a_extraordinary"
+        }
+    ]
     
-    # STEP 1: Verify existing case OSP-8731E45D
-    print("\n📋 STEP 1: Verify Existing Case OSP-8731E45D")
+    # STEP 1: Update EB-1A case with correct visa_type (as requested)
+    print("\n📋 STEP 1: Update EB-1A Case with Correct visa_type")
     print("-" * 50)
     
     try:
