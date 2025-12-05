@@ -50,14 +50,15 @@ def test_i539_ai_review_system():
     print("=" * 60)
     
     results = {
-        "etapa_1_user_creation": {},
-        "etapa_2_login": {},
-        "etapa_3_start_application": {},
-        "etapa_4_basic_data": {},
-        "etapa_5_friendly_form": {},
-        "etapa_6_document_uploads": {},
-        "etapa_7_ai_review": {},
-        "etapa_8_final_status": {},
+        "fase_1_case_creation": {},
+        "fase_2_basic_data": {},
+        "fase_3_document_uploads": {},
+        "fase_4_ai_review_endpoints": {},
+        "fase_5_document_validation": {},
+        "fase_6_letter_quality": {},
+        "fase_7_form_verification": {},
+        "fase_8_uscis_compliance": {},
+        "fase_9_final_analysis": {},
         "summary": {}
     }
     
