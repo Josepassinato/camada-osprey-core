@@ -33,15 +33,15 @@ def test_uscis_form_generation_system():
     - Valid PDF files generated (3/3)
     """
     
-    print("🎯 TESTE EB-1A APÓS CORREÇÕES - VALIDAÇÃO FINAL")
-    print("📋 Case ID: OSP-8731E45D (existing case)")
-    print("🎯 Focus: AI Review System After Corrections")
+    print("🎯 TESTE COMPLETO - SISTEMA DE GERAÇÃO DE FORMULÁRIOS USCIS")
+    print("📋 Testing 3 visa types: I-539, I-589, EB-1A")
+    print("🎯 Focus: Form generation and download functionality")
     print("=" * 60)
     
     results = {
-        "case_verification": {},
-        "ai_review_test": {},
-        "comparison_before_after": {},
+        "i539_extension": {},
+        "i589_asylum": {},
+        "eb1a_extraordinary": {},
         "summary": {}
     }
     
