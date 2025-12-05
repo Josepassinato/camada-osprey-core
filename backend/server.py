@@ -2747,7 +2747,7 @@ async def validate_friendly_form_ai(case: dict, friendly_form_data: dict, basic_
             llm = EmergentLLM(api_key=emergent_key)
         except ImportError:
             logger.error("EmergentLLM import failed, using programmatic validation only")
-            overall_status = "approved" if completion_percentage >= 90 else "needs_review" if completion_percentage >= 70 else "rejected"
+            overall_status = determine_overall_status(completion_percentage, validation_issues)
             return {
                 "validation_issues": validation_issues,
                 "overall_status": overall_status,
