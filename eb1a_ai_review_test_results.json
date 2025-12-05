@@ -1,0 +1,354 @@
+{
+  "test_results": {
+    "case_verification": {
+      "status_code": 200,
+      "processing_time": 0.05886554718017578,
+      "validations": {
+        "1_case_exists": true,
+        "2_eb1a_visa_type": false,
+        "3_documents_present": false,
+        "4_personal_statement_present": true,
+        "5_personal_statement_length": true,
+        "6_eb1a_form_present": true,
+        "7_criteria_count": true
+      },
+      "case_data": {
+        "case_id": "OSP-8731E45D",
+        "user_id": null,
+        "session_token": null,
+        "form_code": null,
+        "status": "created",
+        "process_type": null,
+        "progress_percentage": 0,
+        "current_step": null,
+        "basic_data": {
+          "applicant_name": "Dr. Sofia Martinez Chen",
+          "date_of_birth": "1985-09-20",
+          "passport_number": "ES234567890",
+          "current_address": "123 Research Center, Suite 500",
+          "city": "Boston",
+          "state": "MA",
+          "zip_code": "02101",
+          "country_of_birth": "Spain",
+          "email": "sofia.teste@test.com",
+          "phone": "+1-617-555-3456",
+          "field_of_extraordinary_ability": "Sciences - Artificial Intelligence Research",
+          "current_position": "Principal Research Scientist",
+          "current_employer": "MIT Computer Science and AI Laboratory"
+        },
+        "uploaded_documents": [],
+        "document_analysis": null,
+        "user_story_text": null,
+        "user_story_audio_url": null,
+        "ai_extracted_facts": null,
+        "simplified_form_responses": null,
+        "official_form_data": null,
+        "uscis_form_generated": false,
+        "ead_data": null,
+        "ai_processing": null,
+        "payment_status": null,
+        "payment_id": null,
+        "final_package_generated": false,
+        "final_package_url": null,
+        "completed_at": null,
+        "created_at": "2025-12-05T05:19:10.258000",
+        "updated_at": "2025-12-05T05:19:10.568000",
+        "expires_at": "2025-12-12T05:19:10.258000",
+        "documents": [
+          {
+            "id": "5accedba-d02f-4c56-a3dd-cf2865522c5f",
+            "case_id": "OSP-8731E45D",
+            "filename": "passport_sofia_martinez.pdf",
+            "document_type": "passport",
+            "description": null,
+            "content_base64": "UEFTU1BPUlQgLSBSRUlOTyBERSBFU1BBw5FBCk5vbWJyZTogU09GSUEgTUFSVElORVogQ0hFTgpQYXNhcG9ydGU6IEVTMjM0NTY3ODkwCkZlY2hhIGRlIE5hY2ltaWVudG86IDIwLzA5LzE5ODUKTmFjaW9uYWxpZGFkOiBFU1BBw5FPTEEKVmFsaWRlejogMzEvMTIvMjAzMA==",
+            "mime_type": "application/pdf",
+            "file_size": 154,
+            "uploaded_at": "2025-12-05T05:19:10.352000",
+            "status": "uploaded"
+          },
+          {
+            "id": "bb20a244-f141-4a7d-9771-118ac4f03151",
+            "case_id": "OSP-8731E45D",
+            "filename": "awards_national_international.pdf",
+            "document_type": "awards",
+            "description": null,
+            "content_base64": "QVdBUkRTIEFORCBSRUNPR05JVElPTlMKMjAyMyBUdXJpbmcgQXdhcmQgRmluYWxpc3QgLSBBc3NvY2lhdGlvbiBmb3IgQ29tcHV0aW5nIE1hY2hpbmVyeQoyMDIyIE5TRiBDQVJFRVIgQXdhcmQgLSBOYXRpb25hbCBTY2llbmNlIEZvdW5kYXRpb24KMjAyMSBCZXN0IFBhcGVyIEF3YXJkIElDTUwgLSBJbnRlcm5hdGlvbmFsIENvbmZlcmVuY2Ugb24gTWFjaGluZSBMZWFybmluZwoyMDIwIE1JVCBUZWNobm9sb2d5IFJldmlldyAzNSBVbmRlciAzNSAtIE91dHN0YW5kaW5nIFlvdW5nIElubm92YXRvcg==",
+            "mime_type": "application/pdf",
+            "file_size": 283,
+            "uploaded_at": "2025-12-05T05:19:10.376000",
+            "status": "uploaded"
+          },
+          {
+            "id": "4d5cf484-123f-4633-87b0-6da0c25339d7",
+            "case_id": "OSP-8731E45D",
+            "filename": "publications_scientific.pdf",
+            "document_type": "publications",
+            "description": null,
+            "content_base64": "U0NJRU5USUZJQyBQVUJMSUNBVElPTlMKRHIuIFNvZmlhIE1hcnRpbmV6IENoZW4gLSBQdWJsaWNhdGlvbiBSZWNvcmQKVG90YWwgUGFwZXJzOiA0NSBwZWVyLXJldmlld2VkIHB1YmxpY2F0aW9ucwpUb3AgVmVudWVzOiBOYXR1cmUsIFNjaWVuY2UsIElDTUwsIE5ldXJJUFMsIElDTFIKSC1pbmRleDogMjgKVG90YWwgQ2l0YXRpb25zOiAzLDI0NwpGaXJzdCBBdXRob3IgUGFwZXJzOiAxNQpOb3RhYmxlIFB1YmxpY2F0aW9uczoKLSAnQWR2YW5jZXMgaW4gTmV1cmFsIEFyY2hpdGVjdHVyZSBTZWFyY2gnIChOYXR1cmUsIDIwMjMpCi0gJ0V0aGljYWwgQUkgaW4gSGVhbHRoY2FyZSBBcHBsaWNhdGlvbnMnIChTY2llbmNlLCAyMDIyKQ==",
+            "mime_type": "application/pdf",
+            "file_size": 358,
+            "uploaded_at": "2025-12-05T05:19:10.398000",
+            "status": "uploaded"
+          },
+          {
+            "id": "2f3860fe-8a15-4526-be2c-5216965a459f",
+            "case_id": "OSP-8731E45D",
+            "filename": "memberships_associations.pdf",
+            "document_type": "memberships",
+            "description": null,
+            "content_base64": "UFJPRkVTU0lPTkFMIE1FTUJFUlNISVBTCkZlbGxvdyBvZiBBc3NvY2lhdGlvbiBmb3IgQ29tcHV0aW5nIE1hY2hpbmVyeSAoQUNNKSAtIDIwMjIKU2VuaW9yIE1lbWJlciBvZiBJRUVFIENvbXB1dGVyIFNvY2lldHkgLSAyMDIxCkJvYXJkIE1lbWJlciBvZiBBSSBFdGhpY3MgQ29tbWl0dGVlIC0gTUlUIC0gMjAyMC1QcmVzZW50CkVkaXRvcmlhbCBCb2FyZCBNZW1iZXIgLSBKb3VybmFsIG9mIE1hY2hpbmUgTGVhcm5pbmcgUmVzZWFyY2ggLSAyMDIzLVByZXNlbnQ=",
+            "mime_type": "application/pdf",
+            "file_size": 263,
+            "uploaded_at": "2025-12-05T05:19:10.422000",
+            "status": "uploaded"
+          },
+          {
+            "id": "0e352dec-99a8-4c96-907f-a294379640f4",
+            "case_id": "OSP-8731E45D",
+            "filename": "expert_recommendation_letters.pdf",
+            "document_type": "expert_letters",
+            "description": null,
+            "content_base64": "RVhQRVJUIFJFQ09NTUVOREFUSU9OIExFVFRFUlMKTGV0dGVyIDE6IERyLiBZb3NodWEgQmVuZ2lvIChUdXJpbmcgQXdhcmQgV2lubmVyLCBVbml2ZXJzaXR5IG9mIE1vbnRyZWFsKQpMZXR0ZXIgMjogRHIuIEZlaS1GZWkgTGkgKFByb2Zlc3NvciwgU3RhbmZvcmQgVW5pdmVyc2l0eSkKTGV0dGVyIDM6IERyLiBBbmRyZXcgTmcgKEFkanVuY3QgUHJvZmVzc29yLCBTdGFuZm9yZCBVbml2ZXJzaXR5KQpMZXR0ZXIgNDogRHIuIERlbWlzIEhhc3NhYmlzIChDRU8sIERlZXBNaW5kKQpMZXR0ZXIgNTogRHIuIFlhbm4gTGVDdW4gKENoaWVmIEFJIFNjaWVudGlzdCwgTWV0YSkKQWxsIGxldHRlcnMgYXR0ZXN0IHRvIERyLiBNYXJ0aW5leiBDaGVuJ3MgZXh0cmFvcmRpbmFyeSBjb250cmlidXRpb25zIHRvIEFJIHJlc2VhcmNoLg==",
+            "mime_type": "application/pdf",
+            "file_size": 409,
+            "uploaded_at": "2025-12-05T05:19:10.443000",
+            "status": "uploaded"
+          },
+          {
+            "id": "c5ce2ff1-b0c4-41fa-bd92-5d02200eb1e3",
+            "case_id": "OSP-8731E45D",
+            "filename": "high_salary_evidence.pdf",
+            "document_type": "high_salary",
+            "description": null,
+            "content_base64": "U0FMQVJZIEVWSURFTkNFCkN1cnJlbnQgQ29tcGVuc2F0aW9uOiAkMzgwLDAwMC95ZWFyCk1JVCBDb21wdXRlciBTY2llbmNlIGFuZCBBSSBMYWJvcmF0b3J5ClBvc2l0aW9uOiBQcmluY2lwYWwgUmVzZWFyY2ggU2NpZW50aXN0CkNvbXBhcmlzb24gRGF0YToKVG9wIDElIGluIGZpZWxkIG9mIEFJIFJlc2VhcmNoCkNvbXBhcmFibGUgdG8gc2VuaW9yIHJlc2VhcmNoZXJzIGF0IEdvb2dsZSBCcmFpbiwgRGVlcE1pbmQsIE9wZW5BSQpJbmR1c3RyeSBiZW5jaG1hcmtzIGNvbmZpcm0gZXhjZXB0aW9uYWwgY29tcGVuc2F0aW9uIGxldmVs",
+            "mime_type": "application/pdf",
+            "file_size": 303,
+            "uploaded_at": "2025-12-05T05:19:10.468000",
+            "status": "uploaded"
+          },
+          {
+            "id": "6e653124-6f0d-411e-902c-24b853627743",
+            "case_id": "OSP-8731E45D",
+            "filename": "press_media_coverage.pdf",
+            "document_type": "press_coverage",
+            "description": null,
+            "content_base64": "UFJFU1MgQU5EIE1FRElBIENPVkVSQUdFCk1JVCBOZXdzOiAnQnJlYWt0aHJvdWdoIGluIEFJIEV0aGljcyBSZXNlYXJjaCcgLSBNYXJjaCAyMDIzClRlY2hDcnVuY2g6ICdSaXNpbmcgU3RhciBpbiBNYWNoaW5lIExlYXJuaW5nJyAtIEphbnVhcnkgMjAyMwpXaXJlZCBNYWdhemluZTogJ1RoZSBGdXR1cmUgb2YgRXRoaWNhbCBBSScgLSBGZWF0dXJlIEFydGljbGUgLSBEZWNlbWJlciAyMDIyCk5QUiBTY2llbmNlIEZyaWRheTogSW50ZXJ2aWV3IG9uIEFJIGluIEhlYWx0aGNhcmUgLSBOb3ZlbWJlciAyMDIyCk5hdHVyZSBDYXJlZXJzOiBQcm9maWxlIEZlYXR1cmUgLSAnTGVhZGluZyB0aGUgTmV4dCBHZW5lcmF0aW9uIG9mIEFJJyAtIE9jdG9iZXIgMjAyMg==",
+            "mime_type": "application/pdf",
+            "file_size": 373,
+            "uploaded_at": "2025-12-05T05:19:10.487000",
+            "status": "uploaded"
+          },
+          {
+            "id": "77a1b926-7ea1-4a6a-9897-7d96d2a0ab98",
+            "case_id": "OSP-8731E45D",
+            "filename": "judging_reviewer_evidence.pdf",
+            "document_type": "judging_work",
+            "description": null,
+            "content_base64": "SlVER0lORyBBTkQgUkVWSUVXIFdPUksKUGVlciBSZXZpZXcgQWN0aXZpdGllczoKLSBSZXZpZXdlciBmb3IgTmF0dXJlICgyMDIwLVByZXNlbnQpCi0gUmV2aWV3ZXIgZm9yIFNjaWVuY2UgKDIwMjEtUHJlc2VudCkKLSBQcm9ncmFtIENvbW1pdHRlZSBNZW1iZXI6IElDTUwgKDIwMTktMjAyMykKLSBQcm9ncmFtIENvbW1pdHRlZSBNZW1iZXI6IE5ldXJJUFMgKDIwMjAtMjAyMykKLSBQYW5lbCBKdWRnZTogTlNGIENvbXB1dGVyIGFuZCBJbmZvcm1hdGlvbiBTY2llbmNlIGFuZCBFbmdpbmVlcmluZyBHcmFudHMKLSBFZGl0b3JpYWwgQm9hcmQ6IEpvdXJuYWwgb2YgTWFjaGluZSBMZWFybmluZyBSZXNlYXJjaApUb3RhbCBSZXZpZXdzOiAxMjcgcGFwZXJzIHJldmlld2VkCkdyYW50IFBhbmVsczogMTUgTlNGIGdyYW50IHJldmlldyBwYW5lbHM=",
+            "mime_type": "application/pdf",
+            "file_size": 422,
+            "uploaded_at": "2025-12-05T05:19:10.511000",
+            "status": "uploaded"
+          }
+        ],
+        "letters": {
+          "cover_letter": "To USCIS Officer,\n\nI am Dr. Sofia Martinez Chen, and I am applying for an EB-1A visa based on my extraordinary ability in the field of Artificial Intelligence research.\n\nI have achieved sustained national and international acclaim in AI research, specifically in machine learning and computer vision. My work has been recognized through:\n\n1. AWARDS: I am a 2023 Turing Award Finalist, received the 2022 NSF CAREER Award, and was named to MIT Technology Review 35 Under 35 in 2020.\n\n2. PUBLICATIONS: I have authored 45 peer-reviewed papers in top venues including Nature, Science, and ICML. My H-index is 28 with over 3,000 citations, demonstrating significant impact.\n\n3. MEMBERSHIP: I am a Fellow of ACM and serve on the Board of the AI Ethics Committee, positions reserved for those with outstanding achievements.\n\n4. EXPERT RECOGNITION: I have letters from Turing Award winners and leading professors at Stanford and MIT attesting to my extraordinary contributions.\n\n5. HIGH COMPENSATION: My current salary of $380,000/year places me in the top 1% of my field.\n\n6. PRESS COVERAGE: My research has been featured in major publications including Wired, TechCrunch, and MIT News.\n\n7. JUDGING: I serve as a reviewer for Nature and Science and as a panel judge for NSF grants, roles reserved for leading experts.\n\nMy contributions have advanced the field of AI significantly. I am currently leading research at MIT that will benefit the United States through technological innovation and economic growth.\n\nI respectfully request approval of my EB-1A petition.\n\nSincerely,\nDr. Sofia Martinez Chen"
+        },
+        "forms": {
+          "eb1a": {
+            "completed": true,
+            "completion_date": "2024-12-04",
+            "criteria_met": [
+              "Awards - national/international prizes",
+              "Membership in associations requiring outstanding achievements",
+              "Published material about the applicant",
+              "Judging the work of others",
+              "Original contributions of major significance",
+              "Scholarly articles",
+              "High salary"
+            ],
+            "criteria_count": 7
+          }
+        },
+        "ai_review": {
+          "success": true,
+          "case_id": "OSP-8731E45D",
+          "overall_status": "PENDING",
+          "overall_score": 75.0,
+          "approval_message": "\u26a0\ufe0f Caso pendente. Alguns itens precisam de aten\u00e7\u00e3o.",
+          "detailed_checks": {
+            "basic_data": {
+              "status": "COMPLETE",
+              "score": 1.0,
+              "missing_fields": [],
+              "message": "Dados b\u00e1sicos completos"
+            },
+            "documents": {
+              "status": "COMPLETE",
+              "score": 1.0,
+              "uploaded": 8,
+              "required": 1,
+              "missing_documents": [],
+              "message": "8 documentos enviados"
+            },
+            "forms": {
+              "status": "COMPLETE",
+              "score": 1.0,
+              "message": "Formul\u00e1rios preenchidos"
+            },
+            "letters": {
+              "status": "COMPLETE",
+              "score": 0.75,
+              "has_cover_letter": true,
+              "letter_length": 1592,
+              "message": "Carta de apresenta\u00e7\u00e3o presente"
+            },
+            "payment": {
+              "status": "PENDING",
+              "score": 0.0,
+              "message": "Pagamento: pending"
+            }
+          },
+          "summary": {
+            "basic_data_complete": true,
+            "documents_complete": true,
+            "forms_complete": true,
+            "letters_complete": true,
+            "payment_complete": false
+          },
+          "missing_items": {
+            "fields": [],
+            "documents": []
+          },
+          "timestamp": "2025-12-05T05:19:10.567577"
+        },
+        "ai_review_date": "2025-12-05T05:19:10.568000",
+        "ai_review_score": 0.75
+      }
+    },
+    "ai_review_test": {
+      "status_code": 200,
+      "processing_time": 0.034635066986083984,
+      "validations": {
+        "1_recognizes_eb1a": false,
+        "2_score_above_85": false,
+        "3_status_approved": false,
+        "4_eb1a_in_message": false,
+        "5_extraordinary_ability_mentioned": false,
+        "6_sustained_acclaim_mentioned": false,
+        "7_uscis_criteria_mentioned": false,
+        "8_documents_score_perfect": true,
+        "9_letters_score_90": false,
+        "10_documents_count_8": true
+      },
+      "response_data": {
+        "success": true,
+        "case_id": "OSP-8731E45D",
+        "overall_status": "PENDING",
+        "overall_score": 75.0,
+        "approval_message": "\u26a0\ufe0f Caso pendente. Alguns itens precisam de aten\u00e7\u00e3o.",
+        "detailed_checks": {
+          "basic_data": {
+            "status": "COMPLETE",
+            "score": 1.0,
+            "missing_fields": [],
+            "message": "Dados b\u00e1sicos completos"
+          },
+          "documents": {
+            "status": "COMPLETE",
+            "score": 1.0,
+            "uploaded": 8,
+            "required": 1,
+            "missing_documents": [],
+            "message": "8 documentos enviados"
+          },
+          "forms": {
+            "status": "COMPLETE",
+            "score": 1.0,
+            "message": "Formul\u00e1rios preenchidos"
+          },
+          "letters": {
+            "status": "COMPLETE",
+            "score": 0.75,
+            "has_cover_letter": true,
+            "letter_length": 1592,
+            "message": "Carta de apresenta\u00e7\u00e3o presente"
+          },
+          "payment": {
+            "status": "PENDING",
+            "score": 0.0,
+            "message": "Pagamento: pending"
+          }
+        },
+        "summary": {
+          "basic_data_complete": true,
+          "documents_complete": true,
+          "forms_complete": true,
+          "letters_complete": true,
+          "payment_complete": false
+        },
+        "missing_items": {
+          "fields": [],
+          "documents": []
+        },
+        "timestamp": "2025-12-05T05:25:08.230557"
+      },
+      "improvement_criteria": {
+        "score_improved": false,
+        "status_specific": false,
+        "eb1a_terminology": false,
+        "documents_perfect": true,
+        "letters_improved": false
+      }
+    },
+    "comparison_before_after": {
+      "before": {
+        "score": 75,
+        "status": "Generic",
+        "message": "Caso aprovado",
+        "letter_score": 0.75,
+        "requirements": "N\u00e3o espec\u00edficos EB-1A"
+      },
+      "after": {
+        "score": 75.0,
+        "status": "PENDING",
+        "message": "\u26a0\ufe0f Caso pendente. Alguns itens precisam de aten\u00e7\u00e3o...",
+        "letter_score": 0.75,
+        "requirements": "EB-1A espec\u00edficos (8 documentos)"
+      }
+    },
+    "summary": {
+      "case_id": "OSP-8731E45D",
+      "case_success_rate": 71.42857142857143,
+      "ai_success_rate": 20.0,
+      "improvement_success_rate": 20.0,
+      "overall_success_rate": 37.142857142857146,
+      "eb1a_system_ready": false,
+      "before_corrections": {
+        "score": 75,
+        "status": "Generic",
+        "message": "Caso aprovado",
+        "letter_score": 0.75,
+        "requirements": "N\u00e3o espec\u00edficos EB-1A"
+      },
+      "after_corrections": {
+        "score": 75.0,
+        "status": "PENDING",
+        "message": "\u26a0\ufe0f Caso pendente. Alguns itens precisam de aten\u00e7\u00e3o...",
+        "letter_score": 0.75,
+        "requirements": "EB-1A espec\u00edficos (8 documentos)"
+      }
+    }
+  },
+  "timestamp": 1764912308.2402387,
+  "test_focus": "EB-1A AI Review System After Corrections",
+  "case_id": "OSP-8731E45D",
+  "expected_improvements": [
+    "Score > 85% (before was 75%)",
+    "Status = APPROVED (before was generic)",
+    "EB-1A specific terminology",
+    "Documents score = 1.0",
+    "Letters score = 0.90"
+  ]
+}
