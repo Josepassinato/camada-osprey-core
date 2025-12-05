@@ -887,10 +887,39 @@ Dr. Sofia Martinez Chen"""
     results["summary"]["total_phases"] = total_phases
     results["summary"]["success_rate"] = success_rate
     results["summary"]["case_id"] = case_id
-    results["summary"]["ai_review_functional"] = working_ai_endpoints > 0
+    results["summary"]["eb1a_functional"] = ai_working and successful_uploads >= 6
+    results["summary"]["ai_score"] = ai_score
+    results["summary"]["adaptation_score"] = adaptation_score
     
-    print(f"\n🎯 RESULTADO FINAL: {'✅ SISTEMA FUNCIONAL' if overall_success else '❌ NECESSITA MELHORIAS'}")
+    print(f"\n🎯 RESULTADO FINAL EB-1A: {'✅ SISTEMA FUNCIONAL' if overall_success else '❌ NECESSITA MELHORIAS'}")
     print(f"📈 Taxa de sucesso: {success_rate:.1f}%")
+    
+    # EB-1A specific success criteria
+    eb1a_success_criteria = {
+        "case_creation": results["fase_1_case_creation"].get("validations", {}).get("1_eb1a_case_created", False),
+        "basic_data_eb1a": results["fase_2_basic_data"].get("validations", {}).get("4_extraordinary_ability_field", False),
+        "documents_uploaded": successful_uploads >= 6,  # At least 6/8 documents
+        "personal_statement": statement_working,
+        "eb1a_form": form_working,
+        "ai_review_high_score": ai_score > 85,
+        "persistence": persistence_working,
+        "system_adaptation": adaptation_working
+    }
+    
+    eb1a_criteria_met = sum(eb1a_success_criteria.values())
+    eb1a_total_criteria = len(eb1a_success_criteria)
+    eb1a_success_rate = (eb1a_criteria_met / eb1a_total_criteria) * 100
+    
+    print(f"\n🏆 CRITÉRIOS DE SUCESSO EB-1A:")
+    print("=" * 50)
+    for criterion, passed in eb1a_success_criteria.items():
+        status = "✅" if passed else "❌"
+        print(f"  {status} {criterion}: {passed}")
+    
+    print(f"\n📊 EB-1A SUCCESS RATE: {eb1a_criteria_met}/{eb1a_total_criteria} ({eb1a_success_rate:.1f}%)")
+    
+    results["summary"]["eb1a_success_criteria"] = eb1a_success_criteria
+    results["summary"]["eb1a_success_rate"] = eb1a_success_rate
     
     return results
 
