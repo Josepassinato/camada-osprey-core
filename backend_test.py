@@ -134,8 +134,8 @@ def test_eb1a_extraordinary_ability_system():
         print(f"❌ Exception during case creation: {str(e)}")
         results["fase_1_case_creation"]["exception"] = str(e)
     
-    # FASE 2: Completar dados básicos do I-539
-    print("\n📋 FASE 2: Completar Dados Básicos I-539")
+    # FASE 2: Completar dados básicos do EB-1A
+    print("\n📋 FASE 2: Completar Dados Básicos EB-1A")
     print("-" * 50)
     
     if not case_id:
@@ -143,21 +143,21 @@ def test_eb1a_extraordinary_ability_system():
         return results
     
     basic_data = {
-        "applicant_name": "Carlos Eduardo Silva Mendes",
-        "date_of_birth": "1985-03-15",
-        "passport_number": "BR987654321",
-        "current_address": "123 Main Street, Apt 4B",
-        "city": "New York",
-        "state": "NY",
-        "zip_code": "10001",
-        "country_of_birth": "Brazil",
-        "email": "carlos.mendes@test.com",
-        "phone": "+5511987654321",
-        "current_visa_type": "F-1",
-        "i20_expiration": "2025-06-30",
-        "extension_reason": "Complete Master's degree in Computer Science",
-        "university": "Columbia University",
-        "sevis_number": "N9876543210"
+        "basic_data": {
+            "applicant_name": "Dr. Sofia Martinez Chen",
+            "date_of_birth": "1985-09-20",
+            "passport_number": "ES234567890",
+            "current_address": "123 Research Center, Suite 500",
+            "city": "Boston",
+            "state": "MA",
+            "zip_code": "02101",
+            "country_of_birth": "Spain",
+            "email": "sofia.teste@test.com",
+            "phone": "+1-617-555-3456",
+            "field_of_extraordinary_ability": "Sciences - Artificial Intelligence Research",
+            "current_position": "Principal Research Scientist",
+            "current_employer": "MIT Computer Science and AI Laboratory"
+        }
     }
     
     try:
