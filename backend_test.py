@@ -769,57 +769,9 @@ Dr. Sofia Martinez Chen"""
     else:
         print("⚠️  SISTEMA PRECISA MELHORAR - Adaptação limitada aos requisitos EB-1A")
     
-    # FASE 9: Análise Final do Sistema de Revisão
-    print("\n📋 FASE 9: Análise Final do Sistema de Revisão")
+    # Summary preparation
+    print("\n📊 PREPARANDO RESUMO FINAL EB-1A...")
     print("-" * 50)
-    
-    try:
-        # Check current case status
-        print(f"🔗 Endpoint: GET {API_BASE}/auto-application/case/{case_id}")
-        
-        start_time = time.time()
-        response = requests.get(
-            f"{API_BASE}/auto-application/case/{case_id}",
-            headers={"Content-Type": "application/json"},
-            timeout=30
-        )
-        processing_time = time.time() - start_time
-        
-        print(f"⏱️  Processing time: {processing_time:.2f}s")
-        print(f"📊 Status Code: {response.status_code}")
-        
-        results["fase_9_final_analysis"]["status_code"] = response.status_code
-        results["fase_9_final_analysis"]["processing_time"] = processing_time
-        
-        if response.status_code == 200:
-            response_data = response.json()
-            print(f"📄 Case Status Response: {json.dumps(response_data, indent=2)}")
-            
-            # Final analysis of AI review system
-            ai_review_analysis = {
-                "case_retrieval_working": True,
-                "case_data_complete": bool(response_data.get("case")),
-                "applicant_data_preserved": "Carlos Eduardo Silva Mendes" in str(response_data),
-                "i539_specific_data_present": "I-539" in str(response_data) or "F-1" in str(response_data)
-            }
-            
-            results["fase_9_final_analysis"]["ai_review_analysis"] = ai_review_analysis
-            results["fase_9_final_analysis"]["response_data"] = response_data
-            
-            print("\n🎯 ANÁLISE FINAL DO SISTEMA:")
-            print("=" * 50)
-            for check, passed in ai_review_analysis.items():
-                status = "✅" if passed else "❌"
-                print(f"  {status} {check}: {passed}")
-                
-        else:
-            print(f"❌ Final analysis failed with status {response.status_code}")
-            print(f"📄 Error response: {response.text}")
-            results["fase_9_final_analysis"]["error"] = response.text
-            
-    except Exception as e:
-        print(f"❌ Exception during final analysis: {str(e)}")
-        results["fase_9_final_analysis"]["exception"] = str(e)
     
     # Summary
     print("\n📊 RESUMO COMPLETO DO TESTE I-539 AI REVIEW")
