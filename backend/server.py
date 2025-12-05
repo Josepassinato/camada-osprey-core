@@ -7286,9 +7286,15 @@ async def download_master_packet(job_id: str, current_user = Depends(get_current
 async def register_owl_user(request: dict):
     """Register user for saving progress with email and password"""
     try:
+        # EMAIL BYPASS FOR TESTING
+        email_bypass = os.environ.get('EMAIL_BYPASS_FOR_TESTING', 'FALSE').upper() == 'TRUE'
+        test_email_domain = os.environ.get('TEST_EMAIL_DOMAIN', 'test.local')
+        
         email = request.get("email", "").strip().lower()
         password = request.get("password", "")
         name = request.get("name", "")
+        
+        is_test_email = email.endswith(f"@{test_email_domain}")
         
         if not email or not password or len(password) < 6:
             raise HTTPException(status_code=400, detail="Email and password (min 6 chars) are required")
@@ -7308,6 +7314,8 @@ async def register_owl_user(request: dict):
             "email": email,
             "name": name,
             "password_hash": hashed_password,
+            "email_verified": True if (email_bypass and is_test_email) else False,
+            "is_test_user": is_test_email if email_bypass else False,
             "created_at": datetime.utcnow(),
             "active_sessions": [],
             "completed_applications": []
@@ -7315,13 +7323,22 @@ async def register_owl_user(request: dict):
         
         result = await db.owl_users.insert_one(user_data)
         
-        return {
+        if email_bypass and is_test_email:
+            logger.info(f"🧪 TEST MODE: Owl user registered with email bypass for {email}")
+        
+        response_data = {
             "success": True,
             "message": "User registered successfully",
             "user_id": user_data["user_id"],
             "email": email,
             "timestamp": datetime.utcnow().isoformat()
         }
+        
+        if email_bypass and is_test_email:
+            response_data["test_mode"] = True
+            response_data["message"] = "🧪 TEST MODE: User registered (email verification bypassed)"
+        
+        return response_data
         
     except HTTPException:
         raise
