@@ -1332,15 +1332,15 @@ async def generate_uscis_form(case_id: str):
         
         logger.info(f"📝 Generating form for case {case_id}, type: {visa_type}")
         
-        # Generate appropriate form
+        # Generate appropriate form using USCIS form filler
         if visa_type == "I-539":
-            pdf_bytes = form_filler.fill_i539(case)
+            pdf_bytes = uscis_form_filler.fill_i539(case)
             filename = f"I-539_{case_id}.pdf"
         elif visa_type == "I-589":
-            pdf_bytes = form_filler.fill_i589(case)
+            pdf_bytes = uscis_form_filler.fill_i589(case)
             filename = f"I-589_{case_id}.pdf"
         elif visa_type == "EB-1A" or visa_type == "EB1A":
-            pdf_bytes = form_filler.fill_i140(case)
+            pdf_bytes = uscis_form_filler.fill_i140(case)
             filename = f"I-140_{case_id}.pdf"
         else:
             raise HTTPException(
