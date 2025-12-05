@@ -1093,33 +1093,50 @@ if __name__ == "__main__":
     print(f"   Taxa de sucesso EB-1A: {eb1a_success_rate:.1f}%")
     
     if summary.get("overall_success", False):
-        print("\n🎉 CONCLUSÃO: Sistema de IA de Revisão I-539 está FUNCIONAL!")
-        print("✅ Endpoints de revisão operacionais")
-        print("✅ Validação de documentos funcionando")
-        print("✅ Análise de qualidade implementada")
+        print("\n🎉 CONCLUSÃO: Sistema EB-1A Extraordinary Ability está FUNCIONAL!")
+        print("✅ Reconhecimento de EB-1A operacional")
+        print("✅ Adaptação de requisitos funcionando")
+        print("✅ Documentos específicos validados")
+        print("✅ AI Review com score alto")
         
-        if ai_system_ready:
-            print("✅ SISTEMA PRONTO PARA PRODUÇÃO")
+        if eb1a_system_ready:
+            print("✅ SISTEMA EB-1A PRONTO PARA PRODUÇÃO")
         else:
             print("⚠️  Sistema funcional mas precisa de melhorias")
     else:
-        print("\n⚠️  CONCLUSÃO: Sistema de IA de Revisão I-539 precisa de melhorias")
+        print("\n⚠️  CONCLUSÃO: Sistema EB-1A precisa de melhorias")
         
         # Show areas needing improvement
         improvement_areas = []
-        if not satisfactory:
-            improvement_areas.append("Endpoints de AI Review")
-        if not uscis_compliant:
-            improvement_areas.append("Conformidade USCIS")
-        if not doc_validation_working:
-            improvement_areas.append("Validação de Documentos")
-        if not letter_working:
-            improvement_areas.append("Qualidade de Cartas")
-        if not form_working:
-            improvement_areas.append("Verificação de Formulários")
+        if not case_creation:
+            improvement_areas.append("Reconhecimento EB-1A")
+        if not basic_data_eb1a:
+            improvement_areas.append("Campos específicos EB-1A")
+        if not documents_uploaded:
+            improvement_areas.append("Upload de documentos EB-1A")
+        if not ai_review_high_score:
+            improvement_areas.append("AI Review score")
+        if ai_score <= 85:
+            improvement_areas.append("Score calculation")
         
         if improvement_areas:
             print(f"❌ Áreas que precisam de melhoria: {', '.join(improvement_areas)}")
+    
+    # Comparison with other visa types
+    print(f"\n📊 COMPARAÇÃO DOS 3 VISTOS:")
+    print("=" * 50)
+    print("I-539:  Testado anteriormente → Status conhecido")
+    print("I-589:  Testado anteriormente → Status conhecido") 
+    print(f"EB-1A:  {eb1a_success_rate:.1f}% → {'APPROVED ✅' if eb1a_success_rate >= 80 else 'NEEDS WORK ⚠️'}")
+    
+    print(f"\n🎯 FLEXIBILIDADE DO SISTEMA:")
+    adaptation_score = summary.get("adaptation_score", 0)
+    if adaptation_score >= 80:
+        print("✅ Sistema é ALTAMENTE FLEXÍVEL para diferentes categorias de visto")
+    elif adaptation_score >= 60:
+        print("⚠️  Sistema é MODERADAMENTE FLEXÍVEL - algumas adaptações necessárias")
+    else:
+        print("❌ Sistema precisa MELHORAR FLEXIBILIDADE para diferentes tipos de visto")
         
     # Save results to file
     with open("/app/i539_ai_review_test_results.json", "w") as f:
