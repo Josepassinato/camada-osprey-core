@@ -3138,8 +3138,8 @@ def validate_fields_programmatically(friendly_form_data: dict, basic_data: dict,
     format_errors = [i for i in validation_issues if i.get("severity") == "error" and i.get("issue") != "Campo obrigatório não preenchido"]
     format_warnings = [i for i in validation_issues if i.get("severity") == "warning"]
     
-    # Each format error reduces by 3%, each warning by 1%
-    penalty = (len(format_errors) * 3) + (len(format_warnings) * 1)
+    # Each format error reduces by 5%, each warning by 2%
+    penalty = (len(format_errors) * 5) + (len(format_warnings) * 2)
     completion_percentage = max(0, base_completion - penalty)
     
     return {
