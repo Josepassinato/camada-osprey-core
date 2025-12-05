@@ -546,83 +546,79 @@ Dr. Sofia Martinez Chen"""
     print("\n📋 FASE 6: AI Review EB-1A (CRÍTICO)")
     print("-" * 50)
     
-    # Test letter quality assessment
-    cover_letter_content = """
-    COVER LETTER FOR I-539 APPLICATION
-    
-    To: U.S. Citizenship and Immigration Services
-    Re: Application to Extend F-1 Student Status
-    
-    Dear USCIS Officer,
-    
-    I am Carlos Eduardo Silva Mendes, currently in F-1 student status, respectfully requesting an extension of my nonimmigrant student status to complete my Master of Science degree in Computer Science at Columbia University.
-    
-    I am currently enrolled in the Master's program and need additional time to complete my thesis research on artificial intelligence applications in healthcare. My current I-20 expires on June 30, 2025, and I require an extension until December 31, 2025.
-    
-    I have maintained good academic standing with a GPA of 3.8/4.0 and have sufficient financial resources to support my continued studies as evidenced by the attached bank statements.
-    
-    I respectfully request your favorable consideration of this application.
-    
-    Sincerely,
-    Carlos Eduardo Silva Mendes
-    """
-    
     try:
-        print("🔍 Testing letter quality assessment...")
+        print("🔍 Testing EB-1A AI Review System...")
         
-        letter_data = {
-            "letter_content": cover_letter_content,
-            "letter_type": "cover_letter",
-            "visa_type": "I-539",
-            "applicant_name": "Carlos Eduardo Silva Mendes"
-        }
+        print(f"🔗 Endpoint: GET {API_BASE}/case/{case_id}/ai-review")
         
-        response = requests.post(
-            f"{API_BASE}/llm/dr-paula/review-letter",
-            json=letter_data,
+        start_time = time.time()
+        response = requests.get(
+            f"{API_BASE}/case/{case_id}/ai-review",
             headers={"Content-Type": "application/json"},
-            timeout=30
+            timeout=60
         )
+        processing_time = time.time() - start_time
         
-        print(f"📊 Status: {response.status_code}")
+        print(f"⏱️  Processing time: {processing_time:.2f}s")
+        print(f"📊 Status Code: {response.status_code}")
+        
+        results["fase_6_ai_review"]["status_code"] = response.status_code
+        results["fase_6_ai_review"]["processing_time"] = processing_time
         
         if response.status_code == 200:
-            letter_review = response.json()
-            print("✅ Letter quality assessment completed")
+            ai_review = response.json()
+            print(f"📄 AI Review Response: {json.dumps(ai_review, indent=2)}")
             
-            quality_checks = {
-                "professional_tone": "professional" in str(letter_review).lower(),
-                "complete_information": len(cover_letter_content) > 500,
-                "proper_format": "Dear" in cover_letter_content and "Sincerely" in cover_letter_content,
-                "visa_specific": "I-539" in cover_letter_content and "F-1" in cover_letter_content
+            # EB-1A specific validations
+            eb1a_validations = {
+                "1_overall_status_present": ai_review.get("overall_status") is not None,
+                "2_overall_score_present": ai_review.get("overall_score") is not None,
+                "3_visa_type_recognized": ai_review.get("visa_type") == "EB-1A",
+                "4_high_score": ai_review.get("overall_score", 0) > 85,  # EB-1A should score >85%
+                "5_eb1a_specific_message": "EB-1A" in str(ai_review.get("approval_message", "")),
+                "6_extraordinary_ability_mentioned": "extraordinary" in str(ai_review).lower(),
+                "7_detailed_checks_present": ai_review.get("detailed_checks") is not None,
+                "8_documents_validated": ai_review.get("detailed_checks", {}).get("documents", {}).get("uploaded", 0) >= 8
             }
             
-            results["fase_6_letter_quality"] = {
-                "working": True,
-                "quality_checks": quality_checks,
-                "review_result": letter_review,
-                "overall_quality": sum(quality_checks.values()) / len(quality_checks) * 100
-            }
+            results["fase_6_ai_review"]["validations"] = eb1a_validations
+            results["fase_6_ai_review"]["response_data"] = ai_review
+            results["fase_6_ai_review"]["working"] = all(eb1a_validations.values())
             
-            print(f"   📝 Professional Tone: {quality_checks['professional_tone']}")
-            print(f"   📋 Complete Information: {quality_checks['complete_information']}")
-            print(f"   📄 Proper Format: {quality_checks['proper_format']}")
-            print(f"   🎯 Visa Specific: {quality_checks['visa_specific']}")
-            print(f"   📊 Overall Quality: {results['fase_6_letter_quality']['overall_quality']:.1f}%")
+            print("\n🎯 VALIDAÇÕES FASE 6 - EB-1A AI REVIEW:")
+            print("=" * 50)
+            for check, passed in eb1a_validations.items():
+                status = "✅" if passed else "❌"
+                print(f"  {status} {check}: {passed}")
             
+            print(f"\n📊 EB-1A AI REVIEW RESULTS:")
+            print(f"  🎯 Overall Status: {ai_review.get('overall_status', 'N/A')}")
+            print(f"  📊 Overall Score: {ai_review.get('overall_score', 0)}%")
+            print(f"  🧬 Visa Type: {ai_review.get('visa_type', 'N/A')}")
+            print(f"  📋 Documents Uploaded: {ai_review.get('detailed_checks', {}).get('documents', {}).get('uploaded', 0)}")
+            print(f"  ✅ Approval Message: {ai_review.get('approval_message', 'N/A')[:100]}...")
+            
+            # Check if system recognizes EB-1A specifics
+            if ai_review.get("overall_score", 0) > 85 and "EB-1A" in str(ai_review):
+                print("\n🎉 EB-1A SYSTEM RECOGNITION: ✅ EXCELLENT!")
+                print("   - System correctly identifies EB-1A visa type")
+                print("   - High score indicates proper EB-1A evaluation")
+                print("   - EB-1A specific terminology present")
+            else:
+                print("\n⚠️  EB-1A SYSTEM RECOGNITION: Needs improvement")
+                print("   - May not fully recognize EB-1A specifics")
+                print("   - Score or terminology may be generic")
+                
         else:
-            print(f"❌ Letter assessment failed: {response.text}")
-            results["fase_6_letter_quality"] = {
-                "working": False,
-                "error": response.text
-            }
+            print(f"❌ AI Review failed with status {response.status_code}")
+            print(f"📄 Error response: {response.text}")
+            results["fase_6_ai_review"]["error"] = response.text
+            results["fase_6_ai_review"]["working"] = False
             
     except Exception as e:
-        print(f"❌ Exception in letter quality assessment: {str(e)}")
-        results["fase_6_letter_quality"] = {
-            "working": False,
-            "exception": str(e)
-        }
+        print(f"❌ Exception during AI Review: {str(e)}")
+        results["fase_6_ai_review"]["exception"] = str(e)
+        results["fase_6_ai_review"]["working"] = False
     
     # FASE 7: Verificação de Preenchimento de Formulário
     print("\n📋 FASE 7: Verificação de Preenchimento de Formulário")
