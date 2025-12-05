@@ -1018,60 +1018,114 @@ def test_i539_ai_review_system():
         results["fase_9_final_analysis"]["exception"] = str(e)
     
     # Summary
-    print("\n📊 RESUMO COMPLETO DO TESTE O-1")
+    print("\n📊 RESUMO COMPLETO DO TESTE I-539 AI REVIEW")
     print("=" * 60)
     
-    # Count successful steps
-    successful_steps = 0
-    total_steps = 8
+    # Count successful phases
+    successful_phases = 0
+    total_phases = 9
     
-    for step_key in ["etapa_1_user_creation", "etapa_2_login", "etapa_3_start_application", 
-                     "etapa_4_basic_data", "etapa_5_friendly_form", "etapa_6_document_uploads",
-                     "etapa_7_ai_review", "etapa_8_final_status"]:
-        step_data = results.get(step_key, {})
-        if step_data.get("status_code") in [200, 201]:
-            successful_steps += 1
-    
-    success_rate = (successful_steps / total_steps) * 100
-    
-    print(f"🧪 Teste O-1 Complete Flow: {successful_steps}/{total_steps} etapas concluídas ({success_rate:.1f}%)")
-    print(f"👤 Aplicante: Dr. Sofia Mendes Rodrigues")
-    print(f"🎯 Visto: O-1 (Extraordinary Ability)")
-    print(f"📋 Case ID: {case_id}")
-    print(f"🔑 JWT Token: {'✅ Presente' if jwt_token else '❌ Ausente'}")
-    
-    # Show step-by-step results
-    print(f"\n📋 RESULTADOS POR ETAPA:")
-    step_names = [
-        "Criação de Usuário",
-        "Login", 
-        "Iniciar Aplicação O-1",
-        "Dados Básicos",
-        "Formulário Completo",
-        "Upload de Documentos",
-        "Revisão da IA",
-        "Status Final"
+    phase_keys = [
+        "fase_1_case_creation", "fase_2_basic_data", "fase_3_document_uploads", 
+        "fase_4_ai_review_endpoints", "fase_5_document_validation", "fase_6_letter_quality",
+        "fase_7_form_verification", "fase_8_uscis_compliance", "fase_9_final_analysis"
     ]
     
-    for i, (step_key, step_name) in enumerate(zip(
-        ["etapa_1_user_creation", "etapa_2_login", "etapa_3_start_application", 
-         "etapa_4_basic_data", "etapa_5_friendly_form", "etapa_6_document_uploads",
-         "etapa_7_ai_review", "etapa_8_final_status"], step_names)):
-        
-        step_data = results.get(step_key, {})
-        status_code = step_data.get("status_code", 0)
-        status = "✅" if status_code in [200, 201] else "❌"
-        print(f"  {status} Etapa {i+1}: {step_name} (Status: {status_code})")
+    for phase_key in phase_keys:
+        phase_data = results.get(phase_key, {})
+        if isinstance(phase_data, dict):
+            if phase_data.get("status_code") in [200, 201] or phase_data.get("working", False):
+                successful_phases += 1
+        elif isinstance(phase_data, list):
+            # For document validation (list of results)
+            if any(item.get("working", False) for item in phase_data):
+                successful_phases += 1
     
-    overall_success = success_rate >= 75  # Consider success if 75% or more steps completed
+    success_rate = (successful_phases / total_phases) * 100
+    
+    print(f"🧪 Teste I-539 AI Review System: {successful_phases}/{total_phases} fases concluídas ({success_rate:.1f}%)")
+    print(f"👤 Aplicante: Carlos Eduardo Silva Mendes")
+    print(f"🎯 Processo: I-539 Extension of Stay")
+    print(f"📋 Case ID: {case_id}")
+    
+    # Show phase-by-phase results
+    print(f"\n📋 RESULTADOS POR FASE:")
+    phase_names = [
+        "Criação de Caso I-539",
+        "Dados Básicos", 
+        "Upload de Documentos",
+        "Endpoints de AI Review",
+        "Validação de Documentos",
+        "Qualidade de Cartas",
+        "Verificação de Formulário",
+        "Conformidade USCIS",
+        "Análise Final"
+    ]
+    
+    for i, (phase_key, phase_name) in enumerate(zip(phase_keys, phase_names)):
+        phase_data = results.get(phase_key, {})
+        
+        if isinstance(phase_data, dict):
+            status_code = phase_data.get("status_code", 0)
+            working = phase_data.get("working", False)
+            status = "✅" if status_code in [200, 201] or working else "❌"
+            print(f"  {status} Fase {i+1}: {phase_name}")
+        elif isinstance(phase_data, list):
+            working_items = sum(1 for item in phase_data if item.get("working", False))
+            total_items = len(phase_data)
+            status = "✅" if working_items > 0 else "❌"
+            print(f"  {status} Fase {i+1}: {phase_name} ({working_items}/{total_items} working)")
+        else:
+            print(f"  ❌ Fase {i+1}: {phase_name} (No data)")
+    
+    # AI Review System Analysis
+    print(f"\n🤖 ANÁLISE DO SISTEMA DE IA DE REVISÃO:")
+    print("=" * 50)
+    
+    # Check AI Review endpoints
+    ai_endpoints = results.get("fase_4_ai_review_endpoints", {})
+    working_ai_endpoints = sum(1 for result in ai_endpoints.values() if result.get("working", False))
+    total_ai_endpoints = len(ai_endpoints)
+    
+    print(f"📡 Endpoints de IA: {working_ai_endpoints}/{total_ai_endpoints} funcionando")
+    
+    # Check document validation
+    doc_validation = results.get("fase_5_document_validation", [])
+    working_validations = sum(1 for doc in doc_validation if doc.get("working", False))
+    total_validations = len(doc_validation)
+    
+    print(f"📄 Validação de Documentos: {working_validations}/{total_validations} documentos validados")
+    
+    # Check letter quality
+    letter_quality = results.get("fase_6_letter_quality", {})
+    letter_working = letter_quality.get("working", False)
+    letter_score = letter_quality.get("overall_quality", 0)
+    
+    print(f"✍️  Qualidade de Cartas: {'✅' if letter_working else '❌'} (Score: {letter_score:.1f}%)")
+    
+    # Check form verification
+    form_verification = results.get("fase_7_form_verification", {})
+    form_working = form_verification.get("working", False)
+    form_completion = form_verification.get("completion_rate", 0)
+    
+    print(f"📋 Verificação de Formulário: {'✅' if form_working else '❌'} (Completude: {form_completion:.1f}%)")
+    
+    # Check USCIS compliance
+    uscis_compliance = results.get("fase_8_uscis_compliance", {})
+    uscis_working = uscis_compliance.get("working", False)
+    uscis_score = uscis_compliance.get("compliance_score", 0)
+    
+    print(f"⚖️  Conformidade USCIS: {'✅' if uscis_working else '❌'} (Score: {uscis_score:.1f}%)")
+    
+    overall_success = success_rate >= 70  # Consider success if 70% or more phases completed
     results["summary"]["overall_success"] = overall_success
-    results["summary"]["successful_steps"] = successful_steps
-    results["summary"]["total_steps"] = total_steps
+    results["summary"]["successful_phases"] = successful_phases
+    results["summary"]["total_phases"] = total_phases
     results["summary"]["success_rate"] = success_rate
     results["summary"]["case_id"] = case_id
-    results["summary"]["jwt_token_present"] = jwt_token is not None
+    results["summary"]["ai_review_functional"] = working_ai_endpoints > 0
     
-    print(f"\n🎯 RESULTADO FINAL: {'✅ SUCESSO COMPLETO' if overall_success else '❌ NECESSITA MELHORIAS'}")
+    print(f"\n🎯 RESULTADO FINAL: {'✅ SISTEMA FUNCIONAL' if overall_success else '❌ NECESSITA MELHORIAS'}")
     print(f"📈 Taxa de sucesso: {success_rate:.1f}%")
     
     return results
