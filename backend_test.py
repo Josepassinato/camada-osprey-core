@@ -198,39 +198,194 @@ def test_enhanced_ai_validation_system():
         print("❌ Failed to create test case, aborting tests")
         return results
     
-    # STEP 1: Update EB-1A case with correct visa_type (as requested)
-    print("\n📋 STEP 1: Update EB-1A Case with Correct visa_type")
-    print("-" * 50)
+    # TEST 1: Complete Data Validation (I-539) - Expected: approved, 100%, 0 issues
+    print("\n📋 TEST 1: Validação com Dados Completos (I-539)")
+    print("-" * 60)
     
-    try:
-        case_id = "OSP-8731E45D"
-        update_data = {"visa_type": "EB-1A"}
-        
-        print(f"🔗 Endpoint: PUT {API_BASE}/auto-application/case/{case_id}")
-        print(f"📤 Payload: {json.dumps(update_data)}")
-        
-        response = requests.put(
-            f"{API_BASE}/auto-application/case/{case_id}",
-            json=update_data,
-            headers={"Content-Type": "application/json"},
-            timeout=30
-        )
-        
-        print(f"📊 Status Code: {response.status_code}")
-        
-        if response.status_code in [200, 201]:
-            response_data = response.json()
-            print(f"✅ EB-1A case updated successfully")
-            print(f"📄 Response: {json.dumps(response_data, indent=2)}")
-        else:
-            print(f"⚠️  EB-1A case update returned {response.status_code}: {response.text}")
-            
-    except Exception as e:
-        print(f"❌ Exception updating EB-1A case: {str(e)}")
+    complete_data = {
+        "friendly_form_data": {
+            "nome_completo": "Carlos Eduardo Silva Mendes",
+            "data_nascimento": "1985-03-15",
+            "email": "carlos.teste@test.com",
+            "telefone": "+55 11 98765-4321",
+            "numero_passaporte": "BR987654321",
+            "pais_nascimento": "Brazil",
+            "endereco": "123 Main Street, Apt 4B",
+            "cidade": "New York",
+            "estado": "NY",
+            "cep": "10001",
+            "status_atual": "F-1",
+            "status_solicitado": "H-1B",
+            "motivo_mudanca": "Consegui emprego em empresa americana e preciso mudar meu status de estudante para trabalhador especializado",
+            "data_entrada_eua": "2020-08-15",
+            "numero_i94": "1234567890"
+        }
+    }
     
-    # STEP 2: Test form generation for all 3 visa types
-    print("\n📋 STEP 2: Test Form Generation for All 3 Visa Types")
-    print("-" * 50)
+    test1_result = test_validation_endpoint(test_case_id, complete_data, "TEST 1: Dados Completos")
+    results["test1_complete_data"] = test1_result
+    
+    if test1_result.get("success"):
+        validation_result = test1_result["validation_result"]
+        
+        # Verify expected results
+        expected_checks = {
+            "status_approved": validation_result.get("validation_status") == "approved",
+            "completion_near_100": validation_result.get("completion_percentage", 0) >= 95,
+            "minimal_issues": len(validation_result.get("validation_issues", [])) <= 2,
+            "success_true": validation_result.get("success", False),
+            "case_id_correct": validation_result.get("case_id") == test_case_id
+        }
+        
+        print(f"\n🎯 TEST 1 VERIFICATION:")
+        for check, passed in expected_checks.items():
+            status = "✅" if passed else "❌"
+            print(f"  {status} {check}: {passed}")
+        
+        results["test1_complete_data"]["verification"] = expected_checks
+        results["test1_complete_data"]["passed"] = all(expected_checks.values())
+    
+    # TEST 2: Partial Data Validation (50%) - Expected: rejected, 40-60%, >5 issues
+    print("\n📋 TEST 2: Validação com Dados Parciais (50%)")
+    print("-" * 60)
+    
+    partial_data = {
+        "friendly_form_data": {
+            "nome_completo": "Maria Santos",
+            "data_nascimento": "1990-12-25",
+            "email": "maria@test.com",
+            "numero_passaporte": "BR555666777",
+            "pais_nascimento": "Brazil",
+            "endereco": "456 Oak Street",
+            "cidade": "Los Angeles"
+            # Missing: telefone, estado, cep, status_atual, status_solicitado, data_entrada_eua, numero_i94
+        }
+    }
+    
+    test2_result = test_validation_endpoint(test_case_id, partial_data, "TEST 2: Dados Parciais")
+    results["test2_partial_data"] = test2_result
+    
+    if test2_result.get("success"):
+        validation_result = test2_result["validation_result"]
+        
+        # Verify expected results
+        expected_checks = {
+            "status_rejected_or_needs_review": validation_result.get("validation_status") in ["rejected", "needs_review"],
+            "completion_40_to_60": 40 <= validation_result.get("completion_percentage", 0) <= 60,
+            "multiple_issues": len(validation_result.get("validation_issues", [])) >= 5,
+            "success_true": validation_result.get("success", False),
+            "case_id_correct": validation_result.get("case_id") == test_case_id
+        }
+        
+        print(f"\n🎯 TEST 2 VERIFICATION:")
+        for check, passed in expected_checks.items():
+            status = "✅" if passed else "❌"
+            print(f"  {status} {check}: {passed}")
+        
+        results["test2_partial_data"]["verification"] = expected_checks
+        results["test2_partial_data"]["passed"] = all(expected_checks.values())
+    
+    # TEST 3: Format Errors Validation - Expected: needs_review, 80-95%, >=2 issues
+    print("\n📋 TEST 3: Validação com Erros de Formato")
+    print("-" * 60)
+    
+    format_error_data = {
+        "friendly_form_data": {
+            "nome_completo": "Ana Paula Costa Silva",
+            "data_nascimento": "15/03/1988",  # Wrong format (should be YYYY-MM-DD)
+            "email": "ana.paula@invalid",  # Invalid email format
+            "telefone": "abc-def-ghij",  # Invalid phone format
+            "numero_passaporte": "BR999888777",
+            "pais_nascimento": "Brazil",
+            "endereco": "789 Pine Street, Suite 100",
+            "cidade": "Miami",
+            "estado": "FL",
+            "cep": "33101",
+            "status_atual": "B-2",
+            "status_solicitado": "F-1",
+            "motivo_mudanca": "Quero estudar",  # Too short
+            "data_entrada_eua": "2023/01/10",  # Wrong format
+            "numero_i94": "ABC123XYZ"  # Should be numeric
+        }
+    }
+    
+    test3_result = test_validation_endpoint(test_case_id, format_error_data, "TEST 3: Erros de Formato")
+    results["test3_format_errors"] = test3_result
+    
+    if test3_result.get("success"):
+        validation_result = test3_result["validation_result"]
+        
+        # Verify expected results
+        expected_checks = {
+            "status_needs_review": validation_result.get("validation_status") == "needs_review",
+            "completion_80_to_95": 80 <= validation_result.get("completion_percentage", 0) <= 95,
+            "format_issues": len(validation_result.get("validation_issues", [])) >= 2,
+            "success_true": validation_result.get("success", False),
+            "case_id_correct": validation_result.get("case_id") == test_case_id
+        }
+        
+        print(f"\n🎯 TEST 3 VERIFICATION:")
+        for check, passed in expected_checks.items():
+            status = "✅" if passed else "❌"
+            print(f"  {status} {check}: {passed}")
+        
+        results["test3_format_errors"]["verification"] = expected_checks
+        results["test3_format_errors"]["passed"] = all(expected_checks.values())
+    
+    # TEST 4: Detailed Issues Verification
+    print("\n📋 TEST 4: Verificar Lista Detalhada de Issues")
+    print("-" * 60)
+    
+    # Use the format error test result for detailed analysis
+    if test3_result.get("success"):
+        validation_result = test3_result["validation_result"]
+        issues = validation_result.get("validation_issues", [])
+        
+        print(f"📊 Total Issues Found: {len(issues)}")
+        
+        issue_analysis = {
+            "has_field_names": all(issue.get("field") for issue in issues),
+            "has_field_labels": all(issue.get("field_label") for issue in issues),
+            "has_issue_descriptions": all(issue.get("issue") for issue in issues),
+            "has_severity_levels": all(issue.get("severity") in ["error", "warning", "info"] for issue in issues),
+            "has_suggestions": all(issue.get("suggestion") for issue in issues),
+            "portuguese_suggestions": all(any(char in issue.get("suggestion", "") for char in "áéíóúãõç") or "exemplo" in issue.get("suggestion", "").lower() for issue in issues)
+        }
+        
+        print(f"\n🎯 DETAILED ISSUES ANALYSIS:")
+        for check, passed in issue_analysis.items():
+            status = "✅" if passed else "❌"
+            print(f"  {status} {check}: {passed}")
+        
+        # Print sample issues
+        print(f"\n📄 SAMPLE ISSUES (first 3):")
+        for i, issue in enumerate(issues[:3]):
+            print(f"  Issue {i+1}:")
+            print(f"    Field: {issue.get('field', 'N/A')}")
+            print(f"    Label: {issue.get('field_label', 'N/A')}")
+            print(f"    Issue: {issue.get('issue', 'N/A')}")
+            print(f"    Severity: {issue.get('severity', 'N/A')}")
+            print(f"    Suggestion: {issue.get('suggestion', 'N/A')}")
+        
+        results["test4_issues_verification"] = {
+            "success": True,
+            "issue_analysis": issue_analysis,
+            "total_issues": len(issues),
+            "sample_issues": issues[:3],
+            "passed": all(issue_analysis.values())
+        }
+    else:
+        results["test4_issues_verification"] = {
+            "success": False,
+            "error": "Could not analyze issues - previous test failed"
+        }
+    
+    # TEST 5: MongoDB Persistence Verification
+    print("\n📋 TEST 5: Persistência no MongoDB")
+    print("-" * 60)
+    
+    persistence_result = verify_mongodb_persistence(test_case_id)
+    results["test5_mongodb_persistence"] = persistence_result
     
     for test_case in test_cases:
         case_name = test_case["name"]
