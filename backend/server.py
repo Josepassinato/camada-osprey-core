@@ -2754,50 +2754,52 @@ async def validate_friendly_form_ai(case: dict, friendly_form_data: dict, basic_
             logger.warning(f"Could not get visa specifications: {spec_error}")
             visa_specs = {}
         
-        # Prepare validation prompt
+        # Prepare enhanced validation prompt with programmatic results
         validation_prompt = f"""
-Você é um especialista em imigração dos EUA. Analise os dados do formulário preenchido pelo usuário e verifique:
+Você é um especialista em imigração dos EUA. Uma validação programática inicial já foi feita.
 
-**TIPO DE VISTO**: {visa_type}
+**CONTEXTO**:
+- Tipo de Visto: {visa_type}
+- Validação Programática: {completion_percentage}% completo
+- Problemas Detectados: {len(validation_issues)} problemas
+- Campos Faltando: {len(missing_fields)} campos
 
-**DADOS BÁSICOS DO USUÁRIO**:
-{json.dumps(basic_data, indent=2, ensure_ascii=False)}
+**DADOS DO USUÁRIO**:
+Dados Básicos: {json.dumps(basic_data, indent=2, ensure_ascii=False)}
+Formulário Amigável: {json.dumps(friendly_form_data, indent=2, ensure_ascii=False)}
 
-**RESPOSTAS DO FORMULÁRIO AMIGÁVEL**:
-{json.dumps(friendly_form_data, indent=2, ensure_ascii=False)}
+**PROBLEMAS JÁ IDENTIFICADOS**:
+{json.dumps(validation_issues[:5], indent=2, ensure_ascii=False) if validation_issues else "Nenhum problema detectado na validação inicial"}
 
-**REQUISITOS ESPECÍFICOS DO VISTO {visa_type}**:
-{json.dumps(visa_specs, indent=2, ensure_ascii=False) if visa_specs else "Requisitos gerais de imigração"}
+**SUA TAREFA ADICIONAL** (além dos problemas já detectados):
+1. Verificar COERÊNCIA dos dados (datas cronológicas, informações consistentes)
+2. Identificar CONTRADIÇÕES ou INCONSISTÊNCIAS que a validação programática não detectou
+3. Avaliar se as EXPLICAÇÕES/TEXTOS são suficientemente detalhados
+4. Verificar LÓGICA do pedido (ex: motivo da mudança de status faz sentido?)
+5. Sugerir MELHORIAS nos textos e respostas
 
-**SUA TAREFA**:
-1. Verificar se TODOS os campos obrigatórios estão preenchidos para o visto {visa_type}
-2. Verificar se as informações são COERENTES (ex: datas fazem sentido, não há contradições)
-3. Verificar FORMATOS (emails válidos, telefones, datas, números de passaporte)
-4. Identificar informações FALTANTES ou INCOMPLETAS
-5. Sugerir correções específicas quando necessário
+**IMPORTANTE**: 
+- NÃO repita os problemas já listados acima
+- Foque em análise semântica e coerência
+- Se não encontrar problemas adicionais, retorne array vazio em "additional_issues"
+- Mantenha o completion_percentage próximo ao detectado ({completion_percentage}%)
 
 **RESPONDA EM JSON** (APENAS JSON, SEM TEXTO ADICIONAL):
 {{
-    "validation_issues": [
+    "additional_issues": [
         {{
             "field": "nome_do_campo",
-            "issue": "descrição clara do problema em português",
-            "severity": "error|warning|info",
-            "suggestion": "como o usuário deve corrigir"
+            "issue": "problema de coerência ou lógica",
+            "severity": "warning|info",
+            "suggestion": "como melhorar"
         }}
     ],
-    "overall_status": "approved|needs_review|rejected",
-    "completion_percentage": 85,
-    "missing_fields": ["lista", "de", "campos", "faltantes"],
-    "message_to_user": "Mensagem clara em português sobre o status do formulário"
+    "coherence_score": 85,
+    "recommendations": [
+        "Recomendação específica para melhorar a aplicação"
+    ],
+    "overall_assessment": "Breve avaliação geral em português"
 }}
-
-**IMPORTANTE**:
-- Se completion_percentage < 70%, status deve ser "rejected"
-- Se completion_percentage >= 70% e < 90%, status deve ser "needs_review"
-- Se completion_percentage >= 90%, status pode ser "approved"
-- Seja específico nas sugestões
-- Use português claro e amigável
 """
         
         # Call AI
