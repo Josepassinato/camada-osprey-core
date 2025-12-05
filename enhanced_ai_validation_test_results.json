@@ -1,13 +1,308 @@
 {
   "test_results": {
-    "test1_complete_data": {},
-    "test2_partial_data": {},
-    "test3_format_errors": {},
-    "test4_issues_verification": {},
-    "test5_mongodb_persistence": {},
-    "summary": {}
+    "test1_complete_data": {
+      "success": true,
+      "status_code": 200,
+      "processing_time": 0.023593664169311523,
+      "validation_result": {
+        "success": true,
+        "case_id": "OSP-E834EF46",
+        "validation_status": "approved",
+        "completion_percentage": 100,
+        "message": "✅ Excelente! Seu formulário está completo e coerente. Você pode prosseguir para a próxima etapa.",
+        "validation_issues": [],
+        "next_steps": [
+          "Revisar seus dados uma última vez",
+          "Clicar em 'Continuar' para gerar os formulários oficiais",
+          "Upload de documentos de suporte (se necessário)"
+        ]
+      },
+      "verification": {
+        "status_approved": true,
+        "completion_near_100": true,
+        "minimal_issues": true,
+        "success_true": true,
+        "case_id_correct": true
+      },
+      "passed": true
+    },
+    "test2_partial_data": {
+      "success": true,
+      "status_code": 200,
+      "processing_time": 0.027013540267944336,
+      "validation_result": {
+        "success": true,
+        "case_id": "OSP-E834EF46",
+        "validation_status": "rejected",
+        "completion_percentage": 50,
+        "message": "❌ Seu formulário precisa de mais informações (50% completo). Por favor, preencha os campos faltantes.",
+        "validation_issues": [
+          {
+            "field": "estado",
+            "field_label": "Estado",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'Estado'. Exemplo: NY"
+          },
+          {
+            "field": "cep",
+            "field_label": "CEP/ZIP Code",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'CEP/ZIP Code'. Exemplo: 10001"
+          },
+          {
+            "field": "telefone",
+            "field_label": "Telefone",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'Telefone'. Exemplo: +1 555-1234"
+          },
+          {
+            "field": "status_atual",
+            "field_label": "Status de Visto Atual",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'Status de Visto Atual'. Exemplo: F-1"
+          },
+          {
+            "field": "status_solicitado",
+            "field_label": "Status de Visto Solicitado",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'Status de Visto Solicitado'. Exemplo: H-1B"
+          },
+          {
+            "field": "data_entrada_eua",
+            "field_label": "Data de Entrada nos EUA",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'Data de Entrada nos EUA'. Exemplo: 2020-08-15"
+          },
+          {
+            "field": "numero_i94",
+            "field_label": "Número I-94",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'Número I-94'. Exemplo: 1234567890"
+          }
+        ],
+        "next_steps": [
+          "Preencher todos os campos obrigatórios",
+          "Revisar informações básicas",
+          "Garantir que todos os dados estão corretos"
+        ]
+      },
+      "verification": {
+        "status_rejected_or_needs_review": true,
+        "completion_40_to_60": true,
+        "multiple_issues": true,
+        "success_true": true,
+        "case_id_correct": true
+      },
+      "passed": true
+    },
+    "test3_format_errors": {
+      "success": true,
+      "status_code": 200,
+      "processing_time": 0.024326801300048828,
+      "validation_result": {
+        "success": true,
+        "case_id": "OSP-E834EF46",
+        "validation_status": "needs_review",
+        "completion_percentage": 83,
+        "message": "⚠️ Seu formulário está 83% completo. Por favor, revise as informações destacadas abaixo.",
+        "validation_issues": [
+          {
+            "field": "data_nascimento",
+            "field_label": "Data de Nascimento",
+            "issue": "Formato de data inválido",
+            "severity": "error",
+            "suggestion": "Use o formato YYYY-MM-DD, como: 1990-05-15"
+          },
+          {
+            "field": "email",
+            "field_label": "Email",
+            "issue": "Formato de email inválido",
+            "severity": "error",
+            "suggestion": "Use um email válido, como: maria@example.com"
+          },
+          {
+            "field": "data_entrada_eua",
+            "field_label": "Data de Entrada nos EUA",
+            "issue": "Formato de data inválido",
+            "severity": "error",
+            "suggestion": "Use o formato YYYY-MM-DD, como: 2020-08-15"
+          },
+          {
+            "field": "numero_i94",
+            "field_label": "Número I-94",
+            "issue": "Deve conter apenas números",
+            "severity": "warning",
+            "suggestion": "Use apenas números, como: 1234567890"
+          }
+        ],
+        "next_steps": [
+          "Revisar e corrigir as informações destacadas",
+          "Preencher campos faltantes",
+          "Verificar datas e formatos de dados"
+        ]
+      },
+      "verification": {
+        "status_needs_review": true,
+        "completion_80_to_95": true,
+        "format_issues": true,
+        "success_true": true,
+        "case_id_correct": true
+      },
+      "passed": true
+    },
+    "test4_issues_verification": {
+      "success": true,
+      "issue_analysis": {
+        "has_field_names": true,
+        "has_field_labels": true,
+        "has_issue_descriptions": true,
+        "has_severity_levels": true,
+        "has_suggestions": true,
+        "portuguese_suggestions": false
+      },
+      "total_issues": 4,
+      "sample_issues": [
+        {
+          "field": "data_nascimento",
+          "field_label": "Data de Nascimento",
+          "issue": "Formato de data inválido",
+          "severity": "error",
+          "suggestion": "Use o formato YYYY-MM-DD, como: 1990-05-15"
+        },
+        {
+          "field": "email",
+          "field_label": "Email",
+          "issue": "Formato de email inválido",
+          "severity": "error",
+          "suggestion": "Use um email válido, como: maria@example.com"
+        },
+        {
+          "field": "data_entrada_eua",
+          "field_label": "Data de Entrada nos EUA",
+          "issue": "Formato de data inválido",
+          "severity": "error",
+          "suggestion": "Use o formato YYYY-MM-DD, como: 2020-08-15"
+        }
+      ],
+      "passed": false
+    },
+    "test5_mongodb_persistence": {
+      "success": true,
+      "persistence_checks": {
+        "simplified_form_responses_saved": true,
+        "friendly_form_validation_saved": true,
+        "validation_status_present": true,
+        "completion_percentage_present": true,
+        "validation_date_present": true,
+        "issues_array_present": true
+      },
+      "case_data": {
+        "case_id": "OSP-E834EF46",
+        "user_id": null,
+        "session_token": null,
+        "form_code": "I-539",
+        "status": "created",
+        "process_type": null,
+        "progress_percentage": 45,
+        "current_step": "friendly-form-partial",
+        "basic_data": {},
+        "uploaded_documents": [],
+        "document_analysis": null,
+        "user_story_text": null,
+        "user_story_audio_url": null,
+        "ai_extracted_facts": null,
+        "simplified_form_responses": {
+          "nome_completo": "Ana Paula Costa Silva",
+          "data_nascimento": "15/03/1988",
+          "email": "ana.paula@invalid",
+          "telefone": "abc-def-ghij",
+          "numero_passaporte": "BR999888777",
+          "pais_nascimento": "Brazil",
+          "endereco": "789 Pine Street, Suite 100",
+          "cidade": "Miami",
+          "estado": "FL",
+          "cep": "33101",
+          "status_atual": "B-2",
+          "status_solicitado": "F-1",
+          "motivo_mudanca": "Quero estudar",
+          "data_entrada_eua": "2023/01/10",
+          "numero_i94": "ABC123XYZ"
+        },
+        "official_form_data": null,
+        "uscis_form_generated": false,
+        "ead_data": null,
+        "ai_processing": null,
+        "payment_status": null,
+        "payment_id": null,
+        "final_package_generated": false,
+        "final_package_url": null,
+        "completed_at": null,
+        "created_at": "2025-12-05T06:42:12.190000",
+        "updated_at": "2025-12-05T06:42:12.266000",
+        "expires_at": "2025-12-12T06:42:12.190000",
+        "friendly_form_validation": {
+          "status": "needs_review",
+          "completion_percentage": 83,
+          "validation_date": "2025-12-05T06:42:12.266000",
+          "issues": [
+            {
+              "field": "data_nascimento",
+              "field_label": "Data de Nascimento",
+              "issue": "Formato de data inválido",
+              "severity": "error",
+              "suggestion": "Use o formato YYYY-MM-DD, como: 1990-05-15"
+            },
+            {
+              "field": "email",
+              "field_label": "Email",
+              "issue": "Formato de email inválido",
+              "severity": "error",
+              "suggestion": "Use um email válido, como: maria@example.com"
+            },
+            {
+              "field": "data_entrada_eua",
+              "field_label": "Data de Entrada nos EUA",
+              "issue": "Formato de data inválido",
+              "severity": "error",
+              "suggestion": "Use o formato YYYY-MM-DD, como: 2020-08-15"
+            },
+            {
+              "field": "numero_i94",
+              "field_label": "Número I-94",
+              "issue": "Deve conter apenas números",
+              "severity": "warning",
+              "suggestion": "Use apenas números, como: 1234567890"
+            }
+          ]
+        }
+      }
+    },
+    "summary": {
+      "successful_tests": 3,
+      "total_tests": 5,
+      "success_rate": 60.0,
+      "criteria_met": {
+        "validacao_diferencia_completo_incompleto": true,
+        "completion_percentage_preciso": true,
+        "issues_listados_com_detalhes": false,
+        "status_determinado_corretamente": true,
+        "dados_persistem_mongodb": false,
+        "performance_adequada": true
+      },
+      "criteria_passed": 4,
+      "total_criteria": 6,
+      "system_ready": false,
+      "avg_processing_time": 0.024978001912434895
+    }
   },
-  "timestamp": 1764916910.9467733,
+  "timestamp": 1764916932.2912858,
   "test_focus": "Enhanced AI Validation System Testing",
   "test_cases": [
     {
