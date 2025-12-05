@@ -620,8 +620,8 @@ Dr. Sofia Martinez Chen"""
         results["fase_6_ai_review"]["exception"] = str(e)
         results["fase_6_ai_review"]["working"] = False
     
-    # FASE 7: Verificação de Preenchimento de Formulário
-    print("\n📋 FASE 7: Verificação de Preenchimento de Formulário")
+    # FASE 7: Verificar Persistência
+    print("\n📋 FASE 7: Verificar Persistência")
     print("-" * 50)
     
     try:
