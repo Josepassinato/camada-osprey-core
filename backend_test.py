@@ -22,31 +22,28 @@ def create_test_case():
         print("📝 Creating test case for validation...")
         response = requests.post(
             f"{API_BASE}/auto-application/start",
-            json={},
+            json={"form_code": "I-539"},
             headers={"Content-Type": "application/json"},
             timeout=30
         )
         
+        print(f"📊 Status Code: {response.status_code}")
+        print(f"📄 Response: {response.text}")
+        
         if response.status_code in [200, 201]:
             case_data = response.json()
-            case_id = case_data.get("case_id")
+            case_info = case_data.get("case", {})
+            case_id = case_info.get("case_id")
             
-            # Set visa type to I-539
-            update_response = requests.put(
-                f"{API_BASE}/auto-application/case/{case_id}",
-                json={"form_code": "I-539"},
-                headers={"Content-Type": "application/json"},
-                timeout=30
-            )
-            
-            if update_response.status_code in [200, 201]:
+            if case_id:
                 print(f"✅ Test case created: {case_id}")
                 return case_id
             else:
-                print(f"❌ Failed to set visa type: {update_response.status_code}")
+                print(f"❌ No case_id in response: {case_data}")
                 return None
         else:
             print(f"❌ Failed to create case: {response.status_code}")
+            print(f"📄 Error response: {response.text}")
             return None
             
     except Exception as e:
