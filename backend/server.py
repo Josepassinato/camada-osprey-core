@@ -3027,8 +3027,8 @@ async def comprehensive_ai_review(case_id: str):
             "timestamp": review_results["timestamp"]
         }
         
-        # Salvar resultado da revisão no banco
-        await db.application_cases.update_one(
+        # Salvar resultado da revisão no banco (try both collections)
+        result = await db.application_cases.update_one(
             {"case_id": case_id},
             {
                 "$set": {
@@ -3039,6 +3039,20 @@ async def comprehensive_ai_review(case_id: str):
                 }
             }
         )
+        
+        # If not found in application_cases, try auto_cases
+        if result.matched_count == 0:
+            await db.auto_cases.update_one(
+                {"case_id": case_id},
+                {
+                    "$set": {
+                        "ai_review": final_result,
+                        "ai_review_date": datetime.utcnow(),
+                        "ai_review_score": overall_score,
+                        "updated_at": datetime.utcnow()
+                    }
+                }
+            )
         
         logger.info(f"✅ Revisão IA completa para {case_id}: {overall_status} ({overall_score*100:.1f}%)")
         
