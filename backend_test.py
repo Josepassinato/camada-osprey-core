@@ -1242,8 +1242,14 @@ if __name__ == "__main__":
     
     print(f"👤 Aplicante: Carlos Eduardo Silva Mendes")
     print(f"🎯 Processo: I-539 Extension of Stay")
-    print(f"📊 Teste principal: {main_results['summary']['successful_phases']}/{main_results['summary']['total_phases']} fases")
-    print(f"📈 Taxa de sucesso: {main_results['summary']['success_rate']:.1f}%")
+    # Safely get summary data with defaults
+    summary = main_results.get('summary', {})
+    successful_phases = summary.get('successful_phases', 0)
+    total_phases = summary.get('total_phases', 9)
+    success_rate = summary.get('success_rate', 0)
+    
+    print(f"📊 Teste principal: {successful_phases}/{total_phases} fases")
+    print(f"📈 Taxa de sucesso: {success_rate:.1f}%")
     print(f"🔍 Testes adicionais: {sum(additional_results.values())}/{len(additional_results)}")
     
     # Show case details if available
