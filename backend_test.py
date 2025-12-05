@@ -228,21 +228,12 @@ def test_eb1a_ai_review_after_corrections():
         print(f"❌ Exception during AI Review: {str(e)}")
         results["ai_review_test"]["exception"] = str(e)
     
-    # FASE 3: Upload de documentos EB-1A (8 documentos específicos)
-    print("\n📋 FASE 3: Upload de Documentos EB-1A (8 documentos)")
+    # STEP 3: Compare Before vs After Results
+    print("\n📋 STEP 3: Compare Before vs After Results")
     print("-" * 50)
     
     if not case_id:
         print("❌ Cannot proceed without case_id")
-        # Set default values for summary to avoid KeyError
-        if "summary" not in results:
-            results["summary"] = {}
-        results["summary"]["overall_success"] = False
-        results["summary"]["successful_phases"] = 2  # Only first 2 phases completed
-        results["summary"]["total_phases"] = 8
-        results["summary"]["success_rate"] = 25.0
-        results["summary"]["case_id"] = None
-        results["summary"]["ai_review_functional"] = False
         return results
     
     # Create simulated EB-1A document content
