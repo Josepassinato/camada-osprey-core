@@ -1195,6 +1195,110 @@ async def login(login_data: UserLogin):
         logger.error(f"Error in login: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error logging in: {str(e)}")
 
+@api_router.post("/auth/google-callback")
+async def google_auth_callback(request: dict):
+    """Process Google OAuth callback from Emergent Auth"""
+    try:
+        # Extract data from request
+        session_token = request.get('session_token')
+        email = request.get('email')
+        name = request.get('name')
+        picture = request.get('picture')
+        google_id = request.get('id')
+        
+        if not email or not session_token:
+            raise HTTPException(status_code=400, detail="Missing required fields")
+        
+        logger.info(f"🔐 Google OAuth callback for: {email}")
+        
+        # Check if user already exists
+        existing_user = await db.users.find_one({"email": email})
+        
+        if existing_user:
+            # Update existing user
+            logger.info(f"✅ Existing user found: {email}")
+            user_id = existing_user["id"]
+            
+            # Update Google-specific fields
+            await db.users.update_one(
+                {"id": user_id},
+                {"$set": {
+                    "google_id": google_id,
+                    "picture": picture,
+                    "email_verified": True,
+                    "updated_at": datetime.utcnow()
+                }}
+            )
+        else:
+            # Create new user
+            logger.info(f"📝 Creating new user from Google OAuth: {email}")
+            user_id = str(uuid.uuid4())
+            
+            # Split name into first and last
+            name_parts = name.split(' ', 1) if name else ['', '']
+            first_name = name_parts[0]
+            last_name = name_parts[1] if len(name_parts) > 1 else ''
+            
+            user_doc = {
+                "id": user_id,
+                "email": email,
+                "password": None,  # No password for Google OAuth users
+                "first_name": first_name,
+                "last_name": last_name,
+                "phone": None,
+                "role": "user",
+                "google_id": google_id,
+                "picture": picture,
+                "email_verified": True,
+                "country_of_birth": None,
+                "current_country": None,
+                "date_of_birth": None,
+                "passport_number": None,
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            }
+            
+            await db.users.insert_one(user_doc)
+            
+            # Initialize user progress
+            progress = UserProgress(user_id=user_id)
+            await db.user_progress.insert_one(progress.dict())
+        
+        # Store session in database
+        from datetime import timezone, timedelta
+        session_doc = {
+            "user_id": user_id,
+            "session_token": session_token,
+            "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+            "created_at": datetime.now(timezone.utc)
+        }
+        await db.oauth_sessions.insert_one(session_doc)
+        
+        # Create our own JWT token
+        token = create_jwt_token(user_id, email)
+        
+        # Get updated user data
+        user = await db.users.find_one({"id": user_id})
+        
+        logger.info(f"✅ Google OAuth successful for: {email}")
+        
+        return {
+            "message": "Google authentication successful",
+            "token": token,
+            "session_token": session_token,
+            "user": {
+                "id": user_id,
+                "email": email,
+                "first_name": user.get("first_name", ""),
+                "last_name": user.get("last_name", ""),
+                "picture": picture
+            }
+        }
+    
+    except Exception as e:
+        logger.error(f"Error in Google OAuth callback: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Authentication error: {str(e)}")
+
 # User profile routes (keeping existing ones)
 @api_router.get("/profile", response_model=UserProfile)
 async def get_profile(current_user = Depends(get_current_user)):
