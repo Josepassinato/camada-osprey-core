@@ -211,13 +211,9 @@ def test_i539_ai_review_system():
         print(f"❌ Exception during basic data update: {str(e)}")
         results["fase_2_basic_data"]["exception"] = str(e)
     
-    # ETAPA 3: Iniciar aplicação O-1
-    print("\n📋 ETAPA 3: Iniciar Aplicação O-1")
+    # FASE 3: Upload de documentos I-539
+    print("\n📋 FASE 3: Upload de Documentos I-539")
     print("-" * 50)
-    
-    if not jwt_token:
-        print("❌ Cannot proceed without JWT token")
-        return results
     
     start_application_data = {
         "visa_code": "O-1",
