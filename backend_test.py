@@ -131,82 +131,102 @@ def test_eb1a_ai_review_after_corrections():
         print("❌ Cannot proceed without case_id")
         return results
     
-    basic_data = {
-        "basic_data": {
-            "applicant_name": "Dr. Sofia Martinez Chen",
-            "date_of_birth": "1985-09-20",
-            "passport_number": "ES234567890",
-            "current_address": "123 Research Center, Suite 500",
-            "city": "Boston",
-            "state": "MA",
-            "zip_code": "02101",
-            "country_of_birth": "Spain",
-            "email": "sofia.teste@test.com",
-            "phone": "+1-617-555-3456",
-            "field_of_extraordinary_ability": "Sciences - Artificial Intelligence Research",
-            "current_position": "Principal Research Scientist",
-            "current_employer": "MIT Computer Science and AI Laboratory"
-        }
-    }
-    
     try:
-        print(f"🔗 Endpoint: PUT {API_BASE}/auto-application/case/{case_id}")
-        print(f"📤 Payload: {json.dumps(basic_data, indent=2)}")
+        print("🔍 Testing EB-1A AI Review System After Corrections...")
+        print(f"🔗 Endpoint: GET {API_BASE}/case/{case_id}/ai-review")
         
         start_time = time.time()
-        response = requests.put(
-            f"{API_BASE}/auto-application/case/{case_id}",
-            json=basic_data,
+        response = requests.get(
+            f"{API_BASE}/case/{case_id}/ai-review",
             headers={"Content-Type": "application/json"},
-            timeout=30
+            timeout=60
         )
         processing_time = time.time() - start_time
         
         print(f"⏱️  Processing time: {processing_time:.2f}s")
         print(f"📊 Status Code: {response.status_code}")
         
-        results["fase_2_basic_data"]["status_code"] = response.status_code
-        results["fase_2_basic_data"]["processing_time"] = processing_time
+        results["ai_review_test"]["status_code"] = response.status_code
+        results["ai_review_test"]["processing_time"] = processing_time
         
-        if response.status_code in [200, 201]:
-            response_data = response.json()
-            print(f"📄 Response: {json.dumps(response_data, indent=2)}")
+        if response.status_code == 200:
+            ai_review = response.json()
+            print(f"📄 AI Review Response: {json.dumps(ai_review, indent=2)}")
             
-            case_data = response_data.get("case", {})
-            basic_data_saved = case_data.get("basic_data", {})
-            
-            validations = {
-                "1_case_updated": response_data.get("message") == "Case updated successfully",
-                "2_basic_data_saved": basic_data_saved is not None,
-                "3_applicant_name_correct": basic_data_saved.get("applicant_name") == "Dr. Sofia Martinez Chen",
-                "4_extraordinary_ability_field": basic_data_saved.get("field_of_extraordinary_ability") is not None,
-                "5_current_position_saved": basic_data_saved.get("current_position") == "Principal Research Scientist",
-                "6_employer_saved": basic_data_saved.get("current_employer") == "MIT Computer Science and AI Laboratory"
+            # EB-1A specific validations after corrections
+            eb1a_validations = {
+                "1_recognizes_eb1a": ai_review.get("visa_type") == "EB-1A",
+                "2_score_above_85": ai_review.get("overall_score", 0) > 85,
+                "3_status_approved": ai_review.get("overall_status") == "APPROVED",
+                "4_eb1a_in_message": "EB-1A" in str(ai_review.get("approval_message", "")),
+                "5_extraordinary_ability_mentioned": "extraordinary ability" in str(ai_review).lower(),
+                "6_sustained_acclaim_mentioned": "sustained" in str(ai_review).lower() and "acclaim" in str(ai_review).lower(),
+                "7_uscis_criteria_mentioned": "USCIS criteria" in str(ai_review) or "criteria" in str(ai_review).lower(),
+                "8_documents_score_perfect": ai_review.get("detailed_checks", {}).get("documents", {}).get("score", 0) == 1.0,
+                "9_letters_score_90": ai_review.get("detailed_checks", {}).get("letters", {}).get("score", 0) >= 0.90,
+                "10_documents_count_8": ai_review.get("detailed_checks", {}).get("documents", {}).get("uploaded", 0) >= 8
             }
             
-            results["fase_2_basic_data"]["validations"] = validations
-            results["fase_2_basic_data"]["response_data"] = response_data
+            results["ai_review_test"]["validations"] = eb1a_validations
+            results["ai_review_test"]["response_data"] = ai_review
             
-            print("\n🎯 VALIDAÇÕES FASE 2 - EB-1A BASIC DATA:")
-            print("=" * 50)
-            for check, passed in validations.items():
+            print("\n🎯 EB-1A AI REVIEW VALIDATIONS AFTER CORRECTIONS:")
+            print("=" * 60)
+            for check, passed in eb1a_validations.items():
                 status = "✅" if passed else "❌"
                 print(f"  {status} {check}: {passed}")
             
-            print(f"\n📊 DADOS EB-1A ESPECÍFICOS SALVOS:")
-            print(f"  👩‍🔬 Nome: {basic_data_saved.get('applicant_name', 'N/A')}")
-            print(f"  🧬 Campo de Habilidade Extraordinária: {basic_data_saved.get('field_of_extraordinary_ability', 'N/A')}")
-            print(f"  💼 Posição Atual: {basic_data_saved.get('current_position', 'N/A')}")
-            print(f"  🏢 Empregador: {basic_data_saved.get('current_employer', 'N/A')}")
+            # Extract key metrics
+            overall_score = ai_review.get("overall_score", 0)
+            overall_status = ai_review.get("overall_status", "N/A")
+            visa_type = ai_review.get("visa_type", "N/A")
+            approval_message = ai_review.get("approval_message", "N/A")
+            
+            detailed_checks = ai_review.get("detailed_checks", {})
+            documents_info = detailed_checks.get("documents", {})
+            letters_info = detailed_checks.get("letters", {})
+            
+            documents_score = documents_info.get("score", 0)
+            documents_uploaded = documents_info.get("uploaded", 0)
+            documents_required = documents_info.get("required", 8)
+            
+            letters_score = letters_info.get("score", 0)
+            letter_length = letters_info.get("letter_length", 0)
+            
+            print(f"\n📊 EB-1A AI REVIEW RESULTS:")
+            print("=" * 50)
+            print(f"  🎯 Overall Status: {overall_status}")
+            print(f"  📊 Overall Score: {overall_score}%")
+            print(f"  🧬 Visa Type: {visa_type}")
+            print(f"  📄 Documents: {documents_uploaded}/{documents_required} (Score: {documents_score})")
+            print(f"  📝 Letters: {letter_length} chars (Score: {letters_score})")
+            print(f"  ✅ Message: {approval_message[:100]}...")
+            
+            # Check improvement criteria
+            improvement_criteria = {
+                "score_improved": overall_score > 85,  # Before was 75%
+                "status_specific": overall_status == "APPROVED",  # Before was generic
+                "eb1a_terminology": eb1a_validations["4_eb1a_in_message"] and eb1a_validations["5_extraordinary_ability_mentioned"],
+                "documents_perfect": documents_score == 1.0,
+                "letters_improved": letters_score >= 0.90
+            }
+            
+            results["ai_review_test"]["improvement_criteria"] = improvement_criteria
+            
+            print(f"\n🎉 IMPROVEMENT VERIFICATION:")
+            print("=" * 50)
+            for criterion, met in improvement_criteria.items():
+                status = "✅" if met else "❌"
+                print(f"  {status} {criterion}: {met}")
                 
         else:
-            print(f"❌ Basic data update failed with status {response.status_code}")
+            print(f"❌ AI Review failed with status {response.status_code}")
             print(f"📄 Error response: {response.text}")
-            results["fase_2_basic_data"]["error"] = response.text
+            results["ai_review_test"]["error"] = response.text
             
     except Exception as e:
-        print(f"❌ Exception during basic data update: {str(e)}")
-        results["fase_2_basic_data"]["exception"] = str(e)
+        print(f"❌ Exception during AI Review: {str(e)}")
+        results["ai_review_test"]["exception"] = str(e)
     
     # FASE 3: Upload de documentos EB-1A (8 documentos específicos)
     print("\n📋 FASE 3: Upload de Documentos EB-1A (8 documentos)")
