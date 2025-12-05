@@ -219,8 +219,8 @@ def test_eb1a_extraordinary_ability_system():
         print(f"❌ Exception during basic data update: {str(e)}")
         results["fase_2_basic_data"]["exception"] = str(e)
     
-    # FASE 3: Upload de documentos I-539
-    print("\n📋 FASE 3: Upload de Documentos I-539")
+    # FASE 3: Upload de documentos EB-1A (8 documentos específicos)
+    print("\n📋 FASE 3: Upload de Documentos EB-1A (8 documentos)")
     print("-" * 50)
     
     if not case_id:
@@ -230,42 +230,58 @@ def test_eb1a_extraordinary_ability_system():
             results["summary"] = {}
         results["summary"]["overall_success"] = False
         results["summary"]["successful_phases"] = 2  # Only first 2 phases completed
-        results["summary"]["total_phases"] = 9
-        results["summary"]["success_rate"] = 22.2
+        results["summary"]["total_phases"] = 8
+        results["summary"]["success_rate"] = 25.0
         results["summary"]["case_id"] = None
         results["summary"]["ai_review_functional"] = False
         return results
     
-    # Create simulated I-539 document content
+    # Create simulated EB-1A document content
     def create_simulated_document(doc_type, content):
         """Create a simulated PDF document as base64"""
         return base64.b64encode(content.encode()).decode()
     
+    # EB-1A specific documents (8 required documents)
     documents_to_upload = [
         {
-            "name": "passport_carlos_mendes.pdf",
+            "name": "passport_sofia_martinez.pdf",
             "type": "passport",
-            "content": "PASSPORT - REPÚBLICA FEDERATIVA DO BRASIL\nNome: CARLOS EDUARDO SILVA MENDES\nPassaporte: BR987654321\nData de Nascimento: 15/03/1985\nNacionalidade: BRASILEIRA\nValidade: 31/12/2030"
+            "content": "PASSPORT - REINO DE ESPAÑA\nNombre: SOFIA MARTINEZ CHEN\nPasaporte: ES234567890\nFecha de Nacimiento: 20/09/1985\nNacionalidad: ESPAÑOLA\nValidez: 31/12/2030"
         },
         {
-            "name": "i20_columbia_university.pdf", 
-            "type": "i20",
-            "content": "FORM I-20 - CERTIFICATE OF ELIGIBILITY FOR NONIMMIGRANT STUDENT STATUS\nStudent Name: Carlos Eduardo Silva Mendes\nSEVIS ID: N9876543210\nSchool: Columbia University\nProgram: Master of Science in Computer Science\nProgram End Date: June 30, 2025"
+            "name": "awards_national_international.pdf", 
+            "type": "awards",
+            "content": "AWARDS AND RECOGNITIONS\n2023 Turing Award Finalist - Association for Computing Machinery\n2022 NSF CAREER Award - National Science Foundation\n2021 Best Paper Award ICML - International Conference on Machine Learning\n2020 MIT Technology Review 35 Under 35 - Outstanding Young Innovator"
         },
         {
-            "name": "financial_support_proof.pdf",
-            "type": "financial_documents",
-            "content": "BANK STATEMENT - BANCO DO BRASIL\nAccount Holder: Carlos Eduardo Silva Mendes\nBalance: R$ 450,000.00\nStatement Period: January 2025\nSufficient funds for educational expenses"
+            "name": "publications_scientific.pdf",
+            "type": "publications",
+            "content": "SCIENTIFIC PUBLICATIONS\nDr. Sofia Martinez Chen - Publication Record\nTotal Papers: 45 peer-reviewed publications\nTop Venues: Nature, Science, ICML, NeurIPS, ICLR\nH-index: 28\nTotal Citations: 3,247\nFirst Author Papers: 15\nNotable Publications:\n- 'Advances in Neural Architecture Search' (Nature, 2023)\n- 'Ethical AI in Healthcare Applications' (Science, 2022)"
         },
         {
-            "name": "cover_letter_i539.pdf",
-            "type": "cover_letter", 
-            "content": "COVER LETTER FOR I-539 APPLICATION\nTo: U.S. Citizenship and Immigration Services\nRe: Application to Extend F-1 Student Status\nApplicant: Carlos Eduardo Silva Mendes\nI am respectfully requesting an extension of my F-1 student status to complete my Master's degree program at Columbia University."
+            "name": "memberships_associations.pdf",
+            "type": "memberships",
+            "content": "PROFESSIONAL MEMBERSHIPS\nFellow of Association for Computing Machinery (ACM) - 2022\nSenior Member of IEEE Computer Society - 2021\nBoard Member of AI Ethics Committee - MIT - 2020-Present\nEditorial Board Member - Journal of Machine Learning Research - 2023-Present"
         },
         {
-            "name": "academic_transcript.pdf",
-            "type": "education_documents",
-            "content": "COLUMBIA UNIVERSITY - OFFICIAL TRANSCRIPT\nStudent: Carlos Eduardo Silva Mendes\nProgram: Master of Science in Computer Science\nCurrent GPA: 3.8/4.0\nExpected Graduation: June 2025"
+            "name": "expert_recommendation_letters.pdf",
+            "type": "expert_letters",
+            "content": "EXPERT RECOMMENDATION LETTERS\nLetter 1: Dr. Yoshua Bengio (Turing Award Winner, University of Montreal)\nLetter 2: Dr. Fei-Fei Li (Professor, Stanford University)\nLetter 3: Dr. Andrew Ng (Adjunct Professor, Stanford University)\nLetter 4: Dr. Demis Hassabis (CEO, DeepMind)\nLetter 5: Dr. Yann LeCun (Chief AI Scientist, Meta)\nAll letters attest to Dr. Martinez Chen's extraordinary contributions to AI research."
+        },
+        {
+            "name": "high_salary_evidence.pdf",
+            "type": "high_salary",
+            "content": "SALARY EVIDENCE\nCurrent Compensation: $380,000/year\nMIT Computer Science and AI Laboratory\nPosition: Principal Research Scientist\nComparison Data:\nTop 1% in field of AI Research\nComparable to senior researchers at Google Brain, DeepMind, OpenAI\nIndustry benchmarks confirm exceptional compensation level"
+        },
+        {
+            "name": "press_media_coverage.pdf",
+            "type": "press_coverage",
+            "content": "PRESS AND MEDIA COVERAGE\nMIT News: 'Breakthrough in AI Ethics Research' - March 2023\nTechCrunch: 'Rising Star in Machine Learning' - January 2023\nWired Magazine: 'The Future of Ethical AI' - Feature Article - December 2022\nNPR Science Friday: Interview on AI in Healthcare - November 2022\nNature Careers: Profile Feature - 'Leading the Next Generation of AI' - October 2022"
+        },
+        {
+            "name": "judging_reviewer_evidence.pdf",
+            "type": "judging_work",
+            "content": "JUDGING AND REVIEW WORK\nPeer Review Activities:\n- Reviewer for Nature (2020-Present)\n- Reviewer for Science (2021-Present)\n- Program Committee Member: ICML (2019-2023)\n- Program Committee Member: NeurIPS (2020-2023)\n- Panel Judge: NSF Computer and Information Science and Engineering Grants\n- Editorial Board: Journal of Machine Learning Research\nTotal Reviews: 127 papers reviewed\nGrant Panels: 15 NSF grant review panels"
         }
     ]
     
