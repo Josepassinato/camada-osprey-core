@@ -117,8 +117,8 @@ class USCISFormFiller:
                 form_fields = reader.get_form_text_fields() or {}
                 logger.info(f"📋 Found {len(form_fields)} form fields in I-589")
             
-            # Map data to form fields
-            field_mapping = self._get_i589_mapping(basic_data, letters)
+            # Map data to form fields - NOW USES simplified_form too
+            field_mapping = self._get_i589_mapping(basic_data, simplified_form, letters)
             
             # Fill form
             for page in reader.pages:
