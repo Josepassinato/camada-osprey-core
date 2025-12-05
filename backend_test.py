@@ -1365,7 +1365,7 @@ if __name__ == "__main__":
         print("   - Todos os critérios principais atendidos")
         print("   - Endpoints funcionais e validações operacionais")
         print("   - Conformidade USCIS adequada")
-    elif main_results["summary"]["success_rate"] >= 50:
+    elif success_rate >= 50:
         print("\n⚠️  RECOMENDAÇÃO: Sistema parcialmente funcional, melhorias necessárias")
         print("   - Funcionalidade básica presente")
         print("   - Alguns critérios precisam de ajustes")
