@@ -19,7 +19,7 @@ import tempfile
 from datetime import datetime
 
 # Backend URL from environment
-BACKEND_URL = "https://visa-ai-assistant.preview.emergentagent.com"
+BACKEND_URL = "https://docsimple-3.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 def create_test_file(content, filename):

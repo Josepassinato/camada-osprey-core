@@ -14,7 +14,7 @@ import os
 from typing import Dict, Any
 
 # Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://visa-ai-assistant.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://docsimple-3.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 print(f"🌐 I-539 END-TO-END TEST TARGET: {BACKEND_URL}")

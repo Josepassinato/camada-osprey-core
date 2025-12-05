@@ -16,7 +16,7 @@ from pathlib import Path
 from datetime import datetime
 
 # Get backend URL from frontend .env
-BACKEND_URL = "https://visa-ai-assistant.preview.emergentagent.com"
+BACKEND_URL = "https://docsimple-3.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_i589_asylum_application_corrections():
