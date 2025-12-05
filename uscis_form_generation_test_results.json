@@ -1,0 +1,104 @@
+{
+  "test_results": {
+    "i539_extension": {
+      "generation": {
+        "status_code": 400,
+        "processing_time": 0.02456212043762207,
+        "error": "{\"detail\":\"Form generation not supported for visa type: \"}",
+        "working": false
+      },
+      "download": {
+        "status_code": 404,
+        "processing_time": 0.02522420883178711,
+        "error": "{\"detail\":\"Form not generated yet. Please call /generate-form first.\"}",
+        "working": false
+      },
+      "persistence": {
+        "status_code": 200,
+        "validations": {
+          "generated_form_exists": false,
+          "filename_persisted": false,
+          "generated_at_present": false,
+          "form_type_correct": false,
+          "file_size_recorded": false
+        },
+        "generated_form": {},
+        "working": false
+      }
+    },
+    "i589_asylum": {
+      "generation": {
+        "status_code": 404,
+        "processing_time": 0.020558595657348633,
+        "error": "{\"detail\":\"Case OSP-4899BE72 not found\"}",
+        "working": false
+      },
+      "download": {
+        "status_code": 404,
+        "processing_time": 0.06235861778259277,
+        "error": "{\"detail\":\"Case OSP-4899BE72 not found\"}",
+        "working": false
+      },
+      "persistence": {
+        "status_code": 404,
+        "error": "{\"detail\":\"Case not found\"}",
+        "working": false
+      }
+    },
+    "eb1a_extraordinary": {
+      "generation": {
+        "status_code": 400,
+        "processing_time": 0.02112579345703125,
+        "error": "{\"detail\":\"Form generation not supported for visa type: \"}",
+        "working": false
+      },
+      "download": {
+        "status_code": 404,
+        "processing_time": 0.05875992774963379,
+        "error": "{\"detail\":\"Form not generated yet. Please call /generate-form first.\"}",
+        "working": false
+      },
+      "persistence": {
+        "status_code": 200,
+        "validations": {
+          "generated_form_exists": false,
+          "filename_persisted": false,
+          "generated_at_present": false,
+          "form_type_correct": false,
+          "file_size_recorded": false
+        },
+        "generated_form": {},
+        "working": false
+      }
+    },
+    "summary": {
+      "success_counts": {
+        "form_generation": 0,
+        "form_download": 0,
+        "data_persistence": 0,
+        "valid_pdfs": 0
+      },
+      "total_tests": 3,
+      "successful_operations": 0,
+      "total_operations": 12,
+      "overall_success_rate": 0.0,
+      "system_ready": false
+    }
+  },
+  "timestamp": 1764913787.3974805,
+  "test_focus": "USCIS Form Generation System Testing",
+  "test_cases": [
+    {
+      "name": "I-539 Extension",
+      "case_id": "OSP-BD2D8ED2"
+    },
+    {
+      "name": "I-589 Asylum",
+      "case_id": "OSP-4899BE72"
+    },
+    {
+      "name": "EB-1A Extraordinary",
+      "case_id": "OSP-8731E45D"
+    }
+  ]
+}
