@@ -57,6 +57,18 @@
 ##   test_priority: "high_first"  # or "sequential" or "stuck_first"
 ##
 ## agent_communication:
+  - task: "Google OAuth Button Testing - Login and Signup Pages"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Login.tsx, /app/frontend/src/pages/Signup.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "✅ GOOGLE OAUTH BUTTONS IMPLEMENTED: Both Login.tsx and Signup.tsx pages have Google OAuth buttons implemented. FEATURES: 1) Login page has 'Entrar com Google' button with proper Google logo (4 colors), 2) Signup page has 'Cadastrar com Google' button with same Google logo, 3) Both buttons redirect to https://auth.emergentagent.com/?redirect={redirectUrl}, 4) Proper dividers with 'ou' and 'ou use email' text, 5) Buttons have white background with gray border styling, 6) Both pages have proper layout and positioning. Ready for comprehensive testing of visual appearance, positioning, and click functionality."
+
 agent_communication:
     -agent: "main"
     -message: "Communication message between agents"
