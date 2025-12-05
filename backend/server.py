@@ -7350,8 +7350,14 @@ async def register_owl_user(request: dict):
 async def login_owl_user(request: dict):
     """Login user to access saved progress"""
     try:
+        # EMAIL BYPASS FOR TESTING
+        email_bypass = os.environ.get('EMAIL_BYPASS_FOR_TESTING', 'FALSE').upper() == 'TRUE'
+        test_email_domain = os.environ.get('TEST_EMAIL_DOMAIN', 'test.local')
+        
         email = request.get("email", "").strip().lower()
         password = request.get("password", "")
+        
+        is_test_email = email.endswith(f"@{test_email_domain}")
         
         if not email or not password:
             raise HTTPException(status_code=400, detail="Email and password are required")
@@ -7361,9 +7367,15 @@ async def login_owl_user(request: dict):
         if not user:
             raise HTTPException(status_code=401, detail="Invalid email or password")
         
-        # Verify password
+        # Verify password - bypass for test emails
         import bcrypt
-        if not bcrypt.checkpw(password.encode('utf-8'), user["password_hash"]):
+        if email_bypass and is_test_email:
+            logger.info(f"🧪 TEST MODE: Owl login bypass active for {email}")
+            password_valid = True
+        else:
+            password_valid = bcrypt.checkpw(password.encode('utf-8'), user["password_hash"])
+        
+        if not password_valid:
             raise HTTPException(status_code=401, detail="Invalid email or password")
         
         # Update last login
@@ -7381,7 +7393,7 @@ async def login_owl_user(request: dict):
         # Serialize sessions
         serialized_sessions = serialize_doc(sessions)
         
-        return {
+        response_data = {
             "success": True,
             "message": "Login successful",
             "user": {
@@ -7392,6 +7404,12 @@ async def login_owl_user(request: dict):
             "saved_sessions": serialized_sessions,
             "timestamp": datetime.utcnow().isoformat()
         }
+        
+        if email_bypass and is_test_email:
+            response_data["test_mode"] = True
+            response_data["message"] = "🧪 TEST MODE: Login successful (password verification bypassed)"
+        
+        return response_data
         
     except HTTPException:
         raise
