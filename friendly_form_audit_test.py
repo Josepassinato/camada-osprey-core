@@ -234,7 +234,7 @@ def test_friendly_form_complete_flow():
         
         if response.status_code in [200, 201]:
             case_info = response.json()
-            case_id = case_info.get("case_id")
+            case_id = case_info.get("case", {}).get("case_id")
             print(f"✅ Caso criado: {case_id}")
             
             # 3.2: Salvar Respostas do Formulário Amigável
