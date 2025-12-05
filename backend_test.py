@@ -184,22 +184,31 @@ def test_eb1a_extraordinary_ability_system():
             print(f"📄 Response: {json.dumps(response_data, indent=2)}")
             
             case_data = response_data.get("case", {})
+            basic_data_saved = case_data.get("basic_data", {})
             
             validations = {
                 "1_case_updated": response_data.get("message") == "Case updated successfully",
-                "2_basic_data_saved": case_data.get("basic_data") is not None,
-                "3_applicant_name_correct": case_data.get("applicant_name") == "Carlos Eduardo Silva Mendes",
-                "4_visa_type_correct": case_data.get("current_visa_type") == "F-1"
+                "2_basic_data_saved": basic_data_saved is not None,
+                "3_applicant_name_correct": basic_data_saved.get("applicant_name") == "Dr. Sofia Martinez Chen",
+                "4_extraordinary_ability_field": basic_data_saved.get("field_of_extraordinary_ability") is not None,
+                "5_current_position_saved": basic_data_saved.get("current_position") == "Principal Research Scientist",
+                "6_employer_saved": basic_data_saved.get("current_employer") == "MIT Computer Science and AI Laboratory"
             }
             
             results["fase_2_basic_data"]["validations"] = validations
             results["fase_2_basic_data"]["response_data"] = response_data
             
-            print("\n🎯 VALIDAÇÕES FASE 2:")
+            print("\n🎯 VALIDAÇÕES FASE 2 - EB-1A BASIC DATA:")
             print("=" * 50)
             for check, passed in validations.items():
                 status = "✅" if passed else "❌"
                 print(f"  {status} {check}: {passed}")
+            
+            print(f"\n📊 DADOS EB-1A ESPECÍFICOS SALVOS:")
+            print(f"  👩‍🔬 Nome: {basic_data_saved.get('applicant_name', 'N/A')}")
+            print(f"  🧬 Campo de Habilidade Extraordinária: {basic_data_saved.get('field_of_extraordinary_ability', 'N/A')}")
+            print(f"  💼 Posição Atual: {basic_data_saved.get('current_position', 'N/A')}")
+            print(f"  🏢 Empregador: {basic_data_saved.get('current_employer', 'N/A')}")
                 
         else:
             print(f"❌ Basic data update failed with status {response.status_code}")
