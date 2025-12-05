@@ -2982,10 +2982,10 @@ async def comprehensive_ai_review(case_id: str):
         }
         
         # 5. VERIFICAÇÃO DE PAYMENT
-        payment_status = case.get("payment_status", "pending")
+        payment_status = case.get("payment_status") or "pending"
         
         review_results["checks"]["payment"] = {
-            "status": payment_status.upper(),
+            "status": payment_status.upper() if payment_status else "PENDING",
             "score": 1.0 if payment_status in ["completed", "test_mode"] else 0.0,
             "message": f"Pagamento: {payment_status}"
         }
