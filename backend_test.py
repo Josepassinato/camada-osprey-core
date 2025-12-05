@@ -1303,7 +1303,7 @@ if __name__ == "__main__":
     print(f"   Critérios atendidos: {overall_criteria_met}/5")
     print(f"   Sistema pronto: {'✅ SIM' if ai_system_ready else '❌ NÃO'}")
     
-    if main_results["summary"]["overall_success"]:
+    if summary.get("overall_success", False):
         print("\n🎉 CONCLUSÃO: Sistema de IA de Revisão I-539 está FUNCIONAL!")
         print("✅ Endpoints de revisão operacionais")
         print("✅ Validação de documentos funcionando")
