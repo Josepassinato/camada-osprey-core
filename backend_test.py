@@ -1139,31 +1139,33 @@ if __name__ == "__main__":
         print("❌ Sistema precisa MELHORAR FLEXIBILIDADE para diferentes tipos de visto")
         
     # Save results to file
-    with open("/app/i539_ai_review_test_results.json", "w") as f:
+    with open("/app/eb1a_extraordinary_ability_test_results.json", "w") as f:
         json.dump({
             "main_results": main_results,
             "additional_results": additional_results,
             "timestamp": time.time(),
-            "test_focus": "I-539 Extension of Stay AI Review System Analysis",
+            "test_focus": "EB-1A Extraordinary Ability Visa System Testing",
             "applicant": {
-                "name": "Carlos Eduardo Silva Mendes",
-                "email": "carlos.mendes@test.com",
-                "visa_type": "I-539",
-                "current_status": "F-1",
-                "extension_reason": "Complete Master's degree in Computer Science"
+                "name": "Dr. Sofia Martinez Chen",
+                "email": "sofia.teste@test.com",
+                "visa_type": "EB-1A",
+                "field_of_extraordinary_ability": "Sciences - Artificial Intelligence Research",
+                "current_position": "Principal Research Scientist",
+                "current_employer": "MIT Computer Science and AI Laboratory"
             },
-            "ai_review_assessment": {
-                "satisfactory": satisfactory,
-                "uscis_compliant": uscis_compliant,
-                "identifies_missing_docs": doc_validation_working,
-                "evaluates_letter_quality": letter_working,
-                "verifies_form_completion": form_working,
-                "overall_ready": ai_system_ready,
-                "criteria_met": f"{overall_criteria_met}/5"
+            "eb1a_assessment": {
+                "case_creation": case_creation,
+                "basic_data_eb1a": basic_data_eb1a,
+                "documents_uploaded": documents_uploaded,
+                "ai_review_high_score": ai_review_high_score,
+                "ai_score": ai_score,
+                "overall_ready": eb1a_system_ready,
+                "success_rate": eb1a_success_rate,
+                "adaptation_score": summary.get("adaptation_score", 0)
             }
         }, f, indent=2)
     
-    print(f"\n💾 Resultados salvos em: /app/i539_ai_review_test_results.json")
+    print(f"\n💾 Resultados salvos em: /app/eb1a_extraordinary_ability_test_results.json")
     
     # Final recommendation based on AI Review System analysis
     if ai_system_ready and success_rate >= 70:
