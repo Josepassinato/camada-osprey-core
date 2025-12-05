@@ -2742,7 +2742,19 @@ async def validate_friendly_form_ai(case: dict, friendly_form_data: dict, basic_
                 "message_to_user": f"Validação programática concluída. {len(missing_fields)} campos obrigatórios faltando."
             }
         
-        llm = EmergentLLM(api_key=emergent_key)
+        try:
+            from emergentintegrations import EmergentLLM
+            llm = EmergentLLM(api_key=emergent_key)
+        except ImportError:
+            logger.error("EmergentLLM import failed, using programmatic validation only")
+            overall_status = "approved" if completion_percentage >= 90 else "needs_review" if completion_percentage >= 70 else "rejected"
+            return {
+                "validation_issues": validation_issues,
+                "overall_status": overall_status,
+                "completion_percentage": completion_percentage,
+                "missing_fields": missing_fields,
+                "message_to_user": f"Validação programática concluída. {len(missing_fields)} campos obrigatórios faltando."
+            }
         
         # Get visa-specific requirements
         try:
