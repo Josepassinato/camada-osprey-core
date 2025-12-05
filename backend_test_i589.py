@@ -778,13 +778,13 @@ Hassan Ahmed Ibrahim"""
     return results
 
 if __name__ == "__main__":
-    print("🚀 INICIANDO TESTE COMPLETO I-589 ASYLUM APPLICATION - HASSAN AHMED IBRAHIM")
+    print("🚀 INICIANDO TESTE I-589 APÓS CORREÇÕES - OMAR HASSAN ALI")
     print(f"🌐 Backend URL: {BACKEND_URL}")
     print(f"🔗 API Base: {API_BASE}")
     print(f"⏰ Timestamp: {datetime.now().isoformat()}")
     
-    # Main test - I-589 Asylum Application as requested
-    main_results = test_i589_complete_flow()
+    # Main test - I-589 after corrections
+    main_results = test_i589_asylum_application_corrections()
     
     # Final summary
     print("\n" + "=" * 80)
