@@ -183,24 +183,73 @@ class USCISFormFiller:
             logger.error(f"❌ Error filling I-140: {str(e)}")
             raise
     
-    def _get_i539_mapping(self, basic_data: Dict[str, Any]) -> Dict[str, str]:
-        """Map case data to I-539 form fields"""
+    def _get_i539_mapping(self, basic_data: Dict[str, Any], simplified_form: Dict[str, Any] = None) -> Dict[str, str]:
+        """
+        Map case data to I-539 form fields
+        Now uses BOTH basic_data and simplified_form_responses (friendly form in Portuguese)
+        """
         
-        # Parse name
-        full_name = basic_data.get("applicant_name", "")
+        # Use simplified_form if available (data from friendly form)
+        if simplified_form is None:
+            simplified_form = {}
+        
+        # Parse name - try friendly form first, then basic_data
+        full_name = (
+            simplified_form.get("nome_completo") or 
+            simplified_form.get("nome") or 
+            basic_data.get("applicant_name", "")
+        )
         name_parts = full_name.split(" ", 1)
         family_name = name_parts[-1] if name_parts else ""
         given_name = name_parts[0] if len(name_parts) > 1 else ""
         
-        # Parse date of birth
-        dob = basic_data.get("date_of_birth", "")
+        # Parse date of birth - try friendly form first
+        dob = (
+            simplified_form.get("data_nascimento") or 
+            basic_data.get("date_of_birth", "")
+        )
         dob_parts = dob.split("-") if dob else ["", "", ""]
         
-        # Parse address
-        address = basic_data.get("current_address", "")
-        city = basic_data.get("city", "")
-        state = basic_data.get("state", "")
-        zip_code = basic_data.get("zip_code", "")
+        # Parse address - try friendly form first
+        address = (
+            simplified_form.get("endereco") or 
+            basic_data.get("current_address", "")
+        )
+        city = (
+            simplified_form.get("cidade") or 
+            basic_data.get("city", "")
+        )
+        state = (
+            simplified_form.get("estado") or 
+            basic_data.get("state", "")
+        )
+        zip_code = (
+            simplified_form.get("cep") or 
+            simplified_form.get("zip_code") or 
+            basic_data.get("zip_code", "")
+        )
+        
+        # Email and phone - try friendly form first
+        email = (
+            simplified_form.get("email") or 
+            basic_data.get("email", "")
+        )
+        phone = (
+            simplified_form.get("telefone") or 
+            basic_data.get("phone", "")
+        )
+        
+        # Country info - try friendly form first
+        country_of_birth = (
+            simplified_form.get("pais_nascimento") or 
+            basic_data.get("country_of_birth", "")
+        )
+        
+        # Passport - try friendly form first
+        passport = (
+            simplified_form.get("numero_passaporte") or 
+            basic_data.get("passport_number", "")
+        )
         
         mapping = {
             # Part 1: Information About You
@@ -210,17 +259,19 @@ class USCISFormFiller:
             "Pt1Line3a_DateOfBirth_Month": dob_parts[1] if len(dob_parts) > 1 else "",
             "Pt1Line3a_DateOfBirth_Day": dob_parts[2] if len(dob_parts) > 2 else "",
             "Pt1Line3a_DateOfBirth_Year": dob_parts[0] if len(dob_parts) > 0 else "",
-            "Pt1Line4_CountryOfBirth": basic_data.get("country_of_birth", ""),
-            "Pt1Line5_CountryOfCitizenship": basic_data.get("country_of_birth", ""),
-            "Pt1Line6_PassportNumber": basic_data.get("passport_number", ""),
+            "Pt1Line4_CountryOfBirth": country_of_birth,
+            "Pt1Line5_CountryOfCitizenship": country_of_birth,
+            "Pt1Line6_PassportNumber": passport,
             "Pt1Line7a_StreetNumberName": address,
             "Pt1Line7b_AptSteFlrNumber": "",
             "Pt1Line7c_CityOrTown": city,
             "Pt1Line7d_State": state,
             "Pt1Line7e_ZipCode": zip_code,
-            "Pt1Line8_Email": basic_data.get("email", ""),
-            "Pt1Line9_DaytimeTelephone": basic_data.get("phone", ""),
+            "Pt1Line8_Email": email,
+            "Pt1Line9_DaytimeTelephone": phone,
         }
+        
+        logger.info(f"✅ Mapped {len([v for v in mapping.values() if v])} fields from friendly form and basic data")
         
         return mapping
     
