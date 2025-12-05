@@ -533,44 +533,48 @@ def additional_validation_tests():
     pass
 
 if __name__ == "__main__":
-    print("🚀 INICIANDO TESTE COMPLETO - SISTEMA DE GERAÇÃO DE FORMULÁRIOS USCIS")
+    print("🚀 INICIANDO TESTE COMPLETO DA VALIDAÇÃO IA MELHORADA")
     print(f"🌐 Backend URL: {BACKEND_URL}")
     print(f"🔗 API Base: {API_BASE}")
     print(f"⏰ Timestamp: {datetime.now().isoformat()}")
     
     # Execute main test
-    test_results = test_uscis_form_generation_system()
+    test_results = test_enhanced_ai_validation_system()
     
     # Save results to file
-    with open("/app/uscis_form_generation_test_results.json", "w") as f:
+    with open("/app/enhanced_ai_validation_test_results.json", "w") as f:
         json.dump({
             "test_results": test_results,
             "timestamp": time.time(),
-            "test_focus": "USCIS Form Generation System Testing",
+            "test_focus": "Enhanced AI Validation System Testing",
             "test_cases": [
-                {"name": "I-539 Extension", "case_id": "OSP-BD2D8ED2"},
-                {"name": "I-589 Asylum", "case_id": "OSP-4899BE72"},
-                {"name": "EB-1A Extraordinary", "case_id": "OSP-8731E45D"}
+                {"name": "Complete Data (I-539)", "expected": "approved, 100%, 0 issues"},
+                {"name": "Partial Data (50%)", "expected": "rejected, 40-60%, >5 issues"},
+                {"name": "Format Errors", "expected": "needs_review, 80-95%, >=2 issues"},
+                {"name": "Issues Verification", "expected": "detailed issues list"},
+                {"name": "MongoDB Persistence", "expected": "data saved correctly"}
             ]
-        }, f, indent=2)
+        }, f, indent=2, ensure_ascii=False)
     
-    print(f"\n💾 Resultados salvos em: /app/uscis_form_generation_test_results.json")
+    print(f"\n💾 Resultados salvos em: /app/enhanced_ai_validation_test_results.json")
     
     # Final recommendation
     summary = test_results.get("summary", {})
     if summary.get("system_ready", False):
-        print("\n✅ RECOMENDAÇÃO: Sistema de Formulários USCIS PRONTO PARA PRODUÇÃO")
-        print("   - Todos os 3 tipos de visto funcionando")
-        print("   - PDFs oficiais sendo gerados corretamente")
-        print("   - Sistema completo e funcional")
+        print("\n✅ RECOMENDAÇÃO: Sistema de Validação IA PRONTO PARA PRODUÇÃO")
+        print("   - Validação em dois estágios funcionando")
+        print("   - Campos obrigatórios por tipo de visto implementados")
+        print("   - Validações de formato operacionais")
+        print("   - Cálculo inteligente de completude ativo")
+        print("   - Persistência MongoDB confirmada")
     else:
-        success_rate = summary.get("overall_success_rate", 0)
-        if success_rate >= 50:
+        success_rate = summary.get("success_rate", 0)
+        if success_rate >= 60:
             print("\n⚠️  RECOMENDAÇÃO: Sistema parcialmente funcional, melhorias necessárias")
-            print("   - Alguns formulários funcionando")
-            print("   - Revisar casos que falharam")
+            print("   - Alguns testes passando")
+            print("   - Revisar áreas problemáticas identificadas")
         else:
             print("\n❌ RECOMENDAÇÃO: Sistema precisa de desenvolvimento adicional")
             print("   - Múltiplos problemas identificados")
-            print("   - Revisão completa necessária")
+            print("   - Revisão completa da validação necessária")
     
