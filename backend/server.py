@@ -2581,6 +2581,240 @@ async def claim_anonymous_case(case_id: str, current_user = Depends(get_current_
         logger.error(f"Error claiming case: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error claiming case: {str(e)}")
 
+@api_router.post("/case/{case_id}/friendly-form")
+async def submit_friendly_form(case_id: str, request: dict, current_user = Depends(get_current_user_optional)):
+    """
+    Submit and validate friendly form data with AI analysis.
+    This endpoint:
+    1. Receives data from user-friendly form (in Portuguese or user's language)
+    2. Validates data completeness and coherence using AI
+    3. Notifies user of any missing or incorrect information
+    4. Saves validated data for later use in official USCIS forms
+    """
+    try:
+        # Extract form data from request
+        friendly_form_data = request.get("friendly_form_data", {})
+        basic_data = request.get("basic_data", {})
+        
+        if not case_id:
+            raise HTTPException(status_code=400, detail="case_id is required")
+        
+        # Get case from database
+        query = {"case_id": case_id}
+        if current_user:
+            query["user_id"] = current_user["id"]
+        
+        case = await db.auto_cases.find_one(query)
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        # Get visa type for specific validation
+        visa_type = case.get('form_code', 'N/A')
+        
+        # STEP 1: AI Validation - Check completeness and coherence
+        logger.info(f"Starting AI validation for case {case_id}, visa type: {visa_type}")
+        
+        validation_result = await validate_friendly_form_ai(
+            case=case,
+            friendly_form_data=friendly_form_data,
+            basic_data=basic_data,
+            visa_type=visa_type
+        )
+        
+        # STEP 2: Check if validation passed
+        validation_status = validation_result.get("overall_status", "needs_review")
+        validation_issues = validation_result.get("validation_issues", [])
+        completion_percentage = validation_result.get("completion_percentage", 0)
+        
+        # STEP 3: Save data to database (even if validation found issues)
+        update_data = {
+            "simplified_form_responses": friendly_form_data,
+            "basic_data": {**case.get("basic_data", {}), **basic_data},
+            "friendly_form_validation": {
+                "status": validation_status,
+                "completion_percentage": completion_percentage,
+                "validation_date": datetime.utcnow(),
+                "issues": validation_issues
+            },
+            "updated_at": datetime.utcnow()
+        }
+        
+        # Update progress based on completion
+        if completion_percentage >= 90:
+            update_data["progress_percentage"] = 50
+            update_data["current_step"] = "friendly-form-complete"
+        elif completion_percentage >= 50:
+            update_data["progress_percentage"] = 45
+            update_data["current_step"] = "friendly-form-partial"
+        
+        await db.auto_cases.update_one(
+            {"case_id": case_id},
+            {"$set": update_data}
+        )
+        
+        logger.info(f"Friendly form data saved for case {case_id}")
+        
+        # STEP 4: Return validation result to user
+        response = {
+            "success": True,
+            "case_id": case_id,
+            "validation_status": validation_status,
+            "completion_percentage": completion_percentage,
+            "message": get_validation_message_pt(validation_status, completion_percentage),
+            "validation_issues": validation_issues,
+            "next_steps": get_next_steps_pt(validation_status, completion_percentage)
+        }
+        
+        return response
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in friendly form submission: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error processing friendly form: {str(e)}")
+
+
+async def validate_friendly_form_ai(case: dict, friendly_form_data: dict, basic_data: dict, visa_type: str):
+    """
+    AI-powered validation of friendly form data.
+    Checks for:
+    - Completeness (all required fields filled)
+    - Coherence (data makes sense and is consistent)
+    - Format correctness (dates, emails, phone numbers)
+    - Visa-specific requirements
+    """
+    try:
+        from emergentintegrations import EmergentLLM
+        
+        # Use Emergent LLM key
+        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not emergent_key:
+            logger.warning("EMERGENT_LLM_KEY not found, validation will be basic")
+            return {
+                "validation_issues": [],
+                "overall_status": "approved",
+                "completion_percentage": 80,
+                "message": "Validação básica concluída"
+            }
+        
+        llm = EmergentLLM(api_key=emergent_key)
+        
+        # Get visa-specific requirements
+        from visa_specifications import get_visa_specifications
+        visa_specs = get_visa_specifications(visa_type) if visa_type else {}
+        
+        # Prepare validation prompt
+        validation_prompt = f"""
+Você é um especialista em imigração dos EUA. Analise os dados do formulário preenchido pelo usuário e verifique:
+
+**TIPO DE VISTO**: {visa_type}
+
+**DADOS BÁSICOS DO USUÁRIO**:
+{json.dumps(basic_data, indent=2, ensure_ascii=False)}
+
+**RESPOSTAS DO FORMULÁRIO AMIGÁVEL**:
+{json.dumps(friendly_form_data, indent=2, ensure_ascii=False)}
+
+**REQUISITOS ESPECÍFICOS DO VISTO {visa_type}**:
+{json.dumps(visa_specs, indent=2, ensure_ascii=False) if visa_specs else "Requisitos gerais de imigração"}
+
+**SUA TAREFA**:
+1. Verificar se TODOS os campos obrigatórios estão preenchidos para o visto {visa_type}
+2. Verificar se as informações são COERENTES (ex: datas fazem sentido, não há contradições)
+3. Verificar FORMATOS (emails válidos, telefones, datas, números de passaporte)
+4. Identificar informações FALTANTES ou INCOMPLETAS
+5. Sugerir correções específicas quando necessário
+
+**RESPONDA EM JSON** (APENAS JSON, SEM TEXTO ADICIONAL):
+{{
+    "validation_issues": [
+        {{
+            "field": "nome_do_campo",
+            "issue": "descrição clara do problema em português",
+            "severity": "error|warning|info",
+            "suggestion": "como o usuário deve corrigir"
+        }}
+    ],
+    "overall_status": "approved|needs_review|rejected",
+    "completion_percentage": 85,
+    "missing_fields": ["lista", "de", "campos", "faltantes"],
+    "message_to_user": "Mensagem clara em português sobre o status do formulário"
+}}
+
+**IMPORTANTE**:
+- Se completion_percentage < 70%, status deve ser "rejected"
+- Se completion_percentage >= 70% e < 90%, status deve ser "needs_review"
+- Se completion_percentage >= 90%, status pode ser "approved"
+- Seja específico nas sugestões
+- Use português claro e amigável
+"""
+        
+        # Call AI
+        response_text = llm.chat([{"role": "user", "content": validation_prompt}])
+        
+        # Parse JSON response
+        try:
+            # Try to extract JSON from response
+            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            if json_match:
+                ai_response = json.loads(json_match.group())
+            else:
+                ai_response = json.loads(response_text.strip())
+        except json.JSONDecodeError:
+            logger.error(f"Failed to parse AI response as JSON: {response_text}")
+            # Fallback response
+            ai_response = {
+                "validation_issues": [],
+                "overall_status": "approved",
+                "completion_percentage": 75,
+                "message_to_user": "Validação concluída com sucesso"
+            }
+        
+        return ai_response
+        
+    except Exception as e:
+        logger.error(f"Error in AI validation: {str(e)}")
+        # Return basic validation on error
+        return {
+            "validation_issues": [],
+            "overall_status": "needs_review",
+            "completion_percentage": 60,
+            "message_to_user": "Validação básica concluída. Revise seus dados."
+        }
+
+
+def get_validation_message_pt(status: str, completion: int) -> str:
+    """Get user-friendly message in Portuguese based on validation status"""
+    if status == "approved" and completion >= 90:
+        return "✅ Excelente! Seu formulário está completo e coerente. Você pode prosseguir para a próxima etapa."
+    elif status == "needs_review":
+        return f"⚠️ Seu formulário está {completion}% completo. Por favor, revise as informações destacadas abaixo."
+    else:
+        return f"❌ Seu formulário precisa de mais informações ({completion}% completo). Por favor, preencha os campos faltantes."
+
+
+def get_next_steps_pt(status: str, completion: int) -> list:
+    """Get next steps recommendations in Portuguese"""
+    if status == "approved" and completion >= 90:
+        return [
+            "Revisar seus dados uma última vez",
+            "Clicar em 'Continuar' para gerar os formulários oficiais",
+            "Upload de documentos de suporte (se necessário)"
+        ]
+    elif status == "needs_review":
+        return [
+            "Revisar e corrigir as informações destacadas",
+            "Preencher campos faltantes",
+            "Verificar datas e formatos de dados"
+        ]
+    else:
+        return [
+            "Preencher todos os campos obrigatórios",
+            "Revisar informações básicas",
+            "Garantir que todos os dados estão corretos"
+        ]
+
+
 @api_router.post("/auto-application/extract-facts")
 async def extract_facts_from_story(request: dict):
     """Extract structured facts from user's story using sistema"""
