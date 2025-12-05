@@ -2927,7 +2927,9 @@ async def comprehensive_ai_review(case_id: str):
         
         # 2. VERIFICAÇÃO DE DOCUMENTOS
         documents = case.get("documents", [])
-        visa_type = case.get("visa_type", "").upper()
+        visa_type = case.get("visa_type") or case.get("form_code") or ""
+        if visa_type:
+            visa_type = visa_type.upper()
         
         # Requisitos por tipo de visto
         required_docs = {
