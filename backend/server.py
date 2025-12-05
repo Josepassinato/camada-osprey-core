@@ -3242,6 +3242,85 @@ def get_next_steps_pt(status: str, completion: int) -> list:
         ]
 
 
+@api_router.get("/friendly-form/available-visas")
+async def get_available_visa_types():
+    """
+    Retorna lista de todos os tipos de visto com estruturas de formulário disponíveis
+    
+    Returns:
+        Lista de vistos disponíveis com informações básicas
+    """
+    try:
+        visa_types = [
+            {
+                "code": "I-539",
+                "name": "Extensão/Mudança de Status Geral",
+                "category": "Não-Imigrante",
+                "description": "Para extensão ou mudança de qualquer status não-imigrante",
+                "estimated_time": "20-30 minutos"
+            },
+            {
+                "code": "F-1",
+                "name": "Visto de Estudante",
+                "category": "Estudante",
+                "description": "Para estudantes em programas acadêmicos",
+                "estimated_time": "25-35 minutos"
+            },
+            {
+                "code": "H-1B",
+                "name": "Visto de Trabalho Especializado",
+                "category": "Trabalho",
+                "description": "Para profissionais em ocupações especializadas",
+                "estimated_time": "30-40 minutos"
+            },
+            {
+                "code": "B-2",
+                "name": "Visto de Turista",
+                "category": "Turismo",
+                "description": "Extensão de visto de turista/visitante",
+                "estimated_time": "15-20 minutos"
+            },
+            {
+                "code": "L-1",
+                "name": "Transferência Intra-Empresa",
+                "category": "Trabalho",
+                "description": "Para executivos e gerentes transferidos",
+                "estimated_time": "30-40 minutos"
+            },
+            {
+                "code": "O-1",
+                "name": "Habilidade Extraordinária (O-1)",
+                "category": "Habilidade Especial",
+                "description": "Para indivíduos com habilidade extraordinária",
+                "estimated_time": "35-45 minutos"
+            },
+            {
+                "code": "I-589",
+                "name": "Pedido de Asilo",
+                "category": "Asilo/Proteção",
+                "description": "Para solicitantes de asilo político",
+                "estimated_time": "45-60 minutos"
+            },
+            {
+                "code": "EB-1A",
+                "name": "Imigrante - Habilidade Extraordinária",
+                "category": "Imigrante",
+                "description": "Green Card baseado em habilidade extraordinária",
+                "estimated_time": "60-90 minutos"
+            }
+        ]
+        
+        return {
+            "success": True,
+            "visa_types": visa_types,
+            "total": len(visa_types)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting available visa types: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error getting visa types: {str(e)}")
+
+
 @api_router.get("/friendly-form/structure/{visa_type}")
 async def get_friendly_form_structure_endpoint(visa_type: str):
     """
@@ -3251,7 +3330,7 @@ async def get_friendly_form_structure_endpoint(visa_type: str):
     ao usuário, garantindo que TODOS os campos obrigatórios do formulário oficial USCIS sejam coletados.
     
     Args:
-        visa_type: Código do visto (I-539, I-589, EB-1A, etc.)
+        visa_type: Código do visto (I-539, I-589, EB-1A, F-1, H-1B, B-2, L-1, O-1, etc.)
         
     Returns:
         Estrutura completa do formulário com seções, campos, validações e mapeamento para formulário oficial
