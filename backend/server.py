@@ -1072,6 +1072,21 @@ async def search_knowledge_base(query: str, visa_type: Optional[VisaType] = None
 async def signup(user_data: UserCreate):
     """Register a new user"""
     try:
+        # EMAIL BYPASS FOR TESTING
+        email_bypass = os.environ.get('EMAIL_BYPASS_FOR_TESTING', 'FALSE').upper() == 'TRUE'
+        test_email_domain = os.environ.get('TEST_EMAIL_DOMAIN', 'test.local')
+        
+        is_test_email = user_data.email.endswith(f"@{test_email_domain}")
+        
+        if email_bypass and is_test_email:
+            logger.info(f"🧪 TEST MODE: Email bypass active for {user_data.email}")
+            # In test mode with test email, skip email validation
+            # Auto-verify email
+            email_verified = True
+        else:
+            # Production mode or real email
+            email_verified = False
+        
         # Check if user already exists
         existing_user = await db.users.find_one({"email": user_data.email})
         if existing_user:
@@ -1093,6 +1108,8 @@ async def signup(user_data: UserCreate):
             "current_country": None,
             "date_of_birth": None,
             "passport_number": None,
+            "email_verified": email_verified,
+            "is_test_user": is_test_email if email_bypass else False,
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow()
         }
@@ -1106,7 +1123,7 @@ async def signup(user_data: UserCreate):
         # Create JWT token
         token = create_jwt_token(user_id, user_data.email)
         
-        return {
+        response_data = {
             "message": "User created successfully",
             "token": token,
             "user": {
@@ -1116,6 +1133,13 @@ async def signup(user_data: UserCreate):
                 "last_name": user_data.last_name
             }
         }
+        
+        # Add test mode indicator if applicable
+        if email_bypass and is_test_email:
+            response_data["test_mode"] = True
+            response_data["message"] = "🧪 TEST MODE: User created (email verification bypassed)"
+        
+        return response_data
     
     except Exception as e:
         logger.error(f"Error in signup: {str(e)}")
