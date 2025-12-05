@@ -1355,7 +1355,9 @@ async def generate_uscis_form(case_id: str):
         import base64
         pdf_base64 = base64.b64encode(pdf_bytes).decode('utf-8')
         
-        await db.application_cases.update_one(
+        # Update the correct collection
+        collection = db.application_cases if case_collection == "application_cases" else db.auto_cases
+        await collection.update_one(
             {"case_id": case_id},
             {
                 "$set": {
