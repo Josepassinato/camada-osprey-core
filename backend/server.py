@@ -2700,8 +2700,14 @@ async def validate_friendly_form_ai(case: dict, friendly_form_data: dict, basic_
         llm = EmergentLLM(api_key=emergent_key)
         
         # Get visa-specific requirements
-        from visa_specifications import get_visa_specifications
-        visa_specs = get_visa_specifications(visa_type) if visa_type else {}
+        try:
+            from visa_specifications import get_visa_specifications
+            visa_specs = get_visa_specifications(visa_type) if visa_type else {}
+            if visa_specs is None:
+                visa_specs = {}
+        except Exception as spec_error:
+            logger.warning(f"Could not get visa specifications: {spec_error}")
+            visa_specs = {}
         
         # Prepare validation prompt
         validation_prompt = f"""
