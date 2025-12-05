@@ -1,0 +1,720 @@
+{
+  "form_system": {
+    "form_endpoints": {
+      "/api/auto-application/case/{id}/generate-form": {
+        "status_code": 405,
+        "exists": true,
+        "response": "{\"detail\":\"Method Not Allowed\"}"
+      },
+      "/api/case/{id}/download-form": {
+        "status_code": 404,
+        "exists": false,
+        "response": "{\"detail\":\"Not Found\"}"
+      },
+      "/api/documents/case/{id}/forms": {
+        "status_code": 404,
+        "exists": false,
+        "response": "{\"detail\":\"Not Found\"}"
+      },
+      "/api/uscis-forms/generate": {
+        "status_code": 404,
+        "exists": false,
+        "response": "{\"detail\":\"Not Found\"}"
+      },
+      "/api/forms/fill": {
+        "status_code": 404,
+        "exists": false,
+        "response": "{\"detail\":\"Not Found\"}"
+      },
+      "/api/forms/validate": {
+        "status_code": 404,
+        "exists": false,
+        "response": "{\"detail\":\"Not Found\"}"
+      }
+    },
+    "specialized_agents": {
+      "/api/specialized-agents/form-validation": {
+        "status_code": 405,
+        "exists": true,
+        "functional": false
+      },
+      "/api/specialized-agents/form-filler": {
+        "status_code": 404,
+        "exists": false,
+        "functional": false
+      },
+      "/api/specialized-agents/uscis-translator": {
+        "status_code": 404,
+        "exists": false,
+        "functional": false
+      },
+      "/api/agents/form-mapper": {
+        "status_code": 404,
+        "exists": false,
+        "functional": false
+      },
+      "/api/llm/form-assistant": {
+        "status_code": 404,
+        "exists": false,
+        "functional": false
+      }
+    },
+    "mapping_logic": {
+      "/api/visa-detailed-info/I-539": {
+        "status_code": 200,
+        "exists": true,
+        "has_mapping": false
+      },
+      "/api/visa-detailed-info/I-589": {
+        "status_code": 404,
+        "exists": false,
+        "has_mapping": false
+      },
+      "/api/visa-detailed-info/EB-1A": {
+        "status_code": 200,
+        "exists": true,
+        "has_mapping": false
+      },
+      "/api/forms/field-mapping/I-539": {
+        "status_code": 404,
+        "exists": false,
+        "has_mapping": false
+      },
+      "/api/forms/field-mapping/I-589": {
+        "status_code": 404,
+        "exists": false,
+        "has_mapping": false
+      },
+      "/api/forms/field-mapping/EB-1A": {
+        "status_code": 404,
+        "exists": false,
+        "has_mapping": false
+      }
+    }
+  },
+  "existing_cases": {
+    "OSP-BD2D8ED2": {
+      "case_data": {
+        "case_id": "OSP-BD2D8ED2",
+        "user_id": null,
+        "session_token": null,
+        "form_code": null,
+        "status": "created",
+        "process_type": null,
+        "progress_percentage": 0,
+        "current_step": null,
+        "basic_data": {
+          "applicant_name": "Maria Santos Silva",
+          "date_of_birth": "1990-05-20",
+          "passport_number": "BR123456789",
+          "current_address": "456 Park Avenue, Apt 8C",
+          "city": "Miami",
+          "state": "FL",
+          "zip_code": "33101",
+          "country_of_birth": "Brazil",
+          "email": "maria.teste@test.com",
+          "phone": "+1-305-555-0123"
+        },
+        "uploaded_documents": [],
+        "document_analysis": null,
+        "user_story_text": null,
+        "user_story_audio_url": null,
+        "ai_extracted_facts": null,
+        "simplified_form_responses": null,
+        "official_form_data": null,
+        "uscis_form_generated": false,
+        "ead_data": null,
+        "ai_processing": null,
+        "payment_status": null,
+        "payment_id": null,
+        "final_package_generated": false,
+        "final_package_url": null,
+        "completed_at": null,
+        "created_at": "2025-12-05T04:52:03.578000",
+        "updated_at": "2025-12-05T04:52:03.853000",
+        "expires_at": "2025-12-12T04:52:03.578000",
+        "ai_review": {
+          "success": true,
+          "case_id": "OSP-BD2D8ED2",
+          "overall_status": "REJECTED",
+          "overall_score": 40.0,
+          "approval_message": "\u274c Caso rejeitado. Muitos itens faltando.",
+          "detailed_checks": {
+            "basic_data": {
+              "status": "COMPLETE",
+              "score": 1.0,
+              "missing_fields": [],
+              "message": "Dados b\u00e1sicos completos"
+            },
+            "documents": {
+              "status": "COMPLETE",
+              "score": 1.0,
+              "uploaded": 5,
+              "required": 1,
+              "missing_documents": [],
+              "message": "5 documentos enviados"
+            },
+            "forms": {
+              "status": "NOT_STARTED",
+              "score": 0.0,
+              "message": "Formul\u00e1rios n\u00e3o iniciados"
+            },
+            "letters": {
+              "status": "INCOMPLETE",
+              "score": 0.0,
+              "has_cover_letter": false,
+              "message": "Carta de apresenta\u00e7\u00e3o faltando"
+            },
+            "payment": {
+              "status": "PENDING",
+              "score": 0.0,
+              "message": "Pagamento: pending"
+            }
+          },
+          "summary": {
+            "basic_data_complete": true,
+            "documents_complete": true,
+            "forms_complete": false,
+            "letters_complete": false,
+            "payment_complete": false
+          },
+          "missing_items": {
+            "fields": [],
+            "documents": []
+          },
+          "timestamp": "2025-12-05T04:52:03.852839"
+        },
+        "ai_review_date": "2025-12-05T04:52:03.853000",
+        "ai_review_score": 0.4,
+        "documents": [
+          {
+            "id": "25a9f808-3a49-44ee-a0df-01b8e5009788",
+            "case_id": "OSP-BD2D8ED2",
+            "filename": "passport.txt",
+            "document_type": "passport",
+            "description": "Passport biographical page",
+            "content_base64": "RmFrZSBwYXNzcG9ydCBjb250ZW50IC0gTWFyaWEgU2FudG9zIFNpbHZhIC0gQlIxMjM0NTY3ODk=",
+            "mime_type": "text/plain",
+            "file_size": 56,
+            "uploaded_at": "2025-12-05T04:52:03.661000",
+            "status": "uploaded"
+          },
+          {
+            "id": "5f4eb32f-ef68-4f68-8733-52f1b05f7889",
+            "case_id": "OSP-BD2D8ED2",
+            "filename": "i94.txt",
+            "document_type": "i94",
+            "description": "I-94 record",
+            "content_base64": "SS05NCBBcnJpdmFsL0RlcGFydHVyZSBSZWNvcmQgLSBNYXJpYSBTYW50b3MgU2lsdmE=",
+            "mime_type": "text/plain",
+            "file_size": 50,
+            "uploaded_at": "2025-12-05T04:52:03.687000",
+            "status": "uploaded"
+          },
+          {
+            "id": "51ee7459-bbe7-4ed6-85ae-fc1933497848",
+            "case_id": "OSP-BD2D8ED2",
+            "filename": "visa.txt",
+            "document_type": "current_visa",
+            "description": "Current visa stamp",
+            "content_base64": "Q3VycmVudCBGLTEgVmlzYSAtIFZhbGlkIHVudGlsIDIwMjU=",
+            "mime_type": "text/plain",
+            "file_size": 35,
+            "uploaded_at": "2025-12-05T04:52:03.712000",
+            "status": "uploaded"
+          },
+          {
+            "id": "d317b800-cb71-4364-b6e1-da1634cdb27f",
+            "case_id": "OSP-BD2D8ED2",
+            "filename": "i20.txt",
+            "document_type": "i20_or_ds2019",
+            "description": "Current I-20",
+            "content_base64": "SS0yMCBGb3JtIC0gVW5pdmVyc2l0eSBvZiBNaWFtaSAtIFNFVklTIE4xMjM0NTY3ODk=",
+            "mime_type": "text/plain",
+            "file_size": 50,
+            "uploaded_at": "2025-12-05T04:52:03.738000",
+            "status": "uploaded"
+          },
+          {
+            "id": "7b05db17-7a63-47e7-8212-b1c3adb06e75",
+            "case_id": "OSP-BD2D8ED2",
+            "filename": "financial.txt",
+            "document_type": "financial_evidence",
+            "description": "Bank statement",
+            "content_base64": "QmFuayBTdGF0ZW1lbnQgLSBCYWxhbmNlOiAkNTAsMDAwIFVTRA==",
+            "mime_type": "text/plain",
+            "file_size": 37,
+            "uploaded_at": "2025-12-05T04:52:03.769000",
+            "status": "uploaded"
+          }
+        ]
+      },
+      "form_exists": false,
+      "fields_filled": {},
+      "pdf_generated": false,
+      "completeness_score": 36,
+      "required_sections": {
+        "part_1_applicant_info": false,
+        "part_2_application_type": false,
+        "part_3_additional_info": false,
+        "part_4_family": false,
+        "part_5_statement": false,
+        "part_6_signature": false
+      },
+      "field_mapping": {
+        "applicant_name_mapped": true,
+        "date_of_birth_mapped": true,
+        "passport_number_mapped": true,
+        "current_address_mapped": true,
+        "i94_number_mapped": false
+      }
+    },
+    "OSP-4899BE72": {
+      "case_data": {},
+      "form_exists": false,
+      "fields_filled": {},
+      "pdf_generated": false,
+      "completeness_score": 0,
+      "error": "{\"detail\":\"Case not found\"}"
+    },
+    "OSP-8731E45D": {
+      "case_data": {
+        "case_id": "OSP-8731E45D",
+        "user_id": null,
+        "session_token": null,
+        "form_code": null,
+        "status": "created",
+        "process_type": null,
+        "progress_percentage": 0,
+        "current_step": null,
+        "basic_data": {
+          "applicant_name": "Dr. Sofia Martinez Chen",
+          "date_of_birth": "1985-09-20",
+          "passport_number": "ES234567890",
+          "current_address": "123 Research Center, Suite 500",
+          "city": "Boston",
+          "state": "MA",
+          "zip_code": "02101",
+          "country_of_birth": "Spain",
+          "email": "sofia.teste@test.com",
+          "phone": "+1-617-555-3456",
+          "field_of_extraordinary_ability": "Sciences - Artificial Intelligence Research",
+          "current_position": "Principal Research Scientist",
+          "current_employer": "MIT Computer Science and AI Laboratory"
+        },
+        "uploaded_documents": [],
+        "document_analysis": null,
+        "user_story_text": null,
+        "user_story_audio_url": null,
+        "ai_extracted_facts": null,
+        "simplified_form_responses": null,
+        "official_form_data": null,
+        "uscis_form_generated": false,
+        "ead_data": null,
+        "ai_processing": null,
+        "payment_status": null,
+        "payment_id": null,
+        "final_package_generated": false,
+        "final_package_url": null,
+        "completed_at": null,
+        "created_at": "2025-12-05T05:19:10.258000",
+        "updated_at": "2025-12-05T05:25:08.232000",
+        "expires_at": "2025-12-12T05:19:10.258000",
+        "documents": [
+          {
+            "id": "5accedba-d02f-4c56-a3dd-cf2865522c5f",
+            "case_id": "OSP-8731E45D",
+            "filename": "passport_sofia_martinez.pdf",
+            "document_type": "passport",
+            "description": null,
+            "content_base64": "UEFTU1BPUlQgLSBSRUlOTyBERSBFU1BBw5FBCk5vbWJyZTogU09GSUEgTUFSVElORVogQ0hFTgpQYXNhcG9ydGU6IEVTMjM0NTY3ODkwCkZlY2hhIGRlIE5hY2ltaWVudG86IDIwLzA5LzE5ODUKTmFjaW9uYWxpZGFkOiBFU1BBw5FPTEEKVmFsaWRlejogMzEvMTIvMjAzMA==",
+            "mime_type": "application/pdf",
+            "file_size": 154,
+            "uploaded_at": "2025-12-05T05:19:10.352000",
+            "status": "uploaded"
+          },
+          {
+            "id": "bb20a244-f141-4a7d-9771-118ac4f03151",
+            "case_id": "OSP-8731E45D",
+            "filename": "awards_national_international.pdf",
+            "document_type": "awards",
+            "description": null,
+            "content_base64": "QVdBUkRTIEFORCBSRUNPR05JVElPTlMKMjAyMyBUdXJpbmcgQXdhcmQgRmluYWxpc3QgLSBBc3NvY2lhdGlvbiBmb3IgQ29tcHV0aW5nIE1hY2hpbmVyeQoyMDIyIE5TRiBDQVJFRVIgQXdhcmQgLSBOYXRpb25hbCBTY2llbmNlIEZvdW5kYXRpb24KMjAyMSBCZXN0IFBhcGVyIEF3YXJkIElDTUwgLSBJbnRlcm5hdGlvbmFsIENvbmZlcmVuY2Ugb24gTWFjaGluZSBMZWFybmluZwoyMDIwIE1JVCBUZWNobm9sb2d5IFJldmlldyAzNSBVbmRlciAzNSAtIE91dHN0YW5kaW5nIFlvdW5nIElubm92YXRvcg==",
+            "mime_type": "application/pdf",
+            "file_size": 283,
+            "uploaded_at": "2025-12-05T05:19:10.376000",
+            "status": "uploaded"
+          },
+          {
+            "id": "4d5cf484-123f-4633-87b0-6da0c25339d7",
+            "case_id": "OSP-8731E45D",
+            "filename": "publications_scientific.pdf",
+            "document_type": "publications",
+            "description": null,
+            "content_base64": "U0NJRU5USUZJQyBQVUJMSUNBVElPTlMKRHIuIFNvZmlhIE1hcnRpbmV6IENoZW4gLSBQdWJsaWNhdGlvbiBSZWNvcmQKVG90YWwgUGFwZXJzOiA0NSBwZWVyLXJldmlld2VkIHB1YmxpY2F0aW9ucwpUb3AgVmVudWVzOiBOYXR1cmUsIFNjaWVuY2UsIElDTUwsIE5ldXJJUFMsIElDTFIKSC1pbmRleDogMjgKVG90YWwgQ2l0YXRpb25zOiAzLDI0NwpGaXJzdCBBdXRob3IgUGFwZXJzOiAxNQpOb3RhYmxlIFB1YmxpY2F0aW9uczoKLSAnQWR2YW5jZXMgaW4gTmV1cmFsIEFyY2hpdGVjdHVyZSBTZWFyY2gnIChOYXR1cmUsIDIwMjMpCi0gJ0V0aGljYWwgQUkgaW4gSGVhbHRoY2FyZSBBcHBsaWNhdGlvbnMnIChTY2llbmNlLCAyMDIyKQ==",
+            "mime_type": "application/pdf",
+            "file_size": 358,
+            "uploaded_at": "2025-12-05T05:19:10.398000",
+            "status": "uploaded"
+          },
+          {
+            "id": "2f3860fe-8a15-4526-be2c-5216965a459f",
+            "case_id": "OSP-8731E45D",
+            "filename": "memberships_associations.pdf",
+            "document_type": "memberships",
+            "description": null,
+            "content_base64": "UFJPRkVTU0lPTkFMIE1FTUJFUlNISVBTCkZlbGxvdyBvZiBBc3NvY2lhdGlvbiBmb3IgQ29tcHV0aW5nIE1hY2hpbmVyeSAoQUNNKSAtIDIwMjIKU2VuaW9yIE1lbWJlciBvZiBJRUVFIENvbXB1dGVyIFNvY2lldHkgLSAyMDIxCkJvYXJkIE1lbWJlciBvZiBBSSBFdGhpY3MgQ29tbWl0dGVlIC0gTUlUIC0gMjAyMC1QcmVzZW50CkVkaXRvcmlhbCBCb2FyZCBNZW1iZXIgLSBKb3VybmFsIG9mIE1hY2hpbmUgTGVhcm5pbmcgUmVzZWFyY2ggLSAyMDIzLVByZXNlbnQ=",
+            "mime_type": "application/pdf",
+            "file_size": 263,
+            "uploaded_at": "2025-12-05T05:19:10.422000",
+            "status": "uploaded"
+          },
+          {
+            "id": "0e352dec-99a8-4c96-907f-a294379640f4",
+            "case_id": "OSP-8731E45D",
+            "filename": "expert_recommendation_letters.pdf",
+            "document_type": "expert_letters",
+            "description": null,
+            "content_base64": "RVhQRVJUIFJFQ09NTUVOREFUSU9OIExFVFRFUlMKTGV0dGVyIDE6IERyLiBZb3NodWEgQmVuZ2lvIChUdXJpbmcgQXdhcmQgV2lubmVyLCBVbml2ZXJzaXR5IG9mIE1vbnRyZWFsKQpMZXR0ZXIgMjogRHIuIEZlaS1GZWkgTGkgKFByb2Zlc3NvciwgU3RhbmZvcmQgVW5pdmVyc2l0eSkKTGV0dGVyIDM6IERyLiBBbmRyZXcgTmcgKEFkanVuY3QgUHJvZmVzc29yLCBTdGFuZm9yZCBVbml2ZXJzaXR5KQpMZXR0ZXIgNDogRHIuIERlbWlzIEhhc3NhYmlzIChDRU8sIERlZXBNaW5kKQpMZXR0ZXIgNTogRHIuIFlhbm4gTGVDdW4gKENoaWVmIEFJIFNjaWVudGlzdCwgTWV0YSkKQWxsIGxldHRlcnMgYXR0ZXN0IHRvIERyLiBNYXJ0aW5leiBDaGVuJ3MgZXh0cmFvcmRpbmFyeSBjb250cmlidXRpb25zIHRvIEFJIHJlc2VhcmNoLg==",
+            "mime_type": "application/pdf",
+            "file_size": 409,
+            "uploaded_at": "2025-12-05T05:19:10.443000",
+            "status": "uploaded"
+          },
+          {
+            "id": "c5ce2ff1-b0c4-41fa-bd92-5d02200eb1e3",
+            "case_id": "OSP-8731E45D",
+            "filename": "high_salary_evidence.pdf",
+            "document_type": "high_salary",
+            "description": null,
+            "content_base64": "U0FMQVJZIEVWSURFTkNFCkN1cnJlbnQgQ29tcGVuc2F0aW9uOiAkMzgwLDAwMC95ZWFyCk1JVCBDb21wdXRlciBTY2llbmNlIGFuZCBBSSBMYWJvcmF0b3J5ClBvc2l0aW9uOiBQcmluY2lwYWwgUmVzZWFyY2ggU2NpZW50aXN0CkNvbXBhcmlzb24gRGF0YToKVG9wIDElIGluIGZpZWxkIG9mIEFJIFJlc2VhcmNoCkNvbXBhcmFibGUgdG8gc2VuaW9yIHJlc2VhcmNoZXJzIGF0IEdvb2dsZSBCcmFpbiwgRGVlcE1pbmQsIE9wZW5BSQpJbmR1c3RyeSBiZW5jaG1hcmtzIGNvbmZpcm0gZXhjZXB0aW9uYWwgY29tcGVuc2F0aW9uIGxldmVs",
+            "mime_type": "application/pdf",
+            "file_size": 303,
+            "uploaded_at": "2025-12-05T05:19:10.468000",
+            "status": "uploaded"
+          },
+          {
+            "id": "6e653124-6f0d-411e-902c-24b853627743",
+            "case_id": "OSP-8731E45D",
+            "filename": "press_media_coverage.pdf",
+            "document_type": "press_coverage",
+            "description": null,
+            "content_base64": "UFJFU1MgQU5EIE1FRElBIENPVkVSQUdFCk1JVCBOZXdzOiAnQnJlYWt0aHJvdWdoIGluIEFJIEV0aGljcyBSZXNlYXJjaCcgLSBNYXJjaCAyMDIzClRlY2hDcnVuY2g6ICdSaXNpbmcgU3RhciBpbiBNYWNoaW5lIExlYXJuaW5nJyAtIEphbnVhcnkgMjAyMwpXaXJlZCBNYWdhemluZTogJ1RoZSBGdXR1cmUgb2YgRXRoaWNhbCBBSScgLSBGZWF0dXJlIEFydGljbGUgLSBEZWNlbWJlciAyMDIyCk5QUiBTY2llbmNlIEZyaWRheTogSW50ZXJ2aWV3IG9uIEFJIGluIEhlYWx0aGNhcmUgLSBOb3ZlbWJlciAyMDIyCk5hdHVyZSBDYXJlZXJzOiBQcm9maWxlIEZlYXR1cmUgLSAnTGVhZGluZyB0aGUgTmV4dCBHZW5lcmF0aW9uIG9mIEFJJyAtIE9jdG9iZXIgMjAyMg==",
+            "mime_type": "application/pdf",
+            "file_size": 373,
+            "uploaded_at": "2025-12-05T05:19:10.487000",
+            "status": "uploaded"
+          },
+          {
+            "id": "77a1b926-7ea1-4a6a-9897-7d96d2a0ab98",
+            "case_id": "OSP-8731E45D",
+            "filename": "judging_reviewer_evidence.pdf",
+            "document_type": "judging_work",
+            "description": null,
+            "content_base64": "SlVER0lORyBBTkQgUkVWSUVXIFdPUksKUGVlciBSZXZpZXcgQWN0aXZpdGllczoKLSBSZXZpZXdlciBmb3IgTmF0dXJlICgyMDIwLVByZXNlbnQpCi0gUmV2aWV3ZXIgZm9yIFNjaWVuY2UgKDIwMjEtUHJlc2VudCkKLSBQcm9ncmFtIENvbW1pdHRlZSBNZW1iZXI6IElDTUwgKDIwMTktMjAyMykKLSBQcm9ncmFtIENvbW1pdHRlZSBNZW1iZXI6IE5ldXJJUFMgKDIwMjAtMjAyMykKLSBQYW5lbCBKdWRnZTogTlNGIENvbXB1dGVyIGFuZCBJbmZvcm1hdGlvbiBTY2llbmNlIGFuZCBFbmdpbmVlcmluZyBHcmFudHMKLSBFZGl0b3JpYWwgQm9hcmQ6IEpvdXJuYWwgb2YgTWFjaGluZSBMZWFybmluZyBSZXNlYXJjaApUb3RhbCBSZXZpZXdzOiAxMjcgcGFwZXJzIHJldmlld2VkCkdyYW50IFBhbmVsczogMTUgTlNGIGdyYW50IHJldmlldyBwYW5lbHM=",
+            "mime_type": "application/pdf",
+            "file_size": 422,
+            "uploaded_at": "2025-12-05T05:19:10.511000",
+            "status": "uploaded"
+          }
+        ],
+        "letters": {
+          "cover_letter": "To USCIS Officer,\n\nI am Dr. Sofia Martinez Chen, and I am applying for an EB-1A visa based on my extraordinary ability in the field of Artificial Intelligence research.\n\nI have achieved sustained national and international acclaim in AI research, specifically in machine learning and computer vision. My work has been recognized through:\n\n1. AWARDS: I am a 2023 Turing Award Finalist, received the 2022 NSF CAREER Award, and was named to MIT Technology Review 35 Under 35 in 2020.\n\n2. PUBLICATIONS: I have authored 45 peer-reviewed papers in top venues including Nature, Science, and ICML. My H-index is 28 with over 3,000 citations, demonstrating significant impact.\n\n3. MEMBERSHIP: I am a Fellow of ACM and serve on the Board of the AI Ethics Committee, positions reserved for those with outstanding achievements.\n\n4. EXPERT RECOGNITION: I have letters from Turing Award winners and leading professors at Stanford and MIT attesting to my extraordinary contributions.\n\n5. HIGH COMPENSATION: My current salary of $380,000/year places me in the top 1% of my field.\n\n6. PRESS COVERAGE: My research has been featured in major publications including Wired, TechCrunch, and MIT News.\n\n7. JUDGING: I serve as a reviewer for Nature and Science and as a panel judge for NSF grants, roles reserved for leading experts.\n\nMy contributions have advanced the field of AI significantly. I am currently leading research at MIT that will benefit the United States through technological innovation and economic growth.\n\nI respectfully request approval of my EB-1A petition.\n\nSincerely,\nDr. Sofia Martinez Chen"
+        },
+        "forms": {
+          "eb1a": {
+            "completed": true,
+            "completion_date": "2024-12-04",
+            "criteria_met": [
+              "Awards - national/international prizes",
+              "Membership in associations requiring outstanding achievements",
+              "Published material about the applicant",
+              "Judging the work of others",
+              "Original contributions of major significance",
+              "Scholarly articles",
+              "High salary"
+            ],
+            "criteria_count": 7
+          }
+        },
+        "ai_review": {
+          "success": true,
+          "case_id": "OSP-8731E45D",
+          "overall_status": "PENDING",
+          "overall_score": 75.0,
+          "approval_message": "\u26a0\ufe0f Caso pendente. Alguns itens precisam de aten\u00e7\u00e3o.",
+          "detailed_checks": {
+            "basic_data": {
+              "status": "COMPLETE",
+              "score": 1.0,
+              "missing_fields": [],
+              "message": "Dados b\u00e1sicos completos"
+            },
+            "documents": {
+              "status": "COMPLETE",
+              "score": 1.0,
+              "uploaded": 8,
+              "required": 1,
+              "missing_documents": [],
+              "message": "8 documentos enviados"
+            },
+            "forms": {
+              "status": "COMPLETE",
+              "score": 1.0,
+              "message": "Formul\u00e1rios preenchidos"
+            },
+            "letters": {
+              "status": "COMPLETE",
+              "score": 0.75,
+              "has_cover_letter": true,
+              "letter_length": 1592,
+              "message": "Carta de apresenta\u00e7\u00e3o presente"
+            },
+            "payment": {
+              "status": "PENDING",
+              "score": 0.0,
+              "message": "Pagamento: pending"
+            }
+          },
+          "summary": {
+            "basic_data_complete": true,
+            "documents_complete": true,
+            "forms_complete": true,
+            "letters_complete": true,
+            "payment_complete": false
+          },
+          "missing_items": {
+            "fields": [],
+            "documents": []
+          },
+          "timestamp": "2025-12-05T05:25:08.230557"
+        },
+        "ai_review_date": "2025-12-05T05:25:08.232000",
+        "ai_review_score": 0.75
+      },
+      "form_exists": true,
+      "fields_filled": {},
+      "pdf_generated": false,
+      "completeness_score": 81,
+      "required_sections": {
+        "part_1_info_about_you": true,
+        "part_2_petition_type": true,
+        "part_3_additional_info": true,
+        "part_6_extraordinary_ability": true
+      },
+      "uscis_criteria": {
+        "criteria_documented": true,
+        "minimum_3_criteria": true,
+        "evidence_provided": false
+      },
+      "field_mapping": {
+        "applicant_name_mapped": true,
+        "field_of_ability_mapped": true,
+        "current_position_mapped": true,
+        "achievements_mapped": false
+      }
+    }
+  },
+  "pdf_generation": {
+    "pdf_system_exists": true,
+    "template_files": {
+      "I-539 template": {
+        "status_code": 404,
+        "exists": false
+      },
+      "I-589 template": {
+        "status_code": 404,
+        "exists": false
+      },
+      "I-140 template (EB-1A)": {
+        "status_code": 404,
+        "exists": false
+      }
+    },
+    "generation_endpoints": {
+      "/api/case/{id}/generate-pdf": {
+        "status_code": 404,
+        "exists": false,
+        "functional": false
+      },
+      "/api/forms/generate-pdf": {
+        "status_code": 404,
+        "exists": false,
+        "functional": false
+      },
+      "/api/uscis-forms/pdf": {
+        "status_code": 404,
+        "exists": false,
+        "functional": false
+      },
+      "/api/documents/generate-form-pdf": {
+        "status_code": 403,
+        "exists": true,
+        "functional": false
+      }
+    },
+    "download_tests": {
+      "OSP-BD2D8ED2": {
+        "/api/case/OSP-BD2D8ED2/download-form": {
+          "status_code": 404,
+          "content_type": "application/json",
+          "is_pdf": false,
+          "has_content": true
+        },
+        "/api/documents/case/OSP-BD2D8ED2/forms": {
+          "status_code": 404,
+          "content_type": "application/json",
+          "is_pdf": false,
+          "has_content": true
+        },
+        "/api/auto-application/case/OSP-BD2D8ED2/download-pdf": {
+          "status_code": 404,
+          "content_type": "application/json",
+          "is_pdf": false,
+          "has_content": true
+        }
+      },
+      "OSP-4899BE72": {
+        "/api/case/OSP-4899BE72/download-form": {
+          "status_code": 404,
+          "content_type": "application/json",
+          "is_pdf": false,
+          "has_content": true
+        },
+        "/api/documents/case/OSP-4899BE72/forms": {
+          "status_code": 404,
+          "content_type": "application/json",
+          "is_pdf": false,
+          "has_content": true
+        },
+        "/api/auto-application/case/OSP-4899BE72/download-pdf": {
+          "status_code": 404,
+          "content_type": "application/json",
+          "is_pdf": false,
+          "has_content": true
+        }
+      },
+      "OSP-8731E45D": {
+        "/api/case/OSP-8731E45D/download-form": {
+          "status_code": 404,
+          "content_type": "application/json",
+          "is_pdf": false,
+          "has_content": true
+        },
+        "/api/documents/case/OSP-8731E45D/forms": {
+          "status_code": 404,
+          "content_type": "application/json",
+          "is_pdf": false,
+          "has_content": true
+        },
+        "/api/auto-application/case/OSP-8731E45D/download-pdf": {
+          "status_code": 404,
+          "content_type": "application/json",
+          "is_pdf": false,
+          "has_content": true
+        }
+      }
+    }
+  },
+  "field_mapping": {
+    "i539_mapping": {
+      "family_name_mapped": true,
+      "date_of_birth_mapped": true,
+      "passport_number_mapped": true,
+      "physical_address_mapped": true,
+      "i94_number_mapped": true
+    },
+    "i589_mapping": {
+      "family_name_mapped": true,
+      "country_of_birth_mapped": true,
+      "country_of_nationality_mapped": true,
+      "date_of_last_arrival_mapped": true,
+      "persecution_details_mapped": true
+    },
+    "eb1a_mapping": {
+      "applicant_name_mapped": true,
+      "field_of_ability_mapped": true,
+      "classification_mapped": true,
+      "criteria_evidence_mapped": true,
+      "supporting_evidence_mapped": true
+    }
+  },
+  "form_validation": {
+    "required_fields": {
+      "I-539": {
+        "status_code": 404,
+        "validation_works": false,
+        "response": "{\"detail\":\"Not Found\"}"
+      },
+      "I-589": {
+        "status_code": 404,
+        "validation_works": false,
+        "response": "{\"detail\":\"Not Found\"}"
+      },
+      "EB-1A": {
+        "status_code": 404,
+        "validation_works": false,
+        "response": "{\"detail\":\"Not Found\"}"
+      }
+    },
+    "format_validation": {
+      "date_of_birth": {
+        "valid_accepted": false,
+        "invalid_rejected": false,
+        "validation_working": false
+      },
+      "phone_number": {
+        "valid_accepted": false,
+        "invalid_rejected": false,
+        "validation_working": false
+      },
+      "passport_number": {
+        "valid_accepted": false,
+        "invalid_rejected": false,
+        "validation_working": false
+      }
+    },
+    "consistency_checks": {}
+  },
+  "final_report": {
+    "visa_analysis": {
+      "I-539": {
+        "structure_score": 0,
+        "completeness_score": 9.0,
+        "consistency_score": 25,
+        "pdf_score": 0,
+        "total_score": 34.0,
+        "case_id": "OSP-BD2D8ED2",
+        "fields_filled": "36%",
+        "pdf_generated": "N\u00c3O"
+      },
+      "I-589": {
+        "structure_score": 0,
+        "completeness_score": 0.0,
+        "consistency_score": 25,
+        "pdf_score": 0,
+        "total_score": 25.0,
+        "case_id": "OSP-4899BE72",
+        "fields_filled": "0%",
+        "pdf_generated": "N\u00c3O"
+      },
+      "EB-1A": {
+        "structure_score": 25,
+        "completeness_score": 20.25,
+        "consistency_score": 25,
+        "pdf_score": 0,
+        "total_score": 70.25,
+        "case_id": "OSP-8731E45D",
+        "fields_filled": "81%",
+        "pdf_generated": "N\u00c3O"
+      }
+    },
+    "criteria_met": 1,
+    "total_criteria": 5,
+    "success_rate": 20.0,
+    "overall_readiness": false,
+    "forms_working": 1,
+    "pdfs_working": 0,
+    "mapping_percentage": 100.0
+  }
+}
