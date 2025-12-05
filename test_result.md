@@ -161,7 +161,7 @@ agent_communication:
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "IMPLEMENTAR AGENTE CORUJA - SISTEMA INTELIGENTE DE QUESTIONÁRIOS: Desenvolver o novo recurso 'Agente Coruja' que conduz usuários através de questionários inteligentes em tempo real, valida respostas usando Google APIs e OpenAI GPT-5, e gera formulários USCIS oficiais automaticamente preenchidos. Sistema multi-idioma (português/inglês) com orientação contextual e validação em tempo real."
+user_problem_statement: "AUDITORIA COMPLETA - FLUXO FORMULÁRIO AMIGÁVEL → FORMULÁRIO OFICIAL: Verificar se o sistema tem um formulário amigável em português para o usuário preencher, e se esses dados alimentam o formulário oficial USCIS. Fluxo esperado: Usuário (Português) → Formulário Amigável → IA Avalia → Dados Coletados → Formulário Oficial USCIS."
 
 frontend:
   - task: "Basic Data Required Fields Validation System"
