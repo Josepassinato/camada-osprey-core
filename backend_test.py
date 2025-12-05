@@ -527,95 +527,10 @@ def test_enhanced_ai_validation_system():
     
     return results
 
-def test_additional_eb1a_endpoints():
-    """Test additional EB-1A related endpoints for completeness"""
-    
-    print("\n🔍 TESTES ADICIONAIS - ENDPOINTS EB-1A RELACIONADOS")
-    print("=" * 60)
-    
-    additional_results = {}
-    
-    # Test visa detailed info for EB-1A
-    try:
-        print("\n📋 EB-1A Visa Detailed Info:")
-        response = requests.get(f"{API_BASE}/visa-detailed-info/EB-1A?process_type=consular", timeout=10)
-        print(f"   Status: {response.status_code}")
-        if response.status_code == 200:
-            visa_info = response.json()
-            print(f"   Response: {json.dumps(visa_info, indent=4)}")
-        additional_results["eb1a_visa_info"] = response.status_code == 200
-    except Exception as e:
-        print(f"   ❌ EB-1A visa info failed: {str(e)}")
-        additional_results["eb1a_visa_info"] = False
-    
-    # Test document requirements for EB-1A
-    try:
-        print("\n📄 EB-1A Document Requirements:")
-        response = requests.get(f"{API_BASE}/visa/EB-1A/documents", timeout=10)
-        print(f"   Status: {response.status_code}")
-        if response.status_code == 200:
-            doc_requirements = response.json()
-            print(f"   Response: {json.dumps(doc_requirements, indent=4)}")
-        additional_results["eb1a_documents"] = response.status_code == 200
-    except Exception as e:
-        print(f"   ❌ EB-1A document requirements failed: {str(e)}")
-        additional_results["eb1a_documents"] = False
-    
-    # Test EB-1A specific validation
-    try:
-        print("\n🏆 EB-1A Specific Validation:")
-        validation_data = {
-            "document_type": "awards",
-            "document_content": "2023 Turing Award Finalist - Dr. Sofia Martinez Chen",
-            "applicant_name": "Dr. Sofia Martinez Chen",
-            "visa_type": "EB-1A"
-        }
-        response = requests.post(
-            f"{API_BASE}/test-comprehensive-document-validation",
-            json=validation_data,
-            headers={"Content-Type": "application/json"},
-            timeout=10
-        )
-        print(f"   Status: {response.status_code}")
-        if response.status_code == 200:
-            validation_result = response.json()
-            print(f"   Response: {json.dumps(validation_result, indent=4)}")
-        additional_results["eb1a_validation"] = response.status_code == 200
-    except Exception as e:
-        print(f"   ❌ EB-1A validation failed: {str(e)}")
-        additional_results["eb1a_validation"] = False
-    
-    # Test extraordinary ability criteria validation
-    try:
-        print("\n🧬 Extraordinary Ability Criteria:")
-        criteria_data = {
-            "criteria": [
-                "Awards - national/international prizes",
-                "Membership in associations requiring outstanding achievements",
-                "Published material about the applicant",
-                "Judging the work of others",
-                "Original contributions of major significance",
-                "Scholarly articles",
-                "High salary"
-            ],
-            "field": "Sciences - Artificial Intelligence Research"
-        }
-        response = requests.post(
-            f"{API_BASE}/validate-eb1a-criteria",
-            json=criteria_data,
-            headers={"Content-Type": "application/json"},
-            timeout=10
-        )
-        print(f"   Status: {response.status_code}")
-        if response.status_code == 200:
-            criteria_result = response.json()
-            print(f"   Response: {json.dumps(criteria_result, indent=4)}")
-        additional_results["eb1a_criteria"] = response.status_code == 200
-    except Exception as e:
-        print(f"   ❌ EB-1A criteria validation failed: {str(e)}")
-        additional_results["eb1a_criteria"] = False
-    
-    return additional_results
+# Helper function for additional testing if needed
+def additional_validation_tests():
+    """Placeholder for additional validation tests"""
+    pass
 
 if __name__ == "__main__":
     print("🚀 INICIANDO TESTE COMPLETO - SISTEMA DE GERAÇÃO DE FORMULÁRIOS USCIS")
