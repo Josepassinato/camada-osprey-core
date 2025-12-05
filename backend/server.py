@@ -1149,13 +1149,29 @@ async def signup(user_data: UserCreate):
 async def login(login_data: UserLogin):
     """Login user"""
     try:
+        # EMAIL BYPASS FOR TESTING
+        email_bypass = os.environ.get('EMAIL_BYPASS_FOR_TESTING', 'FALSE').upper() == 'TRUE'
+        test_email_domain = os.environ.get('TEST_EMAIL_DOMAIN', 'test.local')
+        
+        is_test_email = login_data.email.endswith(f"@{test_email_domain}")
+        
         user = await db.users.find_one({"email": login_data.email})
-        if not user or not verify_password(login_data.password, user["password"]):
+        
+        # Test mode bypass: Accept any password for test emails
+        if email_bypass and is_test_email and user:
+            logger.info(f"🧪 TEST MODE: Login bypass active for {login_data.email}")
+            password_valid = True  # Bypass password check in test mode
+        elif user:
+            password_valid = verify_password(login_data.password, user["password"])
+        else:
+            password_valid = False
+        
+        if not user or not password_valid:
             raise HTTPException(status_code=401, detail="Invalid email or password")
         
         token = create_jwt_token(user["id"], user["email"])
         
-        return {
+        response_data = {
             "message": "Login successful",
             "token": token,
             "user": {
@@ -1165,6 +1181,13 @@ async def login(login_data: UserLogin):
                 "last_name": user["last_name"]
             }
         }
+        
+        # Add test mode indicator if applicable
+        if email_bypass and is_test_email:
+            response_data["test_mode"] = True
+            response_data["message"] = "🧪 TEST MODE: Login successful (password verification bypassed)"
+        
+        return response_data
     
     except HTTPException:
         raise
