@@ -2802,21 +2802,23 @@ Formulário Amigável: {json.dumps(friendly_form_data, indent=2, ensure_ascii=Fa
 }}
 """
         
-        # Call AI
+        # Call AI for enhanced validation
         try:
             response_text = llm.chat([{"role": "user", "content": validation_prompt}])
             
             # Check if response is valid
             if not response_text or response_text is None:
-                logger.warning("AI returned empty response, using fallback")
+                logger.warning("AI returned empty response, using programmatic validation only")
+                overall_status = "approved" if completion_percentage >= 90 else "needs_review" if completion_percentage >= 70 else "rejected"
                 return {
-                    "validation_issues": [],
-                    "overall_status": "needs_review",
-                    "completion_percentage": 70,
-                    "message_to_user": "Validação básica concluída. Revise seus dados."
+                    "validation_issues": validation_issues,
+                    "overall_status": overall_status,
+                    "completion_percentage": completion_percentage,
+                    "missing_fields": missing_fields,
+                    "message_to_user": f"Validação concluída. {len(missing_fields)} campos obrigatórios faltando."
                 }
             
-            # Parse JSON response
+            # Parse JSON response from AI
             try:
                 # Try to extract JSON from response
                 json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
@@ -2824,24 +2826,56 @@ Formulário Amigável: {json.dumps(friendly_form_data, indent=2, ensure_ascii=Fa
                     ai_response = json.loads(json_match.group())
                 else:
                     ai_response = json.loads(response_text.strip())
+                
+                # Combine programmatic issues with AI additional issues
+                additional_issues = ai_response.get("additional_issues", [])
+                all_issues = validation_issues + additional_issues
+                
+                # Adjust completion percentage with AI coherence score
+                coherence_score = ai_response.get("coherence_score", 100)
+                adjusted_completion = int((completion_percentage * 0.7) + (coherence_score * 0.3))
+                
+                # Determine overall status
+                if adjusted_completion >= 90 and len([i for i in all_issues if i.get("severity") == "error"]) == 0:
+                    overall_status = "approved"
+                elif adjusted_completion >= 70:
+                    overall_status = "needs_review"
+                else:
+                    overall_status = "rejected"
+                
+                logger.info(f"✅ AI validation complete: {adjusted_completion}% completion, {len(additional_issues)} additional issues")
+                
+                return {
+                    "validation_issues": all_issues,
+                    "overall_status": overall_status,
+                    "completion_percentage": adjusted_completion,
+                    "missing_fields": missing_fields,
+                    "message_to_user": ai_response.get("overall_assessment", f"Formulário {adjusted_completion}% completo"),
+                    "ai_recommendations": ai_response.get("recommendations", [])
+                }
+                
             except json.JSONDecodeError:
                 logger.error(f"Failed to parse AI response as JSON: {response_text[:200]}")
-                # Fallback response
-                ai_response = {
-                    "validation_issues": [],
-                    "overall_status": "approved",
-                    "completion_percentage": 75,
-                    "message_to_user": "Validação concluída com sucesso"
+                # Use programmatic validation as fallback
+                overall_status = "approved" if completion_percentage >= 90 else "needs_review" if completion_percentage >= 70 else "rejected"
+                return {
+                    "validation_issues": validation_issues,
+                    "overall_status": overall_status,
+                    "completion_percentage": completion_percentage,
+                    "missing_fields": missing_fields,
+                    "message_to_user": f"Validação programática concluída. {len(missing_fields)} campos faltando."
                 }
             
-            return ai_response
         except Exception as llm_error:
             logger.error(f"Error calling LLM: {str(llm_error)}")
+            # Use programmatic validation as fallback
+            overall_status = "approved" if completion_percentage >= 90 else "needs_review" if completion_percentage >= 70 else "rejected"
             return {
-                "validation_issues": [],
-                "overall_status": "needs_review",
-                "completion_percentage": 65,
-                "message_to_user": "Validação básica concluída. Revise seus dados."
+                "validation_issues": validation_issues,
+                "overall_status": overall_status,
+                "completion_percentage": completion_percentage,
+                "missing_fields": missing_fields,
+                "message_to_user": f"Validação concluída. {len(missing_fields)} campos obrigatórios faltando."
             }
         
     except Exception as e:
