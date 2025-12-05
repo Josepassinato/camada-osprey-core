@@ -2901,8 +2901,45 @@ Formulário Amigável: {json.dumps(friendly_form_data, indent=2, ensure_ascii=Fa
         }
 
 
+def get_required_fields_by_visa_type(visa_type: str) -> dict:
+    """
+    Define required fields for each visa type based on official USCIS forms
+    Returns dict with field name, Portuguese label, and validation rules
+    
+    This function now uses the official form structures to ensure ALL required fields
+    from the official USCIS forms are included.
+    """
+    try:
+        from friendly_form_structures import get_friendly_form_structure
+        
+        structure = get_friendly_form_structure(visa_type)
+        required_fields = {}
+        
+        # Extract all required fields from the structure
+        for section in structure.get("sections", []):
+            for field in section.get("fields", []):
+                if field.get("required", False):
+                    # Check if field has conditional requirement
+                    conditional = field.get("conditional")
+                    if not conditional:  # Only include unconditionally required fields
+                        required_fields[field["id"]] = {
+                            "label": field["label"],
+                            "validation": field.get("validation", "required"),
+                            "example": field.get("placeholder", ""),
+                            "official_mapping": field.get("official_mapping", "")
+                        }
+        
+        return required_fields
+        
+    except Exception as e:
+        logger.warning(f"Could not load official structure for {visa_type}, using fallback: {e}")
+        # Fallback to old structure
+        return get_required_fields_by_visa_type_old(visa_type)
+
+
 def get_required_fields_by_visa_type_old(visa_type: str) -> dict:
     """
+    OLD VERSION - Fallback function
     Define required fields for each visa type
     Returns dict with field name, Portuguese label, and validation rules
     """
