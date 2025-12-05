@@ -1120,6 +1120,11 @@ def test_i539_ai_review_system():
     print(f"⚖️  Conformidade USCIS: {'✅' if uscis_working else '❌'} (Score: {uscis_score:.1f}%)")
     
     overall_success = success_rate >= 70  # Consider success if 70% or more phases completed
+    
+    # Ensure summary exists
+    if "summary" not in results:
+        results["summary"] = {}
+    
     results["summary"]["overall_success"] = overall_success
     results["summary"]["successful_phases"] = successful_phases
     results["summary"]["total_phases"] = total_phases
