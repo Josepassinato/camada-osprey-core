@@ -2733,7 +2733,7 @@ async def validate_friendly_form_ai(case: dict, friendly_form_data: dict, basic_
         emergent_key = os.environ.get('EMERGENT_LLM_KEY')
         if not emergent_key:
             logger.warning("EMERGENT_LLM_KEY not found, using programmatic validation only")
-            overall_status = "approved" if completion_percentage >= 90 else "needs_review" if completion_percentage >= 70 else "rejected"
+            overall_status = determine_overall_status(completion_percentage, validation_issues)
             return {
                 "validation_issues": validation_issues,
                 "overall_status": overall_status,
