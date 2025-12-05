@@ -24,9 +24,9 @@ TEST_EMAIL_DOMAIN=test.com
 Use emails com o domínio configurado:
 
 ```
-usuario1@test.local
-maria@test.local
-joao.teste@test.local
+usuario1@test.com
+maria@test.com
+joao.teste@test.com
 ```
 
 **Exemplo de Request:**
