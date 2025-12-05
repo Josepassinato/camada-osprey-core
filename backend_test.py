@@ -289,26 +289,23 @@ def test_eb1a_extraordinary_ability_system():
     
     for doc in documents_to_upload:
         try:
-            print(f"📄 Uploading: {doc['name']}")
+            print(f"📄 Uploading EB-1A Document: {doc['name']}")
             
-            # Simulate multipart form data
+            # Create temporary file content
+            temp_content = doc['content']
+            
+            # Use the case-specific upload endpoint
             files = {
-                'file': (doc['name'], doc['content'], 'application/pdf')
+                'file': (doc['name'], temp_content, 'application/pdf')
             }
             data = {
-                'document_type': doc['type'],
-                'tags': 'O-1,simulation'
-            }
-            
-            headers = {
-                "Content-Type": "application/json"
+                'document_type': doc['type']
             }
             
             response = requests.post(
-                f"{API_BASE}/documents/upload",
+                f"{API_BASE}/case/{case_id}/upload-document",
                 files=files,
                 data=data,
-                headers=headers,
                 timeout=30
             )
             
@@ -317,14 +314,16 @@ def test_eb1a_extraordinary_ability_system():
                 response_data = response.json()
                 uploaded_docs.append({
                     "name": doc['name'],
+                    "type": doc['type'],
                     "document_id": response_data.get("document_id"),
                     "status": "uploaded"
                 })
-                print(f"   ✅ Uploaded: {response_data.get('document_id')}")
+                print(f"   ✅ Uploaded: {doc['type']} - {response_data.get('document_id', 'Success')}")
             else:
                 print(f"   ❌ Failed: {response.text}")
                 uploaded_docs.append({
                     "name": doc['name'],
+                    "type": doc['type'],
                     "status": "failed",
                     "error": response.text
                 })
@@ -333,6 +332,7 @@ def test_eb1a_extraordinary_ability_system():
             print(f"   ❌ Exception: {str(e)}")
             uploaded_docs.append({
                 "name": doc['name'],
+                "type": doc['type'],
                 "status": "exception",
                 "error": str(e)
             })
@@ -340,10 +340,18 @@ def test_eb1a_extraordinary_ability_system():
     results["fase_3_document_uploads"] = {
         "uploaded_docs": uploaded_docs,
         "total_docs": len(documents_to_upload),
-        "successful_uploads": len([d for d in uploaded_docs if d.get("status") == "uploaded"])
+        "successful_uploads": len([d for d in uploaded_docs if d.get("status") == "uploaded"]),
+        "eb1a_specific_docs": [
+            "passport", "awards", "publications", "memberships", 
+            "expert_letters", "high_salary", "press_coverage", "judging_work"
+        ]
     }
     
-    print(f"\n📊 RESUMO UPLOADS: {results['fase_3_document_uploads']['successful_uploads']}/{results['fase_3_document_uploads']['total_docs']} documentos enviados")
+    print(f"\n📊 RESUMO UPLOADS EB-1A: {results['fase_3_document_uploads']['successful_uploads']}/{results['fase_3_document_uploads']['total_docs']} documentos enviados")
+    print("📋 Documentos EB-1A específicos:")
+    for doc in uploaded_docs:
+        status = "✅" if doc.get("status") == "uploaded" else "❌"
+        print(f"   {status} {doc['type']}: {doc['name']}")
     
     # FASE 4: Testar endpoints de AI Review
     print("\n📋 FASE 4: Testar Endpoints de AI Review")
