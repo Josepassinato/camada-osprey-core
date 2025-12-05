@@ -107,7 +107,9 @@ def test_friendly_form_complete_flow():
         
         if response.status_code in [200, 201]:
             case_data = response.json()
-            case_id = case_data.get("case_id")
+            # Extract case_id from nested structure
+            case_info = case_data.get("case", {})
+            case_id = case_info.get("case_id")
             print(f"✅ Test case created: {case_id}")
             
             results["phase1_endpoint_test"]["case_creation"] = {
