@@ -103,27 +103,27 @@ def test_eb1a_extraordinary_ability_system():
             case_id = case_data_response.get("case_id") or response_data.get("case_id")
             
             validations = {
-                "1_case_created": case_id is not None,
+                "1_eb1a_case_created": case_id is not None,
                 "2_case_id_format": case_id.startswith("OSP-") if case_id else False,
-                "3_response_success": response_data.get("success", False) or "case" in response_data,
-                "4_case_data_present": bool(case_data_response or response_data.get("case_id"))
+                "3_visa_type_correct": response_data.get("visa_type") == "EB-1A" or case_data_response.get("form_code") == "EB-1A",
+                "4_response_success": response_data.get("success", False) or "case" in response_data
             }
             
             results["fase_1_case_creation"]["validations"] = validations
             results["fase_1_case_creation"]["response_data"] = response_data
             results["fase_1_case_creation"]["case_id"] = case_id
             
-            print("\n🎯 VALIDAÇÕES FASE 1:")
+            print("\n🎯 VALIDAÇÕES FASE 1 - EB-1A:")
             print("=" * 50)
             for check, passed in validations.items():
                 status = "✅" if passed else "❌"
                 print(f"  {status} {check}: {passed}")
             
-            print(f"\n📊 DADOS DO CASO CRIADO:")
+            print(f"\n📊 DADOS DO CASO EB-1A CRIADO:")
             print(f"  📋 Case ID: {case_id}")
-            print(f"  📝 Response Type: {type(response_data)}")
-            print(f"  👤 Success: {response_data.get('success', 'N/A')}")
-            print(f"  📧 Case Data: {bool(case_data_response)}")
+            print(f"  🎯 Visa Type: EB-1A")
+            print(f"  👩‍🔬 Applicant: Dr. Sofia Martinez Chen")
+            print(f"  📧 Email: sofia.teste@test.com")
                 
         else:
             print(f"❌ Request failed with status {response.status_code}")
