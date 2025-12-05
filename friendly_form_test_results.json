@@ -3,11 +3,11 @@
     "phase1_endpoint_test": {
       "case_creation": {
         "success": true,
-        "case_id": null,
+        "case_id": "OSP-0799B071",
         "response": {
           "message": "Auto-application case created successfully",
           "case": {
-            "case_id": "OSP-7E738387",
+            "case_id": "OSP-0799B071",
             "user_id": null,
             "session_token": null,
             "form_code": "I-539",
@@ -31,67 +31,204 @@
             "final_package_generated": false,
             "final_package_url": null,
             "completed_at": null,
-            "created_at": "2025-12-05T06:24:43.208068",
-            "updated_at": "2025-12-05T06:24:43.208069",
-            "expires_at": "2025-12-12T06:24:43.208006"
+            "created_at": "2025-12-05T06:25:11.730454",
+            "updated_at": "2025-12-05T06:25:11.730455",
+            "expires_at": "2025-12-12T06:25:11.730397"
           }
         }
       },
       "complete_data": {
-        "status_code": 404,
-        "processing_time": 0.020711183547973633,
-        "error": "{\"detail\":\"Case not found\"}",
+        "status_code": 200,
+        "processing_time": 0.02097010612487793,
+        "validations": {
+          "validation_status_present": true,
+          "completion_percentage_present": true,
+          "validation_issues_present": true,
+          "case_id_matches": true,
+          "data_saved_confirmation": false
+        },
+        "response_data": {
+          "success": true,
+          "case_id": "OSP-0799B071",
+          "validation_status": "needs_review",
+          "completion_percentage": 60,
+          "message": "\u26a0\ufe0f Seu formul\u00e1rio est\u00e1 60% completo. Por favor, revise as informa\u00e7\u00f5es destacadas abaixo.",
+          "validation_issues": [],
+          "next_steps": [
+            "Revisar e corrigir as informa\u00e7\u00f5es destacadas",
+            "Preencher campos faltantes",
+            "Verificar datas e formatos de dados"
+          ]
+        },
         "working": false
       },
       "data_persistence": {
-        "success": false,
-        "error": "{\"detail\":\"Case not found\"}"
+        "success": true,
+        "data": {
+          "nome_completo": "Carlos Eduardo Silva Mendes",
+          "data_nascimento": "1985-03-15",
+          "email": "carlos.teste@test.com",
+          "telefone": "+55 11 98765-4321",
+          "numero_passaporte": "BR987654321",
+          "pais_nascimento": "Brazil",
+          "endereco": "123 Main Street, Apt 4B",
+          "cidade": "New York",
+          "estado": "NY",
+          "cep": "10001",
+          "status_atual": "F-1",
+          "status_solicitado": "H-1B",
+          "motivo_mudanca": "Consegui emprego ap\u00f3s conclus\u00e3o dos estudos",
+          "data_entrada_eua": "2020-08-15",
+          "numero_i94": "1234567890"
+        }
       }
     },
     "phase2_ai_validation": {
       "incomplete_data": {
-        "status_code": 404,
-        "processing_time": 0.016022920608520508,
-        "error": "{\"detail\":\"Case not found\"}",
+        "status_code": 200,
+        "processing_time": 0.018593311309814453,
+        "validations": {
+          "status_rejected_or_needs_review": true,
+          "completion_below_70": true,
+          "validation_issues_present": false,
+          "missing_fields_identified": false
+        },
+        "response_data": {
+          "success": true,
+          "case_id": "OSP-D0C7DDFA",
+          "validation_status": "needs_review",
+          "completion_percentage": 60,
+          "message": "\u26a0\ufe0f Seu formul\u00e1rio est\u00e1 60% completo. Por favor, revise as informa\u00e7\u00f5es destacadas abaixo.",
+          "validation_issues": [],
+          "next_steps": [
+            "Revisar e corrigir as informa\u00e7\u00f5es destacadas",
+            "Preencher campos faltantes",
+            "Verificar datas e formatos de dados"
+          ]
+        },
         "working": false
       }
     },
     "phase3_pdf_integration": {
       "form_generation": {
-        "status_code": 404,
-        "processing_time": 0.02438640594482422,
-        "error": "{\"detail\":\"Case None not found\"}",
+        "status_code": 500,
+        "processing_time": 0.017203092575073242,
+        "error": "{\"detail\":\"Error generating form: 'FormFillerAgent' object has no attribute 'fill_i539'\"}",
         "working": false
       },
       "data_usage": {
+        "validations": {
+          "simplified_responses_exist": true,
+          "generated_form_exists": false,
+          "friendly_data_has_name": true,
+          "friendly_data_has_passport": true
+        },
         "working": false,
-        "error": "{\"detail\":\"Case not found\"}"
+        "simplified_responses": {
+          "nome_completo": "Carlos Eduardo Silva Mendes",
+          "data_nascimento": "1985-03-15",
+          "email": "carlos.teste@test.com",
+          "telefone": "+55 11 98765-4321",
+          "numero_passaporte": "BR987654321",
+          "pais_nascimento": "Brazil",
+          "endereco": "123 Main Street, Apt 4B",
+          "cidade": "New York",
+          "estado": "NY",
+          "cep": "10001",
+          "status_atual": "F-1",
+          "status_solicitado": "H-1B",
+          "motivo_mudanca": "Consegui emprego ap\u00f3s conclus\u00e3o dos estudos",
+          "data_entrada_eua": "2020-08-15",
+          "numero_i94": "1234567890"
+        },
+        "generated_form": null
       }
     },
     "phase4_field_mapping": {
-      "working": false,
-      "error": "{\"detail\":\"Case not found\"}"
+      "mapping_results": {
+        "nome_completo": {
+          "portuguese_value": "Carlos Eduardo Silva Mendes",
+          "english_fields": [
+            "Family Name",
+            "Given Name"
+          ],
+          "mapping_exists": true
+        },
+        "data_nascimento": {
+          "portuguese_value": "1985-03-15",
+          "english_fields": [
+            "Date of Birth"
+          ],
+          "mapping_exists": true
+        },
+        "endereco": {
+          "portuguese_value": "123 Main Street, Apt 4B",
+          "english_fields": [
+            "Street Address"
+          ],
+          "mapping_exists": true
+        },
+        "numero_passaporte": {
+          "portuguese_value": "BR987654321",
+          "english_fields": [
+            "Passport Number"
+          ],
+          "mapping_exists": true
+        },
+        "email": {
+          "portuguese_value": "carlos.teste@test.com",
+          "english_fields": [
+            "Email Address"
+          ],
+          "mapping_exists": true
+        },
+        "telefone": {
+          "portuguese_value": "+55 11 98765-4321",
+          "english_fields": [
+            "Phone Number"
+          ],
+          "mapping_exists": true
+        },
+        "status_atual": {
+          "portuguese_value": "F-1",
+          "english_fields": [
+            "Current Status"
+          ],
+          "mapping_exists": true
+        },
+        "status_solicitado": {
+          "portuguese_value": "H-1B",
+          "english_fields": [
+            "Requested Status"
+          ],
+          "mapping_exists": true
+        }
+      },
+      "successful_mappings": 8,
+      "total_mappings": 8,
+      "success_rate": 100.0,
+      "working": true
     },
     "summary": {
       "phase_results": {
         "phase1_endpoint": false,
-        "phase1_persistence": false,
+        "phase1_persistence": true,
         "phase2_ai_validation": false,
         "phase3_pdf_generation": false,
         "phase3_data_usage": false,
-        "phase4_field_mapping": false
+        "phase4_field_mapping": true
       },
-      "successful_phases": 0,
+      "successful_phases": 2,
       "total_phases": 6,
-      "overall_success_rate": 0.0,
+      "overall_success_rate": 33.33333333333333,
       "system_ready": false,
       "test_cases_used": [
-        null,
-        null
+        "OSP-0799B071",
+        "OSP-D0C7DDFA"
       ]
     }
   },
-  "timestamp": 1764915883.3954377,
+  "timestamp": 1764915911.867015,
   "test_focus": "Friendly Form Complete Flow Testing",
   "phases_tested": [
     "Phase 1: Friendly Form Endpoint",
