@@ -3130,8 +3130,16 @@ def validate_fields_programmatically(friendly_form_data: dict, basic_data: dict,
                         "suggestion": f"Forneça mais detalhes. Exemplo: {field_config.get('example', 'N/A')}"
                     })
     
-    # Calculate completion percentage
-    completion_percentage = int((filled_count / total_required) * 100) if total_required > 0 else 0
+    # Calculate completion percentage with penalty for format errors
+    base_completion = int((filled_count / total_required) * 100) if total_required > 0 else 0
+    
+    # Penalize for errors: each error reduces completion
+    error_count = len([i for i in validation_issues if i.get("severity") == "error"])
+    warning_count = len([i for i in validation_issues if i.get("severity") == "warning"])
+    
+    # Each error reduces by 5%, each warning by 2%
+    penalty = (error_count * 5) + (warning_count * 2)
+    completion_percentage = max(0, base_completion - penalty)
     
     return {
         "validation_issues": validation_issues,
