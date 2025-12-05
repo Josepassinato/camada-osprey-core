@@ -923,61 +923,48 @@ Dr. Sofia Martinez Chen"""
     
     return results
 
-def test_additional_i539_endpoints():
-    """Test additional I-539 related endpoints for completeness"""
+def test_additional_eb1a_endpoints():
+    """Test additional EB-1A related endpoints for completeness"""
     
-    print("\n🔍 TESTES ADICIONAIS - ENDPOINTS I-539 RELACIONADOS")
+    print("\n🔍 TESTES ADICIONAIS - ENDPOINTS EB-1A RELACIONADOS")
     print("=" * 60)
     
     additional_results = {}
     
-    # Test visa detailed info for I-539
+    # Test visa detailed info for EB-1A
     try:
-        print("\n📋 I-539 Visa Detailed Info:")
-        response = requests.get(f"{API_BASE}/visa-detailed-info/I-539?process_type=change_of_status", timeout=10)
+        print("\n📋 EB-1A Visa Detailed Info:")
+        response = requests.get(f"{API_BASE}/visa-detailed-info/EB-1A?process_type=consular", timeout=10)
         print(f"   Status: {response.status_code}")
         if response.status_code == 200:
             visa_info = response.json()
             print(f"   Response: {json.dumps(visa_info, indent=4)}")
-        additional_results["i539_visa_info"] = response.status_code == 200
+        additional_results["eb1a_visa_info"] = response.status_code == 200
     except Exception as e:
-        print(f"   ❌ I-539 visa info failed: {str(e)}")
-        additional_results["i539_visa_info"] = False
+        print(f"   ❌ EB-1A visa info failed: {str(e)}")
+        additional_results["eb1a_visa_info"] = False
     
-    # Test document requirements for I-539
+    # Test document requirements for EB-1A
     try:
-        print("\n📄 I-539 Document Requirements:")
-        response = requests.get(f"{API_BASE}/visa/I-539/documents", timeout=10)
+        print("\n📄 EB-1A Document Requirements:")
+        response = requests.get(f"{API_BASE}/visa/EB-1A/documents", timeout=10)
         print(f"   Status: {response.status_code}")
         if response.status_code == 200:
             doc_requirements = response.json()
             print(f"   Response: {json.dumps(doc_requirements, indent=4)}")
-        additional_results["i539_documents"] = response.status_code == 200
+        additional_results["eb1a_documents"] = response.status_code == 200
     except Exception as e:
-        print(f"   ❌ I-539 document requirements failed: {str(e)}")
-        additional_results["i539_documents"] = False
+        print(f"   ❌ EB-1A document requirements failed: {str(e)}")
+        additional_results["eb1a_documents"] = False
     
-    # Test document validation database
+    # Test EB-1A specific validation
     try:
-        print("\n🗄️ Document Validation Database:")
-        response = requests.get(f"{API_BASE}/document-validation-database/passport", timeout=10)
-        print(f"   Status: {response.status_code}")
-        if response.status_code == 200:
-            validation_db = response.json()
-            print(f"   Response: {json.dumps(validation_db, indent=4)}")
-        additional_results["validation_database"] = response.status_code == 200
-    except Exception as e:
-        print(f"   ❌ Validation database failed: {str(e)}")
-        additional_results["validation_database"] = False
-    
-    # Test comprehensive document validation
-    try:
-        print("\n🔍 Comprehensive Document Validation:")
+        print("\n🏆 EB-1A Specific Validation:")
         validation_data = {
-            "document_type": "passport",
-            "document_content": "CARLOS EDUARDO SILVA MENDES passport content",
-            "applicant_name": "Carlos Eduardo Silva Mendes",
-            "visa_type": "I-539"
+            "document_type": "awards",
+            "document_content": "2023 Turing Award Finalist - Dr. Sofia Martinez Chen",
+            "applicant_name": "Dr. Sofia Martinez Chen",
+            "visa_type": "EB-1A"
         }
         response = requests.post(
             f"{API_BASE}/test-comprehensive-document-validation",
@@ -989,23 +976,40 @@ def test_additional_i539_endpoints():
         if response.status_code == 200:
             validation_result = response.json()
             print(f"   Response: {json.dumps(validation_result, indent=4)}")
-        additional_results["comprehensive_validation"] = response.status_code == 200
+        additional_results["eb1a_validation"] = response.status_code == 200
     except Exception as e:
-        print(f"   ❌ Comprehensive validation failed: {str(e)}")
-        additional_results["comprehensive_validation"] = False
+        print(f"   ❌ EB-1A validation failed: {str(e)}")
+        additional_results["eb1a_validation"] = False
     
-    # Test validation capabilities
+    # Test extraordinary ability criteria validation
     try:
-        print("\n⚙️ Validation Capabilities:")
-        response = requests.get(f"{API_BASE}/documents/validation-capabilities", timeout=10)
+        print("\n🧬 Extraordinary Ability Criteria:")
+        criteria_data = {
+            "criteria": [
+                "Awards - national/international prizes",
+                "Membership in associations requiring outstanding achievements",
+                "Published material about the applicant",
+                "Judging the work of others",
+                "Original contributions of major significance",
+                "Scholarly articles",
+                "High salary"
+            ],
+            "field": "Sciences - Artificial Intelligence Research"
+        }
+        response = requests.post(
+            f"{API_BASE}/validate-eb1a-criteria",
+            json=criteria_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
         print(f"   Status: {response.status_code}")
         if response.status_code == 200:
-            capabilities = response.json()
-            print(f"   Response: {json.dumps(capabilities, indent=4)}")
-        additional_results["validation_capabilities"] = response.status_code == 200
+            criteria_result = response.json()
+            print(f"   Response: {json.dumps(criteria_result, indent=4)}")
+        additional_results["eb1a_criteria"] = response.status_code == 200
     except Exception as e:
-        print(f"   ❌ Validation capabilities failed: {str(e)}")
-        additional_results["validation_capabilities"] = False
+        print(f"   ❌ EB-1A criteria validation failed: {str(e)}")
+        additional_results["eb1a_criteria"] = False
     
     return additional_results
 
