@@ -53,26 +53,25 @@ def test_eb1a_extraordinary_ability_system():
         "fase_1_case_creation": {},
         "fase_2_basic_data": {},
         "fase_3_document_uploads": {},
-        "fase_4_ai_review_endpoints": {},
-        "fase_5_document_validation": {},
-        "fase_6_letter_quality": {},
-        "fase_7_form_verification": {},
-        "fase_8_uscis_compliance": {},
-        "fase_9_final_analysis": {},
+        "fase_4_personal_statement": {},
+        "fase_5_eb1a_form": {},
+        "fase_6_ai_review": {},
+        "fase_7_persistence_verification": {},
+        "fase_8_system_comparison": {},
         "summary": {}
     }
     
     # Global variables for the flow
     case_id = None
     
-    # FASE 1: Criar caso I-539
-    print("\n📋 FASE 1: Criação de Caso I-539")
+    # FASE 1: Criar caso EB-1A
+    print("\n📋 FASE 1: Criação de Caso EB-1A")
     print("-" * 50)
     
     case_data = {
-        "visa_type": "I-539",
-        "applicant_name": "Carlos Eduardo Silva Mendes",
-        "email": "carlos.mendes@test.com"
+        "visa_type": "EB-1A",
+        "applicant_name": "Dr. Sofia Martinez Chen",
+        "email": "sofia.teste@test.com"
     }
     
     try:
