@@ -63,19 +63,16 @@ def test_i539_ai_review_system():
     }
     
     # Global variables for the flow
-    jwt_token = None
     case_id = None
     
-    # ETAPA 1: Criar usuário
-    print("\n📋 ETAPA 1: Criação de Usuário")
+    # FASE 1: Criar caso I-539
+    print("\n📋 FASE 1: Criação de Caso I-539")
     print("-" * 50)
     
-    user_data = {
-        "email": "sofia.mendes.test@example.com",
-        "password": "TestPassword123!",
-        "first_name": "Sofia",
-        "last_name": "Mendes Rodrigues",
-        "phone": "+5511987654321"
+    case_data = {
+        "visa_type": "I-539",
+        "applicant_name": "Carlos Eduardo Silva Mendes",
+        "email": "carlos.mendes@test.com"
     }
     
     try:
