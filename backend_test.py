@@ -16,6 +16,149 @@ from datetime import datetime
 BACKEND_URL = "https://docsimple-3.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
+def create_test_case():
+    """Create a test case for validation testing"""
+    try:
+        print("📝 Creating test case for validation...")
+        response = requests.post(
+            f"{API_BASE}/auto-application/start",
+            json={},
+            headers={"Content-Type": "application/json"},
+            timeout=30
+        )
+        
+        if response.status_code in [200, 201]:
+            case_data = response.json()
+            case_id = case_data.get("case_id")
+            
+            # Set visa type to I-539
+            update_response = requests.put(
+                f"{API_BASE}/auto-application/case/{case_id}",
+                json={"form_code": "I-539"},
+                headers={"Content-Type": "application/json"},
+                timeout=30
+            )
+            
+            if update_response.status_code in [200, 201]:
+                print(f"✅ Test case created: {case_id}")
+                return case_id
+            else:
+                print(f"❌ Failed to set visa type: {update_response.status_code}")
+                return None
+        else:
+            print(f"❌ Failed to create case: {response.status_code}")
+            return None
+            
+    except Exception as e:
+        print(f"❌ Exception creating test case: {str(e)}")
+        return None
+
+def test_validation_endpoint(case_id: str, test_data: dict, test_name: str):
+    """Test the friendly form validation endpoint"""
+    try:
+        print(f"\n🔍 {test_name}")
+        print("-" * 50)
+        
+        print(f"🔗 Endpoint: POST {API_BASE}/case/{case_id}/friendly-form")
+        print(f"📤 Test Data: {json.dumps(test_data, indent=2, ensure_ascii=False)}")
+        
+        start_time = time.time()
+        response = requests.post(
+            f"{API_BASE}/case/{case_id}/friendly-form",
+            json=test_data,
+            headers={"Content-Type": "application/json"},
+            timeout=60
+        )
+        processing_time = time.time() - start_time
+        
+        print(f"⏱️  Processing time: {processing_time:.2f}s")
+        print(f"📊 Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            validation_result = response.json()
+            print(f"📄 Validation Response: {json.dumps(validation_result, indent=2, ensure_ascii=False)}")
+            
+            return {
+                "success": True,
+                "status_code": response.status_code,
+                "processing_time": processing_time,
+                "validation_result": validation_result
+            }
+        else:
+            print(f"❌ Validation failed with status {response.status_code}")
+            print(f"📄 Error response: {response.text}")
+            return {
+                "success": False,
+                "status_code": response.status_code,
+                "error": response.text
+            }
+            
+    except Exception as e:
+        print(f"❌ Exception during validation: {str(e)}")
+        return {
+            "success": False,
+            "exception": str(e)
+        }
+
+def verify_mongodb_persistence(case_id: str):
+    """Verify that validation data was saved to MongoDB"""
+    try:
+        print(f"\n💾 Verifying MongoDB persistence for case {case_id}")
+        print("-" * 50)
+        
+        response = requests.get(
+            f"{API_BASE}/auto-application/case/{case_id}",
+            headers={"Content-Type": "application/json"},
+            timeout=30
+        )
+        
+        print(f"📊 Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            case_data = response.json()
+            case_info = case_data.get("case", {})
+            
+            # Check for validation-related fields
+            simplified_form_responses = case_info.get("simplified_form_responses")
+            friendly_form_validation = case_info.get("friendly_form_validation")
+            
+            print(f"📄 Simplified Form Responses: {json.dumps(simplified_form_responses, indent=2, ensure_ascii=False) if simplified_form_responses else 'None'}")
+            print(f"📄 Friendly Form Validation: {json.dumps(friendly_form_validation, indent=2, ensure_ascii=False) if friendly_form_validation else 'None'}")
+            
+            persistence_checks = {
+                "simplified_form_responses_saved": simplified_form_responses is not None,
+                "friendly_form_validation_saved": friendly_form_validation is not None,
+                "validation_status_present": friendly_form_validation.get("status") is not None if friendly_form_validation else False,
+                "completion_percentage_present": friendly_form_validation.get("completion_percentage") is not None if friendly_form_validation else False,
+                "validation_date_present": friendly_form_validation.get("validation_date") is not None if friendly_form_validation else False,
+                "issues_array_present": isinstance(friendly_form_validation.get("issues"), list) if friendly_form_validation else False
+            }
+            
+            print(f"\n🎯 PERSISTENCE CHECKS:")
+            for check, passed in persistence_checks.items():
+                status = "✅" if passed else "❌"
+                print(f"  {status} {check}: {passed}")
+            
+            return {
+                "success": True,
+                "persistence_checks": persistence_checks,
+                "case_data": case_info
+            }
+        else:
+            print(f"❌ Failed to retrieve case: {response.status_code}")
+            return {
+                "success": False,
+                "status_code": response.status_code,
+                "error": response.text
+            }
+            
+    except Exception as e:
+        print(f"❌ Exception during persistence check: {str(e)}")
+        return {
+            "success": False,
+            "exception": str(e)
+        }
+
 def test_enhanced_ai_validation_system():
     """
     🎯 TESTE COMPLETO DA VALIDAÇÃO IA MELHORADA
