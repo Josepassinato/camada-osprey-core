@@ -353,8 +353,8 @@ def test_eb1a_extraordinary_ability_system():
         status = "✅" if doc.get("status") == "uploaded" else "❌"
         print(f"   {status} {doc['type']}: {doc['name']}")
     
-    # FASE 4: Testar endpoints de AI Review
-    print("\n📋 FASE 4: Testar Endpoints de AI Review")
+    # FASE 4: Personal Statement (Cover Letter) EB-1A
+    print("\n📋 FASE 4: Personal Statement EB-1A")
     print("-" * 50)
     
     ai_review_endpoints = [
