@@ -570,23 +570,21 @@ if __name__ == "__main__":
     
     # Final recommendation
     summary = test_results.get("summary", {})
-    
-    print(f"📊 Teste principal: {successful_phases}/{total_phases} fases")
-    print(f"📈 Taxa de sucesso: {success_rate:.1f}%")
-    print(f"🔍 Testes adicionais: {sum(additional_results.values())}/{len(additional_results)}")
-    
-    # Show case details if available
-    if summary.get('case_id'):
-        print(f"📋 Case ID: {summary['case_id']}")
-    
-    if summary.get('eb1a_functional'):
-        print(f"🧬 EB-1A System: ✅ Funcional")
-    
-    if summary.get('ai_score'):
-        print(f"🤖 AI Score: {summary['ai_score']}%")
-    
-    if summary.get('adaptation_score'):
-        print(f"🔄 Adaptation Score: {summary['adaptation_score']:.1f}%")
+    if summary.get("system_ready", False):
+        print("\n✅ RECOMENDAÇÃO: Sistema de Formulários USCIS PRONTO PARA PRODUÇÃO")
+        print("   - Todos os 3 tipos de visto funcionando")
+        print("   - PDFs oficiais sendo gerados corretamente")
+        print("   - Sistema completo e funcional")
+    else:
+        success_rate = summary.get("overall_success_rate", 0)
+        if success_rate >= 50:
+            print("\n⚠️  RECOMENDAÇÃO: Sistema parcialmente funcional, melhorias necessárias")
+            print("   - Alguns formulários funcionando")
+            print("   - Revisar casos que falharam")
+        else:
+            print("\n❌ RECOMENDAÇÃO: Sistema precisa de desenvolvimento adicional")
+            print("   - Múltiplos problemas identificados")
+            print("   - Revisão completa necessária")
     
     # EB-1A System Assessment
     print(f"\n🧬 AVALIAÇÃO DO SISTEMA EB-1A:")
