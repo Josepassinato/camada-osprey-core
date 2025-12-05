@@ -1167,19 +1167,23 @@ if __name__ == "__main__":
     
     print(f"\n💾 Resultados salvos em: /app/eb1a_extraordinary_ability_test_results.json")
     
-    # Final recommendation based on AI Review System analysis
-    if ai_system_ready and success_rate >= 70:
-        print("\n✅ RECOMENDAÇÃO: Sistema de IA de Revisão I-539 PRONTO PARA PRODUÇÃO")
-        print("   - Todos os critérios principais atendidos")
-        print("   - Endpoints funcionais e validações operacionais")
-        print("   - Conformidade USCIS adequada")
-    elif success_rate >= 50:
-        print("\n⚠️  RECOMENDAÇÃO: Sistema parcialmente funcional, melhorias necessárias")
-        print("   - Funcionalidade básica presente")
-        print("   - Alguns critérios precisam de ajustes")
-        print("   - Revisar áreas de melhoria identificadas")
+    # Final recommendation based on EB-1A System analysis
+    if eb1a_system_ready and eb1a_success_rate >= 80:
+        print("\n✅ RECOMENDAÇÃO: Sistema EB-1A PRONTO PARA PRODUÇÃO")
+        print("   - Reconhece e adapta-se aos requisitos EB-1A")
+        print("   - Documentos específicos validados corretamente")
+        print("   - AI Review com score apropriado (>85%)")
+        print("   - Sistema flexível para diferentes tipos de visto")
+    elif eb1a_success_rate >= 60:
+        print("\n⚠️  RECOMENDAÇÃO: Sistema EB-1A parcialmente funcional, melhorias necessárias")
+        print("   - Funcionalidade básica EB-1A presente")
+        print("   - Alguns critérios específicos precisam de ajustes")
+        print("   - Revisar adaptação para extraordinary ability")
     else:
-        print("\n❌ RECOMENDAÇÃO: Sistema precisa de desenvolvimento adicional")
-        print("   - Múltiplos critérios não atendidos")
-        print("   - Endpoints críticos não funcionais")
-        print("   - Revisão arquitetural necessária")
+        print("\n❌ RECOMENDAÇÃO: Sistema EB-1A precisa de desenvolvimento adicional")
+        print("   - Múltiplos critérios EB-1A não atendidos")
+        print("   - Adaptação insuficiente para extraordinary ability")
+        print("   - Revisão da flexibilidade do sistema necessária")
+    
+    print(f"\n🎯 CONCLUSÃO FINAL:")
+    print(f"Sistema {'É' if adaptation_score >= 70 else 'NÃO É'} flexível o suficiente para lidar com diferentes categorias de visto (extensão, asilo, emprego)")
