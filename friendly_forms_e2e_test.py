@@ -587,7 +587,7 @@ def test_phase_3_h1b_complete_flow():
                     
                     # Generate PDF
                     pdf_response = requests.post(
-                        f"{API_BASE}/case/{case_id}/generate-form/I-539",
+                        f"{API_BASE}/case/{case_id}/generate-form",
                         headers={"Content-Type": "application/json"},
                         timeout=60
                     )
