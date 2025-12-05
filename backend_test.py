@@ -16,37 +16,37 @@ from datetime import datetime
 BACKEND_URL = "https://visa-ai-assistant.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
-def test_i539_ai_review_system():
+def test_eb1a_extraordinary_ability_system():
     """
-    🎯 ANÁLISE DA IA DE REVISÃO FINAL - PROCESSO I-539 EXTENSION OF STAY
+    🎯 TESTE COMPLETO EB-1A - EXTRAORDINARY ABILITY VISA
     
-    Testing complete I-539 AI review system for Carlos Eduardo Silva Mendes
+    Testing complete EB-1A system for Dr. Sofia Martinez Chen
     
     SPECIFIC TEST REQUESTED IN REVIEW:
-    Complete I-539 Extension of Stay AI review including:
-    1. Case creation for I-539
-    2. Basic data completion
-    3. Document uploads (passport, I-20, financial proof, etc.)
-    4. AI review endpoints testing
-    5. Document validation analysis
-    6. Letter quality assessment
-    7. Form completion verification
-    8. USCIS compliance checking
+    Complete EB-1A Extraordinary Ability visa testing including:
+    1. Case creation for EB-1A
+    2. Basic data completion with EB-1A specific fields
+    3. Document uploads (8 EB-1A specific documents)
+    4. Personal statement (cover letter)
+    5. EB-1A form completion with USCIS criteria
+    6. AI review that recognizes EB-1A specifics
+    7. Verification of persistence
+    8. System flexibility comparison with I-539/I-589
     
     Expected validations:
-    1. ✅ I-539 case created successfully
-    2. ✅ Basic data saved correctly
-    3. ✅ Documents uploaded and analyzed
-    4. ✅ AI review endpoints functional
-    5. ✅ Document validation working
-    6. ✅ Letter quality assessment working
-    7. ✅ Form completion verification working
-    8. ✅ USCIS compliance checking working
+    1. ✅ EB-1A case created successfully
+    2. ✅ Basic data with extraordinary ability field saved
+    3. ✅ 8 EB-1A documents uploaded (awards, publications, etc.)
+    4. ✅ Personal statement saved
+    5. ✅ EB-1A form with 7 criteria completed
+    6. ✅ AI review recognizes EB-1A and scores >85%
+    7. ✅ All data persisted correctly
+    8. ✅ System adapts to EB-1A vs I-539/I-589 requirements
     """
     
-    print("🎯 TESTING I-539 EXTENSION OF STAY AI REVIEW SYSTEM")
-    print("👨‍🎓 Applicant: Carlos Eduardo Silva Mendes")
-    print("📋 Process: I-539 Extension of Stay")
+    print("🎯 TESTE COMPLETO EB-1A - EXTRAORDINARY ABILITY VISA")
+    print("👩‍🔬 Applicant: Dr. Sofia Martinez Chen")
+    print("📋 Process: EB-1A Extraordinary Ability")
     print("=" * 60)
     
     results = {
