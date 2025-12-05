@@ -462,35 +462,40 @@ def test_i539_ai_review_system():
         print(f"❌ Exception during professional data update: {str(e)}")
         results["etapa_5_friendly_form"]["exception"] = str(e)
     
-    # ETAPA 6: Simular upload de documentos
-    print("\n📋 ETAPA 6: Simular Upload de Documentos")
+    # FASE 3: Upload de documentos I-539
+    print("\n📋 FASE 3: Upload de Documentos I-539")
     print("-" * 50)
     
-    # Create simulated document content
+    # Create simulated I-539 document content
     def create_simulated_document(doc_type, content):
         """Create a simulated PDF document as base64"""
         return base64.b64encode(content.encode()).decode()
     
     documents_to_upload = [
         {
-            "name": "passport_copy.pdf",
+            "name": "passport_carlos_mendes.pdf",
             "type": "passport",
-            "content": "PASSPORT - REPÚBLICA FEDERATIVA DO BRASIL\nNome: SOFIA MENDES RODRIGUES\nPassaporte: BR123456789\nData de Nascimento: 15/03/1988\nNacionalidade: BRASILEIRA"
+            "content": "PASSPORT - REPÚBLICA FEDERATIVA DO BRASIL\nNome: CARLOS EDUARDO SILVA MENDES\nPassaporte: BR987654321\nData de Nascimento: 15/03/1985\nNacionalidade: BRASILEIRA\nValidade: 31/12/2030"
         },
         {
-            "name": "phd_diploma_mit.pdf", 
-            "type": "education_diploma",
-            "content": "MASSACHUSETTS INSTITUTE OF TECHNOLOGY\nDiploma - Doctor of Philosophy\nComputer Science\nSofia Mendes Rodrigues\n2015"
+            "name": "i20_columbia_university.pdf", 
+            "type": "i20",
+            "content": "FORM I-20 - CERTIFICATE OF ELIGIBILITY FOR NONIMMIGRANT STUDENT STATUS\nStudent Name: Carlos Eduardo Silva Mendes\nSEVIS ID: N9876543210\nSchool: Columbia University\nProgram: Master of Science in Computer Science\nProgram End Date: June 30, 2025"
         },
         {
-            "name": "award_certificates.pdf",
-            "type": "other",
-            "content": "UNITED NATIONS - AI for Good Award 2023\nRecipient: Dr. Sofia Mendes Rodrigues\nFor developing AI system for early cancer detection"
+            "name": "financial_support_proof.pdf",
+            "type": "financial_documents",
+            "content": "BANK STATEMENT - BANCO DO BRASIL\nAccount Holder: Carlos Eduardo Silva Mendes\nBalance: R$ 450,000.00\nStatement Period: January 2025\nSufficient funds for educational expenses"
         },
         {
-            "name": "job_offer_johns_hopkins.pdf",
-            "type": "employment_letter", 
-            "content": "JOHNS HOPKINS UNIVERSITY HOSPITAL\nJob Offer Letter\nPosition: Senior AI Research Scientist\nSalary: $180,000/year\nStart Date: January 15, 2026"
+            "name": "cover_letter_i539.pdf",
+            "type": "cover_letter", 
+            "content": "COVER LETTER FOR I-539 APPLICATION\nTo: U.S. Citizenship and Immigration Services\nRe: Application to Extend F-1 Student Status\nApplicant: Carlos Eduardo Silva Mendes\nI am respectfully requesting an extension of my F-1 student status to complete my Master's degree program at Columbia University."
+        },
+        {
+            "name": "academic_transcript.pdf",
+            "type": "education_documents",
+            "content": "COLUMBIA UNIVERSITY - OFFICIAL TRANSCRIPT\nStudent: Carlos Eduardo Silva Mendes\nProgram: Master of Science in Computer Science\nCurrent GPA: 3.8/4.0\nExpected Graduation: June 2025"
         }
     ]
     
