@@ -691,8 +691,8 @@ Dr. Sofia Martinez Chen"""
         results["fase_7_persistence_verification"]["exception"] = str(e)
         results["fase_7_persistence_verification"]["working"] = False
     
-    # FASE 8: Verificação de Conformidade USCIS
-    print("\n📋 FASE 8: Verificação de Conformidade USCIS")
+    # FASE 8: Comparação do Sistema (EB-1A vs I-539/I-589)
+    print("\n📋 FASE 8: Comparação do Sistema (EB-1A vs I-539/I-589)")
     print("-" * 50)
     
     try:
