@@ -313,11 +313,13 @@ def test_i539_ai_review_system():
                 "error": str(e)
             })
     
-    results["etapa_6_document_uploads"]["uploaded_docs"] = uploaded_docs
-    results["etapa_6_document_uploads"]["total_docs"] = len(documents_to_upload)
-    results["etapa_6_document_uploads"]["successful_uploads"] = len([d for d in uploaded_docs if d.get("status") == "uploaded"])
+    results["fase_3_document_uploads"] = {
+        "uploaded_docs": uploaded_docs,
+        "total_docs": len(documents_to_upload),
+        "successful_uploads": len([d for d in uploaded_docs if d.get("status") == "uploaded"])
+    }
     
-    print(f"\n📊 RESUMO UPLOADS: {results['etapa_6_document_uploads']['successful_uploads']}/{results['etapa_6_document_uploads']['total_docs']} documentos enviados")
+    print(f"\n📊 RESUMO UPLOADS: {results['fase_3_document_uploads']['successful_uploads']}/{results['fase_3_document_uploads']['total_docs']} documentos enviados")
     
     # FASE 4: Testar endpoints de AI Review
     print("\n📋 FASE 4: Testar Endpoints de AI Review")
