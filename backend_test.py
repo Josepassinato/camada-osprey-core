@@ -17,7 +17,6 @@ BACKEND_URL = "https://visa-ai-assistant.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_uscis_form_generation_system():
-def test_uscis_form_generation_system():
     """
     🎯 TESTE COMPLETO - SISTEMA DE GERAÇÃO DE FORMULÁRIOS USCIS
     
