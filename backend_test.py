@@ -122,9 +122,9 @@ def test_i539_ai_review_system():
             
             print(f"\n📊 DADOS DO CASO CRIADO:")
             print(f"  📋 Case ID: {case_id}")
-            print(f"  📝 Tipo de Visto: {response_data.get('visa_type')}")
-            print(f"  👤 Aplicante: {response_data.get('applicant_name')}")
-            print(f"  📧 Email: {response_data.get('email')}")
+            print(f"  📝 Response Type: {type(response_data)}")
+            print(f"  👤 Success: {response_data.get('success', 'N/A')}")
+            print(f"  📧 Case Data: {bool(case_data_response)}")
                 
         else:
             print(f"❌ Request failed with status {response.status_code}")
