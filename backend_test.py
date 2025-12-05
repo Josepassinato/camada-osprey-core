@@ -55,25 +55,16 @@ def test_eb1a_ai_review_after_corrections():
     # Use existing case ID from review request
     case_id = "OSP-8731E45D"
     
-    # FASE 1: Criar caso EB-1A
-    print("\n📋 FASE 1: Criação de Caso EB-1A")
+    # STEP 1: Verify existing case OSP-8731E45D
+    print("\n📋 STEP 1: Verify Existing Case OSP-8731E45D")
     print("-" * 50)
     
-    case_data = {
-        "visa_type": "EB-1A",
-        "applicant_name": "Dr. Sofia Martinez Chen",
-        "email": "sofia.teste@test.com"
-    }
-    
     try:
-        # Try the correct endpoint for case creation
-        print(f"🔗 Endpoint: POST {API_BASE}/auto-application/start")
-        print(f"📤 Payload: {json.dumps(case_data, indent=2)}")
+        print(f"🔗 Endpoint: GET {API_BASE}/auto-application/case/{case_id}")
         
         start_time = time.time()
-        response = requests.post(
-            f"{API_BASE}/auto-application/start",
-            json=case_data,
+        response = requests.get(
+            f"{API_BASE}/auto-application/case/{case_id}",
             headers={"Content-Type": "application/json"},
             timeout=30
         )
@@ -82,48 +73,55 @@ def test_eb1a_ai_review_after_corrections():
         print(f"⏱️  Processing time: {processing_time:.2f}s")
         print(f"📊 Status Code: {response.status_code}")
         
-        results["fase_1_case_creation"]["status_code"] = response.status_code
-        results["fase_1_case_creation"]["processing_time"] = processing_time
+        results["case_verification"]["status_code"] = response.status_code
+        results["case_verification"]["processing_time"] = processing_time
         
-        if response.status_code in [200, 201]:
-            response_data = response.json()
-            print(f"📄 Response: {json.dumps(response_data, indent=2)}")
+        if response.status_code == 200:
+            case_data = response.json()
+            print(f"📄 Case Data: {json.dumps(case_data, indent=2)}")
             
-            # Extract case_id for subsequent requests - check nested structure
-            case_data_response = response_data.get("case", {})
-            case_id = case_data_response.get("case_id") or response_data.get("case_id")
+            case_info = case_data.get("case", {})
             
+            # Verify case has expected EB-1A data
             validations = {
-                "1_eb1a_case_created": case_id is not None,
-                "2_case_id_format": case_id.startswith("OSP-") if case_id else False,
-                "3_visa_type_correct": response_data.get("visa_type") == "EB-1A" or case_data_response.get("form_code") == "EB-1A",
-                "4_response_success": response_data.get("success", False) or "case" in response_data
+                "1_case_exists": case_info.get("case_id") == case_id,
+                "2_eb1a_visa_type": case_info.get("form_code") == "EB-1A",
+                "3_documents_present": len(case_info.get("uploaded_documents", [])) >= 8,
+                "4_personal_statement_present": case_info.get("letters", {}).get("cover_letter") is not None,
+                "5_personal_statement_length": len(case_info.get("letters", {}).get("cover_letter", "")) > 1500,
+                "6_eb1a_form_present": case_info.get("forms", {}).get("eb1a") is not None,
+                "7_criteria_count": case_info.get("forms", {}).get("eb1a", {}).get("criteria_count", 0) >= 7
             }
             
-            results["fase_1_case_creation"]["validations"] = validations
-            results["fase_1_case_creation"]["response_data"] = response_data
-            results["fase_1_case_creation"]["case_id"] = case_id
+            results["case_verification"]["validations"] = validations
+            results["case_verification"]["case_data"] = case_info
             
-            print("\n🎯 VALIDAÇÕES FASE 1 - EB-1A:")
+            print("\n🎯 CASE VERIFICATION - OSP-8731E45D:")
             print("=" * 50)
             for check, passed in validations.items():
                 status = "✅" if passed else "❌"
                 print(f"  {status} {check}: {passed}")
             
-            print(f"\n📊 DADOS DO CASO EB-1A CRIADO:")
-            print(f"  📋 Case ID: {case_id}")
-            print(f"  🎯 Visa Type: EB-1A")
-            print(f"  👩‍🔬 Applicant: Dr. Sofia Martinez Chen")
-            print(f"  📧 Email: sofia.teste@test.com")
+            # Show case details
+            documents_count = len(case_info.get("uploaded_documents", []))
+            letter_length = len(case_info.get("letters", {}).get("cover_letter", ""))
+            criteria_count = case_info.get("forms", {}).get("eb1a", {}).get("criteria_count", 0)
+            
+            print(f"\n📊 CASE OSP-8731E45D DETAILS:")
+            print(f"  📋 Case ID: {case_info.get('case_id', 'N/A')}")
+            print(f"  🎯 Visa Type: {case_info.get('form_code', 'N/A')}")
+            print(f"  📄 Documents: {documents_count}/8")
+            print(f"  📝 Personal Statement: {letter_length} characters")
+            print(f"  📋 EB-1A Criteria: {criteria_count}/10")
                 
         else:
-            print(f"❌ Request failed with status {response.status_code}")
+            print(f"❌ Case verification failed with status {response.status_code}")
             print(f"📄 Error response: {response.text}")
-            results["fase_1_case_creation"]["error"] = response.text
+            results["case_verification"]["error"] = response.text
             
     except Exception as e:
-        print(f"❌ Exception during case creation: {str(e)}")
-        results["fase_1_case_creation"]["exception"] = str(e)
+        print(f"❌ Exception during case verification: {str(e)}")
+        results["case_verification"]["exception"] = str(e)
     
     # FASE 2: Completar dados básicos do EB-1A
     print("\n📋 FASE 2: Completar Dados Básicos EB-1A")
