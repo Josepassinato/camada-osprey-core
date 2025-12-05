@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend Testing Suite - O-1 Visa Complete End-to-End Testing
-Testing complete O-1 visa application flow for Dr. Sofia Mendes Rodrigues
+Backend Testing Suite - I-539 Extension of Stay AI Review System Testing
+Testing complete I-539 AI review system for Carlos Eduardo Silva Mendes
 """
 
 import requests
