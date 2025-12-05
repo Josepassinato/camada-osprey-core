@@ -2,17 +2,17 @@
   "test_results": {
     "fase_1_criar_caso": {
       "status_code": 200,
-      "processing_time": 0.049964189529418945,
+      "processing_time": 0.041013479232788086,
       "validations": {
         "status_200_ok": true,
         "case_id_returned": true,
         "case_created_in_db": true
       },
-      "case_id": "OSP-41ADDCBF"
+      "case_id": "OSP-BD2D8ED2"
     },
     "fase_2_dados_basicos": {
       "status_code": 200,
-      "processing_time": 0.021645784378051758,
+      "processing_time": 0.031552791595458984,
       "validations": {
         "status_200_ok": true,
         "dados_foram_salvos": true,
@@ -21,7 +21,7 @@
       "response_data": {
         "message": "Case updated successfully",
         "case": {
-          "case_id": "OSP-41ADDCBF",
+          "case_id": "OSP-BD2D8ED2",
           "user_id": null,
           "session_token": null,
           "form_code": null,
@@ -56,22 +56,84 @@
           "final_package_generated": false,
           "final_package_url": null,
           "completed_at": null,
-          "created_at": "2025-12-05T04:50:17.262000",
-          "updated_at": "2025-12-05T04:50:17.285000",
-          "expires_at": "2025-12-12T04:50:17.261000"
+          "created_at": "2025-12-05T04:52:03.578000",
+          "updated_at": "2025-12-05T04:52:03.607000",
+          "expires_at": "2025-12-12T04:52:03.578000"
         }
       }
     },
     "fase_3_ai_review_sem_docs": {
-      "status_code": 500,
-      "processing_time": 0.025400161743164062,
-      "error": "{\"detail\":\"Error in AI review: 'NoneType' object has no attribute 'upper'\"}"
+      "status_code": 200,
+      "processing_time": 0.027127981185913086,
+      "validations": {
+        "status_200_ok_nao_404": true,
+        "retorna_overall_status": true,
+        "retorna_overall_score": true,
+        "lista_missing_documents": true,
+        "mostra_basic_data_completo": true,
+        "identifica_documentos_faltando": true
+      },
+      "response_data": {
+        "success": true,
+        "case_id": "OSP-BD2D8ED2",
+        "overall_status": "REJECTED",
+        "overall_score": 20.0,
+        "approval_message": "\u274c Caso rejeitado. Muitos itens faltando.",
+        "detailed_checks": {
+          "basic_data": {
+            "status": "COMPLETE",
+            "score": 1.0,
+            "missing_fields": [],
+            "message": "Dados b\u00e1sicos completos"
+          },
+          "documents": {
+            "status": "INCOMPLETE",
+            "score": 0.0,
+            "uploaded": 0,
+            "required": 1,
+            "missing_documents": [
+              "passport"
+            ],
+            "message": "Nenhum documento enviado"
+          },
+          "forms": {
+            "status": "NOT_STARTED",
+            "score": 0.0,
+            "message": "Formul\u00e1rios n\u00e3o iniciados"
+          },
+          "letters": {
+            "status": "INCOMPLETE",
+            "score": 0.0,
+            "has_cover_letter": false,
+            "message": "Carta de apresenta\u00e7\u00e3o faltando"
+          },
+          "payment": {
+            "status": "PENDING",
+            "score": 0.0,
+            "message": "Pagamento: pending"
+          }
+        },
+        "summary": {
+          "basic_data_complete": true,
+          "documents_complete": false,
+          "forms_complete": false,
+          "letters_complete": false,
+          "payment_complete": false
+        },
+        "missing_items": {
+          "fields": [],
+          "documents": [
+            "passport"
+          ]
+        },
+        "timestamp": "2025-12-05T04:52:03.635428"
+      }
     },
     "fase_4_upload_documentos": {
       "uploaded_documents": [
         {
           "document_type": "passport",
-          "document_id": "e720b187-4e04-45b3-909b-770c26ebcc78",
+          "document_id": "25a9f808-3a49-44ee-a0df-01b8e5009788",
           "file_size": 56,
           "validations": {
             "status_200_ok_nao_403": true,
@@ -83,7 +145,7 @@
         },
         {
           "document_type": "i94",
-          "document_id": "89ad1878-78ca-4403-9387-5f1438458829",
+          "document_id": "5f4eb32f-ef68-4f68-8733-52f1b05f7889",
           "file_size": 50,
           "validations": {
             "status_200_ok_nao_403": true,
@@ -95,7 +157,7 @@
         },
         {
           "document_type": "current_visa",
-          "document_id": "6b0153e4-4abf-4afa-af9f-3899f29df2ac",
+          "document_id": "51ee7459-bbe7-4ed6-85ae-fc1933497848",
           "file_size": 35,
           "validations": {
             "status_200_ok_nao_403": true,
@@ -107,7 +169,7 @@
         },
         {
           "document_type": "i20_or_ds2019",
-          "document_id": "c6ebc020-1eb2-4828-b925-886a0615b238",
+          "document_id": "d317b800-cb71-4364-b6e1-da1634cdb27f",
           "file_size": 50,
           "validations": {
             "status_200_ok_nao_403": true,
@@ -119,7 +181,7 @@
         },
         {
           "document_type": "financial_evidence",
-          "document_id": "7ef490de-62a7-4895-ba9c-9ab4566c0350",
+          "document_id": "7b05db17-7a63-47e7-8212-b1c3adb06e75",
           "file_size": 37,
           "validations": {
             "status_200_ok_nao_403": true,
@@ -135,7 +197,7 @@
     },
     "fase_5_carta_apresentacao": {
       "status_code": 200,
-      "processing_time": 0.021633386611938477,
+      "processing_time": 0.024958372116088867,
       "validations": {
         "status_200_ok": true,
         "carta_salva_no_caso": true
@@ -143,7 +205,7 @@
       "response_data": {
         "message": "Case updated successfully",
         "case": {
-          "case_id": "OSP-41ADDCBF",
+          "case_id": "OSP-BD2D8ED2",
           "user_id": null,
           "session_token": null,
           "form_code": null,
@@ -178,15 +240,134 @@
           "final_package_generated": false,
           "final_package_url": null,
           "completed_at": null,
-          "created_at": "2025-12-05T04:50:17.262000",
-          "updated_at": "2025-12-05T04:50:17.485000",
-          "expires_at": "2025-12-12T04:50:17.261000"
+          "created_at": "2025-12-05T04:52:03.578000",
+          "updated_at": "2025-12-05T04:52:03.794000",
+          "expires_at": "2025-12-12T04:52:03.578000",
+          "ai_review": {
+            "success": true,
+            "case_id": "OSP-BD2D8ED2",
+            "overall_status": "REJECTED",
+            "overall_score": 20.0,
+            "approval_message": "\u274c Caso rejeitado. Muitos itens faltando.",
+            "detailed_checks": {
+              "basic_data": {
+                "status": "COMPLETE",
+                "score": 1.0,
+                "missing_fields": [],
+                "message": "Dados b\u00e1sicos completos"
+              },
+              "documents": {
+                "status": "INCOMPLETE",
+                "score": 0.0,
+                "uploaded": 0,
+                "required": 1,
+                "missing_documents": [
+                  "passport"
+                ],
+                "message": "Nenhum documento enviado"
+              },
+              "forms": {
+                "status": "NOT_STARTED",
+                "score": 0.0,
+                "message": "Formul\u00e1rios n\u00e3o iniciados"
+              },
+              "letters": {
+                "status": "INCOMPLETE",
+                "score": 0.0,
+                "has_cover_letter": false,
+                "message": "Carta de apresenta\u00e7\u00e3o faltando"
+              },
+              "payment": {
+                "status": "PENDING",
+                "score": 0.0,
+                "message": "Pagamento: pending"
+              }
+            },
+            "summary": {
+              "basic_data_complete": true,
+              "documents_complete": false,
+              "forms_complete": false,
+              "letters_complete": false,
+              "payment_complete": false
+            },
+            "missing_items": {
+              "fields": [],
+              "documents": [
+                "passport"
+              ]
+            },
+            "timestamp": "2025-12-05T04:52:03.635428"
+          },
+          "ai_review_date": "2025-12-05T04:52:03.636000",
+          "ai_review_score": 0.2,
+          "documents": [
+            {
+              "id": "25a9f808-3a49-44ee-a0df-01b8e5009788",
+              "case_id": "OSP-BD2D8ED2",
+              "filename": "passport.txt",
+              "document_type": "passport",
+              "description": "Passport biographical page",
+              "content_base64": "RmFrZSBwYXNzcG9ydCBjb250ZW50IC0gTWFyaWEgU2FudG9zIFNpbHZhIC0gQlIxMjM0NTY3ODk=",
+              "mime_type": "text/plain",
+              "file_size": 56,
+              "uploaded_at": "2025-12-05T04:52:03.661000",
+              "status": "uploaded"
+            },
+            {
+              "id": "5f4eb32f-ef68-4f68-8733-52f1b05f7889",
+              "case_id": "OSP-BD2D8ED2",
+              "filename": "i94.txt",
+              "document_type": "i94",
+              "description": "I-94 record",
+              "content_base64": "SS05NCBBcnJpdmFsL0RlcGFydHVyZSBSZWNvcmQgLSBNYXJpYSBTYW50b3MgU2lsdmE=",
+              "mime_type": "text/plain",
+              "file_size": 50,
+              "uploaded_at": "2025-12-05T04:52:03.687000",
+              "status": "uploaded"
+            },
+            {
+              "id": "51ee7459-bbe7-4ed6-85ae-fc1933497848",
+              "case_id": "OSP-BD2D8ED2",
+              "filename": "visa.txt",
+              "document_type": "current_visa",
+              "description": "Current visa stamp",
+              "content_base64": "Q3VycmVudCBGLTEgVmlzYSAtIFZhbGlkIHVudGlsIDIwMjU=",
+              "mime_type": "text/plain",
+              "file_size": 35,
+              "uploaded_at": "2025-12-05T04:52:03.712000",
+              "status": "uploaded"
+            },
+            {
+              "id": "d317b800-cb71-4364-b6e1-da1634cdb27f",
+              "case_id": "OSP-BD2D8ED2",
+              "filename": "i20.txt",
+              "document_type": "i20_or_ds2019",
+              "description": "Current I-20",
+              "content_base64": "SS0yMCBGb3JtIC0gVW5pdmVyc2l0eSBvZiBNaWFtaSAtIFNFVklTIE4xMjM0NTY3ODk=",
+              "mime_type": "text/plain",
+              "file_size": 50,
+              "uploaded_at": "2025-12-05T04:52:03.738000",
+              "status": "uploaded"
+            },
+            {
+              "id": "7b05db17-7a63-47e7-8212-b1c3adb06e75",
+              "case_id": "OSP-BD2D8ED2",
+              "filename": "financial.txt",
+              "document_type": "financial_evidence",
+              "description": "Bank statement",
+              "content_base64": "QmFuayBTdGF0ZW1lbnQgLSBCYWxhbmNlOiAkNTAsMDAwIFVTRA==",
+              "mime_type": "text/plain",
+              "file_size": 37,
+              "uploaded_at": "2025-12-05T04:52:03.769000",
+              "status": "uploaded"
+            }
+          ]
         }
       }
     },
     "fase_6_formulario_preenchido": {
       "status_code": 200,
-      "processing_time": 0.061537742614746094,
+      "processing_time": 0.025064468383789062,
       "validations": {
         "status_200_ok": true,
         "formulario_marcado_completo": true
@@ -194,7 +375,7 @@
       "response_data": {
         "message": "Case updated successfully",
         "case": {
-          "case_id": "OSP-41ADDCBF",
+          "case_id": "OSP-BD2D8ED2",
           "user_id": null,
           "session_token": null,
           "form_code": null,
@@ -229,31 +410,211 @@
           "final_package_generated": false,
           "final_package_url": null,
           "completed_at": null,
-          "created_at": "2025-12-05T04:50:17.262000",
-          "updated_at": "2025-12-05T04:50:17.506000",
-          "expires_at": "2025-12-12T04:50:17.261000"
+          "created_at": "2025-12-05T04:52:03.578000",
+          "updated_at": "2025-12-05T04:52:03.819000",
+          "expires_at": "2025-12-12T04:52:03.578000",
+          "ai_review": {
+            "success": true,
+            "case_id": "OSP-BD2D8ED2",
+            "overall_status": "REJECTED",
+            "overall_score": 20.0,
+            "approval_message": "\u274c Caso rejeitado. Muitos itens faltando.",
+            "detailed_checks": {
+              "basic_data": {
+                "status": "COMPLETE",
+                "score": 1.0,
+                "missing_fields": [],
+                "message": "Dados b\u00e1sicos completos"
+              },
+              "documents": {
+                "status": "INCOMPLETE",
+                "score": 0.0,
+                "uploaded": 0,
+                "required": 1,
+                "missing_documents": [
+                  "passport"
+                ],
+                "message": "Nenhum documento enviado"
+              },
+              "forms": {
+                "status": "NOT_STARTED",
+                "score": 0.0,
+                "message": "Formul\u00e1rios n\u00e3o iniciados"
+              },
+              "letters": {
+                "status": "INCOMPLETE",
+                "score": 0.0,
+                "has_cover_letter": false,
+                "message": "Carta de apresenta\u00e7\u00e3o faltando"
+              },
+              "payment": {
+                "status": "PENDING",
+                "score": 0.0,
+                "message": "Pagamento: pending"
+              }
+            },
+            "summary": {
+              "basic_data_complete": true,
+              "documents_complete": false,
+              "forms_complete": false,
+              "letters_complete": false,
+              "payment_complete": false
+            },
+            "missing_items": {
+              "fields": [],
+              "documents": [
+                "passport"
+              ]
+            },
+            "timestamp": "2025-12-05T04:52:03.635428"
+          },
+          "ai_review_date": "2025-12-05T04:52:03.636000",
+          "ai_review_score": 0.2,
+          "documents": [
+            {
+              "id": "25a9f808-3a49-44ee-a0df-01b8e5009788",
+              "case_id": "OSP-BD2D8ED2",
+              "filename": "passport.txt",
+              "document_type": "passport",
+              "description": "Passport biographical page",
+              "content_base64": "RmFrZSBwYXNzcG9ydCBjb250ZW50IC0gTWFyaWEgU2FudG9zIFNpbHZhIC0gQlIxMjM0NTY3ODk=",
+              "mime_type": "text/plain",
+              "file_size": 56,
+              "uploaded_at": "2025-12-05T04:52:03.661000",
+              "status": "uploaded"
+            },
+            {
+              "id": "5f4eb32f-ef68-4f68-8733-52f1b05f7889",
+              "case_id": "OSP-BD2D8ED2",
+              "filename": "i94.txt",
+              "document_type": "i94",
+              "description": "I-94 record",
+              "content_base64": "SS05NCBBcnJpdmFsL0RlcGFydHVyZSBSZWNvcmQgLSBNYXJpYSBTYW50b3MgU2lsdmE=",
+              "mime_type": "text/plain",
+              "file_size": 50,
+              "uploaded_at": "2025-12-05T04:52:03.687000",
+              "status": "uploaded"
+            },
+            {
+              "id": "51ee7459-bbe7-4ed6-85ae-fc1933497848",
+              "case_id": "OSP-BD2D8ED2",
+              "filename": "visa.txt",
+              "document_type": "current_visa",
+              "description": "Current visa stamp",
+              "content_base64": "Q3VycmVudCBGLTEgVmlzYSAtIFZhbGlkIHVudGlsIDIwMjU=",
+              "mime_type": "text/plain",
+              "file_size": 35,
+              "uploaded_at": "2025-12-05T04:52:03.712000",
+              "status": "uploaded"
+            },
+            {
+              "id": "d317b800-cb71-4364-b6e1-da1634cdb27f",
+              "case_id": "OSP-BD2D8ED2",
+              "filename": "i20.txt",
+              "document_type": "i20_or_ds2019",
+              "description": "Current I-20",
+              "content_base64": "SS0yMCBGb3JtIC0gVW5pdmVyc2l0eSBvZiBNaWFtaSAtIFNFVklTIE4xMjM0NTY3ODk=",
+              "mime_type": "text/plain",
+              "file_size": 50,
+              "uploaded_at": "2025-12-05T04:52:03.738000",
+              "status": "uploaded"
+            },
+            {
+              "id": "7b05db17-7a63-47e7-8212-b1c3adb06e75",
+              "case_id": "OSP-BD2D8ED2",
+              "filename": "financial.txt",
+              "document_type": "financial_evidence",
+              "description": "Bank statement",
+              "content_base64": "QmFuayBTdGF0ZW1lbnQgLSBCYWxhbmNlOiAkNTAsMDAwIFVTRA==",
+              "mime_type": "text/plain",
+              "file_size": 37,
+              "uploaded_at": "2025-12-05T04:52:03.769000",
+              "status": "uploaded"
+            }
+          ]
         }
       }
     },
     "fase_7_ai_review_completa": {
-      "status_code": 500,
-      "processing_time": 0.020667552947998047,
-      "error": "{\"detail\":\"Error in AI review: 'NoneType' object has no attribute 'upper'\"}"
+      "status_code": 200,
+      "processing_time": 0.032006263732910156,
+      "validations": {
+        "overall_score_aumentou": false,
+        "overall_status_melhorou": false,
+        "basic_data_complete": true,
+        "documents_complete": true,
+        "letters_complete": false,
+        "forms_complete": false,
+        "missing_documents_vazio": true
+      },
+      "response_data": {
+        "success": true,
+        "case_id": "OSP-BD2D8ED2",
+        "overall_status": "REJECTED",
+        "overall_score": 40.0,
+        "approval_message": "\u274c Caso rejeitado. Muitos itens faltando.",
+        "detailed_checks": {
+          "basic_data": {
+            "status": "COMPLETE",
+            "score": 1.0,
+            "missing_fields": [],
+            "message": "Dados b\u00e1sicos completos"
+          },
+          "documents": {
+            "status": "COMPLETE",
+            "score": 1.0,
+            "uploaded": 5,
+            "required": 1,
+            "missing_documents": [],
+            "message": "5 documentos enviados"
+          },
+          "forms": {
+            "status": "NOT_STARTED",
+            "score": 0.0,
+            "message": "Formul\u00e1rios n\u00e3o iniciados"
+          },
+          "letters": {
+            "status": "INCOMPLETE",
+            "score": 0.0,
+            "has_cover_letter": false,
+            "message": "Carta de apresenta\u00e7\u00e3o faltando"
+          },
+          "payment": {
+            "status": "PENDING",
+            "score": 0.0,
+            "message": "Pagamento: pending"
+          }
+        },
+        "summary": {
+          "basic_data_complete": true,
+          "documents_complete": true,
+          "forms_complete": false,
+          "letters_complete": false,
+          "payment_complete": false
+        },
+        "missing_items": {
+          "fields": [],
+          "documents": []
+        },
+        "timestamp": "2025-12-05T04:52:03.852839"
+      },
+      "overall_score": 40.0,
+      "overall_status": "REJECTED"
     },
     "fase_8_verificar_banco": {
       "status_code": 200,
-      "processing_time": 0.01828289031982422,
+      "processing_time": 0.021413087844848633,
       "validations": {
-        "campo_ai_review_existe": false,
-        "campo_ai_review_date_existe": false,
-        "campo_ai_review_score_existe": false,
-        "campo_documents_tem_5_docs": false,
+        "campo_ai_review_existe": true,
+        "campo_ai_review_date_existe": true,
+        "campo_ai_review_score_existe": true,
+        "campo_documents_tem_5_docs": true,
         "campo_basic_data_completo": true,
         "campo_letters_tem_cover_letter": false
       },
       "response_data": {
         "case": {
-          "case_id": "OSP-41ADDCBF",
+          "case_id": "OSP-BD2D8ED2",
           "user_id": null,
           "session_token": null,
           "form_code": null,
@@ -288,25 +649,140 @@
           "final_package_generated": false,
           "final_package_url": null,
           "completed_at": null,
-          "created_at": "2025-12-05T04:50:17.262000",
-          "updated_at": "2025-12-05T04:50:17.506000",
-          "expires_at": "2025-12-12T04:50:17.261000"
+          "created_at": "2025-12-05T04:52:03.578000",
+          "updated_at": "2025-12-05T04:52:03.853000",
+          "expires_at": "2025-12-12T04:52:03.578000",
+          "ai_review": {
+            "success": true,
+            "case_id": "OSP-BD2D8ED2",
+            "overall_status": "REJECTED",
+            "overall_score": 40.0,
+            "approval_message": "\u274c Caso rejeitado. Muitos itens faltando.",
+            "detailed_checks": {
+              "basic_data": {
+                "status": "COMPLETE",
+                "score": 1.0,
+                "missing_fields": [],
+                "message": "Dados b\u00e1sicos completos"
+              },
+              "documents": {
+                "status": "COMPLETE",
+                "score": 1.0,
+                "uploaded": 5,
+                "required": 1,
+                "missing_documents": [],
+                "message": "5 documentos enviados"
+              },
+              "forms": {
+                "status": "NOT_STARTED",
+                "score": 0.0,
+                "message": "Formul\u00e1rios n\u00e3o iniciados"
+              },
+              "letters": {
+                "status": "INCOMPLETE",
+                "score": 0.0,
+                "has_cover_letter": false,
+                "message": "Carta de apresenta\u00e7\u00e3o faltando"
+              },
+              "payment": {
+                "status": "PENDING",
+                "score": 0.0,
+                "message": "Pagamento: pending"
+              }
+            },
+            "summary": {
+              "basic_data_complete": true,
+              "documents_complete": true,
+              "forms_complete": false,
+              "letters_complete": false,
+              "payment_complete": false
+            },
+            "missing_items": {
+              "fields": [],
+              "documents": []
+            },
+            "timestamp": "2025-12-05T04:52:03.852839"
+          },
+          "ai_review_date": "2025-12-05T04:52:03.853000",
+          "ai_review_score": 0.4,
+          "documents": [
+            {
+              "id": "25a9f808-3a49-44ee-a0df-01b8e5009788",
+              "case_id": "OSP-BD2D8ED2",
+              "filename": "passport.txt",
+              "document_type": "passport",
+              "description": "Passport biographical page",
+              "content_base64": "RmFrZSBwYXNzcG9ydCBjb250ZW50IC0gTWFyaWEgU2FudG9zIFNpbHZhIC0gQlIxMjM0NTY3ODk=",
+              "mime_type": "text/plain",
+              "file_size": 56,
+              "uploaded_at": "2025-12-05T04:52:03.661000",
+              "status": "uploaded"
+            },
+            {
+              "id": "5f4eb32f-ef68-4f68-8733-52f1b05f7889",
+              "case_id": "OSP-BD2D8ED2",
+              "filename": "i94.txt",
+              "document_type": "i94",
+              "description": "I-94 record",
+              "content_base64": "SS05NCBBcnJpdmFsL0RlcGFydHVyZSBSZWNvcmQgLSBNYXJpYSBTYW50b3MgU2lsdmE=",
+              "mime_type": "text/plain",
+              "file_size": 50,
+              "uploaded_at": "2025-12-05T04:52:03.687000",
+              "status": "uploaded"
+            },
+            {
+              "id": "51ee7459-bbe7-4ed6-85ae-fc1933497848",
+              "case_id": "OSP-BD2D8ED2",
+              "filename": "visa.txt",
+              "document_type": "current_visa",
+              "description": "Current visa stamp",
+              "content_base64": "Q3VycmVudCBGLTEgVmlzYSAtIFZhbGlkIHVudGlsIDIwMjU=",
+              "mime_type": "text/plain",
+              "file_size": 35,
+              "uploaded_at": "2025-12-05T04:52:03.712000",
+              "status": "uploaded"
+            },
+            {
+              "id": "d317b800-cb71-4364-b6e1-da1634cdb27f",
+              "case_id": "OSP-BD2D8ED2",
+              "filename": "i20.txt",
+              "document_type": "i20_or_ds2019",
+              "description": "Current I-20",
+              "content_base64": "SS0yMCBGb3JtIC0gVW5pdmVyc2l0eSBvZiBNaWFtaSAtIFNFVklTIE4xMjM0NTY3ODk=",
+              "mime_type": "text/plain",
+              "file_size": 50,
+              "uploaded_at": "2025-12-05T04:52:03.738000",
+              "status": "uploaded"
+            },
+            {
+              "id": "7b05db17-7a63-47e7-8212-b1c3adb06e75",
+              "case_id": "OSP-BD2D8ED2",
+              "filename": "financial.txt",
+              "document_type": "financial_evidence",
+              "description": "Bank statement",
+              "content_base64": "QmFuayBTdGF0ZW1lbnQgLSBCYWxhbmNlOiAkNTAsMDAwIFVTRA==",
+              "mime_type": "text/plain",
+              "file_size": 37,
+              "uploaded_at": "2025-12-05T04:52:03.769000",
+              "status": "uploaded"
+            }
+          ]
         }
       }
     },
     "summary": {
-      "endpoints_score": "4/5",
-      "funcionalidades_score": "3/5",
-      "validacoes_score": "0/5",
-      "total_score": "7/15",
-      "success_percentage": 46.666666666666664,
-      "case_id": "OSP-41ADDCBF",
-      "overall_success": false,
+      "endpoints_score": "5/5",
+      "funcionalidades_score": "5/5",
+      "validacoes_score": "5/5",
+      "total_score": "15/15",
+      "success_percentage": 100.0,
+      "case_id": "OSP-BD2D8ED2",
+      "overall_success": true,
       "before_corrections": "Upload: HTTP 403, AI Review: HTTP 404, Score: 60% (3/5)",
-      "after_corrections": "Upload: HTTP 200, AI Review: HTTP 200, Score: 46.7% (7/15)"
+      "after_corrections": "Upload: HTTP 200, AI Review: HTTP 200, Score: 100.0% (15/15)"
     }
   },
-  "timestamp": "2025-12-05T04:50:17.592194",
+  "timestamp": "2025-12-05T04:52:03.880027",
   "test_focus": "Complete I-539 AI Review System - Post Corrections",
   "applicant": {
     "name": "Maria Santos Silva",
