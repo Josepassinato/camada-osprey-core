@@ -2627,9 +2627,15 @@ async def submit_friendly_form(case_id: str, request: dict, current_user = Depen
         completion_percentage = validation_result.get("completion_percentage", 0)
         
         # STEP 3: Save data to database (even if validation found issues)
+        # Merge basic_data safely
+        existing_basic_data = case.get("basic_data")
+        if existing_basic_data is None or not isinstance(existing_basic_data, dict):
+            existing_basic_data = {}
+        merged_basic_data = {**existing_basic_data, **basic_data}
+        
         update_data = {
             "simplified_form_responses": friendly_form_data,
-            "basic_data": {**case.get("basic_data", {}), **basic_data},
+            "basic_data": merged_basic_data,
             "friendly_form_validation": {
                 "status": validation_status,
                 "completion_percentage": completion_percentage,
