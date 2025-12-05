@@ -25,9 +25,12 @@ class USCISFormFiller:
     def fill_i539(self, case_data: Dict[str, Any]) -> bytes:
         """
         Fill Form I-539 (Application to Extend/Change Nonimmigrant Status)
+        NOW SUPPORTS DATA FROM FRIENDLY FORM (simplified_form_responses)
         
         Args:
             case_data: Dictionary with applicant information
+                       - basic_data: Basic applicant info
+                       - simplified_form_responses: Data from user-friendly form (in Portuguese)
             
         Returns:
             bytes: PDF file content
@@ -35,8 +38,12 @@ class USCISFormFiller:
         try:
             logger.info("🔧 Filling Form I-539...")
             
-            # Extract data
+            # Extract data from both sources
             basic_data = case_data.get("basic_data", {})
+            simplified_form = case_data.get("simplified_form_responses", {})
+            
+            logger.info(f"📝 Using basic_data: {len(basic_data)} fields")
+            logger.info(f"📝 Using simplified_form_responses: {len(simplified_form)} fields")
             
             # Read template
             template_path = os.path.join(self.forms_dir, "I-539.pdf")
@@ -48,8 +55,8 @@ class USCISFormFiller:
                 form_fields = reader.get_form_text_fields()
                 logger.info(f"📋 Found {len(form_fields)} form fields in I-539")
             
-            # Map data to form fields
-            field_mapping = self._get_i539_mapping(basic_data)
+            # Map data to form fields - NOW USES BOTH basic_data AND simplified_form
+            field_mapping = self._get_i539_mapping(basic_data, simplified_form)
             
             # Fill form
             for page in reader.pages:
@@ -67,7 +74,7 @@ class USCISFormFiller:
             writer.write(output)
             output.seek(0)
             
-            logger.info("✅ Form I-539 filled successfully")
+            logger.info("✅ Form I-539 filled successfully with data from friendly form")
             return output.getvalue()
             
         except Exception as e:
