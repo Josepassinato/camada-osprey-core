@@ -1130,65 +1130,89 @@ def test_i539_ai_review_system():
     
     return results
 
-def test_additional_o1_endpoints():
-    """Test additional O-1 related endpoints for completeness"""
+def test_additional_i539_endpoints():
+    """Test additional I-539 related endpoints for completeness"""
     
-    print("\n🔍 TESTES ADICIONAIS - ENDPOINTS O-1 RELACIONADOS")
+    print("\n🔍 TESTES ADICIONAIS - ENDPOINTS I-539 RELACIONADOS")
     print("=" * 60)
     
     additional_results = {}
     
-    # Test visa detailed info for O-1
+    # Test visa detailed info for I-539
     try:
-        print("\n📋 O-1 Visa Detailed Info:")
-        response = requests.get(f"{API_BASE}/visa-detailed-info/O-1?process_type=consular", timeout=10)
+        print("\n📋 I-539 Visa Detailed Info:")
+        response = requests.get(f"{API_BASE}/visa-detailed-info/I-539?process_type=change_of_status", timeout=10)
         print(f"   Status: {response.status_code}")
         if response.status_code == 200:
             visa_info = response.json()
             print(f"   Response: {json.dumps(visa_info, indent=4)}")
-        additional_results["o1_visa_info"] = response.status_code == 200
+        additional_results["i539_visa_info"] = response.status_code == 200
     except Exception as e:
-        print(f"   ❌ O-1 visa info failed: {str(e)}")
-        additional_results["o1_visa_info"] = False
+        print(f"   ❌ I-539 visa info failed: {str(e)}")
+        additional_results["i539_visa_info"] = False
     
-    # Test document requirements for O-1
+    # Test document requirements for I-539
     try:
-        print("\n📄 O-1 Document Requirements:")
-        response = requests.get(f"{API_BASE}/visa/O-1/documents", timeout=10)
+        print("\n📄 I-539 Document Requirements:")
+        response = requests.get(f"{API_BASE}/visa/I-539/documents", timeout=10)
         print(f"   Status: {response.status_code}")
         if response.status_code == 200:
             doc_requirements = response.json()
             print(f"   Response: {json.dumps(doc_requirements, indent=4)}")
-        additional_results["o1_documents"] = response.status_code == 200
+        additional_results["i539_documents"] = response.status_code == 200
     except Exception as e:
-        print(f"   ❌ O-1 document requirements failed: {str(e)}")
-        additional_results["o1_documents"] = False
+        print(f"   ❌ I-539 document requirements failed: {str(e)}")
+        additional_results["i539_documents"] = False
     
-    # Test Owl Agent endpoints (if available)
+    # Test document validation database
     try:
-        print("\n🦉 Owl Agent Session Start:")
-        owl_data = {
-            "visa_type": "O-1",
-            "language": "pt",
-            "user_profile": {
-                "name": "Sofia Mendes Rodrigues",
-                "field": "AI Research"
-            }
+        print("\n🗄️ Document Validation Database:")
+        response = requests.get(f"{API_BASE}/document-validation-database/passport", timeout=10)
+        print(f"   Status: {response.status_code}")
+        if response.status_code == 200:
+            validation_db = response.json()
+            print(f"   Response: {json.dumps(validation_db, indent=4)}")
+        additional_results["validation_database"] = response.status_code == 200
+    except Exception as e:
+        print(f"   ❌ Validation database failed: {str(e)}")
+        additional_results["validation_database"] = False
+    
+    # Test comprehensive document validation
+    try:
+        print("\n🔍 Comprehensive Document Validation:")
+        validation_data = {
+            "document_type": "passport",
+            "document_content": "CARLOS EDUARDO SILVA MENDES passport content",
+            "applicant_name": "Carlos Eduardo Silva Mendes",
+            "visa_type": "I-539"
         }
         response = requests.post(
-            f"{API_BASE}/owl-agent/start-session",
-            json=owl_data,
+            f"{API_BASE}/test-comprehensive-document-validation",
+            json=validation_data,
             headers={"Content-Type": "application/json"},
             timeout=10
         )
         print(f"   Status: {response.status_code}")
-        if response.status_code in [200, 201]:
-            owl_session = response.json()
-            print(f"   Response: {json.dumps(owl_session, indent=4)}")
-        additional_results["owl_agent"] = response.status_code in [200, 201]
+        if response.status_code == 200:
+            validation_result = response.json()
+            print(f"   Response: {json.dumps(validation_result, indent=4)}")
+        additional_results["comprehensive_validation"] = response.status_code == 200
     except Exception as e:
-        print(f"   ❌ Owl Agent failed: {str(e)}")
-        additional_results["owl_agent"] = False
+        print(f"   ❌ Comprehensive validation failed: {str(e)}")
+        additional_results["comprehensive_validation"] = False
+    
+    # Test validation capabilities
+    try:
+        print("\n⚙️ Validation Capabilities:")
+        response = requests.get(f"{API_BASE}/documents/validation-capabilities", timeout=10)
+        print(f"   Status: {response.status_code}")
+        if response.status_code == 200:
+            capabilities = response.json()
+            print(f"   Response: {json.dumps(capabilities, indent=4)}")
+        additional_results["validation_capabilities"] = response.status_code == 200
+    except Exception as e:
+        print(f"   ❌ Validation capabilities failed: {str(e)}")
+        additional_results["validation_capabilities"] = False
     
     return additional_results
 
