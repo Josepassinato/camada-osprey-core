@@ -1572,8 +1572,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Admin Knowledge Base System - Complete Implementation"
-  stuck_tasks: []
+    - "I-589 Asylum Application AI Review System Testing"
+  stuck_tasks:
+    - "I-589 Personal Statement Persistence Issue"
+    - "I-589 Form Completion Data Not Saving"
   test_all: false
   test_priority: "high_first"
 
