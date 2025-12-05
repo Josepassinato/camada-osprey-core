@@ -689,22 +689,333 @@ def get_eb1a_friendly_form_structure() -> Dict[str, Any]:
     }
 
 
+def get_f1_friendly_form_structure() -> Dict[str, Any]:
+    """
+    Estrutura para F-1 Student Visa (Extension/Change of Status)
+    Usa formulário I-539 com campos específicos para estudantes
+    """
+    base_structure = get_i539_friendly_form_structure()
+    
+    # Add F-1 specific fields
+    base_structure["form_name"] = "Extensão de Visto de Estudante (F-1)"
+    base_structure["warning"] = "Para estudantes F-1, você também precisará do Form I-20 atualizado da sua escola."
+    
+    # Add student-specific section
+    student_section = {
+        "id": "informacoes_estudante",
+        "title": "6. Informações do Estudante F-1",
+        "description": "Informações específicas para estudantes",
+        "fields": [
+            {
+                "id": "nome_escola",
+                "label": "Nome da Escola/Universidade",
+                "type": "text",
+                "required": True,
+                "placeholder": "Harvard University",
+                "official_mapping": "Pt3_SchoolName"
+            },
+            {
+                "id": "programa_estudo",
+                "label": "Programa de Estudo",
+                "type": "text",
+                "required": True,
+                "placeholder": "Bachelor of Science in Computer Science",
+                "official_mapping": "Pt3_ProgramOfStudy"
+            },
+            {
+                "id": "data_conclusao_esperada",
+                "label": "Data de Conclusão Esperada",
+                "type": "date",
+                "required": True,
+                "validation": "date|future",
+                "official_mapping": "Pt3_ExpectedCompletionDate"
+            },
+            {
+                "id": "trabalhando_cpt_opt",
+                "label": "Você está trabalhando sob CPT ou OPT?",
+                "type": "select",
+                "required": True,
+                "options": ["Não", "CPT (Curricular Practical Training)", "OPT (Optional Practical Training)"],
+                "official_mapping": "Pt3_EmploymentStatus"
+            }
+        ]
+    }
+    
+    base_structure["sections"].append(student_section)
+    base_structure["total_fields"] = 31
+    
+    return base_structure
+
+
+def get_h1b_friendly_form_structure() -> Dict[str, Any]:
+    """
+    Estrutura para H-1B Specialty Occupation (Extension/Change of Status)
+    Usa formulário I-539 com campos específicos para H-1B
+    """
+    base_structure = get_i539_friendly_form_structure()
+    
+    base_structure["form_name"] = "Extensão/Mudança para Visto H-1B (Trabalho Especializado)"
+    base_structure["warning"] = "Para H-1B, você precisará de uma petição I-129 aprovada do seu empregador."
+    
+    # Add H-1B specific section
+    h1b_section = {
+        "id": "informacoes_emprego",
+        "title": "6. Informações de Emprego H-1B",
+        "description": "Dados do seu emprego especializado",
+        "fields": [
+            {
+                "id": "nome_empregador",
+                "label": "Nome do Empregador/Empresa",
+                "type": "text",
+                "required": True,
+                "placeholder": "Google LLC",
+                "official_mapping": "Pt3_EmployerName"
+            },
+            {
+                "id": "cargo",
+                "label": "Cargo/Posição",
+                "type": "text",
+                "required": True,
+                "placeholder": "Software Engineer",
+                "official_mapping": "Pt3_JobTitle"
+            },
+            {
+                "id": "salario_anual",
+                "label": "Salário Anual (USD)",
+                "type": "text",
+                "required": True,
+                "placeholder": "120000",
+                "validation": "numeric",
+                "official_mapping": "Pt3_AnnualSalary"
+            },
+            {
+                "id": "numero_petição_i129",
+                "label": "Número da Petição I-129",
+                "type": "text",
+                "required": True,
+                "placeholder": "EAC1234567890",
+                "official_mapping": "Pt3_I129ReceiptNumber"
+            },
+            {
+                "id": "data_aprovacao_i129",
+                "label": "Data de Aprovação do I-129",
+                "type": "date",
+                "required": True,
+                "validation": "date|past",
+                "official_mapping": "Pt3_I129ApprovalDate"
+            }
+        ]
+    }
+    
+    base_structure["sections"].append(h1b_section)
+    base_structure["total_fields"] = 32
+    
+    return base_structure
+
+
+def get_b2_friendly_form_structure() -> Dict[str, Any]:
+    """
+    Estrutura para B-2 Tourist Visa Extension
+    Formulário I-539 simplificado para turistas
+    """
+    base_structure = get_i539_friendly_form_structure()
+    
+    base_structure["form_name"] = "Extensão de Visto de Turista (B-2)"
+    base_structure["estimated_time"] = "15-20 minutos"
+    base_structure["warning"] = "Extensões de B-2 são normalmente concedidas apenas em casos de emergência ou circunstâncias extraordinárias."
+    
+    # Add tourist-specific section
+    tourist_section = {
+        "id": "motivo_extensao_turista",
+        "title": "6. Motivo da Extensão (B-2)",
+        "description": "Por que você precisa estender sua estadia?",
+        "fields": [
+            {
+                "id": "motivo_emergencia",
+                "label": "Motivo da Extensão",
+                "type": "select",
+                "required": True,
+                "options": [
+                    "Emergência médica pessoal",
+                    "Emergência médica familiar",
+                    "Questões legais urgentes",
+                    "Outro motivo extraordinário"
+                ],
+                "official_mapping": "Pt4_ReasonForExtension"
+            },
+            {
+                "id": "explicacao_detalhada",
+                "label": "Explique detalhadamente o motivo da extensão",
+                "type": "textarea",
+                "required": True,
+                "placeholder": "Descreva a situação que justifica a extensão...",
+                "validation": "min:200",
+                "official_mapping": "Pt4_DetailedExplanation",
+                "help_text": "Seja específico. Extensões de B-2 são difíceis de obter sem motivo válido."
+            },
+            {
+                "id": "fundos_manutencao",
+                "label": "Como você planeja se sustentar financeiramente durante a extensão?",
+                "type": "textarea",
+                "required": True,
+                "placeholder": "Poupanças pessoais, suporte familiar, etc.",
+                "validation": "min:50",
+                "official_mapping": "Pt4_FinancialSupport"
+            }
+        ]
+    }
+    
+    base_structure["sections"].append(tourist_section)
+    base_structure["total_fields"] = 30
+    
+    return base_structure
+
+
+def get_l1_friendly_form_structure() -> Dict[str, Any]:
+    """
+    Estrutura para L-1 Intracompany Transfer
+    Formulário I-539 para extensão/mudança
+    """
+    base_structure = get_i539_friendly_form_structure()
+    
+    base_structure["form_name"] = "Extensão/Mudança L-1 (Transferência Intra-Empresa)"
+    base_structure["warning"] = "Para L-1, você precisará de petição I-129 aprovada e comprovação de relacionamento entre empresas."
+    
+    l1_section = {
+        "id": "informacoes_l1",
+        "title": "6. Informações L-1",
+        "fields": [
+            {
+                "id": "empresa_eua",
+                "label": "Nome da Empresa nos EUA",
+                "type": "text",
+                "required": True,
+                "official_mapping": "Pt3_USCompanyName"
+            },
+            {
+                "id": "empresa_origem",
+                "label": "Nome da Empresa no País de Origem",
+                "type": "text",
+                "required": True,
+                "official_mapping": "Pt3_ForeignCompanyName"
+            },
+            {
+                "id": "tipo_l1",
+                "label": "Tipo de L-1",
+                "type": "select",
+                "required": True,
+                "options": ["L-1A (Executivo/Gerente)", "L-1B (Conhecimento Especializado)"],
+                "official_mapping": "Pt3_L1Type"
+            },
+            {
+                "id": "cargo_eua",
+                "label": "Cargo nos EUA",
+                "type": "text",
+                "required": True,
+                "official_mapping": "Pt3_JobTitleUS"
+            },
+            {
+                "id": "tempo_empresa_origem",
+                "label": "Tempo de Trabalho na Empresa do Exterior (em meses)",
+                "type": "text",
+                "required": True,
+                "validation": "numeric",
+                "official_mapping": "Pt3_TimeWithForeignCompany",
+                "help_text": "Mínimo 1 ano nos últimos 3 anos"
+            }
+        ]
+    }
+    
+    base_structure["sections"].append(l1_section)
+    base_structure["total_fields"] = 32
+    
+    return base_structure
+
+
+def get_o1_friendly_form_structure() -> Dict[str, Any]:
+    """
+    Estrutura para O-1 Individual with Extraordinary Ability or Achievement
+    Formulário I-539 para dependentes O-3 ou extensão
+    """
+    base_structure = get_i539_friendly_form_structure()
+    
+    base_structure["form_name"] = "Extensão/Mudança O-1 (Habilidade Extraordinária)"
+    base_structure["warning"] = "Para O-1, você precisa demonstrar habilidade extraordinária contínua e petição I-129 aprovada."
+    
+    o1_section = {
+        "id": "informacoes_o1",
+        "title": "6. Informações O-1",
+        "fields": [
+            {
+                "id": "categoria_o1",
+                "label": "Categoria O-1",
+                "type": "select",
+                "required": True,
+                "options": ["O-1A (Ciências, Educação, Negócios, Atletismo)", "O-1B (Artes, Cinema, TV)"],
+                "official_mapping": "Pt3_O1Category"
+            },
+            {
+                "id": "area_especialidade",
+                "label": "Área de Especialidade",
+                "type": "text",
+                "required": True,
+                "placeholder": "Ex: Artificial Intelligence Research",
+                "official_mapping": "Pt3_FieldOfExpertise"
+            },
+            {
+                "id": "realizacoes_principais",
+                "label": "Principais Realizações que Demonstram Habilidade Extraordinária",
+                "type": "textarea",
+                "required": True,
+                "placeholder": "Liste prêmios, publicações, reconhecimentos...",
+                "validation": "min:200",
+                "official_mapping": "Pt3_MajorAchievements"
+            },
+            {
+                "id": "empregador_patrocinador",
+                "label": "Empregador/Agente Patrocinador",
+                "type": "text",
+                "required": True,
+                "official_mapping": "Pt3_PetitionerName"
+            }
+        ]
+    }
+    
+    base_structure["sections"].append(o1_section)
+    base_structure["total_fields"] = 31
+    
+    return base_structure
+
+
 def get_friendly_form_structure(visa_type: str) -> Dict[str, Any]:
     """
     Retorna a estrutura completa do formulário amigável para o tipo de visto especificado
     
     Args:
-        visa_type: Código do visto (I-539, I-589, EB-1A, etc.)
+        visa_type: Código do visto (I-539, I-589, EB-1A, F-1, H-1B, B-2, L-1, O-1, etc.)
         
     Returns:
         Dict com a estrutura completa do formulário
     """
     structures = {
+        # Base forms
         "I-539": get_i539_friendly_form_structure,
         "I-589": get_i589_friendly_form_structure,
         "EB-1A": get_eb1a_friendly_form_structure,
         "EB1A": get_eb1a_friendly_form_structure,
-        "I-140": get_eb1a_friendly_form_structure
+        "I-140": get_eb1a_friendly_form_structure,
+        
+        # Specific visa types
+        "F-1": get_f1_friendly_form_structure,
+        "F1": get_f1_friendly_form_structure,
+        "H-1B": get_h1b_friendly_form_structure,
+        "H1B": get_h1b_friendly_form_structure,
+        "B-2": get_b2_friendly_form_structure,
+        "B2": get_b2_friendly_form_structure,
+        "L-1": get_l1_friendly_form_structure,
+        "L1": get_l1_friendly_form_structure,
+        "O-1": get_o1_friendly_form_structure,
+        "O1": get_o1_friendly_form_structure
     }
     
     structure_func = structures.get(visa_type)
