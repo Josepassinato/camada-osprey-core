@@ -33,9 +33,9 @@
     "case_creation": {
       "success": true,
       "status_code": 200,
-      "case_id": "OSP-0ACB4075",
+      "case_id": "OSP-3006F7BA",
       "case_data": {
-        "case_id": "OSP-0ACB4075",
+        "case_id": "OSP-3006F7BA",
         "user_id": null,
         "session_token": null,
         "form_code": "F-1",
@@ -59,9 +59,9 @@
         "final_package_generated": false,
         "final_package_url": null,
         "completed_at": null,
-        "created_at": "2025-12-05T15:35:52.701284",
-        "updated_at": "2025-12-05T15:35:52.701285",
-        "expires_at": "2025-12-12T15:35:52.701204"
+        "created_at": "2025-12-05T15:36:35.724917",
+        "updated_at": "2025-12-05T15:36:35.724918",
+        "expires_at": "2025-12-12T15:36:35.724862"
       }
     },
     "friendly_form": {
@@ -79,13 +79,13 @@
     },
     "pdf_generation": {
       "success": false,
-      "status_code": 404,
-      "error": "{\"detail\":\"Not Found\"}"
+      "status_code": 400,
+      "error": "{\"detail\":\"Form generation not supported for visa type: F-1\"}"
     },
     "pdf_download": {
       "success": false,
       "status_code": 404,
-      "error": "{\"detail\":\"Not Found\"}"
+      "error": "{\"detail\":\"Form not generated yet. Please call /generate-form first.\"}"
     }
   },
   "phase_3_h1b_complete": {
@@ -126,6 +126,6 @@
     "criteria_passed": 8,
     "total_criteria": 8,
     "system_ready": false,
-    "timestamp": "2025-12-05T15:35:52.941787"
+    "timestamp": "2025-12-05T15:36:35.890319"
   }
 }
