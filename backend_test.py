@@ -16,7 +16,7 @@ from datetime import datetime
 BACKEND_URL = "https://visa-ai-assistant.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
-def test_eb1a_ai_review_after_corrections():
+def test_uscis_form_generation_system():
     """
     🎯 TESTE EB-1A APÓS CORREÇÕES - VALIDAÇÃO FINAL
     
