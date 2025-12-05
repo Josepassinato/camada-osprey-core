@@ -1755,14 +1755,24 @@ async def upload_document_to_case(
             "status": "uploaded"
         }
         
-        # Atualizar caso com o novo documento
-        await db.application_cases.update_one(
+        # Atualizar caso com o novo documento (try both collections)
+        result = await db.application_cases.update_one(
             {"case_id": case_id},
             {
                 "$push": {"documents": document_record},
                 "$set": {"updated_at": datetime.utcnow()}
             }
         )
+        
+        # If not found in application_cases, try auto_cases
+        if result.matched_count == 0:
+            await db.auto_cases.update_one(
+                {"case_id": case_id},
+                {
+                    "$push": {"documents": document_record},
+                    "$set": {"updated_at": datetime.utcnow()}
+                }
+            )
         
         logger.info(f"✅ Documento {file.filename} enviado para case {case_id}")
         
