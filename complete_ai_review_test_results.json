@@ -1,0 +1,24 @@
+{
+  "test_results": {
+    "fase_1_criar_caso": {
+      "status_code": 404,
+      "processing_time": 0.09043717384338379,
+      "error": "{\"detail\":\"Not Found\"}"
+    },
+    "fase_2_dados_basicos": {},
+    "fase_3_ai_review_sem_docs": {},
+    "fase_4_upload_documentos": {},
+    "fase_5_carta_apresentacao": {},
+    "fase_6_formulario_preenchido": {},
+    "fase_7_ai_review_completa": {},
+    "fase_8_verificar_banco": {},
+    "summary": {}
+  },
+  "timestamp": "2025-12-05T04:49:51.053438",
+  "test_focus": "Complete I-539 AI Review System - Post Corrections",
+  "applicant": {
+    "name": "Maria Santos Silva",
+    "email": "maria.teste@test.com",
+    "visa_type": "I-539"
+  }
+}
