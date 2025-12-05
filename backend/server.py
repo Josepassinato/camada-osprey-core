@@ -2979,11 +2979,22 @@ async def comprehensive_ai_review(case_id: str):
         letters = case.get("letters", {})
         cover_letter = letters.get("cover_letter", "")
         
+        # Para I-589, personal statement é OBRIGATÓRIO e mais crítico
+        if visa_type == "I-589":
+            letter_score = 0.85 if cover_letter and len(cover_letter) > 200 else (0.5 if cover_letter else 0.0)
+            letter_message = "Personal statement presente e detalhado" if cover_letter and len(cover_letter) > 200 else \
+                            ("Personal statement muito curto - precisa mais detalhes" if cover_letter else \
+                             "Personal statement OBRIGATÓRIO para asilo - FALTANDO")
+        else:
+            letter_score = 0.75 if cover_letter else 0.0
+            letter_message = "Carta de apresentação presente" if cover_letter else "Carta de apresentação faltando"
+        
         review_results["checks"]["letters"] = {
             "status": "COMPLETE" if cover_letter else "INCOMPLETE",
-            "score": 0.75 if cover_letter else 0.0,  # Score padrão de 75% se existir
+            "score": letter_score,
             "has_cover_letter": bool(cover_letter),
-            "message": "Carta de apresentação presente" if cover_letter else "Carta de apresentação faltando"
+            "letter_length": len(cover_letter) if cover_letter else 0,
+            "message": letter_message
         }
         
         # 5. VERIFICAÇÃO DE PAYMENT
