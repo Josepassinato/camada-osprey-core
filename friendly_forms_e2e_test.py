@@ -517,7 +517,7 @@ def test_phase_3_h1b_complete_flow():
     # Create case
     try:
         case_data = {
-            "form_code": "H-1B",
+            "form_code": "I-539",
             "process_type": "extension"
         }
         
