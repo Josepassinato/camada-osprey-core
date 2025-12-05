@@ -76,13 +76,13 @@ def test_i539_ai_review_system():
     }
     
     try:
-        print(f"🔗 Endpoint: POST {API_BASE}/auth/signup")
-        print(f"📤 Payload: {json.dumps(user_data, indent=2)}")
+        print(f"🔗 Endpoint: POST {API_BASE}/auto-application/create-case")
+        print(f"📤 Payload: {json.dumps(case_data, indent=2)}")
         
         start_time = time.time()
         response = requests.post(
-            f"{API_BASE}/auth/signup",
-            json=user_data,
+            f"{API_BASE}/auto-application/create-case",
+            json=case_data,
             headers={"Content-Type": "application/json"},
             timeout=30
         )
@@ -91,52 +91,47 @@ def test_i539_ai_review_system():
         print(f"⏱️  Processing time: {processing_time:.2f}s")
         print(f"📊 Status Code: {response.status_code}")
         
-        results["etapa_1_user_creation"]["status_code"] = response.status_code
-        results["etapa_1_user_creation"]["processing_time"] = processing_time
+        results["fase_1_case_creation"]["status_code"] = response.status_code
+        results["fase_1_case_creation"]["processing_time"] = processing_time
         
-        if response.status_code == 200:
+        if response.status_code in [200, 201]:
             response_data = response.json()
             print(f"📄 Response: {json.dumps(response_data, indent=2)}")
             
-            # Extract JWT token for subsequent requests
-            jwt_token = response_data.get("token")
-            user_info = response_data.get("user", {})
+            # Extract case_id for subsequent requests
+            case_id = response_data.get("case_id")
             
             validations = {
-                "1_user_created": response_data.get("message") == "User created successfully",
-                "2_token_present": jwt_token is not None,
-                "3_user_email_correct": user_info.get("email") == "sofia.mendes.test@example.com",
-                "4_user_name_correct": user_info.get("first_name") == "Sofia"
+                "1_case_created": case_id is not None,
+                "2_case_id_format": case_id.startswith("OSP-") if case_id else False,
+                "3_visa_type_correct": response_data.get("visa_type") == "I-539",
+                "4_applicant_name_correct": response_data.get("applicant_name") == "Carlos Eduardo Silva Mendes"
             }
             
-            results["etapa_1_user_creation"]["validations"] = validations
-            results["etapa_1_user_creation"]["response_data"] = response_data
-            results["etapa_1_user_creation"]["jwt_token"] = jwt_token
+            results["fase_1_case_creation"]["validations"] = validations
+            results["fase_1_case_creation"]["response_data"] = response_data
+            results["fase_1_case_creation"]["case_id"] = case_id
             
-            print("\n🎯 VALIDAÇÕES ETAPA 1:")
+            print("\n🎯 VALIDAÇÕES FASE 1:")
             print("=" * 50)
             for check, passed in validations.items():
                 status = "✅" if passed else "❌"
                 print(f"  {status} {check}: {passed}")
             
-            print(f"\n📊 DADOS DO USUÁRIO CRIADO:")
-            print(f"  👤 Nome: {user_info.get('first_name')} {user_info.get('last_name')}")
-            print(f"  📧 Email: {user_info.get('email')}")
-            print(f"  🔑 Token JWT: {'✅ Presente' if jwt_token else '❌ Ausente'}")
-            
-            if jwt_token:
-                print(f"  🔑 Token (primeiros 50 chars): {jwt_token[:50]}...")
-            else:
-                print(f"  ❌ No JWT token found")
+            print(f"\n📊 DADOS DO CASO CRIADO:")
+            print(f"  📋 Case ID: {case_id}")
+            print(f"  📝 Tipo de Visto: {response_data.get('visa_type')}")
+            print(f"  👤 Aplicante: {response_data.get('applicant_name')}")
+            print(f"  📧 Email: {response_data.get('email')}")
                 
         else:
             print(f"❌ Request failed with status {response.status_code}")
             print(f"📄 Error response: {response.text}")
-            results["etapa_1_user_creation"]["error"] = response.text
+            results["fase_1_case_creation"]["error"] = response.text
             
     except Exception as e:
-        print(f"❌ Exception during user creation: {str(e)}")
-        results["etapa_1_user_creation"]["exception"] = str(e)
+        print(f"❌ Exception during case creation: {str(e)}")
+        results["fase_1_case_creation"]["exception"] = str(e)
     
     # ETAPA 2: Login
     print("\n📋 ETAPA 2: Login do Usuário")
