@@ -1,0 +1,866 @@
+{
+  "main_results": {
+    "fase_1_case_creation": {
+      "status_code": 200,
+      "processing_time": 0.05259299278259277,
+      "validations": {
+        "1_case_created": true,
+        "2_case_id_format": true,
+        "3_response_success": true,
+        "4_i589_type_correct": false
+      },
+      "response_data": {
+        "message": "Auto-application case created successfully",
+        "case": {
+          "case_id": "OSP-3F0CB31F",
+          "user_id": null,
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "process_type": null,
+          "progress_percentage": 0,
+          "current_step": null,
+          "basic_data": null,
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-12-05T04:58:10.570547",
+          "updated_at": "2025-12-05T04:58:10.570548",
+          "expires_at": "2025-12-12T04:58:10.570477"
+        }
+      },
+      "case_id": "OSP-3F0CB31F"
+    },
+    "fase_2_basic_data": {
+      "status_code": 200,
+      "processing_time": 0.026967287063598633,
+      "validations": {
+        "1_case_updated": true,
+        "2_basic_data_saved": true,
+        "3_applicant_name_correct": true,
+        "4_country_of_nationality_saved": true,
+        "5_date_of_arrival_saved": true,
+        "6_i94_number_saved": true
+      },
+      "response_data": {
+        "message": "Case updated successfully",
+        "case": {
+          "case_id": "OSP-3F0CB31F",
+          "user_id": null,
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "process_type": null,
+          "progress_percentage": 0,
+          "current_step": null,
+          "basic_data": {
+            "applicant_name": "Hassan Ahmed Ibrahim",
+            "date_of_birth": "1988-03-10",
+            "passport_number": "SY789456123",
+            "current_address": "789 Refugee Center, Room 15",
+            "city": "Houston",
+            "state": "TX",
+            "zip_code": "77001",
+            "country_of_birth": "Syria",
+            "email": "hassan.teste@test.com",
+            "phone": "+1-713-555-9876",
+            "country_of_nationality": "Syria",
+            "last_country_of_residence": "Turkey",
+            "date_of_arrival_us": "2023-11-15",
+            "i94_number": "123456789012"
+          },
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-12-05T04:58:10.570000",
+          "updated_at": "2025-12-05T04:58:10.595000",
+          "expires_at": "2025-12-12T04:58:10.570000"
+        }
+      }
+    },
+    "fase_3_ai_review_without_docs": {
+      "status_code": 200,
+      "processing_time": 0.026131391525268555,
+      "validations": {
+        "1_ai_review_working": true,
+        "2_identifies_i589": false,
+        "3_low_score_without_docs": true,
+        "4_identifies_missing_docs": true,
+        "5_asylum_specific_requirements": false
+      },
+      "response_data": {
+        "success": true,
+        "case_id": "OSP-3F0CB31F",
+        "overall_status": "REJECTED",
+        "overall_score": 20.0,
+        "approval_message": "\u274c Caso rejeitado. Muitos itens faltando.",
+        "detailed_checks": {
+          "basic_data": {
+            "status": "COMPLETE",
+            "score": 1.0,
+            "missing_fields": [],
+            "message": "Dados b\u00e1sicos completos"
+          },
+          "documents": {
+            "status": "INCOMPLETE",
+            "score": 0.0,
+            "uploaded": 0,
+            "required": 1,
+            "missing_documents": [
+              "passport"
+            ],
+            "message": "Nenhum documento enviado"
+          },
+          "forms": {
+            "status": "NOT_STARTED",
+            "score": 0.0,
+            "message": "Formul\u00e1rios n\u00e3o iniciados"
+          },
+          "letters": {
+            "status": "INCOMPLETE",
+            "score": 0.0,
+            "has_cover_letter": false,
+            "message": "Carta de apresenta\u00e7\u00e3o faltando"
+          },
+          "payment": {
+            "status": "PENDING",
+            "score": 0.0,
+            "message": "Pagamento: pending"
+          }
+        },
+        "summary": {
+          "basic_data_complete": true,
+          "documents_complete": false,
+          "forms_complete": false,
+          "letters_complete": false,
+          "payment_complete": false
+        },
+        "missing_items": {
+          "fields": [],
+          "documents": [
+            "passport"
+          ]
+        },
+        "timestamp": "2025-12-05T04:58:10.621917"
+      }
+    },
+    "fase_4_document_uploads": {
+      "uploaded_docs": [
+        {
+          "name": "passport_hassan_ibrahim.txt",
+          "type": "passport",
+          "document_id": "6e1a6016-ad81-418e-930a-d28e3a9329b5",
+          "status": "uploaded"
+        },
+        {
+          "name": "i94_hassan_ibrahim.txt",
+          "type": "i94",
+          "document_id": "7c2ab8d4-298d-4e04-86f3-a63c94ad8ea4",
+          "status": "uploaded"
+        },
+        {
+          "name": "persecution_evidence.txt",
+          "type": "evidence_persecution",
+          "document_id": "939c8ffb-9ab1-4cf3-8f2b-e2dbf8abacc7",
+          "status": "uploaded"
+        },
+        {
+          "name": "medical_report.txt",
+          "type": "medical_records",
+          "document_id": "b053b734-dca8-4485-8d9a-85a5cadc4e98",
+          "status": "uploaded"
+        },
+        {
+          "name": "witness_statement.txt",
+          "type": "witness_statements",
+          "document_id": "0a456e07-6f76-41be-a221-e94d8d24108c",
+          "status": "uploaded"
+        },
+        {
+          "name": "country_conditions.txt",
+          "type": "country_conditions",
+          "document_id": "00459fd5-132d-4b92-a822-7871356baf60",
+          "status": "uploaded"
+        }
+      ],
+      "total_docs": 6,
+      "successful_uploads": 6
+    },
+    "fase_5_personal_statement": {
+      "status_code": 200,
+      "processing_time": 0.019251108169555664,
+      "validations": {
+        "1_statement_saved": false,
+        "2_asylum_content": false,
+        "3_persecution_mentioned": false,
+        "4_syria_mentioned": false,
+        "5_appropriate_length": false
+      },
+      "response_data": {
+        "message": "Case updated successfully",
+        "case": {
+          "case_id": "OSP-3F0CB31F",
+          "user_id": null,
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "process_type": null,
+          "progress_percentage": 0,
+          "current_step": null,
+          "basic_data": {
+            "applicant_name": "Hassan Ahmed Ibrahim",
+            "date_of_birth": "1988-03-10",
+            "passport_number": "SY789456123",
+            "current_address": "789 Refugee Center, Room 15",
+            "city": "Houston",
+            "state": "TX",
+            "zip_code": "77001",
+            "country_of_birth": "Syria",
+            "email": "hassan.teste@test.com",
+            "phone": "+1-713-555-9876",
+            "country_of_nationality": "Syria",
+            "last_country_of_residence": "Turkey",
+            "date_of_arrival_us": "2023-11-15",
+            "i94_number": "123456789012"
+          },
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-12-05T04:58:10.570000",
+          "updated_at": "2025-12-05T04:58:10.865000",
+          "expires_at": "2025-12-12T04:58:10.570000",
+          "ai_review": {
+            "success": true,
+            "case_id": "OSP-3F0CB31F",
+            "overall_status": "REJECTED",
+            "overall_score": 20.0,
+            "approval_message": "\u274c Caso rejeitado. Muitos itens faltando.",
+            "detailed_checks": {
+              "basic_data": {
+                "status": "COMPLETE",
+                "score": 1.0,
+                "missing_fields": [],
+                "message": "Dados b\u00e1sicos completos"
+              },
+              "documents": {
+                "status": "INCOMPLETE",
+                "score": 0.0,
+                "uploaded": 0,
+                "required": 1,
+                "missing_documents": [
+                  "passport"
+                ],
+                "message": "Nenhum documento enviado"
+              },
+              "forms": {
+                "status": "NOT_STARTED",
+                "score": 0.0,
+                "message": "Formul\u00e1rios n\u00e3o iniciados"
+              },
+              "letters": {
+                "status": "INCOMPLETE",
+                "score": 0.0,
+                "has_cover_letter": false,
+                "message": "Carta de apresenta\u00e7\u00e3o faltando"
+              },
+              "payment": {
+                "status": "PENDING",
+                "score": 0.0,
+                "message": "Pagamento: pending"
+              }
+            },
+            "summary": {
+              "basic_data_complete": true,
+              "documents_complete": false,
+              "forms_complete": false,
+              "letters_complete": false,
+              "payment_complete": false
+            },
+            "missing_items": {
+              "fields": [],
+              "documents": [
+                "passport"
+              ]
+            },
+            "timestamp": "2025-12-05T04:58:10.621917"
+          },
+          "ai_review_date": "2025-12-05T04:58:10.622000",
+          "ai_review_score": 0.2,
+          "documents": [
+            {
+              "id": "6e1a6016-ad81-418e-930a-d28e3a9329b5",
+              "case_id": "OSP-3F0CB31F",
+              "filename": "passport_hassan_ibrahim.txt",
+              "document_type": "passport",
+              "description": "passport for I-589 asylum application",
+              "content_base64": "U3lyaWFuIFBhc3Nwb3J0IC0gSGFzc2FuIEFobWVkIElicmFoaW0gLSBTWTc4OTQ1NjEyMyAtIElzc3VlZDogRGFtYXNjdXMgMjAyMA==",
+              "mime_type": "text/plain",
+              "file_size": 76,
+              "uploaded_at": "2025-12-05T04:58:10.646000",
+              "status": "uploaded"
+            },
+            {
+              "id": "7c2ab8d4-298d-4e04-86f3-a63c94ad8ea4",
+              "case_id": "OSP-3F0CB31F",
+              "filename": "i94_hassan_ibrahim.txt",
+              "document_type": "i94",
+              "description": "i94 for I-589 asylum application",
+              "content_base64": "SS05NCBBcnJpdmFsIFJlY29yZCAtIEhhc3NhbiBBaG1lZCBJYnJhaGltIC0gQXJyaXZlZDogMTEvMTUvMjAyMyAtIFBvcnQ6IEpGSw==",
+              "mime_type": "text/plain",
+              "file_size": 76,
+              "uploaded_at": "2025-12-05T04:58:10.712000",
+              "status": "uploaded"
+            },
+            {
+              "id": "939c8ffb-9ab1-4cf3-8f2b-e2dbf8abacc7",
+              "case_id": "OSP-3F0CB31F",
+              "filename": "persecution_evidence.txt",
+              "document_type": "evidence_persecution",
+              "description": "evidence_persecution for I-589 asylum application",
+              "content_base64": "RXZpZGVuY2Ugb2YgUGVyc2VjdXRpb246IFRocmVhdHMgcmVjZWl2ZWQgZHVlIHRvIHBvbGl0aWNhbCBhY3Rpdml0aWVzLiBEZXRhaW5lZCBieSBhdXRob3JpdGllcyBpbiBEYW1hc2N1cyAyMDIzLiBGYW1pbHkgbWVtYmVycyBoYXJhc3NlZC4=",
+              "mime_type": "text/plain",
+              "file_size": 137,
+              "uploaded_at": "2025-12-05T04:58:10.733000",
+              "status": "uploaded"
+            },
+            {
+              "id": "b053b734-dca8-4485-8d9a-85a5cadc4e98",
+              "case_id": "OSP-3F0CB31F",
+              "filename": "medical_report.txt",
+              "document_type": "medical_records",
+              "description": "medical_records for I-589 asylum application",
+              "content_base64": "TWVkaWNhbCBSZXBvcnQ6IFBhdGllbnQgc2hvd3Mgc2lnbnMgb2YgdHJhdW1hLiBQVFNEIGRpYWdub3Npcy4gVHJlYXRtZW50IHJlY29tbWVuZGVkLiBEci4gU2FyYWggSm9obnNvbiwgSG91c3RvbiBNZWRpY2FsIENlbnRlciwgRGVjIDIwMjM=",
+              "mime_type": "text/plain",
+              "file_size": 137,
+              "uploaded_at": "2025-12-05T04:58:10.756000",
+              "status": "uploaded"
+            },
+            {
+              "id": "0a456e07-6f76-41be-a221-e94d8d24108c",
+              "case_id": "OSP-3F0CB31F",
+              "filename": "witness_statement.txt",
+              "document_type": "witness_statements",
+              "description": "witness_statements for I-589 asylum application",
+              "content_base64": "V2l0bmVzcyBTdGF0ZW1lbnQ6IEksIEFobWFkIEhhc3NhbiAoYnJvdGhlciksIHdpdG5lc3NlZCB0aGUgaGFyYXNzbWVudCBhbmQgdGhyZWF0cyBhZ2FpbnN0IEhhc3NhbiBBaG1lZCBJYnJhaGltIGJ5IFN5cmlhbiBhdXRob3JpdGllcyBpbiAyMDIzLiBTaWduZWQ6IEFobWFkIEhhc3Nhbg==",
+              "mime_type": "text/plain",
+              "file_size": 163,
+              "uploaded_at": "2025-12-05T04:58:10.819000",
+              "status": "uploaded"
+            },
+            {
+              "id": "00459fd5-132d-4b92-a822-7871356baf60",
+              "case_id": "OSP-3F0CB31F",
+              "filename": "country_conditions.txt",
+              "document_type": "country_conditions",
+              "description": "country_conditions for I-589 asylum application",
+              "content_base64": "SHVtYW4gUmlnaHRzIFJlcG9ydDogU3lyaWEgMjAyMyAtIERvY3VtZW50ZWQgY2FzZXMgb2YgcG9saXRpY2FsIHBlcnNlY3V0aW9uLCBkZXRlbnRpb24gd2l0aG91dCB0cmlhbCwgdG9ydHVyZS4gU291cmNlOiBVUyBTdGF0ZSBEZXBhcnRtZW50",
+              "mime_type": "text/plain",
+              "file_size": 138,
+              "uploaded_at": "2025-12-05T04:58:10.846000",
+              "status": "uploaded"
+            }
+          ]
+        }
+      }
+    },
+    "fase_6_form_completion": {
+      "status_code": 200,
+      "processing_time": 0.02044844627380371,
+      "validations": {
+        "1_form_data_saved": true,
+        "2_i589_completed": false,
+        "3_completion_date_saved": false,
+        "4_sections_saved": false
+      },
+      "response_data": {
+        "message": "Case updated successfully",
+        "case": {
+          "case_id": "OSP-3F0CB31F",
+          "user_id": null,
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "process_type": null,
+          "progress_percentage": 0,
+          "current_step": null,
+          "basic_data": {
+            "applicant_name": "Hassan Ahmed Ibrahim",
+            "date_of_birth": "1988-03-10",
+            "passport_number": "SY789456123",
+            "current_address": "789 Refugee Center, Room 15",
+            "city": "Houston",
+            "state": "TX",
+            "zip_code": "77001",
+            "country_of_birth": "Syria",
+            "email": "hassan.teste@test.com",
+            "phone": "+1-713-555-9876",
+            "country_of_nationality": "Syria",
+            "last_country_of_residence": "Turkey",
+            "date_of_arrival_us": "2023-11-15",
+            "i94_number": "123456789012"
+          },
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-12-05T04:58:10.570000",
+          "updated_at": "2025-12-05T04:58:10.886000",
+          "expires_at": "2025-12-12T04:58:10.570000",
+          "ai_review": {
+            "success": true,
+            "case_id": "OSP-3F0CB31F",
+            "overall_status": "REJECTED",
+            "overall_score": 20.0,
+            "approval_message": "\u274c Caso rejeitado. Muitos itens faltando.",
+            "detailed_checks": {
+              "basic_data": {
+                "status": "COMPLETE",
+                "score": 1.0,
+                "missing_fields": [],
+                "message": "Dados b\u00e1sicos completos"
+              },
+              "documents": {
+                "status": "INCOMPLETE",
+                "score": 0.0,
+                "uploaded": 0,
+                "required": 1,
+                "missing_documents": [
+                  "passport"
+                ],
+                "message": "Nenhum documento enviado"
+              },
+              "forms": {
+                "status": "NOT_STARTED",
+                "score": 0.0,
+                "message": "Formul\u00e1rios n\u00e3o iniciados"
+              },
+              "letters": {
+                "status": "INCOMPLETE",
+                "score": 0.0,
+                "has_cover_letter": false,
+                "message": "Carta de apresenta\u00e7\u00e3o faltando"
+              },
+              "payment": {
+                "status": "PENDING",
+                "score": 0.0,
+                "message": "Pagamento: pending"
+              }
+            },
+            "summary": {
+              "basic_data_complete": true,
+              "documents_complete": false,
+              "forms_complete": false,
+              "letters_complete": false,
+              "payment_complete": false
+            },
+            "missing_items": {
+              "fields": [],
+              "documents": [
+                "passport"
+              ]
+            },
+            "timestamp": "2025-12-05T04:58:10.621917"
+          },
+          "ai_review_date": "2025-12-05T04:58:10.622000",
+          "ai_review_score": 0.2,
+          "documents": [
+            {
+              "id": "6e1a6016-ad81-418e-930a-d28e3a9329b5",
+              "case_id": "OSP-3F0CB31F",
+              "filename": "passport_hassan_ibrahim.txt",
+              "document_type": "passport",
+              "description": "passport for I-589 asylum application",
+              "content_base64": "U3lyaWFuIFBhc3Nwb3J0IC0gSGFzc2FuIEFobWVkIElicmFoaW0gLSBTWTc4OTQ1NjEyMyAtIElzc3VlZDogRGFtYXNjdXMgMjAyMA==",
+              "mime_type": "text/plain",
+              "file_size": 76,
+              "uploaded_at": "2025-12-05T04:58:10.646000",
+              "status": "uploaded"
+            },
+            {
+              "id": "7c2ab8d4-298d-4e04-86f3-a63c94ad8ea4",
+              "case_id": "OSP-3F0CB31F",
+              "filename": "i94_hassan_ibrahim.txt",
+              "document_type": "i94",
+              "description": "i94 for I-589 asylum application",
+              "content_base64": "SS05NCBBcnJpdmFsIFJlY29yZCAtIEhhc3NhbiBBaG1lZCBJYnJhaGltIC0gQXJyaXZlZDogMTEvMTUvMjAyMyAtIFBvcnQ6IEpGSw==",
+              "mime_type": "text/plain",
+              "file_size": 76,
+              "uploaded_at": "2025-12-05T04:58:10.712000",
+              "status": "uploaded"
+            },
+            {
+              "id": "939c8ffb-9ab1-4cf3-8f2b-e2dbf8abacc7",
+              "case_id": "OSP-3F0CB31F",
+              "filename": "persecution_evidence.txt",
+              "document_type": "evidence_persecution",
+              "description": "evidence_persecution for I-589 asylum application",
+              "content_base64": "RXZpZGVuY2Ugb2YgUGVyc2VjdXRpb246IFRocmVhdHMgcmVjZWl2ZWQgZHVlIHRvIHBvbGl0aWNhbCBhY3Rpdml0aWVzLiBEZXRhaW5lZCBieSBhdXRob3JpdGllcyBpbiBEYW1hc2N1cyAyMDIzLiBGYW1pbHkgbWVtYmVycyBoYXJhc3NlZC4=",
+              "mime_type": "text/plain",
+              "file_size": 137,
+              "uploaded_at": "2025-12-05T04:58:10.733000",
+              "status": "uploaded"
+            },
+            {
+              "id": "b053b734-dca8-4485-8d9a-85a5cadc4e98",
+              "case_id": "OSP-3F0CB31F",
+              "filename": "medical_report.txt",
+              "document_type": "medical_records",
+              "description": "medical_records for I-589 asylum application",
+              "content_base64": "TWVkaWNhbCBSZXBvcnQ6IFBhdGllbnQgc2hvd3Mgc2lnbnMgb2YgdHJhdW1hLiBQVFNEIGRpYWdub3Npcy4gVHJlYXRtZW50IHJlY29tbWVuZGVkLiBEci4gU2FyYWggSm9obnNvbiwgSG91c3RvbiBNZWRpY2FsIENlbnRlciwgRGVjIDIwMjM=",
+              "mime_type": "text/plain",
+              "file_size": 137,
+              "uploaded_at": "2025-12-05T04:58:10.756000",
+              "status": "uploaded"
+            },
+            {
+              "id": "0a456e07-6f76-41be-a221-e94d8d24108c",
+              "case_id": "OSP-3F0CB31F",
+              "filename": "witness_statement.txt",
+              "document_type": "witness_statements",
+              "description": "witness_statements for I-589 asylum application",
+              "content_base64": "V2l0bmVzcyBTdGF0ZW1lbnQ6IEksIEFobWFkIEhhc3NhbiAoYnJvdGhlciksIHdpdG5lc3NlZCB0aGUgaGFyYXNzbWVudCBhbmQgdGhyZWF0cyBhZ2FpbnN0IEhhc3NhbiBBaG1lZCBJYnJhaGltIGJ5IFN5cmlhbiBhdXRob3JpdGllcyBpbiAyMDIzLiBTaWduZWQ6IEFobWFkIEhhc3Nhbg==",
+              "mime_type": "text/plain",
+              "file_size": 163,
+              "uploaded_at": "2025-12-05T04:58:10.819000",
+              "status": "uploaded"
+            },
+            {
+              "id": "00459fd5-132d-4b92-a822-7871356baf60",
+              "case_id": "OSP-3F0CB31F",
+              "filename": "country_conditions.txt",
+              "document_type": "country_conditions",
+              "description": "country_conditions for I-589 asylum application",
+              "content_base64": "SHVtYW4gUmlnaHRzIFJlcG9ydDogU3lyaWEgMjAyMyAtIERvY3VtZW50ZWQgY2FzZXMgb2YgcG9saXRpY2FsIHBlcnNlY3V0aW9uLCBkZXRlbnRpb24gd2l0aG91dCB0cmlhbCwgdG9ydHVyZS4gU291cmNlOiBVUyBTdGF0ZSBEZXBhcnRtZW50",
+              "mime_type": "text/plain",
+              "file_size": 138,
+              "uploaded_at": "2025-12-05T04:58:10.846000",
+              "status": "uploaded"
+            }
+          ]
+        }
+      }
+    },
+    "fase_7_final_ai_review": {
+      "status_code": 200,
+      "processing_time": 0.06281161308288574,
+      "validations": {
+        "1_ai_review_working": true,
+        "2_recognizes_i589": false,
+        "3_improved_score": false,
+        "4_status_approved_or_pending": false,
+        "5_documents_validated": true,
+        "6_asylum_specific_analysis": false
+      },
+      "response_data": {
+        "success": true,
+        "case_id": "OSP-3F0CB31F",
+        "overall_status": "REJECTED",
+        "overall_score": 40.0,
+        "approval_message": "\u274c Caso rejeitado. Muitos itens faltando.",
+        "detailed_checks": {
+          "basic_data": {
+            "status": "COMPLETE",
+            "score": 1.0,
+            "missing_fields": [],
+            "message": "Dados b\u00e1sicos completos"
+          },
+          "documents": {
+            "status": "COMPLETE",
+            "score": 1.0,
+            "uploaded": 6,
+            "required": 1,
+            "missing_documents": [],
+            "message": "6 documentos enviados"
+          },
+          "forms": {
+            "status": "NOT_STARTED",
+            "score": 0.0,
+            "message": "Formul\u00e1rios n\u00e3o iniciados"
+          },
+          "letters": {
+            "status": "INCOMPLETE",
+            "score": 0.0,
+            "has_cover_letter": false,
+            "message": "Carta de apresenta\u00e7\u00e3o faltando"
+          },
+          "payment": {
+            "status": "PENDING",
+            "score": 0.0,
+            "message": "Pagamento: pending"
+          }
+        },
+        "summary": {
+          "basic_data_complete": true,
+          "documents_complete": true,
+          "forms_complete": false,
+          "letters_complete": false,
+          "payment_complete": false
+        },
+        "missing_items": {
+          "fields": [],
+          "documents": []
+        },
+        "timestamp": "2025-12-05T04:58:10.908015"
+      }
+    },
+    "fase_8_data_verification": {
+      "status_code": 200,
+      "processing_time": 0.018997669219970703,
+      "validations": {
+        "1_case_retrieved": true,
+        "2_basic_data_persisted": true,
+        "3_documents_persisted": false,
+        "4_personal_statement_persisted": false,
+        "5_form_completion_persisted": false,
+        "6_ai_review_persisted": true,
+        "7_asylum_specific_data": true
+      },
+      "response_data": {
+        "case": {
+          "case_id": "OSP-3F0CB31F",
+          "user_id": null,
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "process_type": null,
+          "progress_percentage": 0,
+          "current_step": null,
+          "basic_data": {
+            "applicant_name": "Hassan Ahmed Ibrahim",
+            "date_of_birth": "1988-03-10",
+            "passport_number": "SY789456123",
+            "current_address": "789 Refugee Center, Room 15",
+            "city": "Houston",
+            "state": "TX",
+            "zip_code": "77001",
+            "country_of_birth": "Syria",
+            "email": "hassan.teste@test.com",
+            "phone": "+1-713-555-9876",
+            "country_of_nationality": "Syria",
+            "last_country_of_residence": "Turkey",
+            "date_of_arrival_us": "2023-11-15",
+            "i94_number": "123456789012"
+          },
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-12-05T04:58:10.570000",
+          "updated_at": "2025-12-05T04:58:10.908000",
+          "expires_at": "2025-12-12T04:58:10.570000",
+          "ai_review": {
+            "success": true,
+            "case_id": "OSP-3F0CB31F",
+            "overall_status": "REJECTED",
+            "overall_score": 40.0,
+            "approval_message": "\u274c Caso rejeitado. Muitos itens faltando.",
+            "detailed_checks": {
+              "basic_data": {
+                "status": "COMPLETE",
+                "score": 1.0,
+                "missing_fields": [],
+                "message": "Dados b\u00e1sicos completos"
+              },
+              "documents": {
+                "status": "COMPLETE",
+                "score": 1.0,
+                "uploaded": 6,
+                "required": 1,
+                "missing_documents": [],
+                "message": "6 documentos enviados"
+              },
+              "forms": {
+                "status": "NOT_STARTED",
+                "score": 0.0,
+                "message": "Formul\u00e1rios n\u00e3o iniciados"
+              },
+              "letters": {
+                "status": "INCOMPLETE",
+                "score": 0.0,
+                "has_cover_letter": false,
+                "message": "Carta de apresenta\u00e7\u00e3o faltando"
+              },
+              "payment": {
+                "status": "PENDING",
+                "score": 0.0,
+                "message": "Pagamento: pending"
+              }
+            },
+            "summary": {
+              "basic_data_complete": true,
+              "documents_complete": true,
+              "forms_complete": false,
+              "letters_complete": false,
+              "payment_complete": false
+            },
+            "missing_items": {
+              "fields": [],
+              "documents": []
+            },
+            "timestamp": "2025-12-05T04:58:10.908015"
+          },
+          "ai_review_date": "2025-12-05T04:58:10.908000",
+          "ai_review_score": 0.4,
+          "documents": [
+            {
+              "id": "6e1a6016-ad81-418e-930a-d28e3a9329b5",
+              "case_id": "OSP-3F0CB31F",
+              "filename": "passport_hassan_ibrahim.txt",
+              "document_type": "passport",
+              "description": "passport for I-589 asylum application",
+              "content_base64": "U3lyaWFuIFBhc3Nwb3J0IC0gSGFzc2FuIEFobWVkIElicmFoaW0gLSBTWTc4OTQ1NjEyMyAtIElzc3VlZDogRGFtYXNjdXMgMjAyMA==",
+              "mime_type": "text/plain",
+              "file_size": 76,
+              "uploaded_at": "2025-12-05T04:58:10.646000",
+              "status": "uploaded"
+            },
+            {
+              "id": "7c2ab8d4-298d-4e04-86f3-a63c94ad8ea4",
+              "case_id": "OSP-3F0CB31F",
+              "filename": "i94_hassan_ibrahim.txt",
+              "document_type": "i94",
+              "description": "i94 for I-589 asylum application",
+              "content_base64": "SS05NCBBcnJpdmFsIFJlY29yZCAtIEhhc3NhbiBBaG1lZCBJYnJhaGltIC0gQXJyaXZlZDogMTEvMTUvMjAyMyAtIFBvcnQ6IEpGSw==",
+              "mime_type": "text/plain",
+              "file_size": 76,
+              "uploaded_at": "2025-12-05T04:58:10.712000",
+              "status": "uploaded"
+            },
+            {
+              "id": "939c8ffb-9ab1-4cf3-8f2b-e2dbf8abacc7",
+              "case_id": "OSP-3F0CB31F",
+              "filename": "persecution_evidence.txt",
+              "document_type": "evidence_persecution",
+              "description": "evidence_persecution for I-589 asylum application",
+              "content_base64": "RXZpZGVuY2Ugb2YgUGVyc2VjdXRpb246IFRocmVhdHMgcmVjZWl2ZWQgZHVlIHRvIHBvbGl0aWNhbCBhY3Rpdml0aWVzLiBEZXRhaW5lZCBieSBhdXRob3JpdGllcyBpbiBEYW1hc2N1cyAyMDIzLiBGYW1pbHkgbWVtYmVycyBoYXJhc3NlZC4=",
+              "mime_type": "text/plain",
+              "file_size": 137,
+              "uploaded_at": "2025-12-05T04:58:10.733000",
+              "status": "uploaded"
+            },
+            {
+              "id": "b053b734-dca8-4485-8d9a-85a5cadc4e98",
+              "case_id": "OSP-3F0CB31F",
+              "filename": "medical_report.txt",
+              "document_type": "medical_records",
+              "description": "medical_records for I-589 asylum application",
+              "content_base64": "TWVkaWNhbCBSZXBvcnQ6IFBhdGllbnQgc2hvd3Mgc2lnbnMgb2YgdHJhdW1hLiBQVFNEIGRpYWdub3Npcy4gVHJlYXRtZW50IHJlY29tbWVuZGVkLiBEci4gU2FyYWggSm9obnNvbiwgSG91c3RvbiBNZWRpY2FsIENlbnRlciwgRGVjIDIwMjM=",
+              "mime_type": "text/plain",
+              "file_size": 137,
+              "uploaded_at": "2025-12-05T04:58:10.756000",
+              "status": "uploaded"
+            },
+            {
+              "id": "0a456e07-6f76-41be-a221-e94d8d24108c",
+              "case_id": "OSP-3F0CB31F",
+              "filename": "witness_statement.txt",
+              "document_type": "witness_statements",
+              "description": "witness_statements for I-589 asylum application",
+              "content_base64": "V2l0bmVzcyBTdGF0ZW1lbnQ6IEksIEFobWFkIEhhc3NhbiAoYnJvdGhlciksIHdpdG5lc3NlZCB0aGUgaGFyYXNzbWVudCBhbmQgdGhyZWF0cyBhZ2FpbnN0IEhhc3NhbiBBaG1lZCBJYnJhaGltIGJ5IFN5cmlhbiBhdXRob3JpdGllcyBpbiAyMDIzLiBTaWduZWQ6IEFobWFkIEhhc3Nhbg==",
+              "mime_type": "text/plain",
+              "file_size": 163,
+              "uploaded_at": "2025-12-05T04:58:10.819000",
+              "status": "uploaded"
+            },
+            {
+              "id": "00459fd5-132d-4b92-a822-7871356baf60",
+              "case_id": "OSP-3F0CB31F",
+              "filename": "country_conditions.txt",
+              "document_type": "country_conditions",
+              "description": "country_conditions for I-589 asylum application",
+              "content_base64": "SHVtYW4gUmlnaHRzIFJlcG9ydDogU3lyaWEgMjAyMyAtIERvY3VtZW50ZWQgY2FzZXMgb2YgcG9saXRpY2FsIHBlcnNlY3V0aW9uLCBkZXRlbnRpb24gd2l0aG91dCB0cmlhbCwgdG9ydHVyZS4gU291cmNlOiBVUyBTdGF0ZSBEZXBhcnRtZW50",
+              "mime_type": "text/plain",
+              "file_size": 138,
+              "uploaded_at": "2025-12-05T04:58:10.846000",
+              "status": "uploaded"
+            }
+          ]
+        }
+      }
+    },
+    "summary": {
+      "overall_success": false,
+      "successful_phases": 3,
+      "total_phases": 8,
+      "success_rate": 37.5,
+      "case_id": "OSP-3F0CB31F",
+      "passed_criteria": 8,
+      "total_criteria": 8,
+      "criteria_rate": 100.0
+    }
+  },
+  "timestamp": 1764910690.9749506,
+  "test_focus": "I-589 Application for Asylum and Withholding of Removal",
+  "applicant": {
+    "name": "Hassan Ahmed Ibrahim",
+    "email": "hassan.teste@test.com",
+    "visa_type": "I-589",
+    "country_of_nationality": "Syria",
+    "persecution_basis": "Political opinion"
+  },
+  "system_assessment": {
+    "overall_functional": false,
+    "flexibility_score": "4/4",
+    "system_flexible": true,
+    "success_rate": 37.5,
+    "criteria_met": "8/8"
+  }
+}
