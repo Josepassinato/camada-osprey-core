@@ -833,44 +833,48 @@ Dr. Sofia Martinez Chen"""
         else:
             print(f"  ❌ Fase {i+1}: {phase_name} (No data)")
     
-    # AI Review System Analysis
-    print(f"\n🤖 ANÁLISE DO SISTEMA DE IA DE REVISÃO:")
+    # EB-1A System Analysis
+    print(f"\n🤖 ANÁLISE DO SISTEMA EB-1A:")
     print("=" * 50)
     
-    # Check AI Review endpoints
-    ai_endpoints = results.get("fase_4_ai_review_endpoints", {})
-    working_ai_endpoints = sum(1 for result in ai_endpoints.values() if result.get("working", False))
-    total_ai_endpoints = len(ai_endpoints)
+    # Check document uploads
+    doc_uploads = results.get("fase_3_document_uploads", {})
+    successful_uploads = doc_uploads.get("successful_uploads", 0)
+    total_docs = doc_uploads.get("total_docs", 8)
     
-    print(f"📡 Endpoints de IA: {working_ai_endpoints}/{total_ai_endpoints} funcionando")
+    print(f"📄 Documentos EB-1A: {successful_uploads}/{total_docs} enviados")
     
-    # Check document validation
-    doc_validation = results.get("fase_5_document_validation", [])
-    working_validations = sum(1 for doc in doc_validation if doc.get("working", False))
-    total_validations = len(doc_validation)
+    # Check personal statement
+    personal_statement = results.get("fase_4_personal_statement", {})
+    statement_working = personal_statement.get("working", False)
     
-    print(f"📄 Validação de Documentos: {working_validations}/{total_validations} documentos validados")
+    print(f"📝 Personal Statement: {'✅' if statement_working else '❌'}")
     
-    # Check letter quality
-    letter_quality = results.get("fase_6_letter_quality", {})
-    letter_working = letter_quality.get("working", False)
-    letter_score = letter_quality.get("overall_quality", 0)
+    # Check EB-1A form
+    eb1a_form = results.get("fase_5_eb1a_form", {})
+    form_working = eb1a_form.get("working", False)
     
-    print(f"✍️  Qualidade de Cartas: {'✅' if letter_working else '❌'} (Score: {letter_score:.1f}%)")
+    print(f"📋 Formulário EB-1A: {'✅' if form_working else '❌'}")
     
-    # Check form verification
-    form_verification = results.get("fase_7_form_verification", {})
-    form_working = form_verification.get("working", False)
-    form_completion = form_verification.get("completion_rate", 0)
+    # Check AI Review
+    ai_review = results.get("fase_6_ai_review", {})
+    ai_working = ai_review.get("working", False)
+    ai_score = ai_review.get("response_data", {}).get("overall_score", 0)
     
-    print(f"📋 Verificação de Formulário: {'✅' if form_working else '❌'} (Completude: {form_completion:.1f}%)")
+    print(f"🤖 AI Review EB-1A: {'✅' if ai_working else '❌'} (Score: {ai_score}%)")
     
-    # Check USCIS compliance
-    uscis_compliance = results.get("fase_8_uscis_compliance", {})
-    uscis_working = uscis_compliance.get("working", False)
-    uscis_score = uscis_compliance.get("compliance_score", 0)
+    # Check persistence
+    persistence = results.get("fase_7_persistence_verification", {})
+    persistence_working = persistence.get("working", False)
     
-    print(f"⚖️  Conformidade USCIS: {'✅' if uscis_working else '❌'} (Score: {uscis_score:.1f}%)")
+    print(f"💾 Persistência: {'✅' if persistence_working else '❌'}")
+    
+    # Check system adaptation
+    system_comparison = results.get("fase_8_system_comparison", {})
+    adaptation_score = system_comparison.get("adaptation_score", 0)
+    adaptation_working = system_comparison.get("working", False)
+    
+    print(f"🔄 Adaptação do Sistema: {'✅' if adaptation_working else '❌'} (Score: {adaptation_score:.1f}%)")
     
     overall_success = success_rate >= 70  # Consider success if 70% or more phases completed
     
