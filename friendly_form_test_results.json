@@ -3,11 +3,11 @@
     "phase1_endpoint_test": {
       "case_creation": {
         "success": true,
-        "case_id": "OSP-0799B071",
+        "case_id": "OSP-902EB214",
         "response": {
           "message": "Auto-application case created successfully",
           "case": {
-            "case_id": "OSP-0799B071",
+            "case_id": "OSP-902EB214",
             "user_id": null,
             "session_token": null,
             "form_code": "I-539",
@@ -31,15 +31,15 @@
             "final_package_generated": false,
             "final_package_url": null,
             "completed_at": null,
-            "created_at": "2025-12-05T06:25:11.730454",
-            "updated_at": "2025-12-05T06:25:11.730455",
-            "expires_at": "2025-12-12T06:25:11.730397"
+            "created_at": "2025-12-05T06:26:58.747489",
+            "updated_at": "2025-12-05T06:26:58.747490",
+            "expires_at": "2025-12-12T06:26:58.747424"
           }
         }
       },
       "complete_data": {
         "status_code": 200,
-        "processing_time": 0.02097010612487793,
+        "processing_time": 0.02534651756286621,
         "validations": {
           "validation_status_present": true,
           "completion_percentage_present": true,
@@ -49,7 +49,7 @@
         },
         "response_data": {
           "success": true,
-          "case_id": "OSP-0799B071",
+          "case_id": "OSP-902EB214",
           "validation_status": "needs_review",
           "completion_percentage": 60,
           "message": "\u26a0\ufe0f Seu formul\u00e1rio est\u00e1 60% completo. Por favor, revise as informa\u00e7\u00f5es destacadas abaixo.",
@@ -86,7 +86,7 @@
     "phase2_ai_validation": {
       "incomplete_data": {
         "status_code": 200,
-        "processing_time": 0.018593311309814453,
+        "processing_time": 0.025644779205322266,
         "validations": {
           "status_rejected_or_needs_review": true,
           "completion_below_70": true,
@@ -95,7 +95,7 @@
         },
         "response_data": {
           "success": true,
-          "case_id": "OSP-D0C7DDFA",
+          "case_id": "OSP-DFBDF10C",
           "validation_status": "needs_review",
           "completion_percentage": 60,
           "message": "\u26a0\ufe0f Seu formul\u00e1rio est\u00e1 60% completo. Por favor, revise as informa\u00e7\u00f5es destacadas abaixo.",
@@ -111,10 +111,24 @@
     },
     "phase3_pdf_integration": {
       "form_generation": {
-        "status_code": 500,
-        "processing_time": 0.017203092575073242,
-        "error": "{\"detail\":\"Error generating form: 'FormFillerAgent' object has no attribute 'fill_i539'\"}",
-        "working": false
+        "status_code": 200,
+        "processing_time": 0.4481232166290283,
+        "validations": {
+          "success_true": true,
+          "form_type_i539": true,
+          "filename_present": true,
+          "file_size_positive": true
+        },
+        "response_data": {
+          "success": true,
+          "message": "USCIS form generated successfully",
+          "case_id": "OSP-902EB214",
+          "form_type": "I-539",
+          "filename": "I-539_OSP-902EB214.pdf",
+          "file_size": 337970,
+          "download_url": "/api/case/OSP-902EB214/download-form"
+        },
+        "working": true
       },
       "data_usage": {
         "validations": {
@@ -214,21 +228,21 @@
         "phase1_endpoint": false,
         "phase1_persistence": true,
         "phase2_ai_validation": false,
-        "phase3_pdf_generation": false,
+        "phase3_pdf_generation": true,
         "phase3_data_usage": false,
         "phase4_field_mapping": true
       },
-      "successful_phases": 2,
+      "successful_phases": 3,
       "total_phases": 6,
-      "overall_success_rate": 33.33333333333333,
+      "overall_success_rate": 50.0,
       "system_ready": false,
       "test_cases_used": [
-        "OSP-0799B071",
-        "OSP-D0C7DDFA"
+        "OSP-902EB214",
+        "OSP-DFBDF10C"
       ]
     }
   },
-  "timestamp": 1764915911.867015,
+  "timestamp": 1764916019.3350625,
   "test_focus": "Friendly Form Complete Flow Testing",
   "phases_tested": [
     "Phase 1: Friendly Form Endpoint",
