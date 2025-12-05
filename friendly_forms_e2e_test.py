@@ -383,10 +383,10 @@ def test_phase_2_f1_complete_flow():
     print("-" * 60)
     
     try:
-        print(f"🔗 Endpoint: GET {API_BASE}/case/{case_id}/download-form/I-539")
+        print(f"🔗 Endpoint: GET {API_BASE}/case/{case_id}/download-form")
         
         response = requests.get(
-            f"{API_BASE}/case/{case_id}/download-form/I-539",
+            f"{API_BASE}/case/{case_id}/download-form",
             timeout=60
         )
         
