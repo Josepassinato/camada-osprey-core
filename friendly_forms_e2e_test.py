@@ -168,7 +168,7 @@ def test_phase_2_f1_complete_flow():
         print(f"🔗 Endpoint: POST {API_BASE}/auto-application/start")
         
         case_data = {
-            "form_code": "F-1",
+            "form_code": "I-539",
             "process_type": "extension"
         }
         
