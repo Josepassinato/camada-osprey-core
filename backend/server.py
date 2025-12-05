@@ -2949,6 +2949,7 @@ async def comprehensive_ai_review(case_id: str):
         required_docs = {
             "I-539": ["passport", "i94", "current_visa", "i20_or_ds2019", "financial_evidence"],
             "I-589": ["passport", "i94", "evidence_persecution", "medical_records", "witness_statements", "country_conditions"],
+            "EB-1A": ["passport", "awards", "publications", "memberships", "expert_letters", "high_salary", "press_coverage", "judging_work"],
             "F-1": ["passport", "i20", "school_acceptance", "financial_evidence"],
             "H-1B": ["passport", "lca", "diploma", "resume", "support_letter"]
         }
