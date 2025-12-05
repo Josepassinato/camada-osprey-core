@@ -104,9 +104,20 @@ def test_uscis_form_generation_system():
     print("\n📋 STEP 2: Test Form Generation for All 3 Visa Types")
     print("-" * 50)
     
-    try:
-        print("🔍 Testing EB-1A AI Review System After Corrections...")
-        print(f"🔗 Endpoint: GET {API_BASE}/case/{case_id}/ai-review")
+    for test_case in test_cases:
+        case_name = test_case["name"]
+        case_id = test_case["case_id"]
+        expected_form = test_case["expected_form"]
+        min_file_size = test_case["min_file_size"]
+        result_key = test_case["key"]
+        
+        print(f"\n🔍 Testing {case_name} - Case {case_id}")
+        print("-" * 40)
+        
+        # Test form generation
+        try:
+            print(f"📝 Generating {expected_form} form...")
+            print(f"🔗 Endpoint: POST {API_BASE}/case/{case_id}/generate-form")
         
         start_time = time.time()
         response = requests.get(
