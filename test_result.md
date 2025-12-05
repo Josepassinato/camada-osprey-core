@@ -1421,9 +1421,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Google OAuth Button Testing - Login and Signup Pages"
+    - "EB-1A Extraordinary Ability Visa System Testing"
   stuck_tasks:
-    - "Agente Coruja - Frontend Implementation"
+    - "AI Review EB-1A Specific Recognition"
   test_all: false
   test_priority: "high_first"
 
