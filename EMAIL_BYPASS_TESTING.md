@@ -11,11 +11,11 @@ Sistema de bypass de email para facilitar testes durante o desenvolvimento, simi
 ```env
 # Testing Mode - Email Bypass
 EMAIL_BYPASS_FOR_TESTING=TRUE
-TEST_EMAIL_DOMAIN=test.local
+TEST_EMAIL_DOMAIN=test.com
 ```
 
 - **EMAIL_BYPASS_FOR_TESTING**: `TRUE` para ativar, `FALSE` para desativar
-- **TEST_EMAIL_DOMAIN**: Domínio dos emails de teste (padrão: `test.local`)
+- **TEST_EMAIL_DOMAIN**: Domínio dos emails de teste (padrão: `test.com`)
 
 ## Como Usar
 
