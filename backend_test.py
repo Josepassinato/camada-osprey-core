@@ -35,15 +35,17 @@ def test_enhanced_ai_validation_system():
     - TEST 5: MongoDB persistence verification
     """
     
-    print("🎯 TESTE COMPLETO - SISTEMA DE GERAÇÃO DE FORMULÁRIOS USCIS")
-    print("📋 Testing 3 visa types: I-539, I-589, EB-1A")
-    print("🎯 Focus: Form generation and download functionality")
-    print("=" * 60)
+    print("🎯 TESTE COMPLETO DA VALIDAÇÃO IA MELHORADA")
+    print("📋 Testing enhanced AI validation system with two-stage validation")
+    print("🎯 Focus: Programmatic + AI validation, format checks, completeness calculation")
+    print("=" * 80)
     
     results = {
-        "i539_extension": {},
-        "i589_asylum": {},
-        "eb1a_extraordinary": {},
+        "test1_complete_data": {},
+        "test2_partial_data": {},
+        "test3_format_errors": {},
+        "test4_issues_verification": {},
+        "test5_mongodb_persistence": {},
         "summary": {}
     }
     
