@@ -545,16 +545,13 @@ def test_additional_eb1a_endpoints():
     return additional_results
 
 if __name__ == "__main__":
-    print("🚀 INICIANDO TESTE COMPLETO EB-1A EXTRAORDINARY ABILITY VISA - DR. SOFIA MARTINEZ CHEN")
+    print("🚀 INICIANDO TESTE COMPLETO - SISTEMA DE GERAÇÃO DE FORMULÁRIOS USCIS")
     print(f"🌐 Backend URL: {BACKEND_URL}")
     print(f"🔗 API Base: {API_BASE}")
     print(f"⏰ Timestamp: {datetime.now().isoformat()}")
     
-    # Main test - EB-1A Extraordinary Ability System as requested
-    main_results = test_eb1a_extraordinary_ability_system()
-    
-    # Additional tests for context
-    additional_results = test_additional_eb1a_endpoints()
+    # Execute main test
+    test_results = test_uscis_form_generation_system()
     
     # Final summary
     print("\n" + "=" * 80)
