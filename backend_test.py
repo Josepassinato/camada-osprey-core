@@ -1014,16 +1014,16 @@ def test_additional_eb1a_endpoints():
     return additional_results
 
 if __name__ == "__main__":
-    print("🚀 INICIANDO TESTE COMPLETO I-539 AI REVIEW SYSTEM - CARLOS EDUARDO SILVA MENDES")
+    print("🚀 INICIANDO TESTE COMPLETO EB-1A EXTRAORDINARY ABILITY VISA - DR. SOFIA MARTINEZ CHEN")
     print(f"🌐 Backend URL: {BACKEND_URL}")
     print(f"🔗 API Base: {API_BASE}")
     print(f"⏰ Timestamp: {datetime.now().isoformat()}")
     
-    # Main test - I-539 AI Review System as requested
-    main_results = test_i539_ai_review_system()
+    # Main test - EB-1A Extraordinary Ability System as requested
+    main_results = test_eb1a_extraordinary_ability_system()
     
     # Additional tests for context
-    additional_results = test_additional_i539_endpoints()
+    additional_results = test_additional_eb1a_endpoints()
     
     # Final summary
     print("\n" + "=" * 80)
