@@ -290,19 +290,56 @@ class USCISFormFiller:
         
         return mapping
     
-    def _get_i589_mapping(self, basic_data: Dict[str, Any], letters: Dict[str, Any]) -> Dict[str, str]:
-        """Map case data to I-589 form fields"""
+    def _get_i589_mapping(self, basic_data: Dict[str, Any], simplified_form: Dict[str, Any], letters: Dict[str, Any]) -> Dict[str, str]:
+        """
+        Map case data to I-589 form fields
+        Now uses BOTH basic_data and simplified_form_responses (friendly form)
+        """
         
-        # Parse name
-        full_name = basic_data.get("applicant_name", "")
+        # Use simplified_form if available
+        if simplified_form is None:
+            simplified_form = {}
+        
+        # Parse name - try friendly form first
+        full_name = (
+            simplified_form.get("nome_completo") or 
+            simplified_form.get("nome") or 
+            basic_data.get("applicant_name", "")
+        )
         name_parts = full_name.split(" ")
         family_name = name_parts[-1] if name_parts else ""
         first_name = name_parts[0] if len(name_parts) > 0 else ""
         middle_name = " ".join(name_parts[1:-1]) if len(name_parts) > 2 else ""
         
-        # Parse dates
-        dob = basic_data.get("date_of_birth", "")
-        arrival_date = basic_data.get("date_of_arrival_us", "")
+        # Parse dates - try friendly form first
+        dob = (
+            simplified_form.get("data_nascimento") or 
+            basic_data.get("date_of_birth", "")
+        )
+        arrival_date = (
+            simplified_form.get("data_chegada_eua") or 
+            basic_data.get("date_of_arrival_us", "")
+        )
+        
+        # Country information - try friendly form first
+        country_of_birth = (
+            simplified_form.get("pais_nascimento") or 
+            basic_data.get("country_of_birth", "")
+        )
+        nationality = (
+            simplified_form.get("nacionalidade") or 
+            basic_data.get("country_of_nationality", country_of_birth)
+        )
+        
+        # Document numbers - try friendly form first
+        passport = (
+            simplified_form.get("numero_passaporte") or 
+            basic_data.get("passport_number", "")
+        )
+        i94_number = (
+            simplified_form.get("numero_i94") or 
+            basic_data.get("i94_number", "")
+        )
         
         mapping = {
             # Part A: Information About You
@@ -310,10 +347,10 @@ class USCISFormFiller:
             "PartA_FirstName": first_name,
             "PartA_MiddleName": middle_name,
             "PartA_DateOfBirth": dob,
-            "PartA_CountryOfBirth": basic_data.get("country_of_birth", ""),
-            "PartA_Nationality": basic_data.get("country_of_nationality", basic_data.get("country_of_birth", "")),
-            "PartA_PassportNumber": basic_data.get("passport_number", ""),
-            "PartA_I94Number": basic_data.get("i94_number", ""),
+            "PartA_CountryOfBirth": country_of_birth,
+            "PartA_Nationality": nationality,
+            "PartA_PassportNumber": passport,
+            "PartA_I94Number": i94_number,
             "PartA_DateOfArrival": arrival_date,
             "PartA_CurrentAddress": basic_data.get("current_address", ""),
             "PartA_City": basic_data.get("city", ""),
