@@ -40,25 +40,20 @@ def test_eb1a_ai_review_after_corrections():
     - ✅ Letters score = 0.90 (petition letter > 500 chars)
     """
     
-    print("🎯 TESTE COMPLETO EB-1A - EXTRAORDINARY ABILITY VISA")
-    print("👩‍🔬 Applicant: Dr. Sofia Martinez Chen")
-    print("📋 Process: EB-1A Extraordinary Ability")
+    print("🎯 TESTE EB-1A APÓS CORREÇÕES - VALIDAÇÃO FINAL")
+    print("📋 Case ID: OSP-8731E45D (existing case)")
+    print("🎯 Focus: AI Review System After Corrections")
     print("=" * 60)
     
     results = {
-        "fase_1_case_creation": {},
-        "fase_2_basic_data": {},
-        "fase_3_document_uploads": {},
-        "fase_4_personal_statement": {},
-        "fase_5_eb1a_form": {},
-        "fase_6_ai_review": {},
-        "fase_7_persistence_verification": {},
-        "fase_8_system_comparison": {},
+        "case_verification": {},
+        "ai_review_test": {},
+        "comparison_before_after": {},
         "summary": {}
     }
     
-    # Global variables for the flow
-    case_id = None
+    # Use existing case ID from review request
+    case_id = "OSP-8731E45D"
     
     # FASE 1: Criar caso EB-1A
     print("\n📋 FASE 1: Criação de Caso EB-1A")
