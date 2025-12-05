@@ -1,0 +1,706 @@
+{
+  "main_results": {
+    "fase_1_case_creation": {
+      "status_code": 200,
+      "processing_time": 0.058277130126953125,
+      "validations": {
+        "1_case_created": true,
+        "2_case_id_format": true,
+        "3_i589_visa_type": false,
+        "4_response_success": true
+      },
+      "response_data": {
+        "message": "Auto-application case created successfully",
+        "case": {
+          "case_id": "OSP-10CCBCAE",
+          "user_id": null,
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "process_type": null,
+          "progress_percentage": 0,
+          "current_step": null,
+          "basic_data": null,
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-12-05T05:07:51.316322",
+          "updated_at": "2025-12-05T05:07:51.316323",
+          "expires_at": "2025-12-12T05:07:51.316245"
+        }
+      },
+      "case_id": "OSP-10CCBCAE"
+    },
+    "fase_2_basic_data": {
+      "status_code": 200,
+      "processing_time": 0.0270082950592041,
+      "validations": {
+        "1_case_updated": true,
+        "2_basic_data_saved": true,
+        "3_applicant_name_correct": true,
+        "4_afghanistan_country": true
+      },
+      "response_data": {
+        "message": "Case updated successfully",
+        "case": {
+          "case_id": "OSP-10CCBCAE",
+          "user_id": null,
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "process_type": null,
+          "progress_percentage": 0,
+          "current_step": null,
+          "basic_data": {
+            "applicant_name": "Omar Hassan Ali",
+            "date_of_birth": "1990-07-15",
+            "passport_number": "AF456789123",
+            "current_address": "456 Asylum Center, Room 10",
+            "city": "Los Angeles",
+            "state": "CA",
+            "zip_code": "90001",
+            "country_of_birth": "Afghanistan",
+            "email": "omar.teste@test.com",
+            "phone": "+1-323-555-1234"
+          },
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-12-05T05:07:51.316000",
+          "updated_at": "2025-12-05T05:07:51.342000",
+          "expires_at": "2025-12-12T05:07:51.316000"
+        }
+      }
+    },
+    "fase_3_document_uploads": {
+      "uploaded_docs": [
+        {
+          "filename": "passport.txt",
+          "document_type": "passport",
+          "document_id": "d46720dd-4891-4351-9cda-937dbc61b3f3",
+          "status": "uploaded"
+        },
+        {
+          "filename": "i94.txt",
+          "document_type": "i94",
+          "document_id": "e8ae403f-d63f-4a2a-b82b-56a635703f80",
+          "status": "uploaded"
+        },
+        {
+          "filename": "persecution.txt",
+          "document_type": "evidence_persecution",
+          "document_id": "aa8e37cf-ac27-4125-a3f7-86e0c3fc4463",
+          "status": "uploaded"
+        },
+        {
+          "filename": "medical.txt",
+          "document_type": "medical_records",
+          "document_id": "d03603dd-f6a0-405c-8240-4f0a624e8656",
+          "status": "uploaded"
+        },
+        {
+          "filename": "witness.txt",
+          "document_type": "witness_statements",
+          "document_id": "4be6a0eb-69a6-45e2-b8ca-84651e48b384",
+          "status": "uploaded"
+        },
+        {
+          "filename": "country.txt",
+          "document_type": "country_conditions",
+          "document_id": "973b7130-f24c-4b6e-9635-8753f4588f44",
+          "status": "uploaded"
+        }
+      ],
+      "total_docs": 6,
+      "successful_uploads": 6
+    },
+    "fase_4_personal_statement": {
+      "status_code": 200,
+      "processing_time": 0.022907018661499023,
+      "validations": {
+        "1_status_200_ok": true,
+        "2_letters_field_accepted": true,
+        "3_cover_letter_content": true,
+        "4_asylum_specific_content": true
+      },
+      "response_data": {
+        "message": "Case updated successfully",
+        "case": {
+          "case_id": "OSP-10CCBCAE",
+          "user_id": null,
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "process_type": null,
+          "progress_percentage": 0,
+          "current_step": null,
+          "basic_data": {
+            "applicant_name": "Omar Hassan Ali",
+            "date_of_birth": "1990-07-15",
+            "passport_number": "AF456789123",
+            "current_address": "456 Asylum Center, Room 10",
+            "city": "Los Angeles",
+            "state": "CA",
+            "zip_code": "90001",
+            "country_of_birth": "Afghanistan",
+            "email": "omar.teste@test.com",
+            "phone": "+1-323-555-1234"
+          },
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-12-05T05:07:51.316000",
+          "updated_at": "2025-12-05T05:07:51.589000",
+          "expires_at": "2025-12-12T05:07:51.316000",
+          "documents": [
+            {
+              "id": "d46720dd-4891-4351-9cda-937dbc61b3f3",
+              "case_id": "OSP-10CCBCAE",
+              "filename": "passport.txt",
+              "document_type": "passport",
+              "description": null,
+              "content_base64": "QWZnaGFuaXN0YW4gUGFzc3BvcnQgLSBPbWFyIEhhc3NhbiBBbGkgLSBBRjQ1Njc4OTEyMw==",
+              "mime_type": "text/plain",
+              "file_size": 52,
+              "uploaded_at": "2025-12-05T05:07:51.364000",
+              "status": "uploaded"
+            },
+            {
+              "id": "e8ae403f-d63f-4a2a-b82b-56a635703f80",
+              "case_id": "OSP-10CCBCAE",
+              "filename": "i94.txt",
+              "document_type": "i94",
+              "description": null,
+              "content_base64": "SS05NCBSZWNvcmQgLSBPbWFyIEhhc3NhbiBBbGkgLSBBcnJpdmVkIDIwMjQtMDEtMTA=",
+              "mime_type": "text/plain",
+              "file_size": 50,
+              "uploaded_at": "2025-12-05T05:07:51.392000",
+              "status": "uploaded"
+            },
+            {
+              "id": "aa8e37cf-ac27-4125-a3f7-86e0c3fc4463",
+              "case_id": "OSP-10CCBCAE",
+              "filename": "persecution.txt",
+              "document_type": "evidence_persecution",
+              "description": null,
+              "content_base64": "RXZpZGVuY2U6IFRhbGliYW4gdGhyZWF0cyBkdWUgdG8gd29yayB3aXRoIFVTIGZvcmNlcy4gRmFtaWx5IG1lbWJlcnMgdGFyZ2V0ZWQu",
+              "mime_type": "text/plain",
+              "file_size": 78,
+              "uploaded_at": "2025-12-05T05:07:51.413000",
+              "status": "uploaded"
+            },
+            {
+              "id": "d03603dd-f6a0-405c-8240-4f0a624e8656",
+              "case_id": "OSP-10CCBCAE",
+              "filename": "medical.txt",
+              "document_type": "medical_records",
+              "description": null,
+              "content_base64": "TWVkaWNhbCBSZWNvcmRzOiBQVFNEIGRpYWdub3Npcy4gU2NhcnMgZnJvbSB0b3J0dXJlLiBEci4gU21pdGgsIFVDTEEgTWVkaWNhbA==",
+              "mime_type": "text/plain",
+              "file_size": 76,
+              "uploaded_at": "2025-12-05T05:07:51.481000",
+              "status": "uploaded"
+            },
+            {
+              "id": "4be6a0eb-69a6-45e2-b8ca-84651e48b384",
+              "case_id": "OSP-10CCBCAE",
+              "filename": "witness.txt",
+              "document_type": "witness_statements",
+              "description": null,
+              "content_base64": "V2l0bmVzczogQWhtYWQgKGNvbGxlYWd1ZSkgY29uZmlybXMgdGhyZWF0cyBhbmQgcGVyc2VjdXRpb24gYnkgVGFsaWJhbiAyMDIz",
+              "mime_type": "text/plain",
+              "file_size": 75,
+              "uploaded_at": "2025-12-05T05:07:51.502000",
+              "status": "uploaded"
+            },
+            {
+              "id": "973b7130-f24c-4b6e-9635-8753f4588f44",
+              "case_id": "OSP-10CCBCAE",
+              "filename": "country.txt",
+              "document_type": "country_conditions",
+              "description": null,
+              "content_base64": "Q291bnRyeSBSZXBvcnQ6IEFmZ2hhbmlzdGFuIDIwMjQgLSBUYWxpYmFuIHBlcnNlY3V0aW9uIG9mIGZvcm1lciBpbnRlcnByZXRlcnMgZG9jdW1lbnRlZA==",
+              "mime_type": "text/plain",
+              "file_size": 88,
+              "uploaded_at": "2025-12-05T05:07:51.524000",
+              "status": "uploaded"
+            }
+          ],
+          "letters": {
+            "cover_letter": "To the Asylum Officer,\n\nMy name is Omar Hassan Ali, and I am applying for asylum in the United States because I fear persecution in Afghanistan due to my work as an interpreter for US military forces from 2018-2021.\n\nDuring my time as an interpreter, I assisted US soldiers in combat zones. After US withdrawal, the Taliban targeted me and my family. In August 2023, Taliban members came to my home and threatened to kill me for being a traitor. My brother was kidnapped and tortured. I received multiple death threats.\n\nI fled Afghanistan in December 2023 and arrived in the US on January 10, 2024. I cannot return to Afghanistan as I fear for my life. The Taliban has a list of interpreters and actively hunts us down.\n\nI have medical records showing PTSD and physical scars from torture. I have witness statements from colleagues who faced similar persecution. Country conditions reports document Taliban violence against interpreters.\n\nI respectfully request asylum in the United States.\n\nSincerely,\nOmar Hassan Ali"
+          }
+        }
+      },
+      "correction_1_working": true
+    },
+    "fase_5_form_completion": {
+      "status_code": 200,
+      "processing_time": 0.020964622497558594,
+      "validations": {
+        "1_status_200_ok": true,
+        "2_forms_field_accepted": true,
+        "3_i589_form_data": true,
+        "4_sections_completed": true
+      },
+      "response_data": {
+        "message": "Case updated successfully",
+        "case": {
+          "case_id": "OSP-10CCBCAE",
+          "user_id": null,
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "process_type": null,
+          "progress_percentage": 0,
+          "current_step": null,
+          "basic_data": {
+            "applicant_name": "Omar Hassan Ali",
+            "date_of_birth": "1990-07-15",
+            "passport_number": "AF456789123",
+            "current_address": "456 Asylum Center, Room 10",
+            "city": "Los Angeles",
+            "state": "CA",
+            "zip_code": "90001",
+            "country_of_birth": "Afghanistan",
+            "email": "omar.teste@test.com",
+            "phone": "+1-323-555-1234"
+          },
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-12-05T05:07:51.316000",
+          "updated_at": "2025-12-05T05:07:51.611000",
+          "expires_at": "2025-12-12T05:07:51.316000",
+          "documents": [
+            {
+              "id": "d46720dd-4891-4351-9cda-937dbc61b3f3",
+              "case_id": "OSP-10CCBCAE",
+              "filename": "passport.txt",
+              "document_type": "passport",
+              "description": null,
+              "content_base64": "QWZnaGFuaXN0YW4gUGFzc3BvcnQgLSBPbWFyIEhhc3NhbiBBbGkgLSBBRjQ1Njc4OTEyMw==",
+              "mime_type": "text/plain",
+              "file_size": 52,
+              "uploaded_at": "2025-12-05T05:07:51.364000",
+              "status": "uploaded"
+            },
+            {
+              "id": "e8ae403f-d63f-4a2a-b82b-56a635703f80",
+              "case_id": "OSP-10CCBCAE",
+              "filename": "i94.txt",
+              "document_type": "i94",
+              "description": null,
+              "content_base64": "SS05NCBSZWNvcmQgLSBPbWFyIEhhc3NhbiBBbGkgLSBBcnJpdmVkIDIwMjQtMDEtMTA=",
+              "mime_type": "text/plain",
+              "file_size": 50,
+              "uploaded_at": "2025-12-05T05:07:51.392000",
+              "status": "uploaded"
+            },
+            {
+              "id": "aa8e37cf-ac27-4125-a3f7-86e0c3fc4463",
+              "case_id": "OSP-10CCBCAE",
+              "filename": "persecution.txt",
+              "document_type": "evidence_persecution",
+              "description": null,
+              "content_base64": "RXZpZGVuY2U6IFRhbGliYW4gdGhyZWF0cyBkdWUgdG8gd29yayB3aXRoIFVTIGZvcmNlcy4gRmFtaWx5IG1lbWJlcnMgdGFyZ2V0ZWQu",
+              "mime_type": "text/plain",
+              "file_size": 78,
+              "uploaded_at": "2025-12-05T05:07:51.413000",
+              "status": "uploaded"
+            },
+            {
+              "id": "d03603dd-f6a0-405c-8240-4f0a624e8656",
+              "case_id": "OSP-10CCBCAE",
+              "filename": "medical.txt",
+              "document_type": "medical_records",
+              "description": null,
+              "content_base64": "TWVkaWNhbCBSZWNvcmRzOiBQVFNEIGRpYWdub3Npcy4gU2NhcnMgZnJvbSB0b3J0dXJlLiBEci4gU21pdGgsIFVDTEEgTWVkaWNhbA==",
+              "mime_type": "text/plain",
+              "file_size": 76,
+              "uploaded_at": "2025-12-05T05:07:51.481000",
+              "status": "uploaded"
+            },
+            {
+              "id": "4be6a0eb-69a6-45e2-b8ca-84651e48b384",
+              "case_id": "OSP-10CCBCAE",
+              "filename": "witness.txt",
+              "document_type": "witness_statements",
+              "description": null,
+              "content_base64": "V2l0bmVzczogQWhtYWQgKGNvbGxlYWd1ZSkgY29uZmlybXMgdGhyZWF0cyBhbmQgcGVyc2VjdXRpb24gYnkgVGFsaWJhbiAyMDIz",
+              "mime_type": "text/plain",
+              "file_size": 75,
+              "uploaded_at": "2025-12-05T05:07:51.502000",
+              "status": "uploaded"
+            },
+            {
+              "id": "973b7130-f24c-4b6e-9635-8753f4588f44",
+              "case_id": "OSP-10CCBCAE",
+              "filename": "country.txt",
+              "document_type": "country_conditions",
+              "description": null,
+              "content_base64": "Q291bnRyeSBSZXBvcnQ6IEFmZ2hhbmlzdGFuIDIwMjQgLSBUYWxpYmFuIHBlcnNlY3V0aW9uIG9mIGZvcm1lciBpbnRlcnByZXRlcnMgZG9jdW1lbnRlZA==",
+              "mime_type": "text/plain",
+              "file_size": 88,
+              "uploaded_at": "2025-12-05T05:07:51.524000",
+              "status": "uploaded"
+            }
+          ],
+          "letters": {
+            "cover_letter": "To the Asylum Officer,\n\nMy name is Omar Hassan Ali, and I am applying for asylum in the United States because I fear persecution in Afghanistan due to my work as an interpreter for US military forces from 2018-2021.\n\nDuring my time as an interpreter, I assisted US soldiers in combat zones. After US withdrawal, the Taliban targeted me and my family. In August 2023, Taliban members came to my home and threatened to kill me for being a traitor. My brother was kidnapped and tortured. I received multiple death threats.\n\nI fled Afghanistan in December 2023 and arrived in the US on January 10, 2024. I cannot return to Afghanistan as I fear for my life. The Taliban has a list of interpreters and actively hunts us down.\n\nI have medical records showing PTSD and physical scars from torture. I have witness statements from colleagues who faced similar persecution. Country conditions reports document Taliban violence against interpreters.\n\nI respectfully request asylum in the United States.\n\nSincerely,\nOmar Hassan Ali"
+          },
+          "forms": {
+            "i589": {
+              "completed": true,
+              "completion_date": "2024-12-04",
+              "sections_completed": [
+                "Part A: Information About You",
+                "Part B: Information About Your Spouse and Children",
+                "Part C: Additional Information About Your Application",
+                "Part D: Your Signature"
+              ]
+            }
+          }
+        }
+      },
+      "correction_2_working": true
+    },
+    "fase_6_ai_review_i589": {
+      "status_code": 200,
+      "processing_time": 0.021638870239257812,
+      "validations": {
+        "1_recognizes_i589": false,
+        "2_asylum_requirements": false,
+        "3_high_score": false,
+        "4_approved_status": false,
+        "5_asylum_message": false
+      },
+      "response_data": {
+        "success": true,
+        "case_id": "OSP-10CCBCAE",
+        "overall_status": "PENDING",
+        "overall_score": 75.0,
+        "approval_message": "\u26a0\ufe0f Caso pendente. Alguns itens precisam de aten\u00e7\u00e3o.",
+        "detailed_checks": {
+          "basic_data": {
+            "status": "COMPLETE",
+            "score": 1.0,
+            "missing_fields": [],
+            "message": "Dados b\u00e1sicos completos"
+          },
+          "documents": {
+            "status": "COMPLETE",
+            "score": 1.0,
+            "uploaded": 6,
+            "required": 1,
+            "missing_documents": [],
+            "message": "6 documentos enviados"
+          },
+          "forms": {
+            "status": "COMPLETE",
+            "score": 1.0,
+            "message": "Formul\u00e1rios preenchidos"
+          },
+          "letters": {
+            "status": "COMPLETE",
+            "score": 0.75,
+            "has_cover_letter": true,
+            "letter_length": 1019,
+            "message": "Carta de apresenta\u00e7\u00e3o presente"
+          },
+          "payment": {
+            "status": "PENDING",
+            "score": 0.0,
+            "message": "Pagamento: pending"
+          }
+        },
+        "summary": {
+          "basic_data_complete": true,
+          "documents_complete": true,
+          "forms_complete": true,
+          "letters_complete": true,
+          "payment_complete": false
+        },
+        "missing_items": {
+          "fields": [],
+          "documents": []
+        },
+        "timestamp": "2025-12-05T05:07:51.633673"
+      },
+      "correction_3_working": false,
+      "overall_score": 75.0,
+      "overall_status": "PENDING"
+    },
+    "fase_7_data_persistence": {
+      "status_code": 200,
+      "processing_time": 0.015575170516967773,
+      "validations": {
+        "1_letters_persisted": true,
+        "2_forms_persisted": true,
+        "3_documents_persisted": true,
+        "4_basic_data_persisted": true,
+        "5_ai_review_persisted": true
+      },
+      "response_data": {
+        "case": {
+          "case_id": "OSP-10CCBCAE",
+          "user_id": null,
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "process_type": null,
+          "progress_percentage": 0,
+          "current_step": null,
+          "basic_data": {
+            "applicant_name": "Omar Hassan Ali",
+            "date_of_birth": "1990-07-15",
+            "passport_number": "AF456789123",
+            "current_address": "456 Asylum Center, Room 10",
+            "city": "Los Angeles",
+            "state": "CA",
+            "zip_code": "90001",
+            "country_of_birth": "Afghanistan",
+            "email": "omar.teste@test.com",
+            "phone": "+1-323-555-1234"
+          },
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-12-05T05:07:51.316000",
+          "updated_at": "2025-12-05T05:07:51.634000",
+          "expires_at": "2025-12-12T05:07:51.316000",
+          "documents": [
+            {
+              "id": "d46720dd-4891-4351-9cda-937dbc61b3f3",
+              "case_id": "OSP-10CCBCAE",
+              "filename": "passport.txt",
+              "document_type": "passport",
+              "description": null,
+              "content_base64": "QWZnaGFuaXN0YW4gUGFzc3BvcnQgLSBPbWFyIEhhc3NhbiBBbGkgLSBBRjQ1Njc4OTEyMw==",
+              "mime_type": "text/plain",
+              "file_size": 52,
+              "uploaded_at": "2025-12-05T05:07:51.364000",
+              "status": "uploaded"
+            },
+            {
+              "id": "e8ae403f-d63f-4a2a-b82b-56a635703f80",
+              "case_id": "OSP-10CCBCAE",
+              "filename": "i94.txt",
+              "document_type": "i94",
+              "description": null,
+              "content_base64": "SS05NCBSZWNvcmQgLSBPbWFyIEhhc3NhbiBBbGkgLSBBcnJpdmVkIDIwMjQtMDEtMTA=",
+              "mime_type": "text/plain",
+              "file_size": 50,
+              "uploaded_at": "2025-12-05T05:07:51.392000",
+              "status": "uploaded"
+            },
+            {
+              "id": "aa8e37cf-ac27-4125-a3f7-86e0c3fc4463",
+              "case_id": "OSP-10CCBCAE",
+              "filename": "persecution.txt",
+              "document_type": "evidence_persecution",
+              "description": null,
+              "content_base64": "RXZpZGVuY2U6IFRhbGliYW4gdGhyZWF0cyBkdWUgdG8gd29yayB3aXRoIFVTIGZvcmNlcy4gRmFtaWx5IG1lbWJlcnMgdGFyZ2V0ZWQu",
+              "mime_type": "text/plain",
+              "file_size": 78,
+              "uploaded_at": "2025-12-05T05:07:51.413000",
+              "status": "uploaded"
+            },
+            {
+              "id": "d03603dd-f6a0-405c-8240-4f0a624e8656",
+              "case_id": "OSP-10CCBCAE",
+              "filename": "medical.txt",
+              "document_type": "medical_records",
+              "description": null,
+              "content_base64": "TWVkaWNhbCBSZWNvcmRzOiBQVFNEIGRpYWdub3Npcy4gU2NhcnMgZnJvbSB0b3J0dXJlLiBEci4gU21pdGgsIFVDTEEgTWVkaWNhbA==",
+              "mime_type": "text/plain",
+              "file_size": 76,
+              "uploaded_at": "2025-12-05T05:07:51.481000",
+              "status": "uploaded"
+            },
+            {
+              "id": "4be6a0eb-69a6-45e2-b8ca-84651e48b384",
+              "case_id": "OSP-10CCBCAE",
+              "filename": "witness.txt",
+              "document_type": "witness_statements",
+              "description": null,
+              "content_base64": "V2l0bmVzczogQWhtYWQgKGNvbGxlYWd1ZSkgY29uZmlybXMgdGhyZWF0cyBhbmQgcGVyc2VjdXRpb24gYnkgVGFsaWJhbiAyMDIz",
+              "mime_type": "text/plain",
+              "file_size": 75,
+              "uploaded_at": "2025-12-05T05:07:51.502000",
+              "status": "uploaded"
+            },
+            {
+              "id": "973b7130-f24c-4b6e-9635-8753f4588f44",
+              "case_id": "OSP-10CCBCAE",
+              "filename": "country.txt",
+              "document_type": "country_conditions",
+              "description": null,
+              "content_base64": "Q291bnRyeSBSZXBvcnQ6IEFmZ2hhbmlzdGFuIDIwMjQgLSBUYWxpYmFuIHBlcnNlY3V0aW9uIG9mIGZvcm1lciBpbnRlcnByZXRlcnMgZG9jdW1lbnRlZA==",
+              "mime_type": "text/plain",
+              "file_size": 88,
+              "uploaded_at": "2025-12-05T05:07:51.524000",
+              "status": "uploaded"
+            }
+          ],
+          "letters": {
+            "cover_letter": "To the Asylum Officer,\n\nMy name is Omar Hassan Ali, and I am applying for asylum in the United States because I fear persecution in Afghanistan due to my work as an interpreter for US military forces from 2018-2021.\n\nDuring my time as an interpreter, I assisted US soldiers in combat zones. After US withdrawal, the Taliban targeted me and my family. In August 2023, Taliban members came to my home and threatened to kill me for being a traitor. My brother was kidnapped and tortured. I received multiple death threats.\n\nI fled Afghanistan in December 2023 and arrived in the US on January 10, 2024. I cannot return to Afghanistan as I fear for my life. The Taliban has a list of interpreters and actively hunts us down.\n\nI have medical records showing PTSD and physical scars from torture. I have witness statements from colleagues who faced similar persecution. Country conditions reports document Taliban violence against interpreters.\n\nI respectfully request asylum in the United States.\n\nSincerely,\nOmar Hassan Ali"
+          },
+          "forms": {
+            "i589": {
+              "completed": true,
+              "completion_date": "2024-12-04",
+              "sections_completed": [
+                "Part A: Information About You",
+                "Part B: Information About Your Spouse and Children",
+                "Part C: Additional Information About Your Application",
+                "Part D: Your Signature"
+              ]
+            }
+          },
+          "ai_review": {
+            "success": true,
+            "case_id": "OSP-10CCBCAE",
+            "overall_status": "PENDING",
+            "overall_score": 75.0,
+            "approval_message": "\u26a0\ufe0f Caso pendente. Alguns itens precisam de aten\u00e7\u00e3o.",
+            "detailed_checks": {
+              "basic_data": {
+                "status": "COMPLETE",
+                "score": 1.0,
+                "missing_fields": [],
+                "message": "Dados b\u00e1sicos completos"
+              },
+              "documents": {
+                "status": "COMPLETE",
+                "score": 1.0,
+                "uploaded": 6,
+                "required": 1,
+                "missing_documents": [],
+                "message": "6 documentos enviados"
+              },
+              "forms": {
+                "status": "COMPLETE",
+                "score": 1.0,
+                "message": "Formul\u00e1rios preenchidos"
+              },
+              "letters": {
+                "status": "COMPLETE",
+                "score": 0.75,
+                "has_cover_letter": true,
+                "letter_length": 1019,
+                "message": "Carta de apresenta\u00e7\u00e3o presente"
+              },
+              "payment": {
+                "status": "PENDING",
+                "score": 0.0,
+                "message": "Pagamento: pending"
+              }
+            },
+            "summary": {
+              "basic_data_complete": true,
+              "documents_complete": true,
+              "forms_complete": true,
+              "letters_complete": true,
+              "payment_complete": false
+            },
+            "missing_items": {
+              "fields": [],
+              "documents": []
+            },
+            "timestamp": "2025-12-05T05:07:51.633673"
+          },
+          "ai_review_date": "2025-12-05T05:07:51.634000",
+          "ai_review_score": 0.75
+        }
+      },
+      "all_corrections_persisted": true
+    },
+    "summary": {
+      "overall_success": true,
+      "successful_phases": 6,
+      "total_phases": 7,
+      "success_rate": 85.71428571428571,
+      "case_id": "OSP-10CCBCAE",
+      "corrections_working": 2,
+      "correction_1_letters": true,
+      "correction_2_forms": true,
+      "correction_3_ai_logic": false
+    }
+  },
+  "timestamp": 1764911271.654641,
+  "test_focus": "I-589 Asylum Application After 3 Critical Corrections",
+  "applicant": {
+    "name": "Omar Hassan Ali",
+    "email": "omar.teste@test.com",
+    "visa_type": "I-589",
+    "country_of_origin": "Afghanistan",
+    "persecution_reason": "Work as interpreter for US forces"
+  },
+  "corrections_assessment": {
+    "correction_1_letters": true,
+    "correction_2_forms": true,
+    "correction_3_ai_logic": false,
+    "overall_corrections_working": 2,
+    "corrections_success_rate": "2/3"
+  }
+}
