@@ -1027,15 +1027,15 @@ if __name__ == "__main__":
     
     # Final summary
     print("\n" + "=" * 80)
-    print("🎯 RELATÓRIO FINAL - ANÁLISE DA IA DE REVISÃO I-539")
+    print("🎯 RELATÓRIO FINAL - TESTE COMPLETO EB-1A EXTRAORDINARY ABILITY")
     print("=" * 80)
     
-    print(f"👤 Aplicante: Carlos Eduardo Silva Mendes")
-    print(f"🎯 Processo: I-539 Extension of Stay")
+    print(f"👩‍🔬 Aplicante: Dr. Sofia Martinez Chen")
+    print(f"🎯 Processo: EB-1A Extraordinary Ability")
     # Safely get summary data with defaults
     summary = main_results.get('summary', {})
     successful_phases = summary.get('successful_phases', 0)
-    total_phases = summary.get('total_phases', 9)
+    total_phases = summary.get('total_phases', 8)
     success_rate = summary.get('success_rate', 0)
     
     print(f"📊 Teste principal: {successful_phases}/{total_phases} fases")
@@ -1046,8 +1046,14 @@ if __name__ == "__main__":
     if summary.get('case_id'):
         print(f"📋 Case ID: {summary['case_id']}")
     
-    if summary.get('ai_review_functional'):
-        print(f"🤖 AI Review: ✅ Funcional")
+    if summary.get('eb1a_functional'):
+        print(f"🧬 EB-1A System: ✅ Funcional")
+    
+    if summary.get('ai_score'):
+        print(f"🤖 AI Score: {summary['ai_score']}%")
+    
+    if summary.get('adaptation_score'):
+        print(f"🔄 Adaptation Score: {summary['adaptation_score']:.1f}%")
     
     # AI Review System Assessment
     print(f"\n🤖 AVALIAÇÃO DO SISTEMA DE IA DE REVISÃO:")
