@@ -1705,6 +1705,83 @@ async def get_user_progress(current_user = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail=f"Error getting progress: {str(e)}")
 
 # Document routes (keeping existing ones with modifications for education integration)
+@api_router.post("/case/{case_id}/upload-document")
+async def upload_document_to_case(
+    case_id: str,
+    file: UploadFile = File(...),
+    document_type: str = Form(...),
+    description: Optional[str] = Form(None)
+):
+    """
+    Upload de documento para um caso específico - SEM AUTENTICAÇÃO (para testes)
+    """
+    try:
+        # Validar caso existe
+        case = await db.application_cases.find_one({"case_id": case_id})
+        if not case:
+            case = await db.auto_cases.find_one({"case_id": case_id})
+        
+        if not case:
+            raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
+        
+        # Validar arquivo
+        if not file:
+            raise HTTPException(status_code=400, detail="No file uploaded")
+        
+        content = await file.read()
+        if len(content) == 0:
+            raise HTTPException(status_code=400, detail="Empty file")
+        
+        # Size limit: 10MB
+        if len(content) > 10 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="File too large (max 10MB)")
+        
+        # Converter para base64
+        content_base64 = base64.b64encode(content).decode('utf-8')
+        mime_type = file.content_type or 'application/octet-stream'
+        
+        # Criar registro do documento
+        doc_id = str(uuid.uuid4())
+        document_record = {
+            "id": doc_id,
+            "case_id": case_id,
+            "filename": file.filename,
+            "document_type": document_type,
+            "description": description,
+            "content_base64": content_base64,
+            "mime_type": mime_type,
+            "file_size": len(content),
+            "uploaded_at": datetime.utcnow(),
+            "status": "uploaded"
+        }
+        
+        # Atualizar caso com o novo documento
+        await db.application_cases.update_one(
+            {"case_id": case_id},
+            {
+                "$push": {"documents": document_record},
+                "$set": {"updated_at": datetime.utcnow()}
+            }
+        )
+        
+        logger.info(f"✅ Documento {file.filename} enviado para case {case_id}")
+        
+        return {
+            "success": True,
+            "message": "Document uploaded successfully",
+            "document_id": doc_id,
+            "case_id": case_id,
+            "filename": file.filename,
+            "document_type": document_type,
+            "file_size": len(content)
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Erro no upload: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error uploading document: {str(e)}")
+
 @api_router.post("/documents/upload")
 async def upload_document(
     file: UploadFile = File(...),
