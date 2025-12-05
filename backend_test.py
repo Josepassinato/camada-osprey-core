@@ -453,8 +453,8 @@ Dr. Sofia Martinez Chen"""
         results["fase_4_personal_statement"]["exception"] = str(e)
         results["fase_4_personal_statement"]["working"] = False
     
-    # FASE 5: Análise de Validação de Documentos
-    print("\n📋 FASE 5: Análise de Validação de Documentos")
+    # FASE 5: EB-1A Form Completion
+    print("\n📋 FASE 5: EB-1A Form Completion")
     print("-" * 50)
     
     document_validation_tests = []
