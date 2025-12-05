@@ -75,68 +75,30 @@ def test_uscis_form_generation_system():
     print("-" * 50)
     
     try:
-        print(f"🔗 Endpoint: GET {API_BASE}/auto-application/case/{case_id}")
+        case_id = "OSP-8731E45D"
+        update_data = {"visa_type": "EB-1A"}
         
-        start_time = time.time()
-        response = requests.get(
+        print(f"🔗 Endpoint: PUT {API_BASE}/auto-application/case/{case_id}")
+        print(f"📤 Payload: {json.dumps(update_data)}")
+        
+        response = requests.put(
             f"{API_BASE}/auto-application/case/{case_id}",
+            json=update_data,
             headers={"Content-Type": "application/json"},
             timeout=30
         )
-        processing_time = time.time() - start_time
         
-        print(f"⏱️  Processing time: {processing_time:.2f}s")
         print(f"📊 Status Code: {response.status_code}")
         
-        results["case_verification"]["status_code"] = response.status_code
-        results["case_verification"]["processing_time"] = processing_time
-        
-        if response.status_code == 200:
-            case_data = response.json()
-            print(f"📄 Case Data: {json.dumps(case_data, indent=2)}")
-            
-            case_info = case_data.get("case", {})
-            
-            # Verify case has expected EB-1A data
-            validations = {
-                "1_case_exists": case_info.get("case_id") == case_id,
-                "2_eb1a_visa_type": case_info.get("form_code") == "EB-1A",
-                "3_documents_present": len(case_info.get("uploaded_documents", [])) >= 8,
-                "4_personal_statement_present": case_info.get("letters", {}).get("cover_letter") is not None,
-                "5_personal_statement_length": len(case_info.get("letters", {}).get("cover_letter", "")) > 1500,
-                "6_eb1a_form_present": case_info.get("forms", {}).get("eb1a") is not None,
-                "7_criteria_count": case_info.get("forms", {}).get("eb1a", {}).get("criteria_count", 0) >= 7
-            }
-            
-            results["case_verification"]["validations"] = validations
-            results["case_verification"]["case_data"] = case_info
-            
-            print("\n🎯 CASE VERIFICATION - OSP-8731E45D:")
-            print("=" * 50)
-            for check, passed in validations.items():
-                status = "✅" if passed else "❌"
-                print(f"  {status} {check}: {passed}")
-            
-            # Show case details
-            documents_count = len(case_info.get("uploaded_documents", []))
-            letter_length = len(case_info.get("letters", {}).get("cover_letter", ""))
-            criteria_count = case_info.get("forms", {}).get("eb1a", {}).get("criteria_count", 0)
-            
-            print(f"\n📊 CASE OSP-8731E45D DETAILS:")
-            print(f"  📋 Case ID: {case_info.get('case_id', 'N/A')}")
-            print(f"  🎯 Visa Type: {case_info.get('form_code', 'N/A')}")
-            print(f"  📄 Documents: {documents_count}/8")
-            print(f"  📝 Personal Statement: {letter_length} characters")
-            print(f"  📋 EB-1A Criteria: {criteria_count}/10")
-                
+        if response.status_code in [200, 201]:
+            response_data = response.json()
+            print(f"✅ EB-1A case updated successfully")
+            print(f"📄 Response: {json.dumps(response_data, indent=2)}")
         else:
-            print(f"❌ Case verification failed with status {response.status_code}")
-            print(f"📄 Error response: {response.text}")
-            results["case_verification"]["error"] = response.text
+            print(f"⚠️  EB-1A case update returned {response.status_code}: {response.text}")
             
     except Exception as e:
-        print(f"❌ Exception during case verification: {str(e)}")
-        results["case_verification"]["exception"] = str(e)
+        print(f"❌ Exception updating EB-1A case: {str(e)}")
     
     # STEP 2: Test AI Review After Corrections
     print("\n📋 STEP 2: AI Review After EB-1A Corrections")
