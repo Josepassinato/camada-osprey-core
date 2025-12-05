@@ -71,7 +71,7 @@ import io
 from case_finalizer_complete import case_finalizer_complete
 from visa_specifications import get_visa_specifications, get_required_documents, get_key_questions, get_common_issues
 from visa_document_mapping import get_visa_document_requirements
-from uscis_form_filler import form_filler
+from uscis_form_filler import form_filler as uscis_form_filler
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 import openai
 import yaml
