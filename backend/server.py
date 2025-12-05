@@ -3205,6 +3205,39 @@ def get_next_steps_pt(status: str, completion: int) -> list:
         ]
 
 
+@api_router.get("/friendly-form/structure/{visa_type}")
+async def get_friendly_form_structure_endpoint(visa_type: str):
+    """
+    Retorna a estrutura completa do formulário amigável para o tipo de visto
+    
+    Este endpoint fornece ao frontend a estrutura exata do formulário que deve ser apresentado
+    ao usuário, garantindo que TODOS os campos obrigatórios do formulário oficial USCIS sejam coletados.
+    
+    Args:
+        visa_type: Código do visto (I-539, I-589, EB-1A, etc.)
+        
+    Returns:
+        Estrutura completa do formulário com seções, campos, validações e mapeamento para formulário oficial
+    """
+    try:
+        from friendly_form_structures import get_friendly_form_structure
+        
+        structure = get_friendly_form_structure(visa_type)
+        
+        return {
+            "success": True,
+            "visa_type": visa_type,
+            "structure": structure,
+            "message": f"Estrutura do formulário para {visa_type} obtida com sucesso"
+        }
+        
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error getting friendly form structure: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error getting form structure: {str(e)}")
+
+
 @api_router.post("/auto-application/extract-facts")
 async def extract_facts_from_story(request: dict):
     """Extract structured facts from user's story using sistema"""
