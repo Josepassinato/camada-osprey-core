@@ -2756,27 +2756,46 @@ Você é um especialista em imigração dos EUA. Analise os dados do formulário
 """
         
         # Call AI
-        response_text = llm.chat([{"role": "user", "content": validation_prompt}])
-        
-        # Parse JSON response
         try:
-            # Try to extract JSON from response
-            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
-            if json_match:
-                ai_response = json.loads(json_match.group())
-            else:
-                ai_response = json.loads(response_text.strip())
-        except json.JSONDecodeError:
-            logger.error(f"Failed to parse AI response as JSON: {response_text}")
-            # Fallback response
-            ai_response = {
+            response_text = llm.chat([{"role": "user", "content": validation_prompt}])
+            
+            # Check if response is valid
+            if not response_text or response_text is None:
+                logger.warning("AI returned empty response, using fallback")
+                return {
+                    "validation_issues": [],
+                    "overall_status": "needs_review",
+                    "completion_percentage": 70,
+                    "message_to_user": "Validação básica concluída. Revise seus dados."
+                }
+            
+            # Parse JSON response
+            try:
+                # Try to extract JSON from response
+                json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+                if json_match:
+                    ai_response = json.loads(json_match.group())
+                else:
+                    ai_response = json.loads(response_text.strip())
+            except json.JSONDecodeError:
+                logger.error(f"Failed to parse AI response as JSON: {response_text[:200]}")
+                # Fallback response
+                ai_response = {
+                    "validation_issues": [],
+                    "overall_status": "approved",
+                    "completion_percentage": 75,
+                    "message_to_user": "Validação concluída com sucesso"
+                }
+            
+            return ai_response
+        except Exception as llm_error:
+            logger.error(f"Error calling LLM: {str(llm_error)}")
+            return {
                 "validation_issues": [],
-                "overall_status": "approved",
-                "completion_percentage": 75,
-                "message_to_user": "Validação concluída com sucesso"
+                "overall_status": "needs_review",
+                "completion_percentage": 65,
+                "message_to_user": "Validação básica concluída. Revise seus dados."
             }
-        
-        return ai_response
         
     except Exception as e:
         logger.error(f"Error in AI validation: {str(e)}")
