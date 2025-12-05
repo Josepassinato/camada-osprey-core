@@ -1,0 +1,51 @@
+{
+  "audit_results": {
+    "parte1_friendly_form": {
+      "exists": true,
+      "file_size": 34777,
+      "has_form_section": true,
+      "has_form_field": true,
+      "has_ai_suggestion": true,
+      "has_validation": true,
+      "has_portuguese": false,
+      "working": true
+    },
+    "parte2_backend": {
+      "working": false
+    },
+    "parte3_fluxo_completo": {
+      "working": false
+    },
+    "parte4_mapeamento_ia": {
+      "mapping_endpoints_found": true,
+      "form_filler_exists": true,
+      "uses_simplified_responses": false,
+      "has_translation_logic": true,
+      "working": true
+    },
+    "parte5_geracao_oficial": {
+      "working": false
+    },
+    "summary": {
+      "friendly_form_score": 4,
+      "backend_score": 2,
+      "integration_score": 3,
+      "ux_score": 3,
+      "total_score": 12,
+      "max_score": 20,
+      "percentage": 60.0,
+      "working_steps": 2,
+      "total_steps": 5,
+      "system_status": "PARCIAL"
+    }
+  },
+  "timestamp": 1764914581.7137227,
+  "test_focus": "Friendly Form → Official Form Flow Audit",
+  "criteria": {
+    "friendly_form": 5,
+    "backend": 5,
+    "integration": 5,
+    "user_experience": 5,
+    "total": 20
+  }
+}
