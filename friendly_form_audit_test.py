@@ -128,7 +128,7 @@ def test_friendly_form_complete_flow():
         
         if response.status_code in [200, 201]:
             case_data = response.json()
-            case_id = case_data.get("case_id")
+            case_id = case_data.get("case", {}).get("case_id")
             print(f"✅ Caso criado: {case_id}")
             
             # Testar se aceita simplified_form_responses
