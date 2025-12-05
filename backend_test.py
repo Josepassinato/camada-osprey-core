@@ -695,74 +695,79 @@ Dr. Sofia Martinez Chen"""
     print("\n📋 FASE 8: Comparação do Sistema (EB-1A vs I-539/I-589)")
     print("-" * 50)
     
-    try:
-        print("🔍 Testing USCIS compliance check...")
-        
-        # Comprehensive compliance check for I-539
-        compliance_data = {
-            "complete_application": {
-                "case_id": case_id,
-                "applicant_data": basic_data,
-                "documents": [doc["type"] for doc in documents_to_upload],
-                "form_type": "I-539"
-            },
-            "documents": ["passport", "i20", "financial_documents", "cover_letter", "education_documents"],
-            "visa_type": "I-539"
+    print("🔍 Analyzing system flexibility and adaptation...")
+    
+    # Compare EB-1A requirements vs other visa types
+    visa_comparison = {
+        "I-539": {
+            "documents": ["passport", "i94", "current_visa", "i20", "financial_evidence"],
+            "focus": "Extension of stay",
+            "key_fields": ["current_visa_type", "extension_reason", "sevis_number"],
+            "criteria": "Maintain status, financial support"
+        },
+        "I-589": {
+            "documents": ["passport", "i94", "evidence_persecution", "medical_records", "witness_statements", "country_conditions"],
+            "focus": "Asylum application",
+            "key_fields": ["country_of_nationality", "persecution_evidence", "fear_basis"],
+            "criteria": "Well-founded fear of persecution"
+        },
+        "EB-1A": {
+            "documents": ["passport", "awards", "publications", "memberships", "expert_letters", "high_salary", "press_coverage", "judging_work"],
+            "focus": "Extraordinary ability",
+            "key_fields": ["field_of_extraordinary_ability", "current_position", "achievements"],
+            "criteria": "3 of 10 USCIS criteria, sustained acclaim"
         }
-        
-        response = requests.post(
-            f"{API_BASE}/specialized-agents/compliance-check",
-            json=compliance_data,
-            headers={"Content-Type": "application/json"},
-            timeout=30
-        )
-        
-        print(f"📊 Status: {response.status_code}")
-        
-        if response.status_code == 200:
-            compliance_result = response.json()
-            print("✅ USCIS compliance check completed")
-            
-            # Check I-539 specific USCIS requirements
-            uscis_requirements = {
-                "form_i539_complete": True,  # Simulated
-                "supporting_documents_present": len([doc for doc in documents_to_upload]) >= 4,
-                "financial_evidence_provided": any("financial" in doc["type"] for doc in documents_to_upload),
-                "current_status_documented": bool(basic_data.get("current_visa_type")),
-                "extension_reason_valid": bool(basic_data.get("extension_reason")),
-                "i94_copy_available": True,  # Simulated
-                "passport_copy_available": any("passport" in doc["type"] for doc in documents_to_upload)
-            }
-            
-            results["fase_8_uscis_compliance"] = {
-                "working": True,
-                "uscis_requirements": uscis_requirements,
-                "compliance_result": compliance_result,
-                "compliance_score": sum(uscis_requirements.values()) / len(uscis_requirements) * 100
-            }
-            
-            print(f"   📋 Form I-539 Complete: {uscis_requirements['form_i539_complete']}")
-            print(f"   📄 Supporting Documents: {uscis_requirements['supporting_documents_present']}")
-            print(f"   💰 Financial Evidence: {uscis_requirements['financial_evidence_provided']}")
-            print(f"   📋 Current Status Documented: {uscis_requirements['current_status_documented']}")
-            print(f"   📝 Extension Reason Valid: {uscis_requirements['extension_reason_valid']}")
-            print(f"   🛂 I-94 Copy Available: {uscis_requirements['i94_copy_available']}")
-            print(f"   📘 Passport Copy Available: {uscis_requirements['passport_copy_available']}")
-            print(f"   📊 Compliance Score: {results['fase_8_uscis_compliance']['compliance_score']:.1f}%")
-            
-        else:
-            print(f"❌ USCIS compliance check failed: {response.text}")
-            results["fase_8_uscis_compliance"] = {
-                "working": False,
-                "error": response.text
-            }
-            
-    except Exception as e:
-        print(f"❌ Exception in USCIS compliance check: {str(e)}")
-        results["fase_8_uscis_compliance"] = {
-            "working": False,
-            "exception": str(e)
-        }
+    }
+    
+    # System adaptation analysis
+    system_adaptation = {
+        "1_document_requirements_adapted": len(results["fase_3_document_uploads"]["eb1a_specific_docs"]) == 8,
+        "2_field_requirements_adapted": results["fase_2_basic_data"]["validations"].get("4_extraordinary_ability_field", False),
+        "3_form_criteria_adapted": results["fase_5_eb1a_form"]["validations"].get("3_criteria_count_correct", False),
+        "4_ai_recognition_adapted": results["fase_6_ai_review"]["validations"].get("3_visa_type_recognized", False),
+        "5_terminology_adapted": results["fase_6_ai_review"]["validations"].get("5_eb1a_specific_message", False),
+        "6_scoring_adapted": results["fase_6_ai_review"]["validations"].get("4_high_score", False),
+        "7_persistence_adapted": results["fase_7_persistence_verification"]["validations"].get("5_extraordinary_ability_field", False),
+        "8_complete_workflow": all([
+            results["fase_1_case_creation"].get("validations", {}).get("1_eb1a_case_created", False),
+            results["fase_2_basic_data"].get("working", False),
+            results["fase_3_document_uploads"]["successful_uploads"] >= 6,  # At least 6/8 documents
+            results["fase_4_personal_statement"].get("working", False),
+            results["fase_5_eb1a_form"].get("working", False)
+        ])
+    }
+    
+    results["fase_8_system_comparison"] = {
+        "visa_comparison": visa_comparison,
+        "system_adaptation": system_adaptation,
+        "adaptation_score": sum(system_adaptation.values()) / len(system_adaptation) * 100,
+        "working": sum(system_adaptation.values()) >= 6  # At least 6/8 adaptations working
+    }
+    
+    print("\n🎯 ANÁLISE DE ADAPTAÇÃO DO SISTEMA:")
+    print("=" * 50)
+    for check, passed in system_adaptation.items():
+        status = "✅" if passed else "❌"
+        print(f"  {status} {check}: {passed}")
+    
+    print(f"\n📊 COMPARAÇÃO DE REQUISITOS:")
+    print("=" * 50)
+    for visa_type, requirements in visa_comparison.items():
+        print(f"\n🎯 {visa_type}:")
+        print(f"   📄 Documents: {len(requirements['documents'])} required")
+        print(f"   🎯 Focus: {requirements['focus']}")
+        print(f"   📋 Key Fields: {', '.join(requirements['key_fields'])}")
+        print(f"   ✅ Criteria: {requirements['criteria']}")
+    
+    adaptation_score = results["fase_8_system_comparison"]["adaptation_score"]
+    print(f"\n📈 SCORE DE ADAPTAÇÃO: {adaptation_score:.1f}%")
+    
+    if adaptation_score >= 80:
+        print("🎉 SISTEMA ALTAMENTE FLEXÍVEL - Adapta-se bem a diferentes tipos de visto")
+    elif adaptation_score >= 60:
+        print("✅ SISTEMA MODERADAMENTE FLEXÍVEL - Adaptação parcial aos requisitos EB-1A")
+    else:
+        print("⚠️  SISTEMA PRECISA MELHORAR - Adaptação limitada aos requisitos EB-1A")
     
     # FASE 9: Análise Final do Sistema de Revisão
     print("\n📋 FASE 9: Análise Final do Sistema de Revisão")
