@@ -557,69 +557,120 @@ def test_i539_ai_review_system():
     
     print(f"\n📊 RESUMO UPLOADS: {results['etapa_6_document_uploads']['successful_uploads']}/{results['etapa_6_document_uploads']['total_docs']} documentos enviados")
     
-    # ETAPA 7: Processar com IA
-    print("\n📋 ETAPA 7: Processar com IA")
+    # FASE 4: Testar endpoints de AI Review
+    print("\n📋 FASE 4: Testar Endpoints de AI Review")
     print("-" * 50)
     
-    try:
-        print(f"🔗 Endpoint: POST {API_BASE}/auto-application/case/{case_id}/ai-processing")
-        
-        ai_processing_data = {
-            "step": "validation",
+    ai_review_endpoints = [
+        {
+            "name": "AI Case Review",
+            "endpoint": f"/api/case/{case_id}/ai-review",
+            "method": "POST",
+            "data": {"review_type": "comprehensive"}
+        },
+        {
+            "name": "Professional QA Review", 
+            "endpoint": f"/api/auto-application/case/{case_id}/professional-qa-review",
+            "method": "POST",
+            "data": {"review_level": "detailed"}
+        },
+        {
+            "name": "Document Validation",
+            "endpoint": "/api/specialized-agents/document-validation",
+            "method": "POST", 
             "data": {
-                "visa_type": "O-1",
-                "applicant_field": "AI Research",
-                "extraordinary_ability": True
+                "document_type": "passport",
+                "document_content": "CARLOS EDUARDO SILVA MENDES passport content",
+                "case_context": {"applicant_name": "Carlos Eduardo Silva Mendes", "visa_type": "I-539"}
+            }
+        },
+        {
+            "name": "Form Validation",
+            "endpoint": "/api/specialized-agents/form-validation", 
+            "method": "POST",
+            "data": {
+                "form_data": basic_data,
+                "visa_type": "I-539",
+                "step_id": "basic_data"
+            }
+        },
+        {
+            "name": "Compliance Check",
+            "endpoint": "/api/specialized-agents/compliance-check",
+            "method": "POST",
+            "data": {
+                "complete_application": basic_data,
+                "documents": ["passport", "i20", "financial_documents"],
+                "visa_type": "I-539"
             }
         }
-        
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {jwt_token}"
-        }
-        
-        start_time = time.time()
-        response = requests.post(
-            f"{API_BASE}/auto-application/case/{case_id}/ai-processing",
-            json=ai_processing_data,
-            headers=headers,
-            timeout=60
-        )
-        processing_time = time.time() - start_time
-        
-        print(f"⏱️  Processing time: {processing_time:.2f}s")
-        print(f"📊 Status Code: {response.status_code}")
-        
-        results["etapa_7_ai_review"]["status_code"] = response.status_code
-        results["etapa_7_ai_review"]["processing_time"] = processing_time
-        
-        if response.status_code in [200, 201]:
-            response_data = response.json()
-            print(f"📄 Response: {json.dumps(response_data, indent=2)}")
+    ]
+    
+    ai_review_results = {}
+    
+    for endpoint_test in ai_review_endpoints:
+        try:
+            print(f"\n🔍 Testing: {endpoint_test['name']}")
+            print(f"🔗 Endpoint: {endpoint_test['method']} {API_BASE}{endpoint_test['endpoint']}")
             
-            validations = {
-                "1_ai_processing_completed": response_data.get("success") == True,
-                "2_step_id_present": response_data.get("step_id") is not None,
-                "3_progress_updated": response_data.get("progress_percentage", 0) > 50
+            start_time = time.time()
+            
+            if endpoint_test['method'] == 'POST':
+                response = requests.post(
+                    f"{API_BASE}{endpoint_test['endpoint']}",
+                    json=endpoint_test['data'],
+                    headers={"Content-Type": "application/json"},
+                    timeout=60
+                )
+            else:
+                response = requests.get(
+                    f"{API_BASE}{endpoint_test['endpoint']}",
+                    headers={"Content-Type": "application/json"},
+                    timeout=30
+                )
+            
+            processing_time = time.time() - start_time
+            
+            print(f"⏱️  Processing time: {processing_time:.2f}s")
+            print(f"📊 Status Code: {response.status_code}")
+            
+            ai_review_results[endpoint_test['name']] = {
+                "status_code": response.status_code,
+                "processing_time": processing_time,
+                "working": response.status_code in [200, 201]
             }
             
-            results["etapa_7_ai_review"]["validations"] = validations
-            results["etapa_7_ai_review"]["response_data"] = response_data
-            
-            print("\n🎯 VALIDAÇÕES ETAPA 7:")
-            print("=" * 50)
-            for check, passed in validations.items():
-                status = "✅" if passed else "❌"
-                print(f"  {status} {check}: {passed}")
+            if response.status_code in [200, 201]:
+                response_data = response.json()
+                print(f"✅ {endpoint_test['name']}: SUCCESS")
+                print(f"📄 Response preview: {str(response_data)[:200]}...")
+                ai_review_results[endpoint_test['name']]["response_data"] = response_data
+            else:
+                print(f"❌ {endpoint_test['name']}: FAILED")
+                print(f"📄 Error: {response.text}")
+                ai_review_results[endpoint_test['name']]["error"] = response.text
                 
-        else:
-            print(f"❌ AI processing failed with status {response.status_code}")
-            print(f"📄 Error response: {response.text}")
-            results["etapa_7_ai_review"]["error"] = response.text
-            
-    except Exception as e:
-        print(f"❌ Exception during AI processing: {str(e)}")
-        results["etapa_7_ai_review"]["exception"] = str(e)
+        except Exception as e:
+            print(f"❌ Exception testing {endpoint_test['name']}: {str(e)}")
+            ai_review_results[endpoint_test['name']] = {
+                "status_code": 0,
+                "processing_time": 0,
+                "working": False,
+                "exception": str(e)
+            }
+    
+    results["fase_4_ai_review_endpoints"] = ai_review_results
+    
+    # Summary of AI Review endpoints
+    working_endpoints = sum(1 for result in ai_review_results.values() if result.get("working", False))
+    total_endpoints = len(ai_review_endpoints)
+    
+    print(f"\n📊 AI REVIEW ENDPOINTS SUMMARY:")
+    print(f"   Working: {working_endpoints}/{total_endpoints} ({working_endpoints/total_endpoints*100:.1f}%)")
+    
+    for name, result in ai_review_results.items():
+        status = "✅" if result.get("working", False) else "❌"
+        print(f"   {status} {name}: {result.get('status_code', 0)}")
     
     # ETAPA 8: Verificar status final e gerar pacote
     print("\n📋 ETAPA 8: Verificar Status Final e Gerar Pacote")
