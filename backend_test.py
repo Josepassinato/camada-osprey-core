@@ -1360,7 +1360,7 @@ if __name__ == "__main__":
     print(f"\n💾 Resultados salvos em: /app/i539_ai_review_test_results.json")
     
     # Final recommendation based on AI Review System analysis
-    if ai_system_ready and main_results["summary"]["success_rate"] >= 70:
+    if ai_system_ready and success_rate >= 70:
         print("\n✅ RECOMENDAÇÃO: Sistema de IA de Revisão I-539 PRONTO PARA PRODUÇÃO")
         print("   - Todos os critérios principais atendidos")
         print("   - Endpoints funcionais e validações operacionais")
