@@ -16,21 +16,23 @@ from datetime import datetime
 BACKEND_URL = "https://docsimple-3.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
-def test_uscis_form_generation_system():
+def test_enhanced_ai_validation_system():
     """
-    🎯 TESTE COMPLETO - SISTEMA DE GERAÇÃO DE FORMULÁRIOS USCIS
+    🎯 TESTE COMPLETO DA VALIDAÇÃO IA MELHORADA
     
-    Testing the new USCIS form generation system for 3 visa types:
-    1. I-539 (Extension) - Case OSP-BD2D8ED2
-    2. I-589 (Asylum) - Case OSP-4899BE72  
-    3. EB-1A (Extraordinary) - Case OSP-8731E45D
+    Testing the enhanced AI validation system with:
+    1. Two-Stage Validation (Programmatic + AI)
+    2. Required Fields by Visa Type (I-539: 14, I-589: 11, EB-1A: 8)
+    3. Format Validations (email, date, phone, numeric, min length)
+    4. Intelligent Completeness Calculation with penalties
+    5. MongoDB Persistence
     
-    VERIFICATION CRITERIA:
-    - Form generation endpoints working (3/3)
-    - PDF download working (3/3)
-    - Proper file sizes (I-539: >400KB, I-589: >800KB, I-140: >500KB)
-    - Data persistence in database (3/3)
-    - Valid PDF files generated (3/3)
+    TEST CASES:
+    - TEST 1: Complete data (I-539) - Expected: approved, 100%, 0 issues
+    - TEST 2: Partial data (50%) - Expected: rejected, 40-60%, >5 issues  
+    - TEST 3: Format errors - Expected: needs_review, 80-95%, >=2 issues
+    - TEST 4: Detailed issues verification
+    - TEST 5: MongoDB persistence verification
     """
     
     print("🎯 TESTE COMPLETO - SISTEMA DE GERAÇÃO DE FORMULÁRIOS USCIS")
