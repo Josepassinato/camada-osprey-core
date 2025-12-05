@@ -774,17 +774,17 @@ Dr. Sofia Martinez Chen"""
     print("-" * 50)
     
     # Summary
-    print("\n📊 RESUMO COMPLETO DO TESTE I-539 AI REVIEW")
+    print("\n📊 RESUMO COMPLETO DO TESTE EB-1A EXTRAORDINARY ABILITY")
     print("=" * 60)
     
     # Count successful phases
     successful_phases = 0
-    total_phases = 9
+    total_phases = 8
     
     phase_keys = [
         "fase_1_case_creation", "fase_2_basic_data", "fase_3_document_uploads", 
-        "fase_4_ai_review_endpoints", "fase_5_document_validation", "fase_6_letter_quality",
-        "fase_7_form_verification", "fase_8_uscis_compliance", "fase_9_final_analysis"
+        "fase_4_personal_statement", "fase_5_eb1a_form", "fase_6_ai_review",
+        "fase_7_persistence_verification", "fase_8_system_comparison"
     ]
     
     for phase_key in phase_keys:
@@ -799,23 +799,22 @@ Dr. Sofia Martinez Chen"""
     
     success_rate = (successful_phases / total_phases) * 100
     
-    print(f"🧪 Teste I-539 AI Review System: {successful_phases}/{total_phases} fases concluídas ({success_rate:.1f}%)")
-    print(f"👤 Aplicante: Carlos Eduardo Silva Mendes")
-    print(f"🎯 Processo: I-539 Extension of Stay")
+    print(f"🧪 Teste EB-1A Extraordinary Ability: {successful_phases}/{total_phases} fases concluídas ({success_rate:.1f}%)")
+    print(f"👩‍🔬 Aplicante: Dr. Sofia Martinez Chen")
+    print(f"🎯 Processo: EB-1A Extraordinary Ability")
     print(f"📋 Case ID: {case_id}")
     
     # Show phase-by-phase results
     print(f"\n📋 RESULTADOS POR FASE:")
     phase_names = [
-        "Criação de Caso I-539",
-        "Dados Básicos", 
-        "Upload de Documentos",
-        "Endpoints de AI Review",
-        "Validação de Documentos",
-        "Qualidade de Cartas",
-        "Verificação de Formulário",
-        "Conformidade USCIS",
-        "Análise Final"
+        "Criação de Caso EB-1A",
+        "Dados Básicos EB-1A", 
+        "Upload de 8 Documentos EB-1A",
+        "Personal Statement",
+        "Formulário EB-1A",
+        "AI Review EB-1A",
+        "Verificação de Persistência",
+        "Comparação do Sistema"
     ]
     
     for i, (phase_key, phase_name) in enumerate(zip(phase_keys, phase_names)):
