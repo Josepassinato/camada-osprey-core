@@ -100,8 +100,9 @@ def test_complete_i539_ai_review_flow():
             response_data = response.json()
             print(f"📄 Response: {json.dumps(response_data, indent=2)}")
             
-            # Extract case_id
-            case_id = response_data.get("case_id")
+            # Extract case_id - check nested structure
+            case_data_response = response_data.get("case", {})
+            case_id = case_data_response.get("case_id") or response_data.get("case_id")
             
             validations = {
                 "status_200_ok": response.status_code == 200,
