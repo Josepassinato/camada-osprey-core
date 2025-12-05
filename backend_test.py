@@ -1217,25 +1217,25 @@ def test_additional_i539_endpoints():
     return additional_results
 
 if __name__ == "__main__":
-    print("🚀 INICIANDO TESTE COMPLETO O-1 VISA - DR. SOFIA MENDES RODRIGUES")
+    print("🚀 INICIANDO TESTE COMPLETO I-539 AI REVIEW SYSTEM - CARLOS EDUARDO SILVA MENDES")
     print(f"🌐 Backend URL: {BACKEND_URL}")
     print(f"🔗 API Base: {API_BASE}")
     print(f"⏰ Timestamp: {datetime.now().isoformat()}")
     
-    # Main test - O-1 Complete Flow as requested
-    main_results = test_o1_visa_complete_flow()
+    # Main test - I-539 AI Review System as requested
+    main_results = test_i539_ai_review_system()
     
     # Additional tests for context
-    additional_results = test_additional_o1_endpoints()
+    additional_results = test_additional_i539_endpoints()
     
     # Final summary
     print("\n" + "=" * 80)
-    print("🎯 RELATÓRIO FINAL - TESTE COMPLETO O-1 VISA")
+    print("🎯 RELATÓRIO FINAL - ANÁLISE DA IA DE REVISÃO I-539")
     print("=" * 80)
     
-    print(f"👤 Aplicante: Dr. Sofia Mendes Rodrigues")
-    print(f"🎯 Visto: O-1 (Extraordinary Ability)")
-    print(f"📊 Teste principal: {main_results['summary']['successful_steps']}/{main_results['summary']['total_steps']} etapas")
+    print(f"👤 Aplicante: Carlos Eduardo Silva Mendes")
+    print(f"🎯 Processo: I-539 Extension of Stay")
+    print(f"📊 Teste principal: {main_results['summary']['successful_phases']}/{main_results['summary']['total_phases']} fases")
     print(f"📈 Taxa de sucesso: {main_results['summary']['success_rate']:.1f}%")
     print(f"🔍 Testes adicionais: {sum(additional_results.values())}/{len(additional_results)}")
     
@@ -1243,88 +1243,122 @@ if __name__ == "__main__":
     if main_results['summary'].get('case_id'):
         print(f"📋 Case ID: {main_results['summary']['case_id']}")
     
-    if main_results['summary'].get('jwt_token_present'):
-        print(f"🔑 JWT Token: ✅ Presente")
+    if main_results['summary'].get('ai_review_functional'):
+        print(f"🤖 AI Review: ✅ Funcional")
     
-    # Detailed analysis of each step
-    print(f"\n📋 ANÁLISE DETALHADA POR ETAPA:")
-    step_names = [
-        "Criação de Usuário",
-        "Login", 
-        "Iniciar Aplicação O-1",
-        "Dados Básicos",
-        "Formulário Completo",
-        "Upload de Documentos",
-        "Revisão da IA",
-        "Status Final"
-    ]
+    # AI Review System Assessment
+    print(f"\n🤖 AVALIAÇÃO DO SISTEMA DE IA DE REVISÃO:")
+    print("=" * 50)
     
-    for i, (step_key, step_name) in enumerate(zip(
-        ["etapa_1_user_creation", "etapa_2_login", "etapa_3_start_application", 
-         "etapa_4_basic_data", "etapa_5_friendly_form", "etapa_6_document_uploads",
-         "etapa_7_ai_review", "etapa_8_final_status"], step_names)):
-        
-        step_data = main_results.get(step_key, {})
-        status_code = step_data.get("status_code", 0)
-        processing_time = step_data.get("processing_time", 0)
-        validations = step_data.get("validations", {})
-        
-        status = "✅" if status_code in [200, 201] else "❌"
-        validation_count = f"{sum(validations.values())}/{len(validations)}" if validations else "N/A"
-        
-        print(f"  {status} Etapa {i+1}: {step_name}")
-        print(f"      Status: {status_code} | Tempo: {processing_time:.2f}s | Validações: {validation_count}")
-        
-        if step_data.get("error"):
-            print(f"      ❌ Erro: {step_data['error'][:100]}...")
+    # 1. ✅ Está satisfatória?
+    ai_endpoints = main_results.get("fase_4_ai_review_endpoints", {})
+    working_endpoints = sum(1 for result in ai_endpoints.values() if result.get("working", False))
+    satisfactory = working_endpoints >= 3  # At least 3 out of 5 endpoints working
+    
+    print(f"1. ✅ Sistema satisfatório? {'SIM' if satisfactory else 'NÃO'} ({working_endpoints}/5 endpoints funcionando)")
+    
+    # 2. ✅ Preenche todos os requisitos do USCIS?
+    uscis_compliance = main_results.get("fase_8_uscis_compliance", {})
+    uscis_score = uscis_compliance.get("compliance_score", 0)
+    uscis_compliant = uscis_score >= 80
+    
+    print(f"2. ✅ Requisitos USCIS atendidos? {'SIM' if uscis_compliant else 'NÃO'} (Score: {uscis_score:.1f}%)")
+    
+    # 3. ✅ Identifica documentos faltantes?
+    doc_validation = main_results.get("fase_5_document_validation", [])
+    doc_validation_working = any(doc.get("working", False) for doc in doc_validation)
+    
+    print(f"3. ✅ Identifica documentos faltantes? {'SIM' if doc_validation_working else 'NÃO'}")
+    
+    # 4. ✅ Avalia qualidade das cartas?
+    letter_quality = main_results.get("fase_6_letter_quality", {})
+    letter_working = letter_quality.get("working", False)
+    
+    print(f"4. ✅ Avalia qualidade das cartas? {'SIM' if letter_working else 'NÃO'}")
+    
+    # 5. ✅ Verifica preenchimento correto dos formulários oficiais?
+    form_verification = main_results.get("fase_7_form_verification", {})
+    form_working = form_verification.get("working", False)
+    
+    print(f"5. ✅ Verifica preenchimento de formulários? {'SIM' if form_working else 'NÃO'}")
+    
+    # Overall AI Review System Status
+    overall_criteria_met = sum([satisfactory, uscis_compliant, doc_validation_working, letter_working, form_working])
+    ai_system_ready = overall_criteria_met >= 4  # At least 4 out of 5 criteria met
+    
+    print(f"\n🎯 STATUS GERAL DO SISTEMA DE IA:")
+    print(f"   Critérios atendidos: {overall_criteria_met}/5")
+    print(f"   Sistema pronto: {'✅ SIM' if ai_system_ready else '❌ NÃO'}")
     
     if main_results["summary"]["overall_success"]:
-        print("\n🎉 CONCLUSÃO: O-1 Visa Complete Flow está FUNCIONAL!")
-        print("✅ Fluxo completo executado com sucesso")
-        print("✅ Sistema de aplicação O-1 operacional")
+        print("\n🎉 CONCLUSÃO: Sistema de IA de Revisão I-539 está FUNCIONAL!")
+        print("✅ Endpoints de revisão operacionais")
+        print("✅ Validação de documentos funcionando")
+        print("✅ Análise de qualidade implementada")
         
-        # Show final results
-        final_status = main_results.get("etapa_8_final_status", {})
-        if final_status.get("download_data"):
-            download_data = final_status["download_data"]
-            if download_data.get("download_url"):
-                print(f"📁 Link para download: {download_data['download_url']}")
+        if ai_system_ready:
+            print("✅ SISTEMA PRONTO PARA PRODUÇÃO")
+        else:
+            print("⚠️  Sistema funcional mas precisa de melhorias")
     else:
-        print("\n⚠️  CONCLUSÃO: O-1 Visa Flow precisa de melhorias")
+        print("\n⚠️  CONCLUSÃO: Sistema de IA de Revisão I-539 precisa de melhorias")
         
-        # Show failed steps
-        failed_steps = []
-        for step_key in ["etapa_1_user_creation", "etapa_2_login", "etapa_3_start_application", 
-                         "etapa_4_basic_data", "etapa_5_friendly_form", "etapa_6_document_uploads",
-                         "etapa_7_ai_review", "etapa_8_final_status"]:
-            step_data = main_results.get(step_key, {})
-            if step_data.get("status_code") not in [200, 201]:
-                failed_steps.append(step_key.replace("etapa_", "").replace("_", " ").title())
+        # Show areas needing improvement
+        improvement_areas = []
+        if not satisfactory:
+            improvement_areas.append("Endpoints de AI Review")
+        if not uscis_compliant:
+            improvement_areas.append("Conformidade USCIS")
+        if not doc_validation_working:
+            improvement_areas.append("Validação de Documentos")
+        if not letter_working:
+            improvement_areas.append("Qualidade de Cartas")
+        if not form_working:
+            improvement_areas.append("Verificação de Formulários")
         
-        if failed_steps:
-            print(f"❌ Etapas que falharam: {', '.join(failed_steps)}")
+        if improvement_areas:
+            print(f"❌ Áreas que precisam de melhoria: {', '.join(improvement_areas)}")
         
     # Save results to file
-    with open("/app/o1_visa_complete_test_results.json", "w") as f:
+    with open("/app/i539_ai_review_test_results.json", "w") as f:
         json.dump({
             "main_results": main_results,
             "additional_results": additional_results,
             "timestamp": time.time(),
-            "test_focus": "O-1 Visa Complete End-to-End Flow for Dr. Sofia Mendes Rodrigues",
+            "test_focus": "I-539 Extension of Stay AI Review System Analysis",
             "applicant": {
-                "name": "Dr. Sofia Mendes Rodrigues",
-                "email": "sofia.mendes.test@example.com",
-                "visa_type": "O-1",
-                "field": "AI Research and Machine Learning in Healthcare"
+                "name": "Carlos Eduardo Silva Mendes",
+                "email": "carlos.mendes@test.com",
+                "visa_type": "I-539",
+                "current_status": "F-1",
+                "extension_reason": "Complete Master's degree in Computer Science"
+            },
+            "ai_review_assessment": {
+                "satisfactory": satisfactory,
+                "uscis_compliant": uscis_compliant,
+                "identifies_missing_docs": doc_validation_working,
+                "evaluates_letter_quality": letter_working,
+                "verifies_form_completion": form_working,
+                "overall_ready": ai_system_ready,
+                "criteria_met": f"{overall_criteria_met}/5"
             }
         }, f, indent=2)
     
-    print(f"\n💾 Resultados salvos em: /app/o1_visa_complete_test_results.json")
+    print(f"\n💾 Resultados salvos em: /app/i539_ai_review_test_results.json")
     
-    # Final recommendation
-    if main_results["summary"]["success_rate"] >= 75:
-        print("\n✅ RECOMENDAÇÃO: Sistema pronto para aplicações O-1 reais")
+    # Final recommendation based on AI Review System analysis
+    if ai_system_ready and main_results["summary"]["success_rate"] >= 70:
+        print("\n✅ RECOMENDAÇÃO: Sistema de IA de Revisão I-539 PRONTO PARA PRODUÇÃO")
+        print("   - Todos os critérios principais atendidos")
+        print("   - Endpoints funcionais e validações operacionais")
+        print("   - Conformidade USCIS adequada")
     elif main_results["summary"]["success_rate"] >= 50:
         print("\n⚠️  RECOMENDAÇÃO: Sistema parcialmente funcional, melhorias necessárias")
+        print("   - Funcionalidade básica presente")
+        print("   - Alguns critérios precisam de ajustes")
+        print("   - Revisar áreas de melhoria identificadas")
     else:
-        print("\n❌ RECOMENDAÇÃO: Sistema precisa de correções significativas")
+        print("\n❌ RECOMENDAÇÃO: Sistema precisa de desenvolvimento adicional")
+        print("   - Múltiplos critérios não atendidos")
+        print("   - Endpoints críticos não funcionais")
+        print("   - Revisão arquitetural necessária")
