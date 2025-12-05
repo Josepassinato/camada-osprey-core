@@ -33,7 +33,7 @@ joao.teste@test.com
 ```json
 POST /api/auth/signup
 {
-  "email": "usuario1@test.local",
+  "email": "usuario1@test.com",
   "password": "qualquer123",
   "first_name": "Usuario",
   "last_name": "Teste",
