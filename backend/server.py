@@ -2819,6 +2819,247 @@ Você é um especialista em imigração dos EUA. Analise os dados do formulário
         }
 
 
+def get_required_fields_by_visa_type(visa_type: str) -> dict:
+    """
+    Define required fields for each visa type
+    Returns dict with field name, Portuguese label, and validation rules
+    """
+    
+    # Common fields for all visa types
+    common_fields = {
+        "nome_completo": {
+            "label": "Nome Completo",
+            "validation": "required|min:3",
+            "example": "Maria Santos Silva"
+        },
+        "data_nascimento": {
+            "label": "Data de Nascimento",
+            "validation": "required|date",
+            "example": "1990-05-15"
+        },
+        "email": {
+            "label": "Email",
+            "validation": "required|email",
+            "example": "maria@example.com"
+        },
+        "numero_passaporte": {
+            "label": "Número do Passaporte",
+            "validation": "required|min:5",
+            "example": "BR123456789"
+        },
+        "pais_nascimento": {
+            "label": "País de Nascimento",
+            "validation": "required",
+            "example": "Brazil"
+        }
+    }
+    
+    # Visa-specific fields
+    if visa_type == "I-539":
+        return {
+            **common_fields,
+            "endereco": {
+                "label": "Endereço nos EUA",
+                "validation": "required|min:5",
+                "example": "123 Main Street, Apt 4B"
+            },
+            "cidade": {
+                "label": "Cidade",
+                "validation": "required",
+                "example": "New York"
+            },
+            "estado": {
+                "label": "Estado",
+                "validation": "required|length:2",
+                "example": "NY"
+            },
+            "cep": {
+                "label": "CEP/ZIP Code",
+                "validation": "required",
+                "example": "10001"
+            },
+            "telefone": {
+                "label": "Telefone",
+                "validation": "required",
+                "example": "+1 555-1234"
+            },
+            "status_atual": {
+                "label": "Status de Visto Atual",
+                "validation": "required",
+                "example": "F-1"
+            },
+            "status_solicitado": {
+                "label": "Status de Visto Solicitado",
+                "validation": "required",
+                "example": "H-1B"
+            },
+            "data_entrada_eua": {
+                "label": "Data de Entrada nos EUA",
+                "validation": "required|date",
+                "example": "2020-08-15"
+            },
+            "numero_i94": {
+                "label": "Número I-94",
+                "validation": "required|numeric",
+                "example": "1234567890"
+            }
+        }
+    
+    elif visa_type == "I-589":
+        return {
+            **common_fields,
+            "data_chegada_eua": {
+                "label": "Data de Chegada nos EUA",
+                "validation": "required|date",
+                "example": "2023-01-15"
+            },
+            "numero_i94": {
+                "label": "Número I-94",
+                "validation": "required|numeric",
+                "example": "1234567890"
+            },
+            "nacionalidade": {
+                "label": "Nacionalidade",
+                "validation": "required",
+                "example": "Brazilian"
+            },
+            "motivo_asilo": {
+                "label": "Motivo do Pedido de Asilo",
+                "validation": "required|min:50",
+                "example": "Perseguição política no país de origem..."
+            },
+            "endereco": {
+                "label": "Endereço Atual nos EUA",
+                "validation": "required|min:5",
+                "example": "123 Main Street"
+            },
+            "telefone": {
+                "label": "Telefone",
+                "validation": "required",
+                "example": "+1 555-1234"
+            }
+        }
+    
+    elif visa_type in ["EB-1A", "EB1A", "I-140"]:
+        return {
+            **common_fields,
+            "area_expertise": {
+                "label": "Área de Expertise",
+                "validation": "required|min:3",
+                "example": "Tecnologia da Informação"
+            },
+            "realizacoes": {
+                "label": "Realizações Extraordinárias",
+                "validation": "required|min:100",
+                "example": "Publicações, prêmios, patentes..."
+            },
+            "publicacoes": {
+                "label": "Publicações",
+                "validation": "optional",
+                "example": "Lista de publicações acadêmicas"
+            },
+            "premios": {
+                "label": "Prêmios e Reconhecimentos",
+                "validation": "optional",
+                "example": "Prêmios nacionais ou internacionais"
+            }
+        }
+    
+    # Default: return common fields only
+    return common_fields
+
+
+def validate_fields_programmatically(friendly_form_data: dict, basic_data: dict, visa_type: str) -> dict:
+    """
+    Perform programmatic validation before AI validation
+    This is faster and more reliable for basic checks
+    
+    Returns: dict with validation_issues, completion_percentage, missing_fields
+    """
+    
+    required_fields = get_required_fields_by_visa_type(visa_type)
+    validation_issues = []
+    missing_fields = []
+    filled_count = 0
+    total_required = len(required_fields)
+    
+    # Merge both data sources for validation
+    all_data = {**basic_data, **friendly_form_data}
+    
+    for field_name, field_config in required_fields.items():
+        field_value = all_data.get(field_name, "")
+        field_label = field_config["label"]
+        validation_rules = field_config["validation"]
+        
+        # Check if field is empty
+        if not field_value or (isinstance(field_value, str) and field_value.strip() == ""):
+            if "required" in validation_rules:
+                missing_fields.append(field_name)
+                validation_issues.append({
+                    "field": field_name,
+                    "field_label": field_label,
+                    "issue": f"Campo obrigatório não preenchido",
+                    "severity": "error",
+                    "suggestion": f"Por favor, preencha o campo '{field_label}'. Exemplo: {field_config.get('example', 'N/A')}"
+                })
+        else:
+            filled_count += 1
+            
+            # Additional validation rules
+            if "email" in validation_rules:
+                if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', str(field_value)):
+                    validation_issues.append({
+                        "field": field_name,
+                        "field_label": field_label,
+                        "issue": "Formato de email inválido",
+                        "severity": "error",
+                        "suggestion": f"Use um email válido, como: {field_config.get('example', 'usuario@example.com')}"
+                    })
+            
+            if "date" in validation_rules:
+                # Check if date is in valid format
+                if not re.match(r'^\d{4}-\d{2}-\d{2}$', str(field_value)):
+                    validation_issues.append({
+                        "field": field_name,
+                        "field_label": field_label,
+                        "issue": "Formato de data inválido",
+                        "severity": "error",
+                        "suggestion": f"Use o formato YYYY-MM-DD, como: {field_config.get('example', '1990-01-15')}"
+                    })
+            
+            if "numeric" in validation_rules:
+                if not str(field_value).replace("-", "").isdigit():
+                    validation_issues.append({
+                        "field": field_name,
+                        "field_label": field_label,
+                        "issue": "Deve conter apenas números",
+                        "severity": "warning",
+                        "suggestion": f"Use apenas números, como: {field_config.get('example', '123456')}"
+                    })
+            
+            if "min:" in validation_rules:
+                min_length = int(validation_rules.split("min:")[1].split("|")[0])
+                if len(str(field_value)) < min_length:
+                    validation_issues.append({
+                        "field": field_name,
+                        "field_label": field_label,
+                        "issue": f"Muito curto (mínimo {min_length} caracteres)",
+                        "severity": "warning",
+                        "suggestion": f"Forneça mais detalhes. Exemplo: {field_config.get('example', 'N/A')}"
+                    })
+    
+    # Calculate completion percentage
+    completion_percentage = int((filled_count / total_required) * 100) if total_required > 0 else 0
+    
+    return {
+        "validation_issues": validation_issues,
+        "missing_fields": missing_fields,
+        "completion_percentage": completion_percentage,
+        "total_required": total_required,
+        "filled_count": filled_count
+    }
+
+
 def get_validation_message_pt(status: str, completion: int) -> str:
     """Get user-friendly message in Portuguese based on validation status"""
     if status == "approved" and completion >= 90:
