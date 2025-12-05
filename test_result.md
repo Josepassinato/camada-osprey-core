@@ -165,7 +165,7 @@ agent_communication:
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "AUDITORIA COMPLETA - FLUXO FORMULÁRIO AMIGÁVEL → FORMULÁRIO OFICIAL: Verificar se o sistema tem um formulário amigável em português para o usuário preencher, e se esses dados alimentam o formulário oficial USCIS. Fluxo esperado: Usuário (Português) → Formulário Amigável → IA Avalia → Dados Coletados → Formulário Oficial USCIS."
+user_problem_statement: "TESTE END-TO-END COMPLETO: DO INÍCIO AO FIM - Validar que o sistema funciona perfeitamente do começo ao fim, testando: Seleção de visto, Criação de caso, Obtenção de estrutura do formulário, Preenchimento do formulário amigável, Validação IA em 2 estágios, Geração do PDF oficial USCIS, Download do PDF preenchido."
 
 frontend:
   - task: "Basic Data Required Fields Validation System"
