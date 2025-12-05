@@ -1,0 +1,280 @@
+{
+  "main_results": {
+    "fase_1_case_creation": {
+      "status_code": 200,
+      "processing_time": 0.042450904846191406,
+      "validations": {
+        "1_case_created": true,
+        "2_case_id_format": true,
+        "3_response_success": true,
+        "4_case_data_present": true
+      },
+      "response_data": {
+        "message": "Auto-application case created successfully",
+        "case": {
+          "case_id": "OSP-50765E8F",
+          "user_id": null,
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "process_type": null,
+          "progress_percentage": 0,
+          "current_step": null,
+          "basic_data": null,
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-12-05T04:32:35.325318",
+          "updated_at": "2025-12-05T04:32:35.325318",
+          "expires_at": "2025-12-12T04:32:35.325256"
+        }
+      },
+      "case_id": "OSP-50765E8F"
+    },
+    "fase_2_basic_data": {
+      "status_code": 200,
+      "processing_time": 0.024289846420288086,
+      "validations": {
+        "1_case_updated": true,
+        "2_basic_data_saved": false,
+        "3_applicant_name_correct": false,
+        "4_visa_type_correct": false
+      },
+      "response_data": {
+        "message": "Case updated successfully",
+        "case": {
+          "case_id": "OSP-50765E8F",
+          "user_id": null,
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "process_type": null,
+          "progress_percentage": 0,
+          "current_step": null,
+          "basic_data": null,
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-12-05T04:32:35.325000",
+          "updated_at": "2025-12-05T04:32:35.349000",
+          "expires_at": "2025-12-12T04:32:35.325000"
+        }
+      }
+    },
+    "fase_3_document_uploads": {
+      "uploaded_docs": [
+        {
+          "name": "passport_carlos_mendes.pdf",
+          "status": "failed",
+          "error": "{\"detail\":\"Not authenticated\"}"
+        },
+        {
+          "name": "i20_columbia_university.pdf",
+          "status": "failed",
+          "error": "{\"detail\":\"Not authenticated\"}"
+        },
+        {
+          "name": "financial_support_proof.pdf",
+          "status": "failed",
+          "error": "{\"detail\":\"Not authenticated\"}"
+        },
+        {
+          "name": "cover_letter_i539.pdf",
+          "status": "failed",
+          "error": "{\"detail\":\"Not authenticated\"}"
+        },
+        {
+          "name": "academic_transcript.pdf",
+          "status": "failed",
+          "error": "{\"detail\":\"Not authenticated\"}"
+        }
+      ],
+      "total_docs": 5,
+      "successful_uploads": 0
+    },
+    "fase_4_ai_review_endpoints": {
+      "AI Case Review": {
+        "status_code": 404,
+        "processing_time": 0.056815385818481445,
+        "working": false,
+        "error": "{\"detail\":\"Not Found\"}"
+      },
+      "Professional QA Review": {
+        "status_code": 404,
+        "processing_time": 0.02405691146850586,
+        "working": false,
+        "error": "{\"detail\":\"Not Found\"}"
+      },
+      "Document Validation": {
+        "status_code": 404,
+        "processing_time": 0.018726587295532227,
+        "working": false,
+        "error": "{\"detail\":\"Not Found\"}"
+      },
+      "Form Validation": {
+        "status_code": 404,
+        "processing_time": 0.05610156059265137,
+        "working": false,
+        "error": "{\"detail\":\"Not Found\"}"
+      },
+      "Compliance Check": {
+        "status_code": 404,
+        "processing_time": 0.020334720611572266,
+        "working": false,
+        "error": "{\"detail\":\"Not Found\"}"
+      }
+    },
+    "fase_5_document_validation": [],
+    "fase_6_letter_quality": {
+      "working": true,
+      "quality_checks": {
+        "professional_tone": false,
+        "complete_information": true,
+        "proper_format": true,
+        "visa_specific": true
+      },
+      "review_result": {
+        "success": false,
+        "error": "Carta do aplicante n\u00e3o fornecida"
+      },
+      "overall_quality": 75.0
+    },
+    "fase_7_form_verification": {
+      "working": true,
+      "i539_requirements": {
+        "applicant_name_present": true,
+        "current_visa_type_present": true,
+        "extension_reason_present": true,
+        "i20_expiration_present": true,
+        "sevis_number_present": true,
+        "university_present": true
+      },
+      "validation_result": {
+        "success": true,
+        "agent": "Dra. Ana - Validadora de Formul\u00e1rios",
+        "specialization": "Form Validation & Data Consistency",
+        "analysis": "Para realizar a valida\u00e7\u00e3o sistem\u00e1tica, preciso dos dados do formul\u00e1rio espec\u00edfico que voc\u00ea deseja que eu valide. No entanto, voc\u00ea mencionou que n\u00e3o possui nenhum dado de formul\u00e1rio ({}). \n\nPor favor, forne\u00e7a os dados do formul\u00e1rio para que eu possa prosseguir com a valida\u00e7\u00e3o.",
+        "timestamp": "2025-12-05T04:32:38.635903"
+      },
+      "completion_rate": 100.0
+    },
+    "fase_8_uscis_compliance": {
+      "working": true,
+      "uscis_requirements": {
+        "form_i539_complete": true,
+        "supporting_documents_present": true,
+        "financial_evidence_provided": true,
+        "current_status_documented": true,
+        "extension_reason_valid": true,
+        "i94_copy_available": true,
+        "passport_copy_available": true
+      },
+      "compliance_result": {
+        "success": true,
+        "agent": "Dra. Patricia - Compliance USCIS",
+        "specialization": "USCIS Compliance & Final Review",
+        "analysis": "Para fornecer uma avalia\u00e7\u00e3o precisa, \u00e9 necess\u00e1rio que os detalhes dos formul\u00e1rios preenchidos sejam fornecidos. Ao mesmo tempo, para uma melhor an\u00e1lise, devemos ter uma vis\u00e3o clara sobre o tipo de aplica\u00e7\u00e3o que est\u00e1 sendo feita. \n\nNo entanto, com base na lista de documentos fornecida, aqui est\u00e1 uma avalia\u00e7\u00e3o preliminar:\n\n{\n    \"agent\": \"Dra. Patricia - Compliance\",\n    \"uscis_compliant\": false,\n    \"ready_for_submission\": false,\n    \"compliance_score\": 60,\n    \"red_flags\": [\"Formul\u00e1rios n\u00e3o especificados\", \"Tipo de aplica\u00e7\u00e3o n\u00e3o especificado\"],\n    \"missing_elements\": [\"Detalhes dos formul\u00e1rios\", \"Tipo de aplica\u00e7\u00e3o\"],\n    \"final_checklist\": [\n        {\"item\": \"Passaporte\", \"status\": \"ok\"},\n        {\"item\": \"I20\", \"status\": \"ok\"},\n        {\"item\": \"Documentos financeiros\", \"status\": \"ok\"},\n        {\"item\": \"Carta de apresenta\u00e7\u00e3o\", \"status\": \"ok\"},\n        {\"item\": \"Documentos de educa\u00e7\u00e3o\", \"status\": \"ok\"},\n        {\"item\": \"Formul\u00e1rios\", \"status\": \"missing\"},\n        {\"item\": \"Tipo de aplica\u00e7\u00e3o\", \"status\": \"missing\"}\n    ],\n    \"submission_recommendation\": \"REVISAR_PRIMEIRO\",\n    \"final_notes\": \"Sem detalhes suficientes sobre os formul\u00e1rios preenchidos e o tipo de aplica\u00e7\u00e3o, a an\u00e1lise de compliance n\u00e3o pode ser conclu\u00edda. Por favor, forne\u00e7a esses detalhes para uma revis\u00e3o mais completa.\"\n}",
+        "timestamp": "2025-12-05T04:32:56.578582"
+      },
+      "compliance_score": 100.0
+    },
+    "fase_9_final_analysis": {
+      "status_code": 200,
+      "processing_time": 0.05069875717163086,
+      "ai_review_analysis": {
+        "case_retrieval_working": true,
+        "case_data_complete": true,
+        "applicant_data_preserved": false,
+        "i539_specific_data_present": false
+      },
+      "response_data": {
+        "case": {
+          "case_id": "OSP-50765E8F",
+          "user_id": null,
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "process_type": null,
+          "progress_percentage": 0,
+          "current_step": null,
+          "basic_data": null,
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-12-05T04:32:35.325000",
+          "updated_at": "2025-12-05T04:32:35.349000",
+          "expires_at": "2025-12-12T04:32:35.325000"
+        }
+      }
+    },
+    "summary": {
+      "overall_success": false,
+      "successful_phases": 6,
+      "total_phases": 9,
+      "success_rate": 66.66666666666666,
+      "case_id": "OSP-50765E8F",
+      "ai_review_functional": false
+    }
+  },
+  "additional_results": {
+    "i539_visa_info": true,
+    "i539_documents": false,
+    "validation_database": true,
+    "comprehensive_validation": false,
+    "validation_capabilities": false
+  },
+  "timestamp": 1764909186.778035,
+  "test_focus": "I-539 Extension of Stay AI Review System Analysis",
+  "applicant": {
+    "name": "Carlos Eduardo Silva Mendes",
+    "email": "carlos.mendes@test.com",
+    "visa_type": "I-539",
+    "current_status": "F-1",
+    "extension_reason": "Complete Master's degree in Computer Science"
+  },
+  "ai_review_assessment": {
+    "satisfactory": false,
+    "uscis_compliant": true,
+    "identifies_missing_docs": false,
+    "evaluates_letter_quality": true,
+    "verifies_form_completion": true,
+    "overall_ready": false,
+    "criteria_met": "3/5"
+  }
+}
