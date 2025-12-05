@@ -100,13 +100,9 @@ def test_uscis_form_generation_system():
     except Exception as e:
         print(f"❌ Exception updating EB-1A case: {str(e)}")
     
-    # STEP 2: Test AI Review After Corrections
-    print("\n📋 STEP 2: AI Review After EB-1A Corrections")
+    # STEP 2: Test form generation for all 3 visa types
+    print("\n📋 STEP 2: Test Form Generation for All 3 Visa Types")
     print("-" * 50)
-    
-    if not case_id:
-        print("❌ Cannot proceed without case_id")
-        return results
     
     try:
         print("🔍 Testing EB-1A AI Review System After Corrections...")
