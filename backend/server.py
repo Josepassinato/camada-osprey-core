@@ -403,6 +403,10 @@ class CaseUpdate(BaseModel):
     current_step: Optional[str] = None
     # I-765 EAD specific fields
     ead_data: Optional[Dict[str, Any]] = None
+    # Letters (cover letter, personal statement, etc.)
+    letters: Optional[Dict[str, Any]] = None
+    # Forms completion tracking
+    forms: Optional[Dict[str, Any]] = None
 
 # Document Models (keeping existing ones)
 class UserDocument(BaseModel):
