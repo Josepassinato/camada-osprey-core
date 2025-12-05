@@ -11,10 +11,18 @@
       "working": true
     },
     "parte2_backend": {
-      "working": false
+      "case_created": true,
+      "simplified_responses_accepted": true,
+      "data_persisted": true,
+      "portuguese_preserved": true,
+      "working": true
     },
     "parte3_fluxo_completo": {
-      "working": false
+      "case_created": true,
+      "responses_saved": true,
+      "data_persisted": true,
+      "structure_correct": true,
+      "working": true
     },
     "parte4_mapeamento_ia": {
       "mapping_endpoints_found": true,
@@ -27,19 +35,19 @@
       "working": false
     },
     "summary": {
-      "friendly_form_score": 4,
-      "backend_score": 2,
+      "friendly_form_score": 5,
+      "backend_score": 5,
       "integration_score": 3,
-      "ux_score": 3,
-      "total_score": 12,
+      "ux_score": 4,
+      "total_score": 17,
       "max_score": 20,
-      "percentage": 60.0,
-      "working_steps": 2,
+      "percentage": 85.0,
+      "working_steps": 3,
       "total_steps": 5,
-      "system_status": "PARCIAL"
+      "system_status": "COMPLETO"
     }
   },
-  "timestamp": 1764914581.7137227,
+  "timestamp": 1764914602.0578582,
   "test_focus": "Friendly Form → Official Form Flow Audit",
   "criteria": {
     "friendly_form": 5,
