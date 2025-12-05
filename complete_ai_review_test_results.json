@@ -1,20 +1,312 @@
 {
   "test_results": {
     "fase_1_criar_caso": {
-      "status_code": 404,
-      "processing_time": 0.09043717384338379,
-      "error": "{\"detail\":\"Not Found\"}"
+      "status_code": 200,
+      "processing_time": 0.049964189529418945,
+      "validations": {
+        "status_200_ok": true,
+        "case_id_returned": true,
+        "case_created_in_db": true
+      },
+      "case_id": "OSP-41ADDCBF"
     },
-    "fase_2_dados_basicos": {},
-    "fase_3_ai_review_sem_docs": {},
-    "fase_4_upload_documentos": {},
-    "fase_5_carta_apresentacao": {},
-    "fase_6_formulario_preenchido": {},
-    "fase_7_ai_review_completa": {},
-    "fase_8_verificar_banco": {},
-    "summary": {}
+    "fase_2_dados_basicos": {
+      "status_code": 200,
+      "processing_time": 0.021645784378051758,
+      "validations": {
+        "status_200_ok": true,
+        "dados_foram_salvos": true,
+        "basic_data_no_banco": true
+      },
+      "response_data": {
+        "message": "Case updated successfully",
+        "case": {
+          "case_id": "OSP-41ADDCBF",
+          "user_id": null,
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "process_type": null,
+          "progress_percentage": 0,
+          "current_step": null,
+          "basic_data": {
+            "applicant_name": "Maria Santos Silva",
+            "date_of_birth": "1990-05-20",
+            "passport_number": "BR123456789",
+            "current_address": "456 Park Avenue, Apt 8C",
+            "city": "Miami",
+            "state": "FL",
+            "zip_code": "33101",
+            "country_of_birth": "Brazil",
+            "email": "maria.teste@test.com",
+            "phone": "+1-305-555-0123"
+          },
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-12-05T04:50:17.262000",
+          "updated_at": "2025-12-05T04:50:17.285000",
+          "expires_at": "2025-12-12T04:50:17.261000"
+        }
+      }
+    },
+    "fase_3_ai_review_sem_docs": {
+      "status_code": 500,
+      "processing_time": 0.025400161743164062,
+      "error": "{\"detail\":\"Error in AI review: 'NoneType' object has no attribute 'upper'\"}"
+    },
+    "fase_4_upload_documentos": {
+      "uploaded_documents": [
+        {
+          "document_type": "passport",
+          "document_id": "e720b187-4e04-45b3-909b-770c26ebcc78",
+          "file_size": 56,
+          "validations": {
+            "status_200_ok_nao_403": true,
+            "retorna_document_id": true,
+            "documento_salvo_no_caso": true,
+            "sem_erro_autenticacao": true
+          },
+          "status": "success"
+        },
+        {
+          "document_type": "i94",
+          "document_id": "89ad1878-78ca-4403-9387-5f1438458829",
+          "file_size": 50,
+          "validations": {
+            "status_200_ok_nao_403": true,
+            "retorna_document_id": true,
+            "documento_salvo_no_caso": true,
+            "sem_erro_autenticacao": true
+          },
+          "status": "success"
+        },
+        {
+          "document_type": "current_visa",
+          "document_id": "6b0153e4-4abf-4afa-af9f-3899f29df2ac",
+          "file_size": 35,
+          "validations": {
+            "status_200_ok_nao_403": true,
+            "retorna_document_id": true,
+            "documento_salvo_no_caso": true,
+            "sem_erro_autenticacao": true
+          },
+          "status": "success"
+        },
+        {
+          "document_type": "i20_or_ds2019",
+          "document_id": "c6ebc020-1eb2-4828-b925-886a0615b238",
+          "file_size": 50,
+          "validations": {
+            "status_200_ok_nao_403": true,
+            "retorna_document_id": true,
+            "documento_salvo_no_caso": true,
+            "sem_erro_autenticacao": true
+          },
+          "status": "success"
+        },
+        {
+          "document_type": "financial_evidence",
+          "document_id": "7ef490de-62a7-4895-ba9c-9ab4566c0350",
+          "file_size": 37,
+          "validations": {
+            "status_200_ok_nao_403": true,
+            "retorna_document_id": true,
+            "documento_salvo_no_caso": true,
+            "sem_erro_autenticacao": true
+          },
+          "status": "success"
+        }
+      ],
+      "total_documents": 5,
+      "successful_uploads": 5
+    },
+    "fase_5_carta_apresentacao": {
+      "status_code": 200,
+      "processing_time": 0.021633386611938477,
+      "validations": {
+        "status_200_ok": true,
+        "carta_salva_no_caso": true
+      },
+      "response_data": {
+        "message": "Case updated successfully",
+        "case": {
+          "case_id": "OSP-41ADDCBF",
+          "user_id": null,
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "process_type": null,
+          "progress_percentage": 0,
+          "current_step": null,
+          "basic_data": {
+            "applicant_name": "Maria Santos Silva",
+            "date_of_birth": "1990-05-20",
+            "passport_number": "BR123456789",
+            "current_address": "456 Park Avenue, Apt 8C",
+            "city": "Miami",
+            "state": "FL",
+            "zip_code": "33101",
+            "country_of_birth": "Brazil",
+            "email": "maria.teste@test.com",
+            "phone": "+1-305-555-0123"
+          },
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-12-05T04:50:17.262000",
+          "updated_at": "2025-12-05T04:50:17.485000",
+          "expires_at": "2025-12-12T04:50:17.261000"
+        }
+      }
+    },
+    "fase_6_formulario_preenchido": {
+      "status_code": 200,
+      "processing_time": 0.061537742614746094,
+      "validations": {
+        "status_200_ok": true,
+        "formulario_marcado_completo": true
+      },
+      "response_data": {
+        "message": "Case updated successfully",
+        "case": {
+          "case_id": "OSP-41ADDCBF",
+          "user_id": null,
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "process_type": null,
+          "progress_percentage": 0,
+          "current_step": null,
+          "basic_data": {
+            "applicant_name": "Maria Santos Silva",
+            "date_of_birth": "1990-05-20",
+            "passport_number": "BR123456789",
+            "current_address": "456 Park Avenue, Apt 8C",
+            "city": "Miami",
+            "state": "FL",
+            "zip_code": "33101",
+            "country_of_birth": "Brazil",
+            "email": "maria.teste@test.com",
+            "phone": "+1-305-555-0123"
+          },
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-12-05T04:50:17.262000",
+          "updated_at": "2025-12-05T04:50:17.506000",
+          "expires_at": "2025-12-12T04:50:17.261000"
+        }
+      }
+    },
+    "fase_7_ai_review_completa": {
+      "status_code": 500,
+      "processing_time": 0.020667552947998047,
+      "error": "{\"detail\":\"Error in AI review: 'NoneType' object has no attribute 'upper'\"}"
+    },
+    "fase_8_verificar_banco": {
+      "status_code": 200,
+      "processing_time": 0.01828289031982422,
+      "validations": {
+        "campo_ai_review_existe": false,
+        "campo_ai_review_date_existe": false,
+        "campo_ai_review_score_existe": false,
+        "campo_documents_tem_5_docs": false,
+        "campo_basic_data_completo": true,
+        "campo_letters_tem_cover_letter": false
+      },
+      "response_data": {
+        "case": {
+          "case_id": "OSP-41ADDCBF",
+          "user_id": null,
+          "session_token": null,
+          "form_code": null,
+          "status": "created",
+          "process_type": null,
+          "progress_percentage": 0,
+          "current_step": null,
+          "basic_data": {
+            "applicant_name": "Maria Santos Silva",
+            "date_of_birth": "1990-05-20",
+            "passport_number": "BR123456789",
+            "current_address": "456 Park Avenue, Apt 8C",
+            "city": "Miami",
+            "state": "FL",
+            "zip_code": "33101",
+            "country_of_birth": "Brazil",
+            "email": "maria.teste@test.com",
+            "phone": "+1-305-555-0123"
+          },
+          "uploaded_documents": [],
+          "document_analysis": null,
+          "user_story_text": null,
+          "user_story_audio_url": null,
+          "ai_extracted_facts": null,
+          "simplified_form_responses": null,
+          "official_form_data": null,
+          "uscis_form_generated": false,
+          "ead_data": null,
+          "ai_processing": null,
+          "payment_status": null,
+          "payment_id": null,
+          "final_package_generated": false,
+          "final_package_url": null,
+          "completed_at": null,
+          "created_at": "2025-12-05T04:50:17.262000",
+          "updated_at": "2025-12-05T04:50:17.506000",
+          "expires_at": "2025-12-12T04:50:17.261000"
+        }
+      }
+    },
+    "summary": {
+      "endpoints_score": "4/5",
+      "funcionalidades_score": "3/5",
+      "validacoes_score": "0/5",
+      "total_score": "7/15",
+      "success_percentage": 46.666666666666664,
+      "case_id": "OSP-41ADDCBF",
+      "overall_success": false,
+      "before_corrections": "Upload: HTTP 403, AI Review: HTTP 404, Score: 60% (3/5)",
+      "after_corrections": "Upload: HTTP 200, AI Review: HTTP 200, Score: 46.7% (7/15)"
+    }
   },
-  "timestamp": "2025-12-05T04:49:51.053438",
+  "timestamp": "2025-12-05T04:50:17.592194",
   "test_focus": "Complete I-539 AI Review System - Post Corrections",
   "applicant": {
     "name": "Maria Santos Silva",
