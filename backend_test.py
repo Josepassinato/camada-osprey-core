@@ -133,23 +133,40 @@ def test_i539_ai_review_system():
         print(f"❌ Exception during case creation: {str(e)}")
         results["fase_1_case_creation"]["exception"] = str(e)
     
-    # ETAPA 2: Login
-    print("\n📋 ETAPA 2: Login do Usuário")
+    # FASE 2: Completar dados básicos do I-539
+    print("\n📋 FASE 2: Completar Dados Básicos I-539")
     print("-" * 50)
     
-    login_data = {
-        "email": "sofia.mendes.test@example.com",
-        "password": "TestPassword123!"
+    if not case_id:
+        print("❌ Cannot proceed without case_id")
+        return results
+    
+    basic_data = {
+        "applicant_name": "Carlos Eduardo Silva Mendes",
+        "date_of_birth": "1985-03-15",
+        "passport_number": "BR987654321",
+        "current_address": "123 Main Street, Apt 4B",
+        "city": "New York",
+        "state": "NY",
+        "zip_code": "10001",
+        "country_of_birth": "Brazil",
+        "email": "carlos.mendes@test.com",
+        "phone": "+5511987654321",
+        "current_visa_type": "F-1",
+        "i20_expiration": "2025-06-30",
+        "extension_reason": "Complete Master's degree in Computer Science",
+        "university": "Columbia University",
+        "sevis_number": "N9876543210"
     }
     
     try:
-        print(f"🔗 Endpoint: POST {API_BASE}/auth/login")
-        print(f"📤 Payload: {json.dumps(login_data, indent=2)}")
+        print(f"🔗 Endpoint: PUT {API_BASE}/auto-application/case/{case_id}")
+        print(f"📤 Payload: {json.dumps(basic_data, indent=2)}")
         
         start_time = time.time()
-        response = requests.post(
-            f"{API_BASE}/auth/login",
-            json=login_data,
+        response = requests.put(
+            f"{API_BASE}/auto-application/case/{case_id}",
+            json=basic_data,
             headers={"Content-Type": "application/json"},
             timeout=30
         )
@@ -158,42 +175,39 @@ def test_i539_ai_review_system():
         print(f"⏱️  Processing time: {processing_time:.2f}s")
         print(f"📊 Status Code: {response.status_code}")
         
-        results["etapa_2_login"]["status_code"] = response.status_code
-        results["etapa_2_login"]["processing_time"] = processing_time
+        results["fase_2_basic_data"]["status_code"] = response.status_code
+        results["fase_2_basic_data"]["processing_time"] = processing_time
         
-        if response.status_code == 200:
+        if response.status_code in [200, 201]:
             response_data = response.json()
             print(f"📄 Response: {json.dumps(response_data, indent=2)}")
             
-            # Update JWT token from login
-            jwt_token = response_data.get("token")
-            user_info = response_data.get("user", {})
+            case_data = response_data.get("case", {})
             
             validations = {
-                "1_login_successful": response_data.get("message") == "Login successful",
-                "2_token_present": jwt_token is not None,
-                "3_user_email_correct": user_info.get("email") == "sofia.mendes.test@example.com",
-                "4_user_name_correct": user_info.get("first_name") == "Sofia"
+                "1_case_updated": response_data.get("message") == "Case updated successfully",
+                "2_basic_data_saved": case_data.get("basic_data") is not None,
+                "3_applicant_name_correct": case_data.get("applicant_name") == "Carlos Eduardo Silva Mendes",
+                "4_visa_type_correct": case_data.get("current_visa_type") == "F-1"
             }
             
-            results["etapa_2_login"]["validations"] = validations
-            results["etapa_2_login"]["response_data"] = response_data
-            results["etapa_2_login"]["jwt_token"] = jwt_token
+            results["fase_2_basic_data"]["validations"] = validations
+            results["fase_2_basic_data"]["response_data"] = response_data
             
-            print("\n🎯 VALIDAÇÕES ETAPA 2:")
+            print("\n🎯 VALIDAÇÕES FASE 2:")
             print("=" * 50)
             for check, passed in validations.items():
                 status = "✅" if passed else "❌"
                 print(f"  {status} {check}: {passed}")
                 
         else:
-            print(f"❌ Login failed with status {response.status_code}")
+            print(f"❌ Basic data update failed with status {response.status_code}")
             print(f"📄 Error response: {response.text}")
-            results["etapa_2_login"]["error"] = response.text
+            results["fase_2_basic_data"]["error"] = response.text
             
     except Exception as e:
-        print(f"❌ Exception during login: {str(e)}")
-        results["etapa_2_login"]["exception"] = str(e)
+        print(f"❌ Exception during basic data update: {str(e)}")
+        results["fase_2_basic_data"]["exception"] = str(e)
     
     # ETAPA 3: Iniciar aplicação O-1
     print("\n📋 ETAPA 3: Iniciar Aplicação O-1")
