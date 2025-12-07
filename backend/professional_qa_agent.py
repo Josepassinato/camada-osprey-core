@@ -41,6 +41,12 @@ class ProfessionalQAAgent:
         requirements = {
             "O-1": {
                 "form": "I-129",
+                "category_weights": {
+                    "personal_data": 0.10,
+                    "professional_data": 0.40,  # Muito importante - habilidade extraordinária
+                    "documents": 0.35,  # Evidências críticas
+                    "critical_criteria": 0.15
+                },
                 "required_documents": [
                     "Passport copy (valid for at least 6 months)",
                     "I-94 Arrival/Departure Record",
