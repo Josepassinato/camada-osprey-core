@@ -23,8 +23,16 @@ class ProfessionalQAAgent:
     def __init__(self):
         """Inicializa o agente de QA com requisitos USCIS"""
         self.knowledge_base = self._load_uscis_requirements()
-        self.minimum_approval_score = 0.85  # 85% mínimo para aprovação
-        self.critical_threshold = 0.95  # 95% para processos críticos
+        
+        # 🧪 MODO DE TESTE: Se SKIP_QA_THRESHOLD=TRUE, usar threshold mais baixo
+        test_mode = os.environ.get('SKIP_QA_THRESHOLD', 'FALSE').upper() == 'TRUE'
+        if test_mode:
+            self.minimum_approval_score = 0.50  # 50% em modo de teste
+            self.critical_threshold = 0.60  # 60% para processos críticos em teste
+            logger.warning("⚠️  QA Agent em MODO DE TESTE - thresholds reduzidos")
+        else:
+            self.minimum_approval_score = 0.85  # 85% mínimo para aprovação
+            self.critical_threshold = 0.95  # 95% para processos críticos
         
         logger.info("✅ Professional QA Agent inicializado com base USCIS")
     
