@@ -1987,7 +1987,20 @@ async def upload_document_to_case(
                 }
             )
         
-        logger.info(f"✅ Documento {file.filename} enviado para case {case_id}")
+        logger.info(f"✅ Document uploaded: {file.filename} ({len(content)} bytes) - Type: {document_type}")
+        
+        # 🆕 P1-5: Update progress status after document upload
+        # Get current document count
+        case = await db.auto_cases.find_one({"case_id": case_id})
+        if not case:
+            case = await db.application_cases.find_one({"case_id": case_id})
+        
+        if case:
+            doc_count = len(case.get('uploaded_documents', []))
+            # Update status if we have minimum documents (3+)
+            if doc_count >= 3:
+                collection_name = "auto_cases" if case.get("session_token") else "application_cases"
+                await update_case_status_and_progress(case_id, "documents_uploaded", collection_name)
         
         return {
             "success": True,
