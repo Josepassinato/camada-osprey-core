@@ -2304,14 +2304,40 @@ async def reanalyze_document(document_id: str, current_user = Depends(get_curren
 async def start_auto_application(case_data: CaseCreate, current_user = Depends(get_current_user_optional)):
     """Start a new auto-application case (anonymous or authenticated)"""
     try:
+        # 🆕 P0-3: Pre-populate basic_data with empty structure for all required fields
+        initial_basic_data = {
+            "full_name": "",
+            "email": "",
+            "phone": "",
+            "date_of_birth": "",
+            "country_of_birth": "",
+            "passport_number": "",
+            "passport_country": "",
+            "passport_issue_date": "",
+            "passport_expiration_date": "",
+            "current_address": "",
+            "mailing_address": ""
+        }
+        
         # Create case with or without user association
         if current_user:
             # Authenticated user - associate case with user
+            # Try to pre-fill from user profile if available
+            user_profile = await db.users.find_one({"id": current_user["id"]})
+            if user_profile:
+                if user_profile.get("email"):
+                    initial_basic_data["email"] = user_profile["email"]
+                if user_profile.get("full_name"):
+                    initial_basic_data["full_name"] = user_profile["full_name"]
+                if user_profile.get("phone"):
+                    initial_basic_data["phone"] = user_profile["phone"]
+            
             case = AutoApplicationCase(
                 form_code=case_data.form_code,
                 process_type=case_data.process_type,
                 session_token=case_data.session_token,
                 user_id=current_user["id"],
+                basic_data=initial_basic_data,
                 expires_at=datetime.utcnow() + timedelta(days=30)  # Longer expiration for authenticated users
             )
         else:
@@ -2320,6 +2346,7 @@ async def start_auto_application(case_data: CaseCreate, current_user = Depends(g
                 form_code=case_data.form_code,
                 process_type=case_data.process_type,
                 session_token=case_data.session_token,
+                basic_data=initial_basic_data,
                 expires_at=datetime.utcnow() + timedelta(days=7)
             )
         
