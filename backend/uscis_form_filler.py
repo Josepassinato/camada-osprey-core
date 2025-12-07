@@ -200,6 +200,10 @@ class USCISFormFiller:
             for page in reader.pages:
                 writer.add_page(page)
             
+            # Clone the AcroForm from reader to writer
+            if "/AcroForm" in reader.trailer["/Root"]:
+                writer._root_object.update({pypdf.generic.NameObject("/AcroForm"): reader.trailer["/Root"]["/AcroForm"]})
+            
             # Fill form fields using pypdf
             writer.update_page_form_field_values(
                 writer.pages[0],
