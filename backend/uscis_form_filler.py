@@ -1,14 +1,14 @@
 """
 USCIS Form Filler System
 Auto-fill official USCIS forms with case data
-FIXED: Now uses pdfrw for reliable PDF form filling
+FIXED: Now uses pypdf for reliable PDF form filling
 """
 
 import os
 import io
 from datetime import datetime
 from typing import Dict, Any, Optional
-from pdfrw import PdfReader as PdfrwReader, PdfWriter as PdfrwWriter, PdfDict, PdfName, PdfString, PdfArray
+import pypdf
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 import logging
