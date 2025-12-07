@@ -587,27 +587,64 @@ class ProfessionalQAAgent:
             "approved": False,
             "confidence": overall_score,
             "reason": "",
-            "required_actions": []
+            "required_actions": [],
+            "category_breakdown": {}  # 🆕 Breakdown detalhado por categoria
         }
         
         # Processos críticos (O-1, EB-1A) exigem score mais alto
         threshold = self.critical_threshold if form_code in ['O-1', 'EB-1A'] else self.minimum_approval_score
         
-        # Decisão
+        # 🆕 Adicionar breakdown detalhado de cada categoria
+        for category_name, category_data in report['categories'].items():
+            cat_score = category_data['score']
+            cat_weight = category_data['weight']
+            contribution = cat_score * cat_weight
+            
+            # Nome amigável da categoria
+            friendly_names = {
+                'personal_data': 'Dados Pessoais',
+                'professional_data': 'Dados Profissionais',
+                'documents': 'Documentos',
+                'critical_criteria': 'Critérios Críticos USCIS'
+            }
+            
+            approval['category_breakdown'][category_name] = {
+                "name": friendly_names.get(category_name, category_name),
+                "score": f"{cat_score:.1%}",
+                "weight": f"{cat_weight:.0%}",
+                "contribution": f"{contribution:.1%}",
+                "status": "✅ OK" if cat_score >= 0.80 else ("⚠️ Atenção" if cat_score >= 0.60 else "❌ Crítico"),
+                "issues_count": len(category_data.get('issues', []))
+            }
+        
+        # Decisão com feedback específico
         if overall_score < threshold:
             approval['approved'] = False
             approval['reason'] = f"Overall quality score ({overall_score:.1%}) below required threshold ({threshold:.1%})"
-            approval['required_actions'].append(f"Improve quality to reach minimum {threshold:.1%}")
+            
+            # 🆕 Adicionar ações específicas por categoria com score baixo
+            for cat_name, cat_data in report['categories'].items():
+                if cat_data['score'] < 0.70:
+                    friendly_name = approval['category_breakdown'][cat_name]['name']
+                    approval['required_actions'].append(
+                        f"🔴 {friendly_name}: Score {cat_data['score']:.1%} - {len(cat_data['issues'])} issues found"
+                    )
+                    # Adicionar até 3 issues específicos
+                    for issue in cat_data['issues'][:3]:
+                        approval['required_actions'].append(f"  • {issue}")
         
         elif missing_items:
             approval['approved'] = False
             approval['reason'] = f"Missing {len(missing_items)} critical items"
-            approval['required_actions'] = [f"Add: {item}" for item in missing_items]
+            approval['required_actions'] = [f"📄 Add: {item}" for item in missing_items]
         
         elif report['categories']['critical_criteria']['score'] < 0.70:
             approval['approved'] = False
             approval['reason'] = "Critical USCIS criteria not met"
-            approval['required_actions'].append("Address all critical criteria issues")
+            approval['required_actions'].append("⚠️ Address all critical criteria issues")
+            # Adicionar issues específicos
+            for issue in report['categories']['critical_criteria']['issues']:
+                approval['required_actions'].append(f"  • {issue}")
         
         else:
             approval['approved'] = True
