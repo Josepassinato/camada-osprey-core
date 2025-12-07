@@ -703,7 +703,7 @@ const NewHomepage = () => {
                   ⭐⭐⭐⭐⭐
                 </div>
                 <p className="text-gray-700 leading-relaxed">
-                  "Incrível! Preenchi meu formulário I-20 em menos de 20 minutos. O processo que parecia impossível ficou super simples. A validação por IA me ajudou a evitar erros que eu nem sabia que estava cometendo."
+                  &ldquo;Incrível! Preenchi meu formulário I-20 em menos de 20 minutos. O processo que parecia impossível ficou super simples. A validação por IA me ajudou a evitar erros que eu nem sabia que estava cometendo.&rdquo;
                 </p>
               </div>
               <div className="text-sm text-purple-600 font-semibold">
