@@ -1906,11 +1906,14 @@ async def upload_document_to_case(
             "status": "uploaded"
         }
         
-        # Atualizar caso com o novo documento (try both collections)
+        # Atualizar caso com o novo documento (try both collections and both fields)
         result = await db.application_cases.update_one(
             {"case_id": case_id},
             {
-                "$push": {"documents": document_record},
+                "$push": {
+                    "documents": document_record,
+                    "uploaded_documents": document_record
+                },
                 "$set": {"updated_at": datetime.utcnow()}
             }
         )
@@ -1920,7 +1923,10 @@ async def upload_document_to_case(
             await db.auto_cases.update_one(
                 {"case_id": case_id},
                 {
-                    "$push": {"documents": document_record},
+                    "$push": {
+                        "documents": document_record,
+                        "uploaded_documents": document_record
+                    },
                     "$set": {"updated_at": datetime.utcnow()}
                 }
             )
