@@ -32,6 +32,15 @@ except ImportError:
     VISA_API_AVAILABLE = False
     print("⚠️  Visa API not available")
 
+# Import immigration legal rules
+try:
+    from immigration_legal_rules import apply_legal_rules, ImmigrationLegalRules
+    LEGAL_RULES_AVAILABLE = True
+    print("✅ Immigration Legal Rules loaded successfully")
+except ImportError as e:
+    LEGAL_RULES_AVAILABLE = False
+    print(f"⚠️  Immigration Legal Rules not available: {e}")
+
 # Configure JSON encoder for ObjectId (Pydantic v2 compatible)
 # pydantic.json.ENCODERS_BY_TYPE[ObjectId] = str  # This is for Pydantic v1
 
