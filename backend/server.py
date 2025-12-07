@@ -2832,6 +2832,12 @@ async def submit_friendly_form(case_id: str, request: dict, current_user = Depen
             "updated_at": datetime.utcnow()
         }
         
+        # 🆕 P1-5: Update progress status
+        if completion_percentage >= 100:
+            await update_case_status_and_progress(case_id, "friendly-form-complete", "auto_cases")
+        elif completion_percentage >= 50:
+            await update_case_status_and_progress(case_id, "friendly_form_partial", "auto_cases")
+        
         # Update progress based on completion
         if completion_percentage >= 90:
             update_data["progress_percentage"] = 50
