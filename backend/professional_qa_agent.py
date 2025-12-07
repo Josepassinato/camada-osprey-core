@@ -114,6 +114,12 @@ class ProfessionalQAAgent:
             },
             "H-1B": {
                 "form": "I-129 (H-1B)",
+                "category_weights": {
+                    "personal_data": 0.15,
+                    "professional_data": 0.35,  # Qualificações profissionais
+                    "documents": 0.35,  # LCA, diplomas, CV
+                    "critical_criteria": 0.15  # Specialty occupation
+                },
                 "required_documents": [
                     "Form I-129 with H Classification Supplement",
                     "Labor Condition Application (LCA) certified by DOL",
