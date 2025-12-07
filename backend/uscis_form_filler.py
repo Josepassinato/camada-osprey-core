@@ -152,6 +152,12 @@ class USCISFormFiller:
                 field_mapping
             )
             
+            # Force PDF viewers to regenerate field appearances
+            if "/AcroForm" in writer._root_object:
+                writer._root_object["/AcroForm"].update({
+                    pypdf.generic.NameObject("/NeedAppearances"): pypdf.generic.BooleanObject(True)
+                })
+            
             filled_count = len([v for v in field_mapping.values() if v])
             logger.info(f"✅ Mapped {filled_count} non-empty fields in Form I-589")
             
