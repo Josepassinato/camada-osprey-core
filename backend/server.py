@@ -1360,9 +1360,22 @@ async def generate_uscis_form(case_id: str):
                 detail=f"Form generation not supported for visa type: {visa_type}"
             )
         
-        # Save generated form to case
+        # 🆕 P0-4: Persist PDF to disk
         import base64
+        import os
+        
         pdf_base64 = base64.b64encode(pdf_bytes).decode('utf-8')
+        
+        # Create downloads directory if it doesn't exist
+        download_dir = "/app/downloads/forms"
+        os.makedirs(download_dir, exist_ok=True)
+        
+        # Save PDF to disk
+        pdf_path = os.path.join(download_dir, filename)
+        with open(pdf_path, 'wb') as f:
+            f.write(pdf_bytes)
+        
+        logger.info(f"💾 PDF saved to disk: {pdf_path}")
         
         # Update the correct collection
         collection = db.application_cases if case_collection == "application_cases" else db.auto_cases
@@ -1377,6 +1390,8 @@ async def generate_uscis_form(case_id: str):
                         "form_type": visa_type,
                         "file_size": len(pdf_bytes)
                     },
+                    "generated_pdf_path": pdf_path,  # 🆕 Save file path
+                    "uscis_form_generated": True,  # 🆕 Flag for tracking
                     "updated_at": datetime.utcnow()
                 }
             }
