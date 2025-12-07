@@ -727,7 +727,7 @@ const NewHomepage = () => {
                   ⭐⭐⭐⭐⭐
                 </div>
                 <p className="text-gray-700 leading-relaxed">
-                  "Economizei mais de $2000 que gastaria com um serviço de preenchimento. A plataforma é intuitiva e me guiou passo a passo. Senti confiança total nos documentos gerados."
+                  &ldquo;Economizei mais de $2000 que gastaria com um serviço de preenchimento. A plataforma é intuitiva e me guiou passo a passo. Senti confiança total nos documentos gerados.&rdquo;
                 </p>
               </div>
               <div className="text-sm text-blue-600 font-semibold">
