@@ -170,6 +170,12 @@ class ProfessionalQAAgent:
             },
             "I-539": {
                 "form": "I-539",
+                "category_weights": {
+                    "personal_data": 0.15,
+                    "professional_data": 0.10,  # Menos importante para turismo
+                    "documents": 0.50,  # Mais importante - evidência de turismo
+                    "critical_criteria": 0.25  # Timing e elegibilidade
+                },
                 "required_documents": [
                     "Form I-539 Application to Extend/Change Nonimmigrant Status",
                     "Copy of I-94 Arrival/Departure Record",
