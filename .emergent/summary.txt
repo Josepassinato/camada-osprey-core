@@ -1,89 +1,81 @@
 <analysis>**original_problem_statement**:
-The user's goal is to build and refine a customer-facing AI-powered visa application platform.
+The user's primary goal is to build and enhance a customer-facing AI-powered visa application platform.
 
-Key requirements for this session included:
-1.  **Implement Test Mode Frontend**: Complete the payment bypass feature by adding an automatic redirect on the frontend.
-2.  **Fix UI Bug**: Resolve a visual bug on the final package download page.
-3.  **Implement Email Bypass**: Create a system to bypass email verification for testing purposes.
-4.  **Add Google Authentication**: Integrate Login with Google on the login and signup pages.
-5.  **Conduct CTO-level E2E Testing**: Perform a comprehensive end-to-end test of the I-539 (Extension of Stay) visa application flow, identifying bugs and areas for improvement.
-6.  **Enhance AI Review Agent**: Analyze and improve the final AI review process for specific visa types (I-539, I-589, EB-1A) by adding custom logic and document checks.
-7.  **Implement Official Form Filling**: Address a critical gap by implementing a system to download official USCIS PDF forms and automatically fill them with user data.
-8.  **Verify Friendly Form Flow**: Ensure that a user-friendly form (in the user's language) effectively collects data that is subsequently used to populate the official government forms.
+The initial request was to fix a critical bug preventing the submission of a friendly form. The user's requests evolved to include:
+1.  **Fix Friendly Form Submission:** Resolve the  on the friendly form submission endpoint.
+2.  **Implement Advanced AI Validation:** The AI must analyze the user's form input for coherence and completeness, notifying the user of any missing or incorrect information.
+3.  **Ensure 1:1 Form Mapping:** The data collected in the user-friendly form must perfectly match all the data requirements of the official USCIS PDF form for the specific visa type.
+4.  **Expand Visa Support:** Add more visa types (like F-1, H-1B) to the dynamic form system.
+5.  **End-to-End Testing:** Perform comprehensive tests of the entire user flow, including the Save and Continue feature.
+6.  **Improve Website Trust and Professionalism:** Implement a detailed list of changes to enhance the site's credibility, including adding legal pages (About Us, Contact, Privacy Policy, Terms of Use), a legal disclaimer, and updating the site's footer.
 
 **User's preferred language**: Portuguese. The next agent MUST respond in Portuguese.
 
 **what currently exists?**
-The application is a full-stack platform (React/FastAPI/MongoDB) with a robust set of features for visa application processing.
-- **Comprehensive Testing Modes**: Both a payment bypass () and an email verification bypass () are implemented and functional, facilitating end-to-end testing.
-- **Google OAuth**: Users can now sign up and log in using their Google accounts. The frontend UI and backend callbacks are in place.
-- **Enhanced AI Review Logic**: The backend AI review agent has been significantly improved with custom validation logic and document requirements for I-539, I-589 (Asylum), and EB-1A (Extraordinary Ability) visas.
-- **Critical PDF Form Filling System**: A major gap has been closed. The system can now download official USCIS PDF forms (I-539, I-589, I-140) and has a backend module () and API endpoints () to automatically populate them with case data.
-- **UI/UX Fixes**: The button rendering bug on the download page has been resolved, and the form for basic data now provides clear visual feedback to the user about missing required fields.
-- **Friendly Form UI**: A user-friendly form () exists to capture user data in a simplified manner before it's processed by the AI and used for the official forms.
+The application is a full-stack platform (React/FastAPI/MongoDB).
+- **Dynamic Form Generation System:** A core feature has been implemented where the backend () defines the exact structure, fields, and validation rules for various USCIS forms (I-539, I-589, EB-1A, F-1, H-1B, etc.). The frontend dynamically renders these forms using the  component, ensuring the data collected precisely matches official requirements.
+- **Advanced Validation Engine:** A robust, two-stage validation system is in place. It first performs programmatic checks for missing required fields and data format errors, then uses an AI (Gemini) for a deeper contextual analysis. It provides detailed feedback to the user, including a completion percentage and a list of issues.
+- **Functional Endpoints:** New backend endpoints have been created and are functional:
+    - : Lists all available visa types for which a form structure exists.
+    - : Provides the detailed form structure (schema) to the frontend.
+    - : Receives form submissions, performs validation, and saves progress. This endpoint is now fixed and enhanced.
+- **New Frontend Pages:** Several static pages have been created to improve site credibility: , , , , and .
+- **E2E and Feature Tests:** The Save and Continue functionality and the entire end-to-end user flow have been successfully tested.
 
 **Last working item**:
-- **Last item agent was working:** The agent was auditing the end-to-end flow of the Friendly Form. The user asked to verify that data entered by the user in this simplified form is correctly captured and used to fill the official USCIS PDF. The agent ran a simulation test for this flow.
-- **Status:** BLOCKED
-- **Reasoning**: The simulation test failed with a  on the  endpoint. The root cause was identified as an  in the backend code, where the application was trying to use an object method () on a raw dictionary retrieved from MongoDB. This bug blocks the entire data collection and form-filling pipeline.
-- **Agent Testing Done:** Y (The test failed, identifying the bug).
-- **Which testing method agent to use?** Manual testing by  or . The agent needs to fix the backend code and then can re-run the simulation script created in the last session to confirm the fix.
+- **Last item agent was working:** The agent was implementing the user's request to improve website trust and credibility. It had just finished creating the required static pages (, , , , ) and was about to update the site's footer () to include links to these new pages.
+- **Status:** IN PROGRESS
+- **Agent Testing Done:** N
+- **Which testing method agent to use?** screenshot tool (After updating the footer, the agent should take a screenshot to visually confirm the new links are present and correct).
 - **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-- **Issue 1: Fix 500 Error in Friendly Form Submission Endpoint (P0)**
-    - **Description**: The  endpoint crashes with an  when processing form submissions. This is because the code incorrectly assumes the  object fetched from MongoDB is an object instance rather than a dictionary.
-    - **Attempted fixes**: None. The issue was just identified.
-    - **Next debug checklist**:
-        1.  Open .
-        2.  Locate the  endpoint and the functions it calls (like ).
-        3.  Find all instances where  is called on the  variable (e.g., ).
-        4.  Replace them with standard dictionary access (e.g.,  or ).
-        5.  Restart the backend server: backend: stopped
-backend: started.
-        6.  Re-run the test script that was used in  to confirm the endpoint now works and returns a successful response.
-    - **Why fix this issue and what will be achieved with the fix?**: This is a critical blocker. Fixing it will unblock the entire user data collection pipeline, allowing data from the friendly form to be validated by the AI and used to populate the official USCIS PDF forms.
-    - **Status**: NOT STARTED
-    - **Is recurring issue?** N
-    - **Should Test frontend/backend/both after fix?**: Backend.
-
-- **Issue 2: Activate Security Middleware (P2)**
-    - **Description**: The agent created  and  in a previous session, but these security features were never integrated into the FastAPI application in , so they are currently inactive.
-    - **Attempted fixes**: The agent looked at the  file but was sidetracked and did not complete the integration.
-    - **Next debug checklist**:
-        1.  Review .
-        2.  Import the necessary classes/functions from  and .
-        3.  Register them as FastAPI middleware using  or apply them as dependencies to the relevant API routes.
-    - **Why fix this issue and what will be achieved with the fix?**: To activate intended security features, protecting the application from denial-of-service attacks and basic input-based attacks.
-    - **Status**: NOT STARTED
-    - **Is recurring issue?** N
-    - **Should Test frontend/backend/both after fix?**: Backend.
-    - **Blocked on other issue**: None.
+There are no known bugs or blocking issues. The work is focused on feature implementation.
 
 **In progress Task List**:
-None.
+- **Task 1: Complete Website Trust & Professionalism Adjustments (P0)**
+    - **Description**: The user provided a detailed table of requirements to make the site more professional and trustworthy. Several pages have been created, but the task is not complete.
+    - **Where to resume**:
+        1.  Edit  to add links to the newly created pages: Sobre Nós, Contato, Política de Privacidade, Termos de Uso, and Aviso Legal.
+        2.  Update the main application router (likely in ) to include routes for these new pages.
+        3.  Proceed with the remaining items from the user's list in , such as creating a FAQ page, rewriting website copy, and adding social proof.
+    - **What will be achieved with this?**: The website will appear more credible and trustworthy to users, addressing legal and professional standards.
+    - **Status**: IN PROGRESS
+    - **Should Test frontend/backend/both after fix?**: Frontend.
+    - **Blocked on something**: None.
 
 **Upcoming and Future Tasks**
 - **Upcoming Tasks:**
-    - **(P1)** Populate Footer Pages: Add content to , , and .
+    - **(P1)** Create a robust FAQ page as per user's request.
+    - **(P1)** Review and rewrite website copy to be clearer and avoid legally sensitive terms.
+    - **(P2)** Add a section for Social Proof / Credibility (testimonials, reviews).
+    - **(P2)** Implement full transparency on costs and plans.
+    - **(P2)** Activate security middleware (, ) in .
+
 - **Future Tasks:**
-    - **(P2)** Complete Maria WhatsApp Integration.
+    - **(P3)** Complete Maria WhatsApp Integration.
     - **(P3)** Implement full Multilingual Feature.
     - **(P4)** Implement Maria Voice Integration.
     - **(P5)** Create USCIS Website Scraper.
 
 **Completed work in this session**
-- **Test Mode Frontend Redirect**: Implemented auto-redirect on the checkout page when  is active.
-- **Download Page UI Bug Fix**: Resolved the incorrect button rendering on the package download page.
-- **Email Bypass System**: Created a backend feature to allow user registration/login with  emails and any password for streamlined testing.
-- **Google OAuth Integration**: Successfully added Login with Google to the authentication flow, including frontend UI and backend callback handling.
-- **CTO-level E2E Testing**: Performed a detailed audit of the I-539 visa flow, which led to UX improvements.
-- **Form Validation UX Improvement**: Implemented a dynamic visual alert on the basic data form to show users which required fields are missing.
-- **AI Review Agent Enhancements**: Added visa-specific logic for I-589 and EB-1A cases to the AI review process, making it more accurate.
-- **USCIS PDF Form Filling System**: Implemented a critical new feature to download, auto-fill, and serve official USCIS PDF forms (I-539, I-589, I-140) based on user data.
+- **Critical Bug Fix:** Resolved the  on form submission by correctly handling dictionary objects from MongoDB.
+- **Dynamic Form Architecture:** Implemented a system to define official form structures in the backend and render them dynamically on the frontend.
+- **Advanced Validation System:** Built a multi-stage (programmatic + AI) validation engine that provides precise feedback on form completeness and correctness.
+- **Expanded Visa Support:** Added structures for multiple new visa types (F-1, H-1B, I-130, etc.).
+- **New Static Pages:** Created , , , , and  pages.
+- **Successful E2E Testing:** Verified the entire user flow from visa selection to form submission and progress saving.
 
 **Earlier issues found/mentioned but not fixed**
-None in this session; the middleware issue is carried over but is tracked in the pending list.
+- **Issue 1: Inactive Security Middleware**
+    - **Description**: The security middleware files  and  exist but have not been imported and registered in , leaving the application without rate limiting or input sanitization.
+    - **Debug checklist**:
+        1.  Edit .
+        2.  Import the necessary middleware classes.
+        3.  Register them with the FastAPI app instance using .
+    - **Why to solve this issue and what will be achieved with this?**: To enhance application security against DoS attacks and malicious inputs.
+    - **Should Test frontend/backend/both after fix?**: Backend.
+    - **Is recurring issue?** Y
 
 **Known issue recurrence from previous fork**
 None.
@@ -95,41 +87,38 @@ None.
 - **Backend**: FastAPI
 - **Frontend**: React, TypeScript, shadcn/ui
 - **Database**: MongoDB
-- **Authentication**: JWT, Google OAuth 2.0 (via )
-- **PDF Manipulation**: ,  for filling PDF forms.
-- **AI/LLM**: Gemini for AI review agents.
+- **AI/LLM**: Gemini via  for form validation.
+- **Core Pattern**: Dynamic form generation based on a backend-defined schema.
 
 **key DB schema**
-- : The model was updated in  () to include  and  to better support the detailed AI review process.
+- **application_cases**: The  field in this collection now stores data that is structured according to the schemas in .
 
 **changes in tech stack**
--  was added to the backend stack for PDF generation.
+None.
 
 **All files of reference**
 - **Key New/Updated Files**:
-    - : Major updates for Google Auth, PDF generation, email bypass, and AI review logic.
-    - : New module for the core PDF filling functionality.
-    -  & : Updated with Google Auth button.
-    - : Updated with form validation UX improvements.
-    - : New custom hook for handling Google Auth logic.
-    - : New directory containing official USCIS PDFs.
-    - : New documentation for the email bypass feature.
-    - : New documentation from the E2E testing.
+    - : Major updates with new endpoints and the advanced validation engine.
+    - : New core file defining all form schemas.
+    - : New core component for rendering forms.
+    - : New page for user flow.
+    - : New page for user flow.
+    - , , , , : New static content pages.
+    - : The next file to be modified.
 
 **Areas that need refactoring**:
-- The middleware in  and  needs to be properly registered in  to be active.
+None identified, but the security middleware needs to be activated.
 
 **key api endpoints**
-- : (New) Handles the callback from Google after successful authentication.
-- : (New) Triggers the filling of a specific USCIS PDF form.
-- : (New) Allows downloading the generated PDF.
-- : (Existing, but currently broken) Endpoint to submit data from the simplified user form.
--  & : (Updated) Now include logic for the email bypass test mode.
+- : (Fixed & Enhanced) Submits form data for validation and persistence.
+- : (New) Returns a list of all supported visa types.
+- : (New) Returns the JSON schema for a specific visa form.
 
 **Critical Info for New Agent**
 - **Language is Portuguese**: All user communication MUST be in Portuguese.
-- **Top Priority (P0)**: The most critical task is to fix the  on the  endpoint. This is blocking the main data collection workflow. The fix involves changing how the  dictionary is accessed in .
-- **Test Procedures**: For the email bypass, use any email ending in  with any password. For payment bypass, the  is already active in the backend.
+- **Top Priority (P0)**: Continue with the user's request to improve website credibility. The immediate next step is to edit  to add links to the new static pages.
+- **Core Architecture**: Understand the new dynamic form system. The frontend is now driven by the schemas defined in . Any changes to forms should start there.
+- **Testing Scripts**: Several useful Python test scripts exist in  (, , ) that can be used for regression testing.
 
 **documents created in this job**
 - 
@@ -137,22 +126,23 @@ None.
 - 
 - 
 - 
+- 
+- New frontend pages in 
 
 **Last 10 User Messages and any pending user messages**
-1.  **User**: Test the EB-1A visa flow. - **Status: COMPLETED**.
-2.  **User**: Are the official forms being filled correctly? - **Status: COMPLETED** (This led to the discovery of the critical gap).
-3.  **User**: Download the official forms from USCIS and fix the problem. - **Status: COMPLETED** (PDF filling system implemented).
-4.  **User**: Check if the friendly form in the user's language is being used to collect data for the official forms. - **Status: IN PROGRESS** (Audit test failed, revealing the P0 bug).
-5.  **User**: Let's fix this. - **Status: ACKNOWLEDGED** (In response to fixing the AI review issues for I-589).
-6.  **User**: Fix this. - **Status: ACKNOWLEDGED** (In response to fixing the AI review issues for I-589).
-7.  **User**: Do the same test again. - **Status: COMPLETED** (Re-testing the AI review fixes).
-8.  **User**: Now fix the issues found in the CTO analysis. - **Status: COMPLETED**.
-9.  **User**: I want an AI review analysis of the generated process. - **Status: COMPLETED**.
-10. **User**: Be a CTO with 20 years of experience and test the whole flow. - **Status: COMPLETED**.
+1.  **User:** Test from start to finish. - **Status: COMPLETED** (E2E test was run).
+2.  **User:** Check if the page progress saving is working (Save and continue). - **Status: COMPLETED** (Save/continue test was run).
+3.  **User:** Provided a large table of website adjustments for trust/credibility. - **Status: IN PROGRESS**.
+4.  **User:** Continue one by one. - **Status: ACKNOWLEDGED**.
+5.  **User:** Continue (after Contact page was done). - **Status: ACKNOWLEDGED**.
+6.  **User:** Proceed (after Privacy Policy was done). - **Status: ACKNOWLEDGED**.
+7.  **User:** Continue (after Terms of Use was done). - **Status: ACKNOWLEDGED**.
+8.  **User:** 8 (requesting to jump to item 8, updating the footer). - **Status: ACKNOWLEDGED**.
+9.  **User:** No message, agent continued with work.
+10. **User:** No message, agent continued with work.
 
 **Project Health Check:**
-- **Broken**:
-    - The core user data submission flow is broken. The  on the frontend cannot successfully submit data to the backend due to a  in the  endpoint. This is the highest priority to fix.
+- **Broken**: None.
 - **Mocked**: N/A
 
 **3rd Party Integrations**:
@@ -161,11 +151,14 @@ None.
 - **Google OAuth 2.0** — uses , configured.
 
 **Testing status**
-- **Testing agent used after significant changes**: YES. The testing agent, troubleshoot agent, and manual test scripts were used extensively to validate new features and diagnose issues.
-- **Troubleshoot agent used after agent stuck in loop**: YES, used to identify the root cause of form validation issues and simulation failures.
-- **Test files created**: . Multiple simulation scripts were run via the  but not saved as permanent files.
-- **Known regressions**: None. The current main issue is a new bug, not a regression.
+- **Testing agent used after significant changes**: YES, used after the initial fix. The agent then switched to using custom Python test scripts which proved very effective.
+- **Troubleshoot agent used after agent stuck in loop**: NO.
+- **Test files created**: Yes, multiple Python test scripts in .
+- **Known regressions**: None.
 
 **Credentials to test flow:**
 - **Email/Password**: Use any email ending in  (e.g., ) and any password to sign up or log in.
-- **Payment**: No credentials needed.  is set in , so all payments are automatically bypassed.</analysis>
+- **Payment**:  is set, payments are bypassed.
+
+**What agent forgot to execute**
+- The agent did not activate the security middleware (, ) in , which was a pending task from the previous fork summary.</analysis>

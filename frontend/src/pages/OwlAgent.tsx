@@ -71,7 +71,7 @@ export const OwlAgent: React.FC = () => {
 
   const handleResumeSession = async (sessionId: string) => {
     const getBackendUrl = () => {
-      return import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://docsimple-3.preview.emergentagent.com' || '';
+      return import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://visaflow-5.preview.emergentagent.com' || '';
     };
 
     try {

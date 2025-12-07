@@ -9,7 +9,7 @@ import json
 import uuid
 import os
 
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://docsimple-3.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://visaflow-5.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 print(f"🔍 DETAILED INVESTIGATION")

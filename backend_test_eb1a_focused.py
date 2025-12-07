@@ -11,7 +11,7 @@ import os
 from datetime import datetime
 
 # Get backend URL from frontend .env
-BACKEND_URL = "https://docsimple-3.preview.emergentagent.com"
+BACKEND_URL = "https://visaflow-5.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_eb1a_ai_review_after_corrections():
