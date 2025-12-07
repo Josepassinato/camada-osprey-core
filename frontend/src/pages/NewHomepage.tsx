@@ -746,25 +746,24 @@ const NewHomepage = () => {
             <div>
               <h4 className="font-bold text-gray-900 mb-4">Produto</h4>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li><a href="#" className="hover:text-purple-600">Como Funciona</a></li>
-                <li><a href="#" className="hover:text-purple-600">Preços</a></li>
-                <li><a href="#" className="hover:text-purple-600">Vistos Disponíveis</a></li>
+                <li><a href="#como-funciona" className="hover:text-purple-600">Como Funciona</a></li>
+                <li><a href="#precos" className="hover:text-purple-600">Preços</a></li>
+                <li><a href="/auto-application/select-form" className="hover:text-purple-600">Vistos Disponíveis</a></li>
               </ul>
             </div>
             <div>
               <h4 className="font-bold text-gray-900 mb-4">Empresa</h4>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li><a href="#" className="hover:text-purple-600">Sobre Nós</a></li>
-                <li><a href="#" className="hover:text-purple-600">Blog</a></li>
-                <li><a href="#" className="hover:text-purple-600">Carreiras</a></li>
+                <li><a href="/about" className="hover:text-purple-600">Sobre Nós</a></li>
+                <li><a href="/contact" className="hover:text-purple-600">Contato</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-bold text-gray-900 mb-4">Suporte</h4>
+              <h4 className="font-bold text-gray-900 mb-4">Legal</h4>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li><a href="#" className="hover:text-purple-600">Central de Ajuda</a></li>
-                <li><a href="#" className="hover:text-purple-600">Contato</a></li>
-                <li><a href="#" className="hover:text-purple-600">Termos de Uso</a></li>
+                <li><a href="/privacy-policy" className="hover:text-purple-600">Política de Privacidade</a></li>
+                <li><a href="/terms-of-use" className="hover:text-purple-600">Termos de Uso</a></li>
+                <li><a href="/legal-disclaimer" className="hover:text-purple-600">Aviso Legal</a></li>
               </ul>
             </div>
           </div>
