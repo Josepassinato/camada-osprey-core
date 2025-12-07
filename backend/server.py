@@ -2702,7 +2702,10 @@ async def submit_friendly_form(case_id: str, request: dict, current_user = Depen
                 "status": validation_status,
                 "completion_percentage": completion_percentage,
                 "validation_date": datetime.utcnow(),
-                "issues": validation_issues
+                "issues": validation_issues,
+                "legal_rules_applied": LEGAL_RULES_AVAILABLE,
+                "legal_rules_passed": legal_rules_passed,
+                "total_legal_issues": len(legal_validation_issues)
             },
             "updated_at": datetime.utcnow()
         }
