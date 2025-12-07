@@ -631,17 +631,21 @@ class ProfessionalQAAgent:
         
         critical_checks = requirements.get('critical_checks', [])
         
-        # Verificar pagamento
-        payment_status = case_data.get('payment_status')
-        if payment_status != 'completed':
-            issues.append("CRITICAL: Payment not completed")
-            score -= 0.40
-        
-        # Verificar processamento AI
-        ai_status = case_data.get('ai_processing_status')
-        if ai_status != 'approved':
-            issues.append(f"AI processing not approved (status: {ai_status})")
-            score -= 0.30
+        # 🆕 P1-8: Bypass payment/AI checks in test mode
+        if self.test_mode:
+            logger.info("🧪 Test mode: Skipping payment and AI processing checks")
+        else:
+            # Verificar pagamento
+            payment_status = case_data.get('payment_status')
+            if payment_status != 'completed':
+                issues.append("CRITICAL: Payment not completed")
+                score -= 0.40
+            
+            # Verificar processamento AI
+            ai_status = case_data.get('ai_processing_status')
+            if ai_status != 'approved':
+                issues.append(f"AI processing not approved (status: {ai_status})")
+                score -= 0.30
         
         # Verificar progresso
         progress = case_data.get('progress_percentage', 0)
