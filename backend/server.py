@@ -2629,7 +2629,40 @@ async def submit_friendly_form(case_id: str, request: dict, current_user = Depen
             raise HTTPException(status_code=404, detail="Case not found")
         
         # Get visa type for specific validation
+        # 🆕 P0-2: Auto-detect form_code from friendly form data if not set
         visa_type = case.get('form_code', 'N/A')
+        
+        if not visa_type or visa_type == 'N/A':
+            # Try to detect from friendly form data
+            detected_visa = None
+            status_atual = friendly_form_data.get('status_atual', '').upper()
+            status_solicitado = friendly_form_data.get('status_solicitado', '').upper()
+            
+            # Detection logic
+            if 'B-2' in status_atual or 'B2' in status_atual:
+                if 'EXTENSION' in str(friendly_form_data).upper() or 'EXTENSÃO' in str(friendly_form_data).upper():
+                    detected_visa = 'I-539'
+            elif 'F-1' in status_solicitado or 'F1' in status_solicitado:
+                detected_visa = 'F-1'
+            elif 'H-1B' in status_solicitado or 'H1B' in status_solicitado:
+                detected_visa = 'H-1B'
+            elif 'O-1' in status_solicitado:
+                detected_visa = 'O-1'
+            elif 'EB-1A' in status_solicitado:
+                detected_visa = 'EB-1A'
+            
+            if detected_visa:
+                # Update case with detected visa type
+                await db.auto_cases.update_one(
+                    {"case_id": case_id},
+                    {"$set": {"form_code": detected_visa}}
+                )
+                visa_type = detected_visa
+                logger.info(f"🔍 Auto-detected and set form_code: {detected_visa} for case {case_id}")
+        
+        # If still not detected, use default
+        if not visa_type or visa_type == 'N/A':
+            visa_type = 'I-539'  # Default to most common
         
         # STEP 1: Apply Legal Rules Validation (CRITICAL - From Immigration Attorney)
         legal_validation_issues = []
