@@ -41,6 +41,40 @@ const AboutUs: React.FC = () => {
               </p>
             </div>
 
+            {/* USCIS Official Statement - Self Representation */}
+            <div className="bg-green-50 border-2 border-green-600 p-6 rounded-lg my-6">
+              <h3 className="font-bold text-lg mb-3 text-green-900 flex items-center gap-2">
+                ✅ Direito de Auto-Representação (USCIS Oficial)
+              </h3>
+              <div className="space-y-3 text-gray-800">
+                <p className="text-base leading-relaxed">
+                  Você <strong>pode aplicar para benefícios imigratórios nos Estados Unidos por conta própria</strong>, 
+                  sem a necessidade de advogado ou representante legal.
+                </p>
+                <div className="bg-white p-4 rounded border-l-4 border-green-600">
+                  <p className="italic text-gray-700 mb-2">
+                    "Você sempre pode se representar perante o USCIS. Você não precisa ter um advogado 
+                    ou outro representante."
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    — <strong>USCIS</strong> – Serviço de Cidadania e Imigração dos Estados Unidos
+                  </p>
+                  <a 
+                    href="https://www.uscis.gov/forms/filing-guidance/how-to-make-a-request-for-expedited-processing" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline text-sm mt-2 inline-block"
+                  >
+                    📄 Ver fonte oficial do USCIS →
+                  </a>
+                </div>
+                <p className="text-sm text-gray-600 mt-3">
+                  <strong>Nossa plataforma existe para facilitar</strong> esse direito, oferecendo ferramentas 
+                  tecnológicas que ajudam você a organizar documentos e preencher formulários oficiais corretamente.
+                </p>
+              </div>
+            </div>
+
             <div className="bg-gray-100 p-6 rounded-lg">
               <h3 className="font-semibold text-lg mb-3">📍 Informações Legais:</h3>
               <div className="space-y-2 text-gray-700">
