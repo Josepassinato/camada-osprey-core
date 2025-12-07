@@ -131,6 +131,7 @@ const App = () => (
           {/* Static Pages Routes */}
           <Route path="/about" element={<AboutUs />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/faq" element={<FAQ />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-use" element={<TermsOfUse />} />
           <Route path="/legal-disclaimer" element={<LegalDisclaimer />} />
