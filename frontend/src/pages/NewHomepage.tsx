@@ -818,6 +818,138 @@ const NewHomepage = () => {
         </div>
       </section>
 
+
+      {/* Testimonials Section - Social Proof */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center justify-center gap-2 bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+              <Award className="w-4 h-4" />
+              Histórias de Sucesso
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Milhares de Aplicações Bem-Sucedidas
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Veja o que nossos usuários dizem sobre como transformamos o processo de aplicação de visto
+            </p>
+          </div>
+
+          {/* Testimonials Grid */}
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Testimonial 1 */}
+            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-8 border border-purple-200 hover:shadow-xl transition-shadow">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                  MC
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900">Maria Costa</h4>
+                  <p className="text-sm text-gray-600">F-1 Estudante • Brasil</p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <div className="flex gap-1 text-yellow-400 mb-3">
+                  ⭐⭐⭐⭐⭐
+                </div>
+                <p className="text-gray-700 leading-relaxed">
+                  "Incrível! Preenchi meu formulário I-20 em menos de 20 minutos. O processo que parecia impossível ficou super simples. A validação por IA me ajudou a evitar erros que eu nem sabia que estava cometendo."
+                </p>
+              </div>
+              <div className="text-sm text-purple-600 font-semibold">
+                ✅ Visto aprovado em 3 semanas
+              </div>
+            </div>
+
+            {/* Testimonial 2 */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-200 hover:shadow-xl transition-shadow">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                  RS
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900">Rafael Silva</h4>
+                  <p className="text-sm text-gray-600">H-1B Trabalho • Portugal</p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <div className="flex gap-1 text-yellow-400 mb-3">
+                  ⭐⭐⭐⭐⭐
+                </div>
+                <p className="text-gray-700 leading-relaxed">
+                  "Economizei mais de $2000 que gastaria com um serviço de preenchimento. A plataforma é intuitiva e me guiou passo a passo. Senti confiança total nos documentos gerados."
+                </p>
+              </div>
+              <div className="text-sm text-blue-600 font-semibold">
+                ✅ Processo concluído em 1 dia
+              </div>
+            </div>
+
+            {/* Testimonial 3 */}
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 border border-green-200 hover:shadow-xl transition-shadow">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 bg-gradient-to-r from-green-600 to-emerald-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                  AP
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900">Ana Pereira</h4>
+                  <p className="text-sm text-gray-600">EB-1A Green Card • Brasil</p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <div className="flex gap-1 text-yellow-400 mb-3">
+                  ⭐⭐⭐⭐⭐
+                </div>
+                <p className="text-gray-700 leading-relaxed">
+                  "Achei que teria que contratar um advogado caríssimo. Com a Osprey, organizei tudo sozinha e depois levei para um advogado revisar. Economizei tempo e dinheiro!"
+                </p>
+              </div>
+              <div className="text-sm text-green-600 font-semibold">
+                ✅ Documentos aprovados pelo advogado
+              </div>
+            </div>
+          </div>
+
+          {/* Trust Indicators */}
+          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div>
+              <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+                10,000+
+              </div>
+              <p className="text-gray-600 text-sm">Aplicações Processadas</p>
+            </div>
+            <div>
+              <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+                98%
+              </div>
+              <p className="text-gray-600 text-sm">Taxa de Satisfação</p>
+            </div>
+            <div>
+              <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+                15 min
+              </div>
+              <p className="text-gray-600 text-sm">Tempo Médio</p>
+            </div>
+            <div>
+              <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+                $2,500
+              </div>
+              <p className="text-gray-600 text-sm">Economia Média</p>
+            </div>
+          </div>
+
+          {/* Legal Disclaimer */}
+          <div className="mt-12 bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
+            <p className="text-sm text-gray-700">
+              <strong>Importante:</strong> Os depoimentos representam experiências individuais. Resultados podem variar. 
+              Nossa plataforma é uma ferramenta tecnológica e não garante aprovação de vistos. 
+              Recomendamos consultar um advogado de imigração para avaliação legal do seu caso.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="py-20 bg-gradient-to-r from-purple-600 to-indigo-600 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
