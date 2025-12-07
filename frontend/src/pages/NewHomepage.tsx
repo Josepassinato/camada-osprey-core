@@ -751,7 +751,7 @@ const NewHomepage = () => {
                   ⭐⭐⭐⭐⭐
                 </div>
                 <p className="text-gray-700 leading-relaxed">
-                  "Achei que teria que contratar um advogado caríssimo. Com a Osprey, organizei tudo sozinha e depois levei para um advogado revisar. Economizei tempo e dinheiro!"
+                  &ldquo;Achei que teria que contratar um advogado caríssimo. Com a Osprey, organizei tudo sozinha e depois levei para um advogado revisar. Economizei tempo e dinheiro!&rdquo;
                 </p>
               </div>
               <div className="text-sm text-green-600 font-semibold">
