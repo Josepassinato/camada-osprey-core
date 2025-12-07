@@ -126,6 +126,14 @@ const App = () => (
           {/* Demo/Example Routes */}
           {/* <Route path="/demo/adaptive-language" element={<AdaptiveFormExample />} /> */}
           <Route path="/demo/proactive-alerts" element={<ProactiveAlertsDemo />} />
+          
+          {/* Static Pages Routes */}
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-of-use" element={<TermsOfUse />} />
+          <Route path="/legal-disclaimer" element={<LegalDisclaimer />} />
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
