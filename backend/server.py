@@ -2625,7 +2625,49 @@ async def submit_friendly_form(case_id: str, request: dict, current_user = Depen
         # Get visa type for specific validation
         visa_type = case.get('form_code', 'N/A')
         
-        # STEP 1: AI Validation - Check completeness and coherence
+        # STEP 1: Apply Legal Rules Validation (CRITICAL - From Immigration Attorney)
+        legal_validation_issues = []
+        legal_rules_passed = True
+        
+        if LEGAL_RULES_AVAILABLE:
+            logger.info(f"Applying legal rules validation for visa type: {visa_type}")
+            try:
+                legal_rules_passed, legal_messages = apply_legal_rules(friendly_form_data, visa_type)
+                if not legal_rules_passed or legal_messages:
+                    for message in legal_messages:
+                        # Categorize messages by type
+                        if message.startswith("❌"):
+                            legal_validation_issues.append({
+                                "field": "legal_requirement",
+                                "issue": message,
+                                "severity": "critical",
+                                "type": "legal_rule"
+                            })
+                        elif message.startswith("⚠️") or message.startswith("🚨"):
+                            legal_validation_issues.append({
+                                "field": "legal_warning",
+                                "issue": message,
+                                "severity": "warning",
+                                "type": "legal_rule"
+                            })
+                        else:
+                            legal_validation_issues.append({
+                                "field": "legal_info",
+                                "issue": message,
+                                "severity": "info",
+                                "type": "legal_rule"
+                            })
+                    logger.info(f"Legal validation found {len(legal_validation_issues)} issues/warnings")
+            except Exception as e:
+                logger.error(f"Error applying legal rules: {e}")
+                legal_validation_issues.append({
+                    "field": "legal_validation",
+                    "issue": f"⚠️ Erro ao aplicar regras jurídicas: {str(e)}",
+                    "severity": "warning",
+                    "type": "system_error"
+                })
+        
+        # STEP 2: AI Validation - Check completeness and coherence
         logger.info(f"Starting AI validation for case {case_id}, visa type: {visa_type}")
         
         validation_result = await validate_friendly_form_ai(
@@ -2635,9 +2677,15 @@ async def submit_friendly_form(case_id: str, request: dict, current_user = Depen
             visa_type=visa_type
         )
         
-        # STEP 2: Check if validation passed
+        # STEP 3: Merge legal validation with AI validation
         validation_status = validation_result.get("overall_status", "needs_review")
-        validation_issues = validation_result.get("validation_issues", [])
+        validation_issues = legal_validation_issues + validation_result.get("validation_issues", [])
+        
+        # If legal rules failed, override status to needs_review
+        if not legal_rules_passed:
+            validation_status = "needs_review"
+            logger.warning(f"Legal rules validation failed for case {case_id}")
+        
         completion_percentage = validation_result.get("completion_percentage", 0)
         
         # STEP 3: Save data to database (even if validation found issues)
