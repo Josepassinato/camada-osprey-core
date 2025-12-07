@@ -52,20 +52,24 @@ const AboutUs: React.FC = () => {
                   sem a necessidade de advogado ou representante legal.
                 </p>
                 <div className="bg-white p-4 rounded border-l-4 border-green-600">
-                  <p className="italic text-gray-700 mb-2">
+                  <p className="italic text-gray-800 mb-3 font-medium">
+                    "You may always represent yourself before USCIS. You do not need to have a lawyer 
+                    or other representative."
+                  </p>
+                  <p className="text-sm text-gray-600 mb-3 italic">
                     "Você sempre pode se representar perante o USCIS. Você não precisa ter um advogado 
                     ou outro representante."
                   </p>
-                  <p className="text-sm text-gray-600">
-                    — <strong>USCIS</strong> – Serviço de Cidadania e Imigração dos Estados Unidos
+                  <p className="text-sm text-gray-700 font-semibold">
+                    — U.S. Citizenship and Immigration Services (<strong>USCIS</strong>)
                   </p>
                   <a 
-                    href="https://www.uscis.gov/forms/filing-guidance/how-to-make-a-request-for-expedited-processing" 
+                    href="https://www.uscis.gov" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline text-sm mt-2 inline-block"
+                    className="text-blue-600 hover:underline text-sm mt-2 inline-block font-semibold"
                   >
-                    📄 Ver fonte oficial do USCIS →
+                    📄 Ver fonte oficial do USCIS.gov →
                   </a>
                 </div>
                 <p className="text-sm text-gray-600 mt-3">
