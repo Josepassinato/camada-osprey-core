@@ -1,60 +1,44 @@
-import { Sparkles } from "lucide-react";
+import { Sparkles, Shield, Phone, Mail, MapPin } from "lucide-react";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   const footerSections = [
     {
-      title: "Serviços",
+      title: "Vistos Disponíveis",
       links: [
-        { name: "Visto H1-B", href: "#" },
-        { name: "Green Card", href: "#" },
-        { name: "Visto de Estudante", href: "#" },
-        { name: "Reunificação Familiar", href: "#" },
-        { name: "Visto de Investidor", href: "#" },
-        { name: "Visto de Turismo", href: "#" }
+        { name: "F-1 (Estudante)", href: "/visa-selection" },
+        { name: "H-1B (Trabalho)", href: "/visa-selection" },
+        { name: "I-539 (Extensão)", href: "/visa-selection" },
+        { name: "I-589 (Asilo)", href: "/visa-selection" },
+        { name: "EB-1A (Green Card)", href: "/visa-selection" },
+        { name: "Ver Todos", href: "/visa-selection" }
       ]
     },
     {
       title: "Empresa",
       links: [
-        { name: "Sobre Nós", href: "#" },
-        { name: "Nossa Equipe", href: "#" },
-        { name: "Carreiras", href: "#" },
-        { name: "Imprensa", href: "#" },
-        { name: "Blog", href: "#" },
-        { name: "Parceiros", href: "#" }
-      ]
-    },
-    {
-      title: "Recursos",
-      links: [
-        { name: "Central de Ajuda", href: "#" },
-        { name: "Guias de Imigração", href: "#" },
-        { name: "Calculadora de Custos", href: "#" },
-        { name: "Status do Sistema", href: "#" },
-        { name: "API Documentation", href: "#" },
-        { name: "Webinars", href: "#" }
+        { name: "Sobre Nós", href: "/about" },
+        { name: "Contato", href: "/contact" },
+        { name: "FAQ", href: "/faq" },
+        { name: "Como Funciona", href: "/about#como-funciona" }
       ]
     },
     {
       title: "Legal",
       links: [
-        { name: "Política de Privacidade", href: "#" },
-        { name: "Termos de Uso", href: "#" },
-        { name: "Cookies", href: "#" },
-        { name: "Compliance", href: "#" },
-        { name: "Segurança", href: "#" },
-        { name: "GDPR", href: "#" }
+        { name: "Política de Privacidade", href: "/privacy-policy" },
+        { name: "Termos de Uso", href: "/terms-of-use" },
+        { name: "Disclaimer Legal", href: "/legal-disclaimer" },
+        { name: "Aviso de Limitações", href: "/legal-disclaimer" }
       ]
     },
     {
-      title: "Contato",
+      title: "Suporte",
       links: [
-        { name: "📧 Email", href: "mailto:contact@goosprey.com" },
-        { name: "💬 Chat de Suporte", href: "#" },
-        { name: "📞 Agendar Ligação", href: "#" },
-        { name: "❓ FAQ", href: "#" }
+        { name: "Central de Ajuda", href: "/faq" },
+        { name: "Fale Conosco", href: "/contact" },
+        { name: "Encontrar Advogado", href: "https://www.aila.org/find-a-lawyer", external: true }
       ]
     }
   ];
