@@ -32,7 +32,7 @@ const FAQ = () => {
     {
       category: "platform",
       question: "Posso aplicar para visto sem advogado? É legal fazer isso por conta própria?",
-      answer: "SIM! Você tem o DIREITO LEGAL de se auto-representar perante o USCIS. Segundo informação oficial do USCIS: \"Você sempre pode se representar perante o USCIS. Você não precisa ter um advogado ou outro representante.\" Nossa plataforma existe justamente para facilitar esse direito, oferecendo ferramentas que ajudam você a organizar documentos e preencher formulários oficiais corretamente. Para casos simples e diretos, muitas pessoas conseguem aplicar com sucesso por conta própria. No entanto, para casos complexos (ex: histórico criminal, negações anteriores, situações especiais), recomendamos consultar um advogado."
+      answer: "SIM! Você tem o DIREITO LEGAL de se auto-representar perante o USCIS.\n\nSegundo informação oficial do USCIS:\n\n\"You may always represent yourself before USCIS. You do not need to have a lawyer or other representative.\" — U.S. Citizenship and Immigration Services (USCIS)\n\nTradução: \"Você sempre pode se representar perante o USCIS. Você não precisa ter um advogado ou outro representante.\"\n\nNossa plataforma existe justamente para facilitar esse direito, oferecendo ferramentas que ajudam você a organizar documentos e preencher formulários oficiais corretamente. Para casos simples e diretos, muitas pessoas conseguem aplicar com sucesso por conta própria. No entanto, para casos complexos (ex: histórico criminal, negações anteriores, situações especiais), recomendamos fortemente consultar um advogado de imigração."
     },
     {
       category: "platform",
