@@ -81,6 +81,7 @@ class USCISFormFiller:
         """
         Fill Form I-589 (Application for Asylum)
         NOW SUPPORTS DATA FROM FRIENDLY FORM (simplified_form_responses)
+        FIXED: Uses pdfrw for reliable form filling
         
         Args:
             case_data: Dictionary with applicant and asylum information
@@ -92,7 +93,7 @@ class USCISFormFiller:
             bytes: PDF file content
         """
         try:
-            logger.info("🔧 Filling Form I-589...")
+            logger.info("🔧 Filling Form I-589 with pdfrw...")
             
             # Extract data from all sources
             basic_data = case_data.get("basic_data", {})
@@ -104,32 +105,25 @@ class USCISFormFiller:
             
             # Read template
             template_path = os.path.join(self.forms_dir, "I-589.pdf")
-            reader = PdfReader(template_path)
-            writer = PdfWriter()
+            template = PdfrwReader(template_path)
             
-            # Get form fields
-            form_fields = {}
-            if "/AcroForm" in reader.trailer["/Root"]:
-                form_fields = reader.get_form_text_fields() or {}
-                logger.info(f"📋 Found {len(form_fields)} form fields in I-589")
+            # Get form fields count
+            field_count = 0
+            if template.Root.AcroForm:
+                field_count = len(template.Root.AcroForm.Fields) if template.Root.AcroForm.Fields else 0
+                logger.info(f"📋 Found {field_count} form fields in I-589")
             
             # Map data to form fields - NOW USES simplified_form too
             field_mapping = self._get_i589_mapping(basic_data, simplified_form, letters)
             
-            # Fill form
-            for page in reader.pages:
-                writer.add_page(page)
+            # Fill form fields using pdfrw
+            filled_count = self._fill_pdf_fields_pdfrw(template, field_mapping)
             
-            # Update form fields
-            if form_fields:
-                writer.update_page_form_field_values(
-                    writer.pages[0],
-                    field_mapping
-                )
+            logger.info(f"✅ Filled {filled_count} fields in Form I-589")
             
             # Generate PDF
             output = io.BytesIO()
-            writer.write(output)
+            PdfrwWriter().write(output, template)
             output.seek(0)
             
             logger.info("✅ Form I-589 filled successfully")
