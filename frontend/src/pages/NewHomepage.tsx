@@ -60,7 +60,7 @@ const NewHomepage = () => {
       } else {
         throw new Error('Resposta inválida do servidor');
       }
-    } catch (error: any) {
+    } catch (error) {
       alert(`Erro ao iniciar aplicação: ${error.message}\n\nTente novamente ou recarregue a página.`);
     } finally {
       setIsCreating(false);
