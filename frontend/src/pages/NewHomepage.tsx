@@ -556,10 +556,19 @@ const NewHomepage = () => {
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">
                   Você Pode Se Representar Legalmente
                 </h3>
-                <p className="text-gray-700 mb-4 leading-relaxed">
-                  Segundo o <strong>USCIS oficial</strong>: <em>"Você sempre pode se representar perante o USCIS. 
-                  Você não precisa ter um advogado ou outro representante."</em>
-                </p>
+                <div className="mb-4">
+                  <p className="text-gray-800 font-medium mb-2 leading-relaxed italic">
+                    "You may always represent yourself before USCIS. You do not need to have a lawyer 
+                    or other representative."
+                  </p>
+                  <p className="text-sm text-gray-600 mb-2">
+                    <strong>— U.S. Citizenship and Immigration Services (USCIS)</strong>
+                  </p>
+                  <p className="text-gray-700 text-sm italic">
+                    "Você sempre pode se representar perante o USCIS. Você não precisa ter um advogado 
+                    ou outro representante."
+                  </p>
+                </div>
                 <div className="bg-green-50 border-l-4 border-green-600 p-4 rounded">
                   <p className="text-sm text-gray-700">
                     <strong>Nossa missão</strong> é facilitar esse direito através de tecnologia, 
