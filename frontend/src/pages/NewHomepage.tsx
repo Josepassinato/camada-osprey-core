@@ -756,6 +756,7 @@ const NewHomepage = () => {
               <ul className="space-y-2 text-sm text-gray-600">
                 <li><a href="/about" className="hover:text-purple-600">Sobre Nós</a></li>
                 <li><a href="/contact" className="hover:text-purple-600">Contato</a></li>
+                <li><a href="/faq" className="hover:text-purple-600">FAQ</a></li>
               </ul>
             </div>
             <div>
