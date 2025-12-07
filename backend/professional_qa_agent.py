@@ -26,6 +26,8 @@ class ProfessionalQAAgent:
         
         # 🧪 MODO DE TESTE: Se SKIP_QA_THRESHOLD=TRUE, usar threshold mais baixo
         test_mode = os.environ.get('SKIP_QA_THRESHOLD', 'FALSE').upper() == 'TRUE'
+        self.test_mode = test_mode  # 🆕 P1-8: Store test mode for use in other methods
+        
         if test_mode:
             self.minimum_approval_score = 0.50  # 50% em modo de teste
             self.critical_threshold = 0.60  # 60% para processos críticos em teste
