@@ -225,20 +225,24 @@ class USCISFormFiller:
         )
         dob_parts = dob.split("-") if dob else ["", "", ""]
         
-        # Parse address - try friendly form first
+        # Parse address - try friendly form first (with _eua suffix)
         address = (
+            simplified_form.get("endereco_eua") or 
             simplified_form.get("endereco") or 
             basic_data.get("current_address", "")
         )
         city = (
+            simplified_form.get("cidade_eua") or 
             simplified_form.get("cidade") or 
             basic_data.get("city", "")
         )
         state = (
+            simplified_form.get("estado_eua") or 
             simplified_form.get("estado") or 
             basic_data.get("state", "")
         )
         zip_code = (
+            simplified_form.get("cep_eua") or 
             simplified_form.get("cep") or 
             simplified_form.get("zip_code") or 
             basic_data.get("zip_code", "")
