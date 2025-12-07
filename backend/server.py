@@ -1440,6 +1440,9 @@ async def generate_uscis_form(case_id: str):
         
         logger.info(f"✅ Form generated: {filename} ({len(pdf_bytes)} bytes)")
         
+        # 🆕 P1-5: Update progress status after form generation
+        await update_case_status_and_progress(case_id, "form_generated", case_collection)
+        
         return {
             "success": True,
             "message": "USCIS form generated successfully",
