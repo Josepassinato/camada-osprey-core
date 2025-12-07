@@ -347,11 +347,20 @@ class ProfessionalQAAgent:
             }
         }
         
+        # Obter pesos dinâmicos por tipo de visto (ou usar defaults)
+        default_weights = {
+            "personal_data": 0.15,
+            "professional_data": 0.25,
+            "documents": 0.40,
+            "critical_criteria": 0.20
+        }
+        weights = requirements.get('category_weights', default_weights)
+        
         # 1. Verificar completude de dados pessoais
         personal_score, personal_issues = self._check_personal_data(case_data)
         report['categories']['personal_data'] = {
             "score": personal_score,
-            "weight": 0.15,
+            "weight": weights['personal_data'],
             "issues": personal_issues
         }
         
@@ -361,7 +370,7 @@ class ProfessionalQAAgent:
         )
         report['categories']['professional_data'] = {
             "score": professional_score,
-            "weight": 0.25,
+            "weight": weights['professional_data'],
             "issues": professional_issues
         }
         
@@ -371,7 +380,7 @@ class ProfessionalQAAgent:
         )
         report['categories']['documents'] = {
             "score": documents_score,
-            "weight": 0.40,
+            "weight": weights['documents'],
             "issues": documents_issues
         }
         report['missing_items'] = missing
@@ -382,7 +391,7 @@ class ProfessionalQAAgent:
         )
         report['categories']['critical_criteria'] = {
             "score": critical_score,
-            "weight": 0.20,
+            "weight": weights['critical_criteria'],
             "issues": critical_issues
         }
         
