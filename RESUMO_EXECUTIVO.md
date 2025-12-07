@@ -263,8 +263,8 @@ Plataforma web completa que automatiza a criação de pacotes de visto para imig
 ### **Ambiente**
 - **Plataforma**: Kubernetes
 - **URLs**:
-  - Frontend: `https://visaflow-5.preview.emergentagent.com`
-  - Backend: `https://visaflow-5.preview.emergentagent.com/api`
+  - Frontend: `https://smart-visa-helper-1.preview.emergentagent.com`
+  - Backend: `https://smart-visa-helper-1.preview.emergentagent.com/api`
 - **Process Manager**: Supervisord
 
 ### **Comandos**

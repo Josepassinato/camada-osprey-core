@@ -277,13 +277,13 @@ STRIPE_PUBLISHABLE_KEY=pk_live_51PByv6AfnK9GyzVJ...
 STRIPE_WEBHOOK_SECRET=whsec_...  # (Opcional, para webhooks)
 
 # Frontend URL para redirecionamento
-REACT_APP_BACKEND_URL=https://visaflow-5.preview.emergentagent.com
+REACT_APP_BACKEND_URL=https://smart-visa-helper-1.preview.emergentagent.com
 ```
 
 ### **Frontend (.env)**
 ```bash
-VITE_BACKEND_URL=https://visaflow-5.preview.emergentagent.com
-REACT_APP_BACKEND_URL=https://visaflow-5.preview.emergentagent.com
+VITE_BACKEND_URL=https://smart-visa-helper-1.preview.emergentagent.com
+REACT_APP_BACKEND_URL=https://smart-visa-helper-1.preview.emergentagent.com
 ```
 
 ---
@@ -294,7 +294,7 @@ REACT_APP_BACKEND_URL=https://visaflow-5.preview.emergentagent.com
 - **Modo**: LIVE (Produção)
 - **Chaves**: Configuradas e ativas
 - **Webhooks**: 
-  - Endpoint: `https://visaflow-5.preview.emergentagent.com/api/webhook/stripe`
+  - Endpoint: `https://smart-visa-helper-1.preview.emergentagent.com/api/webhook/stripe`
   - Eventos: `checkout.session.completed`, `payment_intent.payment_failed`
 
 ### **Cupons e Promoções**

@@ -22,7 +22,7 @@
 │  │  • CaseFinalizer (chamada aos agentes)                             │ │
 │  └────────────────────────────────────────────────────────────────────┘ │
 │  Port: 3000                                                              │
-│  URL: https://visaflow-5.preview.emergentagent.com                    │
+│  URL: https://smart-visa-helper-1.preview.emergentagent.com                    │
 └─────────────────────────────────┬───────────────────────────────────────┘
                                   │
                                   │ REST API (axios)
@@ -394,8 +394,8 @@ sudo supervisorctl restart all
 ```
 
 ### **URLs**
-- **Frontend**: `https://visaflow-5.preview.emergentagent.com`
-- **Backend**: `https://visaflow-5.preview.emergentagent.com/api`
+- **Frontend**: `https://smart-visa-helper-1.preview.emergentagent.com`
+- **Backend**: `https://smart-visa-helper-1.preview.emergentagent.com/api`
 - **MongoDB**: `mongodb://localhost:27017`
 
 ## 📊 FLUXO DE DADOS COMPLETO
