@@ -52,25 +52,26 @@ const AboutUs: React.FC = () => {
                   sem a necessidade de advogado ou representante legal.
                 </p>
                 <div className="bg-white p-4 rounded border-l-4 border-green-600">
-                  <p className="italic text-gray-800 mb-3 font-medium">
-                    "You may always represent yourself before USCIS. You do not need to have a lawyer 
-                    or other representative."
+                  <p className="italic text-gray-800 mb-3 font-medium text-lg">
+                    "You can always represent yourself before USCIS."
                   </p>
                   <p className="text-sm text-gray-600 mb-3 italic">
-                    "Você sempre pode se representar perante o USCIS. Você não precisa ter um advogado 
-                    ou outro representante."
+                    "Você sempre pode se representar perante o USCIS."
                   </p>
-                  <p className="text-sm text-gray-700 font-semibold">
+                  <p className="text-sm text-gray-700 font-semibold mb-3">
                     — U.S. Citizenship and Immigration Services (<strong>USCIS</strong>)
                   </p>
                   <a 
-                    href="https://www.uscis.gov" 
+                    href="https://www.uscis.gov/sites/default/files/document/brochures/UPIL%20Brochure_English.pdf" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline text-sm mt-2 inline-block font-semibold"
+                    className="text-blue-600 hover:underline text-sm inline-block font-semibold"
                   >
-                    📄 Ver fonte oficial do USCIS.gov →
+                    📄 Ver documento oficial do USCIS (PDF) →
                   </a>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Fonte: USCIS Official Brochure - "Who can help me with my USCIS case?"
+                  </p>
                 </div>
                 <p className="text-sm text-gray-600 mt-3">
                   <strong>Nossa plataforma existe para facilitar</strong> esse direito, oferecendo ferramentas 
