@@ -81,6 +81,12 @@ class ProfessionalQAAgent:
             },
             "F-1": {
                 "form": "I-20",
+                "category_weights": {
+                    "personal_data": 0.15,
+                    "professional_data": 0.25,  # Histórico acadêmico
+                    "documents": 0.40,  # I-20, SEVIS, financeiro
+                    "critical_criteria": 0.20  # Vínculos, não-imigrante intent
+                },
                 "required_documents": [
                     "Valid passport (at least 6 months beyond program end)",
                     "Form I-20 from SEVP-certified school",
