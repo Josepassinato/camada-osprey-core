@@ -215,55 +215,6 @@ class USCISFormFiller:
             logger.error(traceback.format_exc())
             raise
     
-    
-    def _fill_pdf_fields_pdfrw(self, template, field_mapping: Dict[str, str]) -> int:
-        """
-        Fill PDF form fields using pdfrw library
-        This is more reliable than PyPDF2 for form filling
-        
-        Args:
-            template: PDF template loaded with pdfrw
-            field_mapping: Dictionary mapping field names to values
-            
-        Returns:
-            int: Number of fields filled
-        """
-        filled_count = 0
-        
-        if not template.Root.AcroForm:
-            logger.warning("PDF template has no AcroForm")
-            return 0
-        
-        if not template.Root.AcroForm.Fields:
-            logger.warning("PDF AcroForm has no Fields")
-            return 0
-        
-        # Iterate through all fields in the PDF
-        for field in template.Root.AcroForm.Fields:
-            field_name = field.T
-            if field_name:
-                # Remove parentheses from field name (pdfrw format)
-                field_name_str = str(field_name)[1:-1] if str(field_name).startswith('(') else str(field_name)
-                
-                # Check if we have a value for this field
-                if field_name_str in field_mapping:
-                    field_value = field_mapping[field_name_str]
-                    if field_value:
-                        # Set the field value
-                        field.V = PdfString.from_unicode(str(field_value))
-                        # Also set the appearance stream
-                        field.AP = PdfDict(N=PdfDict())
-                        # Mark field as filled
-                        filled_count += 1
-                        
-                        logger.debug(f"  ✓ Filled field '{field_name_str}' = '{field_value}'")
-        
-        # Update the PDF to reflect the filled fields
-        if template.Root.AcroForm:
-            template.Root.AcroForm.update(PdfDict(NeedAppearances=PdfString('true')))
-        
-        return filled_count
-
     def _get_i539_mapping(self, basic_data: Dict[str, Any], simplified_form: Dict[str, Any] = None) -> Dict[str, str]:
         """
         Map case data to I-539 form fields
