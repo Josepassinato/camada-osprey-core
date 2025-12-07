@@ -54,6 +54,7 @@ import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfUse from "./pages/TermsOfUse";
 import LegalDisclaimer from "./pages/LegalDisclaimer";
+import FAQ from "./pages/FAQ";
 
 const queryClient = new QueryClient();
 
