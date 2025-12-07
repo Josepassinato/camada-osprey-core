@@ -506,12 +506,13 @@ class ProfessionalQAAgent:
         case_data: Dict[str, Any], 
         requirements: Dict[str, Any]
     ) -> tuple[float, List[str], List[str]]:
-        """Verifica presença de documentos obrigatórios"""
+        """Verifica presença e qualidade de documentos obrigatórios"""
         issues = []
         missing = []
         score = 1.0
         
-        documents = case_data.get('documents', [])
+        # Verificar ambos os campos (uploaded_documents tem prioridade)
+        documents = case_data.get('uploaded_documents', case_data.get('documents', []))
         document_types = [doc.get('document_type', '') for doc in documents]
         
         # Documentos essenciais que TODO processo precisa
@@ -520,13 +521,88 @@ class ProfessionalQAAgent:
         for essential in essential_docs:
             if not any(essential in dtype.lower() for dtype in document_types):
                 missing.append(f"Essential document: {essential}")
-                issues.append(f"Critical: Missing {essential}")
+                issues.append(f"❌ Critical: Missing {essential}")
                 score -= 0.25
         
-        # Verificar quantidade mínima de documentos
-        if len(documents) < 3:
-            issues.append(f"Only {len(documents)} documents uploaded (minimum 3 expected)")
+        # 🆕 Verificar documentos específicos por tipo de visto
+        form_code = case_data.get('form_code', '').upper()
+        
+        if form_code == 'I-539':  # Extension/Change of Status
+            # Documentos específicos para extensão
+            i539_docs = {
+                'i94': 'I-94 Arrival/Departure Record',
+                'financial_support': 'Financial support documents (bank statements)',
+                'supporting_letter': 'Letter explaining reason for extension'
+            }
+            
+            for doc_type, doc_name in i539_docs.items():
+                if not any(doc_type in dtype.lower() for dtype in document_types):
+                    missing.append(doc_name)
+                    issues.append(f"⚠️ Missing: {doc_name}")
+                    score -= 0.15
+            
+            # 🆕 Verificar evidência de turismo (se B-2)
+            status = case_data.get('simplified_form_responses', {}).get('status_atual', '')
+            if 'B-2' in status or 'B2' in status:
+                has_tourism_evidence = any('tourism' in dtype.lower() or 'itinerary' in dtype.lower() 
+                                           for dtype in document_types)
+                if not has_tourism_evidence:
+                    issues.append("⚠️ Recommended: Tourism evidence (photos, itinerary) strengthens B-2 extension")
+                    score -= 0.10
+        
+        elif form_code == 'F-1':  # Student
+            f1_docs = {
+                'i20': 'Form I-20',
+                'sevis': 'SEVIS fee receipt',
+                'financial': 'Financial documents',
+                'academic': 'Academic transcripts'
+            }
+            
+            for doc_type, doc_name in f1_docs.items():
+                if not any(doc_type in dtype.lower() for dtype in document_types):
+                    missing.append(doc_name)
+                    issues.append(f"❌ Missing: {doc_name}")
+                    score -= 0.20
+        
+        elif form_code == 'H-1B':  # Work
+            h1b_docs = {
+                'lca': 'Labor Condition Application (LCA)',
+                'diploma': 'Diploma/Degree certificate',
+                'employment': 'Employment offer letter',
+                'resume': 'Resume/CV'
+            }
+            
+            for doc_type, doc_name in h1b_docs.items():
+                if not any(doc_type in dtype.lower() for dtype in document_types):
+                    missing.append(doc_name)
+                    issues.append(f"❌ Missing: {doc_name}")
+                    score -= 0.20
+        
+        # 🆕 Verificar qualidade dos documentos
+        for doc in documents:
+            file_size = doc.get('file_size', 0)
+            filename = doc.get('filename', '')
+            
+            # Arquivo muito pequeno pode ser corrupto
+            if file_size < 100:  # Menos de 100 bytes
+                issues.append(f"⚠️ Suspicious file size: {filename} ({file_size} bytes) - may be corrupted")
+                score -= 0.05
+            
+            # Verificar se tem descrição
+            if not doc.get('description'):
+                issues.append(f"ℹ️ Missing description for: {filename}")
+                score -= 0.02
+        
+        # Verificar quantidade mínima de documentos (ajustado por tipo)
+        min_docs = 5 if form_code in ['O-1', 'EB-1A'] else 3
+        if len(documents) < min_docs:
+            issues.append(f"⚠️ Only {len(documents)} documents uploaded (minimum {min_docs} expected for {form_code})")
             score -= 0.20
+        
+        # 🆕 Bônus por documentação completa
+        if len(documents) >= min_docs + 3:
+            issues.append(f"✅ Good: {len(documents)} documents provided (above minimum)")
+            score += 0.10
         
         # Verificar se documentos estão validados
         unvalidated = [
@@ -536,10 +612,11 @@ class ProfessionalQAAgent:
         ]
         
         if unvalidated:
-            issues.append(f"{len(unvalidated)} documents not validated: {', '.join(unvalidated[:3])}")
-            score -= 0.10 * min(len(unvalidated), 3)
+            issues.append(f"ℹ️ {len(unvalidated)} documents not yet validated: {', '.join(unvalidated[:3])}")
+            # Não penalizar tanto se documentos existem mas não foram validados
+            score -= 0.05 * min(len(unvalidated), 3)
         
-        return max(0.0, score), issues, missing
+        return max(0.0, min(1.0, score)), issues, missing
     
     def _check_critical_criteria(
         self, 
