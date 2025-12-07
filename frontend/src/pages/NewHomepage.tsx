@@ -542,6 +542,42 @@ const NewHomepage = () => {
         </div>
       </section>
 
+      {/* USCIS Self-Representation Notice */}
+      <section className="py-12 bg-gradient-to-r from-green-50 to-emerald-50 border-y border-green-200">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-green-500">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                  <span className="text-3xl">✅</span>
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                  Você Pode Se Representar Legalmente
+                </h3>
+                <p className="text-gray-700 mb-4 leading-relaxed">
+                  Segundo o <strong>USCIS oficial</strong>: <em>"Você sempre pode se representar perante o USCIS. 
+                  Você não precisa ter um advogado ou outro representante."</em>
+                </p>
+                <div className="bg-green-50 border-l-4 border-green-600 p-4 rounded">
+                  <p className="text-sm text-gray-700">
+                    <strong>Nossa missão</strong> é facilitar esse direito através de tecnologia, 
+                    tornando o processo mais simples, rápido e acessível para todos.
+                  </p>
+                </div>
+                <a 
+                  href="/about" 
+                  className="inline-block mt-4 text-green-700 font-semibold hover:text-green-800 transition-colors"
+                >
+                  Saiba mais sobre auto-representação →
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Pricing */}
       <section id="precos" className="py-20 bg-gradient-to-br from-purple-50 via-white to-indigo-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
