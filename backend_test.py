@@ -158,23 +158,24 @@ def verify_mongodb_persistence(case_id: str):
             "exception": str(e)
         }
 
-def test_enhanced_ai_validation_system():
+def test_i539_pdf_generation_e2e():
     """
-    🎯 TESTE COMPLETO DA VALIDAÇÃO IA MELHORADA
+    🔍 TESTE END-TO-END COMPLETO APÓS CORREÇÃO DO BUG P0 - PDF GENERATION
     
-    Testing the enhanced AI validation system with:
-    1. Two-Stage Validation (Programmatic + AI)
-    2. Required Fields by Visa Type (I-539: 14, I-589: 11, EB-1A: 8)
-    3. Format Validations (email, date, phone, numeric, min length)
-    4. Intelligent Completeness Calculation with penalties
-    5. MongoDB Persistence
+    Testing complete flow after pypdf migration fix:
+    1. Create I-539 case
+    2. Fill friendly form with Portuguese data
+    3. Verify data persistence (including _eua fields)
+    4. Generate PDF with corrected pypdf library
+    5. Download PDF and verify size
+    6. CRITICAL: Extract field values from PDF to verify P0 bug fix
     
-    TEST CASES:
-    - TEST 1: Complete data (I-539) - Expected: approved, 100%, 0 issues
-    - TEST 2: Partial data (50%) - Expected: rejected, 40-60%, >5 issues  
-    - TEST 3: Format errors - Expected: needs_review, 80-95%, >=2 issues
-    - TEST 4: Detailed issues verification
-    - TEST 5: MongoDB persistence verification
+    SUCCESS CRITERIA:
+    - Case created successfully
+    - Friendly form data saved (including endereco_eua, cidade_eua, estado_eua, cep_eua)
+    - PDF generated (status 200, >300KB)
+    - PDF downloadable (status 200, application/pdf)
+    - CRITICAL: At least 6/8 fields filled in PDF (P0 bug fix verification)
     """
     
     print("🎯 TESTE COMPLETO DA VALIDAÇÃO IA MELHORADA")
