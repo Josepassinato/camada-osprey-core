@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-🎯 TESTE COMPLETO DA VALIDAÇÃO IA MELHORADA
-Testing the enhanced AI validation system with two-stage validation as requested in review
+🔍 TESTE END-TO-END COMPLETO APÓS CORREÇÃO DO BUG P0 - PDF GENERATION
+Testing complete flow from friendly form to PDF download after pypdf migration fix
 """
 
 import requests
@@ -11,6 +11,8 @@ import os
 import base64
 from pathlib import Path
 from datetime import datetime
+import pypdf
+import io
 
 # Get backend URL from frontend .env
 BACKEND_URL = "https://smart-visa-helper-1.preview.emergentagent.com"
