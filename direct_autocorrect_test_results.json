@@ -1,0 +1,150 @@
+{
+  "test_results": {
+    "step1_create_user_incorrect": {
+      "success": true,
+      "user_id": "22946c8e-1dfe-4e03-8259-af16e3d9777e",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMjI5NDZjOGUtMWRmZS00ZTAzLTgyNTktYWYxNmUzZDk3NzdlIiwiZW1haWwiOiJ0ZXN0X2F1dG9jb3JyZWN0QHRlc3QuY29tIiwiZXhwIjoxNzY3Nzk0NjE1fQ.xXGuX-dRw3LeVCIQ7at2sCfCcA8yroi5ckuvnmQQwEI",
+      "status_code": 200,
+      "initial_first_name": "Joao",
+      "initial_last_name": "Silva",
+      "email": "test_autocorrect@test.com"
+    },
+    "step2_create_case": {
+      "success": true,
+      "case_id": "OSP-05B3422B",
+      "status_code": 200
+    },
+    "step3_simulate_ocr": {
+      "success": true,
+      "passport_text": "PASSPORT\nUNITED STATES OF AMERICA\nPASSPORT NO: BR1234567\nNAME: JOÃO SILVA SANTOS\nDATE OF BIRTH: 15 MAY 1990\nNATIONALITY: BRAZILIAN\nDATE OF ISSUE: 01 JAN 2020\nDATE OF EXPIRY: 01 JAN 2030\nPLACE OF BIRTH: SAO PAULO, BRAZIL\nSEX: M",
+      "expected_name": "JOÃO SILVA SANTOS",
+      "expected_passport": "BR1234567",
+      "expected_nationality": "BRAZILIAN"
+    },
+    "step4_test_autocorrection": {
+      "success": true,
+      "extraction_result": {
+        "extraction_successful": true,
+        "auto_corrected": false,
+        "suggested_corrections": {
+          "first_name": "Jo",
+          "date_of_birth": "15 MAY 1990",
+          "country_of_birth": "BRAZILIAN\nDATE OF ISSUE",
+          "passport_number": "BR1234567"
+        },
+        "discrepancies_found": [
+          {
+            "field": "first_name",
+            "current_value": "Joao",
+            "document_value": "Jo",
+            "severity": "high",
+            "source": "official_document"
+          },
+          {
+            "field": "date_of_birth",
+            "current_value": null,
+            "document_value": "15 MAY 1990",
+            "severity": "high",
+            "source": "official_document"
+          },
+          {
+            "field": "country_of_birth",
+            "current_value": null,
+            "document_value": "BRAZILIAN\nDATE OF ISSUE",
+            "severity": "medium",
+            "source": "official_document"
+          },
+          {
+            "field": "passport_number",
+            "current_value": null,
+            "document_value": "BR1234567",
+            "severity": "medium",
+            "source": "official_document"
+          }
+        ],
+        "message": "Discrepâncias encontradas. Revisão manual recomendada.",
+        "confidence": 1.0,
+        "reason_not_corrected": "Confidence too low or too many discrepancies"
+      },
+      "extraction_checks": {
+        "extraction_successful": true,
+        "auto_corrected": false,
+        "corrections_made": false,
+        "discrepancies_found": true,
+        "confidence_adequate": true
+      },
+      "passed": false
+    },
+    "step5_verify_updates": {
+      "success": true,
+      "user_profile": {
+        "id": "22946c8e-1dfe-4e03-8259-af16e3d9777e",
+        "email": "test_autocorrect@test.com",
+        "first_name": "Joao",
+        "last_name": "Silva",
+        "phone": "+1-555-0123",
+        "role": "user",
+        "country_of_birth": null,
+        "current_country": null,
+        "date_of_birth": null,
+        "passport_number": null,
+        "created_at": "2025-12-08T14:03:35.558000",
+        "updated_at": "2025-12-08T14:03:35.558000"
+      },
+      "user_update_checks": {
+        "first_name_corrected": false,
+        "last_name_corrected": false,
+        "data_verified_by_document": false,
+        "verification_document_type": false,
+        "verification_date": false
+      },
+      "passed": false
+    },
+    "summary": {
+      "successful_steps": 3,
+      "total_steps": 5,
+      "success_rate": 60.0,
+      "system_criteria": {
+        "extrai_dados_passaporte": true,
+        "detecta_discrepancias": true,
+        "corrige_automaticamente": false,
+        "adiciona_campos_auditoria": false,
+        "confianca_adequada": true
+      },
+      "criteria_passed": 3,
+      "total_criteria": 5,
+      "system_ready": false,
+      "user_id": "22946c8e-1dfe-4e03-8259-af16e3d9777e",
+      "case_id": "OSP-05B3422B",
+      "auto_correction_worked": false,
+      "extraction_confidence": 1.0
+    }
+  },
+  "timestamp": 1765202615.7691202,
+  "test_focus": "🎯 TESTE DIRETO: Correção Automática de Dados - Simulação OCR",
+  "test_methodology": "TESTE DIRETO EM 5 ETAPAS - BYPASS GOOGLE VISION API",
+  "test_scenario": {
+    "incorrect_initial_data": {
+      "first_name": "Joao",
+      "last_name": "Silva",
+      "email": "test_autocorrect@test.com"
+    },
+    "correct_passport_data": {
+      "name": "JOÃO SILVA SANTOS",
+      "passport_number": "BR1234567",
+      "nationality": "BRAZILIAN"
+    },
+    "expected_corrections": {
+      "first_name": "João",
+      "last_name": "Silva Santos"
+    }
+  },
+  "validation_criteria": [
+    "Sistema extrai dados corretos do texto do passaporte",
+    "Sistema detecta discrepância no nome",
+    "Sistema calcula confiança >= 70%",
+    "Sistema corrige automaticamente o cadastro",
+    "Sistema adiciona campos de auditoria",
+    "Dados são persistidos no MongoDB"
+  ]
+}
