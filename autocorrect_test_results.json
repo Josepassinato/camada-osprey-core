@@ -1,261 +1,145 @@
 {
   "test_results": {
-    "step1_create_case_incorrect_data": {
+    "step1_create_user": {
       "success": true,
-      "case_id": "OSP-A6ABE401",
-      "status_code": 200,
-      "initial_name": "Joao Silva",
-      "initial_email": "test_autocorrect@test.com",
-      "initial_dob": "1990-05-15"
+      "user_id": "a8e34d48-5d82-4b5d-a247-478f8967fe10",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYThlMzRkNDgtNWQ4Mi00YjVkLWEyNDctNDc4Zjg5NjdmZTEwIiwiZW1haWwiOiJ0ZXN0X2F1dG9jb3JyZWN0X3YyQHRlc3QuY29tIiwiZXhwIjoxNzY3Nzk0OTg1fQ.cP8WFQGbZaQ7lxxdsayK4DIn2nst_Wd3ZpUjra8yef0",
+      "email": "test_autocorrect_v2@test.com",
+      "original_data": {
+        "email": "test_autocorrect_v2@test.com",
+        "password": "testpass123",
+        "first_name": "Joao",
+        "last_name": "Silva",
+        "phone": "+1-555-0123"
+      }
     },
-    "step2_upload_passport_document": {
+    "step2_create_case": {
+      "success": true,
+      "case_id": "OSP-B3680E3F",
+      "case_data": {
+        "case_id": "OSP-B3680E3F",
+        "user_id": "a8e34d48-5d82-4b5d-a247-478f8967fe10",
+        "session_token": "test_v2_session",
+        "form_code": null,
+        "status": "created",
+        "process_type": null,
+        "progress_percentage": 0,
+        "current_step": null,
+        "basic_data": {
+          "full_name": "",
+          "email": "test_autocorrect_v2@test.com",
+          "phone": "+1-555-0123",
+          "date_of_birth": "",
+          "country_of_birth": "",
+          "passport_number": "",
+          "passport_country": "",
+          "passport_issue_date": "",
+          "passport_expiration_date": "",
+          "current_address": "",
+          "mailing_address": ""
+        },
+        "uploaded_documents": [],
+        "document_analysis": null,
+        "user_story_text": null,
+        "user_story_audio_url": null,
+        "ai_extracted_facts": null,
+        "simplified_form_responses": null,
+        "official_form_data": null,
+        "uscis_form_generated": false,
+        "ead_data": null,
+        "ai_processing": null,
+        "payment_status": null,
+        "payment_id": null,
+        "final_package_generated": false,
+        "final_package_url": null,
+        "completed_at": null,
+        "created_at": "2025-12-08T14:09:45.232278",
+        "updated_at": "2025-12-08T14:09:45.232279",
+        "expires_at": "2026-01-07T14:09:45.232221"
+      }
+    },
+    "step3_upload_document": {
       "success": true,
       "status_code": 200,
-      "upload_result": {
+      "result": {
         "success": true,
         "message": "Document uploaded successfully",
-        "document_id": "3af403ca-9ebe-4e71-ae57-d5c3e5c2d76a",
-        "case_id": "OSP-A6ABE401",
+        "document_id": "40f1314d-d9f6-44b4-bff2-8b845dc6e509",
+        "case_id": "OSP-B3680E3F",
         "filename": "test_passport.txt",
         "document_type": "passport",
-        "file_size": 228
+        "file_size": 230
       },
-      "extraction": {},
-      "auto_corrected": false,
-      "corrections_made": {}
+      "extraction": {}
     },
-    "step3_verify_auto_correction": {
+    "step4_verify_updates": {
       "success": true,
-      "case_data": {
-        "case_id": "OSP-A6ABE401",
-        "user_id": null,
-        "session_token": "test_autocorrect_session",
-        "form_code": null,
-        "status": "created",
-        "process_type": null,
-        "progress_percentage": 0,
-        "current_step": null,
-        "basic_data": {
-          "full_name": "",
-          "email": "",
-          "phone": "",
-          "date_of_birth": "",
-          "country_of_birth": "",
-          "passport_number": "",
-          "passport_country": "",
-          "passport_issue_date": "",
-          "passport_expiration_date": "",
-          "current_address": "",
-          "mailing_address": ""
-        },
-        "uploaded_documents": [
-          {
-            "id": "3af403ca-9ebe-4e71-ae57-d5c3e5c2d76a",
-            "case_id": "OSP-A6ABE401",
-            "filename": "test_passport.txt",
-            "document_type": "passport",
-            "description": null,
-            "content_base64": "UEFTU1BPUlQKVU5JVEVEIFNUQVRFUyBPRiBBTUVSSUNBClBBU1NQT1JUIE5POiBCUjEyMzQ1NjcKTkFNRTogSk/Dg08gU0lMVkEgU0FOVE9TCkRBVEUgT0YgQklSVEg6IDE1IE1BWSAxOTkwCk5BVElPTkFMSVRZOiBCUkFaSUxJQU4KREFURSBPRiBJU1NVRTogMDEgSkFOIDIwMjAKREFURSBPRiBFWFBJUlk6IDAxIEpBTiAyMDMwClBMQUNFIE9GIEJJUlRIOiBTQU8gUEFVTE8sIEJSQVpJTApTRVg6IE0K",
-            "mime_type": "text/plain",
-            "file_size": 228,
-            "uploaded_at": "2025-12-08T14:02:04.018000",
-            "status": "uploaded"
-          }
-        ],
-        "document_analysis": null,
-        "user_story_text": null,
-        "user_story_audio_url": null,
-        "ai_extracted_facts": null,
-        "simplified_form_responses": null,
-        "official_form_data": null,
-        "uscis_form_generated": false,
-        "ead_data": null,
-        "ai_processing": null,
-        "payment_status": null,
-        "payment_id": null,
-        "final_package_generated": false,
-        "final_package_url": null,
-        "completed_at": null,
-        "created_at": "2025-12-08T14:02:03.780000",
-        "updated_at": "2025-12-08T14:02:04.019000",
-        "expires_at": "2025-12-15T14:02:03.780000",
-        "documents": [
-          {
-            "id": "3af403ca-9ebe-4e71-ae57-d5c3e5c2d76a",
-            "case_id": "OSP-A6ABE401",
-            "filename": "test_passport.txt",
-            "document_type": "passport",
-            "description": null,
-            "content_base64": "UEFTU1BPUlQKVU5JVEVEIFNUQVRFUyBPRiBBTUVSSUNBClBBU1NQT1JUIE5POiBCUjEyMzQ1NjcKTkFNRTogSk/Dg08gU0lMVkEgU0FOVE9TCkRBVEUgT0YgQklSVEg6IDE1IE1BWSAxOTkwCk5BVElPTkFMSVRZOiBCUkFaSUxJQU4KREFURSBPRiBJU1NVRTogMDEgSkFOIDIwMjAKREFURSBPRiBFWFBJUlk6IDAxIEpBTiAyMDMwClBMQUNFIE9GIEJJUlRIOiBTQU8gUEFVTE8sIEJSQVpJTApTRVg6IE0K",
-            "mime_type": "text/plain",
-            "file_size": 228,
-            "uploaded_at": "2025-12-08T14:02:04.018000",
-            "status": "uploaded"
-          }
-        ]
+      "user_data": {
+        "id": "a8e34d48-5d82-4b5d-a247-478f8967fe10",
+        "email": "test_autocorrect_v2@test.com",
+        "first_name": "Joao",
+        "last_name": "Silva",
+        "phone": "+1-555-0123",
+        "role": "user",
+        "country_of_birth": null,
+        "current_country": null,
+        "date_of_birth": null,
+        "passport_number": null,
+        "created_at": "2025-12-08T14:09:45.206000",
+        "updated_at": "2025-12-08T14:09:45.206000"
       },
-      "basic_data": {
-        "full_name": "",
-        "email": "",
-        "phone": "",
-        "date_of_birth": "",
-        "country_of_birth": "",
-        "passport_number": "",
-        "passport_country": "",
-        "passport_issue_date": "",
-        "passport_expiration_date": "",
-        "current_address": "",
-        "mailing_address": ""
+      "verification_results": {
+        "name_was_corrected": false,
+        "original_name": "Joao Silva",
+        "updated_name": "Joao Silva",
+        "audit_fields_present": false,
+        "data_verified_by_document": null,
+        "verification_document_type": null,
+        "verification_date": null
       },
-      "auto_correction_checks": {
-        "name_corrected": false,
-        "audit_fields_added": false,
-        "data_verified_by_document": false,
-        "verification_document_type": false,
-        "verification_date": false
-      },
-      "original_name": "Joao Silva",
-      "current_name": " ",
-      "expected_name": "João Silva Santos",
-      "passed": false
-    },
-    "step4_check_audit_fields": {
-      "success": true,
-      "final_case_data": {
-        "case_id": "OSP-A6ABE401",
-        "user_id": null,
-        "session_token": "test_autocorrect_session",
-        "form_code": null,
-        "status": "created",
-        "process_type": null,
-        "progress_percentage": 0,
-        "current_step": null,
-        "basic_data": {
-          "full_name": "",
-          "email": "",
-          "phone": "",
-          "date_of_birth": "",
-          "country_of_birth": "",
-          "passport_number": "",
-          "passport_country": "",
-          "passport_issue_date": "",
-          "passport_expiration_date": "",
-          "current_address": "",
-          "mailing_address": ""
-        },
-        "uploaded_documents": [
-          {
-            "id": "3af403ca-9ebe-4e71-ae57-d5c3e5c2d76a",
-            "case_id": "OSP-A6ABE401",
-            "filename": "test_passport.txt",
-            "document_type": "passport",
-            "description": null,
-            "content_base64": "UEFTU1BPUlQKVU5JVEVEIFNUQVRFUyBPRiBBTUVSSUNBClBBU1NQT1JUIE5POiBCUjEyMzQ1NjcKTkFNRTogSk/Dg08gU0lMVkEgU0FOVE9TCkRBVEUgT0YgQklSVEg6IDE1IE1BWSAxOTkwCk5BVElPTkFMSVRZOiBCUkFaSUxJQU4KREFURSBPRiBJU1NVRTogMDEgSkFOIDIwMjAKREFURSBPRiBFWFBJUlk6IDAxIEpBTiAyMDMwClBMQUNFIE9GIEJJUlRIOiBTQU8gUEFVTE8sIEJSQVpJTApTRVg6IE0K",
-            "mime_type": "text/plain",
-            "file_size": 228,
-            "uploaded_at": "2025-12-08T14:02:04.018000",
-            "status": "uploaded"
-          }
-        ],
-        "document_analysis": null,
-        "user_story_text": null,
-        "user_story_audio_url": null,
-        "ai_extracted_facts": null,
-        "simplified_form_responses": null,
-        "official_form_data": null,
-        "uscis_form_generated": false,
-        "ead_data": null,
-        "ai_processing": null,
-        "payment_status": null,
-        "payment_id": null,
-        "final_package_generated": false,
-        "final_package_url": null,
-        "completed_at": null,
-        "created_at": "2025-12-08T14:02:03.780000",
-        "updated_at": "2025-12-08T14:02:04.019000",
-        "expires_at": "2025-12-15T14:02:03.780000",
-        "documents": [
-          {
-            "id": "3af403ca-9ebe-4e71-ae57-d5c3e5c2d76a",
-            "case_id": "OSP-A6ABE401",
-            "filename": "test_passport.txt",
-            "document_type": "passport",
-            "description": null,
-            "content_base64": "UEFTU1BPUlQKVU5JVEVEIFNUQVRFUyBPRiBBTUVSSUNBClBBU1NQT1JUIE5POiBCUjEyMzQ1NjcKTkFNRTogSk/Dg08gU0lMVkEgU0FOVE9TCkRBVEUgT0YgQklSVEg6IDE1IE1BWSAxOTkwCk5BVElPTkFMSVRZOiBCUkFaSUxJQU4KREFURSBPRiBJU1NVRTogMDEgSkFOIDIwMjAKREFURSBPRiBFWFBJUlk6IDAxIEpBTiAyMDMwClBMQUNFIE9GIEJJUlRIOiBTQU8gUEFVTE8sIEJSQVpJTApTRVg6IE0K",
-            "mime_type": "text/plain",
-            "file_size": 228,
-            "uploaded_at": "2025-12-08T14:02:04.018000",
-            "status": "uploaded"
-          }
-        ]
-      },
-      "final_basic_data": {
-        "full_name": "",
-        "email": "",
-        "phone": "",
-        "date_of_birth": "",
-        "country_of_birth": "",
-        "passport_number": "",
-        "passport_country": "",
-        "passport_issue_date": "",
-        "passport_expiration_date": "",
-        "current_address": "",
-        "mailing_address": ""
-      },
-      "final_audit_checks": {
-        "name_persisted": false,
-        "santos_surname_added": false,
-        "verification_fields_persisted": false,
-        "document_type_recorded": false,
-        "verification_timestamp": false
-      },
-      "passed": false
+      "name_corrected": false
     },
     "summary": {
-      "successful_steps": 2,
+      "successful_steps": 4,
       "total_steps": 4,
-      "success_rate": 50.0,
-      "system_criteria": {
-        "extrai_dados_passaporte": false,
-        "detecta_discrepancias": false,
-        "corrige_automaticamente": false,
-        "adiciona_campos_auditoria": false,
-        "persiste_no_mongodb": true
+      "success_rate": 100.0,
+      "autocorrect_checks": {
+        "document_uploaded": true,
+        "extraction_successful": false,
+        "auto_correction_triggered": false,
+        "corrections_applied": false,
+        "user_data_updated": false,
+        "audit_fields_added": false
       },
-      "criteria_passed": 1,
-      "total_criteria": 5,
-      "system_ready": false,
-      "case_id": "OSP-A6ABE401",
-      "auto_correction_worked": false,
-      "response_format_correct": false
+      "autocorrect_success": 1,
+      "total_autocorrect_checks": 6,
+      "autocorrect_rate": 16.666666666666664,
+      "system_working": false,
+      "extraction_data": {},
+      "verification_data": {
+        "name_was_corrected": false,
+        "original_name": "Joao Silva",
+        "updated_name": "Joao Silva",
+        "audit_fields_present": false,
+        "data_verified_by_document": null,
+        "verification_document_type": null,
+        "verification_date": null
+      }
     }
   },
-  "timestamp": 1765202524.1378863,
-  "test_focus": "🎯 TESTE COMPLETO: Correção Automática de Dados do Cadastro Baseado em Documentos",
-  "test_methodology": "TESTE EM 4 ETAPAS SEQUENCIAIS",
+  "timestamp": 1765202987.365562,
+  "test_focus": "🎯 TESTE COMPLETO - CORREÇÃO AUTOMÁTICA DE DADOS COM REGEX CORRIGIDO",
   "test_scenario": {
-    "incorrect_initial_data": {
-      "name": "Joao Silva",
-      "date_of_birth": "1990-05-15",
-      "email": "test_autocorrect@test.com"
-    },
-    "correct_passport_data": {
-      "name": "JOÃO SILVA SANTOS",
-      "date_of_birth": "15 MAY 1990",
-      "passport_number": "BR1234567",
-      "nationality": "BRAZILIAN"
-    },
-    "expected_corrections": {
-      "first_name": "João",
-      "last_name": "Silva Santos"
-    }
+    "original_name": "Joao Silva",
+    "document_name": "JOÃO SILVA SANTOS",
+    "expected_correction": "João Silva Santos",
+    "document_type": "passport"
   },
-  "validation_criteria": [
-    "Sistema extrai dados corretos do passaporte",
-    "Sistema detecta discrepância no nome",
-    "Sistema calcula confiança > 80%",
-    "Sistema corrige automaticamente o cadastro",
-    "Sistema adiciona campos de auditoria",
-    "Dados são persistidos no MongoDB"
+  "expected_validations": [
+    "Regex deve extrair 'JOÃO SILVA SANTOS' completo (não apenas 'Jo')",
+    "Comparação deve identificar que 'Joao Silva' é subset de 'João Silva Santos'",
+    "Sistema deve calcular discrepâncias menores",
+    "Com confiança >80%, deve AUTO-CORRIGIR",
+    "Nome atualizado para 'João Silva Santos'"
   ]
 }
