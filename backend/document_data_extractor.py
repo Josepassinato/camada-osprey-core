@@ -300,21 +300,59 @@ class DocumentDataExtractor:
         user_data: Dict[str, Any]
     ) -> bool:
         """Compara nomes considerando formato completo vs. separado"""
-        extracted_clean = extracted_name.lower().strip()
+        # Normalizar texto: lowercase, remover acentos extras, espaços duplos
+        import unicodedata
+        
+        def normalize(text):
+            if not text:
+                return ""
+            # Remove acentos mas mantém a estrutura
+            text = str(text).lower().strip()
+            # Remove espaços duplicados
+            text = re.sub(r'\s+', ' ', text)
+            return text
+        
+        extracted_clean = normalize(extracted_name)
         
         # Se o campo atual é o nome completo
         if current_value:
-            current_clean = str(current_value).lower().strip()
+            current_clean = normalize(current_value)
+            # Exato match
             if extracted_clean == current_clean:
                 return False
+            # Nome extraído contém nome atual (ex: "joão silva santos" contém "joao silva")
+            if current_clean in extracted_clean:
+                # Verificar se não é apenas substring acidental
+                # Ex: "joao silva" está em "joão silva santos" ✓
+                # Mas "silva" não deve casar com "joão silva santos" ✗
+                parts_current = current_clean.split()
+                parts_extracted = extracted_clean.split()
+                # Se todas as partes do nome atual estão no nome extraído, é match
+                if len(parts_current) > 0 and all(any(p1 in p2 or p2 in p1 for p2 in parts_extracted) for p1 in parts_current):
+                    return False
         
         # Se há first_name e last_name separados
-        first_name = user_data.get("first_name", "")
-        last_name = user_data.get("last_name", "")
+        first_name = normalize(user_data.get("first_name", ""))
+        last_name = normalize(user_data.get("last_name", ""))
         
-        if first_name and last_name:
-            full_current = f"{first_name} {last_name}".lower().strip()
+        if first_name or last_name:
+            # Construir nome completo atual
+            full_current = f"{first_name} {last_name}".strip()
+            
+            # Exato match
             if extracted_clean == full_current:
+                return False
+            
+            # Nome extraído contém nome atual completo
+            if full_current and full_current in extracted_clean:
+                return False
+            
+            # Verificar se partes do nome estão presentes
+            parts_current = [p for p in [first_name, last_name] if p]
+            parts_extracted = extracted_clean.split()
+            
+            if parts_current and all(any(p1 in p2 or p2 in p1 for p2 in parts_extracted) for p1 in parts_current):
+                # Nome atual é subset do nome extraído
                 return False
         
         # Nomes são diferentes
