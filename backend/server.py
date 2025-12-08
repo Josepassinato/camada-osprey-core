@@ -2728,40 +2728,71 @@ async def submit_friendly_form(case_id: str, request: dict, current_user = Depen
             raise HTTPException(status_code=404, detail="Case not found")
         
         # Get visa type for specific validation
-        # 🆕 P0-2: Auto-detect form_code from friendly form data if not set
+        # 🆕 BUG P1 FIX: Improved auto-detect form_code from friendly form data
         visa_type = case.get('form_code', 'N/A')
+        
+        logger.info(f"🔍 Current form_code for case {case_id}: {visa_type}")
         
         if not visa_type or visa_type == 'N/A':
             # Try to detect from friendly form data
             detected_visa = None
-            status_atual = friendly_form_data.get('status_atual', '').upper()
-            status_solicitado = friendly_form_data.get('status_solicitado', '').upper()
+            status_atual = str(friendly_form_data.get('status_atual', '')).upper()
+            status_solicitado = str(friendly_form_data.get('status_solicitado', '')).upper()
             
-            # Detection logic
-            if 'B-2' in status_atual or 'B2' in status_atual:
-                if 'EXTENSION' in str(friendly_form_data).upper() or 'EXTENSÃO' in str(friendly_form_data).upper():
+            logger.info(f"🔍 Attempting auto-detection - status_atual: {status_atual}, status_solicitado: {status_solicitado}")
+            
+            # Enhanced detection logic with better patterns
+            # I-539: Extension or Change of Status
+            if ('B-2' in status_atual or 'B2' in status_atual or 'TOURIST' in status_atual):
+                if 'EXTENSION' in status_solicitado or 'EXTENSÃO' in status_solicitado or 'B-2' in status_solicitado:
                     detected_visa = 'I-539'
-            elif 'F-1' in status_solicitado or 'F1' in status_solicitado:
-                detected_visa = 'F-1'
-            elif 'H-1B' in status_solicitado or 'H1B' in status_solicitado:
-                detected_visa = 'H-1B'
-            elif 'O-1' in status_solicitado:
+                    logger.info(f"✅ Detected I-539 (B-2 Extension)")
+            
+            # Check if explicitly asking for I-539
+            if 'I-539' in status_solicitado or 'I539' in status_solicitado:
+                detected_visa = 'I-539'
+                logger.info(f"✅ Detected I-539 (Explicit)")
+            
+            # F-1 Student Visa
+            if 'F-1' in status_solicitado or 'F1' in status_solicitado or 'STUDENT' in status_solicitado:
+                detected_visa = 'I-539'  # F-1 uses I-539 for status change
+                logger.info(f"✅ Detected I-539 (F-1 Status Change)")
+            
+            # H-1B Work Visa
+            if 'H-1B' in status_solicitado or 'H1B' in status_solicitado:
+                detected_visa = 'I-539'  # H-1B also uses I-539 for extension
+                logger.info(f"✅ Detected I-539 (H-1B Extension)")
+            
+            # O-1 Extraordinary Ability
+            if 'O-1' in status_solicitado or 'O1' in status_solicitado:
                 detected_visa = 'O-1'
-            elif 'EB-1A' in status_solicitado:
-                detected_visa = 'EB-1A'
+                logger.info(f"✅ Detected O-1")
+            
+            # EB-1A Extraordinary Ability (Immigrant)
+            if 'EB-1A' in status_solicitado or 'EB1A' in status_solicitado:
+                detected_visa = 'I-140'
+                logger.info(f"✅ Detected I-140 (EB-1A)")
+            
+            # I-589 Asylum
+            if 'ASYLUM' in status_solicitado or 'ASILO' in status_solicitado or 'I-589' in status_solicitado:
+                detected_visa = 'I-589'
+                logger.info(f"✅ Detected I-589 (Asylum)")
             
             if detected_visa:
                 # Update case with detected visa type
-                await db.auto_cases.update_one(
+                result = await db.auto_cases.update_one(
                     {"case_id": case_id},
-                    {"$set": {"form_code": detected_visa}}
+                    {"$set": {"form_code": detected_visa, "updated_at": datetime.utcnow()}}
                 )
                 visa_type = detected_visa
-                logger.info(f"🔍 Auto-detected and set form_code: {detected_visa} for case {case_id}")
+                logger.info(f"✅ BUG P1 FIX: Auto-detected and saved form_code: {detected_visa} for case {case_id} (matched: {result.matched_count}, modified: {result.modified_count})")
+            else:
+                logger.warning(f"⚠️ Could not auto-detect form_code for case {case_id}")
         
-        # If still not detected, use default
+        # If still not detected, use I-539 as default (most common)
         if not visa_type or visa_type == 'N/A':
-            visa_type = 'I-539'  # Default to most common
+            visa_type = 'I-539'
+            logger.info(f"ℹ️ Using default form_code: I-539 for case {case_id}")
         
         # STEP 1: Apply Legal Rules Validation (CRITICAL - From Immigration Attorney)
         legal_validation_issues = []
