@@ -258,8 +258,43 @@ def test_i539_pdf_generation_e2e():
         "basic_data": {}
     }
     
-    test1_result = test_validation_endpoint(test_case_id, complete_data, "TEST 1: Dados Completos")
-    results["test1_complete_data"] = test1_result
+    try:
+        print(f"📤 Sending friendly form data to case {case_id}...")
+        print(f"🔗 Endpoint: POST {API_BASE}/case/{case_id}/friendly-form")
+        
+        response = requests.post(
+            f"{API_BASE}/case/{case_id}/friendly-form",
+            json=friendly_form_data,
+            headers={"Content-Type": "application/json"},
+            timeout=60
+        )
+        
+        print(f"📊 Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            form_result = response.json()
+            print(f"✅ Friendly form data saved successfully")
+            print(f"📄 Response: {json.dumps(form_result, indent=2, ensure_ascii=False)}")
+            
+            results["step2_friendly_form"] = {
+                "success": True,
+                "status_code": response.status_code,
+                "response": form_result
+            }
+        else:
+            print(f"❌ Failed to save friendly form: {response.status_code}")
+            print(f"📄 Error: {response.text}")
+            results["step2_friendly_form"] = {
+                "success": False,
+                "status_code": response.status_code,
+                "error": response.text
+            }
+            return results
+            
+    except Exception as e:
+        print(f"❌ Exception saving friendly form: {str(e)}")
+        results["step2_friendly_form"] = {"success": False, "exception": str(e)}
+        return results
     
     if test1_result.get("success"):
         validation_result = test1_result["validation_result"]
