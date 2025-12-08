@@ -918,48 +918,63 @@ def additional_validation_tests():
     pass
 
 if __name__ == "__main__":
-    print("🚀 INICIANDO TESTE COMPLETO DA VALIDAÇÃO IA MELHORADA")
+    print("🚀 INICIANDO TESTE END-TO-END COMPLETO APÓS CORREÇÃO DO BUG P0")
     print(f"🌐 Backend URL: {BACKEND_URL}")
     print(f"🔗 API Base: {API_BASE}")
     print(f"⏰ Timestamp: {datetime.now().isoformat()}")
+    print("🎯 Focus: Verificar se migração pypdf corrigiu bug de PDF vazio")
     
     # Execute main test
-    test_results = test_enhanced_ai_validation_system()
+    test_results = test_i539_pdf_generation_e2e()
     
     # Save results to file
-    with open("/app/enhanced_ai_validation_test_results.json", "w") as f:
+    with open("/app/i539_pdf_e2e_test_results.json", "w") as f:
         json.dump({
             "test_results": test_results,
             "timestamp": time.time(),
-            "test_focus": "Enhanced AI Validation System Testing",
-            "test_cases": [
-                {"name": "Complete Data (I-539)", "expected": "approved, 100%, 0 issues"},
-                {"name": "Partial Data (50%)", "expected": "rejected, 40-60%, >5 issues"},
-                {"name": "Format Errors", "expected": "needs_review, 80-95%, >=2 issues"},
-                {"name": "Issues Verification", "expected": "detailed issues list"},
-                {"name": "MongoDB Persistence", "expected": "data saved correctly"}
-            ]
+            "test_focus": "I-539 PDF Generation E2E Testing After P0 Bug Fix",
+            "test_steps": [
+                {"step": "Create I-539 Case", "expected": "Case created successfully"},
+                {"step": "Fill Friendly Form", "expected": "Portuguese data saved"},
+                {"step": "Verify Data Persistence", "expected": "_eua fields saved correctly"},
+                {"step": "Generate PDF", "expected": "PDF generated >300KB"},
+                {"step": "Download PDF", "expected": "PDF downloadable"},
+                {"step": "Verify PDF Fields", "expected": "At least 6/8 fields filled"}
+            ],
+            "p0_bug_assessment": {
+                "bug_fixed": test_results.get("summary", {}).get("p0_bug_fixed", False),
+                "fields_filled": test_results.get("summary", {}).get("fields_filled", 0),
+                "total_fields": test_results.get("summary", {}).get("total_critical_fields", 8)
+            }
         }, f, indent=2, ensure_ascii=False)
     
-    print(f"\n💾 Resultados salvos em: /app/enhanced_ai_validation_test_results.json")
+    print(f"\n💾 Resultados salvos em: /app/i539_pdf_e2e_test_results.json")
     
     # Final recommendation
     summary = test_results.get("summary", {})
-    if summary.get("system_ready", False):
-        print("\n✅ RECOMENDAÇÃO: Sistema de Validação IA PRONTO PARA PRODUÇÃO")
-        print("   - Validação em dois estágios funcionando")
-        print("   - Campos obrigatórios por tipo de visto implementados")
-        print("   - Validações de formato operacionais")
-        print("   - Cálculo inteligente de completude ativo")
-        print("   - Persistência MongoDB confirmada")
+    p0_fixed = summary.get("p0_bug_fixed", False)
+    success_rate = summary.get("success_rate", 0)
+    
+    if p0_fixed and success_rate >= 80:
+        print("\n✅ RECOMENDAÇÃO: BUG P0 CORRIGIDO COM SUCESSO!")
+        print("   ✅ Migração pypdf funcionou corretamente")
+        print("   ✅ PDFs I-539 não estão mais vazios")
+        print("   ✅ Campos do formulário sendo preenchidos")
+        print("   ✅ Fluxo end-to-end operacional")
+        print("   ✅ Sistema pronto para produção")
+    elif p0_fixed:
+        print("\n⚠️  RECOMENDAÇÃO: BUG P0 corrigido, mas outros problemas identificados")
+        print("   ✅ PDF não está mais vazio")
+        print("   ⚠️  Alguns passos do fluxo falharam")
+        print("   🔧 Revisar áreas problemáticas")
     else:
-        success_rate = summary.get("success_rate", 0)
-        if success_rate >= 60:
-            print("\n⚠️  RECOMENDAÇÃO: Sistema parcialmente funcional, melhorias necessárias")
-            print("   - Alguns testes passando")
-            print("   - Revisar áreas problemáticas identificadas")
-        else:
-            print("\n❌ RECOMENDAÇÃO: Sistema precisa de desenvolvimento adicional")
-            print("   - Múltiplos problemas identificados")
-            print("   - Revisão completa da validação necessária")
+        print("\n❌ RECOMENDAÇÃO: BUG P0 AINDA EXISTE!")
+        print("   ❌ PDFs continuam vazios ou com poucos campos")
+        print("   ❌ Migração pypdf pode ter problemas")
+        print("   🚨 Correção urgente necessária")
+        
+        fields_filled = summary.get("fields_filled", 0)
+        total_fields = summary.get("total_critical_fields", 8)
+        print(f"   📊 Apenas {fields_filled}/{total_fields} campos preenchidos")
+        print(f"   🎯 Necessário pelo menos 6/{total_fields} para aprovação")
     
