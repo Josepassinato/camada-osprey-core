@@ -67,7 +67,7 @@ export const SocialProofDisplay: React.FC<SocialProofDisplayProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [selectedCase, setSelectedCase] = useState<string | null>(null);
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://smart-visa-helper-1.preview.emergentagent.com';
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://formfiller-26.preview.emergentagent.com';
 
   useEffect(() => {
     if (visaType) {

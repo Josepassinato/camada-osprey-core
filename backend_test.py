@@ -40,7 +40,7 @@ except ImportError:
         PYMUPDF_AVAILABLE = False
 
 # Get backend URL from frontend .env
-BACKEND_URL = "https://smart-visa-helper-1.preview.emergentagent.com"
+BACKEND_URL = "https://formfiller-26.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 def create_test_case():

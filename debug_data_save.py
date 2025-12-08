@@ -6,7 +6,7 @@ Debug script to check what's happening with data saving
 import requests
 import json
 
-BACKEND_URL = "https://smart-visa-helper-1.preview.emergentagent.com"
+BACKEND_URL = "https://formfiller-26.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_data_save():

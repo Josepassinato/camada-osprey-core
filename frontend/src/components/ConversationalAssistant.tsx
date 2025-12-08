@@ -50,7 +50,7 @@ export const ConversationalAssistant: React.FC<ConversationalAssistantProps> = (
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://smart-visa-helper-1.preview.emergentagent.com';
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://formfiller-26.preview.emergentagent.com';
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
