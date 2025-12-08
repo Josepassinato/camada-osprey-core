@@ -1,0 +1,262 @@
+{
+  "test_results": {
+    "step1_case_creation": {
+      "success": true,
+      "case_id": "OSP-768A5F30",
+      "status_code": 200
+    },
+    "step2_friendly_form": {
+      "success": true,
+      "status_code": 200,
+      "response": {
+        "success": true,
+        "case_id": "OSP-768A5F30",
+        "validation_status": "needs_review",
+        "completion_percentage": 34,
+        "message": "⚠️ Seu formulário está 34% completo. Por favor, revise as informações destacadas abaixo.",
+        "validation_issues": [
+          {
+            "field": "legal_requirement",
+            "issue": "❌ DATA DE VALIDADE DO PASSAPORTE OBRIGATÓRIA",
+            "severity": "critical",
+            "type": "legal_rule"
+          },
+          {
+            "field": "legal_requirement",
+            "issue": "❌ CÓPIA DO VISTO ATUAL OBRIGATÓRIA",
+            "severity": "critical",
+            "type": "legal_rule"
+          },
+          {
+            "field": "legal_requirement",
+            "issue": "❌ I-94 OBRIGATÓRIO: Faça download em https://i94.cbp.dhs.gov/",
+            "severity": "critical",
+            "type": "legal_rule"
+          },
+          {
+            "field": "legal_requirement",
+            "issue": "❌ DATA DE VENCIMENTO DO I-94 OBRIGATÓRIA",
+            "severity": "critical",
+            "type": "legal_rule"
+          },
+          {
+            "field": "legal_requirement",
+            "issue": "❌ EXTRATO BANCÁRIO RECENTE OBRIGATÓRIO (últimos 3 meses)",
+            "severity": "critical",
+            "type": "legal_rule"
+          },
+          {
+            "field": "legal_requirement",
+            "issue": "❌ PROVAS DE VÍNCULO COM BRASIL OBRIGATÓRIAS: Contas, CNPS, declaração IR, propriedades, etc.",
+            "severity": "critical",
+            "type": "legal_rule"
+          },
+          {
+            "field": "legal_requirement",
+            "issue": "❌ FOTOS OBRIGATÓRIAS: Você precisa de 2 fotos padrão passaporte (2 por pessoa)",
+            "severity": "critical",
+            "type": "legal_rule"
+          },
+          {
+            "field": "legal_warning",
+            "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Seu extrato bancário deve estar traduzido para inglês por tradutor juramentado",
+            "severity": "warning",
+            "type": "legal_rule"
+          },
+          {
+            "field": "legal_warning",
+            "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Documentos brasileiros devem estar traduzidos para inglês",
+            "severity": "warning",
+            "type": "legal_rule"
+          },
+          {
+            "field": "pais_cidadania",
+            "field_label": "País de Cidadania",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'País de Cidadania'. Exemplo: Brazil"
+          },
+          {
+            "field": "sexo",
+            "field_label": "Sexo",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'Sexo'. Exemplo: "
+          },
+          {
+            "field": "numero_passaporte",
+            "field_label": "Número do Passaporte",
+            "issue": "Deve conter apenas números",
+            "severity": "warning",
+            "suggestion": "Use apenas números, como: BR123456789"
+          },
+          {
+            "field": "pais_emissao_passaporte",
+            "field_label": "País de Emissão do Passaporte",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'País de Emissão do Passaporte'. Exemplo: "
+          },
+          {
+            "field": "local_entrada",
+            "field_label": "Local de Entrada nos EUA",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'Local de Entrada nos EUA'. Exemplo: JFK Airport, New York"
+          },
+          {
+            "field": "tipo_pedido",
+            "field_label": "O que você está solicitando?",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'O que você está solicitando?'. Exemplo: "
+          },
+          {
+            "field": "cidade",
+            "field_label": "Cidade",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'Cidade'. Exemplo: New York"
+          },
+          {
+            "field": "estado",
+            "field_label": "Estado",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'Estado'. Exemplo: "
+          }
+        ],
+        "next_steps": [
+          "Revisar e corrigir as informações destacadas",
+          "Preencher campos faltantes",
+          "Verificar datas e formatos de dados"
+        ]
+      }
+    },
+    "step3_data_verification": {
+      "success": true,
+      "verification_checks": {
+        "simplified_form_responses_exists": true,
+        "nome_completo_saved": true,
+        "endereco_eua_saved": true,
+        "cidade_eua_saved": true,
+        "estado_eua_saved": true,
+        "cep_eua_saved": true,
+        "email_saved": true,
+        "telefone_saved": true,
+        "numero_passaporte_saved": true
+      },
+      "simplified_responses": {
+        "nome_completo": "Ana Paula Santos Silva",
+        "data_nascimento": "1992-07-18",
+        "endereco_eua": "789 Broadway Avenue",
+        "cidade_eua": "Miami",
+        "estado_eua": "FL",
+        "cep_eua": "33101",
+        "email": "ana.santos@test.com",
+        "telefone": "+1-305-555-8888",
+        "numero_passaporte": "BR555666777",
+        "pais_nascimento": "Brazil",
+        "status_atual": "B-2",
+        "status_solicitado": "B-2 Extension",
+        "data_entrada_eua": "2024-01-15",
+        "numero_i94": "99887766554"
+      },
+      "passed": true
+    },
+    "step4_pdf_generation": {
+      "success": true,
+      "status_code": 200,
+      "pdf_result": {
+        "success": true,
+        "message": "USCIS form generated successfully",
+        "case_id": "OSP-768A5F30",
+        "form_type": "I-539",
+        "filename": "I-539_OSP-768A5F30.pdf",
+        "file_size": 335332,
+        "download_url": "/api/case/OSP-768A5F30/download-form"
+      },
+      "pdf_checks": {
+        "success_true": true,
+        "filename_present": true,
+        "file_size_adequate": true,
+        "download_url_present": true
+      },
+      "passed": true
+    },
+    "step5_pdf_download": {
+      "success": true,
+      "status_code": 200,
+      "content_type": "application/pdf",
+      "file_size": 335332,
+      "download_checks": {
+        "status_200": true,
+        "content_type_pdf": true,
+        "file_size_adequate": true,
+        "content_not_empty": true
+      },
+      "pdf_path": "/tmp/test_e2e_i539.pdf",
+      "passed": true
+    },
+    "step6_pdf_field_verification": {
+      "success": false,
+      "exception": "argument of type 'NoneType' is not iterable",
+      "passed": false
+    },
+    "summary": {
+      "successful_steps": 5,
+      "total_steps": 6,
+      "success_rate": 83.33333333333334,
+      "p0_bug_fixed": false,
+      "fields_filled": 0,
+      "total_critical_fields": 8,
+      "success_criteria": {
+        "caso_i539_criado": true,
+        "dados_formulario_salvos": true,
+        "campos_eua_salvos": true,
+        "pdf_gerado_sucesso": true,
+        "pdf_baixado_sucesso": true,
+        "pdf_tamanho_adequado": true,
+        "campos_preenchidos_pdf": false,
+        "sem_erros_500": true
+      },
+      "criteria_passed": 7,
+      "total_criteria": 8,
+      "system_ready": false,
+      "case_id": "OSP-768A5F30"
+    }
+  },
+  "timestamp": 1765152661.5888522,
+  "test_focus": "I-539 PDF Generation E2E Testing After P0 Bug Fix",
+  "test_steps": [
+    {
+      "step": "Create I-539 Case",
+      "expected": "Case created successfully"
+    },
+    {
+      "step": "Fill Friendly Form",
+      "expected": "Portuguese data saved"
+    },
+    {
+      "step": "Verify Data Persistence",
+      "expected": "_eua fields saved correctly"
+    },
+    {
+      "step": "Generate PDF",
+      "expected": "PDF generated >300KB"
+    },
+    {
+      "step": "Download PDF",
+      "expected": "PDF downloadable"
+    },
+    {
+      "step": "Verify PDF Fields",
+      "expected": "At least 6/8 fields filled"
+    }
+  ],
+  "p0_bug_assessment": {
+    "bug_fixed": false,
+    "fields_filled": 0,
+    "total_fields": 8
+  }
+}
