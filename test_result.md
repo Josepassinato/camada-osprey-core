@@ -349,9 +349,9 @@ backend:
 
   - task: "P0 Bug Fix - PDF Generation Empty Fields Critical Issue"
     implemented: true
-    working: true
+    working: false
     file: "/app/backend/uscis_form_filler.py"
-    stuck_count: 0
+    stuck_count: 2
     priority: "critical"
     needs_retesting: false
     status_history:
@@ -364,6 +364,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "🎉 BUG P0 CRÍTICO CORRIGIDO COM SUCESSO - TESTE END-TO-END COMPLETO 100% APROVADO! Executei teste abrangente conforme review request verificando TODO o fluxo após correção do bug de PDF vazio. RESULTADOS EXCELENTES: ✅ ETAPA 1 - CASO I-539 CRIADO: Case OSP-EA4DF483 criado com sucesso (HTTP 200), ✅ ETAPA 2 - FORMULÁRIO AMIGÁVEL PREENCHIDO: Dados em português salvos corretamente (Ana Paula Santos Silva, endereco_eua: 789 Broadway Avenue, cidade_eua: Miami, estado_eua: FL, cep_eua: 33101, email: ana.santos@test.com, telefone: +1-305-555-8888), ✅ ETAPA 3 - PERSISTÊNCIA VERIFICADA: Todos os campos _eua salvos corretamente no MongoDB (9/9 verificações passaram), ✅ ETAPA 4 - PDF GERADO: I-539 PDF gerado com sucesso (337KB, HTTP 200), ✅ ETAPA 5 - DOWNLOAD FUNCIONAL: PDF baixado corretamente (application/pdf, 337KB), ✅ ETAPA 6 - VERIFICAÇÃO CRÍTICA P0: 6/8 campos preenchidos no PDF (P1Line1a_FamilyName: 'Paula Santos Silva', P1_Line1b_GivenName: 'Ana', Part1_Item6_StreetName: '789 Broadway Avenue', Part2_Item11_City: 'Miami', Part2_Item11_ZipCode: '33101', Part1_Item4_Number: 'BR555666777'). CRITÉRIO P0 ATENDIDO: ✅ 6/8 campos preenchidos (threshold: 6/8), ✅ BUG P0 CORRIGIDO CONFIRMADO! MIGRAÇÃO PYPDF: ✅ Funcionando perfeitamente, ✅ Campos do formulário sendo preenchidos corretamente, ✅ Mapeamento PT→EN operacional, ✅ PDFs não estão mais vazios. TAXA DE SUCESSO: 6/6 etapas (100%), 8/8 critérios atendidos (100%). CONCLUSÃO: BUG P0 CRÍTICO foi TOTALMENTE CORRIGIDO. Sistema de geração de PDF está PRONTO PARA PRODUÇÃO com fluxo end-to-end completamente operacional."
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL REGRESSION IDENTIFIED - RETEST DISCIPLINA SESSION: 0/10 campos críticos preenchidos no PDF (vs 6/10 no teste anterior). Logs mostram 'Method 1 SUCCESS: Applied 15 field values globally' mas PDF final não contém dados (0/12 strings encontradas no texto). pypdf form filling não está persistindo - campos sendo flattened ou AcroForm perdido durante processo. REGRESSÃO TOTAL: 6/10 (60%) → 0/10 (0%). URGENTE: Investigar por que pypdf não persiste dados no PDF final, considerar biblioteca alternativa (pdftk, PyMuPDF), verificar preservação do AcroForm."
 
   - task: "Progress Percentage Field Implementation and Testing"
     implemented: true
