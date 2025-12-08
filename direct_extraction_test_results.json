@@ -1,0 +1,114 @@
+{
+  "test1_extraction": {
+    "success": true,
+    "extracted_data": {
+      "confidence": 1.0,
+      "fields": {
+        "full_name": "João Silva Santos",
+        "passport_number": "BR1234567",
+        "date_of_birth": "15 MAY 1990",
+        "nationality": "BRAZILIAN",
+        "issue_date": "01 JAN 2020",
+        "expiry_date": "01 JAN 2030"
+      }
+    },
+    "checks": {
+      "nome_completo_extraido": true,
+      "nome_completo_correto": true,
+      "numero_passaporte_extraido": true,
+      "data_nascimento_extraida": true,
+      "nacionalidade_extraida": true,
+      "confianca_adequada": true
+    },
+    "success_rate": 100.0
+  },
+  "test2_comparison": {
+    "success": false,
+    "results": [
+      {
+        "scenario": "Subset simples",
+        "passed": false,
+        "is_different": true,
+        "expected": false
+      },
+      {
+        "scenario": "Nome completo vs separado",
+        "passed": true,
+        "is_different": false,
+        "expected": false
+      },
+      {
+        "scenario": "Nomes completamente diferentes",
+        "passed": true,
+        "is_different": true,
+        "expected": true
+      },
+      {
+        "scenario": "Acentos diferentes",
+        "passed": false,
+        "is_different": true,
+        "expected": false
+      }
+    ],
+    "success_rate": 50.0
+  },
+  "test3_autocorrection": {
+    "success": true,
+    "result": {
+      "success": true,
+      "extracted_data": {
+        "confidence": 1.0,
+        "fields": {
+          "full_name": "João Silva Santos",
+          "passport_number": "BR1234567",
+          "date_of_birth": "15 MAY 1990",
+          "nationality": "BRAZILIAN",
+          "issue_date": "01 JAN 2020",
+          "expiry_date": "01 JAN 2030"
+        }
+      },
+      "discrepancies": [
+        {
+          "field": "first_name",
+          "current_value": "Joao",
+          "document_value": "João Silva Santos",
+          "severity": "high",
+          "source": "official_document"
+        },
+        {
+          "field": "date_of_birth",
+          "current_value": "1990-05-15",
+          "document_value": "15 MAY 1990",
+          "severity": "high",
+          "source": "official_document"
+        }
+      ],
+      "suggested_corrections": {
+        "first_name": "João Silva Santos",
+        "date_of_birth": "15 MAY 1990"
+      },
+      "confidence": 1.0,
+      "should_auto_correct": true,
+      "document_type": "passport"
+    },
+    "checks": {
+      "extracao_bem_sucedida": true,
+      "confianca_adequada": true,
+      "discrepancias_identificadas": true,
+      "auto_correcao_ativada": true,
+      "correcoes_sugeridas": true
+    },
+    "success_rate": 100.0
+  },
+  "summary": {
+    "successful_tests": 2,
+    "total_tests": 3,
+    "overall_success_rate": 66.66666666666666,
+    "system_ready": false,
+    "test_results": [
+      true,
+      false,
+      true
+    ]
+  }
+}
