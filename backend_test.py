@@ -296,25 +296,66 @@ def test_i539_pdf_generation_e2e():
         results["step2_friendly_form"] = {"success": False, "exception": str(e)}
         return results
     
-    if test1_result.get("success"):
-        validation_result = test1_result["validation_result"]
+    # STEP 3: Verify Data Persistence (including _eua fields)
+    print("\n📋 STEP 3: Verificar Salvamento dos Dados")
+    print("-" * 60)
+    
+    try:
+        print(f"🔍 Retrieving case data for {case_id}...")
+        response = requests.get(
+            f"{API_BASE}/auto-application/case/{case_id}",
+            headers={"Content-Type": "application/json"},
+            timeout=30
+        )
         
-        # Verify expected results
-        expected_checks = {
-            "status_approved": validation_result.get("validation_status") == "approved",
-            "completion_near_100": validation_result.get("completion_percentage", 0) >= 95,
-            "minimal_issues": len(validation_result.get("validation_issues", [])) <= 2,
-            "success_true": validation_result.get("success", False),
-            "case_id_correct": validation_result.get("case_id") == test_case_id
-        }
+        print(f"📊 Status Code: {response.status_code}")
         
-        print(f"\n🎯 TEST 1 VERIFICATION:")
-        for check, passed in expected_checks.items():
-            status = "✅" if passed else "❌"
-            print(f"  {status} {check}: {passed}")
-        
-        results["test1_complete_data"]["verification"] = expected_checks
-        results["test1_complete_data"]["passed"] = all(expected_checks.values())
+        if response.status_code == 200:
+            case_data = response.json()
+            case_info = case_data.get("case", {})
+            
+            # Check for simplified_form_responses
+            simplified_responses = case_info.get("simplified_form_responses", {})
+            
+            print(f"📄 Simplified Form Responses: {json.dumps(simplified_responses, indent=2, ensure_ascii=False)}")
+            
+            # Verify critical fields including _eua fields
+            verification_checks = {
+                "simplified_form_responses_exists": simplified_responses is not None and len(simplified_responses) > 0,
+                "nome_completo_saved": simplified_responses.get("nome_completo") == "Ana Paula Santos Silva",
+                "endereco_eua_saved": simplified_responses.get("endereco_eua") == "789 Broadway Avenue",
+                "cidade_eua_saved": simplified_responses.get("cidade_eua") == "Miami",
+                "estado_eua_saved": simplified_responses.get("estado_eua") == "FL",
+                "cep_eua_saved": simplified_responses.get("cep_eua") == "33101",
+                "email_saved": simplified_responses.get("email") == "ana.santos@test.com",
+                "telefone_saved": simplified_responses.get("telefone") == "+1-305-555-8888",
+                "numero_passaporte_saved": simplified_responses.get("numero_passaporte") == "BR555666777"
+            }
+            
+            print(f"\n🎯 DATA PERSISTENCE VERIFICATION:")
+            for check, passed in verification_checks.items():
+                status = "✅" if passed else "❌"
+                print(f"  {status} {check}: {passed}")
+            
+            results["step3_data_verification"] = {
+                "success": True,
+                "verification_checks": verification_checks,
+                "simplified_responses": simplified_responses,
+                "passed": all(verification_checks.values())
+            }
+        else:
+            print(f"❌ Failed to retrieve case: {response.status_code}")
+            results["step3_data_verification"] = {
+                "success": False,
+                "status_code": response.status_code,
+                "error": response.text
+            }
+            return results
+            
+    except Exception as e:
+        print(f"❌ Exception retrieving case: {str(e)}")
+        results["step3_data_verification"] = {"success": False, "exception": str(e)}
+        return results
     
     # TEST 2: Partial Data Validation (50%) - Expected: rejected, 40-60%, >5 issues
     print("\n📋 TEST 2: Validação com Dados Parciais (50%)")
