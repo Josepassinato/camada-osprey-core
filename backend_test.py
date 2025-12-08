@@ -928,14 +928,18 @@ def test_i539_pdf_generation_e2e_pymupdf():
     total_steps = len(step_results)
     success_rate = (successful_steps / total_steps) * 100
     
-    # Individual step results
+    # Individual step results (all 10 steps)
     step_names = [
-        "STEP 1: Criar Caso I-539",
-        "STEP 2: Preencher Formulário Amigável",
-        "STEP 3: Verificar Salvamento dos Dados",
-        "STEP 4: Gerar PDF Oficial I-539",
-        "STEP 5: Download do PDF",
-        "STEP 6: Verificação Crítica do Bug P0"
+        "ETAPA 1: Criação de Caso I-539",
+        "ETAPA 2: Submissão do Formulário Amigável", 
+        "ETAPA 3: Verificação de Persistência",
+        "ETAPA 4: ⭐ Geração do PDF I-539 (MOMENTO CRÍTICO)",
+        "ETAPA 5: Download do PDF",
+        "ETAPA 6: ⭐⭐⭐ Validação Crítica - PyMuPDF",
+        "ETAPA 7: Integridade do Arquivo",
+        "ETAPA 8: Extração de Texto (Opcional)",
+        "ETAPA 9: Comparação Completa - Tabela Evolutiva",
+        "ETAPA 10: Verificação Final e Relatório Comparativo"
     ]
     
     print(f"📊 RESULTADOS POR ETAPA:")
