@@ -411,25 +411,64 @@ def test_i539_pdf_generation_e2e():
         results["step4_pdf_generation"] = {"success": False, "exception": str(e)}
         return results
     
-    if test2_result.get("success"):
-        validation_result = test2_result["validation_result"]
+    # STEP 5: Download PDF and Verify
+    print("\n📋 STEP 5: Download do PDF")
+    print("-" * 60)
+    
+    try:
+        print(f"📥 Downloading PDF for case {case_id}...")
+        response = requests.get(
+            f"{API_BASE}/case/{case_id}/download-form",
+            timeout=60
+        )
         
-        # Verify expected results
-        expected_checks = {
-            "status_rejected_or_needs_review": validation_result.get("validation_status") in ["rejected", "needs_review"],
-            "completion_40_to_60": 40 <= validation_result.get("completion_percentage", 0) <= 60,
-            "multiple_issues": len(validation_result.get("validation_issues", [])) >= 5,
-            "success_true": validation_result.get("success", False),
-            "case_id_correct": validation_result.get("case_id") == test_case_id
-        }
+        print(f"📊 Status Code: {response.status_code}")
+        print(f"📄 Content-Type: {response.headers.get('Content-Type', 'N/A')}")
+        print(f"📏 Content-Length: {len(response.content)} bytes")
         
-        print(f"\n🎯 TEST 2 VERIFICATION:")
-        for check, passed in expected_checks.items():
-            status = "✅" if passed else "❌"
-            print(f"  {status} {check}: {passed}")
-        
-        results["test2_partial_data"]["verification"] = expected_checks
-        results["test2_partial_data"]["passed"] = all(expected_checks.values())
+        if response.status_code == 200:
+            # Verify download response
+            download_checks = {
+                "status_200": response.status_code == 200,
+                "content_type_pdf": response.headers.get('Content-Type') == 'application/pdf',
+                "file_size_adequate": len(response.content) > 300000,  # >300KB (~335KB expected)
+                "content_not_empty": len(response.content) > 0
+            }
+            
+            print(f"\n🎯 PDF DOWNLOAD VERIFICATION:")
+            for check, passed in download_checks.items():
+                status = "✅" if passed else "❌"
+                print(f"  {status} {check}: {passed}")
+            
+            # Save PDF for field verification
+            pdf_path = "/tmp/test_e2e_i539.pdf"
+            with open(pdf_path, 'wb') as f:
+                f.write(response.content)
+            print(f"💾 PDF saved to: {pdf_path}")
+            
+            results["step5_pdf_download"] = {
+                "success": True,
+                "status_code": response.status_code,
+                "content_type": response.headers.get('Content-Type'),
+                "file_size": len(response.content),
+                "download_checks": download_checks,
+                "pdf_path": pdf_path,
+                "passed": all(download_checks.values())
+            }
+        else:
+            print(f"❌ PDF download failed: {response.status_code}")
+            print(f"📄 Error: {response.text}")
+            results["step5_pdf_download"] = {
+                "success": False,
+                "status_code": response.status_code,
+                "error": response.text
+            }
+            return results
+            
+    except Exception as e:
+        print(f"❌ Exception downloading PDF: {str(e)}")
+        results["step5_pdf_download"] = {"success": False, "exception": str(e)}
+        return results
     
     # TEST 3: Format Errors Validation - Expected: needs_review, 80-95%, >=2 issues
     print("\n📋 TEST 3: Validação com Erros de Formato")
