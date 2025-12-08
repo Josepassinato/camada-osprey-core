@@ -183,6 +183,7 @@ class USCISForm(str, Enum):
     I751 = "I-751"  # Petition to Remove Conditions on Residence
     I131 = "I-131"  # Application for Travel Document
     I129 = "I-129"  # Nonimmigrant Worker Petition
+    I140 = "I-140"  # Immigrant Petition for Alien Worker (EB-1A, EB-2 NIW) - 🆕 ADDED
     I589 = "I-589"  # Application for Asylum
     I539 = "I-539"  # Application to Extend/Change Nonimmigrant Status
     O1 = "O-1"      # Extraordinary Ability (part of I-129)
