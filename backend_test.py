@@ -943,13 +943,13 @@ def test_i539_pdf_generation_e2e_pymupdf():
         print(f"✅ STEP 6 - PDF analisado ({total_fields} campos detectados)")
         
         # Show which critical fields were filled
-        critical_fields = results["step6_pdf_field_verification"]["critical_fields_check"]
-        filled_fields = [name for name, info in critical_fields.items() if info["filled"]]
+        critical_fields = results["step6_pdf_field_verification"].get("critical_fields_validation", {})
+        filled_fields = [name.split("_", 1)[1].replace("_", " ").title() for name, info in critical_fields.items() if info.get("found", False)]
         
         if filled_fields:
             print(f"✅ Campos preenchidos: {', '.join(filled_fields)}")
         
-        empty_fields = [name for name, info in critical_fields.items() if not info["filled"]]
+        empty_fields = [name.split("_", 1)[1].replace("_", " ").title() for name, info in critical_fields.items() if not info.get("found", False)]
         if empty_fields:
             print(f"❌ Campos vazios: {', '.join(empty_fields)}")
     
