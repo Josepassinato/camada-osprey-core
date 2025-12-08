@@ -484,20 +484,53 @@ def test_i539_pdf_generation_e2e():
             
             print(f"📄 PDF Pages: {len(pdf_reader.pages)}")
             
-            # Extract form fields
+            # Extract form fields - try multiple methods
             form_fields = {}
-            if pdf_reader.get_form_text_fields():
-                form_fields = pdf_reader.get_form_text_fields()
-                print(f"📊 Total form fields detected: {len(form_fields)}")
-            else:
-                print("⚠️  No form fields detected using get_form_text_fields()")
-                
-                # Try alternative method
+            
+            # Method 1: get_form_text_fields()
+            try:
+                text_fields = pdf_reader.get_form_text_fields()
+                if text_fields and isinstance(text_fields, dict):
+                    form_fields.update(text_fields)
+                    print(f"📊 Text fields detected: {len(text_fields)}")
+            except Exception as e:
+                print(f"⚠️  get_form_text_fields() failed: {str(e)}")
+            
+            # Method 2: get_fields()
+            try:
                 if hasattr(pdf_reader, 'get_fields'):
                     fields = pdf_reader.get_fields()
-                    if fields:
-                        form_fields = {k: v.get('/V', '') for k, v in fields.items() if hasattr(v, 'get')}
-                        print(f"📊 Form fields via get_fields(): {len(form_fields)}")
+                    if fields and isinstance(fields, dict):
+                        for k, v in fields.items():
+                            if v and hasattr(v, 'get'):
+                                field_value = v.get('/V', '')
+                                if field_value:
+                                    form_fields[k] = str(field_value)
+                        print(f"📊 Fields via get_fields(): {len(fields)}")
+            except Exception as e:
+                print(f"⚠️  get_fields() failed: {str(e)}")
+            
+            # Method 3: Manual extraction from pages
+            try:
+                for page_num, page in enumerate(pdf_reader.pages):
+                    if '/Annots' in page:
+                        annotations = page['/Annots']
+                        if annotations:
+                            for annot_ref in annotations:
+                                try:
+                                    annot = annot_ref.get_object()
+                                    if annot and '/T' in annot and '/V' in annot:
+                                        field_name = str(annot['/T'])
+                                        field_value = str(annot['/V']) if annot['/V'] else ''
+                                        if field_value:
+                                            form_fields[field_name] = field_value
+                                except Exception:
+                                    continue
+                print(f"📊 Manual extraction found: {len(form_fields)} total fields")
+            except Exception as e:
+                print(f"⚠️  Manual extraction failed: {str(e)}")
+            
+            print(f"📊 Total form fields detected: {len(form_fields)}")
             
             # Critical fields to verify (from review request)
             critical_fields_check = {
