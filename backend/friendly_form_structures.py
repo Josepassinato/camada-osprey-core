@@ -901,6 +901,7 @@ def get_b2_friendly_form_structure() -> Dict[str, Any]:
     """
     Estrutura para B-2 Tourist Visa Extension
     Formulário I-539 simplificado para turistas
+    Inclui validações jurídicas conforme diretrizes de advogados de imigração
     """
     base_structure = get_i539_friendly_form_structure()
     
@@ -949,8 +950,67 @@ def get_b2_friendly_form_structure() -> Dict[str, Any]:
         ]
     }
     
+    # LEGAL VALIDATION SECTION - B2 Requirements
+    legal_validation_section = {
+        "id": "validacao_legal_b2",
+        "title": "7. Requisitos Legais B-2 (OBRIGATÓRIO)",
+        "description": "Validações obrigatórias conforme legislação de imigração",
+        "fields": [
+            {
+                "id": "entry_type",
+                "label": "Como você entrou nos EUA?",
+                "type": "select",
+                "required": True,
+                "options": ["Visto B-2", "Visto B-1", "ESTA", "Outro visto"],
+                "help_text": "❌ ATENÇÃO: ESTA não pode ser estendido. Você deve sair dos EUA e retornar."
+            },
+            {
+                "id": "entry_date_usa",
+                "label": "Data de entrada nos EUA",
+                "type": "date",
+                "required": True,
+                "validation": "date|past",
+                "help_text": "❌ OBRIGATÓRIO: Você deve esperar pelo menos 90 dias desde a entrada para solicitar extensão"
+            },
+            {
+                "id": "i94_expiration_date",
+                "label": "Data de vencimento do I-94",
+                "type": "date",
+                "required": True,
+                "validation": "date",
+                "help_text": "❌ OBRIGATÓRIO: Verifique em https://i94.cbp.dhs.gov/"
+            },
+            {
+                "id": "extension_duration_months",
+                "label": "Por quantos meses você deseja estender? (padrão: 6 meses)",
+                "type": "text",
+                "required": True,
+                "placeholder": "6",
+                "validation": "numeric",
+                "help_text": "⚠️ A extensão padrão é de 6 meses. Períodos maiores podem ser negados."
+            },
+            {
+                "id": "plans_to_travel_during_process",
+                "label": "Você planeja viajar para fora dos EUA durante o processo?",
+                "type": "select",
+                "required": True,
+                "options": ["no", "yes"],
+                "help_text": "🚨 ATENÇÃO CRÍTICA: Sair dos EUA durante o processo CANCELA automaticamente seu pedido!"
+            },
+            {
+                "id": "has_i94",
+                "label": "Você possui o formulário I-94?",
+                "type": "select",
+                "required": True,
+                "options": ["yes", "no"],
+                "help_text": "❌ OBRIGATÓRIO: Baixe em https://i94.cbp.dhs.gov/"
+            }
+        ]
+    }
+    
     base_structure["sections"].append(tourist_section)
-    base_structure["total_fields"] = 30
+    base_structure["sections"].append(legal_validation_section)
+    base_structure["total_fields"] = 36
     
     return base_structure
 
