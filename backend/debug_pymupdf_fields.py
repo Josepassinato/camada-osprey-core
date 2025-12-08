@@ -17,7 +17,7 @@ def debug_fields():
     all_fields = []
     
     for page_num, page in enumerate(doc):
-        widgets = page.widgets()
+        widgets = list(page.widgets())
         if widgets:
             print(f"\n📄 Page {page_num + 1}: {len(widgets)} widgets")
             for widget in widgets:
