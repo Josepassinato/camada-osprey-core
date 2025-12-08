@@ -318,19 +318,23 @@ class USCISFormFiller:
         )
         
         mapping = {
-            # Part 1: Information About You - CORRECTED FIELD NAMES
+            # Part 1: Information About You - CORRECTED FIELD NAMES (from I-539 template analysis)
             "P1Line1a_FamilyName[0]": family_name,
             "P1_Line1b_GivenName[0]": given_name,
             "P1_Line1c_MiddleName[0]": "",
-            "P1_Line8_DateOfBirth[0]": dob,  # Full date format
-            "P1_Line7_CountryOfBirth[0]": country_of_birth,
+            "P1_Line8_DateOfBirth[0]": dob,  # Full date format YYYY-MM-DD
+            "P1_Line6_CountryOfBirth[0]": country_of_birth,  # FIXED: was P1_Line7
             "P1_Line7_CountryOfCitizenship[0]": country_of_birth,
             "Part1_Item6_StreetName[0]": address,
-            "Part2_Item11_City[0]": city,
-            "Part2_Item11_ZipCode[0]": zip_code,
-            "P5_Line3_DaytimePhoneNumber[0]": phone,
-            # Additional fields that might exist
-            "Part1_Item4_Number[0]": passport,
+            "Part1_Item6_City[0]": city,  # FIXED: City field for Part 1
+            "Part1_Item6_ZipCode[0]": zip_code,  # FIXED: ZIP field for Part 1
+            "Part2_Item11_City[0]": city,  # Alternative city field
+            "Part2_Item11_ZipCode[0]": zip_code,  # Alternative ZIP field
+            "P2_Line10_Province[0]": state,  # FIXED: State/Province field
+            "P5_Line3_DaytimePhoneNumber[0]": phone,  # Daytime phone
+            "P5_Line5_EmailAddress[0]": email,  # FIXED: Email field
+            "Part1_Item4_Number[0]": passport,  # Passport number
+            "SupA_Line1k_Passport[0]": passport,  # Alternative passport field
         }
         
         logger.info(f"✅ Mapped {len([v for v in mapping.values() if v])} fields from friendly form and basic data")
