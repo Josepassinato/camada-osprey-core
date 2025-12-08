@@ -98,7 +98,7 @@ class USCISFormFiller:
         """
         Fill Form I-589 (Application for Asylum)
         NOW SUPPORTS DATA FROM FRIENDLY FORM (simplified_form_responses)
-        FIXED: Uses pypdf for reliable form filling
+        FIXED: Uses PyMuPDF (fitz) for reliable form filling
         
         Args:
             case_data: Dictionary with applicant and asylum information
@@ -110,7 +110,7 @@ class USCISFormFiller:
             bytes: PDF file content
         """
         try:
-            logger.info("🔧 Filling Form I-589 with pypdf...")
+            logger.info("🔧 Filling Form I-589 with PyMuPDF (fitz)...")
             
             # Extract data from all sources
             basic_data = case_data.get("basic_data", {})
@@ -120,55 +120,41 @@ class USCISFormFiller:
             logger.info(f"📝 Using basic_data: {len(basic_data)} fields")
             logger.info(f"📝 Using simplified_form_responses: {len(simplified_form)} fields")
             
-            # Read template
+            # Read template with PyMuPDF
             template_path = os.path.join(self.forms_dir, "I-589.pdf")
-            reader = pypdf.PdfReader(template_path)
-            writer = pypdf.PdfWriter()
+            doc = fitz.open(template_path)
             
-            # Get form fields count
-            field_count = 0
-            if reader.get_form_text_fields():
-                field_count = len(reader.get_form_text_fields())
-                logger.info(f"📋 Found {field_count} form fields in I-589")
+            logger.info(f"📋 PDF has {len(doc)} pages")
             
             # Map data to form fields - NOW USES simplified_form too
             field_mapping = self._get_i589_mapping(basic_data, simplified_form, letters)
             
-            # Clone all pages to writer
-            for page in reader.pages:
-                writer.add_page(page)
+            # Create a dictionary of all non-empty field values
+            form_data = {k: v for k, v in field_mapping.items() if v}
+            logger.info(f"📝 Attempting to fill {len(form_data)} fields")
             
-            # Clone the AcroForm from reader to writer (MUST be done before filling)
-            if "/AcroForm" in reader.trailer["/Root"]:
-                writer._root_object.update({
-                    pypdf.generic.NameObject("/AcroForm"): reader.trailer["/Root"]["/AcroForm"]
-                })
-                
-                # Set NeedAppearances flag BEFORE filling
-                writer._root_object["/AcroForm"].update({
-                    pypdf.generic.NameObject("/NeedAppearances"): pypdf.generic.BooleanObject(True)
-                })
-            
-            # Fill form fields using pypdf - fill each field individually for better compatibility
+            # Fill form fields using PyMuPDF
             filled_count = 0
-            for field_name, field_value in field_mapping.items():
-                if field_value:
-                    try:
-                        writer.update_page_form_field_values(
-                            writer.pages[0],
-                            {field_name: field_value},
-                            auto_regenerate=False
-                        )
-                        filled_count += 1
-                        logger.debug(f"  ✓ Filled: {field_name} = {field_value}")
-                    except Exception as e:
-                        logger.warning(f"  ⚠️ Could not fill {field_name}: {e}")
+            for page in doc:
+                widgets = page.widgets()
+                if widgets:
+                    for widget in widgets:
+                        field_name = widget.field_name
+                        if field_name and field_name in form_data:
+                            try:
+                                widget.field_value = form_data[field_name]
+                                widget.update()
+                                filled_count += 1
+                                logger.debug(f"  ✅ Filled: {field_name} = {form_data[field_name]}")
+                            except Exception as e:
+                                logger.warning(f"  ⚠️ Could not fill {field_name}: {e}")
             
             logger.info(f"✅ Filled {filled_count} fields in Form I-589")
             
-            # Generate PDF
+            # Save to bytes
             output = io.BytesIO()
-            writer.write(output)
+            doc.save(output)
+            doc.close()
             output.seek(0)
             
             logger.info("✅ Form I-589 filled successfully")
