@@ -4582,7 +4582,7 @@ async def generate_final_package(request: dict):
         # Generate download URL (in real implementation, create actual ZIP file)
         download_url = f"/downloads/packages/OSPREY-{form_code}-{case_id}-{package_type}.zip"
         
-        # Update case with package information
+        # 🆕 BUG P2 FIX: Update case with package information and set final status
         await db.auto_cases.update_one(
             {"case_id": case_id},
             {
@@ -4591,11 +4591,15 @@ async def generate_final_package(request: dict):
                     "final_package_url": download_url,
                     "package_contents": package_contents,
                     "status": "completed",
+                    "current_step": "finalized",
+                    "progress_percentage": 100,
                     "completed_at": datetime.utcnow(),
                     "updated_at": datetime.utcnow()
                 }
             }
         )
+        
+        logger.info(f"✅ BUG P2 FIX: Case {case_id} finalized with status='completed', progress=100%")
         
         return {
             "message": "Package generated successfully",
