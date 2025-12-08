@@ -61,28 +61,37 @@ class USCISFormFiller:
             # Map data to form fields - NOW USES BOTH basic_data AND simplified_form
             field_mapping = self._get_i539_mapping(basic_data, simplified_form)
             
-            # Clone all pages
+            # Clone all pages to writer
             for page in reader.pages:
                 writer.add_page(page)
             
-            # Clone the AcroForm from reader to writer
+            # Clone the AcroForm from reader to writer (MUST be done before filling)
             if "/AcroForm" in reader.trailer["/Root"]:
-                writer._root_object.update({pypdf.generic.NameObject("/AcroForm"): reader.trailer["/Root"]["/AcroForm"]})
-            
-            # Fill form fields using pypdf
-            writer.update_page_form_field_values(
-                writer.pages[0],  # Update fields on first page (they apply to all)
-                field_mapping
-            )
-            
-            # Force PDF viewers to regenerate field appearances
-            if "/AcroForm" in writer._root_object:
+                writer._root_object.update({
+                    pypdf.generic.NameObject("/AcroForm"): reader.trailer["/Root"]["/AcroForm"]
+                })
+                
+                # Set NeedAppearances flag BEFORE filling
                 writer._root_object["/AcroForm"].update({
                     pypdf.generic.NameObject("/NeedAppearances"): pypdf.generic.BooleanObject(True)
                 })
             
-            filled_count = len([v for v in field_mapping.values() if v])
-            logger.info(f"✅ Mapped {filled_count} non-empty fields in Form I-539")
+            # Fill form fields using pypdf - fill each field individually for better compatibility
+            filled_count = 0
+            for field_name, field_value in field_mapping.items():
+                if field_value:
+                    try:
+                        writer.update_page_form_field_values(
+                            writer.pages[0],
+                            {field_name: field_value},
+                            auto_regenerate=False  # Don't regenerate appearances yet
+                        )
+                        filled_count += 1
+                        logger.debug(f"  ✓ Filled: {field_name} = {field_value}")
+                    except Exception as e:
+                        logger.warning(f"  ⚠️ Could not fill {field_name}: {e}")
+            
+            logger.info(f"✅ Filled {filled_count} fields in Form I-539")
             
             # Generate PDF
             output = io.BytesIO()
