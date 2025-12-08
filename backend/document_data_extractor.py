@@ -299,8 +299,14 @@ class DocumentDataExtractor:
         current_value: str, 
         user_data: Dict[str, Any]
     ) -> bool:
-        """Compara nomes considerando formato completo vs. separado"""
-        # Normalizar texto: lowercase, remover acentos extras, espaços duplos
+        """
+        Compara nomes considerando formato completo vs. separado
+        
+        IMPORTANTE: Retorna True se o nome do documento é MELHOR/MAIS COMPLETO
+        que o nome atual, mesmo que o nome atual seja subset do documento.
+        Isso permite que nomes incompletos sejam atualizados para nomes completos.
+        """
+        # Normalizar texto: lowercase, remover acentos, espaços duplos
         import unicodedata
         
         def normalize(text):
@@ -323,16 +329,16 @@ class DocumentDataExtractor:
             # Exato match
             if extracted_clean == current_clean:
                 return False
-            # Nome extraído contém nome atual (ex: "joão silva santos" contém "joao silva")
-            if current_clean in extracted_clean:
-                # Verificar se não é apenas substring acidental
-                # Ex: "joao silva" está em "joão silva santos" ✓
-                # Mas "silva" não deve casar com "joão silva santos" ✗
+            # Nome extraído é MAIS COMPLETO que nome atual
+            # Ex: "joao silva" (atual) vs "joao silva santos" (documento)
+            if current_clean in extracted_clean and len(extracted_clean) > len(current_clean):
                 parts_current = current_clean.split()
                 parts_extracted = extracted_clean.split()
-                # Se todas as partes do nome atual estão no nome extraído, é match
+                # Se todas as partes do nome atual estão no extraído
                 if len(parts_current) > 0 and all(any(p1 in p2 or p2 in p1 for p2 in parts_extracted) for p1 in parts_current):
-                    return False
+                    # Nome do documento é mais completo - RETORNAR TRUE para indicar diferença
+                    logger.info(f"Document name is more complete: '{current_clean}' → '{extracted_clean}'")
+                    return True  # É diferente e deve ser atualizado!
         
         # Se há first_name e last_name separados
         first_name = normalize(user_data.get("first_name", ""))
@@ -346,19 +352,17 @@ class DocumentDataExtractor:
             if extracted_clean == full_current:
                 return False
             
-            # Nome extraído contém nome atual completo
-            if full_current and full_current in extracted_clean:
-                return False
-            
-            # Verificar se partes do nome estão presentes
-            parts_current = [p for p in [first_name, last_name] if p]
-            parts_extracted = extracted_clean.split()
-            
-            if parts_current and all(any(p1 in p2 or p2 in p1 for p2 in parts_extracted) for p1 in parts_current):
-                # Nome atual é subset do nome extraído
-                return False
+            # Nome extraído é MAIS COMPLETO
+            if full_current and full_current in extracted_clean and len(extracted_clean) > len(full_current):
+                parts_current = [p for p in full_current.split() if p]
+                parts_extracted = extracted_clean.split()
+                
+                if parts_current and all(any(p1 in p2 or p2 in p1 for p2 in parts_extracted) for p1 in parts_current):
+                    # Nome do documento é mais completo - RETORNAR TRUE
+                    logger.info(f"Document name is more complete: '{full_current}' → '{extracted_clean}'")
+                    return True  # É diferente e deve ser atualizado!
         
-        # Nomes são diferentes
+        # Nomes são completamente diferentes
         return True
     
     def _should_auto_correct(
