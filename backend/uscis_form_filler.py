@@ -283,6 +283,155 @@ class USCISFormFiller:
             import traceback
             logger.error(traceback.format_exc())
             raise
+
+    def fill_i129(self, case_data: Dict[str, Any]) -> bytes:
+        """
+        Fill Form I-129 (Petition for Nonimmigrant Worker)
+        Used for: O-1, H-1B, L-1, P-1, and other temporary work visas
+        USES: PyMuPDF (fitz) for reliable form filling
+        
+        Args:
+            case_data: Dictionary with petition information
+                       - basic_data: Basic petitioner and beneficiary info
+                       - simplified_form_responses: Data from user-friendly form
+                       - visa_category: O-1, H-1B, L-1, etc.
+            
+        Returns:
+            bytes: PDF file content
+        """
+        try:
+            logger.info("🔧 Filling Form I-129 with PyMuPDF (fitz)...")
+            
+            # Extract data
+            basic_data = case_data.get("basic_data", {})
+            simplified_form = case_data.get("simplified_form_responses", {})
+            visa_category = case_data.get("visa_category", "O-1")
+            
+            logger.info(f"📝 Using basic_data: {len(basic_data)} fields")
+            logger.info(f"📝 Using simplified_form_responses: {len(simplified_form)} fields")
+            logger.info(f"📝 Visa category: {visa_category}")
+            
+            # Read template with PyMuPDF
+            template_path = os.path.join(self.forms_dir, "i-129.pdf")
+            doc = fitz.open(template_path)
+            
+            logger.info(f"📋 PDF has {len(doc)} pages")
+            
+            # Map data to form fields
+            field_mapping = self._get_i129_mapping(basic_data, simplified_form, visa_category)
+            
+            # Create a dictionary of all non-empty field values
+            form_data = {k: v for k, v in field_mapping.items() if v}
+            logger.info(f"📝 Attempting to fill {len(form_data)} fields")
+            
+            # Fill form fields using PyMuPDF
+            filled_count = 0
+            for page in doc:
+                widgets = list(page.widgets())
+                if widgets:
+                    for widget in widgets:
+                        full_field_name = widget.field_name
+                        if full_field_name:
+                            # Try exact match first
+                            if full_field_name in form_data:
+                                try:
+                                    widget.field_value = form_data[full_field_name]
+                                    widget.update()
+                                    filled_count += 1
+                                    logger.debug(f"  ✅ Filled (exact): {full_field_name} = {form_data[full_field_name]}")
+                                    continue
+                                except Exception as e:
+                                    logger.warning(f"  ⚠️ Could not fill {full_field_name}: {e}")
+                            
+                            # Try suffix match
+                            for short_name, value in form_data.items():
+                                if full_field_name.endswith(short_name):
+                                    try:
+                                        widget.field_value = value
+                                        widget.update()
+                                        filled_count += 1
+                                        logger.debug(f"  ✅ Filled (suffix): {full_field_name} = {value}")
+                                        break
+                                    except Exception as e:
+                                        logger.warning(f"  ⚠️ Could not fill {full_field_name}: {e}")
+            
+            logger.info(f"✅ Filled {filled_count} fields in Form I-129")
+            
+            # Save to bytes
+            output = io.BytesIO()
+            doc.save(output)
+            doc.close()
+            output.seek(0)
+            
+            logger.info(f"✅ Form I-129 filled successfully for {visa_category}")
+            return output.getvalue()
+            
+        except Exception as e:
+            logger.error(f"❌ Error filling I-129: {str(e)}")
+            import traceback
+            logger.error(traceback.format_exc())
+            raise
+    
+    def fill_o1(self, case_data: Dict[str, Any]) -> bytes:
+        """
+        Fill O-1 Visa Petition (uses I-129)
+        O-1: Extraordinary Ability in Arts, Sciences, Education, Business, or Athletics
+        
+        Args:
+            case_data: Dictionary with petition information
+            
+        Returns:
+            bytes: PDF file content
+        """
+        logger.info("🔧 Filling O-1 Visa Petition (I-129)...")
+        case_data["visa_category"] = "O-1"
+        return self.fill_i129(case_data)
+    
+    def fill_h1b(self, case_data: Dict[str, Any]) -> bytes:
+        """
+        Fill H-1B Visa Petition (uses I-129)
+        H-1B: Specialty Occupation Worker
+        
+        Args:
+            case_data: Dictionary with petition information
+            
+        Returns:
+            bytes: PDF file content
+        """
+        logger.info("🔧 Filling H-1B Visa Petition (I-129)...")
+        case_data["visa_category"] = "H-1B"
+        return self.fill_i129(case_data)
+    
+    def fill_l1(self, case_data: Dict[str, Any]) -> bytes:
+        """
+        Fill L-1 Visa Petition (uses I-129)
+        L-1: Intracompany Transferee
+        
+        Args:
+            case_data: Dictionary with petition information
+            
+        Returns:
+            bytes: PDF file content
+        """
+        logger.info("🔧 Filling L-1 Visa Petition (I-129)...")
+        case_data["visa_category"] = "L-1"
+        return self.fill_i129(case_data)
+    
+    def fill_f1(self, case_data: Dict[str, Any]) -> bytes:
+        """
+        Fill F-1 Student Visa Application (uses I-539 for status change/extension)
+        F-1: Academic Student
+        
+        Args:
+            case_data: Dictionary with student information
+            
+        Returns:
+            bytes: PDF file content
+        """
+        logger.info("🔧 Filling F-1 Student Visa (I-539)...")
+        # F-1 uses I-539 for extension or change of status
+        return self.fill_i539(case_data)
+
     
     def _get_i539_mapping(self, basic_data: Dict[str, Any], simplified_form: Dict[str, Any] = None) -> Dict[str, str]:
         """
