@@ -4,7 +4,7 @@
       "visa_type": "I-539",
       "step1_create_case": {
         "success": true,
-        "case_id": "OSP-081335D5",
+        "case_id": "OSP-1AF684B1",
         "status_code": 200,
         "form_code": "I-539"
       },
@@ -13,10 +13,10 @@
         "status_code": 200,
         "response": {
           "success": true,
-          "case_id": "OSP-081335D5",
+          "case_id": "OSP-1AF684B1",
           "validation_status": "needs_review",
-          "completion_percentage": 0,
-          "message": "⚠️ Seu formulário está 0% completo. Por favor, revise as informações destacadas abaixo.",
+          "completion_percentage": 34,
+          "message": "⚠️ Seu formulário está 34% completo. Por favor, revise as informações destacadas abaixo.",
           "validation_issues": [
             {
               "field": "legal_requirement",
@@ -73,13 +73,6 @@
               "type": "legal_rule"
             },
             {
-              "field": "pais_nascimento",
-              "field_label": "País de Nascimento",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'País de Nascimento'. Exemplo: Brazil"
-            },
-            {
               "field": "pais_cidadania",
               "field_label": "País de Cidadania",
               "issue": "Campo obrigatório não preenchido",
@@ -94,6 +87,13 @@
               "suggestion": "Por favor, preencha o campo 'Sexo'. Exemplo: "
             },
             {
+              "field": "numero_passaporte",
+              "field_label": "Número do Passaporte",
+              "issue": "Deve conter apenas números",
+              "severity": "warning",
+              "suggestion": "Use apenas números, como: BR123456789"
+            },
+            {
               "field": "pais_emissao_passaporte",
               "field_label": "País de Emissão do Passaporte",
               "issue": "Campo obrigatório não preenchido",
@@ -106,13 +106,6 @@
               "issue": "Campo obrigatório não preenchido",
               "severity": "error",
               "suggestion": "Por favor, preencha o campo 'Local de Entrada nos EUA'. Exemplo: JFK Airport, New York"
-            },
-            {
-              "field": "status_atual",
-              "field_label": "Status Atual de Não-Imigrante",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'Status Atual de Não-Imigrante'. Exemplo: "
             },
             {
               "field": "tipo_pedido",
@@ -151,16 +144,31 @@
       "step3_verify_persistence": {
         "success": true,
         "fields_sent": 14,
-        "fields_saved": 0,
+        "fields_saved": 14,
         "key_fields_saved": {
-          "nome_completo": false,
-          "email": false,
-          "telefone": false,
-          "numero_passaporte": false
+          "nome_completo": true,
+          "email": true,
+          "telefone": true,
+          "numero_passaporte": true
         },
-        "key_fields_count": 0,
-        "simplified_responses": {},
-        "passed": false
+        "key_fields_count": 4,
+        "simplified_responses": {
+          "nome_completo": "Carlos Eduardo Silva",
+          "data_nascimento": "1985-06-15",
+          "endereco_eua": "456 Main Street Apt 2B",
+          "cidade_eua": "Miami",
+          "estado_eua": "FL",
+          "cep_eua": "33101",
+          "email": "carlos.silva@email.com",
+          "telefone": "+1-305-555-7890",
+          "numero_passaporte": "BR123456789",
+          "pais_nascimento": "Brazil",
+          "status_atual": "B-2",
+          "status_solicitado": "B-2 Extension",
+          "data_entrada_eua": "2024-06-01",
+          "numero_i94": "12345678901"
+        },
+        "passed": true
       },
       "step4_generate_pdf": {
         "success": true,
@@ -168,11 +176,11 @@
         "pdf_result": {
           "success": true,
           "message": "USCIS form generated successfully",
-          "case_id": "OSP-081335D5",
+          "case_id": "OSP-1AF684B1",
           "form_type": "I-539",
-          "filename": "I-539_OSP-081335D5.pdf",
-          "file_size": 725076,
-          "download_url": "/api/case/OSP-081335D5/download-form"
+          "filename": "I-539_OSP-1AF684B1.pdf",
+          "file_size": 729613,
+          "download_url": "/api/case/OSP-1AF684B1/download-form"
         },
         "pdf_checks": {
           "success_true": true,
@@ -186,19 +194,19 @@
         "success": true,
         "status_code": 200,
         "content_type": "application/pdf",
-        "file_size": 725076,
+        "file_size": 729613,
         "download_checks": {
           "status_200": true,
           "content_type_pdf": true,
           "file_size_adequate": true,
           "content_not_empty": true
         },
-        "pdf_path": "/tmp/final_test_i_539_OSP-081335D5.pdf",
+        "pdf_path": "/tmp/final_test_i_539_OSP-1AF684B1.pdf",
         "passed": true
       },
       "step6_validate_integrity": {
         "success": true,
-        "file_size": 725076,
+        "file_size": 729613,
         "integrity_checks": {
           "file_exists": true,
           "file_size_adequate": true,
@@ -210,25 +218,86 @@
       "step7_verify_fields": {
         "success": true,
         "total_widgets": 159,
-        "filled_fields_count": 0,
+        "filled_fields_count": 15,
         "min_expected": 10,
-        "fields_adequate": false,
-        "sample_fields": [],
-        "passed": false
+        "fields_adequate": true,
+        "sample_fields": [
+          [
+            "form1[0].#subform[0].P1Line1a_FamilyName[0]",
+            "Eduardo Silva"
+          ],
+          [
+            "form1[0].#subform[0].P1_Line1b_GivenName[0]",
+            "Carlos"
+          ],
+          [
+            "form1[0].#subform[0].Part1_Item4_Number[0]",
+            "BR123456789"
+          ],
+          [
+            "form1[0].#subform[0].Part2_Item11_City[0]",
+            "Miami"
+          ],
+          [
+            "form1[0].#subform[0].Part2_Item11_ZipCode[0]",
+            "33101"
+          ],
+          [
+            "form1[0].#subform[0].Part1_Item6_StreetName[0]",
+            "456 Main Street Apt 2B"
+          ],
+          [
+            "form1[0].#subform[0].Part1_Item6_City[0]",
+            "Miami"
+          ],
+          [
+            "form1[0].#subform[0].Part1_Item6_ZipCode[0]",
+            "33101"
+          ],
+          [
+            "form1[0].#subform[1].P1_Line8_DateOfBirth[0]",
+            "1985-06-15"
+          ],
+          [
+            "form1[0].#subform[1].P1_Line7_CountryOfCitizenship[0]",
+            "Brazil"
+          ],
+          [
+            "form1[0].#subform[1].P1_Line6_CountryOfBirth[0]",
+            "Brazil"
+          ],
+          [
+            "form1[0].#subform[1].SupA_Line1k_Passport[0]",
+            "BR123456789"
+          ],
+          [
+            "form1[0].#subform[2].P2_Line10_Province[0]",
+            "FL"
+          ],
+          [
+            "form1[0].#subform[4].P5_Line3_DaytimePhoneNumber[0]",
+            "+1-305-555-7890"
+          ],
+          [
+            "form1[0].#subform[4].P5_Line5_EmailAddress[0]",
+            "carlos.silva@email.com"
+          ]
+        ],
+        "passed": true
       },
       "summary": {
-        "successful_steps": 5,
+        "successful_steps": 7,
         "total_steps": 7,
-        "success_rate": 71.42857142857143,
-        "case_id": "OSP-081335D5",
-        "overall_success": false
+        "success_rate": 100.0,
+        "case_id": "OSP-1AF684B1",
+        "overall_success": true
       }
     },
     "I-589": {
       "visa_type": "I-589",
       "step1_create_case": {
         "success": true,
-        "case_id": "OSP-A645C7B4",
+        "case_id": "OSP-63D773DB",
         "status_code": 200,
         "form_code": "I-589"
       },
@@ -237,10 +306,10 @@
         "status_code": 200,
         "response": {
           "success": true,
-          "case_id": "OSP-A645C7B4",
+          "case_id": "OSP-63D773DB",
           "validation_status": "needs_review",
-          "completion_percentage": 0,
-          "message": "⚠️ Seu formulário está 0% completo. Por favor, revise as informações destacadas abaixo.",
+          "completion_percentage": 35,
+          "message": "⚠️ Seu formulário está 35% completo. Por favor, revise as informações destacadas abaixo.",
           "validation_issues": [
             {
               "field": "legal_requirement",
@@ -295,20 +364,6 @@
               "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Documentos brasileiros devem estar traduzidos para inglês",
               "severity": "warning",
               "type": "legal_rule"
-            },
-            {
-              "field": "nome_completo",
-              "field_label": "Nome Completo",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'Nome Completo'. Exemplo: "
-            },
-            {
-              "field": "pais_nascimento",
-              "field_label": "País de Nascimento",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'País de Nascimento'. Exemplo: "
             },
             {
               "field": "nacionalidade",
@@ -360,13 +415,6 @@
               "suggestion": "Por favor, preencha o campo 'Estado'. Exemplo: "
             },
             {
-              "field": "telefone",
-              "field_label": "Telefone",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'Telefone'. Exemplo: "
-            },
-            {
               "field": "motivo_principal",
               "field_label": "Qual é o principal motivo do seu medo?",
               "issue": "Campo obrigatório não preenchido",
@@ -389,16 +437,35 @@
       "step3_verify_persistence": {
         "success": true,
         "fields_sent": 18,
-        "fields_saved": 0,
+        "fields_saved": 18,
         "key_fields_saved": {
-          "nome_completo": false,
-          "email": false,
-          "telefone": false,
-          "numero_passaporte": false
+          "nome_completo": true,
+          "email": true,
+          "telefone": true,
+          "numero_passaporte": true
         },
-        "key_fields_count": 0,
-        "simplified_responses": {},
-        "passed": false
+        "key_fields_count": 4,
+        "simplified_responses": {
+          "nome_completo": "Ahmed Hassan Mohamed",
+          "data_nascimento": "1980-03-10",
+          "endereco_eua": "789 Refugee Center Dr Apt 5C",
+          "cidade_eua": "New York",
+          "estado_eua": "NY",
+          "cep_eua": "10001",
+          "email": "ahmed.hassan@refugeehelp.org",
+          "telefone": "+1-212-555-4321",
+          "numero_passaporte": "EG987654321",
+          "pais_nascimento": "Egypt",
+          "pais_nacionalidade": "Egypt",
+          "data_entrada_eua": "2024-11-01",
+          "numero_i94": "98765432109",
+          "motivo_asilo": "Political persecution due to political opinion",
+          "tipo_perseguicao": "Political",
+          "tem_familia": "Yes",
+          "membros_familia": "2",
+          "deseja_trabalhar": "Yes"
+        },
+        "passed": true
       },
       "step4_generate_pdf": {
         "success": true,
@@ -406,11 +473,11 @@
         "pdf_result": {
           "success": true,
           "message": "USCIS form generated successfully",
-          "case_id": "OSP-A645C7B4",
+          "case_id": "OSP-63D773DB",
           "form_type": "I-589",
-          "filename": "I-589_OSP-A645C7B4.pdf",
+          "filename": "I-589_OSP-63D773DB.pdf",
           "file_size": 1338481,
-          "download_url": "/api/case/OSP-A645C7B4/download-form"
+          "download_url": "/api/case/OSP-63D773DB/download-form"
         },
         "pdf_checks": {
           "success_true": true,
@@ -431,7 +498,7 @@
           "file_size_adequate": true,
           "content_not_empty": true
         },
-        "pdf_path": "/tmp/final_test_i_589_OSP-A645C7B4.pdf",
+        "pdf_path": "/tmp/final_test_i_589_OSP-63D773DB.pdf",
         "passed": true
       },
       "step6_validate_integrity": {
@@ -464,18 +531,18 @@
         "passed": false
       },
       "summary": {
-        "successful_steps": 5,
+        "successful_steps": 6,
         "total_steps": 7,
-        "success_rate": 71.42857142857143,
-        "case_id": "OSP-A645C7B4",
-        "overall_success": false
+        "success_rate": 85.71428571428571,
+        "case_id": "OSP-63D773DB",
+        "overall_success": true
       }
     },
     "I-140": {
       "visa_type": "I-140",
       "step1_create_case": {
         "success": true,
-        "case_id": "OSP-B40924E7",
+        "case_id": "OSP-B869F9E3",
         "status_code": 200,
         "form_code": "I-140"
       },
@@ -484,10 +551,10 @@
         "status_code": 200,
         "response": {
           "success": true,
-          "case_id": "OSP-B40924E7",
+          "case_id": "OSP-B869F9E3",
           "validation_status": "needs_review",
-          "completion_percentage": 0,
-          "message": "⚠️ Seu formulário está 0% completo. Por favor, revise as informações destacadas abaixo.",
+          "completion_percentage": 75,
+          "message": "⚠️ Seu formulário está 75% completo. Por favor, revise as informações destacadas abaixo.",
           "validation_issues": [
             {
               "field": "legal_requirement",
@@ -542,34 +609,6 @@
               "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Documentos brasileiros devem estar traduzidos para inglês",
               "severity": "warning",
               "type": "legal_rule"
-            },
-            {
-              "field": "nome_completo",
-              "field_label": "Nome Completo",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'Nome Completo'. Exemplo: "
-            },
-            {
-              "field": "pais_nascimento",
-              "field_label": "País de Nascimento",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'País de Nascimento'. Exemplo: "
-            },
-            {
-              "field": "numero_passaporte",
-              "field_label": "Número do Passaporte",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'Número do Passaporte'. Exemplo: "
-            },
-            {
-              "field": "campo_atuacao",
-              "field_label": "Campo de Atuação",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'Campo de Atuação'. Exemplo: "
             }
           ],
           "next_steps": [
@@ -587,16 +626,36 @@
       "step3_verify_persistence": {
         "success": true,
         "fields_sent": 19,
-        "fields_saved": 0,
+        "fields_saved": 19,
         "key_fields_saved": {
-          "nome_completo": false,
-          "email": false,
-          "telefone": false,
-          "numero_passaporte": false
+          "nome_completo": true,
+          "email": true,
+          "telefone": true,
+          "numero_passaporte": true
         },
-        "key_fields_count": 0,
-        "simplified_responses": {},
-        "passed": false
+        "key_fields_count": 4,
+        "simplified_responses": {
+          "nome_completo": "Dr. Sofia Martinez Gonzalez",
+          "data_nascimento": "1975-09-20",
+          "endereco_eua": "2000 Research Institute Blvd",
+          "cidade_eua": "Palo Alto",
+          "estado_eua": "CA",
+          "cep_eua": "94301",
+          "email": "sofia.martinez@research.stanford.edu",
+          "telefone": "+1-650-555-9999",
+          "numero_passaporte": "ES123456789",
+          "pais_nascimento": "Spain",
+          "area_extraordinaria": "Scientific Research - Artificial Intelligence",
+          "campo_atuacao": "Computer Science",
+          "premios_recebidos": "Turing Award 2022, 5 IEEE awards",
+          "publicacoes": "120+ peer-reviewed papers in top journals",
+          "citacoes": "15,000+ citations (h-index: 85)",
+          "contribuicoes_originais": "Developed breakthrough neural network architecture",
+          "memberships": "IEEE Fellow, ACM Fellow, AAAI Fellow",
+          "high_salary": "Top 1% in field ($500k+/year)",
+          "press_coverage": "Featured in Nature, Science, NYT"
+        },
+        "passed": true
       },
       "step4_generate_pdf": {
         "success": true,
@@ -604,11 +663,11 @@
         "pdf_result": {
           "success": true,
           "message": "USCIS form generated successfully",
-          "case_id": "OSP-B40924E7",
+          "case_id": "OSP-B869F9E3",
           "form_type": "I-140",
-          "filename": "I-140_OSP-B40924E7.pdf",
+          "filename": "I-140_OSP-B869F9E3.pdf",
           "file_size": 877311,
-          "download_url": "/api/case/OSP-B40924E7/download-form"
+          "download_url": "/api/case/OSP-B869F9E3/download-form"
         },
         "pdf_checks": {
           "success_true": true,
@@ -629,7 +688,7 @@
           "file_size_adequate": true,
           "content_not_empty": true
         },
-        "pdf_path": "/tmp/final_test_i_140_OSP-B40924E7.pdf",
+        "pdf_path": "/tmp/final_test_i_140_OSP-B869F9E3.pdf",
         "passed": true
       },
       "step6_validate_integrity": {
@@ -653,18 +712,18 @@
         "passed": false
       },
       "summary": {
-        "successful_steps": 5,
+        "successful_steps": 6,
         "total_steps": 7,
-        "success_rate": 71.42857142857143,
-        "case_id": "OSP-B40924E7",
-        "overall_success": false
+        "success_rate": 85.71428571428571,
+        "case_id": "OSP-B869F9E3",
+        "overall_success": true
       }
     },
     "O-1": {
       "visa_type": "O-1",
       "step1_create_case": {
         "success": true,
-        "case_id": "OSP-ED46AFF1",
+        "case_id": "OSP-08AC57B9",
         "status_code": 200,
         "form_code": "O-1"
       },
@@ -673,10 +732,10 @@
         "status_code": 200,
         "response": {
           "success": true,
-          "case_id": "OSP-ED46AFF1",
+          "case_id": "OSP-08AC57B9",
           "validation_status": "needs_review",
-          "completion_percentage": 0,
-          "message": "⚠️ Seu formulário está 0% completo. Por favor, revise as informações destacadas abaixo.",
+          "completion_percentage": 21,
+          "message": "⚠️ Seu formulário está 21% completo. Por favor, revise as informações destacadas abaixo.",
           "validation_issues": [
             {
               "field": "legal_requirement",
@@ -733,13 +792,6 @@
               "type": "legal_rule"
             },
             {
-              "field": "pais_nascimento",
-              "field_label": "País de Nascimento",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'País de Nascimento'. Exemplo: Brazil"
-            },
-            {
               "field": "pais_cidadania",
               "field_label": "País de Cidadania",
               "issue": "Campo obrigatório não preenchido",
@@ -752,6 +804,13 @@
               "issue": "Campo obrigatório não preenchido",
               "severity": "error",
               "suggestion": "Por favor, preencha o campo 'Sexo'. Exemplo: "
+            },
+            {
+              "field": "numero_passaporte",
+              "field_label": "Número do Passaporte",
+              "issue": "Deve conter apenas números",
+              "severity": "warning",
+              "suggestion": "Use apenas números, como: BR123456789"
             },
             {
               "field": "pais_emissao_passaporte",
@@ -832,16 +891,32 @@
       "step3_verify_persistence": {
         "success": true,
         "fields_sent": 15,
-        "fields_saved": 0,
+        "fields_saved": 15,
         "key_fields_saved": {
-          "nome_completo": false,
-          "email": false,
-          "telefone": false,
-          "numero_passaporte": false
+          "nome_completo": true,
+          "email": true,
+          "telefone": true,
+          "numero_passaporte": true
         },
-        "key_fields_count": 0,
-        "simplified_responses": {},
-        "passed": false
+        "key_fields_count": 4,
+        "simplified_responses": {
+          "nome_completo": "Marina Santos Costa",
+          "nome_empresa": "Innovation Tech Labs Inc",
+          "cargo": "Lead AI Researcher",
+          "data_nascimento": "1987-04-12",
+          "endereco_eua": "3500 Silicon Valley Way",
+          "cidade_eua": "San Jose",
+          "estado_eua": "CA",
+          "cep_eua": "95110",
+          "email": "marina.costa@innovationlabs.com",
+          "telefone": "+1-408-555-6666",
+          "numero_passaporte": "BR777888999",
+          "pais_nascimento": "Brazil",
+          "data_inicio": "2025-02-01",
+          "data_fim": "2028-01-31",
+          "field_of_ability": "Artificial Intelligence and Machine Learning"
+        },
+        "passed": true
       },
       "step4_generate_pdf": {
         "success": true,
@@ -849,11 +924,11 @@
         "pdf_result": {
           "success": true,
           "message": "USCIS form generated successfully",
-          "case_id": "OSP-ED46AFF1",
+          "case_id": "OSP-08AC57B9",
           "form_type": "O-1",
-          "filename": "I-129-O1_OSP-ED46AFF1.pdf",
+          "filename": "I-129-O1_OSP-08AC57B9.pdf",
           "file_size": 1603265,
-          "download_url": "/api/case/OSP-ED46AFF1/download-form"
+          "download_url": "/api/case/OSP-08AC57B9/download-form"
         },
         "pdf_checks": {
           "success_true": true,
@@ -874,7 +949,7 @@
           "file_size_adequate": true,
           "content_not_empty": true
         },
-        "pdf_path": "/tmp/final_test_o_1_OSP-ED46AFF1.pdf",
+        "pdf_path": "/tmp/final_test_o_1_OSP-08AC57B9.pdf",
         "passed": true
       },
       "step6_validate_integrity": {
@@ -894,10 +969,10 @@
         "passed": true
       },
       "summary": {
-        "successful_steps": 6,
+        "successful_steps": 7,
         "total_steps": 7,
-        "success_rate": 85.71428571428571,
-        "case_id": "OSP-ED46AFF1",
+        "success_rate": 100.0,
+        "case_id": "OSP-08AC57B9",
         "overall_success": true
       }
     },
@@ -905,7 +980,7 @@
       "visa_type": "H-1B",
       "step1_create_case": {
         "success": true,
-        "case_id": "OSP-713CA185",
+        "case_id": "OSP-AB0427BA",
         "status_code": 200,
         "form_code": "H-1B"
       },
@@ -914,10 +989,10 @@
         "status_code": 200,
         "response": {
           "success": true,
-          "case_id": "OSP-713CA185",
+          "case_id": "OSP-AB0427BA",
           "validation_status": "needs_review",
-          "completion_percentage": 0,
-          "message": "⚠️ Seu formulário está 0% completo. Por favor, revise as informações destacadas abaixo.",
+          "completion_percentage": 23,
+          "message": "⚠️ Seu formulário está 23% completo. Por favor, revise as informações destacadas abaixo.",
           "validation_issues": [
             {
               "field": "legal_requirement",
@@ -974,13 +1049,6 @@
               "type": "legal_rule"
             },
             {
-              "field": "pais_nascimento",
-              "field_label": "País de Nascimento",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'País de Nascimento'. Exemplo: Brazil"
-            },
-            {
               "field": "pais_cidadania",
               "field_label": "País de Cidadania",
               "issue": "Campo obrigatório não preenchido",
@@ -993,6 +1061,13 @@
               "issue": "Campo obrigatório não preenchido",
               "severity": "error",
               "suggestion": "Por favor, preencha o campo 'Sexo'. Exemplo: "
+            },
+            {
+              "field": "numero_passaporte",
+              "field_label": "Número do Passaporte",
+              "issue": "Deve conter apenas números",
+              "severity": "warning",
+              "suggestion": "Use apenas números, como: BR123456789"
             },
             {
               "field": "pais_emissao_passaporte",
@@ -1044,13 +1119,6 @@
               "suggestion": "Por favor, preencha o campo 'Nome do Empregador/Empresa'. Exemplo: Google LLC"
             },
             {
-              "field": "cargo",
-              "field_label": "Cargo/Posição",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'Cargo/Posição'. Exemplo: Software Engineer"
-            },
-            {
               "field": "numero_petição_i129",
               "field_label": "Número da Petição I-129",
               "issue": "Campo obrigatório não preenchido",
@@ -1073,16 +1141,32 @@
       "step3_verify_persistence": {
         "success": true,
         "fields_sent": 15,
-        "fields_saved": 0,
+        "fields_saved": 15,
         "key_fields_saved": {
-          "nome_completo": false,
-          "email": false,
-          "telefone": false,
-          "numero_passaporte": false
+          "nome_completo": true,
+          "email": true,
+          "telefone": true,
+          "numero_passaporte": true
         },
-        "key_fields_count": 0,
-        "simplified_responses": {},
-        "passed": false
+        "key_fields_count": 4,
+        "simplified_responses": {
+          "nome_completo": "Raj Kumar Patel",
+          "nome_empresa": "Global Software Corp",
+          "cargo": "Senior Software Engineer",
+          "data_nascimento": "1990-08-25",
+          "endereco_eua": "1200 Tech Plaza Suite 800",
+          "cidade_eua": "Seattle",
+          "estado_eua": "WA",
+          "cep_eua": "98101",
+          "email": "raj.patel@globalsoftware.com",
+          "telefone": "+1-206-555-3333",
+          "numero_passaporte": "IN555666777",
+          "pais_nascimento": "India",
+          "data_inicio": "2025-04-01",
+          "data_fim": "2028-03-31",
+          "soc_code": "15-1252"
+        },
+        "passed": true
       },
       "step4_generate_pdf": {
         "success": true,
@@ -1090,11 +1174,11 @@
         "pdf_result": {
           "success": true,
           "message": "USCIS form generated successfully",
-          "case_id": "OSP-713CA185",
+          "case_id": "OSP-AB0427BA",
           "form_type": "H-1B",
-          "filename": "I-129-H1B_OSP-713CA185.pdf",
+          "filename": "I-129-H1B_OSP-AB0427BA.pdf",
           "file_size": 1603265,
-          "download_url": "/api/case/OSP-713CA185/download-form"
+          "download_url": "/api/case/OSP-AB0427BA/download-form"
         },
         "pdf_checks": {
           "success_true": true,
@@ -1115,7 +1199,7 @@
           "file_size_adequate": true,
           "content_not_empty": true
         },
-        "pdf_path": "/tmp/final_test_h_1b_OSP-713CA185.pdf",
+        "pdf_path": "/tmp/final_test_h_1b_OSP-AB0427BA.pdf",
         "passed": true
       },
       "step6_validate_integrity": {
@@ -1135,10 +1219,10 @@
         "passed": true
       },
       "summary": {
-        "successful_steps": 6,
+        "successful_steps": 7,
         "total_steps": 7,
-        "success_rate": 85.71428571428571,
-        "case_id": "OSP-713CA185",
+        "success_rate": 100.0,
+        "case_id": "OSP-AB0427BA",
         "overall_success": true
       }
     },
@@ -1146,7 +1230,7 @@
       "visa_type": "L-1",
       "step1_create_case": {
         "success": true,
-        "case_id": "OSP-80A84F87",
+        "case_id": "OSP-08EA01FE",
         "status_code": 200,
         "form_code": "L-1"
       },
@@ -1155,10 +1239,10 @@
         "status_code": 200,
         "response": {
           "success": true,
-          "case_id": "OSP-80A84F87",
+          "case_id": "OSP-08EA01FE",
           "validation_status": "needs_review",
-          "completion_percentage": 0,
-          "message": "⚠️ Seu formulário está 0% completo. Por favor, revise as informações destacadas abaixo.",
+          "completion_percentage": 20,
+          "message": "⚠️ Seu formulário está 20% completo. Por favor, revise as informações destacadas abaixo.",
           "validation_issues": [
             {
               "field": "legal_requirement",
@@ -1215,13 +1299,6 @@
               "type": "legal_rule"
             },
             {
-              "field": "pais_nascimento",
-              "field_label": "País de Nascimento",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'País de Nascimento'. Exemplo: Brazil"
-            },
-            {
               "field": "pais_cidadania",
               "field_label": "País de Cidadania",
               "issue": "Campo obrigatório não preenchido",
@@ -1234,6 +1311,13 @@
               "issue": "Campo obrigatório não preenchido",
               "severity": "error",
               "suggestion": "Por favor, preencha o campo 'Sexo'. Exemplo: "
+            },
+            {
+              "field": "numero_passaporte",
+              "field_label": "Número do Passaporte",
+              "issue": "Deve conter apenas números",
+              "severity": "warning",
+              "suggestion": "Use apenas números, como: BR123456789"
             },
             {
               "field": "pais_emissao_passaporte",
@@ -1321,16 +1405,33 @@
       "step3_verify_persistence": {
         "success": true,
         "fields_sent": 16,
-        "fields_saved": 0,
+        "fields_saved": 16,
         "key_fields_saved": {
-          "nome_completo": false,
-          "email": false,
-          "telefone": false,
-          "numero_passaporte": false
+          "nome_completo": true,
+          "email": true,
+          "telefone": true,
+          "numero_passaporte": true
         },
-        "key_fields_count": 0,
-        "simplified_responses": {},
-        "passed": false
+        "key_fields_count": 4,
+        "simplified_responses": {
+          "nome_completo": "Patricia Alves Mendes",
+          "nome_empresa": "Multinational Tech Solutions Inc",
+          "cargo": "Regional Director of Operations",
+          "data_nascimento": "1978-12-05",
+          "endereco_eua": "4000 Corporate Plaza Tower 3",
+          "cidade_eua": "Austin",
+          "estado_eua": "TX",
+          "cep_eua": "78701",
+          "email": "patricia.mendes@multinationaltech.com",
+          "telefone": "+1-512-555-8888",
+          "numero_passaporte": "BR999000111",
+          "pais_nascimento": "Brazil",
+          "data_inicio": "2025-03-15",
+          "data_fim": "2027-03-14",
+          "is_managerial": "Yes",
+          "anos_experiencia": "12 years"
+        },
+        "passed": true
       },
       "step4_generate_pdf": {
         "success": true,
@@ -1338,11 +1439,11 @@
         "pdf_result": {
           "success": true,
           "message": "USCIS form generated successfully",
-          "case_id": "OSP-80A84F87",
+          "case_id": "OSP-08EA01FE",
           "form_type": "L-1",
-          "filename": "I-129-L1_OSP-80A84F87.pdf",
+          "filename": "I-129-L1_OSP-08EA01FE.pdf",
           "file_size": 1603265,
-          "download_url": "/api/case/OSP-80A84F87/download-form"
+          "download_url": "/api/case/OSP-08EA01FE/download-form"
         },
         "pdf_checks": {
           "success_true": true,
@@ -1363,7 +1464,7 @@
           "file_size_adequate": true,
           "content_not_empty": true
         },
-        "pdf_path": "/tmp/final_test_l_1_OSP-80A84F87.pdf",
+        "pdf_path": "/tmp/final_test_l_1_OSP-08EA01FE.pdf",
         "passed": true
       },
       "step6_validate_integrity": {
@@ -1383,10 +1484,10 @@
         "passed": true
       },
       "summary": {
-        "successful_steps": 6,
+        "successful_steps": 7,
         "total_steps": 7,
-        "success_rate": 85.71428571428571,
-        "case_id": "OSP-80A84F87",
+        "success_rate": 100.0,
+        "case_id": "OSP-08EA01FE",
         "overall_success": true
       }
     },
@@ -1394,7 +1495,7 @@
       "visa_type": "F-1",
       "step1_create_case": {
         "success": true,
-        "case_id": "OSP-1637E71E",
+        "case_id": "OSP-11CD9E97",
         "status_code": 200,
         "form_code": "F-1"
       },
@@ -1403,10 +1504,10 @@
         "status_code": 200,
         "response": {
           "success": true,
-          "case_id": "OSP-1637E71E",
+          "case_id": "OSP-11CD9E97",
           "validation_status": "needs_review",
-          "completion_percentage": 0,
-          "message": "⚠️ Seu formulário está 0% completo. Por favor, revise as informações destacadas abaixo.",
+          "completion_percentage": 28,
+          "message": "⚠️ Seu formulário está 28% completo. Por favor, revise as informações destacadas abaixo.",
           "validation_issues": [
             {
               "field": "legal_requirement",
@@ -1481,13 +1582,6 @@
               "type": "legal_rule"
             },
             {
-              "field": "pais_nascimento",
-              "field_label": "País de Nascimento",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'País de Nascimento'. Exemplo: Brazil"
-            },
-            {
               "field": "pais_cidadania",
               "field_label": "País de Cidadania",
               "issue": "Campo obrigatório não preenchido",
@@ -1502,6 +1596,13 @@
               "suggestion": "Por favor, preencha o campo 'Sexo'. Exemplo: "
             },
             {
+              "field": "numero_passaporte",
+              "field_label": "Número do Passaporte",
+              "issue": "Deve conter apenas números",
+              "severity": "warning",
+              "suggestion": "Use apenas números, como: BR123456789"
+            },
+            {
               "field": "pais_emissao_passaporte",
               "field_label": "País de Emissão do Passaporte",
               "issue": "Campo obrigatório não preenchido",
@@ -1514,13 +1615,6 @@
               "issue": "Campo obrigatório não preenchido",
               "severity": "error",
               "suggestion": "Por favor, preencha o campo 'Local de Entrada nos EUA'. Exemplo: JFK Airport, New York"
-            },
-            {
-              "field": "status_atual",
-              "field_label": "Status Atual de Não-Imigrante",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'Status Atual de Não-Imigrante'. Exemplo: "
             },
             {
               "field": "tipo_pedido",
@@ -1580,16 +1674,33 @@
       "step3_verify_persistence": {
         "success": true,
         "fields_sent": 16,
-        "fields_saved": 0,
+        "fields_saved": 16,
         "key_fields_saved": {
-          "nome_completo": false,
-          "email": false,
-          "telefone": false,
-          "numero_passaporte": false
+          "nome_completo": true,
+          "email": true,
+          "telefone": true,
+          "numero_passaporte": true
         },
-        "key_fields_count": 0,
-        "simplified_responses": {},
-        "passed": false
+        "key_fields_count": 4,
+        "simplified_responses": {
+          "nome_completo": "Li Wei Zhang",
+          "data_nascimento": "1998-07-18",
+          "endereco_eua": "567 University Ave Apt 12",
+          "cidade_eua": "Boston",
+          "estado_eua": "MA",
+          "cep_eua": "02115",
+          "email": "li.zhang@university.edu",
+          "telefone": "+1-617-555-2222",
+          "numero_passaporte": "CN888777666",
+          "pais_nascimento": "China",
+          "status_atual": "F-1",
+          "status_solicitado": "F-1 OPT Extension",
+          "data_entrada_eua": "2021-08-15",
+          "numero_i94": "55566677788",
+          "universidade": "MIT",
+          "programa": "Computer Science PhD"
+        },
+        "passed": true
       },
       "step4_generate_pdf": {
         "success": true,
@@ -1597,11 +1708,11 @@
         "pdf_result": {
           "success": true,
           "message": "USCIS form generated successfully",
-          "case_id": "OSP-1637E71E",
+          "case_id": "OSP-11CD9E97",
           "form_type": "F-1",
-          "filename": "I-539-F1_OSP-1637E71E.pdf",
-          "file_size": 725076,
-          "download_url": "/api/case/OSP-1637E71E/download-form"
+          "filename": "I-539-F1_OSP-11CD9E97.pdf",
+          "file_size": 729606,
+          "download_url": "/api/case/OSP-11CD9E97/download-form"
         },
         "pdf_checks": {
           "success_true": true,
@@ -1615,19 +1726,19 @@
         "success": true,
         "status_code": 200,
         "content_type": "application/pdf",
-        "file_size": 725076,
+        "file_size": 729606,
         "download_checks": {
           "status_200": true,
           "content_type_pdf": true,
           "file_size_adequate": true,
           "content_not_empty": true
         },
-        "pdf_path": "/tmp/final_test_f_1_OSP-1637E71E.pdf",
+        "pdf_path": "/tmp/final_test_f_1_OSP-11CD9E97.pdf",
         "passed": true
       },
       "step6_validate_integrity": {
         "success": true,
-        "file_size": 725076,
+        "file_size": 729606,
         "integrity_checks": {
           "file_exists": true,
           "file_size_adequate": true,
@@ -1639,25 +1750,86 @@
       "step7_verify_fields": {
         "success": true,
         "total_widgets": 159,
-        "filled_fields_count": 0,
+        "filled_fields_count": 15,
         "min_expected": 5,
-        "fields_adequate": false,
-        "sample_fields": [],
-        "passed": false
+        "fields_adequate": true,
+        "sample_fields": [
+          [
+            "form1[0].#subform[0].P1Line1a_FamilyName[0]",
+            "Wei Zhang"
+          ],
+          [
+            "form1[0].#subform[0].P1_Line1b_GivenName[0]",
+            "Li"
+          ],
+          [
+            "form1[0].#subform[0].Part1_Item4_Number[0]",
+            "CN888777666"
+          ],
+          [
+            "form1[0].#subform[0].Part2_Item11_City[0]",
+            "Boston"
+          ],
+          [
+            "form1[0].#subform[0].Part2_Item11_ZipCode[0]",
+            "02115"
+          ],
+          [
+            "form1[0].#subform[0].Part1_Item6_StreetName[0]",
+            "567 University Ave Apt 12"
+          ],
+          [
+            "form1[0].#subform[0].Part1_Item6_City[0]",
+            "Boston"
+          ],
+          [
+            "form1[0].#subform[0].Part1_Item6_ZipCode[0]",
+            "02115"
+          ],
+          [
+            "form1[0].#subform[1].P1_Line8_DateOfBirth[0]",
+            "1998-07-18"
+          ],
+          [
+            "form1[0].#subform[1].P1_Line7_CountryOfCitizenship[0]",
+            "China"
+          ],
+          [
+            "form1[0].#subform[1].P1_Line6_CountryOfBirth[0]",
+            "China"
+          ],
+          [
+            "form1[0].#subform[1].SupA_Line1k_Passport[0]",
+            "CN888777666"
+          ],
+          [
+            "form1[0].#subform[2].P2_Line10_Province[0]",
+            "MA"
+          ],
+          [
+            "form1[0].#subform[4].P5_Line3_DaytimePhoneNumber[0]",
+            "+1-617-555-2222"
+          ],
+          [
+            "form1[0].#subform[4].P5_Line5_EmailAddress[0]",
+            "li.zhang@university.edu"
+          ]
+        ],
+        "passed": true
       },
       "summary": {
-        "successful_steps": 5,
+        "successful_steps": 7,
         "total_steps": 7,
-        "success_rate": 71.42857142857143,
-        "case_id": "OSP-1637E71E",
-        "overall_success": false
+        "success_rate": 100.0,
+        "case_id": "OSP-11CD9E97",
+        "overall_success": true
       }
     },
     "I-129": {
       "visa_type": "I-129",
       "step1_create_case": {
         "success": true,
-        "case_id": "OSP-166DDCF1",
+        "case_id": "OSP-2130171A",
         "status_code": 200,
         "form_code": "I-129"
       },
@@ -1666,10 +1838,10 @@
         "status_code": 200,
         "response": {
           "success": true,
-          "case_id": "OSP-166DDCF1",
+          "case_id": "OSP-2130171A",
           "validation_status": "needs_review",
-          "completion_percentage": 0,
-          "message": "⚠️ Seu formulário está 0% completo. Por favor, revise as informações destacadas abaixo.",
+          "completion_percentage": 100,
+          "message": "⚠️ Seu formulário está 100% completo. Por favor, revise as informações destacadas abaixo.",
           "validation_issues": [
             {
               "field": "legal_requirement",
@@ -1724,41 +1896,6 @@
               "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Documentos brasileiros devem estar traduzidos para inglês",
               "severity": "warning",
               "type": "legal_rule"
-            },
-            {
-              "field": "nome_completo",
-              "field_label": "Nome Completo",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'Nome Completo'. Exemplo: Maria Santos Silva"
-            },
-            {
-              "field": "data_nascimento",
-              "field_label": "Data de Nascimento",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'Data de Nascimento'. Exemplo: 1990-05-15"
-            },
-            {
-              "field": "email",
-              "field_label": "Email",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'Email'. Exemplo: maria@example.com"
-            },
-            {
-              "field": "numero_passaporte",
-              "field_label": "Número do Passaporte",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'Número do Passaporte'. Exemplo: BR123456789"
-            },
-            {
-              "field": "pais_nascimento",
-              "field_label": "País de Nascimento",
-              "issue": "Campo obrigatório não preenchido",
-              "severity": "error",
-              "suggestion": "Por favor, preencha o campo 'País de Nascimento'. Exemplo: Brazil"
             }
           ],
           "next_steps": [
@@ -1776,16 +1913,29 @@
       "step3_verify_persistence": {
         "success": true,
         "fields_sent": 12,
-        "fields_saved": 0,
+        "fields_saved": 12,
         "key_fields_saved": {
-          "nome_completo": false,
-          "email": false,
-          "telefone": false,
-          "numero_passaporte": false
+          "nome_completo": true,
+          "email": true,
+          "telefone": true,
+          "numero_passaporte": true
         },
-        "key_fields_count": 0,
-        "simplified_responses": {},
-        "passed": false
+        "key_fields_count": 4,
+        "simplified_responses": {
+          "nome_completo": "Generic Test User",
+          "nome_empresa": "Test Company Inc",
+          "cargo": "Test Position",
+          "data_nascimento": "1985-01-01",
+          "endereco_eua": "100 Test St",
+          "cidade_eua": "Test City",
+          "estado_eua": "CA",
+          "cep_eua": "90000",
+          "email": "test@test.com",
+          "telefone": "+1-555-0000",
+          "numero_passaporte": "XX000000000",
+          "pais_nascimento": "Test Country"
+        },
+        "passed": true
       },
       "step4_generate_pdf": {
         "success": true,
@@ -1793,11 +1943,11 @@
         "pdf_result": {
           "success": true,
           "message": "USCIS form generated successfully",
-          "case_id": "OSP-166DDCF1",
+          "case_id": "OSP-2130171A",
           "form_type": "I-129",
-          "filename": "I-129_OSP-166DDCF1.pdf",
+          "filename": "I-129_OSP-2130171A.pdf",
           "file_size": 1603265,
-          "download_url": "/api/case/OSP-166DDCF1/download-form"
+          "download_url": "/api/case/OSP-2130171A/download-form"
         },
         "pdf_checks": {
           "success_true": true,
@@ -1818,7 +1968,7 @@
           "file_size_adequate": true,
           "content_not_empty": true
         },
-        "pdf_path": "/tmp/final_test_i_129_OSP-166DDCF1.pdf",
+        "pdf_path": "/tmp/final_test_i_129_OSP-2130171A.pdf",
         "passed": true
       },
       "step6_validate_integrity": {
@@ -1838,10 +1988,10 @@
         "passed": true
       },
       "summary": {
-        "successful_steps": 6,
+        "successful_steps": 7,
         "total_steps": 7,
-        "success_rate": 85.71428571428571,
-        "case_id": "OSP-166DDCF1",
+        "success_rate": 100.0,
+        "case_id": "OSP-2130171A",
         "overall_success": true
       }
     }
@@ -1849,60 +1999,60 @@
   "summary_table": [
     {
       "visa": "I-539",
-      "case_id": "OSP-081335D5",
-      "success_rate": 71.42857142857143,
-      "status": "❌"
+      "case_id": "OSP-1AF684B1",
+      "success_rate": 100.0,
+      "status": "✅"
     },
     {
       "visa": "I-589",
-      "case_id": "OSP-A645C7B4",
-      "success_rate": 71.42857142857143,
-      "status": "❌"
+      "case_id": "OSP-63D773DB",
+      "success_rate": 85.71428571428571,
+      "status": "✅"
     },
     {
       "visa": "I-140",
-      "case_id": "OSP-B40924E7",
-      "success_rate": 71.42857142857143,
-      "status": "❌"
+      "case_id": "OSP-B869F9E3",
+      "success_rate": 85.71428571428571,
+      "status": "✅"
     },
     {
       "visa": "O-1",
-      "case_id": "OSP-ED46AFF1",
-      "success_rate": 85.71428571428571,
+      "case_id": "OSP-08AC57B9",
+      "success_rate": 100.0,
       "status": "✅"
     },
     {
       "visa": "H-1B",
-      "case_id": "OSP-713CA185",
-      "success_rate": 85.71428571428571,
+      "case_id": "OSP-AB0427BA",
+      "success_rate": 100.0,
       "status": "✅"
     },
     {
       "visa": "L-1",
-      "case_id": "OSP-80A84F87",
-      "success_rate": 85.71428571428571,
+      "case_id": "OSP-08EA01FE",
+      "success_rate": 100.0,
       "status": "✅"
     },
     {
       "visa": "F-1",
-      "case_id": "OSP-1637E71E",
-      "success_rate": 71.42857142857143,
-      "status": "❌"
+      "case_id": "OSP-11CD9E97",
+      "success_rate": 100.0,
+      "status": "✅"
     },
     {
       "visa": "I-129",
-      "case_id": "OSP-166DDCF1",
-      "success_rate": 85.71428571428571,
+      "case_id": "OSP-2130171A",
+      "success_rate": 100.0,
       "status": "✅"
     }
   ],
   "statistics": {
     "visas_tested": 8,
-    "successful_visas": 4,
-    "overall_success_rate": 50.0,
-    "avg_success_rate": 78.57142857142857
+    "successful_visas": 8,
+    "overall_success_rate": 100.0,
+    "avg_success_rate": 96.42857142857143
   },
-  "timestamp": "2025-12-08T04:45:45.709999",
+  "timestamp": "2025-12-08T04:47:13.778187",
   "test_focus": "🎯 TESTE END-TO-END COMPLETO - VALIDAÇÃO FINAL DE TODOS OS 8 VISTOS",
   "backend_url": "https://smart-visa-helper-1.preview.emergentagent.com"
 }
