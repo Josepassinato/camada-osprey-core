@@ -1131,6 +1131,547 @@ def get_o1_friendly_form_structure() -> Dict[str, Any]:
     return base_structure
 
 
+def get_green_card_renewal_form_structure() -> Dict[str, Any]:
+    """
+    Estrutura para Renovação de Green Card (I-90)
+    Inclui validações jurídicas conforme diretrizes de advogados de imigração
+    """
+    return {
+        "form_code": "I-90",
+        "form_name": "Renovação de Green Card",
+        "estimated_time": "20-25 minutos",
+        "total_fields": 25,
+        "warning": "Você pode renovar seu Green Card até 6 meses antes do vencimento.",
+        "sections": [
+            {
+                "id": "informacoes_green_card",
+                "title": "1. Informações do Green Card Atual",
+                "description": "Dados do seu Green Card que será renovado",
+                "fields": [
+                    {
+                        "id": "nome_completo",
+                        "label": "Nome Completo (como está no Green Card)",
+                        "type": "text",
+                        "required": True,
+                        "placeholder": "João Silva Santos"
+                    },
+                    {
+                        "id": "alien_registration_number",
+                        "label": "Alien Registration Number (A-Number)",
+                        "type": "text",
+                        "required": True,
+                        "placeholder": "A123456789",
+                        "help_text": "Número de 9 dígitos no seu Green Card"
+                    },
+                    {
+                        "id": "green_card_expiration_date",
+                        "label": "Data de Vencimento do Green Card",
+                        "type": "date",
+                        "required": True,
+                        "validation": "date",
+                        "help_text": "❌ OBRIGATÓRIO: Data de vencimento para validar período de renovação"
+                    },
+                    {
+                        "id": "data_emissao_green_card",
+                        "label": "Data de Emissão do Green Card",
+                        "type": "date",
+                        "required": True,
+                        "validation": "date|past"
+                    },
+                    {
+                        "id": "categoria_green_card",
+                        "label": "Categoria do Green Card",
+                        "type": "select",
+                        "required": True,
+                        "options": [
+                            "IR1 - Spouse of U.S. Citizen",
+                            "IR2 - Child of U.S. Citizen",
+                            "EB-1 - Priority Worker",
+                            "EB-2 - Advanced Degree",
+                            "EB-3 - Skilled Worker",
+                            "DV - Diversity Visa",
+                            "Outro"
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "endereco_atual",
+                "title": "2. Endereço Atual",
+                "description": "Onde você mora atualmente",
+                "fields": [
+                    {
+                        "id": "endereco_completo",
+                        "label": "Endereço Completo",
+                        "type": "text",
+                        "required": True,
+                        "placeholder": "123 Main Street, Apt 4B"
+                    },
+                    {
+                        "id": "cidade",
+                        "label": "Cidade",
+                        "type": "text",
+                        "required": True,
+                        "placeholder": "New York"
+                    },
+                    {
+                        "id": "estado",
+                        "label": "Estado",
+                        "type": "text",
+                        "required": True,
+                        "placeholder": "NY"
+                    },
+                    {
+                        "id": "cep",
+                        "label": "ZIP Code",
+                        "type": "text",
+                        "required": True,
+                        "placeholder": "10001",
+                        "validation": "numeric"
+                    }
+                ]
+            },
+            {
+                "id": "motivo_renovacao",
+                "title": "3. Motivo da Renovação",
+                "description": "Por que você está renovando",
+                "fields": [
+                    {
+                        "id": "razao_renovacao",
+                        "label": "Razão da Renovação",
+                        "type": "select",
+                        "required": True,
+                        "options": [
+                            "Green Card vencido ou vai vencer em 6 meses",
+                            "Green Card perdido ou roubado",
+                            "Green Card danificado",
+                            "Mudança de nome",
+                            "Erro no Green Card original"
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "validacao_legal_green_card",
+                "title": "4. Validação Legal (OBRIGATÓRIO)",
+                "description": "Verificações conforme legislação de imigração",
+                "fields": [
+                    {
+                        "id": "passport_expiration_date",
+                        "label": "Data de Validade do Passaporte",
+                        "type": "date",
+                        "required": True,
+                        "validation": "date",
+                        "help_text": "⚠️ Se vencido, você pode continuar mas considere renovar"
+                    },
+                    {
+                        "id": "has_current_visa_copy",
+                        "label": "Você possui cópia do Green Card atual?",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"],
+                        "help_text": "Necessário anexar cópia (frente e verso)"
+                    },
+                    {
+                        "id": "has_passport_photos",
+                        "label": "Você possui 2 fotos tamanho passaporte?",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"],
+                        "help_text": "❌ OBRIGATÓRIO: 2 fotos padrão passaporte"
+                    }
+                ]
+            }
+        ]
+    }
+
+
+def get_marriage_adjustment_form_structure() -> Dict[str, Any]:
+    """
+    Estrutura para Ajuste de Status por Casamento
+    Inclui validações jurídicas conforme diretrizes de advogados de imigração
+    """
+    return {
+        "form_code": "I-485-MARRIAGE",
+        "form_name": "Ajuste de Status por Casamento (Green Card)",
+        "estimated_time": "45-60 minutos",
+        "total_fields": 45,
+        "warning": "Este processo é apenas para quem está nos EUA com entrada legal.",
+        "sections": [
+            {
+                "id": "informacoes_pessoais_marriage",
+                "title": "1. Informações Pessoais do Requerente",
+                "fields": [
+                    {
+                        "id": "nome_completo",
+                        "label": "Nome Completo",
+                        "type": "text",
+                        "required": True,
+                        "placeholder": "João Silva Santos"
+                    },
+                    {
+                        "id": "data_nascimento",
+                        "label": "Data de Nascimento",
+                        "type": "date",
+                        "required": True,
+                        "validation": "date|past"
+                    },
+                    {
+                        "id": "pais_nascimento",
+                        "label": "País de Nascimento",
+                        "type": "country",
+                        "required": True,
+                        "placeholder": "Brazil"
+                    }
+                ]
+            },
+            {
+                "id": "informacoes_casamento",
+                "title": "2. Informações do Casamento",
+                "fields": [
+                    {
+                        "id": "marriage_date",
+                        "label": "Data do Casamento",
+                        "type": "date",
+                        "required": True,
+                        "validation": "date|past",
+                        "help_text": "❌ OBRIGATÓRIO: Data do casamento legal"
+                    },
+                    {
+                        "id": "local_casamento",
+                        "label": "Local do Casamento (Cidade, Estado/País)",
+                        "type": "text",
+                        "required": True,
+                        "placeholder": "Las Vegas, Nevada"
+                    },
+                    {
+                        "id": "nome_conjuge",
+                        "label": "Nome Completo do Cônjuge (Peticionário)",
+                        "type": "text",
+                        "required": True,
+                        "placeholder": "Mary Johnson"
+                    },
+                    {
+                        "id": "conjuge_cidadao_americano",
+                        "label": "Seu cônjuge é cidadão americano?",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"],
+                        "help_text": "Para ajuste por casamento, cônjuge deve ser cidadão ou residente permanente"
+                    }
+                ]
+            },
+            {
+                "id": "validacao_legal_marriage",
+                "title": "3. Requisitos Legais (OBRIGATÓRIO)",
+                "description": "Validações obrigatórias conforme legislação de imigração",
+                "fields": [
+                    {
+                        "id": "currently_in_usa",
+                        "label": "Você está atualmente nos Estados Unidos?",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"],
+                        "help_text": "❌ AJUSTE DE STATUS APENAS NOS EUA: Se não, deve fazer processo consular"
+                    },
+                    {
+                        "id": "legal_entry",
+                        "label": "Você entrou legalmente nos EUA?",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"],
+                        "help_text": "❌ ENTRADA LEGAL OBRIGATÓRIA: Com visto válido (B2, F1, etc.)"
+                    },
+                    {
+                        "id": "entry_visa_type",
+                        "label": "Com qual visto você entrou?",
+                        "type": "select",
+                        "required": True,
+                        "options": ["B-2 (Turista)", "F-1 (Estudante)", "H-1B (Trabalho)", "J-1 (Intercâmbio)", "Outro"],
+                        "help_text": "💡 Concurrent filing aceito para entrada legal com visto de visitante"
+                    },
+                    {
+                        "id": "entry_date_usa",
+                        "label": "Data de Entrada nos EUA",
+                        "type": "date",
+                        "required": True,
+                        "validation": "date|past"
+                    },
+                    {
+                        "id": "i94_expiration_date",
+                        "label": "Data de Vencimento do I-94",
+                        "type": "date",
+                        "required": True,
+                        "validation": "date",
+                        "help_text": "Verifique em https://i94.cbp.dhs.gov/"
+                    }
+                ]
+            },
+            {
+                "id": "formularios_obrigatorios",
+                "title": "4. Formulários Obrigatórios",
+                "description": "Confirme quais formulários serão incluídos",
+                "fields": [
+                    {
+                        "id": "has_i_130",
+                        "label": "I-130 - Petição para Parente Estrangeiro",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"],
+                        "help_text": "❌ OBRIGATÓRIO"
+                    },
+                    {
+                        "id": "has_i_130a",
+                        "label": "I-130A - Informações Suplementares",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"],
+                        "help_text": "❌ OBRIGATÓRIO"
+                    },
+                    {
+                        "id": "has_i_485",
+                        "label": "I-485 - Ajuste de Status",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"],
+                        "help_text": "❌ OBRIGATÓRIO"
+                    },
+                    {
+                        "id": "has_i_864",
+                        "label": "I-864 - Affidavit of Support (Suporte Financeiro)",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"],
+                        "help_text": "❌ OBRIGATÓRIO: Seu cônjuge deve preencher"
+                    }
+                ]
+            },
+            {
+                "id": "formularios_opcionais",
+                "title": "5. Formulários Opcionais (Recomendados)",
+                "fields": [
+                    {
+                        "id": "wants_work_permit",
+                        "label": "Você deseja autorização de trabalho?",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"],
+                        "help_text": "💡 RECOMENDADO: Permite trabalhar enquanto aguarda o Green Card"
+                    },
+                    {
+                        "id": "has_i_765",
+                        "label": "I-765 - Autorização de Trabalho (EAD)",
+                        "type": "select",
+                        "required": False,
+                        "options": ["yes", "no"],
+                        "help_text": "Incluir se deseja trabalhar"
+                    },
+                    {
+                        "id": "wants_travel_permit",
+                        "label": "Você deseja permissão para viagem (Advance Parole)?",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"],
+                        "help_text": "💡 RECOMENDADO: Permite viajar internacionalmente durante o processo"
+                    },
+                    {
+                        "id": "has_i_131",
+                        "label": "I-131 - Advance Parole (Permissão de Viagem)",
+                        "type": "select",
+                        "required": False,
+                        "options": ["yes", "no"],
+                        "help_text": "Incluir se deseja viajar"
+                    }
+                ]
+            },
+            {
+                "id": "documentacao_marriage",
+                "title": "6. Documentação Necessária",
+                "fields": [
+                    {
+                        "id": "has_passport",
+                        "label": "Cópia do passaporte válido",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"]
+                    },
+                    {
+                        "id": "has_birth_certificate",
+                        "label": "Certidão de nascimento traduzida",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"]
+                    },
+                    {
+                        "id": "has_marriage_certificate",
+                        "label": "Certidão de casamento (traduzida se necessário)",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"]
+                    },
+                    {
+                        "id": "has_passport_photos",
+                        "label": "2 fotos tamanho passaporte",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"]
+                    }
+                ]
+            }
+        ]
+    }
+
+
+def get_f1_reinstatement_form_structure() -> Dict[str, Any]:
+    """
+    Estrutura para F-1 Reinstatement
+    Inclui validações jurídicas conforme diretrizes de advogados de imigração
+    """
+    return {
+        "form_code": "I-539-REINSTATEMENT",
+        "form_name": "Reinstatement de Status F-1 (Estudante)",
+        "estimated_time": "35-45 minutos",
+        "total_fields": 32,
+        "warning": "Reinstatement é apenas para quem teve status F-1 encerrado pela escola.",
+        "sections": [
+            {
+                "id": "informacoes_pessoais_reinstatement",
+                "title": "1. Informações Pessoais",
+                "fields": [
+                    {
+                        "id": "nome_completo",
+                        "label": "Nome Completo",
+                        "type": "text",
+                        "required": True
+                    },
+                    {
+                        "id": "data_nascimento",
+                        "label": "Data de Nascimento",
+                        "type": "date",
+                        "required": True,
+                        "validation": "date|past"
+                    },
+                    {
+                        "id": "numero_passaporte",
+                        "label": "Número do Passaporte",
+                        "type": "text",
+                        "required": True
+                    }
+                ]
+            },
+            {
+                "id": "status_f1_anterior",
+                "title": "2. Informações do Status F-1 Anterior",
+                "fields": [
+                    {
+                        "id": "previous_visa_status",
+                        "label": "Seu status anterior era F-1?",
+                        "type": "select",
+                        "required": True,
+                        "options": ["F1", "Outro"],
+                        "help_text": "❌ Reinstatement é apenas para quem tinha status F-1"
+                    },
+                    {
+                        "id": "nome_escola_anterior",
+                        "label": "Nome da Escola Anterior",
+                        "type": "text",
+                        "required": True,
+                        "placeholder": "Harvard University"
+                    },
+                    {
+                        "id": "data_encerramento_status",
+                        "label": "Data de Encerramento do Status F-1",
+                        "type": "date",
+                        "required": True,
+                        "validation": "date|past"
+                    },
+                    {
+                        "id": "f1_termination_reason",
+                        "label": "Motivo do Encerramento do Status F-1",
+                        "type": "textarea",
+                        "required": True,
+                        "placeholder": "Explique detalhadamente por que seu status F-1 foi encerrado...",
+                        "validation": "min:100",
+                        "help_text": "❌ OBRIGATÓRIO: Explique as circunstâncias"
+                    }
+                ]
+            },
+            {
+                "id": "novo_i20_reinstatement",
+                "title": "3. Novo I-20 para Reinstatement",
+                "fields": [
+                    {
+                        "id": "nome_escola_nova",
+                        "label": "Nome da Escola (pode ser a mesma)",
+                        "type": "text",
+                        "required": True
+                    },
+                    {
+                        "id": "has_new_i20_for_reinstatement",
+                        "label": "Você possui novo I-20 da escola?",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"],
+                        "help_text": "❌ OBRIGATÓRIO: Você precisa de novo I-20 da escola"
+                    },
+                    {
+                        "id": "i20_indicates_reinstatement",
+                        "label": "O I-20 indica especificamente 'Reinstatement'?",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"],
+                        "help_text": "❌ OBRIGATÓRIO: I-20 deve indicar que é para Reinstatement"
+                    },
+                    {
+                        "id": "data_inicio_programa",
+                        "label": "Data de Início do Programa",
+                        "type": "date",
+                        "required": True,
+                        "validation": "date"
+                    }
+                ]
+            },
+            {
+                "id": "validacao_legal_reinstatement",
+                "title": "4. Requisitos Legais (OBRIGATÓRIO)",
+                "fields": [
+                    {
+                        "id": "has_i_539",
+                        "label": "Você irá preencher o formulário I-539?",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"],
+                        "help_text": "❌ OBRIGATÓRIO: Formulário I-539 é necessário para Reinstatement"
+                    },
+                    {
+                        "id": "motivo_atraso_aplicacao",
+                        "label": "Por que você não aplicou para Reinstatement antes?",
+                        "type": "textarea",
+                        "required": True,
+                        "placeholder": "Explique as razões do atraso...",
+                        "validation": "min:100"
+                    },
+                    {
+                        "id": "vai_retomar_estudos_imediatamente",
+                        "label": "Você está pronto para retomar os estudos IMEDIATAMENTE?",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"],
+                        "help_text": "⚠️ IMPORTANTE: Você deve retornar às aulas IMEDIATAMENTE após receber o I-20"
+                    },
+                    {
+                        "id": "has_passport_photos",
+                        "label": "Você possui 2 fotos tamanho passaporte?",
+                        "type": "select",
+                        "required": True,
+                        "options": ["yes", "no"]
+                    }
+                ]
+            }
+        ]
+    }
+
+
 def get_friendly_form_structure(visa_type: str) -> Dict[str, Any]:
     """
     Retorna a estrutura completa do formulário amigável para o tipo de visto especificado
