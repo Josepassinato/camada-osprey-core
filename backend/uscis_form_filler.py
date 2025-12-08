@@ -636,6 +636,145 @@ class USCISFormFiller:
         
         return mapping
 
+    
+    def _get_i129_mapping(self, basic_data: Dict[str, Any], simplified_form: Dict[str, Any], visa_category: str) -> Dict[str, str]:
+        """
+        Map case data to I-129 form fields
+        Supports multiple visa categories: O-1, H-1B, L-1, P-1, etc.
+        Uses BOTH basic_data and simplified_form_responses
+        
+        Args:
+            basic_data: Basic petitioner/beneficiary data
+            simplified_form: Friendly form data in Portuguese
+            visa_category: Visa type (O-1, H-1B, L-1, etc.)
+            
+        Returns:
+            Dictionary mapping field names to values
+        """
+        if simplified_form is None:
+            simplified_form = {}
+        
+        # Parse beneficiary name (person getting the visa)
+        full_name = (
+            simplified_form.get("nome_completo") or 
+            simplified_form.get("nome_beneficiario") or
+            basic_data.get("beneficiary_name") or
+            basic_data.get("applicant_name", "")
+        )
+        name_parts = full_name.split(" ")
+        family_name = name_parts[-1] if name_parts else ""
+        given_name = " ".join(name_parts[:-1]) if len(name_parts) > 1 else ""
+        
+        # Parse petitioner name (company/employer)
+        petitioner_name = (
+            simplified_form.get("nome_empresa") or
+            simplified_form.get("nome_empregador") or
+            basic_data.get("petitioner_name") or
+            basic_data.get("company_name", "")
+        )
+        
+        # Parse dates
+        dob = simplified_form.get("data_nascimento") or basic_data.get("date_of_birth", "")
+        start_date = simplified_form.get("data_inicio") or basic_data.get("employment_start_date", "")
+        end_date = simplified_form.get("data_fim") or basic_data.get("employment_end_date", "")
+        
+        # Parse address
+        address = (
+            simplified_form.get("endereco_eua") or 
+            simplified_form.get("endereco") or 
+            basic_data.get("current_address", "")
+        )
+        city = (
+            simplified_form.get("cidade_eua") or
+            simplified_form.get("cidade") or
+            basic_data.get("city", "")
+        )
+        state = (
+            simplified_form.get("estado_eua") or
+            simplified_form.get("estado") or
+            basic_data.get("state", "")
+        )
+        zip_code = (
+            simplified_form.get("cep_eua") or
+            simplified_form.get("cep") or
+            basic_data.get("zip_code", "")
+        )
+        
+        # Parse contact info
+        email = simplified_form.get("email") or basic_data.get("email", "")
+        phone = simplified_form.get("telefone") or basic_data.get("phone", "")
+        
+        # Parse passport
+        passport = (
+            simplified_form.get("numero_passaporte") or
+            simplified_form.get("passaporte") or
+            basic_data.get("passport_number", "")
+        )
+        
+        # Parse country
+        country_of_birth = (
+            simplified_form.get("pais_nascimento") or
+            basic_data.get("country_of_birth", "")
+        )
+        
+        # Parse job information
+        job_title = (
+            simplified_form.get("cargo") or
+            simplified_form.get("titulo_trabalho") or
+            basic_data.get("job_title", "")
+        )
+        
+        # Base mapping for I-129 (common fields across all categories)
+        mapping = {
+            # Part 1: Information About the Petitioner
+            "Pt1_PetitionerName[0]": petitioner_name,
+            "Pt1_PetitionerAddress[0]": address,
+            "Pt1_PetitionerCity[0]": city,
+            "Pt1_PetitionerState[0]": state,
+            "Pt1_PetitionerZip[0]": zip_code,
+            "Pt1_PetitionerPhone[0]": phone,
+            "Pt1_PetitionerEmail[0]": email,
+            
+            # Part 2: Information About the Beneficiary
+            "Pt2_BeneficiaryFamilyName[0]": family_name,
+            "Pt2_BeneficiaryGivenName[0]": given_name,
+            "Pt2_BeneficiaryDOB[0]": dob,
+            "Pt2_BeneficiaryCountryOfBirth[0]": country_of_birth,
+            "Pt2_BeneficiaryPassport[0]": passport,
+            "Pt2_BeneficiaryAddress[0]": address,
+            "Pt2_BeneficiaryCity[0]": city,
+            "Pt2_BeneficiaryState[0]": state,
+            "Pt2_BeneficiaryZip[0]": zip_code,
+            
+            # Part 3: Processing Information
+            "Pt3_StartDate[0]": start_date,
+            "Pt3_EndDate[0]": end_date,
+            
+            # Part 4: Basic Job Information
+            "Pt4_JobTitle[0]": job_title,
+        }
+        
+        # Add category-specific fields
+        if visa_category == "O-1":
+            mapping.update({
+                "Pt2_Classification_O1[0]": "X",  # Mark O-1 checkbox
+                "Pt4_FieldOfExtraordinaryAbility[0]": basic_data.get("field_of_ability", ""),
+            })
+        elif visa_category == "H-1B":
+            mapping.update({
+                "Pt2_Classification_H1B[0]": "X",  # Mark H-1B checkbox
+                "Pt4_SpecialtyOccupation[0]": job_title,
+                "Pt4_SOCCode[0]": basic_data.get("soc_code", ""),
+            })
+        elif visa_category == "L-1":
+            mapping.update({
+                "Pt2_Classification_L1[0]": "X",  # Mark L-1 checkbox
+                "Pt4_ManagerialPosition[0]": basic_data.get("is_managerial", "Yes"),
+            })
+        
+        return mapping
+
+
 
 # Singleton instance
 form_filler = USCISFormFiller()
