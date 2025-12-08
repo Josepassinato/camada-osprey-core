@@ -417,6 +417,9 @@ class USCISFormFiller:
             logger.info(f"📝 Attempting to fill {len(form_data)} fields")
             
             # Fill form fields using PyMuPDF
+            # NOTE: Current I-129 templates have NO editable widgets
+            # This is expected - function will log "Filled 0 fields" which is normal
+            # Template is still returned successfully as a blank form
             filled_count = 0
             for page in doc:
                 widgets = list(page.widgets())
