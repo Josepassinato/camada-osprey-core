@@ -2021,6 +2021,41 @@ async def upload_document_to_case(
         
         logger.info(f"✅ Document uploaded: {file.filename} ({len(content)} bytes) - Type: {document_type}")
         
+        # 🆕 AUTO-EXTRACTION AND CORRECTION: Extract data from document and auto-correct user info
+        extraction_result = None
+        try:
+            from document_data_extractor import process_document_and_update_user
+            from google_document_ai_integration import GoogleDocumentAIProcessor
+            
+            # Processar documento com Google Document AI para extrair texto
+            doc_processor = GoogleDocumentAIProcessor()
+            ocr_result = await doc_processor.process_document(
+                file_content=content,
+                filename=file.filename,
+                mime_type=mime_type
+            )
+            
+            if ocr_result.get("success") and ocr_result.get("extracted_text"):
+                # Obter user_id do caso
+                user_id = case.get("user_id") or case.get("applicant_email")
+                
+                if user_id:
+                    # Processar e atualizar usuário se necessário
+                    extraction_result = await process_document_and_update_user(
+                        document_text=ocr_result["extracted_text"],
+                        document_type=document_type,
+                        user_id=user_id,
+                        db=db
+                    )
+                    
+                    if extraction_result.get("auto_corrected"):
+                        logger.info(f"🔄 User data auto-corrected based on {document_type}")
+                        logger.info(f"📝 Corrections: {extraction_result.get('corrections_made')}")
+        
+        except Exception as extract_error:
+            logger.warning(f"⚠️ Document extraction/correction failed: {str(extract_error)}")
+            # Continuar sem extração - não é crítico
+        
         # 🆕 P1-5: Update progress status after document upload
         # Get current document count
         case = await db.auto_cases.find_one({"case_id": case_id})
@@ -2034,7 +2069,7 @@ async def upload_document_to_case(
                 collection_name = "auto_cases" if case.get("session_token") else "application_cases"
                 await update_case_status_and_progress(case_id, "documents_uploaded", collection_name)
         
-        return {
+        response_data = {
             "success": True,
             "message": "Document uploaded successfully",
             "document_id": doc_id,
@@ -2043,6 +2078,17 @@ async def upload_document_to_case(
             "document_type": document_type,
             "file_size": len(content)
         }
+        
+        # Adicionar informações de extração se disponível
+        if extraction_result:
+            response_data["extraction"] = {
+                "successful": extraction_result.get("extraction_successful", False),
+                "auto_corrected": extraction_result.get("auto_corrected", False),
+                "corrections_made": extraction_result.get("corrections_made"),
+                "message": extraction_result.get("message")
+            }
+        
+        return response_data
     
     except HTTPException:
         raise
