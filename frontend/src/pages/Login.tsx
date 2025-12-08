@@ -215,7 +215,7 @@ const Login = () => {
               type="button"
               variant="outline"
               onClick={() => {
-                const redirectUrl = window.location.origin + '/dashboard';
+                const redirectUrl = window.location.origin + '/auth/google/callback';
                 window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
               }}
               className="w-full border-2 border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-medium"
