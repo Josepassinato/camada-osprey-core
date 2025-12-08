@@ -187,6 +187,7 @@ class USCISForm(str, Enum):
     I539 = "I-539"  # Application to Extend/Change Nonimmigrant Status
     O1 = "O-1"      # Extraordinary Ability (part of I-129)
     H1B = "H-1B"    # Specialty Occupation (part of I-129)
+    L1 = "L-1"      # Intracompany Transferee (part of I-129) - 🆕 ADDED
     B1B2 = "B-1/B-2"  # Business/Tourism Visitor Visa
     F1 = "F-1"      # Student Visa
     AR11 = "AR-11"  # Change of Address
