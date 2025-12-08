@@ -906,8 +906,8 @@ def test_i539_pdf_generation_e2e_pymupdf():
         "passed": current_fields >= 6  # Improvement over previous tests
     }
     
-    # Generate Final Summary and Assessment
-    print("\n📋 RESUMO FINAL - TESTE END-TO-END PDF GENERATION")
+    # STEP 10: VERIFICAÇÃO FINAL E RELATÓRIO COMPARATIVO
+    print("\n📋 ETAPA 10: VERIFICAÇÃO FINAL E RELATÓRIO COMPARATIVO")
     print("=" * 80)
     
     # Count successful steps
