@@ -678,63 +678,6 @@ def test_i539_pdf_generation_e2e_pymupdf():
             "passed": fields_found >= 7
         }
             
-            # Check which fields are filled
-            fields_filled = 0
-            print(f"\n🎯 CRITICAL FIELDS VERIFICATION:")
-            print("=" * 60)
-            
-            for field_name, field_info in critical_fields_check.items():
-                actual_value = field_info["actual"]
-                expected_value = field_info["expected"]
-                
-                # Check if field contains expected value (partial match acceptable)
-                if actual_value and (expected_value.lower() in actual_value.lower() or actual_value.lower() in expected_value.lower()):
-                    field_info["filled"] = True
-                    fields_filled += 1
-                    status = "✅"
-                else:
-                    status = "❌"
-                
-                print(f"  {status} {field_name}:")
-                print(f"      Expected: '{expected_value}'")
-                print(f"      Actual: '{actual_value}'")
-                print(f"      Filled: {field_info['filled']}")
-            
-            # P0 Bug Fix Assessment
-            total_critical_fields = len(critical_fields_check)
-            success_threshold = 6  # At least 6/8 fields must be filled
-            
-            print(f"\n🎯 P0 BUG FIX ASSESSMENT:")
-            print("=" * 60)
-            print(f"📊 Fields filled: {fields_filled}/{total_critical_fields}")
-            print(f"🎯 Success threshold: {success_threshold}/{total_critical_fields}")
-            
-            p0_bug_fixed = fields_filled >= success_threshold
-            
-            if p0_bug_fixed:
-                print(f"✅ BUG P0 CORRIGIDO! ({fields_filled}/{total_critical_fields} campos preenchidos)")
-            else:
-                print(f"❌ BUG P0 AINDA EXISTE ({fields_filled}/{total_critical_fields} campos preenchidos)")
-            
-            # Show all detected fields for debugging
-            print(f"\n📄 ALL DETECTED FORM FIELDS ({len(form_fields)}):")
-            for field_name, field_value in list(form_fields.items())[:20]:  # Show first 20
-                print(f"  {field_name}: '{field_value}'")
-            if len(form_fields) > 20:
-                print(f"  ... and {len(form_fields) - 20} more fields")
-            
-            results["step6_pdf_field_verification"] = {
-                "success": True,
-                "total_form_fields": len(form_fields),
-                "critical_fields_check": critical_fields_check,
-                "fields_filled": fields_filled,
-                "total_critical_fields": total_critical_fields,
-                "success_threshold": success_threshold,
-                "p0_bug_fixed": p0_bug_fixed,
-                "all_form_fields": dict(list(form_fields.items())[:50]),  # Store first 50 for analysis
-                "passed": p0_bug_fixed
-            }
-            
     except Exception as e:
         print(f"❌ Exception during PDF field verification: {str(e)}")
         results["step6_pdf_field_verification"] = {
