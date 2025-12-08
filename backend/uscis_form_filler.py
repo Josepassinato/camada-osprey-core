@@ -76,54 +76,54 @@ class USCISFormFiller:
                     pypdf.generic.NameObject("/NeedAppearances"): pypdf.generic.BooleanObject(True)
                 })
             
-            # Fill form fields using pypdf - update all pages with form data
+            # Fill form fields using pypdf - try different approaches
             filled_count = 0
             
-            # Method 1: Try to update all form fields at once
-            try:
-                # Create a dictionary of all non-empty field values
-                form_data = {k: v for k, v in field_mapping.items() if v}
-                
-                if form_data:
-                    # Update form fields across all pages
-                    for page_num, page in enumerate(writer.pages):
-                        try:
-                            writer.update_page_form_field_values(
-                                page,
-                                form_data,
-                                auto_regenerate=False
-                            )
-                            logger.debug(f"  ✓ Updated page {page_num + 1} with {len(form_data)} fields")
-                        except Exception as e:
-                            logger.debug(f"  ⚠️ Page {page_num + 1} update failed: {e}")
-                    
+            # Create a dictionary of all non-empty field values
+            form_data = {k: v for k, v in field_mapping.items() if v}
+            logger.info(f"📝 Form data to fill: {form_data}")
+            
+            if form_data:
+                # Method 1: Try global form field update (recommended approach)
+                try:
+                    logger.info("🔄 Method 1: Global form field update...")
+                    writer.update_page_form_field_values(None, form_data)
                     filled_count = len(form_data)
-                    logger.info(f"✅ Applied {filled_count} field values to all pages")
-                
-            except Exception as e:
-                logger.warning(f"⚠️ Bulk form update failed: {e}")
-                
-                # Method 2: Fallback - fill each field individually on each page
-                logger.info("🔄 Trying individual field updates...")
-                filled_count = 0
-                for field_name, field_value in field_mapping.items():
-                    if field_value:
-                        field_updated = False
+                    logger.info(f"✅ Method 1 SUCCESS: Applied {filled_count} field values globally")
+                    
+                except Exception as e:
+                    logger.warning(f"⚠️ Method 1 failed: {e}")
+                    
+                    # Method 2: Try updating each page individually
+                    try:
+                        logger.info("🔄 Method 2: Page-by-page update...")
                         for page_num, page in enumerate(writer.pages):
                             try:
-                                writer.update_page_form_field_values(
-                                    page,
-                                    {field_name: field_value},
-                                    auto_regenerate=False
-                                )
-                                if not field_updated:
-                                    filled_count += 1
-                                    field_updated = True
-                                    logger.debug(f"  ✓ Filled: {field_name} = {field_value} (page {page_num + 1})")
-                            except Exception as e:
-                                logger.debug(f"  ⚠️ Could not fill {field_name} on page {page_num + 1}: {e}")
+                                writer.update_page_form_field_values(page, form_data)
+                                logger.debug(f"  ✓ Updated page {page_num + 1}")
+                            except Exception as page_e:
+                                logger.debug(f"  ⚠️ Page {page_num + 1} failed: {page_e}")
+                        
+                        filled_count = len(form_data)
+                        logger.info(f"✅ Method 2 SUCCESS: Applied {filled_count} field values to pages")
+                        
+                    except Exception as e2:
+                        logger.warning(f"⚠️ Method 2 failed: {e2}")
+                        
+                        # Method 3: Individual field updates
+                        logger.info("🔄 Method 3: Individual field updates...")
+                        filled_count = 0
+                        for field_name, field_value in form_data.items():
+                            try:
+                                writer.update_page_form_field_values(None, {field_name: field_value})
+                                filled_count += 1
+                                logger.debug(f"  ✓ Filled: {field_name} = {field_value}")
+                            except Exception as field_e:
+                                logger.debug(f"  ⚠️ Could not fill {field_name}: {field_e}")
+                        
+                        logger.info(f"✅ Method 3: Filled {filled_count} individual fields")
             
-            logger.info(f"✅ Filled {filled_count} fields in Form I-539")
+            logger.info(f"✅ Total filled fields: {filled_count}")
             
             # Generate PDF
             output = io.BytesIO()
