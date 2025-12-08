@@ -1,7 +1,42 @@
 """
 USCIS Form Filler System
 Auto-fill official USCIS forms with case data
-FIXED: Now uses PyMuPDF (fitz) for reliable PDF form filling
+
+LIBRARY: PyMuPDF (fitz) for reliable PDF form filling
+
+SUPPORTED FORMS:
+- I-539: Extension/Change of Status (✅ 159 editable fields)
+- I-589: Asylum Application (✅ editable fields)
+- I-140: EB-1A Immigrant Petition (✅ editable fields)
+- I-129: Nonimmigrant Worker Petition (⚠️ NO editable fields in current template)
+  - O-1: Extraordinary Ability
+  - H-1B: Specialty Occupation
+  - L-1: Intracompany Transferee
+- F-1: Student Visa (uses I-539)
+
+IMPORTANT NOTES ABOUT I-129:
+==========================
+The current USCIS I-129 PDF template does NOT have editable form fields.
+This is expected behavior for some USCIS templates, which are designed to be:
+1. Printed blank and filled by hand, OR
+2. Filled using PDF overlay techniques
+
+CURRENT BEHAVIOR:
+- I-129 functions return the blank template PDF successfully
+- No errors are generated
+- PDF is valid and can be downloaded
+- File size: ~1.6MB, 20 pages
+
+FUTURE ENHANCEMENT:
+If clients need pre-filled I-129 forms, implement overlay approach:
+1. Use ReportLab to create an overlay PDF with form data
+2. Merge overlay with template using PyMuPDF
+3. Position text at correct coordinates for each field
+
+For now, clients can:
+- Download the blank I-129 template
+- Fill it manually or using their own PDF editor
+- Or wait for overlay implementation
 """
 
 import os
