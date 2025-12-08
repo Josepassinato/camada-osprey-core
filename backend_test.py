@@ -950,9 +950,9 @@ def test_i539_pdf_generation_e2e_pymupdf():
     print(f"\n🎯 TAXA DE SUCESSO GERAL: {successful_steps}/{total_steps} ({success_rate:.1f}%)")
     
     # Critical P0 Bug Assessment
-    p0_bug_fixed = results.get("step6_pdf_field_verification", {}).get("p0_bug_fixed", False)
-    fields_filled = results.get("step6_pdf_field_verification", {}).get("fields_filled", 0)
-    total_critical_fields = results.get("step6_pdf_field_verification", {}).get("total_critical_fields", 8)
+    p0_bug_fixed = results.get("step6_pdf_field_verification", {}).get("bug_fixed", False)
+    fields_filled = results.get("step6_pdf_field_verification", {}).get("fields_found", 0)
+    total_critical_fields = results.get("step6_pdf_field_verification", {}).get("total_critical_fields", 10)
     
     print(f"\n🎯 AVALIAÇÃO CRÍTICA DO BUG P0:")
     print("=" * 60)
