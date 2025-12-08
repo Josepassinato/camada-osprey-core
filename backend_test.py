@@ -277,20 +277,23 @@ def test_i539_pdf_generation_e2e_pymupdf():
     print("📋 DADOS DE TESTE (IDÊNTICOS AOS ANTERIORES):")
     
     friendly_form_data = {
-        "nome_completo": "Roberto Carlos Mendes Silva",
-        "data_nascimento": "1988-11-25",
-        "endereco_eua": "2580 Ocean Drive Apt 305",
-        "cidade_eua": "Orlando",
-        "estado_eua": "FL",
-        "cep_eua": "32801",
-        "email": "roberto.mendes@testqa.com",
-        "telefone": "+1-407-555-1234",
-        "numero_passaporte": "BR111222333",
-        "pais_nascimento": "Brazil",
-        "status_atual": "B-2",
-        "status_solicitado": "B-2 Extension",
-        "data_entrada_eua": "2024-06-10",
-        "numero_i94": "12345678901"
+        "friendly_form_data": {
+            "nome_completo": "Roberto Carlos Mendes Silva",
+            "data_nascimento": "1988-11-25",
+            "endereco_eua": "2580 Ocean Drive Apt 305",
+            "cidade_eua": "Orlando",
+            "estado_eua": "FL",
+            "cep_eua": "32801",
+            "email": "roberto.mendes@testqa.com",
+            "telefone": "+1-407-555-1234",
+            "numero_passaporte": "BR111222333",
+            "pais_nascimento": "Brazil",
+            "status_atual": "B-2",
+            "status_solicitado": "B-2 Extension",
+            "data_entrada_eua": "2024-06-10",
+            "numero_i94": "12345678901"
+        },
+        "basic_data": {}
     }
     
     try:
