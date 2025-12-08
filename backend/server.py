@@ -2744,6 +2744,10 @@ async def submit_friendly_form(case_id: str, request: dict, current_user = Depen
         friendly_form_data = request.get("friendly_form_data", {})
         basic_data = request.get("basic_data", {})
         
+        # 🆕 BUG FIX DEBUG: Log incoming data
+        logger.info(f"🔍 Received friendly_form_data: {len(friendly_form_data)} keys")
+        logger.info(f"🔍 Keys: {list(friendly_form_data.keys())}")
+        
         if not case_id:
             raise HTTPException(status_code=400, detail="case_id is required")
         
