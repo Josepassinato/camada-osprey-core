@@ -1,0 +1,1908 @@
+{
+  "test_results": {
+    "I-539": {
+      "visa_type": "I-539",
+      "step1_create_case": {
+        "success": true,
+        "case_id": "OSP-081335D5",
+        "status_code": 200,
+        "form_code": "I-539"
+      },
+      "step2_submit_form": {
+        "success": true,
+        "status_code": 200,
+        "response": {
+          "success": true,
+          "case_id": "OSP-081335D5",
+          "validation_status": "needs_review",
+          "completion_percentage": 0,
+          "message": "⚠️ Seu formulário está 0% completo. Por favor, revise as informações destacadas abaixo.",
+          "validation_issues": [
+            {
+              "field": "legal_requirement",
+              "issue": "❌ DATA DE VALIDADE DO PASSAPORTE OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ CÓPIA DO VISTO ATUAL OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ I-94 OBRIGATÓRIO: Faça download em https://i94.cbp.dhs.gov/",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ DATA DE VENCIMENTO DO I-94 OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ EXTRATO BANCÁRIO RECENTE OBRIGATÓRIO (últimos 3 meses)",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ PROVAS DE VÍNCULO COM BRASIL OBRIGATÓRIAS: Contas, CNPS, declaração IR, propriedades, etc.",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ FOTOS OBRIGATÓRIAS: Você precisa de 2 fotos padrão passaporte (2 por pessoa)",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_warning",
+              "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Seu extrato bancário deve estar traduzido para inglês por tradutor juramentado",
+              "severity": "warning",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_warning",
+              "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Documentos brasileiros devem estar traduzidos para inglês",
+              "severity": "warning",
+              "type": "legal_rule"
+            },
+            {
+              "field": "pais_nascimento",
+              "field_label": "País de Nascimento",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'País de Nascimento'. Exemplo: Brazil"
+            },
+            {
+              "field": "pais_cidadania",
+              "field_label": "País de Cidadania",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'País de Cidadania'. Exemplo: Brazil"
+            },
+            {
+              "field": "sexo",
+              "field_label": "Sexo",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Sexo'. Exemplo: "
+            },
+            {
+              "field": "pais_emissao_passaporte",
+              "field_label": "País de Emissão do Passaporte",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'País de Emissão do Passaporte'. Exemplo: "
+            },
+            {
+              "field": "local_entrada",
+              "field_label": "Local de Entrada nos EUA",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Local de Entrada nos EUA'. Exemplo: JFK Airport, New York"
+            },
+            {
+              "field": "status_atual",
+              "field_label": "Status Atual de Não-Imigrante",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Status Atual de Não-Imigrante'. Exemplo: "
+            },
+            {
+              "field": "tipo_pedido",
+              "field_label": "O que você está solicitando?",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'O que você está solicitando?'. Exemplo: "
+            },
+            {
+              "field": "cidade",
+              "field_label": "Cidade",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Cidade'. Exemplo: New York"
+            },
+            {
+              "field": "estado",
+              "field_label": "Estado",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Estado'. Exemplo: "
+            }
+          ],
+          "next_steps": [
+            "Revisar e corrigir as informações destacadas",
+            "Preencher campos faltantes",
+            "Verificar datas e formatos de dados"
+          ]
+        },
+        "success_indicators": {
+          "success_field": true,
+          "completion_percentage": true,
+          "validation_status": true
+        }
+      },
+      "step3_verify_persistence": {
+        "success": true,
+        "fields_sent": 14,
+        "fields_saved": 0,
+        "key_fields_saved": {
+          "nome_completo": false,
+          "email": false,
+          "telefone": false,
+          "numero_passaporte": false
+        },
+        "key_fields_count": 0,
+        "simplified_responses": {},
+        "passed": false
+      },
+      "step4_generate_pdf": {
+        "success": true,
+        "status_code": 200,
+        "pdf_result": {
+          "success": true,
+          "message": "USCIS form generated successfully",
+          "case_id": "OSP-081335D5",
+          "form_type": "I-539",
+          "filename": "I-539_OSP-081335D5.pdf",
+          "file_size": 725076,
+          "download_url": "/api/case/OSP-081335D5/download-form"
+        },
+        "pdf_checks": {
+          "success_true": true,
+          "filename_present": true,
+          "file_size_adequate": true,
+          "download_url_present": true
+        },
+        "passed": true
+      },
+      "step5_download_pdf": {
+        "success": true,
+        "status_code": 200,
+        "content_type": "application/pdf",
+        "file_size": 725076,
+        "download_checks": {
+          "status_200": true,
+          "content_type_pdf": true,
+          "file_size_adequate": true,
+          "content_not_empty": true
+        },
+        "pdf_path": "/tmp/final_test_i_539_OSP-081335D5.pdf",
+        "passed": true
+      },
+      "step6_validate_integrity": {
+        "success": true,
+        "file_size": 725076,
+        "integrity_checks": {
+          "file_exists": true,
+          "file_size_adequate": true,
+          "file_not_corrupted": true,
+          "expected_pages": true
+        },
+        "passed": true
+      },
+      "step7_verify_fields": {
+        "success": true,
+        "total_widgets": 159,
+        "filled_fields_count": 0,
+        "min_expected": 10,
+        "fields_adequate": false,
+        "sample_fields": [],
+        "passed": false
+      },
+      "summary": {
+        "successful_steps": 5,
+        "total_steps": 7,
+        "success_rate": 71.42857142857143,
+        "case_id": "OSP-081335D5",
+        "overall_success": false
+      }
+    },
+    "I-589": {
+      "visa_type": "I-589",
+      "step1_create_case": {
+        "success": true,
+        "case_id": "OSP-A645C7B4",
+        "status_code": 200,
+        "form_code": "I-589"
+      },
+      "step2_submit_form": {
+        "success": true,
+        "status_code": 200,
+        "response": {
+          "success": true,
+          "case_id": "OSP-A645C7B4",
+          "validation_status": "needs_review",
+          "completion_percentage": 0,
+          "message": "⚠️ Seu formulário está 0% completo. Por favor, revise as informações destacadas abaixo.",
+          "validation_issues": [
+            {
+              "field": "legal_requirement",
+              "issue": "❌ DATA DE VALIDADE DO PASSAPORTE OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ CÓPIA DO VISTO ATUAL OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ I-94 OBRIGATÓRIO: Faça download em https://i94.cbp.dhs.gov/",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ DATA DE VENCIMENTO DO I-94 OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ EXTRATO BANCÁRIO RECENTE OBRIGATÓRIO (últimos 3 meses)",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ PROVAS DE VÍNCULO COM BRASIL OBRIGATÓRIAS: Contas, CNPS, declaração IR, propriedades, etc.",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ FOTOS OBRIGATÓRIAS: Você precisa de 2 fotos padrão passaporte (2 por pessoa)",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_warning",
+              "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Seu extrato bancário deve estar traduzido para inglês por tradutor juramentado",
+              "severity": "warning",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_warning",
+              "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Documentos brasileiros devem estar traduzidos para inglês",
+              "severity": "warning",
+              "type": "legal_rule"
+            },
+            {
+              "field": "nome_completo",
+              "field_label": "Nome Completo",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Nome Completo'. Exemplo: "
+            },
+            {
+              "field": "pais_nascimento",
+              "field_label": "País de Nascimento",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'País de Nascimento'. Exemplo: "
+            },
+            {
+              "field": "nacionalidade",
+              "field_label": "Nacionalidade Atual",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Nacionalidade Atual'. Exemplo: "
+            },
+            {
+              "field": "sexo",
+              "field_label": "Sexo",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Sexo'. Exemplo: "
+            },
+            {
+              "field": "estado_civil",
+              "field_label": "Estado Civil",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Estado Civil'. Exemplo: "
+            },
+            {
+              "field": "local_chegada",
+              "field_label": "Local de Chegada nos EUA",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Local de Chegada nos EUA'. Exemplo: "
+            },
+            {
+              "field": "status_entrada",
+              "field_label": "Status na Entrada",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Status na Entrada'. Exemplo: B-2, F-1, etc."
+            },
+            {
+              "field": "cidade",
+              "field_label": "Cidade",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Cidade'. Exemplo: "
+            },
+            {
+              "field": "estado",
+              "field_label": "Estado",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Estado'. Exemplo: "
+            },
+            {
+              "field": "telefone",
+              "field_label": "Telefone",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Telefone'. Exemplo: "
+            },
+            {
+              "field": "motivo_principal",
+              "field_label": "Qual é o principal motivo do seu medo?",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Qual é o principal motivo do seu medo?'. Exemplo: "
+            }
+          ],
+          "next_steps": [
+            "Revisar e corrigir as informações destacadas",
+            "Preencher campos faltantes",
+            "Verificar datas e formatos de dados"
+          ]
+        },
+        "success_indicators": {
+          "success_field": true,
+          "completion_percentage": true,
+          "validation_status": true
+        }
+      },
+      "step3_verify_persistence": {
+        "success": true,
+        "fields_sent": 18,
+        "fields_saved": 0,
+        "key_fields_saved": {
+          "nome_completo": false,
+          "email": false,
+          "telefone": false,
+          "numero_passaporte": false
+        },
+        "key_fields_count": 0,
+        "simplified_responses": {},
+        "passed": false
+      },
+      "step4_generate_pdf": {
+        "success": true,
+        "status_code": 200,
+        "pdf_result": {
+          "success": true,
+          "message": "USCIS form generated successfully",
+          "case_id": "OSP-A645C7B4",
+          "form_type": "I-589",
+          "filename": "I-589_OSP-A645C7B4.pdf",
+          "file_size": 1338481,
+          "download_url": "/api/case/OSP-A645C7B4/download-form"
+        },
+        "pdf_checks": {
+          "success_true": true,
+          "filename_present": true,
+          "file_size_adequate": true,
+          "download_url_present": true
+        },
+        "passed": true
+      },
+      "step5_download_pdf": {
+        "success": true,
+        "status_code": 200,
+        "content_type": "application/pdf",
+        "file_size": 1338481,
+        "download_checks": {
+          "status_200": true,
+          "content_type_pdf": true,
+          "file_size_adequate": true,
+          "content_not_empty": true
+        },
+        "pdf_path": "/tmp/final_test_i_589_OSP-A645C7B4.pdf",
+        "passed": true
+      },
+      "step6_validate_integrity": {
+        "success": true,
+        "file_size": 1338481,
+        "integrity_checks": {
+          "file_exists": true,
+          "file_size_adequate": true,
+          "file_not_corrupted": true,
+          "expected_pages": true
+        },
+        "passed": true
+      },
+      "step7_verify_fields": {
+        "success": true,
+        "total_widgets": 460,
+        "filled_fields_count": 2,
+        "min_expected": 5,
+        "fields_adequate": false,
+        "sample_fields": [
+          [
+            "form1[0].#subform[12].CheckBox12_Sex[2]",
+            "0"
+          ],
+          [
+            "form1[0].#subform[12].CheckBox12_Sex[3]",
+            "0"
+          ]
+        ],
+        "passed": false
+      },
+      "summary": {
+        "successful_steps": 5,
+        "total_steps": 7,
+        "success_rate": 71.42857142857143,
+        "case_id": "OSP-A645C7B4",
+        "overall_success": false
+      }
+    },
+    "I-140": {
+      "visa_type": "I-140",
+      "step1_create_case": {
+        "success": true,
+        "case_id": "OSP-B40924E7",
+        "status_code": 200,
+        "form_code": "I-140"
+      },
+      "step2_submit_form": {
+        "success": true,
+        "status_code": 200,
+        "response": {
+          "success": true,
+          "case_id": "OSP-B40924E7",
+          "validation_status": "needs_review",
+          "completion_percentage": 0,
+          "message": "⚠️ Seu formulário está 0% completo. Por favor, revise as informações destacadas abaixo.",
+          "validation_issues": [
+            {
+              "field": "legal_requirement",
+              "issue": "❌ DATA DE VALIDADE DO PASSAPORTE OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ CÓPIA DO VISTO ATUAL OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ I-94 OBRIGATÓRIO: Faça download em https://i94.cbp.dhs.gov/",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ DATA DE VENCIMENTO DO I-94 OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ EXTRATO BANCÁRIO RECENTE OBRIGATÓRIO (últimos 3 meses)",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ PROVAS DE VÍNCULO COM BRASIL OBRIGATÓRIAS: Contas, CNPS, declaração IR, propriedades, etc.",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ FOTOS OBRIGATÓRIAS: Você precisa de 2 fotos padrão passaporte (2 por pessoa)",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_warning",
+              "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Seu extrato bancário deve estar traduzido para inglês por tradutor juramentado",
+              "severity": "warning",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_warning",
+              "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Documentos brasileiros devem estar traduzidos para inglês",
+              "severity": "warning",
+              "type": "legal_rule"
+            },
+            {
+              "field": "nome_completo",
+              "field_label": "Nome Completo",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Nome Completo'. Exemplo: "
+            },
+            {
+              "field": "pais_nascimento",
+              "field_label": "País de Nascimento",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'País de Nascimento'. Exemplo: "
+            },
+            {
+              "field": "numero_passaporte",
+              "field_label": "Número do Passaporte",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Número do Passaporte'. Exemplo: "
+            },
+            {
+              "field": "campo_atuacao",
+              "field_label": "Campo de Atuação",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Campo de Atuação'. Exemplo: "
+            }
+          ],
+          "next_steps": [
+            "Revisar e corrigir as informações destacadas",
+            "Preencher campos faltantes",
+            "Verificar datas e formatos de dados"
+          ]
+        },
+        "success_indicators": {
+          "success_field": true,
+          "completion_percentage": true,
+          "validation_status": true
+        }
+      },
+      "step3_verify_persistence": {
+        "success": true,
+        "fields_sent": 19,
+        "fields_saved": 0,
+        "key_fields_saved": {
+          "nome_completo": false,
+          "email": false,
+          "telefone": false,
+          "numero_passaporte": false
+        },
+        "key_fields_count": 0,
+        "simplified_responses": {},
+        "passed": false
+      },
+      "step4_generate_pdf": {
+        "success": true,
+        "status_code": 200,
+        "pdf_result": {
+          "success": true,
+          "message": "USCIS form generated successfully",
+          "case_id": "OSP-B40924E7",
+          "form_type": "I-140",
+          "filename": "I-140_OSP-B40924E7.pdf",
+          "file_size": 877311,
+          "download_url": "/api/case/OSP-B40924E7/download-form"
+        },
+        "pdf_checks": {
+          "success_true": true,
+          "filename_present": true,
+          "file_size_adequate": true,
+          "download_url_present": true
+        },
+        "passed": true
+      },
+      "step5_download_pdf": {
+        "success": true,
+        "status_code": 200,
+        "content_type": "application/pdf",
+        "file_size": 877311,
+        "download_checks": {
+          "status_200": true,
+          "content_type_pdf": true,
+          "file_size_adequate": true,
+          "content_not_empty": true
+        },
+        "pdf_path": "/tmp/final_test_i_140_OSP-B40924E7.pdf",
+        "passed": true
+      },
+      "step6_validate_integrity": {
+        "success": true,
+        "file_size": 877311,
+        "integrity_checks": {
+          "file_exists": true,
+          "file_size_adequate": true,
+          "file_not_corrupted": true,
+          "expected_pages": true
+        },
+        "passed": true
+      },
+      "step7_verify_fields": {
+        "success": true,
+        "total_widgets": 262,
+        "filled_fields_count": 0,
+        "min_expected": 5,
+        "fields_adequate": false,
+        "sample_fields": [],
+        "passed": false
+      },
+      "summary": {
+        "successful_steps": 5,
+        "total_steps": 7,
+        "success_rate": 71.42857142857143,
+        "case_id": "OSP-B40924E7",
+        "overall_success": false
+      }
+    },
+    "O-1": {
+      "visa_type": "O-1",
+      "step1_create_case": {
+        "success": true,
+        "case_id": "OSP-ED46AFF1",
+        "status_code": 200,
+        "form_code": "O-1"
+      },
+      "step2_submit_form": {
+        "success": true,
+        "status_code": 200,
+        "response": {
+          "success": true,
+          "case_id": "OSP-ED46AFF1",
+          "validation_status": "needs_review",
+          "completion_percentage": 0,
+          "message": "⚠️ Seu formulário está 0% completo. Por favor, revise as informações destacadas abaixo.",
+          "validation_issues": [
+            {
+              "field": "legal_requirement",
+              "issue": "❌ DATA DE VALIDADE DO PASSAPORTE OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ CÓPIA DO VISTO ATUAL OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ I-94 OBRIGATÓRIO: Faça download em https://i94.cbp.dhs.gov/",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ DATA DE VENCIMENTO DO I-94 OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ EXTRATO BANCÁRIO RECENTE OBRIGATÓRIO (últimos 3 meses)",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ PROVAS DE VÍNCULO COM BRASIL OBRIGATÓRIAS: Contas, CNPS, declaração IR, propriedades, etc.",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ FOTOS OBRIGATÓRIAS: Você precisa de 2 fotos padrão passaporte (2 por pessoa)",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_warning",
+              "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Seu extrato bancário deve estar traduzido para inglês por tradutor juramentado",
+              "severity": "warning",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_warning",
+              "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Documentos brasileiros devem estar traduzidos para inglês",
+              "severity": "warning",
+              "type": "legal_rule"
+            },
+            {
+              "field": "pais_nascimento",
+              "field_label": "País de Nascimento",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'País de Nascimento'. Exemplo: Brazil"
+            },
+            {
+              "field": "pais_cidadania",
+              "field_label": "País de Cidadania",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'País de Cidadania'. Exemplo: Brazil"
+            },
+            {
+              "field": "sexo",
+              "field_label": "Sexo",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Sexo'. Exemplo: "
+            },
+            {
+              "field": "pais_emissao_passaporte",
+              "field_label": "País de Emissão do Passaporte",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'País de Emissão do Passaporte'. Exemplo: "
+            },
+            {
+              "field": "local_entrada",
+              "field_label": "Local de Entrada nos EUA",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Local de Entrada nos EUA'. Exemplo: JFK Airport, New York"
+            },
+            {
+              "field": "status_atual",
+              "field_label": "Status Atual de Não-Imigrante",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Status Atual de Não-Imigrante'. Exemplo: "
+            },
+            {
+              "field": "tipo_pedido",
+              "field_label": "O que você está solicitando?",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'O que você está solicitando?'. Exemplo: "
+            },
+            {
+              "field": "cidade",
+              "field_label": "Cidade",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Cidade'. Exemplo: New York"
+            },
+            {
+              "field": "estado",
+              "field_label": "Estado",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Estado'. Exemplo: "
+            },
+            {
+              "field": "categoria_o1",
+              "field_label": "Categoria O-1",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Categoria O-1'. Exemplo: "
+            },
+            {
+              "field": "area_especialidade",
+              "field_label": "Área de Especialidade",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Área de Especialidade'. Exemplo: Ex: Artificial Intelligence Research"
+            },
+            {
+              "field": "empregador_patrocinador",
+              "field_label": "Empregador/Agente Patrocinador",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Empregador/Agente Patrocinador'. Exemplo: "
+            }
+          ],
+          "next_steps": [
+            "Revisar e corrigir as informações destacadas",
+            "Preencher campos faltantes",
+            "Verificar datas e formatos de dados"
+          ]
+        },
+        "success_indicators": {
+          "success_field": true,
+          "completion_percentage": true,
+          "validation_status": true
+        }
+      },
+      "step3_verify_persistence": {
+        "success": true,
+        "fields_sent": 15,
+        "fields_saved": 0,
+        "key_fields_saved": {
+          "nome_completo": false,
+          "email": false,
+          "telefone": false,
+          "numero_passaporte": false
+        },
+        "key_fields_count": 0,
+        "simplified_responses": {},
+        "passed": false
+      },
+      "step4_generate_pdf": {
+        "success": true,
+        "status_code": 200,
+        "pdf_result": {
+          "success": true,
+          "message": "USCIS form generated successfully",
+          "case_id": "OSP-ED46AFF1",
+          "form_type": "O-1",
+          "filename": "I-129-O1_OSP-ED46AFF1.pdf",
+          "file_size": 1603265,
+          "download_url": "/api/case/OSP-ED46AFF1/download-form"
+        },
+        "pdf_checks": {
+          "success_true": true,
+          "filename_present": true,
+          "file_size_adequate": true,
+          "download_url_present": true
+        },
+        "passed": true
+      },
+      "step5_download_pdf": {
+        "success": true,
+        "status_code": 200,
+        "content_type": "application/pdf",
+        "file_size": 1603265,
+        "download_checks": {
+          "status_200": true,
+          "content_type_pdf": true,
+          "file_size_adequate": true,
+          "content_not_empty": true
+        },
+        "pdf_path": "/tmp/final_test_o_1_OSP-ED46AFF1.pdf",
+        "passed": true
+      },
+      "step6_validate_integrity": {
+        "success": true,
+        "file_size": 1603265,
+        "integrity_checks": {
+          "file_exists": true,
+          "file_size_adequate": true,
+          "file_not_corrupted": true,
+          "expected_pages": true
+        },
+        "passed": true
+      },
+      "step7_verify_fields": {
+        "success": true,
+        "reason": "Template without editable fields",
+        "passed": true
+      },
+      "summary": {
+        "successful_steps": 6,
+        "total_steps": 7,
+        "success_rate": 85.71428571428571,
+        "case_id": "OSP-ED46AFF1",
+        "overall_success": true
+      }
+    },
+    "H-1B": {
+      "visa_type": "H-1B",
+      "step1_create_case": {
+        "success": true,
+        "case_id": "OSP-713CA185",
+        "status_code": 200,
+        "form_code": "H-1B"
+      },
+      "step2_submit_form": {
+        "success": true,
+        "status_code": 200,
+        "response": {
+          "success": true,
+          "case_id": "OSP-713CA185",
+          "validation_status": "needs_review",
+          "completion_percentage": 0,
+          "message": "⚠️ Seu formulário está 0% completo. Por favor, revise as informações destacadas abaixo.",
+          "validation_issues": [
+            {
+              "field": "legal_requirement",
+              "issue": "❌ DATA DE VALIDADE DO PASSAPORTE OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ CÓPIA DO VISTO ATUAL OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ I-94 OBRIGATÓRIO: Faça download em https://i94.cbp.dhs.gov/",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ DATA DE VENCIMENTO DO I-94 OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ EXTRATO BANCÁRIO RECENTE OBRIGATÓRIO (últimos 3 meses)",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ PROVAS DE VÍNCULO COM BRASIL OBRIGATÓRIAS: Contas, CNPS, declaração IR, propriedades, etc.",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ FOTOS OBRIGATÓRIAS: Você precisa de 2 fotos padrão passaporte (2 por pessoa)",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_warning",
+              "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Seu extrato bancário deve estar traduzido para inglês por tradutor juramentado",
+              "severity": "warning",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_warning",
+              "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Documentos brasileiros devem estar traduzidos para inglês",
+              "severity": "warning",
+              "type": "legal_rule"
+            },
+            {
+              "field": "pais_nascimento",
+              "field_label": "País de Nascimento",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'País de Nascimento'. Exemplo: Brazil"
+            },
+            {
+              "field": "pais_cidadania",
+              "field_label": "País de Cidadania",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'País de Cidadania'. Exemplo: Brazil"
+            },
+            {
+              "field": "sexo",
+              "field_label": "Sexo",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Sexo'. Exemplo: "
+            },
+            {
+              "field": "pais_emissao_passaporte",
+              "field_label": "País de Emissão do Passaporte",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'País de Emissão do Passaporte'. Exemplo: "
+            },
+            {
+              "field": "local_entrada",
+              "field_label": "Local de Entrada nos EUA",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Local de Entrada nos EUA'. Exemplo: JFK Airport, New York"
+            },
+            {
+              "field": "status_atual",
+              "field_label": "Status Atual de Não-Imigrante",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Status Atual de Não-Imigrante'. Exemplo: "
+            },
+            {
+              "field": "tipo_pedido",
+              "field_label": "O que você está solicitando?",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'O que você está solicitando?'. Exemplo: "
+            },
+            {
+              "field": "cidade",
+              "field_label": "Cidade",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Cidade'. Exemplo: New York"
+            },
+            {
+              "field": "estado",
+              "field_label": "Estado",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Estado'. Exemplo: "
+            },
+            {
+              "field": "nome_empregador",
+              "field_label": "Nome do Empregador/Empresa",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Nome do Empregador/Empresa'. Exemplo: Google LLC"
+            },
+            {
+              "field": "cargo",
+              "field_label": "Cargo/Posição",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Cargo/Posição'. Exemplo: Software Engineer"
+            },
+            {
+              "field": "numero_petição_i129",
+              "field_label": "Número da Petição I-129",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Número da Petição I-129'. Exemplo: EAC1234567890"
+            }
+          ],
+          "next_steps": [
+            "Revisar e corrigir as informações destacadas",
+            "Preencher campos faltantes",
+            "Verificar datas e formatos de dados"
+          ]
+        },
+        "success_indicators": {
+          "success_field": true,
+          "completion_percentage": true,
+          "validation_status": true
+        }
+      },
+      "step3_verify_persistence": {
+        "success": true,
+        "fields_sent": 15,
+        "fields_saved": 0,
+        "key_fields_saved": {
+          "nome_completo": false,
+          "email": false,
+          "telefone": false,
+          "numero_passaporte": false
+        },
+        "key_fields_count": 0,
+        "simplified_responses": {},
+        "passed": false
+      },
+      "step4_generate_pdf": {
+        "success": true,
+        "status_code": 200,
+        "pdf_result": {
+          "success": true,
+          "message": "USCIS form generated successfully",
+          "case_id": "OSP-713CA185",
+          "form_type": "H-1B",
+          "filename": "I-129-H1B_OSP-713CA185.pdf",
+          "file_size": 1603265,
+          "download_url": "/api/case/OSP-713CA185/download-form"
+        },
+        "pdf_checks": {
+          "success_true": true,
+          "filename_present": true,
+          "file_size_adequate": true,
+          "download_url_present": true
+        },
+        "passed": true
+      },
+      "step5_download_pdf": {
+        "success": true,
+        "status_code": 200,
+        "content_type": "application/pdf",
+        "file_size": 1603265,
+        "download_checks": {
+          "status_200": true,
+          "content_type_pdf": true,
+          "file_size_adequate": true,
+          "content_not_empty": true
+        },
+        "pdf_path": "/tmp/final_test_h_1b_OSP-713CA185.pdf",
+        "passed": true
+      },
+      "step6_validate_integrity": {
+        "success": true,
+        "file_size": 1603265,
+        "integrity_checks": {
+          "file_exists": true,
+          "file_size_adequate": true,
+          "file_not_corrupted": true,
+          "expected_pages": true
+        },
+        "passed": true
+      },
+      "step7_verify_fields": {
+        "success": true,
+        "reason": "Template without editable fields",
+        "passed": true
+      },
+      "summary": {
+        "successful_steps": 6,
+        "total_steps": 7,
+        "success_rate": 85.71428571428571,
+        "case_id": "OSP-713CA185",
+        "overall_success": true
+      }
+    },
+    "L-1": {
+      "visa_type": "L-1",
+      "step1_create_case": {
+        "success": true,
+        "case_id": "OSP-80A84F87",
+        "status_code": 200,
+        "form_code": "L-1"
+      },
+      "step2_submit_form": {
+        "success": true,
+        "status_code": 200,
+        "response": {
+          "success": true,
+          "case_id": "OSP-80A84F87",
+          "validation_status": "needs_review",
+          "completion_percentage": 0,
+          "message": "⚠️ Seu formulário está 0% completo. Por favor, revise as informações destacadas abaixo.",
+          "validation_issues": [
+            {
+              "field": "legal_requirement",
+              "issue": "❌ DATA DE VALIDADE DO PASSAPORTE OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ CÓPIA DO VISTO ATUAL OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ I-94 OBRIGATÓRIO: Faça download em https://i94.cbp.dhs.gov/",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ DATA DE VENCIMENTO DO I-94 OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ EXTRATO BANCÁRIO RECENTE OBRIGATÓRIO (últimos 3 meses)",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ PROVAS DE VÍNCULO COM BRASIL OBRIGATÓRIAS: Contas, CNPS, declaração IR, propriedades, etc.",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ FOTOS OBRIGATÓRIAS: Você precisa de 2 fotos padrão passaporte (2 por pessoa)",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_warning",
+              "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Seu extrato bancário deve estar traduzido para inglês por tradutor juramentado",
+              "severity": "warning",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_warning",
+              "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Documentos brasileiros devem estar traduzidos para inglês",
+              "severity": "warning",
+              "type": "legal_rule"
+            },
+            {
+              "field": "pais_nascimento",
+              "field_label": "País de Nascimento",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'País de Nascimento'. Exemplo: Brazil"
+            },
+            {
+              "field": "pais_cidadania",
+              "field_label": "País de Cidadania",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'País de Cidadania'. Exemplo: Brazil"
+            },
+            {
+              "field": "sexo",
+              "field_label": "Sexo",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Sexo'. Exemplo: "
+            },
+            {
+              "field": "pais_emissao_passaporte",
+              "field_label": "País de Emissão do Passaporte",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'País de Emissão do Passaporte'. Exemplo: "
+            },
+            {
+              "field": "local_entrada",
+              "field_label": "Local de Entrada nos EUA",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Local de Entrada nos EUA'. Exemplo: JFK Airport, New York"
+            },
+            {
+              "field": "status_atual",
+              "field_label": "Status Atual de Não-Imigrante",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Status Atual de Não-Imigrante'. Exemplo: "
+            },
+            {
+              "field": "tipo_pedido",
+              "field_label": "O que você está solicitando?",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'O que você está solicitando?'. Exemplo: "
+            },
+            {
+              "field": "cidade",
+              "field_label": "Cidade",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Cidade'. Exemplo: New York"
+            },
+            {
+              "field": "estado",
+              "field_label": "Estado",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Estado'. Exemplo: "
+            },
+            {
+              "field": "empresa_eua",
+              "field_label": "Nome da Empresa nos EUA",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Nome da Empresa nos EUA'. Exemplo: "
+            },
+            {
+              "field": "empresa_origem",
+              "field_label": "Nome da Empresa no País de Origem",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Nome da Empresa no País de Origem'. Exemplo: "
+            },
+            {
+              "field": "tipo_l1",
+              "field_label": "Tipo de L-1",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Tipo de L-1'. Exemplo: "
+            },
+            {
+              "field": "cargo_eua",
+              "field_label": "Cargo nos EUA",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Cargo nos EUA'. Exemplo: "
+            }
+          ],
+          "next_steps": [
+            "Revisar e corrigir as informações destacadas",
+            "Preencher campos faltantes",
+            "Verificar datas e formatos de dados"
+          ]
+        },
+        "success_indicators": {
+          "success_field": true,
+          "completion_percentage": true,
+          "validation_status": true
+        }
+      },
+      "step3_verify_persistence": {
+        "success": true,
+        "fields_sent": 16,
+        "fields_saved": 0,
+        "key_fields_saved": {
+          "nome_completo": false,
+          "email": false,
+          "telefone": false,
+          "numero_passaporte": false
+        },
+        "key_fields_count": 0,
+        "simplified_responses": {},
+        "passed": false
+      },
+      "step4_generate_pdf": {
+        "success": true,
+        "status_code": 200,
+        "pdf_result": {
+          "success": true,
+          "message": "USCIS form generated successfully",
+          "case_id": "OSP-80A84F87",
+          "form_type": "L-1",
+          "filename": "I-129-L1_OSP-80A84F87.pdf",
+          "file_size": 1603265,
+          "download_url": "/api/case/OSP-80A84F87/download-form"
+        },
+        "pdf_checks": {
+          "success_true": true,
+          "filename_present": true,
+          "file_size_adequate": true,
+          "download_url_present": true
+        },
+        "passed": true
+      },
+      "step5_download_pdf": {
+        "success": true,
+        "status_code": 200,
+        "content_type": "application/pdf",
+        "file_size": 1603265,
+        "download_checks": {
+          "status_200": true,
+          "content_type_pdf": true,
+          "file_size_adequate": true,
+          "content_not_empty": true
+        },
+        "pdf_path": "/tmp/final_test_l_1_OSP-80A84F87.pdf",
+        "passed": true
+      },
+      "step6_validate_integrity": {
+        "success": true,
+        "file_size": 1603265,
+        "integrity_checks": {
+          "file_exists": true,
+          "file_size_adequate": true,
+          "file_not_corrupted": true,
+          "expected_pages": true
+        },
+        "passed": true
+      },
+      "step7_verify_fields": {
+        "success": true,
+        "reason": "Template without editable fields",
+        "passed": true
+      },
+      "summary": {
+        "successful_steps": 6,
+        "total_steps": 7,
+        "success_rate": 85.71428571428571,
+        "case_id": "OSP-80A84F87",
+        "overall_success": true
+      }
+    },
+    "F-1": {
+      "visa_type": "F-1",
+      "step1_create_case": {
+        "success": true,
+        "case_id": "OSP-1637E71E",
+        "status_code": 200,
+        "form_code": "F-1"
+      },
+      "step2_submit_form": {
+        "success": true,
+        "status_code": 200,
+        "response": {
+          "success": true,
+          "case_id": "OSP-1637E71E",
+          "validation_status": "needs_review",
+          "completion_percentage": 0,
+          "message": "⚠️ Seu formulário está 0% completo. Por favor, revise as informações destacadas abaixo.",
+          "validation_issues": [
+            {
+              "field": "legal_requirement",
+              "issue": "❌ OBRIGATÓRIO: Prova de proficiência em inglês (TOEFL, IELTS, Duolingo, etc.)",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ OBRIGATÓRIO: I-20 deve estar emitido pela instituição antes de prosseguir",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ OBRIGATÓRIO: Taxa SEVIS deve estar paga antes de prosseguir",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ DATA DE VALIDADE DO PASSAPORTE OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ CÓPIA DO VISTO ATUAL OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ I-94 OBRIGATÓRIO: Faça download em https://i94.cbp.dhs.gov/",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ DATA DE VENCIMENTO DO I-94 OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ EXTRATO BANCÁRIO RECENTE OBRIGATÓRIO (últimos 3 meses)",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ PROVAS DE VÍNCULO COM BRASIL OBRIGATÓRIAS: Contas, CNPS, declaração IR, propriedades, etc.",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ FOTOS OBRIGATÓRIAS: Você precisa de 2 fotos padrão passaporte (2 por pessoa)",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_warning",
+              "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Seu extrato bancário deve estar traduzido para inglês por tradutor juramentado",
+              "severity": "warning",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_warning",
+              "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Documentos brasileiros devem estar traduzidos para inglês",
+              "severity": "warning",
+              "type": "legal_rule"
+            },
+            {
+              "field": "pais_nascimento",
+              "field_label": "País de Nascimento",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'País de Nascimento'. Exemplo: Brazil"
+            },
+            {
+              "field": "pais_cidadania",
+              "field_label": "País de Cidadania",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'País de Cidadania'. Exemplo: Brazil"
+            },
+            {
+              "field": "sexo",
+              "field_label": "Sexo",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Sexo'. Exemplo: "
+            },
+            {
+              "field": "pais_emissao_passaporte",
+              "field_label": "País de Emissão do Passaporte",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'País de Emissão do Passaporte'. Exemplo: "
+            },
+            {
+              "field": "local_entrada",
+              "field_label": "Local de Entrada nos EUA",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Local de Entrada nos EUA'. Exemplo: JFK Airport, New York"
+            },
+            {
+              "field": "status_atual",
+              "field_label": "Status Atual de Não-Imigrante",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Status Atual de Não-Imigrante'. Exemplo: "
+            },
+            {
+              "field": "tipo_pedido",
+              "field_label": "O que você está solicitando?",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'O que você está solicitando?'. Exemplo: "
+            },
+            {
+              "field": "cidade",
+              "field_label": "Cidade",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Cidade'. Exemplo: New York"
+            },
+            {
+              "field": "estado",
+              "field_label": "Estado",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Estado'. Exemplo: "
+            },
+            {
+              "field": "nome_escola",
+              "field_label": "Nome da Escola/Universidade",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Nome da Escola/Universidade'. Exemplo: Harvard University"
+            },
+            {
+              "field": "programa_estudo",
+              "field_label": "Programa de Estudo",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Programa de Estudo'. Exemplo: Bachelor of Science in Computer Science"
+            },
+            {
+              "field": "trabalhando_cpt_opt",
+              "field_label": "Você está trabalhando sob CPT ou OPT?",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Você está trabalhando sob CPT ou OPT?'. Exemplo: "
+            }
+          ],
+          "next_steps": [
+            "Revisar e corrigir as informações destacadas",
+            "Preencher campos faltantes",
+            "Verificar datas e formatos de dados"
+          ]
+        },
+        "success_indicators": {
+          "success_field": true,
+          "completion_percentage": true,
+          "validation_status": true
+        }
+      },
+      "step3_verify_persistence": {
+        "success": true,
+        "fields_sent": 16,
+        "fields_saved": 0,
+        "key_fields_saved": {
+          "nome_completo": false,
+          "email": false,
+          "telefone": false,
+          "numero_passaporte": false
+        },
+        "key_fields_count": 0,
+        "simplified_responses": {},
+        "passed": false
+      },
+      "step4_generate_pdf": {
+        "success": true,
+        "status_code": 200,
+        "pdf_result": {
+          "success": true,
+          "message": "USCIS form generated successfully",
+          "case_id": "OSP-1637E71E",
+          "form_type": "F-1",
+          "filename": "I-539-F1_OSP-1637E71E.pdf",
+          "file_size": 725076,
+          "download_url": "/api/case/OSP-1637E71E/download-form"
+        },
+        "pdf_checks": {
+          "success_true": true,
+          "filename_present": true,
+          "file_size_adequate": true,
+          "download_url_present": true
+        },
+        "passed": true
+      },
+      "step5_download_pdf": {
+        "success": true,
+        "status_code": 200,
+        "content_type": "application/pdf",
+        "file_size": 725076,
+        "download_checks": {
+          "status_200": true,
+          "content_type_pdf": true,
+          "file_size_adequate": true,
+          "content_not_empty": true
+        },
+        "pdf_path": "/tmp/final_test_f_1_OSP-1637E71E.pdf",
+        "passed": true
+      },
+      "step6_validate_integrity": {
+        "success": true,
+        "file_size": 725076,
+        "integrity_checks": {
+          "file_exists": true,
+          "file_size_adequate": true,
+          "file_not_corrupted": true,
+          "expected_pages": true
+        },
+        "passed": true
+      },
+      "step7_verify_fields": {
+        "success": true,
+        "total_widgets": 159,
+        "filled_fields_count": 0,
+        "min_expected": 5,
+        "fields_adequate": false,
+        "sample_fields": [],
+        "passed": false
+      },
+      "summary": {
+        "successful_steps": 5,
+        "total_steps": 7,
+        "success_rate": 71.42857142857143,
+        "case_id": "OSP-1637E71E",
+        "overall_success": false
+      }
+    },
+    "I-129": {
+      "visa_type": "I-129",
+      "step1_create_case": {
+        "success": true,
+        "case_id": "OSP-166DDCF1",
+        "status_code": 200,
+        "form_code": "I-129"
+      },
+      "step2_submit_form": {
+        "success": true,
+        "status_code": 200,
+        "response": {
+          "success": true,
+          "case_id": "OSP-166DDCF1",
+          "validation_status": "needs_review",
+          "completion_percentage": 0,
+          "message": "⚠️ Seu formulário está 0% completo. Por favor, revise as informações destacadas abaixo.",
+          "validation_issues": [
+            {
+              "field": "legal_requirement",
+              "issue": "❌ DATA DE VALIDADE DO PASSAPORTE OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ CÓPIA DO VISTO ATUAL OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ I-94 OBRIGATÓRIO: Faça download em https://i94.cbp.dhs.gov/",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ DATA DE VENCIMENTO DO I-94 OBRIGATÓRIA",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ EXTRATO BANCÁRIO RECENTE OBRIGATÓRIO (últimos 3 meses)",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ PROVAS DE VÍNCULO COM BRASIL OBRIGATÓRIAS: Contas, CNPS, declaração IR, propriedades, etc.",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_requirement",
+              "issue": "❌ FOTOS OBRIGATÓRIAS: Você precisa de 2 fotos padrão passaporte (2 por pessoa)",
+              "severity": "critical",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_warning",
+              "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Seu extrato bancário deve estar traduzido para inglês por tradutor juramentado",
+              "severity": "warning",
+              "type": "legal_rule"
+            },
+            {
+              "field": "legal_warning",
+              "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Documentos brasileiros devem estar traduzidos para inglês",
+              "severity": "warning",
+              "type": "legal_rule"
+            },
+            {
+              "field": "nome_completo",
+              "field_label": "Nome Completo",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Nome Completo'. Exemplo: Maria Santos Silva"
+            },
+            {
+              "field": "data_nascimento",
+              "field_label": "Data de Nascimento",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Data de Nascimento'. Exemplo: 1990-05-15"
+            },
+            {
+              "field": "email",
+              "field_label": "Email",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Email'. Exemplo: maria@example.com"
+            },
+            {
+              "field": "numero_passaporte",
+              "field_label": "Número do Passaporte",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'Número do Passaporte'. Exemplo: BR123456789"
+            },
+            {
+              "field": "pais_nascimento",
+              "field_label": "País de Nascimento",
+              "issue": "Campo obrigatório não preenchido",
+              "severity": "error",
+              "suggestion": "Por favor, preencha o campo 'País de Nascimento'. Exemplo: Brazil"
+            }
+          ],
+          "next_steps": [
+            "Revisar e corrigir as informações destacadas",
+            "Preencher campos faltantes",
+            "Verificar datas e formatos de dados"
+          ]
+        },
+        "success_indicators": {
+          "success_field": true,
+          "completion_percentage": true,
+          "validation_status": true
+        }
+      },
+      "step3_verify_persistence": {
+        "success": true,
+        "fields_sent": 12,
+        "fields_saved": 0,
+        "key_fields_saved": {
+          "nome_completo": false,
+          "email": false,
+          "telefone": false,
+          "numero_passaporte": false
+        },
+        "key_fields_count": 0,
+        "simplified_responses": {},
+        "passed": false
+      },
+      "step4_generate_pdf": {
+        "success": true,
+        "status_code": 200,
+        "pdf_result": {
+          "success": true,
+          "message": "USCIS form generated successfully",
+          "case_id": "OSP-166DDCF1",
+          "form_type": "I-129",
+          "filename": "I-129_OSP-166DDCF1.pdf",
+          "file_size": 1603265,
+          "download_url": "/api/case/OSP-166DDCF1/download-form"
+        },
+        "pdf_checks": {
+          "success_true": true,
+          "filename_present": true,
+          "file_size_adequate": true,
+          "download_url_present": true
+        },
+        "passed": true
+      },
+      "step5_download_pdf": {
+        "success": true,
+        "status_code": 200,
+        "content_type": "application/pdf",
+        "file_size": 1603265,
+        "download_checks": {
+          "status_200": true,
+          "content_type_pdf": true,
+          "file_size_adequate": true,
+          "content_not_empty": true
+        },
+        "pdf_path": "/tmp/final_test_i_129_OSP-166DDCF1.pdf",
+        "passed": true
+      },
+      "step6_validate_integrity": {
+        "success": true,
+        "file_size": 1603265,
+        "integrity_checks": {
+          "file_exists": true,
+          "file_size_adequate": true,
+          "file_not_corrupted": true,
+          "expected_pages": true
+        },
+        "passed": true
+      },
+      "step7_verify_fields": {
+        "success": true,
+        "reason": "Template without editable fields",
+        "passed": true
+      },
+      "summary": {
+        "successful_steps": 6,
+        "total_steps": 7,
+        "success_rate": 85.71428571428571,
+        "case_id": "OSP-166DDCF1",
+        "overall_success": true
+      }
+    }
+  },
+  "summary_table": [
+    {
+      "visa": "I-539",
+      "case_id": "OSP-081335D5",
+      "success_rate": 71.42857142857143,
+      "status": "❌"
+    },
+    {
+      "visa": "I-589",
+      "case_id": "OSP-A645C7B4",
+      "success_rate": 71.42857142857143,
+      "status": "❌"
+    },
+    {
+      "visa": "I-140",
+      "case_id": "OSP-B40924E7",
+      "success_rate": 71.42857142857143,
+      "status": "❌"
+    },
+    {
+      "visa": "O-1",
+      "case_id": "OSP-ED46AFF1",
+      "success_rate": 85.71428571428571,
+      "status": "✅"
+    },
+    {
+      "visa": "H-1B",
+      "case_id": "OSP-713CA185",
+      "success_rate": 85.71428571428571,
+      "status": "✅"
+    },
+    {
+      "visa": "L-1",
+      "case_id": "OSP-80A84F87",
+      "success_rate": 85.71428571428571,
+      "status": "✅"
+    },
+    {
+      "visa": "F-1",
+      "case_id": "OSP-1637E71E",
+      "success_rate": 71.42857142857143,
+      "status": "❌"
+    },
+    {
+      "visa": "I-129",
+      "case_id": "OSP-166DDCF1",
+      "success_rate": 85.71428571428571,
+      "status": "✅"
+    }
+  ],
+  "statistics": {
+    "visas_tested": 8,
+    "successful_visas": 4,
+    "overall_success_rate": 50.0,
+    "avg_success_rate": 78.57142857142857
+  },
+  "timestamp": "2025-12-08T04:45:45.709999",
+  "test_focus": "🎯 TESTE END-TO-END COMPLETO - VALIDAÇÃO FINAL DE TODOS OS 8 VISTOS",
+  "backend_url": "https://smart-visa-helper-1.preview.emergentagent.com"
+}
