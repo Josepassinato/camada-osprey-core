@@ -271,28 +271,26 @@ def test_i539_pdf_generation_e2e_pymupdf():
         results["step1_case_creation"] = {"success": False, "exception": str(e)}
         return results
     
-    # STEP 2: Fill Friendly Form with Portuguese Data (EXACT data from review request)
-    print("\n📋 STEP 2: Preencher Formulário Amigável em Português")
+    # STEP 2: Fill Friendly Form with EXACT data from review request
+    print("\n📋 ETAPA 2: SUBMISSÃO DO FORMULÁRIO AMIGÁVEL")
     print("-" * 60)
+    print("📋 DADOS DE TESTE (IDÊNTICOS AOS ANTERIORES):")
     
     friendly_form_data = {
-        "friendly_form_data": {
-            "nome_completo": "Ana Paula Santos Silva",
-            "data_nascimento": "1992-07-18",
-            "endereco_eua": "789 Broadway Avenue",
-            "cidade_eua": "Miami",
-            "estado_eua": "FL",
-            "cep_eua": "33101",
-            "email": "ana.santos@test.com",
-            "telefone": "+1-305-555-8888",
-            "numero_passaporte": "BR555666777",
-            "pais_nascimento": "Brazil",
-            "status_atual": "B-2",
-            "status_solicitado": "B-2 Extension",
-            "data_entrada_eua": "2024-01-15",
-            "numero_i94": "99887766554"
-        },
-        "basic_data": {}
+        "nome_completo": "Roberto Carlos Mendes Silva",
+        "data_nascimento": "1988-11-25",
+        "endereco_eua": "2580 Ocean Drive Apt 305",
+        "cidade_eua": "Orlando",
+        "estado_eua": "FL",
+        "cep_eua": "32801",
+        "email": "roberto.mendes@testqa.com",
+        "telefone": "+1-407-555-1234",
+        "numero_passaporte": "BR111222333",
+        "pais_nascimento": "Brazil",
+        "status_atual": "B-2",
+        "status_solicitado": "B-2 Extension",
+        "data_entrada_eua": "2024-06-10",
+        "numero_i94": "12345678901"
     }
     
     try:
