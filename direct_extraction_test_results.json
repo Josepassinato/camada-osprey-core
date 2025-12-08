@@ -23,12 +23,12 @@
     "success_rate": 100.0
   },
   "test2_comparison": {
-    "success": false,
+    "success": true,
     "results": [
       {
         "scenario": "Subset simples",
-        "passed": false,
-        "is_different": true,
+        "passed": true,
+        "is_different": false,
         "expected": false
       },
       {
@@ -45,12 +45,12 @@
       },
       {
         "scenario": "Acentos diferentes",
-        "passed": false,
-        "is_different": true,
+        "passed": true,
+        "is_different": false,
         "expected": false
       }
     ],
-    "success_rate": 50.0
+    "success_rate": 100.0
   },
   "test3_autocorrection": {
     "success": true,
@@ -69,13 +69,6 @@
       },
       "discrepancies": [
         {
-          "field": "first_name",
-          "current_value": "Joao",
-          "document_value": "João Silva Santos",
-          "severity": "high",
-          "source": "official_document"
-        },
-        {
           "field": "date_of_birth",
           "current_value": "1990-05-15",
           "document_value": "15 MAY 1990",
@@ -84,7 +77,6 @@
         }
       ],
       "suggested_corrections": {
-        "first_name": "João Silva Santos",
         "date_of_birth": "15 MAY 1990"
       },
       "confidence": 1.0,
@@ -101,13 +93,13 @@
     "success_rate": 100.0
   },
   "summary": {
-    "successful_tests": 2,
+    "successful_tests": 3,
     "total_tests": 3,
-    "overall_success_rate": 66.66666666666666,
-    "system_ready": false,
+    "overall_success_rate": 100.0,
+    "system_ready": true,
     "test_results": [
       true,
-      false,
+      true,
       true
     ]
   }
