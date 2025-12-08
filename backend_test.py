@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 """
-🔍 TESTE END-TO-END COMPLETO APÓS CORREÇÃO DO BUG P0 - PDF GENERATION
-Testing complete flow from friendly form to PDF download after pypdf migration fix
+🎯 TESTE END-TO-END FINAL - USERSIMULATOR-DISCIPLINA
+TESTE 3 (PyMuPDF) - Validação completa do sistema após migração para PyMuPDF (fitz)
+
+CONTEXTO CRÍTICO:
+- Teste 1 (pypdf): 6/10 campos (60%) - ⚠️ PARCIAL
+- Teste 2 (pypdf regressão): 0/10 campos (0%) - ❌ FALHA CRÍTICA
+- Correção Implementada: Migração completa para PyMuPDF (fitz)
+- Teste Local: 10/10 campos (100%) - ✅ SUCESSO
+
+OBJETIVO: Validar em ambiente de produção (via API) se a solução PyMuPDF funciona corretamente
 """
 
 import requests
@@ -11,8 +19,24 @@ import os
 import base64
 from pathlib import Path
 from datetime import datetime
-import pypdf
-import io
+import hashlib
+
+# Import PyMuPDF (fitz) for PDF field verification
+try:
+    import fitz  # PyMuPDF
+    PYMUPDF_AVAILABLE = True
+    print("✅ PyMuPDF (fitz) library loaded successfully")
+except ImportError:
+    PYMUPDF_AVAILABLE = False
+    print("❌ PyMuPDF (fitz) library not available - installing...")
+    os.system("pip install PyMuPDF")
+    try:
+        import fitz
+        PYMUPDF_AVAILABLE = True
+        print("✅ PyMuPDF (fitz) installed and loaded successfully")
+    except ImportError:
+        print("❌ Failed to install PyMuPDF - using fallback methods")
+        PYMUPDF_AVAILABLE = False
 
 # Get backend URL from frontend .env
 BACKEND_URL = "https://smart-visa-helper-1.preview.emergentagent.com"
