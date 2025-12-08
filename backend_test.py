@@ -569,46 +569,46 @@ def test_i539_pdf_generation_e2e():
                 except Exception as e:
                     print(f"⚠️  Text extraction failed: {str(e)}")
             
-            # Critical fields to verify (from review request)
+            # Critical fields to verify (CORRECTED field names based on actual PDF)
             critical_fields_check = {
-                "Pt1Line1a_FamilyName": {
+                "P1Line1a_FamilyName[0]": {
                     "expected": "Silva",
-                    "actual": form_fields.get("Pt1Line1a_FamilyName", ""),
+                    "actual": form_fields.get("P1Line1a_FamilyName[0]", ""),
                     "filled": False
                 },
-                "Pt1Line1b_GivenName": {
+                "P1_Line1b_GivenName[0]": {
                     "expected": "Ana",
-                    "actual": form_fields.get("Pt1Line1b_GivenName", ""),
+                    "actual": form_fields.get("P1_Line1b_GivenName[0]", ""),
                     "filled": False
                 },
-                "Pt1Line7a_StreetNumberName": {
+                "Part1_Item6_StreetName[0]": {
                     "expected": "789 Broadway Avenue",
-                    "actual": form_fields.get("Pt1Line7a_StreetNumberName", ""),
+                    "actual": form_fields.get("Part1_Item6_StreetName[0]", ""),
                     "filled": False
                 },
-                "Pt1Line7c_CityOrTown": {
+                "Part2_Item11_City[0]": {
                     "expected": "Miami",
-                    "actual": form_fields.get("Pt1Line7c_CityOrTown", ""),
+                    "actual": form_fields.get("Part2_Item11_City[0]", ""),
                     "filled": False
                 },
-                "Pt1Line7d_State": {
-                    "expected": "FL",
-                    "actual": form_fields.get("Pt1Line7d_State", ""),
-                    "filled": False
-                },
-                "Pt1Line7e_ZipCode": {
+                "Part2_Item11_ZipCode[0]": {
                     "expected": "33101",
-                    "actual": form_fields.get("Pt1Line7e_ZipCode", ""),
+                    "actual": form_fields.get("Part2_Item11_ZipCode[0]", ""),
                     "filled": False
                 },
-                "Pt1Line8_Email": {
-                    "expected": "ana.santos@test.com",
-                    "actual": form_fields.get("Pt1Line8_Email", ""),
+                "Part1_Item4_Number[0]": {
+                    "expected": "BR555666777",
+                    "actual": form_fields.get("Part1_Item4_Number[0]", ""),
                     "filled": False
                 },
-                "Pt1Line9_DaytimeTelephone": {
+                "P5_Line3_DaytimePhoneNumber[0]": {
                     "expected": "+1-305-555-8888",
-                    "actual": form_fields.get("Pt1Line9_DaytimeTelephone", ""),
+                    "actual": form_fields.get("P5_Line3_DaytimePhoneNumber[0]", ""),
+                    "filled": False
+                },
+                "P1_Line8_DateOfBirth[0]": {
+                    "expected": "1992-07-18",
+                    "actual": form_fields.get("P1_Line8_DateOfBirth[0]", ""),
                     "filled": False
                 }
             }
