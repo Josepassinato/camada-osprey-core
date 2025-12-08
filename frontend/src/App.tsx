@@ -55,6 +55,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfUse from "./pages/TermsOfUse";
 import LegalDisclaimer from "./pages/LegalDisclaimer";
 import FAQ from "./pages/FAQ";
+import GoogleAuthCallback from "./components/GoogleAuthCallback";
 
 const queryClient = new QueryClient();
 
