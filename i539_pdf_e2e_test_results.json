@@ -2,7 +2,7 @@
   "test_results": {
     "step1_case_creation": {
       "success": true,
-      "case_id": "OSP-8B412BE3",
+      "case_id": "OSP-EA4DF483",
       "status_code": 200
     },
     "step2_friendly_form": {
@@ -10,7 +10,7 @@
       "status_code": 200,
       "response": {
         "success": true,
-        "case_id": "OSP-8B412BE3",
+        "case_id": "OSP-EA4DF483",
         "validation_status": "needs_review",
         "completion_percentage": 34,
         "message": "⚠️ Seu formulário está 34% completo. Por favor, revise as informações destacadas abaixo.",
@@ -170,11 +170,11 @@
       "pdf_result": {
         "success": true,
         "message": "USCIS form generated successfully",
-        "case_id": "OSP-8B412BE3",
+        "case_id": "OSP-EA4DF483",
         "form_type": "I-539",
-        "filename": "I-539_OSP-8B412BE3.pdf",
+        "filename": "I-539_OSP-EA4DF483.pdf",
         "file_size": 337695,
-        "download_url": "/api/case/OSP-8B412BE3/download-form"
+        "download_url": "/api/case/OSP-EA4DF483/download-form"
       },
       "pdf_checks": {
         "success_true": true,
@@ -202,51 +202,51 @@
       "success": true,
       "total_form_fields": 7,
       "critical_fields_check": {
-        "Pt1Line1a_FamilyName": {
+        "P1Line1a_FamilyName[0]": {
           "expected": "Silva",
-          "actual": "",
-          "filled": false
+          "actual": "Paula Santos Silva",
+          "filled": true
         },
-        "Pt1Line1b_GivenName": {
+        "P1_Line1b_GivenName[0]": {
           "expected": "Ana",
-          "actual": "",
-          "filled": false
+          "actual": "Ana",
+          "filled": true
         },
-        "Pt1Line7a_StreetNumberName": {
+        "Part1_Item6_StreetName[0]": {
           "expected": "789 Broadway Avenue",
-          "actual": "",
-          "filled": false
+          "actual": "789 Broadway Avenue",
+          "filled": true
         },
-        "Pt1Line7c_CityOrTown": {
+        "Part2_Item11_City[0]": {
           "expected": "Miami",
-          "actual": "",
-          "filled": false
+          "actual": "Miami",
+          "filled": true
         },
-        "Pt1Line7d_State": {
-          "expected": "FL",
-          "actual": "",
-          "filled": false
-        },
-        "Pt1Line7e_ZipCode": {
+        "Part2_Item11_ZipCode[0]": {
           "expected": "33101",
-          "actual": "",
-          "filled": false
+          "actual": "33101",
+          "filled": true
         },
-        "Pt1Line8_Email": {
-          "expected": "ana.santos@test.com",
-          "actual": "",
-          "filled": false
+        "Part1_Item4_Number[0]": {
+          "expected": "BR555666777",
+          "actual": "BR555666777",
+          "filled": true
         },
-        "Pt1Line9_DaytimeTelephone": {
+        "P5_Line3_DaytimePhoneNumber[0]": {
           "expected": "+1-305-555-8888",
+          "actual": "",
+          "filled": false
+        },
+        "P1_Line8_DateOfBirth[0]": {
+          "expected": "1992-07-18",
           "actual": "",
           "filled": false
         }
       },
-      "fields_filled": 0,
+      "fields_filled": 6,
       "total_critical_fields": 8,
       "success_threshold": 6,
-      "p0_bug_fixed": false,
+      "p0_bug_fixed": true,
       "all_form_fields": {
         "PDF417BarCode1[0]": "I-539|08/28/24|7",
         "P1Line1a_FamilyName[0]": "Paula Santos Silva",
@@ -256,14 +256,14 @@
         "Part2_Item11_ZipCode[0]": "33101",
         "Part1_Item6_StreetName[0]": "789 Broadway Avenue"
       },
-      "passed": false
+      "passed": true
     },
     "summary": {
-      "successful_steps": 5,
+      "successful_steps": 6,
       "total_steps": 6,
-      "success_rate": 83.33333333333334,
-      "p0_bug_fixed": false,
-      "fields_filled": 0,
+      "success_rate": 100.0,
+      "p0_bug_fixed": true,
+      "fields_filled": 6,
       "total_critical_fields": 8,
       "success_criteria": {
         "caso_i539_criado": true,
@@ -272,16 +272,16 @@
         "pdf_gerado_sucesso": true,
         "pdf_baixado_sucesso": true,
         "pdf_tamanho_adequado": true,
-        "campos_preenchidos_pdf": false,
+        "campos_preenchidos_pdf": true,
         "sem_erros_500": true
       },
-      "criteria_passed": 7,
+      "criteria_passed": 8,
       "total_criteria": 8,
-      "system_ready": false,
-      "case_id": "OSP-8B412BE3"
+      "system_ready": true,
+      "case_id": "OSP-EA4DF483"
     }
   },
-  "timestamp": 1765152752.6587439,
+  "timestamp": 1765152772.7672307,
   "test_focus": "I-539 PDF Generation E2E Testing After P0 Bug Fix",
   "test_steps": [
     {
@@ -310,8 +310,8 @@
     }
   ],
   "p0_bug_assessment": {
-    "bug_fixed": false,
-    "fields_filled": 0,
+    "bug_fixed": true,
+    "fields_filled": 6,
     "total_fields": 8
   }
 }
