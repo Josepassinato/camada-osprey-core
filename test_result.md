@@ -241,6 +241,21 @@ frontend:
         comment: "🎉 ADMIN KNOWLEDGE BASE FRONTEND - 100% SUCCESS! Comprehensive testing of the Admin Knowledge Base frontend at /admin/knowledge-base completed with EXCELLENT results: PAGE STRUCTURE: ✅ Title 'Knowledge Base Manager' correct, ✅ Subtitle 'Base de conhecimento interna para orientação dos agentes' correct, ✅ Page loads without JavaScript errors. STATISTICS DASHBOARD: ✅ All 4 statistics cards present (Total Documentos, Categorias, Tipos de Visto, Mais Acessado), ✅ Numbers displayed correctly (showing 0 values as expected for empty state), ✅ Proper icons (FileText, BarChart, CheckCircle, Download) rendering. UPLOAD FORM: ✅ Complete form with all required fields - file input (PDF only), category dropdown (5 categories: Document Requirements Checklists, Letter Templates, Package Organization Standards, Formatting Guides, Official USCIS Instructions), subcategory text input, 9 form type buttons (I-539, F-1, I-130, I-765, I-90, EB-2 NIW, EB-1A, I-589, ALL), description textarea, submit button 'Fazer Upload do Documento'. FORM INTERACTIONS: ✅ Category selection working, ✅ Form type button toggle working (purple when selected), ✅ Description textarea functional, ✅ HTML5 form validation present. SEARCH FUNCTIONALITY: ✅ Search input field present and functional, ✅ Search button present, ✅ Text input accepts search queries. DOCUMENTS LIST: ✅ Proper section title 'Documentos na Base de Conhecimento', ✅ Empty state displayed correctly with message 'Nenhum documento encontrado' and help text. UI/UX ELEMENTS: ✅ 8 SVG icons rendering, ✅ Color scheme implemented (purple for primary actions, proper responsive design), ✅ Responsive layout classes present. API INTEGRATION: ✅ All 3 API endpoints working (categories: 200, list: 200, stats: 200). SUCCESS RATE: 100% (10/10 features verified). CONCLUSION: Admin Knowledge Base frontend is production-ready with all critical functionality working perfectly. Minor note: Icons render as SVG but may not be specifically Lucide-branded, which doesn't affect functionality."
 
 backend:
+  - task: "Document-Based Auto-Correction System"
+    implemented: true
+    working: false
+    file: "/app/backend/document_data_extractor.py, /app/backend/server.py"
+    stuck_count: 1
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "✅ IMPLEMENTED: Document-based auto-correction system with OCR integration. System includes: 1) DocumentDataExtractor class with passport, birth certificate, national ID support, 2) Regex patterns for extracting name, passport number, nationality, dates, 3) Discrepancy detection comparing extracted vs current user data, 4) Auto-correction logic with confidence thresholds (>70% for official docs), 5) Audit fields (data_verified_by_document, verification_document_type, verification_date), 6) Integration with Google Vision API for OCR. Ready for comprehensive testing."
+      - working: false
+        agent: "testing"
+        comment: "❌ DOCUMENT-BASED AUTO-CORRECTION SYSTEM - CRITICAL ISSUES IDENTIFIED! Executei teste abrangente conforme review request testando correção automática de dados baseada em documentos. DESCOBERTAS CRÍTICAS: ❌ GOOGLE VISION API FAILING: 'Bad image data' error quando enviamos arquivo de texto simulando passaporte, sistema espera imagem real para OCR, ❌ REGEX PATTERNS INADEQUADOS: Padrões de extração não capturam nome completo corretamente ('JOÃO SILVA SANTOS' → 'Jo'), extração fragmentada causando múltiplas discrepâncias, ❌ AUTO-CORRECTION LOGIC FLAWED: Sistema detecta 4 discrepâncias e recusa correção automática (limite de 3), confiança 100% mas ainda assim não corrige devido a 'too many discrepancies', ❌ INTEGRATION ISSUES: OCR integration falha com arquivos de texto, sistema não processa documentos corretamente. TESTES EXECUTADOS: 1) Teste via API upload (falhou - Google Vision API error), 2) Teste direto da lógica (falhou - regex patterns inadequados), 3) Simulação OCR (falhou - auto-correction logic). CONCLUSÃO: Sistema tem implementação básica mas FALHAS CRÍTICAS impedem funcionamento. Necessária correção urgente dos padrões regex, lógica de auto-correção e integração OCR."
+
   - task: "Comprehensive E2E Testing - All 8 Visa Types"
     implemented: true
     working: true
