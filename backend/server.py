@@ -10619,67 +10619,78 @@ async def startup_db_client():
         
         # Create optimized indexes for better performance
         try:
+            # Helper function to safely create indexes
+            async def safe_create_index(collection, keys, **kwargs):
+                """Safely create an index, skipping if it already exists with same or compatible spec"""
+                try:
+                    await collection.create_index(keys, **kwargs)
+                except Exception as e:
+                    error_msg = str(e)
+                    # Only log if it's not a "already exists" type error
+                    if "already exists" not in error_msg.lower() and "IndexOptionsConflict" not in error_msg and "IndexKeySpecsConflict" not in error_msg:
+                        logger.warning(f"Error creating index {keys} on {collection.name}: {error_msg}")
+            
             # Auto-application cases indexes
-            await db.auto_cases.create_index("case_id", unique=True)
-            await db.auto_cases.create_index("user_id")
-            await db.auto_cases.create_index("session_token")
-            await db.auto_cases.create_index("status")
-            await db.auto_cases.create_index("created_at")
-            await db.auto_cases.create_index([("user_id", 1), ("status", 1)])
+            await safe_create_index(db.auto_cases, "case_id", unique=True)
+            await safe_create_index(db.auto_cases, "user_id")
+            await safe_create_index(db.auto_cases, "session_token")
+            await safe_create_index(db.auto_cases, "status")
+            await safe_create_index(db.auto_cases, "created_at")
+            await safe_create_index(db.auto_cases, [("user_id", 1), ("status", 1)])
             
             # Users indexes
-            await db.users.create_index("email", unique=True)
-            await db.users.create_index("id", unique=True)
+            await safe_create_index(db.users, "email", unique=True)
+            await safe_create_index(db.users, "id", unique=True)
             
             # Documents indexes
-            await db.documents.create_index("user_id")
-            await db.documents.create_index("document_type")
-            await db.documents.create_index("case_id")
-            await db.documents.create_index([("user_id", 1), ("document_type", 1)])
+            await safe_create_index(db.documents, "user_id")
+            await safe_create_index(db.documents, "document_type")
+            await safe_create_index(db.documents, "case_id")
+            await safe_create_index(db.documents, [("user_id", 1), ("document_type", 1)])
             
             # Chat history indexes for sistema interactions
-            await db.chat_history.create_index("user_id")
-            await db.chat_history.create_index("session_id")
-            await db.chat_history.create_index("created_at")
+            await safe_create_index(db.chat_history, "user_id")
+            await safe_create_index(db.chat_history, "session_id")
+            await safe_create_index(db.chat_history, "created_at")
             
             # Owl Agent indexes
-            await db.owl_sessions.create_index("session_id", unique=True)
-            await db.owl_sessions.create_index("case_id")
-            await db.owl_sessions.create_index("status")
-            await db.owl_sessions.create_index("created_at")
+            await safe_create_index(db.owl_sessions, "session_id", unique=True)
+            await safe_create_index(db.owl_sessions, "case_id")
+            await safe_create_index(db.owl_sessions, "status")
+            await safe_create_index(db.owl_sessions, "created_at")
             
-            await db.owl_responses.create_index("session_id")
-            await db.owl_responses.create_index("field_id")
-            await db.owl_responses.create_index("timestamp")
+            await safe_create_index(db.owl_responses, "session_id")
+            await safe_create_index(db.owl_responses, "field_id")
+            await safe_create_index(db.owl_responses, "timestamp")
             
-            await db.owl_generated_forms.create_index("session_id")
-            await db.owl_generated_forms.create_index("case_id")
-            await db.owl_generated_forms.create_index("visa_type")
-            await db.owl_generated_forms.create_index("created_at")
+            await safe_create_index(db.owl_generated_forms, "session_id")
+            await safe_create_index(db.owl_generated_forms, "case_id")
+            await safe_create_index(db.owl_generated_forms, "visa_type")
+            await safe_create_index(db.owl_generated_forms, "created_at")
             
             # Owl Agent user authentication indexes
-            await db.owl_users.create_index("email", unique=True)
-            await db.owl_users.create_index("user_id", unique=True)
-            await db.owl_users.create_index("created_at")
+            await safe_create_index(db.owl_users, "email", unique=True)
+            await safe_create_index(db.owl_users, "user_id", unique=True)
+            await safe_create_index(db.owl_users, "created_at")
             
             # Owl Agent payment and download indexes
             # Use sparse=True para permitir múltiplos documentos sem stripe_session_id
-            await db.payment_transactions.create_index("stripe_session_id", unique=True, sparse=True)
-            await db.payment_transactions.create_index("owl_session_id")
-            await db.payment_transactions.create_index("user_email")
-            await db.payment_transactions.create_index("payment_status")
-            await db.payment_transactions.create_index("created_at")
+            await safe_create_index(db.payment_transactions, "stripe_session_id", unique=True, sparse=True)
+            await safe_create_index(db.payment_transactions, "owl_session_id")
+            await safe_create_index(db.payment_transactions, "user_email")
+            await safe_create_index(db.payment_transactions, "payment_status")
+            await safe_create_index(db.payment_transactions, "created_at")
             
-            await db.owl_downloads.create_index("download_id", unique=True)
-            await db.owl_downloads.create_index("stripe_session_id")
-            await db.owl_downloads.create_index("owl_session_id")
+            await safe_create_index(db.owl_downloads, "download_id", unique=True)
+            await safe_create_index(db.owl_downloads, "stripe_session_id")
+            await safe_create_index(db.owl_downloads, "owl_session_id")
             
             # Maria conversations indexes
-            await db.maria_conversations.create_index("conversation_id")
-            await db.maria_conversations.create_index("user_id")
-            await db.maria_conversations.create_index("timestamp")
-            await db.maria_conversations.create_index([("conversation_id", 1), ("timestamp", 1)])
-            await db.owl_downloads.create_index("expires_at")
+            await safe_create_index(db.maria_conversations, "conversation_id")
+            await safe_create_index(db.maria_conversations, "user_id")
+            await safe_create_index(db.maria_conversations, "timestamp")
+            await safe_create_index(db.maria_conversations, [("conversation_id", 1), ("timestamp", 1)])
+            await safe_create_index(db.owl_downloads, "expires_at")
             
             logger.info("Database indexes created successfully for optimized performance!")
             
