@@ -139,9 +139,15 @@ def retest_disciplina_i539_complete():
     try:
         print(f"📤 Enviando formulário amigável para caso {case_id}...")
         
+        # Wrap test data in the expected format
+        friendly_form_payload = {
+            "friendly_form_data": test_data,
+            "basic_data": {}
+        }
+        
         response = requests.post(
             f"{API_BASE}/case/{case_id}/friendly-form",
-            json=test_data,
+            json=friendly_form_payload,
             headers={"Content-Type": "application/json"},
             timeout=60
         )
