@@ -2,7 +2,7 @@
   "test_results": {
     "etapa1_criacao_caso": {
       "success": true,
-      "case_id": "OSP-6433A71A",
+      "case_id": "OSP-C4A0C2BC",
       "status_code": 200,
       "persistido_mongodb": true,
       "passed": true
@@ -11,13 +11,13 @@
       "success": true,
       "status_code": 200,
       "validation_status": "needs_review",
-      "completion_percentage": 0,
+      "completion_percentage": 34,
       "response": {
         "success": true,
-        "case_id": "OSP-6433A71A",
+        "case_id": "OSP-C4A0C2BC",
         "validation_status": "needs_review",
-        "completion_percentage": 0,
-        "message": "⚠️ Seu formulário está 0% completo. Por favor, revise as informações destacadas abaixo.",
+        "completion_percentage": 34,
+        "message": "⚠️ Seu formulário está 34% completo. Por favor, revise as informações destacadas abaixo.",
         "validation_issues": [
           {
             "field": "legal_requirement",
@@ -74,13 +74,6 @@
             "type": "legal_rule"
           },
           {
-            "field": "pais_nascimento",
-            "field_label": "País de Nascimento",
-            "issue": "Campo obrigatório não preenchido",
-            "severity": "error",
-            "suggestion": "Por favor, preencha o campo 'País de Nascimento'. Exemplo: Brazil"
-          },
-          {
             "field": "pais_cidadania",
             "field_label": "País de Cidadania",
             "issue": "Campo obrigatório não preenchido",
@@ -95,6 +88,13 @@
             "suggestion": "Por favor, preencha o campo 'Sexo'. Exemplo: "
           },
           {
+            "field": "numero_passaporte",
+            "field_label": "Número do Passaporte",
+            "issue": "Deve conter apenas números",
+            "severity": "warning",
+            "suggestion": "Use apenas números, como: BR123456789"
+          },
+          {
             "field": "pais_emissao_passaporte",
             "field_label": "País de Emissão do Passaporte",
             "issue": "Campo obrigatório não preenchido",
@@ -107,13 +107,6 @@
             "issue": "Campo obrigatório não preenchido",
             "severity": "error",
             "suggestion": "Por favor, preencha o campo 'Local de Entrada nos EUA'. Exemplo: JFK Airport, New York"
-          },
-          {
-            "field": "status_atual",
-            "field_label": "Status Atual de Não-Imigrante",
-            "issue": "Campo obrigatório não preenchido",
-            "severity": "error",
-            "suggestion": "Por favor, preencha o campo 'Status Atual de Não-Imigrante'. Exemplo: "
           },
           {
             "field": "tipo_pedido",
@@ -150,78 +143,93 @@
       "field_checks": {
         "nome_completo": {
           "expected": "Roberto Carlos Mendes Silva",
-          "actual": null,
-          "saved": false
+          "actual": "Roberto Carlos Mendes Silva",
+          "saved": true
         },
         "data_nascimento": {
           "expected": "1988-11-25",
-          "actual": null,
-          "saved": false
+          "actual": "1988-11-25",
+          "saved": true
         },
         "endereco_eua": {
           "expected": "2580 Ocean Drive Apt 305",
-          "actual": null,
-          "saved": false
+          "actual": "2580 Ocean Drive Apt 305",
+          "saved": true
         },
         "cidade_eua": {
           "expected": "Orlando",
-          "actual": null,
-          "saved": false
+          "actual": "Orlando",
+          "saved": true
         },
         "estado_eua": {
           "expected": "FL",
-          "actual": null,
-          "saved": false
+          "actual": "FL",
+          "saved": true
         },
         "cep_eua": {
           "expected": "32801",
-          "actual": null,
-          "saved": false
+          "actual": "32801",
+          "saved": true
         },
         "email": {
           "expected": "roberto.mendes@testqa.com",
-          "actual": null,
-          "saved": false
+          "actual": "roberto.mendes@testqa.com",
+          "saved": true
         },
         "telefone": {
           "expected": "+1-407-555-1234",
-          "actual": null,
-          "saved": false
+          "actual": "+1-407-555-1234",
+          "saved": true
         },
         "numero_passaporte": {
           "expected": "BR111222333",
-          "actual": null,
-          "saved": false
+          "actual": "BR111222333",
+          "saved": true
         },
         "pais_nascimento": {
           "expected": "Brazil",
-          "actual": null,
-          "saved": false
+          "actual": "Brazil",
+          "saved": true
         },
         "status_atual": {
           "expected": "B-2",
-          "actual": null,
-          "saved": false
+          "actual": "B-2",
+          "saved": true
         },
         "status_solicitado": {
           "expected": "B-2 Extension",
-          "actual": null,
-          "saved": false
+          "actual": "B-2 Extension",
+          "saved": true
         },
         "data_entrada_eua": {
           "expected": "2024-06-10",
-          "actual": null,
-          "saved": false
+          "actual": "2024-06-10",
+          "saved": true
         },
         "numero_i94": {
           "expected": "12345678901",
-          "actual": null,
-          "saved": false
+          "actual": "12345678901",
+          "saved": true
         }
       },
-      "fields_saved": 0,
+      "fields_saved": 14,
       "total_fields": 13,
-      "simplified_responses": {},
+      "simplified_responses": {
+        "nome_completo": "Roberto Carlos Mendes Silva",
+        "data_nascimento": "1988-11-25",
+        "endereco_eua": "2580 Ocean Drive Apt 305",
+        "cidade_eua": "Orlando",
+        "estado_eua": "FL",
+        "cep_eua": "32801",
+        "email": "roberto.mendes@testqa.com",
+        "telefone": "+1-407-555-1234",
+        "numero_passaporte": "BR111222333",
+        "pais_nascimento": "Brazil",
+        "status_atual": "B-2",
+        "status_solicitado": "B-2 Extension",
+        "data_entrada_eua": "2024-06-10",
+        "numero_i94": "12345678901"
+      },
       "passed": false
     },
     "etapa4_geracao_pdf": {
@@ -230,11 +238,11 @@
       "pdf_result": {
         "success": true,
         "message": "USCIS form generated successfully",
-        "case_id": "OSP-6433A71A",
+        "case_id": "OSP-C4A0C2BC",
         "form_type": "I-539",
-        "filename": "I-539_OSP-6433A71A.pdf",
-        "file_size": 335332,
-        "download_url": "/api/case/OSP-6433A71A/download-form"
+        "filename": "I-539_OSP-C4A0C2BC.pdf",
+        "file_size": 338082,
+        "download_url": "/api/case/OSP-C4A0C2BC/download-form"
       },
       "pdf_checks": {
         "success_true": true,
@@ -248,15 +256,15 @@
       "success": true,
       "status_code": 200,
       "content_type": "application/pdf",
-      "file_size": 335332,
+      "file_size": 338082,
       "download_checks": {
         "status_200": true,
         "content_type_pdf": true,
         "file_size_adequate": true,
         "content_not_empty": true
       },
-      "pdf_path": "/tmp/retest_disciplina_i539_OSP-6433A71A.pdf",
-      "pdf_hash": "f34f5d078257d241e42171a3ce16ff9b",
+      "pdf_path": "/tmp/retest_disciplina_i539_OSP-C4A0C2BC.pdf",
+      "pdf_hash": "68fadc7fa9eea46f009e88985a424c6a",
       "passed": true
     },
     "etapa6_validacao_bug_p0": {
@@ -453,14 +461,14 @@
       "etapas_passadas": 5,
       "total_etapas": 9,
       "taxa_sucesso": 55.55555555555556,
-      "tempo_execucao": 0.5371284484863281,
+      "tempo_execucao": 0.6815552711486816,
       "passed": false
     },
     "summary": {
       "etapas_passadas": 5,
       "total_etapas": 9,
       "taxa_sucesso": 55.55555555555556,
-      "tempo_execucao": 0.5371284484863281,
+      "tempo_execucao": 0.6815552711486816,
       "fields_filled": 0,
       "total_critical_fields": 10,
       "bug_status": "NÃO CORRIGIDO",
@@ -470,11 +478,11 @@
         "País Nascimento": "NÃO FUNCIONOU"
       },
       "campos_funcionaram": 0,
-      "case_id": "OSP-6433A71A",
+      "case_id": "OSP-C4A0C2BC",
       "sistema_pronto": false
     }
   },
-  "timestamp": 1765153779.5896747,
+  "timestamp": 1765153819.4779499,
   "test_focus": "Retest I-539 End-to-End After Bug P0 Corrections",
   "objetivo": "Verificar se >= 7/10 campos críticos preenchidos (70% threshold)",
   "dados_teste": {
