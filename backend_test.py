@@ -357,25 +357,59 @@ def test_i539_pdf_generation_e2e():
         results["step3_data_verification"] = {"success": False, "exception": str(e)}
         return results
     
-    # TEST 2: Partial Data Validation (50%) - Expected: rejected, 40-60%, >5 issues
-    print("\n📋 TEST 2: Validação com Dados Parciais (50%)")
+    # STEP 4: Generate PDF Official I-539 (CRITICAL - Bug P0 verification)
+    print("\n📋 STEP 4: Gerar PDF Oficial I-539 (⭐ CRÍTICO - Bug P0)")
     print("-" * 60)
     
-    partial_data = {
-        "friendly_form_data": {
-            "nome_completo": "Maria Santos",
-            "data_nascimento": "1990-12-25",
-            "email": "maria@test.com",
-            "numero_passaporte": "BR555666777",
-            "pais_nascimento": "Brazil",
-            "endereco": "456 Oak Street",
-            "cidade": "Los Angeles"
-            # Missing: telefone, estado, cep, status_atual, status_solicitado, data_entrada_eua, numero_i94
-        }
-    }
-    
-    test2_result = test_validation_endpoint(test_case_id, partial_data, "TEST 2: Dados Parciais")
-    results["test2_partial_data"] = test2_result
+    try:
+        print(f"📝 Generating I-539 PDF for case {case_id}...")
+        response = requests.post(
+            f"{API_BASE}/case/{case_id}/generate-form",
+            headers={"Content-Type": "application/json"},
+            timeout=120  # PDF generation might take longer
+        )
+        
+        print(f"📊 Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            pdf_result = response.json()
+            print(f"✅ PDF generation successful")
+            print(f"📄 Response: {json.dumps(pdf_result, indent=2, ensure_ascii=False)}")
+            
+            # Verify PDF generation response
+            pdf_checks = {
+                "success_true": pdf_result.get("success", False),
+                "filename_present": pdf_result.get("filename") is not None,
+                "file_size_adequate": pdf_result.get("file_size", 0) > 300000,  # >300KB
+                "download_url_present": pdf_result.get("download_url") is not None
+            }
+            
+            print(f"\n🎯 PDF GENERATION VERIFICATION:")
+            for check, passed in pdf_checks.items():
+                status = "✅" if passed else "❌"
+                print(f"  {status} {check}: {passed}")
+            
+            results["step4_pdf_generation"] = {
+                "success": True,
+                "status_code": response.status_code,
+                "pdf_result": pdf_result,
+                "pdf_checks": pdf_checks,
+                "passed": all(pdf_checks.values())
+            }
+        else:
+            print(f"❌ PDF generation failed: {response.status_code}")
+            print(f"📄 Error: {response.text}")
+            results["step4_pdf_generation"] = {
+                "success": False,
+                "status_code": response.status_code,
+                "error": response.text
+            }
+            return results
+            
+    except Exception as e:
+        print(f"❌ Exception generating PDF: {str(e)}")
+        results["step4_pdf_generation"] = {"success": False, "exception": str(e)}
+        return results
     
     if test2_result.get("success"):
         validation_result = test2_result["validation_result"]
