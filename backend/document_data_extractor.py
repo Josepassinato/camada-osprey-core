@@ -433,7 +433,17 @@ class DocumentDataExtractor:
         for discrepancy in discrepancies:
             field = discrepancy["field"]
             new_value = discrepancy["document_value"]
-            corrections[field] = new_value
+            
+            # Se o campo é "name" ou referente a nome completo, dividir em first_name e last_name
+            if field in ["name", "applicant_name", "full_name"] and new_value:
+                parts = new_value.strip().split()
+                if len(parts) >= 2:
+                    corrections["first_name"] = parts[0]
+                    corrections["last_name"] = " ".join(parts[1:])
+                elif len(parts) == 1:
+                    corrections["first_name"] = parts[0]
+            else:
+                corrections[field] = new_value
         
         return corrections
 
