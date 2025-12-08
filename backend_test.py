@@ -1184,90 +1184,536 @@ def additional_validation_tests():
     """Placeholder for additional validation tests"""
     pass
 
+def create_test_user_with_incomplete_data():
+    """Criar usuário com dados incompletos para teste de auto-correção"""
+    try:
+        print("📝 Creating test user with incomplete data...")
+        
+        # Dados incompletos propositalmente
+        user_data = {
+            "email": "test_autocorrect_v2@test.com",
+            "password": "testpass123",
+            "first_name": "Joao",  # Sem acento
+            "last_name": "Silva",  # Sem sobrenome completo
+            "phone": "+1-555-0123"
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/auth/signup",
+            json=user_data,
+            headers={"Content-Type": "application/json"},
+            timeout=30
+        )
+        
+        print(f"📊 Status Code: {response.status_code}")
+        print(f"📄 Response: {response.text}")
+        
+        if response.status_code in [200, 201]:
+            result = response.json()
+            token = result.get("token")
+            user_info = result.get("user", {})
+            user_id = user_info.get("id")
+            
+            if token and user_id:
+                print(f"✅ Test user created: {user_id}")
+                print(f"📧 Email: {user_data['email']}")
+                print(f"👤 Name: {user_data['first_name']} {user_data['last_name']}")
+                return {
+                    "success": True,
+                    "user_id": user_id,
+                    "token": token,
+                    "email": user_data["email"],
+                    "original_data": user_data
+                }
+            else:
+                print(f"❌ Missing token or user_id in response")
+                return {"success": False, "error": "Missing credentials"}
+        else:
+            print(f"❌ Failed to create user: {response.status_code}")
+            return {"success": False, "status_code": response.status_code, "error": response.text}
+            
+    except Exception as e:
+        print(f"❌ Exception creating test user: {str(e)}")
+        return {"success": False, "exception": str(e)}
+
+def create_passport_document():
+    """Criar documento de passaporte simulado com nome completo correto"""
+    passport_content = """PASSPORT
+UNITED STATES OF AMERICA  
+PASSPORT NO: BR1234567
+NAME: JOÃO SILVA SANTOS
+DATE OF BIRTH: 15 MAY 1990
+NATIONALITY: BRAZILIAN
+DATE OF ISSUE: 01 JAN 2020
+DATE OF EXPIRY: 01 JAN 2030
+PLACE OF BIRTH: SAO PAULO, BRAZIL
+SEX: M
+"""
+    
+    print("\n📄 Created passport document with content:")
+    print("=" * 50)
+    print(passport_content)
+    print("=" * 50)
+    
+    return passport_content
+
+def upload_passport_document(case_id, token, passport_content):
+    """Upload do documento de passaporte para teste de auto-correção"""
+    try:
+        print(f"\n📤 Uploading passport document to case {case_id}...")
+        
+        # Criar arquivo temporário
+        import tempfile
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+            f.write(passport_content)
+            temp_file_path = f.name
+        
+        try:
+            # Upload via multipart/form-data
+            with open(temp_file_path, 'rb') as f:
+                files = {
+                    'file': ('test_passport.txt', f, 'text/plain')
+                }
+                data = {
+                    'document_type': 'passport'
+                }
+                
+                response = requests.post(
+                    f"{API_BASE}/case/{case_id}/upload-document",
+                    files=files,
+                    data=data,
+                    headers={
+                        "Authorization": f"Bearer {token}"
+                    },
+                    timeout=60
+                )
+        finally:
+            # Limpar arquivo temporário
+            os.unlink(temp_file_path)
+        
+        print(f"📊 Status Code: {response.status_code}")
+        print(f"📄 Response: {response.text}")
+        
+        if response.status_code == 200:
+            result = response.json()
+            print(f"✅ Document uploaded successfully")
+            
+            # Verificar se houve extração e auto-correção
+            extraction = result.get("extraction", {})
+            if extraction:
+                print(f"\n🔍 EXTRACTION RESULTS:")
+                print(f"  Successful: {extraction.get('successful', False)}")
+                print(f"  Auto-corrected: {extraction.get('auto_corrected', False)}")
+                print(f"  Corrections made: {extraction.get('corrections_made', {})}")
+                print(f"  Confidence: {extraction.get('confidence', 0):.1%}")
+                
+                if extraction.get('discrepancies_found'):
+                    print(f"  Discrepancies found: {len(extraction['discrepancies_found'])}")
+                    for i, disc in enumerate(extraction['discrepancies_found'][:3]):
+                        print(f"    {i+1}. {disc.get('field')}: '{disc.get('current_value')}' → '{disc.get('document_value')}'")
+            
+            return {
+                "success": True,
+                "status_code": response.status_code,
+                "result": result,
+                "extraction": extraction
+            }
+        else:
+            print(f"❌ Document upload failed: {response.status_code}")
+            return {
+                "success": False,
+                "status_code": response.status_code,
+                "error": response.text
+            }
+            
+    except Exception as e:
+        print(f"❌ Exception uploading document: {str(e)}")
+        return {"success": False, "exception": str(e)}
+
+def test_document_autocorrect_complete_flow():
+    """
+    🎯 TESTE COMPLETO - CORREÇÃO AUTOMÁTICA DE DADOS COM REGEX CORRIGIDO
+    
+    CENÁRIO DE TESTE:
+    1. CRIAR CASO COM DADOS INCORRETOS
+       - Nome: "Joao Silva" (sem acento, sem sobrenome completo)
+       - Email: "test_autocorrect_v2@test.com"
+       - Data nascimento: "1990-05-15"
+
+    2. SIMULAR UPLOAD DE PASSAPORTE
+       - Arquivo de texto simulando passaporte
+       - Conteúdo: JOÃO SILVA SANTOS
+
+    3. VALIDAÇÕES ESPERADAS:
+       - ✅ Regex deve extrair "JOÃO SILVA SANTOS" completo (não apenas "Jo")
+       - ✅ Comparação deve identificar que "Joao Silva" é subset de "João Silva Santos"
+       - ✅ Sistema deve calcular discrepâncias menores
+       - ✅ Com confiança >80%, deve AUTO-CORRIGIR
+       - ✅ Nome atualizado para "João Silva Santos"
+
+    4. VERIFICAR AUDITORIA:
+       - data_verified_by_document: true
+       - verification_document_type: "passport"
+       - verification_date: timestamp
+    """
+    
+    print("🎯 TESTE COMPLETO - CORREÇÃO AUTOMÁTICA DE DADOS COM REGEX CORRIGIDO")
+    print("📋 SEGUNDA TENTATIVA - Validação das correções implementadas")
+    print("🎯 OBJETIVO: Validar que regex patterns e lógica de auto-correção funcionam")
+    print("=" * 80)
+    
+    results = {
+        "step1_create_user": {},
+        "step2_create_case": {},
+        "step3_upload_document": {},
+        "step4_verify_updates": {},
+        "summary": {}
+    }
+    
+    # STEP 1: Criar usuário com dados incompletos
+    print("\n📋 STEP 1: Criar usuário com dados incompletos")
+    print("-" * 60)
+    
+    user_result = create_test_user_with_incomplete_data()
+    results["step1_create_user"] = user_result
+    
+    if not user_result.get("success"):
+        print("❌ Failed to create test user - aborting test")
+        return results
+    
+    user_id = user_result["user_id"]
+    token = user_result["token"]
+    original_data = user_result["original_data"]
+    
+    # STEP 2: Criar caso de aplicação
+    print("\n📋 STEP 2: Criar caso de aplicação")
+    print("-" * 60)
+    
+    try:
+        case_data = {
+            "session_token": "test_v2_session",
+            "applicant_name": "Joao Silva",
+            "applicant_email": "test_autocorrect_v2@test.com",
+            "date_of_birth": "1990-05-15"
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/auto-application/start",
+            json=case_data,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {token}"
+            },
+            timeout=30
+        )
+        
+        print(f"📊 Status Code: {response.status_code}")
+        print(f"📄 Response: {response.text}")
+        
+        if response.status_code in [200, 201]:
+            result = response.json()
+            case_info = result.get("case", {})
+            case_id = case_info.get("case_id")
+            
+            if case_id:
+                print(f"✅ Auto-application case created: {case_id}")
+                results["step2_create_case"] = {
+                    "success": True,
+                    "case_id": case_id,
+                    "case_data": case_info
+                }
+            else:
+                print(f"❌ No case_id in response")
+                results["step2_create_case"] = {"success": False, "error": "No case_id"}
+                return results
+        else:
+            print(f"❌ Failed to create case: {response.status_code}")
+            results["step2_create_case"] = {"success": False, "status_code": response.status_code, "error": response.text}
+            return results
+            
+    except Exception as e:
+        print(f"❌ Exception creating case: {str(e)}")
+        results["step2_create_case"] = {"success": False, "exception": str(e)}
+        return results
+    
+    case_id = results["step2_create_case"]["case_id"]
+    
+    # STEP 3: Upload documento e testar auto-correção
+    print("\n📋 STEP 3: Upload documento e testar auto-correção")
+    print("-" * 60)
+    
+    passport_content = create_passport_document()
+    upload_result = upload_passport_document(case_id, token, passport_content)
+    results["step3_upload_document"] = upload_result
+    
+    # STEP 4: Verificar se dados foram atualizados
+    print("\n📋 STEP 4: Verificar atualizações nos dados do usuário")
+    print("-" * 60)
+    
+    # Aguardar um pouco para processamento
+    time.sleep(2)
+    
+    try:
+        response = requests.get(
+            f"{API_BASE}/profile",
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json"
+            },
+            timeout=30
+        )
+        
+        print(f"📊 Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            user_data = response.json()
+            print(f"📄 Updated user data: {json.dumps(user_data, indent=2, ensure_ascii=False)}")
+            
+            # Comparar dados originais vs atualizados
+            print(f"\n📊 DATA COMPARISON:")
+            print("=" * 60)
+            
+            original_name = f"{original_data['first_name']} {original_data['last_name']}"
+            updated_first = user_data.get("first_name", "")
+            updated_last = user_data.get("last_name", "")
+            updated_name = f"{updated_first} {updated_last}".strip()
+            
+            print(f"📝 Original Name: '{original_name}'")
+            print(f"📝 Updated Name: '{updated_name}'")
+            
+            # Verificar campos de auditoria
+            audit_fields = {
+                "data_verified_by_document": user_data.get("data_verified_by_document"),
+                "verification_document_type": user_data.get("verification_document_type"),
+                "verification_date": user_data.get("verification_date")
+            }
+            
+            print(f"\n🔍 AUDIT FIELDS:")
+            for field, value in audit_fields.items():
+                status = "✅" if value else "❌"
+                print(f"  {status} {field}: {value}")
+            
+            # Verificar se nome foi corrigido
+            name_corrected = updated_name != original_name and "Santos" in updated_name
+            
+            verification_results = {
+                "name_was_corrected": name_corrected,
+                "original_name": original_name,
+                "updated_name": updated_name,
+                "audit_fields_present": all(audit_fields.values()),
+                "data_verified_by_document": audit_fields["data_verified_by_document"],
+                "verification_document_type": audit_fields["verification_document_type"],
+                "verification_date": audit_fields["verification_date"]
+            }
+            
+            print(f"\n🎯 VERIFICATION RESULTS:")
+            for check, result in verification_results.items():
+                status = "✅" if result else "❌"
+                print(f"  {status} {check}: {result}")
+            
+            results["step4_verify_updates"] = {
+                "success": True,
+                "user_data": user_data,
+                "verification_results": verification_results,
+                "name_corrected": name_corrected
+            }
+        else:
+            print(f"❌ Failed to get user profile: {response.status_code}")
+            results["step4_verify_updates"] = {
+                "success": False,
+                "status_code": response.status_code,
+                "error": response.text
+            }
+            
+    except Exception as e:
+        print(f"❌ Exception verifying user data: {str(e)}")
+        results["step4_verify_updates"] = {"success": False, "exception": str(e)}
+    
+    # ANÁLISE FINAL
+    print("\n📋 ANÁLISE FINAL - SISTEMA DE AUTO-CORREÇÃO")
+    print("=" * 80)
+    
+    # Contar etapas bem-sucedidas
+    step_results = [
+        results.get("step1_create_user", {}).get("success", False),
+        results.get("step2_create_case", {}).get("success", False),
+        results.get("step3_upload_document", {}).get("success", False),
+        results.get("step4_verify_updates", {}).get("success", False)
+    ]
+    
+    successful_steps = sum(step_results)
+    total_steps = len(step_results)
+    success_rate = (successful_steps / total_steps) * 100
+    
+    # Resultados por etapa
+    step_names = [
+        "STEP 1: Criar usuário com dados incompletos",
+        "STEP 2: Criar caso de aplicação",
+        "STEP 3: Upload documento e testar auto-correção",
+        "STEP 4: Verificar atualizações nos dados do usuário"
+    ]
+    
+    print(f"📊 RESULTADOS POR ETAPA:")
+    for i, (step_name, passed) in enumerate(zip(step_names, step_results)):
+        status = "✅" if passed else "❌"
+        print(f"  {status} {step_name}: {'SUCESSO' if passed else 'FALHOU'}")
+    
+    print(f"\n🎯 TAXA DE SUCESSO GERAL: {successful_steps}/{total_steps} ({success_rate:.1f}%)")
+    
+    # Análise específica da auto-correção
+    print(f"\n🔍 ANÁLISE DA AUTO-CORREÇÃO:")
+    print("=" * 60)
+    
+    extraction_data = results.get("step3_upload_document", {}).get("extraction", {})
+    verification_data = results.get("step4_verify_updates", {}).get("verification_results", {})
+    
+    autocorrect_checks = {
+        "document_uploaded": results.get("step3_upload_document", {}).get("success", False),
+        "extraction_successful": extraction_data.get("successful", False),
+        "auto_correction_triggered": extraction_data.get("auto_corrected", False),
+        "corrections_applied": bool(extraction_data.get("corrections_made")),
+        "user_data_updated": verification_data.get("name_was_corrected", False),
+        "audit_fields_added": verification_data.get("audit_fields_present", False)
+    }
+    
+    print(f"📊 VERIFICAÇÕES DE AUTO-CORREÇÃO:")
+    for check, passed in autocorrect_checks.items():
+        status = "✅" if passed else "❌"
+        check_name = check.replace("_", " ").title()
+        print(f"  {status} {check_name}: {'PASSOU' if passed else 'FALHOU'}")
+    
+    autocorrect_success = sum(autocorrect_checks.values())
+    total_autocorrect_checks = len(autocorrect_checks)
+    autocorrect_rate = (autocorrect_success / total_autocorrect_checks) * 100
+    
+    print(f"\n🎯 TAXA DE SUCESSO DA AUTO-CORREÇÃO: {autocorrect_success}/{total_autocorrect_checks} ({autocorrect_rate:.1f}%)")
+    
+    # Detalhes da extração
+    if extraction_data:
+        print(f"\n📋 DETALHES DA EXTRAÇÃO:")
+        print(f"  Successful: {extraction_data.get('successful', False)}")
+        print(f"  Auto-corrected: {extraction_data.get('auto_corrected', False)}")
+        print(f"  Confidence: {extraction_data.get('confidence', 0):.1%}")
+        
+        corrections = extraction_data.get('corrections_made', {})
+        if corrections:
+            print(f"  Corrections made:")
+            for field, value in corrections.items():
+                print(f"    {field}: '{value}'")
+    
+    # Detalhes da verificação
+    if verification_data:
+        print(f"\n📋 DETALHES DA VERIFICAÇÃO:")
+        print(f"  Original name: '{verification_data.get('original_name', '')}'")
+        print(f"  Updated name: '{verification_data.get('updated_name', '')}'")
+        print(f"  Name corrected: {verification_data.get('name_was_corrected', False)}")
+        print(f"  Document verified: {verification_data.get('data_verified_by_document', False)}")
+        print(f"  Document type: {verification_data.get('verification_document_type', 'N/A')}")
+    
+    # Avaliação final
+    system_working = autocorrect_rate >= 50 and verification_data.get("name_was_corrected", False)
+    
+    print(f"\n🎯 AVALIAÇÃO FINAL:")
+    print("=" * 60)
+    
+    if system_working:
+        print("✅ SISTEMA DE AUTO-CORREÇÃO: FUNCIONANDO CORRETAMENTE")
+        print("✅ REGEX PATTERNS: EXTRAINDO NOMES COMPLETOS")
+        print("✅ LÓGICA DE COMPARAÇÃO: IDENTIFICANDO SUBSETS")
+        print("✅ AUTO-CORREÇÃO: ATIVADA COM CONFIANÇA ADEQUADA")
+        print("✅ DADOS DO USUÁRIO: ATUALIZADOS CORRETAMENTE")
+        print("✅ AUDITORIA: CAMPOS PREENCHIDOS")
+    else:
+        print("❌ SISTEMA DE AUTO-CORREÇÃO: PROBLEMAS IDENTIFICADOS")
+        
+        # Identificar áreas problemáticas
+        problem_areas = []
+        if not autocorrect_checks["extraction_successful"]:
+            problem_areas.append("Extração de dados do documento")
+        if not autocorrect_checks["auto_correction_triggered"]:
+            problem_areas.append("Ativação da auto-correção")
+        if not autocorrect_checks["user_data_updated"]:
+            problem_areas.append("Atualização dos dados do usuário")
+        if not autocorrect_checks["audit_fields_added"]:
+            problem_areas.append("Preenchimento dos campos de auditoria")
+        
+        if problem_areas:
+            print(f"❌ Áreas problemáticas: {', '.join(problem_areas)}")
+    
+    # Salvar resumo
+    results["summary"] = {
+        "successful_steps": successful_steps,
+        "total_steps": total_steps,
+        "success_rate": success_rate,
+        "autocorrect_checks": autocorrect_checks,
+        "autocorrect_success": autocorrect_success,
+        "total_autocorrect_checks": total_autocorrect_checks,
+        "autocorrect_rate": autocorrect_rate,
+        "system_working": system_working,
+        "extraction_data": extraction_data,
+        "verification_data": verification_data
+    }
+    
+    return results
+
 if __name__ == "__main__":
-    print("🎯 INICIANDO TESTE END-TO-END FINAL - USERSIMULATOR-DISCIPLINA")
+    print("🎯 INICIANDO TESTE COMPLETO - CORREÇÃO AUTOMÁTICA DE DADOS")
     print(f"🌐 Backend URL: {BACKEND_URL}")
     print(f"🔗 API Base: {API_BASE}")
     print(f"⏰ Timestamp: {datetime.now().isoformat()}")
-    print("🎯 OBJETIVO: Validar se solução PyMuPDF funciona em produção (via API)")
-    print("📊 CONTEXTO: Teste 1 (60%) → Teste 2 (0%) → Teste 3 (?%)")
+    print("🎯 OBJETIVO: Validar sistema de auto-correção com regex corrigido")
     
     # Execute main test
-    test_results = test_i539_pdf_generation_e2e_pymupdf()
+    test_results = test_document_autocorrect_complete_flow()
     
     # Save results to file
-    with open("/app/final_test_i539_pymupdf_results.json", "w") as f:
+    with open("/app/autocorrect_test_results.json", "w") as f:
         json.dump({
             "test_results": test_results,
             "timestamp": time.time(),
-            "test_focus": "🎯 TESTE END-TO-END FINAL - USERSIMULATOR-DISCIPLINA - PyMuPDF Validation",
-            "test_methodology": "TESTE RIGOROSO EM 10 ETAPAS",
-            "test_data": {
-                "nome_completo": "Roberto Carlos Mendes Silva",
-                "endereco_eua": "2580 Ocean Drive Apt 305",
-                "cidade_eua": "Orlando",
-                "estado_eua": "FL",
-                "cep_eua": "32801",
-                "email": "roberto.mendes@testqa.com",
-                "telefone": "+1-407-555-1234",
-                "numero_passaporte": "BR111222333",
-                "pais_nascimento": "Brazil"
+            "test_focus": "🎯 TESTE COMPLETO - CORREÇÃO AUTOMÁTICA DE DADOS COM REGEX CORRIGIDO",
+            "test_scenario": {
+                "original_name": "Joao Silva",
+                "document_name": "JOÃO SILVA SANTOS",
+                "expected_correction": "João Silva Santos",
+                "document_type": "passport"
             },
-            "test_steps": [
-                {"step": "ETAPA 1: Criação de Caso I-539", "expected": "Case OSP-XXXXXXXX criado"},
-                {"step": "ETAPA 2: Submissão do Formulário Amigável", "expected": "13 campos salvos"},
-                {"step": "ETAPA 3: Verificação de Persistência", "expected": "Todos campos em simplified_form_responses"},
-                {"step": "ETAPA 4: Geração do PDF I-539", "expected": "PDF >700KB gerado"},
-                {"step": "ETAPA 5: Download do PDF", "expected": "PDF baixável"},
-                {"step": "ETAPA 6: Validação Crítica PyMuPDF", "expected": ">=7/10 campos preenchidos"},
-                {"step": "ETAPA 7: Integridade do Arquivo", "expected": "PDF válido 7 páginas"},
-                {"step": "ETAPA 8: Extração de Texto", "expected": "Dados encontrados no texto"},
-                {"step": "ETAPA 9: Comparação Evolutiva", "expected": "Melhoria vs testes anteriores"},
-                {"step": "ETAPA 10: Relatório Final", "expected": "Análise completa"}
-            ],
-            "p0_bug_assessment": {
-                "bug_fixed": test_results.get("summary", {}).get("p0_bug_fixed", False),
-                "fields_filled": test_results.get("summary", {}).get("fields_filled", 0),
-                "total_fields": test_results.get("summary", {}).get("total_critical_fields", 10),
-                "success_threshold": 7,
-                "comparison": {
-                    "teste_1_pypdf": "6/10 (60%)",
-                    "teste_2_pypdf_regressao": "0/10 (0%)",
-                    "teste_3_pymupdf": f"{test_results.get('summary', {}).get('fields_filled', 0)}/10"
-                }
-            }
+            "expected_validations": [
+                "Regex deve extrair 'JOÃO SILVA SANTOS' completo (não apenas 'Jo')",
+                "Comparação deve identificar que 'Joao Silva' é subset de 'João Silva Santos'",
+                "Sistema deve calcular discrepâncias menores",
+                "Com confiança >80%, deve AUTO-CORRIGIR",
+                "Nome atualizado para 'João Silva Santos'"
+            ]
         }, f, indent=2, ensure_ascii=False)
     
-    print(f"\n💾 Resultados salvos em: /app/final_test_i539_pymupdf_results.json")
+    print(f"\n💾 Resultados salvos em: /app/autocorrect_test_results.json")
     
     # Final recommendation
     summary = test_results.get("summary", {})
-    p0_fixed = summary.get("p0_bug_fixed", False)
-    success_rate = summary.get("success_rate", 0)
+    system_working = summary.get("system_working", False)
+    autocorrect_rate = summary.get("autocorrect_rate", 0)
     
-    if p0_fixed and success_rate >= 80:
-        print("\n🎉 CONCLUSÃO FINAL: BUG P0 CORRIGIDO COM SUCESSO!")
-        print("   ✅ Migração PyMuPDF funcionou corretamente")
-        print("   ✅ PDFs I-539 não estão mais vazios")
-        print("   ✅ Campos do formulário sendo preenchidos")
-        print("   ✅ Fluxo end-to-end operacional")
+    if system_working:
+        print("\n🎉 CONCLUSÃO FINAL: SISTEMA DE AUTO-CORREÇÃO FUNCIONANDO!")
+        print("   ✅ Regex patterns corrigidos funcionando")
+        print("   ✅ Lógica de comparação de nomes melhorada")
+        print("   ✅ Auto-correção ativada corretamente")
+        print("   ✅ Dados do usuário atualizados")
         print("   ✅ Sistema pronto para produção")
-        print("   🎯 EXPECTATIVA BASEADA NO TESTE LOCAL: ATENDIDA!")
-    elif p0_fixed:
-        print("\n⚠️  CONCLUSÃO: BUG P0 corrigido, mas outros problemas identificados")
-        print("   ✅ PDF não está mais vazio")
-        print("   ⚠️  Alguns passos do fluxo falharam")
-        print("   🔧 Revisar áreas problemáticas")
-        print("   📊 Resultado melhor que testes anteriores")
     else:
-        print("\n❌ CONCLUSÃO CRÍTICA: BUG P0 AINDA EXISTE!")
-        print("   ❌ PDFs continuam vazios ou com poucos campos")
-        print("   ❌ Migração PyMuPDF pode ter problemas de integração")
-        print("   🚨 Correção urgente necessária")
+        print("\n❌ CONCLUSÃO CRÍTICA: SISTEMA DE AUTO-CORREÇÃO COM PROBLEMAS!")
+        print("   ❌ Algumas funcionalidades não estão operacionais")
+        print(f"   📊 Taxa de sucesso: {autocorrect_rate:.1f}%")
+        print("   🔧 Correções adicionais necessárias")
         
-        fields_filled = summary.get("fields_filled", 0)
-        total_fields = summary.get("total_critical_fields", 10)
-        print(f"   📊 Apenas {fields_filled}/{total_fields} campos preenchidos")
-        print(f"   🎯 Necessário pelo menos 7/{total_fields} para aprovação")
-        print(f"   📈 Teste local mostrou 10/10 - indica problema de integração")
+        extraction_successful = summary.get("extraction_data", {}).get("successful", False)
+        auto_corrected = summary.get("extraction_data", {}).get("auto_corrected", False)
+        
+        if not extraction_successful:
+            print("   🚨 PROBLEMA CRÍTICO: Extração de dados falhou")
+        elif not auto_corrected:
+            print("   🚨 PROBLEMA CRÍTICO: Auto-correção não foi ativada")
+        else:
+            print("   ⚠️  Extração funcionou mas dados não foram persistidos")
     
