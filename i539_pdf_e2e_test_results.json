@@ -2,7 +2,7 @@
   "test_results": {
     "step1_case_creation": {
       "success": true,
-      "case_id": "OSP-768A5F30",
+      "case_id": "OSP-F615AED9",
       "status_code": 200
     },
     "step2_friendly_form": {
@@ -10,7 +10,7 @@
       "status_code": 200,
       "response": {
         "success": true,
-        "case_id": "OSP-768A5F30",
+        "case_id": "OSP-F615AED9",
         "validation_status": "needs_review",
         "completion_percentage": 34,
         "message": "⚠️ Seu formulário está 34% completo. Por favor, revise as informações destacadas abaixo.",
@@ -170,11 +170,11 @@
       "pdf_result": {
         "success": true,
         "message": "USCIS form generated successfully",
-        "case_id": "OSP-768A5F30",
+        "case_id": "OSP-F615AED9",
         "form_type": "I-539",
-        "filename": "I-539_OSP-768A5F30.pdf",
+        "filename": "I-539_OSP-F615AED9.pdf",
         "file_size": 335332,
-        "download_url": "/api/case/OSP-768A5F30/download-form"
+        "download_url": "/api/case/OSP-F615AED9/download-form"
       },
       "pdf_checks": {
         "success_true": true,
@@ -199,8 +199,57 @@
       "passed": true
     },
     "step6_pdf_field_verification": {
-      "success": false,
-      "exception": "argument of type 'NoneType' is not iterable",
+      "success": true,
+      "total_form_fields": 1,
+      "critical_fields_check": {
+        "Pt1Line1a_FamilyName": {
+          "expected": "Silva",
+          "actual": "",
+          "filled": false
+        },
+        "Pt1Line1b_GivenName": {
+          "expected": "Ana",
+          "actual": "",
+          "filled": false
+        },
+        "Pt1Line7a_StreetNumberName": {
+          "expected": "789 Broadway Avenue",
+          "actual": "",
+          "filled": false
+        },
+        "Pt1Line7c_CityOrTown": {
+          "expected": "Miami",
+          "actual": "",
+          "filled": false
+        },
+        "Pt1Line7d_State": {
+          "expected": "FL",
+          "actual": "",
+          "filled": false
+        },
+        "Pt1Line7e_ZipCode": {
+          "expected": "33101",
+          "actual": "",
+          "filled": false
+        },
+        "Pt1Line8_Email": {
+          "expected": "ana.santos@test.com",
+          "actual": "",
+          "filled": false
+        },
+        "Pt1Line9_DaytimeTelephone": {
+          "expected": "+1-305-555-8888",
+          "actual": "",
+          "filled": false
+        }
+      },
+      "fields_filled": 0,
+      "total_critical_fields": 8,
+      "success_threshold": 6,
+      "p0_bug_fixed": false,
+      "all_form_fields": {
+        "PDF417BarCode1[0]": "I-539|08/28/24|7"
+      },
       "passed": false
     },
     "summary": {
@@ -223,10 +272,10 @@
       "criteria_passed": 7,
       "total_criteria": 8,
       "system_ready": false,
-      "case_id": "OSP-768A5F30"
+      "case_id": "OSP-F615AED9"
     }
   },
-  "timestamp": 1765152661.5888522,
+  "timestamp": 1765152689.7158763,
   "test_focus": "I-539 PDF Generation E2E Testing After P0 Bug Fix",
   "test_steps": [
     {
