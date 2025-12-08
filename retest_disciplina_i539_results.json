@@ -2,7 +2,7 @@
   "test_results": {
     "etapa1_criacao_caso": {
       "success": true,
-      "case_id": "OSP-A4CCABC4",
+      "case_id": "OSP-3346AAA4",
       "status_code": 200,
       "persistido_mongodb": true,
       "passed": true
@@ -14,7 +14,7 @@
       "completion_percentage": 34,
       "response": {
         "success": true,
-        "case_id": "OSP-A4CCABC4",
+        "case_id": "OSP-3346AAA4",
         "validation_status": "needs_review",
         "completion_percentage": 34,
         "message": "⚠️ Seu formulário está 34% completo. Por favor, revise as informações destacadas abaixo.",
@@ -238,11 +238,11 @@
       "pdf_result": {
         "success": true,
         "message": "USCIS form generated successfully",
-        "case_id": "OSP-A4CCABC4",
+        "case_id": "OSP-3346AAA4",
         "form_type": "I-539",
-        "filename": "I-539_OSP-A4CCABC4.pdf",
-        "file_size": 340487,
-        "download_url": "/api/case/OSP-A4CCABC4/download-form"
+        "filename": "I-539_OSP-3346AAA4.pdf",
+        "file_size": 340486,
+        "download_url": "/api/case/OSP-3346AAA4/download-form"
       },
       "pdf_checks": {
         "success_true": true,
@@ -256,15 +256,15 @@
       "success": true,
       "status_code": 200,
       "content_type": "application/pdf",
-      "file_size": 340487,
+      "file_size": 340486,
       "download_checks": {
         "status_200": true,
         "content_type_pdf": true,
         "file_size_adequate": true,
         "content_not_empty": true
       },
-      "pdf_path": "/tmp/retest_disciplina_i539_OSP-A4CCABC4.pdf",
-      "pdf_hash": "dd7dd5bd97f2ee5efb6f37cf4665de9e",
+      "pdf_path": "/tmp/retest_disciplina_i539_OSP-3346AAA4.pdf",
+      "pdf_hash": "8e0a29a506880a9ee1d27e47d1c12bd6",
       "passed": true
     },
     "etapa6_validacao_bug_p0": {
@@ -461,14 +461,14 @@
       "etapas_passadas": 5,
       "total_etapas": 9,
       "taxa_sucesso": 55.55555555555556,
-      "tempo_execucao": 1.5640206336975098,
+      "tempo_execucao": 1.4826381206512451,
       "passed": false
     },
     "summary": {
       "etapas_passadas": 5,
       "total_etapas": 9,
       "taxa_sucesso": 55.55555555555556,
-      "tempo_execucao": 1.5640206336975098,
+      "tempo_execucao": 1.4826381206512451,
       "fields_filled": 0,
       "total_critical_fields": 10,
       "bug_status": "NÃO CORRIGIDO",
@@ -478,11 +478,11 @@
         "País Nascimento": "NÃO FUNCIONOU"
       },
       "campos_funcionaram": 0,
-      "case_id": "OSP-A4CCABC4",
+      "case_id": "OSP-3346AAA4",
       "sistema_pronto": false
     }
   },
-  "timestamp": 1765153885.678568,
+  "timestamp": 1765153950.1926007,
   "test_focus": "Retest I-539 End-to-End After Bug P0 Corrections",
   "objetivo": "Verificar se >= 7/10 campos críticos preenchidos (70% threshold)",
   "dados_teste": {
