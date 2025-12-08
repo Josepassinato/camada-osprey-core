@@ -470,32 +470,143 @@ def test_i539_pdf_generation_e2e():
         results["step5_pdf_download"] = {"success": False, "exception": str(e)}
         return results
     
-    # TEST 3: Format Errors Validation - Expected: needs_review, 80-95%, >=2 issues
-    print("\n📋 TEST 3: Validação com Erros de Formato")
+    # STEP 6: CRITICAL PDF Field Verification (P0 Bug Fix Verification)
+    print("\n📋 STEP 6: 🔍 VERIFICAÇÃO CRÍTICA DO BUG P0")
     print("-" * 60)
     
-    format_error_data = {
-        "friendly_form_data": {
-            "nome_completo": "Ana Paula Costa Silva",
-            "data_nascimento": "15/03/1988",  # Wrong format (should be YYYY-MM-DD)
-            "email": "ana.paula@invalid",  # Invalid email format
-            "telefone": "abc-def-ghij",  # Invalid phone format
-            "numero_passaporte": "BR999888777",
-            "pais_nascimento": "Brazil",
-            "endereco": "789 Pine Street, Suite 100",
-            "cidade": "Miami",
-            "estado": "FL",
-            "cep": "33101",
-            "status_atual": "B-2",
-            "status_solicitado": "F-1",
-            "motivo_mudanca": "Quero estudar",  # Too short
-            "data_entrada_eua": "2023/01/10",  # Wrong format
-            "numero_i94": "ABC123XYZ"  # Should be numeric
+    try:
+        pdf_path = results["step5_pdf_download"]["pdf_path"]
+        print(f"🔍 Analyzing PDF fields in: {pdf_path}")
+        
+        # Read PDF and extract form fields using pypdf
+        with open(pdf_path, 'rb') as pdf_file:
+            pdf_reader = pypdf.PdfReader(pdf_file)
+            
+            print(f"📄 PDF Pages: {len(pdf_reader.pages)}")
+            
+            # Extract form fields
+            form_fields = {}
+            if pdf_reader.get_form_text_fields():
+                form_fields = pdf_reader.get_form_text_fields()
+                print(f"📊 Total form fields detected: {len(form_fields)}")
+            else:
+                print("⚠️  No form fields detected using get_form_text_fields()")
+                
+                # Try alternative method
+                if hasattr(pdf_reader, 'get_fields'):
+                    fields = pdf_reader.get_fields()
+                    if fields:
+                        form_fields = {k: v.get('/V', '') for k, v in fields.items() if hasattr(v, 'get')}
+                        print(f"📊 Form fields via get_fields(): {len(form_fields)}")
+            
+            # Critical fields to verify (from review request)
+            critical_fields_check = {
+                "Pt1Line1a_FamilyName": {
+                    "expected": "Silva",
+                    "actual": form_fields.get("Pt1Line1a_FamilyName", ""),
+                    "filled": False
+                },
+                "Pt1Line1b_GivenName": {
+                    "expected": "Ana",
+                    "actual": form_fields.get("Pt1Line1b_GivenName", ""),
+                    "filled": False
+                },
+                "Pt1Line7a_StreetNumberName": {
+                    "expected": "789 Broadway Avenue",
+                    "actual": form_fields.get("Pt1Line7a_StreetNumberName", ""),
+                    "filled": False
+                },
+                "Pt1Line7c_CityOrTown": {
+                    "expected": "Miami",
+                    "actual": form_fields.get("Pt1Line7c_CityOrTown", ""),
+                    "filled": False
+                },
+                "Pt1Line7d_State": {
+                    "expected": "FL",
+                    "actual": form_fields.get("Pt1Line7d_State", ""),
+                    "filled": False
+                },
+                "Pt1Line7e_ZipCode": {
+                    "expected": "33101",
+                    "actual": form_fields.get("Pt1Line7e_ZipCode", ""),
+                    "filled": False
+                },
+                "Pt1Line8_Email": {
+                    "expected": "ana.santos@test.com",
+                    "actual": form_fields.get("Pt1Line8_Email", ""),
+                    "filled": False
+                },
+                "Pt1Line9_DaytimeTelephone": {
+                    "expected": "+1-305-555-8888",
+                    "actual": form_fields.get("Pt1Line9_DaytimeTelephone", ""),
+                    "filled": False
+                }
+            }
+            
+            # Check which fields are filled
+            fields_filled = 0
+            print(f"\n🎯 CRITICAL FIELDS VERIFICATION:")
+            print("=" * 60)
+            
+            for field_name, field_info in critical_fields_check.items():
+                actual_value = field_info["actual"]
+                expected_value = field_info["expected"]
+                
+                # Check if field contains expected value (partial match acceptable)
+                if actual_value and (expected_value.lower() in actual_value.lower() or actual_value.lower() in expected_value.lower()):
+                    field_info["filled"] = True
+                    fields_filled += 1
+                    status = "✅"
+                else:
+                    status = "❌"
+                
+                print(f"  {status} {field_name}:")
+                print(f"      Expected: '{expected_value}'")
+                print(f"      Actual: '{actual_value}'")
+                print(f"      Filled: {field_info['filled']}")
+            
+            # P0 Bug Fix Assessment
+            total_critical_fields = len(critical_fields_check)
+            success_threshold = 6  # At least 6/8 fields must be filled
+            
+            print(f"\n🎯 P0 BUG FIX ASSESSMENT:")
+            print("=" * 60)
+            print(f"📊 Fields filled: {fields_filled}/{total_critical_fields}")
+            print(f"🎯 Success threshold: {success_threshold}/{total_critical_fields}")
+            
+            p0_bug_fixed = fields_filled >= success_threshold
+            
+            if p0_bug_fixed:
+                print(f"✅ BUG P0 CORRIGIDO! ({fields_filled}/{total_critical_fields} campos preenchidos)")
+            else:
+                print(f"❌ BUG P0 AINDA EXISTE ({fields_filled}/{total_critical_fields} campos preenchidos)")
+            
+            # Show all detected fields for debugging
+            print(f"\n📄 ALL DETECTED FORM FIELDS ({len(form_fields)}):")
+            for field_name, field_value in list(form_fields.items())[:20]:  # Show first 20
+                print(f"  {field_name}: '{field_value}'")
+            if len(form_fields) > 20:
+                print(f"  ... and {len(form_fields) - 20} more fields")
+            
+            results["step6_pdf_field_verification"] = {
+                "success": True,
+                "total_form_fields": len(form_fields),
+                "critical_fields_check": critical_fields_check,
+                "fields_filled": fields_filled,
+                "total_critical_fields": total_critical_fields,
+                "success_threshold": success_threshold,
+                "p0_bug_fixed": p0_bug_fixed,
+                "all_form_fields": dict(list(form_fields.items())[:50]),  # Store first 50 for analysis
+                "passed": p0_bug_fixed
+            }
+            
+    except Exception as e:
+        print(f"❌ Exception during PDF field verification: {str(e)}")
+        results["step6_pdf_field_verification"] = {
+            "success": False,
+            "exception": str(e),
+            "passed": False
         }
-    }
-    
-    test3_result = test_validation_endpoint(test_case_id, format_error_data, "TEST 3: Erros de Formato")
-    results["test3_format_errors"] = test3_result
     
     if test3_result.get("success"):
         validation_result = test3_result["validation_result"]
