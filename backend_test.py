@@ -532,6 +532,43 @@ def test_i539_pdf_generation_e2e():
             
             print(f"📊 Total form fields detected: {len(form_fields)}")
             
+            # If no form fields found, try to extract text to see if PDF has content
+            if not form_fields:
+                print("⚠️  No form fields detected, checking PDF text content...")
+                try:
+                    all_text = ""
+                    for page in pdf_reader.pages:
+                        all_text += page.extract_text()
+                    
+                    print(f"📄 PDF text length: {len(all_text)} characters")
+                    if len(all_text) > 1000:
+                        print("✅ PDF contains substantial text content")
+                        # Try to find our test data in the text
+                        test_data_found = {
+                            "Ana Paula": "Ana Paula" in all_text or "Ana" in all_text,
+                            "Silva": "Silva" in all_text,
+                            "789 Broadway": "789 Broadway" in all_text or "Broadway" in all_text,
+                            "Miami": "Miami" in all_text,
+                            "FL": "FL" in all_text or "Florida" in all_text,
+                            "33101": "33101" in all_text,
+                            "ana.santos@test.com": "ana.santos@test.com" in all_text or "ana.santos" in all_text,
+                            "+1-305-555-8888": "+1-305-555-8888" in all_text or "305-555-8888" in all_text
+                        }
+                        
+                        found_count = sum(test_data_found.values())
+                        print(f"📊 Test data found in text: {found_count}/8")
+                        for data, found in test_data_found.items():
+                            status = "✅" if found else "❌"
+                            print(f"  {status} {data}: {found}")
+                        
+                        # If we found data in text but not in form fields, it might be a form field extraction issue
+                        if found_count >= 4:
+                            print("✅ Data appears to be in PDF text, form field extraction may have issues")
+                    else:
+                        print("❌ PDF appears to be mostly empty")
+                except Exception as e:
+                    print(f"⚠️  Text extraction failed: {str(e)}")
+            
             # Critical fields to verify (from review request)
             critical_fields_check = {
                 "Pt1Line1a_FamilyName": {
