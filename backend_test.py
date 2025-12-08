@@ -1236,23 +1236,45 @@ if __name__ == "__main__":
     test_results = test_i539_pdf_generation_e2e_pymupdf()
     
     # Save results to file
-    with open("/app/i539_pdf_e2e_test_results.json", "w") as f:
+    with open("/app/final_test_i539_pymupdf_results.json", "w") as f:
         json.dump({
             "test_results": test_results,
             "timestamp": time.time(),
-            "test_focus": "I-539 PDF Generation E2E Testing After P0 Bug Fix",
+            "test_focus": "🎯 TESTE END-TO-END FINAL - USERSIMULATOR-DISCIPLINA - PyMuPDF Validation",
+            "test_methodology": "TESTE RIGOROSO EM 10 ETAPAS",
+            "test_data": {
+                "nome_completo": "Roberto Carlos Mendes Silva",
+                "endereco_eua": "2580 Ocean Drive Apt 305",
+                "cidade_eua": "Orlando",
+                "estado_eua": "FL",
+                "cep_eua": "32801",
+                "email": "roberto.mendes@testqa.com",
+                "telefone": "+1-407-555-1234",
+                "numero_passaporte": "BR111222333",
+                "pais_nascimento": "Brazil"
+            },
             "test_steps": [
-                {"step": "Create I-539 Case", "expected": "Case created successfully"},
-                {"step": "Fill Friendly Form", "expected": "Portuguese data saved"},
-                {"step": "Verify Data Persistence", "expected": "_eua fields saved correctly"},
-                {"step": "Generate PDF", "expected": "PDF generated >300KB"},
-                {"step": "Download PDF", "expected": "PDF downloadable"},
-                {"step": "Verify PDF Fields", "expected": "At least 6/8 fields filled"}
+                {"step": "ETAPA 1: Criação de Caso I-539", "expected": "Case OSP-XXXXXXXX criado"},
+                {"step": "ETAPA 2: Submissão do Formulário Amigável", "expected": "13 campos salvos"},
+                {"step": "ETAPA 3: Verificação de Persistência", "expected": "Todos campos em simplified_form_responses"},
+                {"step": "ETAPA 4: Geração do PDF I-539", "expected": "PDF >700KB gerado"},
+                {"step": "ETAPA 5: Download do PDF", "expected": "PDF baixável"},
+                {"step": "ETAPA 6: Validação Crítica PyMuPDF", "expected": ">=7/10 campos preenchidos"},
+                {"step": "ETAPA 7: Integridade do Arquivo", "expected": "PDF válido 7 páginas"},
+                {"step": "ETAPA 8: Extração de Texto", "expected": "Dados encontrados no texto"},
+                {"step": "ETAPA 9: Comparação Evolutiva", "expected": "Melhoria vs testes anteriores"},
+                {"step": "ETAPA 10: Relatório Final", "expected": "Análise completa"}
             ],
             "p0_bug_assessment": {
                 "bug_fixed": test_results.get("summary", {}).get("p0_bug_fixed", False),
                 "fields_filled": test_results.get("summary", {}).get("fields_filled", 0),
-                "total_fields": test_results.get("summary", {}).get("total_critical_fields", 8)
+                "total_fields": test_results.get("summary", {}).get("total_critical_fields", 10),
+                "success_threshold": 7,
+                "comparison": {
+                    "teste_1_pypdf": "6/10 (60%)",
+                    "teste_2_pypdf_regressao": "0/10 (0%)",
+                    "teste_3_pymupdf": f"{test_results.get('summary', {}).get('fields_filled', 0)}/10"
+                }
             }
         }, f, indent=2, ensure_ascii=False)
     
