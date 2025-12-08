@@ -693,6 +693,7 @@ def get_f1_friendly_form_structure() -> Dict[str, Any]:
     """
     Estrutura para F-1 Student Visa (Extension/Change of Status)
     Usa formulário I-539 com campos específicos para estudantes
+    Inclui validações jurídicas conforme diretrizes de advogados de imigração
     """
     base_structure = get_i539_friendly_form_structure()
     
@@ -700,7 +701,7 @@ def get_f1_friendly_form_structure() -> Dict[str, Any]:
     base_structure["form_name"] = "Extensão de Visto de Estudante (F-1)"
     base_structure["warning"] = "Para estudantes F-1, você também precisará do Form I-20 atualizado da sua escola."
     
-    # Add student-specific section
+    # Add student-specific section with legal validation fields
     student_section = {
         "id": "informacoes_estudante",
         "title": "6. Informações do Estudante F-1",
@@ -741,8 +742,91 @@ def get_f1_friendly_form_structure() -> Dict[str, Any]:
         ]
     }
     
+    # LEGAL VALIDATION SECTION - F1 Requirements
+    legal_validation_section = {
+        "id": "validacao_legal_f1",
+        "title": "7. Requisitos Legais F-1 (OBRIGATÓRIO)",
+        "description": "Validações obrigatórias conforme legislação de imigração",
+        "fields": [
+            {
+                "id": "english_proficiency_proof",
+                "label": "Você possui comprovação de proficiência em inglês?",
+                "type": "select",
+                "required": True,
+                "options": ["none", "TOEFL", "IELTS", "Duolingo", "Cambridge", "PTE", "Outro"],
+                "help_text": "❌ OBRIGATÓRIO: Prova de proficiência em inglês é necessária para admissão em instituições educacionais nos EUA"
+            },
+            {
+                "id": "has_i20_issued",
+                "label": "Você já possui o formulário I-20 emitido pela instituição?",
+                "type": "select",
+                "required": True,
+                "options": ["yes", "no"],
+                "help_text": "❌ OBRIGATÓRIO: O I-20 deve estar emitido antes de prosseguir com a aplicação"
+            },
+            {
+                "id": "sevis_fee_paid",
+                "label": "Você já pagou a taxa SEVIS (I-901)?",
+                "type": "select",
+                "required": True,
+                "options": ["yes", "no"],
+                "help_text": "❌ OBRIGATÓRIO: Taxa SEVIS deve estar paga. Acesse: https://www.fmjfee.com/"
+            },
+            {
+                "id": "current_visa_status",
+                "label": "Qual é seu status de visto atual nos EUA?",
+                "type": "select",
+                "required": False,
+                "options": ["F1", "B2", "J1", "H1B", "Outro", "Nenhum (primeira aplicação)"],
+                "help_text": "Se você está mudando de B2 para F1, deve esperar 90 dias desde a entrada nos EUA"
+            },
+            {
+                "id": "entry_date_usa",
+                "label": "Data de entrada nos EUA (se aplicável)",
+                "type": "date",
+                "required": False,
+                "validation": "date|past",
+                "help_text": "Necessário se estiver mudando de outro status (ex: B2 → F1)"
+            },
+            {
+                "id": "plans_to_work",
+                "label": "Você planeja trabalhar durante seus estudos?",
+                "type": "select",
+                "required": True,
+                "options": ["no", "yes"],
+                "help_text": "Trabalho para estudantes F-1 possui restrições legais"
+            },
+            {
+                "id": "work_type",
+                "label": "Tipo de trabalho (se aplicável)",
+                "type": "select",
+                "required": False,
+                "options": ["on_campus", "off_campus", "opt", "cpt"],
+                "help_text": "❌ Trabalho off-campus NÃO é permitido. Apenas on-campus (máx 20h/semana) ou OPT após conclusão"
+            },
+            {
+                "id": "work_hours_per_week",
+                "label": "Horas de trabalho por semana (se aplicável)",
+                "type": "text",
+                "required": False,
+                "placeholder": "20",
+                "validation": "numeric",
+                "help_text": "❌ Trabalho on-campus limitado a 20 horas por semana durante o período letivo"
+            },
+            {
+                "id": "plans_to_travel_during_process",
+                "label": "Você planeja viajar para fora dos EUA durante o processo?",
+                "type": "select",
+                "required": True,
+                "options": ["no", "yes"],
+                "help_text": "⚠️ ATENÇÃO CRÍTICA: Viajar para fora dos EUA durante o processo CANCELA seu pedido!"
+            }
+        ]
+    }
+    
     base_structure["sections"].append(student_section)
-    base_structure["total_fields"] = 31
+    base_structure["sections"].append(legal_validation_section)
+    base_structure["total_fields"] = 40
     
     return base_structure
 
