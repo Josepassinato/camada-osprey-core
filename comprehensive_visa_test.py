@@ -368,9 +368,15 @@ def test_visa_e2e(visa_type: str, test_data: dict):
     print(f"📤 Sending {len(friendly_form_data)} fields to case {case_id}...")
     
     try:
+        # Wrap data in the expected format
+        payload = {
+            "friendly_form_data": friendly_form_data,
+            "basic_data": {}
+        }
+        
         response = requests.post(
             f"{API_BASE}/case/{case_id}/friendly-form",
-            json=friendly_form_data,
+            json=payload,
             headers={"Content-Type": "application/json"},
             timeout=60
         )
