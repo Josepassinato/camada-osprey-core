@@ -1278,7 +1278,7 @@ if __name__ == "__main__":
             }
         }, f, indent=2, ensure_ascii=False)
     
-    print(f"\n💾 Resultados salvos em: /app/i539_pdf_e2e_test_results.json")
+    print(f"\n💾 Resultados salvos em: /app/final_test_i539_pymupdf_results.json")
     
     # Final recommendation
     summary = test_results.get("summary", {})
