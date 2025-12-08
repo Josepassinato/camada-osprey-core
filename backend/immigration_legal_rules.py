@@ -388,28 +388,30 @@ def apply_legal_rules(form_data: Dict, visa_type: str) -> Tuple[bool, List[str]]
     all_messages = []
     is_valid = True
     
-    # Aplicar regras específicas por tipo de visto
-    if visa_type.upper() == 'F-1' or visa_type.upper() == 'F1':
+    # 🆕 BUG P3 FIX: Aplicar regras específicas por tipo de visto (com proteção contra None)
+    visa_type_upper = visa_type.upper() if visa_type else ''
+    
+    if visa_type_upper == 'F-1' or visa_type_upper == 'F1':
         valid, messages = rules.validate_f1_student_visa(form_data)
         is_valid = is_valid and valid
         all_messages.extend(messages)
     
-    elif 'ADJUSTMENT' in visa_type.upper() or 'MARRIAGE' in visa_type.upper():
+    elif 'ADJUSTMENT' in visa_type_upper or 'MARRIAGE' in visa_type_upper:
         valid, messages = rules.validate_adjustment_of_status_marriage(form_data)
         is_valid = is_valid and valid
         all_messages.extend(messages)
     
-    elif 'GREEN CARD' in visa_type.upper() and 'RENEWAL' in visa_type.upper():
+    elif 'GREEN CARD' in visa_type_upper and 'RENEWAL' in visa_type_upper:
         valid, messages = rules.validate_green_card_renewal(form_data)
         is_valid = is_valid and valid
         all_messages.extend(messages)
     
-    elif 'B-2' in visa_type.upper() or 'B2' in visa_type.upper() or 'EXTENSION' in visa_type.upper():
+    elif 'B-2' in visa_type_upper or 'B2' in visa_type_upper or 'EXTENSION' in visa_type_upper:
         valid, messages = rules.validate_status_extension_b2(form_data)
         is_valid = is_valid and valid
         all_messages.extend(messages)
     
-    elif 'REINSTATEMENT' in visa_type.upper():
+    elif 'REINSTATEMENT' in visa_type_upper:
         valid, messages = rules.validate_f1_reinstatement(form_data)
         is_valid = is_valid and valid
         all_messages.extend(messages)
