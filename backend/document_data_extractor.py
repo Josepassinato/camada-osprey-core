@@ -333,21 +333,48 @@ class DocumentDataExtractor:
         if document_type not in official_docs:
             return False
         
+        # Não há discrepâncias, não há nada a corrigir
+        if not discrepancies:
+            return False
+        
         # Exigir alta confiança (>70%)
         if confidence < 0.7:
             return False
         
+        # Para passaportes, permitir mais discrepâncias (até 6)
+        # Para outros documentos, limite de 4
+        max_discrepancies = 6 if document_type == "passport" else 4
+        
         # Não autocorrigir se houver muitas discrepâncias (pode indicar documento errado)
-        if len(discrepancies) > 3:
+        if len(discrepancies) > max_discrepancies:
+            logger.warning(f"Too many discrepancies ({len(discrepancies)} > {max_discrepancies})")
             return False
         
-        # Verificar se há discrepâncias críticas
-        has_critical = any(d["severity"] == "high" for d in discrepancies)
+        # Verificar se há discrepâncias críticas (nome, data nascimento)
+        critical_discrepancies = [d for d in discrepancies if d["severity"] == "high"]
         
-        # Para passaporte, autocorrigir se houver discrepâncias (é o documento mais confiável)
-        if document_type == "passport" and has_critical and confidence >= 0.8:
+        # Para passaporte com alta confiança, autocorrigir mesmo com múltiplas discrepâncias
+        if document_type == "passport":
+            # Passaporte com confiança muito alta (>80%)
+            if confidence >= 0.8:
+                logger.info(f"Auto-correcting based on passport with {confidence:.0%} confidence")
+                return True
+            # Passaporte com confiança boa (>70%) e apenas discrepâncias críticas
+            elif confidence >= 0.7 and critical_discrepancies:
+                logger.info(f"Auto-correcting critical fields based on passport with {confidence:.0%} confidence")
+                return True
+        
+        # Para certidão de nascimento, apenas com confiança muito alta
+        elif document_type == "birth_certificate" and confidence >= 0.8 and critical_discrepancies:
+            logger.info(f"Auto-correcting based on birth certificate with {confidence:.0%} confidence")
             return True
         
+        # Para outros documentos, exigir confiança muito alta
+        elif confidence >= 0.85 and critical_discrepancies:
+            logger.info(f"Auto-correcting based on {document_type} with {confidence:.0%} confidence")
+            return True
+        
+        logger.info(f"Not auto-correcting: confidence={confidence:.0%}, discrepancies={len(discrepancies)}, type={document_type}")
         return False
     
     def _generate_corrections(
