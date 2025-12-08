@@ -290,26 +290,23 @@ def test_complete_e2e_all_bugs_validation():
     # STEP 2: Fill Friendly Form with EXACT data from review request
     print("\n📋 ETAPA 2: SUBMISSÃO DO FORMULÁRIO AMIGÁVEL")
     print("-" * 60)
-    print("📋 DADOS DE TESTE (IDÊNTICOS AOS ANTERIORES):")
+    print("📋 DADOS DE TESTE (EXATOS DA REVIEW REQUEST):")
     
     friendly_form_data = {
-        "friendly_form_data": {
-            "nome_completo": "Roberto Carlos Mendes Silva",
-            "data_nascimento": "1988-11-25",
-            "endereco_eua": "2580 Ocean Drive Apt 305",
-            "cidade_eua": "Orlando",
-            "estado_eua": "FL",
-            "cep_eua": "32801",
-            "email": "roberto.mendes@testqa.com",
-            "telefone": "+1-407-555-1234",
-            "numero_passaporte": "BR111222333",
-            "pais_nascimento": "Brazil",
-            "status_atual": "B-2",
-            "status_solicitado": "B-2 Extension",
-            "data_entrada_eua": "2024-06-10",
-            "numero_i94": "12345678901"
-        },
-        "basic_data": {}
+        "nome_completo": "Roberto Carlos Mendes Silva",
+        "data_nascimento": "1988-11-25",
+        "endereco_eua": "2580 Ocean Drive Apt 305",
+        "cidade_eua": "Orlando",
+        "estado_eua": "FL",
+        "cep_eua": "32801",
+        "email": "roberto.mendes@testqa.com",
+        "telefone": "+1-407-555-1234",
+        "numero_passaporte": "BR111222333",
+        "pais_nascimento": "Brazil",
+        "status_atual": "B-2",
+        "status_solicitado": "B-2 Extension",
+        "data_entrada_eua": "2024-06-10",
+        "numero_i94": "12345678901"
     }
     
     try:
