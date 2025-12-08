@@ -2926,12 +2926,23 @@ async def submit_friendly_form(case_id: str, request: dict, current_user = Depen
             update_data["progress_percentage"] = 45
             update_data["current_step"] = "friendly-form-partial"
         
-        await db.auto_cases.update_one(
+        # 🆕 BUG FIX DEBUG: Log what we're saving
+        logger.info(f"🔍 About to save simplified_form_responses with {len(friendly_form_data)} fields")
+        logger.info(f"🔍 Sample data: {dict(list(friendly_form_data.items())[:3])}")
+        
+        result = await db.auto_cases.update_one(
             {"case_id": case_id},
             {"$set": update_data}
         )
         
-        logger.info(f"Friendly form data saved for case {case_id}")
+        logger.info(f"✅ Friendly form data saved for case {case_id} (matched: {result.matched_count}, modified: {result.modified_count})")
+        
+        # 🆕 BUG FIX DEBUG: Verify data was saved
+        saved_case = await db.auto_cases.find_one({"case_id": case_id})
+        saved_simplified = saved_case.get("simplified_form_responses", {})
+        logger.info(f"🔍 Verification: simplified_form_responses has {len(saved_simplified)} fields after save")
+        if len(saved_simplified) == 0 and len(friendly_form_data) > 0:
+            logger.error(f"⚠️ DATA LOSS DETECTED! Sent {len(friendly_form_data)} fields but saved 0!")
         
         # STEP 4: Return validation result to user
         response = {
