@@ -910,14 +910,18 @@ def test_i539_pdf_generation_e2e_pymupdf():
     print("\n📋 ETAPA 10: VERIFICAÇÃO FINAL E RELATÓRIO COMPARATIVO")
     print("=" * 80)
     
-    # Count successful steps
+    # Count successful steps (all 10 steps)
     step_results = [
         results.get("step1_case_creation", {}).get("success", False),
         results.get("step2_friendly_form", {}).get("success", False),
         results.get("step3_data_verification", {}).get("passed", False),
         results.get("step4_pdf_generation", {}).get("passed", False),
         results.get("step5_pdf_download", {}).get("passed", False),
-        results.get("step6_pdf_field_verification", {}).get("passed", False)
+        results.get("step6_pdf_field_verification", {}).get("passed", False),
+        results.get("step7_file_integrity", {}).get("passed", False),
+        results.get("step8_text_extraction", {}).get("passed", False),
+        results.get("step9_evolutionary_comparison", {}).get("passed", False),
+        True  # Step 10 is this summary itself
     ]
     
     successful_steps = sum(step_results)
