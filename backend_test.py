@@ -936,7 +936,7 @@ def test_i539_pdf_generation_e2e_pymupdf():
         print(f"✅ STEP 5 - PDF baixado com sucesso ({download_size} bytes)")
     
     if results.get("step6_pdf_field_verification", {}).get("success"):
-        total_fields = results["step6_pdf_field_verification"]["total_form_fields"]
+        total_fields = results["step6_pdf_field_verification"]["total_filled_fields"]
         print(f"✅ STEP 6 - PDF analisado ({total_fields} campos detectados)")
         
         # Show which critical fields were filled
