@@ -318,23 +318,19 @@ class USCISFormFiller:
         )
         
         mapping = {
-            # Part 1: Information About You
-            "Pt1Line1a_FamilyName": family_name,
-            "Pt1Line1b_GivenName": given_name,
-            "Pt1Line2_MiddleName": "",
-            "Pt1Line3a_DateOfBirth_Month": dob_parts[1] if len(dob_parts) > 1 else "",
-            "Pt1Line3a_DateOfBirth_Day": dob_parts[2] if len(dob_parts) > 2 else "",
-            "Pt1Line3a_DateOfBirth_Year": dob_parts[0] if len(dob_parts) > 0 else "",
-            "Pt1Line4_CountryOfBirth": country_of_birth,
-            "Pt1Line5_CountryOfCitizenship": country_of_birth,
-            "Pt1Line6_PassportNumber": passport,
-            "Pt1Line7a_StreetNumberName": address,
-            "Pt1Line7b_AptSteFlrNumber": "",
-            "Pt1Line7c_CityOrTown": city,
-            "Pt1Line7d_State": state,
-            "Pt1Line7e_ZipCode": zip_code,
-            "Pt1Line8_Email": email,
-            "Pt1Line9_DaytimeTelephone": phone,
+            # Part 1: Information About You - CORRECTED FIELD NAMES
+            "P1Line1a_FamilyName[0]": family_name,
+            "P1_Line1b_GivenName[0]": given_name,
+            "P1_Line1c_MiddleName[0]": "",
+            "P1_Line8_DateOfBirth[0]": dob,  # Full date format
+            "P1_Line7_CountryOfBirth[0]": country_of_birth,
+            "P1_Line7_CountryOfCitizenship[0]": country_of_birth,
+            "Part1_Item6_StreetName[0]": address,
+            "Part2_Item11_City[0]": city,
+            "Part2_Item11_ZipCode[0]": zip_code,
+            "P5_Line3_DaytimePhoneNumber[0]": phone,
+            # Additional fields that might exist
+            "Part1_Item4_Number[0]": passport,
         }
         
         logger.info(f"✅ Mapped {len([v for v in mapping.values() if v])} fields from friendly form and basic data")
