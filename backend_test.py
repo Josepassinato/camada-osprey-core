@@ -347,9 +347,10 @@ def test_complete_e2e_all_bugs_validation():
         results["step2_friendly_form"] = {"success": False, "exception": str(e)}
         return results
     
-    # STEP 3: Verify Data Persistence (including _eua fields)
-    print("\n📋 STEP 3: Verificar Salvamento dos Dados")
+    # STEP 3: Verify Data Persistence + BUG P1 (form_code auto-save)
+    print("\n📋 ETAPA 3: VERIFICAÇÃO DE PERSISTÊNCIA + BUG P1 (form_code auto-save)")
     print("-" * 60)
+    print("🔍 VALIDAÇÃO BUG P1: Verificar se form_code foi detectado e salvo automaticamente")
     
     try:
         print(f"🔍 Retrieving case data for {case_id}...")
