@@ -101,36 +101,37 @@ class DocumentDataExtractor:
         # Padrões para passaportes brasileiros e americanos
         patterns = {
             # Nome completo - geralmente após "NAME" ou "NOME"
+            # Captura até encontrar número ou outra palavra-chave
             "full_name": [
-                r"NAME[:\s]+([A-Z\s]+)",
-                r"NOME[:\s]+([A-Z\s]+)",
-                r"SURNAME[:\s]+([A-Z\s]+)\s+GIVEN NAMES[:\s]+([A-Z\s]+)",
+                r"NAME[:\s]+([A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ][A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ\s]+?)(?=\n|DATE|PASSPORT|NATIONALITY|SEX|BIRTH)",
+                r"NOME[:\s]+([A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ][A-ZÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ\s]+?)(?=\n|DATA|PASSAPORTE|NACIONALIDADE)",
+                r"SURNAME[:\s]+([A-Z\s]+?)\s+GIVEN NAMES[:\s]+([A-Z\s]+?)(?=\n|DATE|PASSPORT)",
             ],
             # Número do passaporte - formato BR: XX123456 ou US: 123456789
             "passport_number": [
-                r"PASSPORT\s*NO\.?\s*[:\s]*([A-Z]{2}\d{6,9})",
-                r"PASSAPORTE\s*N[°º]\.?\s*[:\s]*([A-Z]{2}\d{6,9})",
+                r"PASSPORT\s*(?:NO|NUMBER)\.?\s*[:\s]*([A-Z]{2}\d{6,9})",
+                r"PASSAPORTE\s*(?:N[°º]|NÚMERO)\.?\s*[:\s]*([A-Z]{2}\d{6,9})",
                 r"P<[A-Z]{3}([A-Z0-9]{9})",
             ],
             # Data de nascimento - formatos DD/MM/YYYY, DD MMM YYYY
             "date_of_birth": [
-                r"DATE OF BIRTH[:\s]+(\d{2}[\s/\-\.]\w{3}[\s/\-\.]\d{4})",
+                r"(?:DATE OF )?BIRTH[:\s]+(\d{2}[\s/\-\.]\w{3,9}[\s/\-\.]\d{4})",
                 r"DATA DE NASCIMENTO[:\s]+(\d{2}[\s/\-\.]\d{2}[\s/\-\.]\d{4})",
                 r"BIRTH[:\s]+(\d{2}[\s/\-\.]\d{2}[\s/\-\.]\d{4})",
             ],
             # Nacionalidade
             "nationality": [
-                r"NATIONALITY[:\s]+([A-Z\s]+)",
-                r"NACIONALIDADE[:\s]+([A-Z\s]+)",
+                r"NATIONALITY[:\s]+([A-Z]+?)(?=\n|DATE|PASSPORT|SEX)",
+                r"NACIONALIDADE[:\s]+([A-Z]+?)(?=\n|DATA|PASSAPORTE)",
             ],
             # Data de emissão
             "issue_date": [
-                r"DATE OF ISSUE[:\s]+(\d{2}[\s/\-\.]\w{3}[\s/\-\.]\d{4})",
+                r"(?:DATE OF )?ISSUE[:\s]+(\d{2}[\s/\-\.]\w{3,9}[\s/\-\.]\d{4})",
                 r"DATA DE EMISSÃO[:\s]+(\d{2}[\s/\-\.]\d{2}[\s/\-\.]\d{4})",
             ],
             # Data de expiração
             "expiry_date": [
-                r"DATE OF EXPIRY[:\s]+(\d{2}[\s/\-\.]\w{3}[\s/\-\.]\d{4})",
+                r"(?:DATE OF )?EXPIRY[:\s]+(\d{2}[\s/\-\.]\w{3,9}[\s/\-\.]\d{4})",
                 r"VALIDADE[:\s]+(\d{2}[\s/\-\.]\d{2}[\s/\-\.]\d{4})",
             ],
         }
