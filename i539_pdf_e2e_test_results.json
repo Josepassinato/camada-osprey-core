@@ -2,7 +2,7 @@
   "test_results": {
     "step1_case_creation": {
       "success": true,
-      "case_id": "OSP-F615AED9",
+      "case_id": "OSP-8B412BE3",
       "status_code": 200
     },
     "step2_friendly_form": {
@@ -10,7 +10,7 @@
       "status_code": 200,
       "response": {
         "success": true,
-        "case_id": "OSP-F615AED9",
+        "case_id": "OSP-8B412BE3",
         "validation_status": "needs_review",
         "completion_percentage": 34,
         "message": "⚠️ Seu formulário está 34% completo. Por favor, revise as informações destacadas abaixo.",
@@ -170,11 +170,11 @@
       "pdf_result": {
         "success": true,
         "message": "USCIS form generated successfully",
-        "case_id": "OSP-F615AED9",
+        "case_id": "OSP-8B412BE3",
         "form_type": "I-539",
-        "filename": "I-539_OSP-F615AED9.pdf",
-        "file_size": 335332,
-        "download_url": "/api/case/OSP-F615AED9/download-form"
+        "filename": "I-539_OSP-8B412BE3.pdf",
+        "file_size": 337695,
+        "download_url": "/api/case/OSP-8B412BE3/download-form"
       },
       "pdf_checks": {
         "success_true": true,
@@ -188,7 +188,7 @@
       "success": true,
       "status_code": 200,
       "content_type": "application/pdf",
-      "file_size": 335332,
+      "file_size": 337695,
       "download_checks": {
         "status_200": true,
         "content_type_pdf": true,
@@ -200,7 +200,7 @@
     },
     "step6_pdf_field_verification": {
       "success": true,
-      "total_form_fields": 1,
+      "total_form_fields": 7,
       "critical_fields_check": {
         "Pt1Line1a_FamilyName": {
           "expected": "Silva",
@@ -248,7 +248,13 @@
       "success_threshold": 6,
       "p0_bug_fixed": false,
       "all_form_fields": {
-        "PDF417BarCode1[0]": "I-539|08/28/24|7"
+        "PDF417BarCode1[0]": "I-539|08/28/24|7",
+        "P1Line1a_FamilyName[0]": "Paula Santos Silva",
+        "P1_Line1b_GivenName[0]": "Ana",
+        "Part1_Item4_Number[0]": "BR555666777",
+        "Part2_Item11_City[0]": "Miami",
+        "Part2_Item11_ZipCode[0]": "33101",
+        "Part1_Item6_StreetName[0]": "789 Broadway Avenue"
       },
       "passed": false
     },
@@ -272,10 +278,10 @@
       "criteria_passed": 7,
       "total_criteria": 8,
       "system_ready": false,
-      "case_id": "OSP-F615AED9"
+      "case_id": "OSP-8B412BE3"
     }
   },
-  "timestamp": 1765152689.7158763,
+  "timestamp": 1765152752.6587439,
   "test_focus": "I-539 PDF Generation E2E Testing After P0 Bug Fix",
   "test_steps": [
     {
