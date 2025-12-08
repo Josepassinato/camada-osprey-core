@@ -27,7 +27,7 @@ class USCISFormFiller:
         """
         Fill Form I-539 (Application to Extend/Change Nonimmigrant Status)
         NOW SUPPORTS DATA FROM FRIENDLY FORM (simplified_form_responses)
-        FIXED: Uses pypdf for reliable form filling
+        FIXED: Uses PyMuPDF (fitz) for reliable form filling
         
         Args:
             case_data: Dictionary with applicant information
@@ -38,7 +38,7 @@ class USCISFormFiller:
             bytes: PDF file content
         """
         try:
-            logger.info("🔧 Filling Form I-539 with pypdf...")
+            logger.info("🔧 Filling Form I-539 with PyMuPDF (fitz)...")
             
             # Extract data from both sources
             basic_data = case_data.get("basic_data", {})
@@ -47,87 +47,42 @@ class USCISFormFiller:
             logger.info(f"📝 Using basic_data: {len(basic_data)} fields")
             logger.info(f"📝 Using simplified_form_responses: {len(simplified_form)} fields")
             
-            # Read template
+            # Read template with PyMuPDF
             template_path = os.path.join(self.forms_dir, "I-539.pdf")
-            reader = pypdf.PdfReader(template_path)
-            writer = pypdf.PdfWriter()
+            doc = fitz.open(template_path)
             
-            # Get form fields count
-            field_count = 0
-            if reader.get_form_text_fields():
-                field_count = len(reader.get_form_text_fields())
-                logger.info(f"📋 Found {field_count} form fields in I-539")
+            logger.info(f"📋 PDF has {len(doc)} pages")
             
             # Map data to form fields - NOW USES BOTH basic_data AND simplified_form
             field_mapping = self._get_i539_mapping(basic_data, simplified_form)
             
-            # Clone all pages to writer
-            for page in reader.pages:
-                writer.add_page(page)
-            
-            # Clone the AcroForm from reader to writer (MUST be done before filling)
-            if "/AcroForm" in reader.trailer["/Root"]:
-                writer._root_object.update({
-                    pypdf.generic.NameObject("/AcroForm"): reader.trailer["/Root"]["/AcroForm"]
-                })
-                
-                # Set NeedAppearances flag BEFORE filling
-                writer._root_object["/AcroForm"].update({
-                    pypdf.generic.NameObject("/NeedAppearances"): pypdf.generic.BooleanObject(True)
-                })
-            
-            # Fill form fields using pypdf - try different approaches
-            filled_count = 0
-            
             # Create a dictionary of all non-empty field values
             form_data = {k: v for k, v in field_mapping.items() if v}
-            logger.info(f"📝 Form data to fill: {form_data}")
+            logger.info(f"📝 Attempting to fill {len(form_data)} fields")
             
-            if form_data:
-                # Method 1: Try global form field update (recommended approach)
-                try:
-                    logger.info("🔄 Method 1: Global form field update...")
-                    writer.update_page_form_field_values(None, form_data)
-                    filled_count = len(form_data)
-                    logger.info(f"✅ Method 1 SUCCESS: Applied {filled_count} field values globally")
-                    
-                except Exception as e:
-                    logger.warning(f"⚠️ Method 1 failed: {e}")
-                    
-                    # Method 2: Try updating each page individually
-                    try:
-                        logger.info("🔄 Method 2: Page-by-page update...")
-                        for page_num, page in enumerate(writer.pages):
+            # Fill form fields using PyMuPDF
+            filled_count = 0
+            for page in doc:
+                widgets = page.widgets()
+                if widgets:
+                    for widget in widgets:
+                        field_name = widget.field_name
+                        if field_name and field_name in form_data:
                             try:
-                                writer.update_page_form_field_values(page, form_data)
-                                logger.debug(f"  ✓ Updated page {page_num + 1}")
-                            except Exception as page_e:
-                                logger.debug(f"  ⚠️ Page {page_num + 1} failed: {page_e}")
-                        
-                        filled_count = len(form_data)
-                        logger.info(f"✅ Method 2 SUCCESS: Applied {filled_count} field values to pages")
-                        
-                    except Exception as e2:
-                        logger.warning(f"⚠️ Method 2 failed: {e2}")
-                        
-                        # Method 3: Individual field updates
-                        logger.info("🔄 Method 3: Individual field updates...")
-                        filled_count = 0
-                        for field_name, field_value in form_data.items():
-                            try:
-                                writer.update_page_form_field_values(None, {field_name: field_value})
+                                # Set the field value
+                                widget.field_value = form_data[field_name]
+                                widget.update()
                                 filled_count += 1
-                                logger.debug(f"  ✓ Filled: {field_name} = {field_value}")
-                            except Exception as field_e:
-                                logger.debug(f"  ⚠️ Could not fill {field_name}: {field_e}")
-                        
-                        logger.info(f"✅ Method 3: Filled {filled_count} individual fields")
+                                logger.debug(f"  ✅ Filled: {field_name} = {form_data[field_name]}")
+                            except Exception as e:
+                                logger.warning(f"  ⚠️ Could not fill {field_name}: {e}")
             
-            logger.info(f"✅ Total filled fields: {filled_count}")
+            logger.info(f"✅ Filled {filled_count} fields in Form I-539")
             
-            # Generate PDF
+            # Save to bytes
             output = io.BytesIO()
-            writer.write(output)
+            doc.save(output)
+            doc.close()
             output.seek(0)
             
             logger.info("✅ Form I-539 filled successfully with data from friendly form")
