@@ -743,6 +743,169 @@ def test_i539_pdf_generation_e2e_pymupdf():
             "passed": False
         }
     
+    # STEP 7: INTEGRIDADE DO ARQUIVO
+    print("\n📋 ETAPA 7: INTEGRIDADE DO ARQUIVO")
+    print("-" * 60)
+    
+    try:
+        pdf_path = results["step5_pdf_download"]["pdf_path"]
+        file_size = os.path.getsize(pdf_path)
+        
+        integrity_checks = {
+            "file_exists": os.path.exists(pdf_path),
+            "file_size_adequate": file_size > 700000,  # PyMuPDF generates larger PDFs ~730KB
+            "file_not_corrupted": True,  # Will be checked by opening
+            "expected_pages": False
+        }
+        
+        # Check if PDF can be opened and has expected pages
+        if PYMUPDF_AVAILABLE:
+            try:
+                doc = fitz.open(pdf_path)
+                page_count = doc.page_count
+                integrity_checks["expected_pages"] = page_count == 7
+                doc.close()
+                print(f"📄 PDF has {page_count} pages (expected: 7)")
+            except Exception as e:
+                integrity_checks["file_not_corrupted"] = False
+                print(f"❌ PDF appears corrupted: {str(e)}")
+        
+        print(f"📏 File size: {file_size} bytes (expected: >700KB)")
+        
+        print(f"\n🎯 INTEGRIDADE DO ARQUIVO:")
+        for check, passed in integrity_checks.items():
+            status = "✅" if passed else "❌"
+            check_name = check.replace("_", " ").title()
+            print(f"  {status} {check_name}: {passed}")
+        
+        results["step7_file_integrity"] = {
+            "success": True,
+            "file_size": file_size,
+            "integrity_checks": integrity_checks,
+            "passed": all(integrity_checks.values())
+        }
+        
+    except Exception as e:
+        print(f"❌ Exception during file integrity check: {str(e)}")
+        results["step7_file_integrity"] = {
+            "success": False,
+            "exception": str(e),
+            "passed": False
+        }
+    
+    # STEP 8: EXTRAÇÃO DE TEXTO (OPCIONAL)
+    print("\n📋 ETAPA 8: EXTRAÇÃO DE TEXTO (OPCIONAL)")
+    print("-" * 60)
+    
+    try:
+        pdf_path = results["step5_pdf_download"]["pdf_path"]
+        
+        if PYMUPDF_AVAILABLE:
+            doc = fitz.open(pdf_path)
+            all_text = ""
+            for page_num in range(doc.page_count):
+                page = doc[page_num]
+                all_text += page.get_text()
+            doc.close()
+            
+            print(f"📄 Total text extracted: {len(all_text)} characters")
+            
+            # Search for our test data in extracted text
+            test_data_in_text = {
+                "Roberto": "Roberto" in all_text,
+                "Silva": "Silva" in all_text,
+                "Ocean Drive": "Ocean Drive" in all_text or "Ocean" in all_text,
+                "Orlando": "Orlando" in all_text,
+                "FL": "FL" in all_text,
+                "32801": "32801" in all_text
+            }
+            
+            text_matches = sum(test_data_in_text.values())
+            print(f"📊 Test data found in text: {text_matches}/6")
+            
+            for data, found in test_data_in_text.items():
+                status = "✅" if found else "❌"
+                print(f"  {status} {data}: {found}")
+            
+            results["step8_text_extraction"] = {
+                "success": True,
+                "text_length": len(all_text),
+                "test_data_in_text": test_data_in_text,
+                "text_matches": text_matches,
+                "passed": text_matches >= 4
+            }
+        else:
+            print("⚠️  PyMuPDF not available - skipping text extraction")
+            results["step8_text_extraction"] = {
+                "success": False,
+                "reason": "PyMuPDF not available",
+                "passed": False
+            }
+            
+    except Exception as e:
+        print(f"❌ Exception during text extraction: {str(e)}")
+        results["step8_text_extraction"] = {
+            "success": False,
+            "exception": str(e),
+            "passed": False
+        }
+    
+    # STEP 9: COMPARAÇÃO COMPLETA - TABELA EVOLUTIVA
+    print("\n📋 ETAPA 9: COMPARAÇÃO COMPLETA - TABELA EVOLUTIVA")
+    print("-" * 60)
+    
+    # Historical comparison data (from review request)
+    historical_data = {
+        "teste_1_pypdf": {
+            "library": "pypdf",
+            "campos_preenchidos": "6/10 (60%)",
+            "status": "⚠️ PARCIAL",
+            "file_size": "~335KB"
+        },
+        "teste_2_pypdf_regressao": {
+            "library": "pypdf",
+            "campos_preenchidos": "0/10 (0%)",
+            "status": "❌ REGRESSÃO",
+            "file_size": "~338KB"
+        }
+    }
+    
+    # Current test data
+    current_fields = results.get("step6_pdf_field_verification", {}).get("fields_found", 0)
+    current_status = results.get("step6_pdf_field_verification", {}).get("bug_status", "❌ ERRO")
+    current_size = results.get("step5_pdf_download", {}).get("file_size", 0)
+    
+    print(f"📊 COMPARAÇÃO DOS 3 TESTES:")
+    print("=" * 60)
+    print(f"| Métrica           | Teste 1    | Teste 2    | Teste 3 (Atual) |")
+    print(f"|-------------------|------------|------------|------------------|")
+    print(f"| Biblioteca        | pypdf      | pypdf      | PyMuPDF          |")
+    print(f"| Campos Preench.   | 6/10 (60%) | 0/10 (0%)  | {current_fields}/10 ({current_fields/10*100:.0f}%)      |")
+    print(f"| Bug P0 Status     | ⚠️ PARCIAL  | ❌ REGRESSÃO | {current_status.split()[0]} {current_status.split()[1] if len(current_status.split()) > 1 else ''}      |")
+    print(f"| File Size         | ~335KB     | ~338KB     | ~{current_size//1000}KB        |")
+    
+    # Evolution analysis
+    if current_fields >= 7:
+        evolution = "✅ MELHORIA SIGNIFICATIVA"
+    elif current_fields >= 6:
+        evolution = "⚠️ MELHORIA PARCIAL"
+    elif current_fields > 0:
+        evolution = "⚠️ ALGUM PROGRESSO"
+    else:
+        evolution = "❌ SEM MELHORIA"
+    
+    print(f"\n📈 EVOLUÇÃO: 60% → 0% → {current_fields/10*100:.0f}% ({evolution})")
+    
+    results["step9_evolutionary_comparison"] = {
+        "success": True,
+        "historical_data": historical_data,
+        "current_fields": current_fields,
+        "current_status": current_status,
+        "current_size": current_size,
+        "evolution": evolution,
+        "passed": current_fields >= 6  # Improvement over previous tests
+    }
+    
     # Generate Final Summary and Assessment
     print("\n📋 RESUMO FINAL - TESTE END-TO-END PDF GENERATION")
     print("=" * 80)
