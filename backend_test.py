@@ -193,34 +193,69 @@ def test_i539_pdf_generation_e2e():
         "summary": {}
     }
     
-    # Create test case for validation
-    test_case_id = create_test_case()
-    if not test_case_id:
-        print("❌ Failed to create test case, aborting tests")
-        return results
-    
-    # TEST 1: Complete Data Validation (I-539) - Expected: approved, 100%, 0 issues
-    print("\n📋 TEST 1: Validação com Dados Completos (I-539)")
+    # STEP 1: Create I-539 Case
+    print("\n📋 STEP 1: Criar Caso I-539")
     print("-" * 60)
     
-    complete_data = {
+    try:
+        print("📝 Creating I-539 case...")
+        response = requests.post(
+            f"{API_BASE}/auto-application/start",
+            json={"form_code": "I-539"},
+            headers={"Content-Type": "application/json"},
+            timeout=30
+        )
+        
+        print(f"📊 Status Code: {response.status_code}")
+        
+        if response.status_code in [200, 201]:
+            case_data = response.json()
+            case_info = case_data.get("case", {})
+            case_id = case_info.get("case_id")
+            
+            if case_id:
+                print(f"✅ I-539 case created: {case_id}")
+                results["step1_case_creation"] = {
+                    "success": True,
+                    "case_id": case_id,
+                    "status_code": response.status_code
+                }
+            else:
+                print(f"❌ No case_id in response: {case_data}")
+                results["step1_case_creation"] = {"success": False, "error": "No case_id"}
+                return results
+        else:
+            print(f"❌ Failed to create case: {response.status_code}")
+            results["step1_case_creation"] = {"success": False, "status_code": response.status_code}
+            return results
+            
+    except Exception as e:
+        print(f"❌ Exception creating case: {str(e)}")
+        results["step1_case_creation"] = {"success": False, "exception": str(e)}
+        return results
+    
+    # STEP 2: Fill Friendly Form with Portuguese Data (EXACT data from review request)
+    print("\n📋 STEP 2: Preencher Formulário Amigável em Português")
+    print("-" * 60)
+    
+    friendly_form_data = {
         "friendly_form_data": {
-            "nome_completo": "Carlos Eduardo Silva Mendes",
-            "data_nascimento": "1985-03-15",
-            "email": "carlos.teste@test.com",
-            "telefone": "+55 11 98765-4321",
-            "numero_passaporte": "BR987654321",
+            "nome_completo": "Ana Paula Santos Silva",
+            "data_nascimento": "1992-07-18",
+            "endereco_eua": "789 Broadway Avenue",
+            "cidade_eua": "Miami",
+            "estado_eua": "FL",
+            "cep_eua": "33101",
+            "email": "ana.santos@test.com",
+            "telefone": "+1-305-555-8888",
+            "numero_passaporte": "BR555666777",
             "pais_nascimento": "Brazil",
-            "endereco": "123 Main Street, Apt 4B",
-            "cidade": "New York",
-            "estado": "NY",
-            "cep": "10001",
-            "status_atual": "F-1",
-            "status_solicitado": "H-1B",
-            "motivo_mudanca": "Consegui emprego em empresa americana e preciso mudar meu status de estudante para trabalhador especializado",
-            "data_entrada_eua": "2020-08-15",
-            "numero_i94": "1234567890"
-        }
+            "status_atual": "B-2",
+            "status_solicitado": "B-2 Extension",
+            "data_entrada_eua": "2024-01-15",
+            "numero_i94": "99887766554"
+        },
+        "basic_data": {}
     }
     
     test1_result = test_validation_endpoint(test_case_id, complete_data, "TEST 1: Dados Completos")
