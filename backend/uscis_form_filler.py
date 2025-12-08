@@ -325,6 +325,63 @@ class USCISFormFiller:
         Used for: O-1, H-1B, L-1, P-1, and other temporary work visas
         USES: PyMuPDF (fitz) for reliable form filling
         
+        ⚠️ IMPORTANT: CURRENT I-129 TEMPLATE BEHAVIOR
+        ============================================
+        The USCIS I-129 PDF template currently does NOT have editable form fields.
+        This is EXPECTED behavior for some USCIS templates.
+        
+        WHAT THIS FUNCTION DOES:
+        1. Returns the official I-129 blank template PDF
+        2. Prepares field mapping (for future overlay implementation)
+        3. Logs all data that would be filled
+        4. No errors are generated
+        
+        CURRENT OUTPUT:
+        - Valid PDF file (~1.6MB, 20 pages)
+        - Blank form that can be printed and filled manually
+        - Ready for download by client
+        
+        🔮 FUTURE ENHANCEMENT - PDF OVERLAY
+        =================================
+        To pre-fill I-129 forms, implement overlay technique:
+        
+        Option A - ReportLab Overlay:
+        ```python
+        from reportlab.pdfgen import canvas
+        
+        # Create overlay with text at specific coordinates
+        overlay = io.BytesIO()
+        c = canvas.Canvas(overlay, pagesize=letter)
+        c.drawString(x=100, y=700, text="Petitioner Name")
+        c.save()
+        
+        # Merge overlay with template
+        overlay_doc = fitz.open("pdf", overlay.getvalue())
+        for page_num in range(len(template_doc)):
+            template_page = template_doc[page_num]
+            overlay_page = overlay_doc[page_num]
+            template_page.show_pdf_page(
+                template_page.rect, overlay_doc, page_num
+            )
+        ```
+        
+        Option B - Text Insertion:
+        ```python
+        # Insert text directly at coordinates
+        page = doc[0]  # First page
+        page.insert_text(
+            point=(100, 700),
+            text="Petitioner Name",
+            fontsize=10,
+            color=(0, 0, 0)
+        )
+        ```
+        
+        COORDINATE MAPPING NEEDED:
+        - Part 1 Petitioner Name: (x, y) coordinates
+        - Part 2 Beneficiary Name: (x, y) coordinates
+        - etc.
+        
         Args:
             case_data: Dictionary with petition information
                        - basic_data: Basic petitioner and beneficiary info
@@ -332,7 +389,7 @@ class USCISFormFiller:
                        - visa_category: O-1, H-1B, L-1, etc.
             
         Returns:
-            bytes: PDF file content
+            bytes: PDF file content (currently blank template)
         """
         try:
             logger.info("🔧 Filling Form I-129 with PyMuPDF (fitz)...")
