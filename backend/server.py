@@ -1386,20 +1386,47 @@ async def generate_uscis_form(case_id: str):
         logger.info(f"📝 Generating form for case {case_id}, type: {visa_type}")
         
         # Generate appropriate form using USCIS form filler
+        # 🆕 EXPANDED: Now supports all major visa types
         if visa_type == "I-539":
             pdf_bytes = uscis_form_filler.fill_i539(case)
             filename = f"I-539_{case_id}.pdf"
         elif visa_type == "I-589":
             pdf_bytes = uscis_form_filler.fill_i589(case)
             filename = f"I-589_{case_id}.pdf"
-        elif visa_type == "EB-1A" or visa_type == "EB1A":
+        elif visa_type == "EB-1A" or visa_type == "EB1A" or visa_type == "I-140":
             pdf_bytes = uscis_form_filler.fill_i140(case)
             filename = f"I-140_{case_id}.pdf"
+        elif visa_type == "O-1" or visa_type == "O1":
+            pdf_bytes = uscis_form_filler.fill_o1(case)
+            filename = f"I-129-O1_{case_id}.pdf"
+        elif visa_type == "H-1B" or visa_type == "H1B":
+            pdf_bytes = uscis_form_filler.fill_h1b(case)
+            filename = f"I-129-H1B_{case_id}.pdf"
+        elif visa_type == "L-1" or visa_type == "L1":
+            pdf_bytes = uscis_form_filler.fill_l1(case)
+            filename = f"I-129-L1_{case_id}.pdf"
+        elif visa_type == "F-1" or visa_type == "F1":
+            pdf_bytes = uscis_form_filler.fill_f1(case)
+            filename = f"I-539-F1_{case_id}.pdf"
+        elif visa_type == "I-129":
+            # Generic I-129 (will try to determine category from data)
+            pdf_bytes = uscis_form_filler.fill_i129(case)
+            filename = f"I-129_{case_id}.pdf"
         else:
-            raise HTTPException(
-                status_code=400, 
-                detail=f"Form generation not supported for visa type: {visa_type}"
-            )
+            # Try to map common visa types to their forms
+            if "B-" in visa_type or "TOURIST" in visa_type or "EXTENSION" in visa_type:
+                logger.info(f"ℹ️ Mapping {visa_type} to I-539")
+                pdf_bytes = uscis_form_filler.fill_i539(case)
+                filename = f"I-539_{case_id}.pdf"
+            elif "ASYLUM" in visa_type or "ASILO" in visa_type:
+                logger.info(f"ℹ️ Mapping {visa_type} to I-589")
+                pdf_bytes = uscis_form_filler.fill_i589(case)
+                filename = f"I-589_{case_id}.pdf"
+            else:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Form generation not supported for visa type: {visa_type}. Supported types: I-539, I-589, I-140, O-1, H-1B, L-1, F-1"
+                )
         
         # 🆕 P0-4: Persist PDF to disk
         import base64
