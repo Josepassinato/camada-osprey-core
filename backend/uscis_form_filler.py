@@ -134,20 +134,38 @@ class USCISFormFiller:
             logger.info(f"📝 Attempting to fill {len(form_data)} fields")
             
             # Fill form fields using PyMuPDF
+            # PyMuPDF uses full paths like "form1[0].#subform[0].P1Line1a_FamilyName[0]"
+            # but our mapping uses short names like "P1Line1a_FamilyName[0]"
+            # so we need to match by the field name suffix
             filled_count = 0
             for page in doc:
-                widgets = page.widgets()
+                widgets = list(page.widgets())
                 if widgets:
                     for widget in widgets:
-                        field_name = widget.field_name
-                        if field_name and field_name in form_data:
-                            try:
-                                widget.field_value = form_data[field_name]
-                                widget.update()
-                                filled_count += 1
-                                logger.debug(f"  ✅ Filled: {field_name} = {form_data[field_name]}")
-                            except Exception as e:
-                                logger.warning(f"  ⚠️ Could not fill {field_name}: {e}")
+                        full_field_name = widget.field_name
+                        if full_field_name:
+                            # Try exact match first
+                            if full_field_name in form_data:
+                                try:
+                                    widget.field_value = form_data[full_field_name]
+                                    widget.update()
+                                    filled_count += 1
+                                    logger.debug(f"  ✅ Filled (exact): {full_field_name} = {form_data[full_field_name]}")
+                                    continue
+                                except Exception as e:
+                                    logger.warning(f"  ⚠️ Could not fill {full_field_name}: {e}")
+                            
+                            # Try suffix match (field name without path)
+                            for short_name, value in form_data.items():
+                                if full_field_name.endswith(short_name):
+                                    try:
+                                        widget.field_value = value
+                                        widget.update()
+                                        filled_count += 1
+                                        logger.debug(f"  ✅ Filled (suffix): {full_field_name} = {value}")
+                                        break
+                                    except Exception as e:
+                                        logger.warning(f"  ⚠️ Could not fill {full_field_name}: {e}")
             
             logger.info(f"✅ Filled {filled_count} fields in Form I-589")
             
@@ -199,20 +217,38 @@ class USCISFormFiller:
             logger.info(f"📝 Attempting to fill {len(form_data)} fields")
             
             # Fill form fields using PyMuPDF
+            # PyMuPDF uses full paths like "form1[0].#subform[0].P1Line1a_FamilyName[0]"
+            # but our mapping uses short names like "P1Line1a_FamilyName[0]"
+            # so we need to match by the field name suffix
             filled_count = 0
             for page in doc:
-                widgets = page.widgets()
+                widgets = list(page.widgets())
                 if widgets:
                     for widget in widgets:
-                        field_name = widget.field_name
-                        if field_name and field_name in form_data:
-                            try:
-                                widget.field_value = form_data[field_name]
-                                widget.update()
-                                filled_count += 1
-                                logger.debug(f"  ✅ Filled: {field_name} = {form_data[field_name]}")
-                            except Exception as e:
-                                logger.warning(f"  ⚠️ Could not fill {field_name}: {e}")
+                        full_field_name = widget.field_name
+                        if full_field_name:
+                            # Try exact match first
+                            if full_field_name in form_data:
+                                try:
+                                    widget.field_value = form_data[full_field_name]
+                                    widget.update()
+                                    filled_count += 1
+                                    logger.debug(f"  ✅ Filled (exact): {full_field_name} = {form_data[full_field_name]}")
+                                    continue
+                                except Exception as e:
+                                    logger.warning(f"  ⚠️ Could not fill {full_field_name}: {e}")
+                            
+                            # Try suffix match (field name without path)
+                            for short_name, value in form_data.items():
+                                if full_field_name.endswith(short_name):
+                                    try:
+                                        widget.field_value = value
+                                        widget.update()
+                                        filled_count += 1
+                                        logger.debug(f"  ✅ Filled (suffix): {full_field_name} = {value}")
+                                        break
+                                    except Exception as e:
+                                        logger.warning(f"  ⚠️ Could not fill {full_field_name}: {e}")
             
             logger.info(f"✅ Filled {filled_count} fields in Form I-140")
             
