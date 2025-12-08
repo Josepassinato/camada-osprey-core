@@ -1700,7 +1700,17 @@ def get_friendly_form_structure(visa_type: str) -> Dict[str, Any]:
         "L-1": get_l1_friendly_form_structure,
         "L1": get_l1_friendly_form_structure,
         "O-1": get_o1_friendly_form_structure,
-        "O1": get_o1_friendly_form_structure
+        "O1": get_o1_friendly_form_structure,
+        
+        # New legal validation forms
+        "I-90": get_green_card_renewal_form_structure,
+        "GREEN-CARD-RENEWAL": get_green_card_renewal_form_structure,
+        "I-485-MARRIAGE": get_marriage_adjustment_form_structure,
+        "MARRIAGE-ADJUSTMENT": get_marriage_adjustment_form_structure,
+        "ADJUSTMENT-OF-STATUS": get_marriage_adjustment_form_structure,
+        "I-539-REINSTATEMENT": get_f1_reinstatement_form_structure,
+        "F1-REINSTATEMENT": get_f1_reinstatement_form_structure,
+        "REINSTATEMENT": get_f1_reinstatement_form_structure
     }
     
     structure_func = structures.get(visa_type)
