@@ -306,9 +306,12 @@ class DocumentDataExtractor:
         def normalize(text):
             if not text:
                 return ""
-            # Remove acentos mas mantém a estrutura
+            # Convert to string and lowercase
             text = str(text).lower().strip()
-            # Remove espaços duplicados
+            # Remove accents using unicodedata
+            text = unicodedata.normalize('NFD', text)
+            text = ''.join(c for c in text if unicodedata.category(c) != 'Mn')
+            # Remove extra spaces
             text = re.sub(r'\s+', ' ', text)
             return text
         
