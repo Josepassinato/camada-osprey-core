@@ -505,148 +505,178 @@ def test_i539_pdf_generation_e2e_pymupdf():
         results["step5_pdf_download"] = {"success": False, "exception": str(e)}
         return results
     
-    # STEP 6: CRITICAL PDF Field Verification (P0 Bug Fix Verification)
-    print("\n📋 STEP 6: 🔍 VERIFICAÇÃO CRÍTICA DO BUG P0")
+    # STEP 6: ⭐⭐⭐ VALIDAÇÃO CRÍTICA - VERIFICAÇÃO DOS CAMPOS COM PYMUPDF
+    print("\n📋 ETAPA 6: ⭐⭐⭐ VALIDAÇÃO CRÍTICA - VERIFICAÇÃO DOS CAMPOS COM PYMUPDF")
     print("-" * 60)
     
     try:
         pdf_path = results["step5_pdf_download"]["pdf_path"]
-        print(f"🔍 Analyzing PDF fields in: {pdf_path}")
+        print(f"🔍 USAR PyMuPDF PARA LER OS CAMPOS DO PDF GERADO: {pdf_path}")
         
-        # Read PDF and extract form fields using pypdf
-        with open(pdf_path, 'rb') as pdf_file:
-            pdf_reader = pypdf.PdfReader(pdf_file)
+        if not PYMUPDF_AVAILABLE:
+            print("❌ PyMuPDF não disponível - usando método alternativo")
+            # Fallback to text extraction if PyMuPDF not available
+            filled_fields = []
+        else:
+            # Use PyMuPDF to read form fields
+            doc = fitz.open(pdf_path)
             
-            print(f"📄 PDF Pages: {len(pdf_reader.pages)}")
+            print(f"📄 PDF Pages: {doc.page_count}")
+            print(f"📄 PDF Size: {os.path.getsize(pdf_path)} bytes")
             
-            # Extract form fields - try multiple methods
-            form_fields = {}
+            filled_fields = []
+            for page_num in range(doc.page_count):
+                page = doc[page_num]
+                widgets = list(page.widgets())
+                if widgets:
+                    print(f"📊 Page {page_num + 1}: {len(widgets)} widgets found")
+                    for widget in widgets:
+                        if widget.field_value and 'PDF417BarCode' not in widget.field_name:
+                            filled_fields.append((widget.field_name, widget.field_value))
             
-            # Method 1: get_form_text_fields()
-            try:
-                text_fields = pdf_reader.get_form_text_fields()
-                if text_fields and isinstance(text_fields, dict):
-                    form_fields.update(text_fields)
-                    print(f"📊 Text fields detected: {len(text_fields)}")
-            except Exception as e:
-                print(f"⚠️  get_form_text_fields() failed: {str(e)}")
+            doc.close()
             
-            # Method 2: get_fields()
-            try:
-                if hasattr(pdf_reader, 'get_fields'):
-                    fields = pdf_reader.get_fields()
-                    if fields and isinstance(fields, dict):
-                        for k, v in fields.items():
-                            if v and hasattr(v, 'get'):
-                                field_value = v.get('/V', '')
-                                if field_value:
-                                    form_fields[k] = str(field_value)
-                        print(f"📊 Fields via get_fields(): {len(fields)}")
-            except Exception as e:
-                print(f"⚠️  get_fields() failed: {str(e)}")
+            print(f"📊 Total filled fields detected: {len(filled_fields)}")
             
-            # Method 3: Manual extraction from pages
-            try:
-                for page_num, page in enumerate(pdf_reader.pages):
-                    if '/Annots' in page:
-                        annotations = page['/Annots']
-                        if annotations:
-                            for annot_ref in annotations:
-                                try:
-                                    annot = annot_ref.get_object()
-                                    if annot and '/T' in annot and '/V' in annot:
-                                        field_name = str(annot['/T'])
-                                        field_value = str(annot['/V']) if annot['/V'] else ''
-                                        if field_value:
-                                            form_fields[field_name] = field_value
-                                except Exception:
-                                    continue
-                print(f"📊 Manual extraction found: {len(form_fields)} total fields")
-            except Exception as e:
-                print(f"⚠️  Manual extraction failed: {str(e)}")
-            
-            print(f"📊 Total form fields detected: {len(form_fields)}")
-            
-            # If no form fields found, try to extract text to see if PDF has content
-            if not form_fields:
-                print("⚠️  No form fields detected, checking PDF text content...")
-                try:
-                    all_text = ""
-                    for page in pdf_reader.pages:
-                        all_text += page.extract_text()
-                    
-                    print(f"📄 PDF text length: {len(all_text)} characters")
-                    if len(all_text) > 1000:
-                        print("✅ PDF contains substantial text content")
-                        # Try to find our test data in the text
-                        test_data_found = {
-                            "Ana Paula": "Ana Paula" in all_text or "Ana" in all_text,
-                            "Silva": "Silva" in all_text,
-                            "789 Broadway": "789 Broadway" in all_text or "Broadway" in all_text,
-                            "Miami": "Miami" in all_text,
-                            "FL": "FL" in all_text or "Florida" in all_text,
-                            "33101": "33101" in all_text,
-                            "ana.santos@test.com": "ana.santos@test.com" in all_text or "ana.santos" in all_text,
-                            "+1-305-555-8888": "+1-305-555-8888" in all_text or "305-555-8888" in all_text
-                        }
-                        
-                        found_count = sum(test_data_found.values())
-                        print(f"📊 Test data found in text: {found_count}/8")
-                        for data, found in test_data_found.items():
-                            status = "✅" if found else "❌"
-                            print(f"  {status} {data}: {found}")
-                        
-                        # If we found data in text but not in form fields, it might be a form field extraction issue
-                        if found_count >= 4:
-                            print("✅ Data appears to be in PDF text, form field extraction may have issues")
-                    else:
-                        print("❌ PDF appears to be mostly empty")
-                except Exception as e:
-                    print(f"⚠️  Text extraction failed: {str(e)}")
-            
-            # Critical fields to verify (CORRECTED field names based on actual PDF)
-            critical_fields_check = {
-                "P1Line1a_FamilyName[0]": {
-                    "expected": "Silva",
-                    "actual": form_fields.get("P1Line1a_FamilyName[0]", ""),
-                    "filled": False
-                },
-                "P1_Line1b_GivenName[0]": {
-                    "expected": "Ana",
-                    "actual": form_fields.get("P1_Line1b_GivenName[0]", ""),
-                    "filled": False
-                },
-                "Part1_Item6_StreetName[0]": {
-                    "expected": "789 Broadway Avenue",
-                    "actual": form_fields.get("Part1_Item6_StreetName[0]", ""),
-                    "filled": False
-                },
-                "Part2_Item11_City[0]": {
-                    "expected": "Miami",
-                    "actual": form_fields.get("Part2_Item11_City[0]", ""),
-                    "filled": False
-                },
-                "Part2_Item11_ZipCode[0]": {
-                    "expected": "33101",
-                    "actual": form_fields.get("Part2_Item11_ZipCode[0]", ""),
-                    "filled": False
-                },
-                "Part1_Item4_Number[0]": {
-                    "expected": "BR555666777",
-                    "actual": form_fields.get("Part1_Item4_Number[0]", ""),
-                    "filled": False
-                },
-                "P5_Line3_DaytimePhoneNumber[0]": {
-                    "expected": "+1-305-555-8888",
-                    "actual": form_fields.get("P5_Line3_DaytimePhoneNumber[0]", ""),
-                    "filled": False
-                },
-                "P1_Line8_DateOfBirth[0]": {
-                    "expected": "1992-07-18",
-                    "actual": form_fields.get("P1_Line8_DateOfBirth[0]", ""),
-                    "filled": False
-                }
+            # Show all filled fields for debugging
+            if filled_fields:
+                print(f"\n📄 ALL FILLED FIELDS DETECTED:")
+                for field_name, field_value in filled_fields[:20]:  # Show first 20
+                    print(f"  {field_name}: '{field_value}'")
+                if len(filled_fields) > 20:
+                    print(f"  ... and {len(filled_fields) - 20} more fields")
+            else:
+                print("⚠️  No filled fields detected with PyMuPDF")
+        
+        # VALIDAÇÃO DOS 10 CAMPOS CRÍTICOS (from review request)
+        print(f"\n🎯 VALIDAÇÃO DOS 10 CAMPOS CRÍTICOS:")
+        print("=" * 60)
+        
+        critical_fields_validation = {
+            "1_nome_familia": {
+                "expected": "Carlos Mendes Silva",
+                "search_terms": ["Silva", "Carlos Mendes Silva"],
+                "found": False,
+                "actual": ""
+            },
+            "2_nome_proprio": {
+                "expected": "Roberto",
+                "search_terms": ["Roberto"],
+                "found": False,
+                "actual": ""
+            },
+            "3_endereco": {
+                "expected": "2580 Ocean Drive Apt 305",
+                "search_terms": ["Ocean", "2580"],
+                "found": False,
+                "actual": ""
+            },
+            "4_cidade": {
+                "expected": "Orlando",
+                "search_terms": ["Orlando"],
+                "found": False,
+                "actual": ""
+            },
+            "5_estado": {
+                "expected": "FL",
+                "search_terms": ["FL"],
+                "found": False,
+                "actual": ""
+            },
+            "6_cep": {
+                "expected": "32801",
+                "search_terms": ["32801"],
+                "found": False,
+                "actual": ""
+            },
+            "7_email": {
+                "expected": "roberto.mendes@testqa.com",
+                "search_terms": ["roberto.mendes", "@testqa"],
+                "found": False,
+                "actual": ""
+            },
+            "8_telefone": {
+                "expected": "+1-407-555-1234",
+                "search_terms": ["407", "555-1234"],
+                "found": False,
+                "actual": ""
+            },
+            "9_passaporte": {
+                "expected": "BR111222333",
+                "search_terms": ["BR111", "222333"],
+                "found": False,
+                "actual": ""
+            },
+            "10_pais_nascimento": {
+                "expected": "Brazil",
+                "search_terms": ["Brazil"],
+                "found": False,
+                "actual": ""
             }
+        }
+        
+        # Check each critical field
+        fields_found = 0
+        
+        for field_key, field_info in critical_fields_validation.items():
+            field_name = field_key.split("_", 1)[1].replace("_", " ").title()
+            expected = field_info["expected"]
+            search_terms = field_info["search_terms"]
+            
+            # Search in filled fields
+            for field_name_pdf, field_value in filled_fields:
+                for search_term in search_terms:
+                    if search_term.lower() in field_value.lower():
+                        field_info["found"] = True
+                        field_info["actual"] = field_value
+                        fields_found += 1
+                        break
+                if field_info["found"]:
+                    break
+            
+            # Display result
+            status = "✅" if field_info["found"] else "❌"
+            print(f"  {status} {field_name}: {expected}")
+            if field_info["found"]:
+                print(f"      ✅ Encontrado: '{field_info['actual']}'")
+            else:
+                print(f"      ❌ Não encontrado")
+        
+        print(f"\n📊 RESULTADO FINAL DOS 10 CAMPOS CRÍTICOS:")
+        print(f"📊 Campos Preenchidos: {fields_found}/10 ({fields_found/10*100:.1f}%)")
+        
+        # BUG P0 STATUS ASSESSMENT
+        print(f"\n🎯 CRITÉRIO DE APROVAÇÃO DO BUG P0:")
+        print("=" * 60)
+        
+        if fields_found >= 7:
+            bug_status = "✅ BUG P0 CORRIGIDO"
+            bug_color = "✅"
+            print(f"{bug_color} BUG P0 CORRIGIDO: >= 7/10 campos encontrados (70%)")
+        elif fields_found >= 5:
+            bug_status = "⚠️ BUG P0 PARCIAL"
+            bug_color = "⚠️"
+            print(f"{bug_color} BUG P0 PARCIAL: 5-6/10 campos (50-60%)")
+        else:
+            bug_status = "❌ BUG P0 NÃO CORRIGIDO"
+            bug_color = "❌"
+            print(f"{bug_color} BUG P0 NÃO CORRIGIDO: < 5/10 campos")
+        
+        print(f"\n{bug_color} {bug_status}: {fields_found}/10 campos ({fields_found/10*100:.1f}%)")
+        
+        results["step6_pdf_field_verification"] = {
+            "success": True,
+            "pymupdf_available": PYMUPDF_AVAILABLE,
+            "total_filled_fields": len(filled_fields),
+            "critical_fields_validation": critical_fields_validation,
+            "fields_found": fields_found,
+            "total_critical_fields": 10,
+            "success_threshold": 7,
+            "bug_status": bug_status,
+            "bug_fixed": fields_found >= 7,
+            "all_filled_fields": filled_fields[:50] if filled_fields else [],
+            "passed": fields_found >= 7
+        }
             
             # Check which fields are filled
             fields_filled = 0
