@@ -1,0 +1,501 @@
+{
+  "test_results": {
+    "etapa1_criacao_caso": {
+      "success": true,
+      "case_id": "OSP-6433A71A",
+      "status_code": 200,
+      "persistido_mongodb": true,
+      "passed": true
+    },
+    "etapa2_formulario_amigavel": {
+      "success": true,
+      "status_code": 200,
+      "validation_status": "needs_review",
+      "completion_percentage": 0,
+      "response": {
+        "success": true,
+        "case_id": "OSP-6433A71A",
+        "validation_status": "needs_review",
+        "completion_percentage": 0,
+        "message": "⚠️ Seu formulário está 0% completo. Por favor, revise as informações destacadas abaixo.",
+        "validation_issues": [
+          {
+            "field": "legal_requirement",
+            "issue": "❌ DATA DE VALIDADE DO PASSAPORTE OBRIGATÓRIA",
+            "severity": "critical",
+            "type": "legal_rule"
+          },
+          {
+            "field": "legal_requirement",
+            "issue": "❌ CÓPIA DO VISTO ATUAL OBRIGATÓRIA",
+            "severity": "critical",
+            "type": "legal_rule"
+          },
+          {
+            "field": "legal_requirement",
+            "issue": "❌ I-94 OBRIGATÓRIO: Faça download em https://i94.cbp.dhs.gov/",
+            "severity": "critical",
+            "type": "legal_rule"
+          },
+          {
+            "field": "legal_requirement",
+            "issue": "❌ DATA DE VENCIMENTO DO I-94 OBRIGATÓRIA",
+            "severity": "critical",
+            "type": "legal_rule"
+          },
+          {
+            "field": "legal_requirement",
+            "issue": "❌ EXTRATO BANCÁRIO RECENTE OBRIGATÓRIO (últimos 3 meses)",
+            "severity": "critical",
+            "type": "legal_rule"
+          },
+          {
+            "field": "legal_requirement",
+            "issue": "❌ PROVAS DE VÍNCULO COM BRASIL OBRIGATÓRIAS: Contas, CNPS, declaração IR, propriedades, etc.",
+            "severity": "critical",
+            "type": "legal_rule"
+          },
+          {
+            "field": "legal_requirement",
+            "issue": "❌ FOTOS OBRIGATÓRIAS: Você precisa de 2 fotos padrão passaporte (2 por pessoa)",
+            "severity": "critical",
+            "type": "legal_rule"
+          },
+          {
+            "field": "legal_warning",
+            "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Seu extrato bancário deve estar traduzido para inglês por tradutor juramentado",
+            "severity": "warning",
+            "type": "legal_rule"
+          },
+          {
+            "field": "legal_warning",
+            "issue": "⚠️ TRADUÇÃO OBRIGATÓRIA: Documentos brasileiros devem estar traduzidos para inglês",
+            "severity": "warning",
+            "type": "legal_rule"
+          },
+          {
+            "field": "pais_nascimento",
+            "field_label": "País de Nascimento",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'País de Nascimento'. Exemplo: Brazil"
+          },
+          {
+            "field": "pais_cidadania",
+            "field_label": "País de Cidadania",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'País de Cidadania'. Exemplo: Brazil"
+          },
+          {
+            "field": "sexo",
+            "field_label": "Sexo",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'Sexo'. Exemplo: "
+          },
+          {
+            "field": "pais_emissao_passaporte",
+            "field_label": "País de Emissão do Passaporte",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'País de Emissão do Passaporte'. Exemplo: "
+          },
+          {
+            "field": "local_entrada",
+            "field_label": "Local de Entrada nos EUA",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'Local de Entrada nos EUA'. Exemplo: JFK Airport, New York"
+          },
+          {
+            "field": "status_atual",
+            "field_label": "Status Atual de Não-Imigrante",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'Status Atual de Não-Imigrante'. Exemplo: "
+          },
+          {
+            "field": "tipo_pedido",
+            "field_label": "O que você está solicitando?",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'O que você está solicitando?'. Exemplo: "
+          },
+          {
+            "field": "cidade",
+            "field_label": "Cidade",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'Cidade'. Exemplo: New York"
+          },
+          {
+            "field": "estado",
+            "field_label": "Estado",
+            "issue": "Campo obrigatório não preenchido",
+            "severity": "error",
+            "suggestion": "Por favor, preencha o campo 'Estado'. Exemplo: "
+          }
+        ],
+        "next_steps": [
+          "Revisar e corrigir as informações destacadas",
+          "Preencher campos faltantes",
+          "Verificar datas e formatos de dados"
+        ]
+      },
+      "passed": true
+    },
+    "etapa3_verificacao_persistencia": {
+      "success": true,
+      "field_checks": {
+        "nome_completo": {
+          "expected": "Roberto Carlos Mendes Silva",
+          "actual": null,
+          "saved": false
+        },
+        "data_nascimento": {
+          "expected": "1988-11-25",
+          "actual": null,
+          "saved": false
+        },
+        "endereco_eua": {
+          "expected": "2580 Ocean Drive Apt 305",
+          "actual": null,
+          "saved": false
+        },
+        "cidade_eua": {
+          "expected": "Orlando",
+          "actual": null,
+          "saved": false
+        },
+        "estado_eua": {
+          "expected": "FL",
+          "actual": null,
+          "saved": false
+        },
+        "cep_eua": {
+          "expected": "32801",
+          "actual": null,
+          "saved": false
+        },
+        "email": {
+          "expected": "roberto.mendes@testqa.com",
+          "actual": null,
+          "saved": false
+        },
+        "telefone": {
+          "expected": "+1-407-555-1234",
+          "actual": null,
+          "saved": false
+        },
+        "numero_passaporte": {
+          "expected": "BR111222333",
+          "actual": null,
+          "saved": false
+        },
+        "pais_nascimento": {
+          "expected": "Brazil",
+          "actual": null,
+          "saved": false
+        },
+        "status_atual": {
+          "expected": "B-2",
+          "actual": null,
+          "saved": false
+        },
+        "status_solicitado": {
+          "expected": "B-2 Extension",
+          "actual": null,
+          "saved": false
+        },
+        "data_entrada_eua": {
+          "expected": "2024-06-10",
+          "actual": null,
+          "saved": false
+        },
+        "numero_i94": {
+          "expected": "12345678901",
+          "actual": null,
+          "saved": false
+        }
+      },
+      "fields_saved": 0,
+      "total_fields": 13,
+      "simplified_responses": {},
+      "passed": false
+    },
+    "etapa4_geracao_pdf": {
+      "success": true,
+      "status_code": 200,
+      "pdf_result": {
+        "success": true,
+        "message": "USCIS form generated successfully",
+        "case_id": "OSP-6433A71A",
+        "form_type": "I-539",
+        "filename": "I-539_OSP-6433A71A.pdf",
+        "file_size": 335332,
+        "download_url": "/api/case/OSP-6433A71A/download-form"
+      },
+      "pdf_checks": {
+        "success_true": true,
+        "filename_present": true,
+        "file_size_adequate": true,
+        "download_url_present": true
+      },
+      "passed": true
+    },
+    "etapa5_download_pdf": {
+      "success": true,
+      "status_code": 200,
+      "content_type": "application/pdf",
+      "file_size": 335332,
+      "download_checks": {
+        "status_200": true,
+        "content_type_pdf": true,
+        "file_size_adequate": true,
+        "content_not_empty": true
+      },
+      "pdf_path": "/tmp/retest_disciplina_i539_OSP-6433A71A.pdf",
+      "pdf_hash": "f34f5d078257d241e42171a3ce16ff9b",
+      "passed": true
+    },
+    "etapa6_validacao_bug_p0": {
+      "success": true,
+      "total_form_fields": 0,
+      "critical_fields_results": {
+        "1": {
+          "name": "Nome Família",
+          "expected": "Silva",
+          "actual": "",
+          "pdf_field": "P1Line1a_FamilyName[0]",
+          "status_anterior": "✅ PASSOU",
+          "filled": false
+        },
+        "2": {
+          "name": "Nome Próprio",
+          "expected": "Roberto",
+          "actual": "",
+          "pdf_field": "P1_Line1b_GivenName[0]",
+          "status_anterior": "✅ PASSOU",
+          "filled": false
+        },
+        "3": {
+          "name": "Endereço",
+          "expected": "2580 Ocean Drive",
+          "actual": "",
+          "pdf_field": "Part1_Item6_StreetName[0]",
+          "status_anterior": "✅ PASSOU",
+          "filled": false
+        },
+        "4": {
+          "name": "Cidade",
+          "expected": "Orlando",
+          "actual": "",
+          "pdf_field": "Part1_Item6_City[0]",
+          "status_anterior": "✅ PASSOU",
+          "filled": false
+        },
+        "5": {
+          "name": "Estado",
+          "expected": "FL",
+          "actual": "",
+          "pdf_field": "P2_Line10_Province[0]",
+          "status_anterior": "❌ FALHOU → CORRIGIDO",
+          "filled": false
+        },
+        "6": {
+          "name": "CEP",
+          "expected": "32801",
+          "actual": "",
+          "pdf_field": "Part1_Item6_ZipCode[0]",
+          "status_anterior": "✅ PASSOU",
+          "filled": false
+        },
+        "7": {
+          "name": "Email",
+          "expected": "roberto.mendes@testqa.com",
+          "actual": "",
+          "pdf_field": "P5_Line5_EmailAddress[0]",
+          "status_anterior": "❌ FALHOU → CORRIGIDO",
+          "filled": false
+        },
+        "8": {
+          "name": "Telefone",
+          "expected": "+1-407-555-1234",
+          "actual": "",
+          "pdf_field": "P5_Line3_DaytimePhoneNumber[0]",
+          "status_anterior": "✅ PASSOU",
+          "filled": false
+        },
+        "9": {
+          "name": "Passaporte",
+          "expected": "BR111222333",
+          "actual": "",
+          "pdf_field": "Part1_Item4_Number[0]",
+          "status_anterior": "✅ PASSOU",
+          "filled": false
+        },
+        "10": {
+          "name": "País Nascimento",
+          "expected": "Brazil",
+          "actual": "",
+          "pdf_field": "P1_Line6_CountryOfBirth[0]",
+          "status_anterior": "❌ FALHOU → CORRIGIDO",
+          "filled": false
+        }
+      },
+      "fields_filled": 0,
+      "total_critical_fields": 10,
+      "threshold": 7,
+      "bug_status": "NÃO CORRIGIDO",
+      "melhorias": {
+        "Estado": "NÃO FUNCIONOU",
+        "Email": "NÃO FUNCIONOU",
+        "País Nascimento": "NÃO FUNCIONOU"
+      },
+      "all_form_fields": {},
+      "passed": false
+    },
+    "etapa7_integridade_arquivo": {
+      "success": true,
+      "integrity_checks": {
+        "pdf_valido": true,
+        "7_paginas": true,
+        "nao_corrompido": true,
+        "metadados_presentes": true
+      },
+      "pages": 7,
+      "passed": true
+    },
+    "etapa8_extracao_texto": {
+      "success": true,
+      "text_length": 1508,
+      "user_data_found": 0,
+      "user_data_checks": {
+        "Roberto": false,
+        "Silva": false,
+        "Orlando": false,
+        "FL": false,
+        "32801": false,
+        "BR111222333": false
+      },
+      "passed": false
+    },
+    "etapa9_comparacao_dados": {
+      "success": true,
+      "comparison_results": {
+        "Nome Família": {
+          "expected": "Silva",
+          "teste_anterior": "✅",
+          "retest": "❌",
+          "melhoria": "❌ PIOROU"
+        },
+        "Nome Próprio": {
+          "expected": "Roberto",
+          "teste_anterior": "✅",
+          "retest": "❌",
+          "melhoria": "❌ PIOROU"
+        },
+        "Endereço": {
+          "expected": "2580 Ocean Drive",
+          "teste_anterior": "✅",
+          "retest": "❌",
+          "melhoria": "❌ PIOROU"
+        },
+        "Cidade": {
+          "expected": "Orlando",
+          "teste_anterior": "✅",
+          "retest": "❌",
+          "melhoria": "❌ PIOROU"
+        },
+        "Estado": {
+          "expected": "FL",
+          "teste_anterior": "❌",
+          "retest": "❌",
+          "melhoria": "-"
+        },
+        "CEP": {
+          "expected": "32801",
+          "teste_anterior": "✅",
+          "retest": "❌",
+          "melhoria": "❌ PIOROU"
+        },
+        "Email": {
+          "expected": "roberto.mendes@testqa.com",
+          "teste_anterior": "❌",
+          "retest": "❌",
+          "melhoria": "-"
+        },
+        "Telefone": {
+          "expected": "+1-407-555-1234",
+          "teste_anterior": "✅",
+          "retest": "❌",
+          "melhoria": "❌ PIOROU"
+        },
+        "Passaporte": {
+          "expected": "BR111222333",
+          "teste_anterior": "✅",
+          "retest": "❌",
+          "melhoria": "❌ PIOROU"
+        },
+        "País Nascimento": {
+          "expected": "Brazil",
+          "teste_anterior": "❌",
+          "retest": "❌",
+          "melhoria": "-"
+        }
+      },
+      "correspondence_rate": 0.0,
+      "passed": false
+    },
+    "etapa10_verificacao_final": {
+      "success": true,
+      "etapas_passadas": 5,
+      "total_etapas": 9,
+      "taxa_sucesso": 55.55555555555556,
+      "tempo_execucao": 0.5371284484863281,
+      "passed": false
+    },
+    "summary": {
+      "etapas_passadas": 5,
+      "total_etapas": 9,
+      "taxa_sucesso": 55.55555555555556,
+      "tempo_execucao": 0.5371284484863281,
+      "fields_filled": 0,
+      "total_critical_fields": 10,
+      "bug_status": "NÃO CORRIGIDO",
+      "melhorias": {
+        "Estado": "NÃO FUNCIONOU",
+        "Email": "NÃO FUNCIONOU",
+        "País Nascimento": "NÃO FUNCIONOU"
+      },
+      "campos_funcionaram": 0,
+      "case_id": "OSP-6433A71A",
+      "sistema_pronto": false
+    }
+  },
+  "timestamp": 1765153779.5896747,
+  "test_focus": "Retest I-539 End-to-End After Bug P0 Corrections",
+  "objetivo": "Verificar se >= 7/10 campos críticos preenchidos (70% threshold)",
+  "dados_teste": {
+    "nome_completo": "Roberto Carlos Mendes Silva",
+    "data_nascimento": "1988-11-25",
+    "endereco_eua": "2580 Ocean Drive Apt 305",
+    "cidade_eua": "Orlando",
+    "estado_eua": "FL",
+    "cep_eua": "32801",
+    "email": "roberto.mendes@testqa.com",
+    "telefone": "+1-407-555-1234",
+    "numero_passaporte": "BR111222333",
+    "pais_nascimento": "Brazil",
+    "status_atual": "B-2",
+    "status_solicitado": "B-2 Extension",
+    "data_entrada_eua": "2024-06-10",
+    "numero_i94": "12345678901"
+  },
+  "campos_corrigidos": [
+    "Estado (FL) - Campo adicionado: P2_Line10_Province[0]",
+    "Email - Campo adicionado: P5_Line5_EmailAddress[0]",
+    "País de Nascimento - Campo corrigido: P1_Line6_CountryOfBirth[0]"
+  ]
+}
