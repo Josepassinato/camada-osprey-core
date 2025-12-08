@@ -608,80 +608,169 @@ def test_i539_pdf_generation_e2e():
             "passed": False
         }
     
-    if test3_result.get("success"):
-        validation_result = test3_result["validation_result"]
-        
-        # Verify expected results
-        expected_checks = {
-            "status_needs_review": validation_result.get("validation_status") == "needs_review",
-            "completion_80_to_95": 80 <= validation_result.get("completion_percentage", 0) <= 95,
-            "format_issues": len(validation_result.get("validation_issues", [])) >= 2,
-            "success_true": validation_result.get("success", False),
-            "case_id_correct": validation_result.get("case_id") == test_case_id
-        }
-        
-        print(f"\n🎯 TEST 3 VERIFICATION:")
-        for check, passed in expected_checks.items():
-            status = "✅" if passed else "❌"
-            print(f"  {status} {check}: {passed}")
-        
-        results["test3_format_errors"]["verification"] = expected_checks
-        results["test3_format_errors"]["passed"] = all(expected_checks.values())
+    # Generate Final Summary and Assessment
+    print("\n📋 RESUMO FINAL - TESTE END-TO-END PDF GENERATION")
+    print("=" * 80)
     
-    # TEST 4: Detailed Issues Verification
-    print("\n📋 TEST 4: Verificar Lista Detalhada de Issues")
-    print("-" * 60)
+    # Count successful steps
+    step_results = [
+        results.get("step1_case_creation", {}).get("success", False),
+        results.get("step2_friendly_form", {}).get("success", False),
+        results.get("step3_data_verification", {}).get("passed", False),
+        results.get("step4_pdf_generation", {}).get("passed", False),
+        results.get("step5_pdf_download", {}).get("passed", False),
+        results.get("step6_pdf_field_verification", {}).get("passed", False)
+    ]
     
-    # Use the format error test result for detailed analysis
-    if test3_result.get("success"):
-        validation_result = test3_result["validation_result"]
-        issues = validation_result.get("validation_issues", [])
-        
-        print(f"📊 Total Issues Found: {len(issues)}")
-        
-        issue_analysis = {
-            "has_field_names": all(issue.get("field") for issue in issues),
-            "has_field_labels": all(issue.get("field_label") for issue in issues),
-            "has_issue_descriptions": all(issue.get("issue") for issue in issues),
-            "has_severity_levels": all(issue.get("severity") in ["error", "warning", "info"] for issue in issues),
-            "has_suggestions": all(issue.get("suggestion") for issue in issues),
-            "portuguese_suggestions": all(any(char in issue.get("suggestion", "") for char in "áéíóúãõç") or "exemplo" in issue.get("suggestion", "").lower() for issue in issues)
-        }
-        
-        print(f"\n🎯 DETAILED ISSUES ANALYSIS:")
-        for check, passed in issue_analysis.items():
-            status = "✅" if passed else "❌"
-            print(f"  {status} {check}: {passed}")
-        
-        # Print sample issues
-        print(f"\n📄 SAMPLE ISSUES (first 3):")
-        for i, issue in enumerate(issues[:3]):
-            print(f"  Issue {i+1}:")
-            print(f"    Field: {issue.get('field', 'N/A')}")
-            print(f"    Label: {issue.get('field_label', 'N/A')}")
-            print(f"    Issue: {issue.get('issue', 'N/A')}")
-            print(f"    Severity: {issue.get('severity', 'N/A')}")
-            print(f"    Suggestion: {issue.get('suggestion', 'N/A')}")
-        
-        results["test4_issues_verification"] = {
-            "success": True,
-            "issue_analysis": issue_analysis,
-            "total_issues": len(issues),
-            "sample_issues": issues[:3],
-            "passed": all(issue_analysis.values())
-        }
+    successful_steps = sum(step_results)
+    total_steps = len(step_results)
+    success_rate = (successful_steps / total_steps) * 100
+    
+    # Individual step results
+    step_names = [
+        "STEP 1: Criar Caso I-539",
+        "STEP 2: Preencher Formulário Amigável",
+        "STEP 3: Verificar Salvamento dos Dados",
+        "STEP 4: Gerar PDF Oficial I-539",
+        "STEP 5: Download do PDF",
+        "STEP 6: Verificação Crítica do Bug P0"
+    ]
+    
+    print(f"📊 RESULTADOS POR ETAPA:")
+    for i, (step_name, passed) in enumerate(zip(step_names, step_results)):
+        status = "✅" if passed else "❌"
+        print(f"  {status} {step_name}: {'SUCESSO' if passed else 'FALHOU'}")
+    
+    print(f"\n🎯 TAXA DE SUCESSO GERAL: {successful_steps}/{total_steps} ({success_rate:.1f}%)")
+    
+    # Critical P0 Bug Assessment
+    p0_bug_fixed = results.get("step6_pdf_field_verification", {}).get("p0_bug_fixed", False)
+    fields_filled = results.get("step6_pdf_field_verification", {}).get("fields_filled", 0)
+    total_critical_fields = results.get("step6_pdf_field_verification", {}).get("total_critical_fields", 8)
+    
+    print(f"\n🎯 AVALIAÇÃO CRÍTICA DO BUG P0:")
+    print("=" * 60)
+    
+    if p0_bug_fixed:
+        print(f"✅ BUG P0 CORRIGIDO COM SUCESSO!")
+        print(f"✅ Campos preenchidos no PDF: {fields_filled}/{total_critical_fields}")
+        print(f"✅ Migração para pypdf funcionou corretamente")
+        print(f"✅ PDFs I-539 não estão mais vazios")
     else:
-        results["test4_issues_verification"] = {
-            "success": False,
-            "error": "Could not analyze issues - previous test failed"
-        }
+        print(f"❌ BUG P0 AINDA EXISTE")
+        print(f"❌ Campos preenchidos no PDF: {fields_filled}/{total_critical_fields}")
+        print(f"❌ Menos de 6 campos preenchidos")
+        print(f"❌ Migração pypdf pode ter problemas")
     
-    # TEST 5: MongoDB Persistence Verification
-    print("\n📋 TEST 5: Persistência no MongoDB")
-    print("-" * 60)
+    # Detailed Analysis
+    print(f"\n📋 ANÁLISE DETALHADA:")
+    print("=" * 60)
     
-    persistence_result = verify_mongodb_persistence(test_case_id)
-    results["test5_mongodb_persistence"] = persistence_result
+    # Step-by-step analysis
+    if results.get("step1_case_creation", {}).get("success"):
+        case_id = results["step1_case_creation"]["case_id"]
+        print(f"✅ STEP 1 - Caso I-539 criado: {case_id}")
+    
+    if results.get("step2_friendly_form", {}).get("success"):
+        print(f"✅ STEP 2 - Formulário amigável preenchido com dados em português")
+    
+    if results.get("step3_data_verification", {}).get("passed"):
+        print(f"✅ STEP 3 - Dados salvos corretamente (incluindo campos _eua)")
+    
+    if results.get("step4_pdf_generation", {}).get("passed"):
+        pdf_size = results["step4_pdf_generation"]["pdf_result"].get("file_size", 0)
+        print(f"✅ STEP 4 - PDF I-539 gerado ({pdf_size} bytes)")
+    
+    if results.get("step5_pdf_download", {}).get("passed"):
+        download_size = results["step5_pdf_download"]["file_size"]
+        print(f"✅ STEP 5 - PDF baixado com sucesso ({download_size} bytes)")
+    
+    if results.get("step6_pdf_field_verification", {}).get("success"):
+        total_fields = results["step6_pdf_field_verification"]["total_form_fields"]
+        print(f"✅ STEP 6 - PDF analisado ({total_fields} campos detectados)")
+        
+        # Show which critical fields were filled
+        critical_fields = results["step6_pdf_field_verification"]["critical_fields_check"]
+        filled_fields = [name for name, info in critical_fields.items() if info["filled"]]
+        
+        if filled_fields:
+            print(f"✅ Campos preenchidos: {', '.join(filled_fields)}")
+        
+        empty_fields = [name for name, info in critical_fields.items() if not info["filled"]]
+        if empty_fields:
+            print(f"❌ Campos vazios: {', '.join(empty_fields)}")
+    
+    # Success Criteria Assessment
+    print(f"\n🎯 CRITÉRIOS DE SUCESSO:")
+    print("=" * 60)
+    
+    success_criteria = {
+        "caso_i539_criado": results.get("step1_case_creation", {}).get("success", False),
+        "dados_formulario_salvos": results.get("step3_data_verification", {}).get("passed", False),
+        "campos_eua_salvos": results.get("step3_data_verification", {}).get("verification_checks", {}).get("endereco_eua_saved", False),
+        "pdf_gerado_sucesso": results.get("step4_pdf_generation", {}).get("passed", False),
+        "pdf_baixado_sucesso": results.get("step5_pdf_download", {}).get("passed", False),
+        "pdf_tamanho_adequado": results.get("step5_pdf_download", {}).get("file_size", 0) > 300000,
+        "campos_preenchidos_pdf": p0_bug_fixed,
+        "sem_erros_500": all(
+            results.get(step, {}).get("status_code", 500) != 500 
+            for step in ["step1_case_creation", "step2_friendly_form", "step4_pdf_generation", "step5_pdf_download"]
+        )
+    }
+    
+    criteria_passed = sum(success_criteria.values())
+    total_criteria = len(success_criteria)
+    
+    print(f"📊 CRITÉRIOS ATENDIDOS:")
+    for criterion, passed in success_criteria.items():
+        status = "✅" if passed else "❌"
+        criterion_name = criterion.replace("_", " ").title()
+        print(f"  {status} {criterion_name}: {'ATENDIDO' if passed else 'NÃO ATENDIDO'}")
+    
+    print(f"\n🎯 CRITÉRIOS ATENDIDOS: {criteria_passed}/{total_criteria} ({criteria_passed/total_criteria*100:.1f}%)")
+    
+    # Final Assessment
+    system_ready = success_rate >= 80 and p0_bug_fixed
+    
+    if system_ready:
+        print("\n✅ SISTEMA DE GERAÇÃO DE PDF: TOTALMENTE FUNCIONAL")
+        print("✅ BUG P0 CRÍTICO: CORRIGIDO COM SUCESSO")
+        print("✅ MIGRAÇÃO PYPDF: IMPLEMENTADA CORRETAMENTE")
+        print("✅ FLUXO END-TO-END: OPERACIONAL")
+        print("✅ FORMULÁRIOS I-539: PREENCHIDOS CORRETAMENTE")
+    else:
+        print("\n⚠️  SISTEMA DE GERAÇÃO DE PDF: NECESSITA CORREÇÕES")
+        
+        # Identify problem areas
+        problem_areas = []
+        if not success_criteria["caso_i539_criado"]:
+            problem_areas.append("Criação de caso I-539")
+        if not success_criteria["dados_formulario_salvos"]:
+            problem_areas.append("Salvamento de dados do formulário")
+        if not success_criteria["pdf_gerado_sucesso"]:
+            problem_areas.append("Geração de PDF")
+        if not success_criteria["campos_preenchidos_pdf"]:
+            problem_areas.append("Preenchimento de campos no PDF (BUG P0)")
+        
+        if problem_areas:
+            print(f"❌ Áreas problemáticas: {', '.join(problem_areas)}")
+    
+    # Store summary
+    results["summary"] = {
+        "successful_steps": successful_steps,
+        "total_steps": total_steps,
+        "success_rate": success_rate,
+        "p0_bug_fixed": p0_bug_fixed,
+        "fields_filled": fields_filled,
+        "total_critical_fields": total_critical_fields,
+        "success_criteria": success_criteria,
+        "criteria_passed": criteria_passed,
+        "total_criteria": total_criteria,
+        "system_ready": system_ready,
+        "case_id": results.get("step1_case_creation", {}).get("case_id")
+    }
+    
+    return results
     
     # Generate Summary and Assessment
     print("\n📋 RESUMO FINAL - SISTEMA DE VALIDAÇÃO IA MELHORADA")
