@@ -1225,14 +1225,15 @@ def additional_validation_tests():
     pass
 
 if __name__ == "__main__":
-    print("🚀 INICIANDO TESTE END-TO-END COMPLETO APÓS CORREÇÃO DO BUG P0")
+    print("🎯 INICIANDO TESTE END-TO-END FINAL - USERSIMULATOR-DISCIPLINA")
     print(f"🌐 Backend URL: {BACKEND_URL}")
     print(f"🔗 API Base: {API_BASE}")
     print(f"⏰ Timestamp: {datetime.now().isoformat()}")
-    print("🎯 Focus: Verificar se migração pypdf corrigiu bug de PDF vazio")
+    print("🎯 OBJETIVO: Validar se solução PyMuPDF funciona em produção (via API)")
+    print("📊 CONTEXTO: Teste 1 (60%) → Teste 2 (0%) → Teste 3 (?%)")
     
     # Execute main test
-    test_results = test_i539_pdf_generation_e2e()
+    test_results = test_i539_pdf_generation_e2e_pymupdf()
     
     # Save results to file
     with open("/app/i539_pdf_e2e_test_results.json", "w") as f:
