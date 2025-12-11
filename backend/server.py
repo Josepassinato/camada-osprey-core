@@ -10557,6 +10557,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ===== SECURITY MIDDLEWARES (ATIVADOS) =====
+# Import security middlewares
+try:
+    from rate_limiter import RateLimiterMiddleware
+    from input_sanitizer import InputSanitizerMiddleware
+    
+    # Add Rate Limiter Middleware
+    app.add_middleware(RateLimiterMiddleware)
+    logger.info("✅ Rate Limiter Middleware ATIVADO")
+    
+    # Add Input Sanitizer Middleware
+    app.add_middleware(InputSanitizerMiddleware)
+    logger.info("✅ Input Sanitizer Middleware ATIVADO")
+    
+except ImportError as e:
+    logger.warning(f"⚠️ Security middlewares not available: {e}")
+# ===== END SECURITY MIDDLEWARES =====
+
 # Configure structured logging (JSON format)
 import json as json_logging
 import sys
