@@ -407,57 +407,65 @@ class USCISFormFiller:
             
             logger.info(f"📋 PDF has {len(doc)} pages")
             
-            # Map data to form fields
-            field_mapping = self._get_i129_mapping(basic_data, simplified_form, visa_category)
-            
-            # Create a dictionary of all non-empty field values
-            form_data = {k: v for k, v in field_mapping.items() if v}
-            logger.info(f"📝 Attempting to fill {len(form_data)} fields")
-            
-            # Fill form fields using PyMuPDF
-            # NOTE: Current I-129 templates have NO editable widgets
-            # This is expected - function will log "Filled 0 fields" which is normal
-            # Template is still returned successfully as a blank form
-            filled_count = 0
-            for page in doc:
-                widgets = list(page.widgets())
-                if widgets:
-                    for widget in widgets:
-                        full_field_name = widget.field_name
-                        if full_field_name:
-                            # Try exact match first
-                            if full_field_name in form_data:
-                                try:
-                                    widget.field_value = form_data[full_field_name]
-                                    widget.update()
-                                    filled_count += 1
-                                    logger.debug(f"  ✅ Filled (exact): {full_field_name} = {form_data[full_field_name]}")
-                                    continue
-                                except Exception as e:
-                                    logger.warning(f"  ⚠️ Could not fill {full_field_name}: {e}")
-                            
-                            # Try suffix match
-                            for short_name, value in form_data.items():
-                                if full_field_name.endswith(short_name):
-                                    try:
-                                        widget.field_value = value
-                                        widget.update()
-                                        filled_count += 1
-                                        logger.debug(f"  ✅ Filled (suffix): {full_field_name} = {value}")
-                                        break
-                                    except Exception as e:
-                                        logger.warning(f"  ⚠️ Could not fill {full_field_name}: {e}")
-            
-            logger.info(f"✅ Filled {filled_count} fields in Form I-129")
-            
-            # Save to bytes
-            output = io.BytesIO()
-            doc.save(output)
-            doc.close()
-            output.seek(0)
-            
-            logger.info(f"✅ Form I-129 filled successfully for {visa_category}")
-            return output.getvalue()
+            # ===== NEW OVERLAY SYSTEM =====
+            # Use i129_overlay_filler for coordinate-based filling
+            try:
+                from i129_overlay_filler import fill_i129_form
+                import tempfile
+                import os
+                
+                # Preparar dados para overlay
+                friendly_data = {
+                    **basic_data,
+                    **simplified_form,
+                    "visa_type": visa_category
+                }
+                
+                # Criar arquivo temporário para output
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_output:
+                    output_path = tmp_output.name
+                
+                # Salvar template atual para uso como input
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_template:
+                    template_path = tmp_template.name
+                    doc.save(template_path)
+                
+                doc.close()
+                
+                # Preencher usando overlay system
+                result = fill_i129_form(template_path, output_path, friendly_data)
+                
+                if result["success"]:
+                    # Ler PDF preenchido
+                    with open(output_path, "rb") as f:
+                        filled_pdf = f.read()
+                    
+                    # Limpar arquivos temporários
+                    os.unlink(template_path)
+                    os.unlink(output_path)
+                    
+                    logger.info(f"✅ Form I-129 filled with overlay: {result['filled_fields']} fields ({result['fill_rate']:.1f}%)")
+                    return filled_pdf
+                else:
+                    # Fallback: retornar template em branco
+                    logger.warning(f"⚠️ Overlay failed, returning blank template: {result.get('error')}")
+                    output = io.BytesIO()
+                    template_doc = fitz.open(template_path)
+                    template_doc.save(output)
+                    template_doc.close()
+                    output.seek(0)
+                    os.unlink(template_path)
+                    return output.getvalue()
+                    
+            except ImportError:
+                # Fallback se i129_overlay_filler não disponível
+                logger.warning("⚠️ i129_overlay_filler not available, returning blank template")
+                output = io.BytesIO()
+                doc.save(output)
+                doc.close()
+                output.seek(0)
+                return output.getvalue()
+            # ===== END OVERLAY SYSTEM =====
             
         except Exception as e:
             logger.error(f"❌ Error filling I-129: {str(e)}")
