@@ -6418,6 +6418,14 @@ Responda sempre em português, seja clara e profissional."""
         
         ai_response = response.choices[0].message.content
         
+        # ===== SANITIZE AI RESPONSE =====
+        # Sanitizar resposta para remover frases problemáticas
+        ai_response = guardrails.sanitize_ai_response(ai_response)
+        
+        # Adicionar disclaimer de segurança se necessário
+        ai_response = guardrails.add_safety_disclaimer(ai_response, query_type)
+        # ===== END SANITIZATION =====
+        
         # Save conversation to MongoDB
         current_time = datetime.utcnow()
         new_messages = [
