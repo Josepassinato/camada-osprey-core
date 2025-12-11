@@ -10610,14 +10610,14 @@ try:
     
     # Add Rate Limiter Middleware
     app.add_middleware(RateLimiterMiddleware)
-    logger.info("✅ Rate Limiter Middleware ATIVADO")
+    print("✅ Rate Limiter Middleware ATIVADO")
     
     # Add Input Sanitizer Middleware
     app.add_middleware(InputSanitizerMiddleware)
-    logger.info("✅ Input Sanitizer Middleware ATIVADO")
+    print("✅ Input Sanitizer Middleware ATIVADO")
     
 except ImportError as e:
-    logger.warning(f"⚠️ Security middlewares not available: {e}")
+    print(f"⚠️ Security middlewares not available: {e}")
 # ===== END SECURITY MIDDLEWARES =====
 
 # Configure structured logging (JSON format)
