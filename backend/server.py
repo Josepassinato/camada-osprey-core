@@ -12722,6 +12722,50 @@ async def restore_backup(backup_name: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ===== INADMISSIBILITY SCREENING ENDPOINTS =====
+from inadmissibility_screening import screening, perform_screening
+
+@api_router.get("/screening/questions")
+async def get_screening_questions():
+    """Retorna perguntas de triagem de inadmissibilidade"""
+    return {
+        "success": True,
+        "questions": screening.get_screening_questions(),
+        "message": "Responda honestamente. Suas respostas ajudarão a determinar se você precisa de um advogado."
+    }
+
+@api_router.post("/screening/assess")
+async def assess_inadmissibility(answers: Dict[str, str]):
+    """
+    Avalia risco de inadmissibilidade baseado nas respostas
+    
+    Body:
+    {
+        "visa_denial": "yes/no",
+        "unlawful_presence": "yes/no",
+        ...
+    }
+    """
+    try:
+        result = perform_screening(answers)
+        
+        # Log screening result for analytics
+        await db.screening_results.insert_one({
+            "answers": answers,
+            "result": result,
+            "timestamp": datetime.utcnow()
+        })
+        
+        return {
+            "success": True,
+            **result
+        }
+    except Exception as e:
+        logger.error(f"Error in inadmissibility screening: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ===== END INADMISSIBILITY SCREENING =====
+
 # Include all API routes
 app.include_router(api_router)
 
