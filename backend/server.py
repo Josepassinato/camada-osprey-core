@@ -6339,28 +6339,65 @@ async def immigration_chat(request: ChatRequest, current_user = Depends(get_curr
     try:
         session_id = request.session_id or str(uuid.uuid4())
         
+        # ===== AI GUARDRAILS - VALIDAÇÃO DE QUERY =====
+        from ai_guardrails import guardrails
+        
+        should_block, blocked_message, query_type = guardrails.should_block_query(request.message)
+        
+        if should_block:
+            # Query bloqueada - retornar mensagem de aviso
+            logger.warning(f"🛡️ Chat query blocked for user {current_user['id']}: type={query_type}")
+            
+            # Salvar tentativa bloqueada para analytics
+            await db.blocked_queries.insert_one({
+                "user_id": current_user["id"],
+                "session_id": session_id,
+                "query": request.message,
+                "query_type": query_type.value,
+                "timestamp": datetime.utcnow(),
+                "blocked_message": blocked_message
+            })
+            
+            return ChatResponse(
+                message=blocked_message,
+                session_id=session_id,
+                context=request.context
+            )
+        # ===== END AI GUARDRAILS =====
+        
         # Get conversation history from MongoDB
         conversation = await db.chat_sessions.find_one({"session_id": session_id})
         
-        # Build conversation context
+        # Build conversation context with ENHANCED safety instructions
         messages = [
             {
                 "role": "system",
-                "content": f"""Você é um assistente especializado em imigração da OSPREY, uma plataforma B2C para auto-aplicação.
+                "content": f"""Você é Maria, assistente de documentos da OSPREY Immigration - uma plataforma B2C.
 
 Usuário: {current_user['first_name']} {current_user['last_name']}
 
-Suas responsabilidades:
-- Fornecer informações precisas sobre processos imigratórios
-- Orientar sobre documentação necessária para self-application
-- Sugerir próximos passos no processo
-- Manter tom amigável mas profissional
-- SEMPRE mencionar que não oferece conselhos jurídicos
-- Para casos complexos, recomendar consulta com advogado
+🚫 LIMITES CRÍTICOS (NÃO VIOLE):
+1. NUNCA recomende qual visto aplicar ("Você deve aplicar X")
+2. NUNCA avalie chances de aprovação ("Suas chances são boas")
+3. NUNCA diga se usuário é elegível ("Você se qualifica")
+4. NUNCA forneça estratégias legais específicas
+5. NUNCA interprete leis para casos individuais
 
-IMPORTANTE: Esta é uma ferramenta de auto-aplicação. Você orienta o usuário a fazer sua própria aplicação, não fornece serviços jurídicos.
+✅ O QUE VOCÊ PODE FAZER:
+- Explicar requisitos GERAIS publicados pelo USCIS
+- Listar documentos necessários para cada visto
+- Orientar sobre como preencher formulários
+- Explicar diferenças entre vistos (geral)
+- Sugerir consulta com advogado quando apropriado
 
-Responda sempre em português, seja claro e objetivo."""
+📋 SEMPRE INCLUA:
+- Disclaimer que você não é advogada
+- Recomendação de advogado para perguntas complexas
+- Informação GERAL, não análise de caso específico
+
+IMPORTANTE: Esta é uma ferramenta de auto-aplicação. Você NÃO fornece serviços jurídicos.
+
+Responda sempre em português, seja clara e profissional."""
             }
         ]
         
