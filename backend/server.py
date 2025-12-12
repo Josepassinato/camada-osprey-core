@@ -12766,6 +12766,126 @@ async def assess_inadmissibility(answers: Dict[str, str]):
 
 # ===== END INADMISSIBILITY SCREENING =====
 
+# ===== FEEDBACK SYSTEM ENDPOINTS =====
+from feedback_system import FeedbackSystem, FeedbackType, submit_ai_response_feedback, get_nps_score
+
+@api_router.post("/feedback/submit")
+async def submit_feedback(
+    feedback_type: str,
+    rating: Optional[int] = None,
+    thumbs: Optional[str] = None,
+    comment: Optional[str] = None,
+    metadata: Optional[Dict[str, Any]] = None,
+    current_user = Depends(get_current_user)
+):
+    """
+    Submeter feedback do usuário
+    
+    Body:
+    {
+        "feedback_type": "ai_response" | "form_usability" | "document_upload" | "pdf_generation" | "general_experience",
+        "rating": 1-5 (optional),
+        "thumbs": "up" | "down" (optional),
+        "comment": "texto livre" (optional),
+        "metadata": {"response_id": "...", "case_id": "..."} (optional)
+    }
+    """
+    try:
+        feedback_system = FeedbackSystem(db)
+        result = await feedback_system.submit_feedback(
+            user_id=current_user["id"],
+            feedback_type=feedback_type,
+            rating=rating,
+            thumbs=thumbs,
+            comment=comment,
+            metadata=metadata
+        )
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error submitting feedback: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/feedback/stats")
+async def get_feedback_statistics(
+    feedback_type: Optional[str] = None,
+    days: Optional[int] = 30
+):
+    """Obter estatísticas de feedback (Admin/Analytics)"""
+    try:
+        feedback_system = FeedbackSystem(db)
+        
+        start_date = datetime.utcnow() - timedelta(days=days) if days else None
+        
+        stats = await feedback_system.get_feedback_stats(
+            feedback_type=feedback_type,
+            start_date=start_date
+        )
+        
+        return {
+            "success": True,
+            **stats
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting feedback stats: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/feedback/trending-issues")
+async def get_trending_issues(days: int = 7):
+    """Identificar problemas recorrentes"""
+    try:
+        feedback_system = FeedbackSystem(db)
+        issues = await feedback_system.get_trending_issues(days=days)
+        
+        return {
+            "success": True,
+            "issues": issues,
+            "period_days": days
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting trending issues: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/feedback/nps")
+async def get_nps(days: int = 30):
+    """Calcular Net Promoter Score"""
+    try:
+        nps_data = await get_nps_score(db, days=days)
+        return {
+            "success": True,
+            **nps_data
+        }
+    except Exception as e:
+        logger.error(f"Error calculating NPS: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/feedback/my-history")
+async def get_my_feedback_history(
+    limit: int = 10,
+    current_user = Depends(get_current_user)
+):
+    """Obter histórico de feedback do usuário logado"""
+    try:
+        feedback_system = FeedbackSystem(db)
+        history = await feedback_system.get_user_feedback_history(
+            user_id=current_user["id"],
+            limit=limit
+        )
+        
+        return {
+            "success": True,
+            "feedback": history
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting feedback history: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ===== END FEEDBACK SYSTEM =====
+
 # Include all API routes
 app.include_router(api_router)
 
