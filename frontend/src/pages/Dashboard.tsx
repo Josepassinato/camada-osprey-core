@@ -71,6 +71,17 @@ const Dashboard = () => {
   // Check if we're processing Google OAuth
   const isGoogleAuth = window.location.hash.includes('session_id=');
 
+  // Onboarding hook
+  const {
+    showOnboarding,
+    completeOnboarding,
+    skipOnboarding,
+    startOnboarding
+  } = useOnboarding({
+    onboardingKey: 'dashboard',
+    autoStart: true
+  });
+
   useEffect(() => {
     if (!isGoogleAuth) {
       fetchDashboardData();
