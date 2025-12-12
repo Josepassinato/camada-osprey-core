@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import GoogleAuthCallback from "@/components/GoogleAuthCallback";
+import OnboardingTour, { dashboardOnboarding } from "@/components/OnboardingTour";
+import useOnboarding from "@/hooks/useOnboarding";
 
 interface DashboardData {
   user: {
