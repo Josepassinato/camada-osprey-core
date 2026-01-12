@@ -19,7 +19,7 @@ distro==1.9.0
 dnspython==2.7.0
 ecdsa==0.19.1
 email_validator==2.2.0
-emergentintegrations==0.1.0
+# emergentintegrations==0.1.0  # Custom package - not on PyPI
 fastapi==0.110.1
 fastuuid==0.13.5
 filelock==3.19.1
@@ -28,19 +28,19 @@ fonttools==4.60.1
 fpdf2==2.8.4
 frozenlist==1.7.0
 fsspec==2025.9.0
-google-ai-generativelanguage==0.6.15
-google-api-core==2.25.1
+google-ai-generativelanguage>=0.6.15
+google-api-core>=2.25.1
 google-api-python-client==2.183.0
 google-auth==2.40.3
 google-auth-httplib2==0.2.0
 google-auth-oauthlib==1.2.2
-google-cloud-documentai==3.6.0
-google-cloud-vision==3.10.2
+google-cloud-documentai>=3.6.0
+google-cloud-vision>=3.10.2
 google-genai==1.39.1
 google-generativeai==0.8.5
 googleapis-common-protos==1.70.0
-grpcio==1.75.1
-grpcio-status==1.71.2
+grpcio>=1.75.1
+grpcio-status>=1.71.2
 h11==0.16.0
 hf-xet==1.1.10
 httpcore==1.0.9
@@ -81,7 +81,7 @@ pluggy==1.6.0
 pondpond==1.4.1
 propcache==0.3.2
 proto-plus==1.26.1
-protobuf==5.29.5
+protobuf>=5.26.1,<6.0.0
 pyasn1==0.6.1
 pyasn1_modules==0.4.2
 pycodestyle==2.14.0
@@ -95,7 +95,7 @@ pymongo==4.5.0
 pyparsing==3.2.5
 PyPDF2==3.0.1
 pypdf==5.5.0
-PyMuPDF==1.24.0
+PyMuPDF==1.25.3
 pytest==8.4.1
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.1
@@ -145,5 +145,5 @@ pdfplumber
 python-docx>=0.8.11
 
 # Maria Voice Integration (Google Cloud TTS + STT)
-google-cloud-texttospeech==2.24.0
-google-cloud-speech==2.26.0
+google-cloud-texttospeech>=2.24.0
+google-cloud-speech>=2.26.0
