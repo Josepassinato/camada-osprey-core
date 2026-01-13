@@ -7,9 +7,9 @@ import os
 import json
 import logging
 from typing import Dict, List, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+#from emergentintegrations.llm.chat import LlmChat, UserMessage
 import uuid
 
 logger = logging.getLogger(__name__)
@@ -17,13 +17,13 @@ logger = logging.getLogger(__name__)
 # Initialize emergent integrations client
 emergent_llm_key = os.environ.get('EMERGENT_LLM_KEY')
 
-def create_llm_client(system_message: str) -> LlmChat:
-    """Create LlmChat instance with required parameters"""
-    return LlmChat(
-        api_key=emergent_llm_key,
-        session_id=str(uuid.uuid4()),
-        system_message=system_message
-    )
+# def create_llm_client(system_message: str) -> LlmChat:
+#     """Create LlmChat instance with required parameters"""
+#     return LlmChat(
+#         api_key=emergent_llm_key,
+#         session_id=str(uuid.uuid4()),
+#         system_message=system_message
+#     )
 
 class CompletenessLevel(str, Enum):
     """Níveis de completude da aplicação"""
@@ -362,7 +362,7 @@ class CompletenessAnalyzer:
             "critical_issues": critical_issues,
             "warnings": warnings,
             "recommendations": recommendations,
-            "analyzed_at": datetime.utcnow().isoformat(),
+            "analyzed_at": datetime.now(timezone.utc).isoformat(),
             "disclaimer": "Esta análise é educativa e baseada em requisitos públicos do USCIS. Não constitui aconselhamento jurídico. Para orientação legal, consulte um advogado de imigração licenciado."
         }
     

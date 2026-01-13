@@ -3,12 +3,15 @@ Maria WhatsApp Integration usando Baileys
 Integração não-oficial do WhatsApp para mensagens proativas
 """
 
+import logging
 import os
 import asyncio
 import json
 from typing import Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import aiohttp
+
+logger = logging.getLogger(__name__)
 
 # Baileys é uma biblioteca JavaScript, vamos usar via API bridge
 # Você precisará rodar um servidor Baileys separado
@@ -68,22 +71,22 @@ class MariaWhatsAppService:
                 ) as response:
                     if response.status == 200:
                         result = await response.json()
-                        print(f"✅ WhatsApp enviado para {phone_number}")
+                        logger.info(f"✅ WhatsApp enviado para {phone_number}")
                         return {
                             "success": True,
                             "message_id": result.get("messageId"),
-                            "timestamp": datetime.utcnow().isoformat()
+                            "timestamp": datetime.now(timezone.utc).isoformat()
                         }
                     else:
                         error = await response.text()
-                        print(f"❌ Erro ao enviar WhatsApp: {error}")
+                        logger.error(f"❌ Erro ao enviar WhatsApp: {error}")
                         return {
                             "success": False,
                             "error": error
                         }
         
         except Exception as e:
-            print(f"❌ Erro na integração WhatsApp: {e}")
+            logger.error(f"❌ Erro na integração WhatsApp: {e}")
             return {
                 "success": False,
                 "error": str(e)
@@ -230,7 +233,7 @@ Isso pode afetar sua aplicação. Quer que eu explique melhor? Estou aqui para a
                             "status": result.get("status")
                         }
         except Exception as e:
-            print(f"❌ Erro ao verificar status WhatsApp: {e}")
+            logger.error(f"❌ Erro ao verificar status WhatsApp: {e}")
             return {
                 "connected": False,
                 "error": str(e)

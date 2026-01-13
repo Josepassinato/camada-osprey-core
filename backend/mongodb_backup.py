@@ -6,7 +6,7 @@ Cria backups diários do banco de dados
 import os
 import subprocess
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import asyncio
 import shutil
@@ -17,11 +17,21 @@ class MongoDBBackup:
     """Sistema de backup automático para MongoDB"""
     
     def __init__(self, backup_dir: str = "/app/backups"):
-        self.backup_dir = Path(backup_dir)
-        self.backup_dir.mkdir(parents=True, exist_ok=True)
+        default_dir = Path(__file__).resolve().parent.parent / "backups"
+        env_dir = os.environ.get("BACKUP_DIR")
+        self.backup_dir = Path(env_dir) if env_dir else Path(backup_dir)
+        if env_dir is None and backup_dir == "/app/backups":
+            self.backup_dir = default_dir
+        self.enabled = True
+        try:
+            self.backup_dir.mkdir(parents=True, exist_ok=True)
+        except OSError as e:
+            self.enabled = False
+            logger.warning(f"Backup directory not writable: {self.backup_dir} ({e})")
+            return
         
         # Get MongoDB connection from env
-        self.mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+        self.mongo_url = os.environ.get('MONGODB_URI') or os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
         self.db_name = self._extract_db_name(self.mongo_url)
         
         # Retention policy
@@ -51,7 +61,7 @@ class MongoDBBackup:
             Dict com status e informações do backup
         """
         try:
-            timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+            timestamp = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')
             backup_name = f"backup_{self.db_name}_{timestamp}"
             backup_path = self.backup_dir / backup_name
             
@@ -131,7 +141,7 @@ class MongoDBBackup:
     async def cleanup_old_backups(self):
         """Remove backups older than retention_days"""
         try:
-            cutoff_date = datetime.utcnow() - timedelta(days=self.retention_days)
+            cutoff_date = datetime.now(timezone.utc) - timedelta(days=self.retention_days)
             
             for backup_dir in self.backup_dir.iterdir():
                 if backup_dir.is_dir() and backup_dir.name.startswith('backup_'):
@@ -247,7 +257,7 @@ class MongoDBBackup:
         while True:
             try:
                 # Calculate time until next 3AM
-                now = datetime.utcnow()
+                now = datetime.now(timezone.utc)
                 next_backup = now.replace(hour=3, minute=0, second=0, microsecond=0)
                 
                 if next_backup <= now:

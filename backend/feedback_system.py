@@ -6,7 +6,7 @@ Suporta thumbs up/down, ratings 1-5, e comentários
 
 import logging
 from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -87,7 +87,7 @@ class FeedbackSystem:
                 "thumbs": thumbs,
                 "comment": comment,
                 "metadata": metadata or {},
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(timezone.utc),
                 "processed": False
             }
             
@@ -279,7 +279,7 @@ class FeedbackSystem:
             from bson import ObjectId
             result = await self.collection.update_one(
                 {"_id": ObjectId(feedback_id)},
-                {"$set": {"processed": True, "processed_at": datetime.utcnow()}}
+                {"$set": {"processed": True, "processed_at": datetime.now(timezone.utc)}}
             )
             return result.modified_count > 0
         except Exception as e:
@@ -302,7 +302,7 @@ class FeedbackSystem:
             Lista de issues identificados
         """
         try:
-            start_date = datetime.utcnow() - timedelta(days=days)
+            start_date = datetime.now(timezone.utc) - timedelta(days=days)
             
             # Buscar feedback negativo recente
             query = {
@@ -400,7 +400,7 @@ async def get_nps_score(db, days: int = 30) -> Dict[str, Any]:
     Convertido para escala 1-5: Promoters (5), Passives (3-4), Detractors (1-2)
     """
     try:
-        start_date = datetime.utcnow() - timedelta(days=days)
+        start_date = datetime.now(timezone.utc) - timedelta(days=days)
         system = FeedbackSystem(db)
         
         feedbacks = await system.collection.find({

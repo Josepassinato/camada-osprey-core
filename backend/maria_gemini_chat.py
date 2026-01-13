@@ -3,10 +3,13 @@ Maria Chat usando Google Gemini via Emergent LLM Key
 Gemini oferece conversação mais natural
 """
 
+import logging
 import os
 from typing import Dict, List, Any, Optional
-from datetime import datetime
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+from datetime import datetime, timezone
+
+logger = logging.getLogger(__name__)
+#from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 # Configurar Emergent LLM Key
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
@@ -23,9 +26,9 @@ class MariaGeminiChat:
         self.available = EMERGENT_LLM_KEY is not None
         
         if not self.available:
-            print("⚠️ EMERGENT_LLM_KEY não configurada")
+            logger.warning("⚠️ EMERGENT_LLM_KEY não configurada")
         else:
-            print("✅ Maria Gemini Chat configurado com Emergent LLM Key")
+            logger.info("✅ Maria Gemini Chat configurado com Emergent LLM Key")
     
     async def chat(
         self,
@@ -74,11 +77,11 @@ class MariaGeminiChat:
                 "success": True,
                 "response": response_text,
                 "model": "gemini-2.0-flash",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
         except Exception as e:
-            print(f"❌ Erro no chat Gemini (Emergent): {e}")
+            logger.error(f"❌ Erro no chat Gemini (Emergent): {e}")
             import traceback
             traceback.print_exc()
             return {

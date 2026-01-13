@@ -12,7 +12,7 @@ AGORA COM SISTEMA DE APRENDIZADO CONTÍNUO:
 import os
 import logging
 from typing import Dict, Any, List, Optional, Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 import json
 
@@ -106,7 +106,7 @@ class QAFeedbackOrchestrator:
             # Salvar iteração no histórico
             iteration_record = {
                 "iteration": iteration,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "score": current_score,
                 "status": qa_report['status'],
                 "issues_found": len(qa_report.get('missing_items', [])) + 
@@ -394,7 +394,7 @@ class QAFeedbackOrchestrator:
                 {
                     "$set": {
                         "document_feedback": analysis_result,
-                        "document_analysis_date": datetime.utcnow()
+                        "document_analysis_date": datetime.now(timezone.utc)
                     }
                 }
             )
@@ -479,7 +479,7 @@ class QAFeedbackOrchestrator:
                         "$set": {
                             "form_filler_feedback": {
                                 "fixes_applied": fixes_applied,
-                                "timestamp": datetime.utcnow()
+                                "timestamp": datetime.now(timezone.utc)
                             }
                         }
                     }
@@ -567,7 +567,7 @@ class QAFeedbackOrchestrator:
                         "language_feedback": {
                             "corrections_needed": corrections,
                             "texts_reviewed": len(texts_to_review),
-                            "timestamp": datetime.utcnow()
+                            "timestamp": datetime.now(timezone.utc)
                         }
                     }
                 }
@@ -652,7 +652,7 @@ class QAFeedbackOrchestrator:
                     "$set": {
                         "specialized_feedback": {
                             "critical_fixes": critical_fixes,
-                            "timestamp": datetime.utcnow()
+                            "timestamp": datetime.now(timezone.utc)
                         }
                     }
                 }
@@ -788,7 +788,7 @@ class QAFeedbackOrchestrator:
                     "qa_review": qa_report,
                     "qa_approved": qa_report['approval']['approved'],
                     "qa_score": qa_report['overall_score'],
-                    "qa_review_date": datetime.utcnow(),
+                    "qa_review_date": datetime.now(timezone.utc),
                     "qa_iteration_history": iteration_history,
                     "qa_final_status": final_status,
                     "qa_total_iterations": len(iteration_history),

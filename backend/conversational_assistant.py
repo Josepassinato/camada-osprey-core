@@ -7,7 +7,7 @@ import os
 import json
 import logging
 from typing import Dict, List, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 logger = logging.getLogger(__name__)
@@ -154,7 +154,7 @@ ALWAYS:
                 "response": assistant_message,
                 "suggestions": suggestions,
                 "conversation_id": session_id,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
         except Exception as e:
@@ -169,7 +169,7 @@ ALWAYS:
                 "error": str(e),
                 "suggestions": [],
                 "conversation_id": session_id,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
     
     def _generate_suggestions(self, user_message: str, visa_type: Optional[str]) -> List[str]:
@@ -296,7 +296,7 @@ IMPORTANTE: Esta é informação educativa. Sempre mencione que não substitui c
             
             llm = create_llm_client(
                 system_message=system_prompt,
-                session_id=f"quick_{datetime.utcnow().timestamp()}"
+                session_id=f"quick_{datetime.now(timezone.utc).timestamp()}"
             )
             
             response = llm.send_message(

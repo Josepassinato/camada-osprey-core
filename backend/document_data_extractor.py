@@ -7,7 +7,7 @@ import logging
 import json
 import re
 from typing import Dict, Any, Optional, List, Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -512,8 +512,8 @@ async def process_document_and_update_user(
                         **corrections,
                         "data_verified_by_document": True,
                         "verification_document_type": document_type,
-                        "verification_date": datetime.utcnow(),
-                        "updated_at": datetime.utcnow()
+                        "verification_date": datetime.now(timezone.utc),
+                        "updated_at": datetime.now(timezone.utc)
                     }
                 }
             )

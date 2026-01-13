@@ -7,7 +7,7 @@ import os
 import json
 import logging
 from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from bson import ObjectId
 
@@ -96,7 +96,7 @@ class ProactiveAlertSystem:
         if passport_expiry:
             try:
                 expiry_date = datetime.fromisoformat(passport_expiry.replace('Z', '+00:00'))
-                months_until_expiry = (expiry_date - datetime.utcnow()).days / 30
+                months_until_expiry = (expiry_date - datetime.now(timezone.utc)).days / 30
                 
                 if months_until_expiry < 6:
                     priority = AlertPriority.URGENT if months_until_expiry < 3 else AlertPriority.HIGH
@@ -116,7 +116,7 @@ class ProactiveAlertSystem:
                             "months_remaining": int(months_until_expiry),
                             "uscis_requirement": "6 meses de validade mínima"
                         },
-                        "created_at": datetime.utcnow().isoformat(),
+                        "created_at": datetime.now(timezone.utc).isoformat(),
                         "dismissed": False
                     })
             except:
@@ -128,7 +128,7 @@ class ProactiveAlertSystem:
             if doc.get("expiry_date"):
                 try:
                     expiry_date = datetime.fromisoformat(doc["expiry_date"].replace('Z', '+00:00'))
-                    days_until_expiry = (expiry_date - datetime.utcnow()).days
+                    days_until_expiry = (expiry_date - datetime.now(timezone.utc)).days
                     
                     if days_until_expiry < 90:  # 3 meses
                         alerts.append({
@@ -145,7 +145,7 @@ class ProactiveAlertSystem:
                                 "expiry_date": expiry_date.strftime("%d/%m/%Y"),
                                 "days_remaining": days_until_expiry
                             },
-                            "created_at": datetime.utcnow().isoformat(),
+                            "created_at": datetime.now(timezone.utc).isoformat(),
                             "dismissed": False
                         })
                 except:
@@ -165,7 +165,7 @@ class ProactiveAlertSystem:
         if updated_at and progress < 100:
             try:
                 last_update = datetime.fromisoformat(updated_at.replace('Z', '+00:00'))
-                days_since_update = (datetime.utcnow() - last_update).days
+                days_since_update = (datetime.now(timezone.utc) - last_update).days
                 
                 if days_since_update >= 3:  # 3 dias sem atualização
                     time_to_complete = self._estimate_time_to_complete(progress)
@@ -186,7 +186,7 @@ class ProactiveAlertSystem:
                             "estimated_time": time_to_complete,
                             "current_step": case.get("current_step", "")
                         },
-                        "created_at": datetime.utcnow().isoformat(),
+                        "created_at": datetime.now(timezone.utc).isoformat(),
                         "dismissed": False
                     })
             except:
@@ -211,7 +211,7 @@ class ProactiveAlertSystem:
                     "missing_count": len(missing_fields),
                     "missing_fields": missing_fields[:5]  # Mostrar apenas 5
                 },
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
                 "dismissed": False
             })
         
@@ -240,7 +240,7 @@ class ProactiveAlertSystem:
                     "action_label": improvement_potential['action'],
                     "action_url": improvement_potential['url'],
                     "details": improvement_potential,
-                    "created_at": datetime.utcnow().isoformat(),
+                    "created_at": datetime.now(timezone.utc).isoformat(),
                     "dismissed": False
                 })
         
@@ -258,7 +258,7 @@ class ProactiveAlertSystem:
                 "action_label": "Adicionar Documento",
                 "action_url": f"/auto-application/case/{case['id']}/documents",
                 "details": doc_suggestion,
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
                 "dismissed": False
             })
         
@@ -306,7 +306,7 @@ class ProactiveAlertSystem:
                     "percentage": news["percentage"],
                     "visa_type": visa_type
                 },
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
                 "dismissed": False
             })
         
@@ -322,7 +322,7 @@ class ProactiveAlertSystem:
             if current_status_expiry:
                 try:
                     expiry_date = datetime.fromisoformat(current_status_expiry.replace('Z', '+00:00'))
-                    days_until_expiry = (expiry_date - datetime.utcnow()).days
+                    days_until_expiry = (expiry_date - datetime.now(timezone.utc)).days
                     
                     if days_until_expiry < 60:  # 2 meses
                         priority = AlertPriority.URGENT if days_until_expiry < 30 else AlertPriority.HIGH
@@ -342,7 +342,7 @@ class ProactiveAlertSystem:
                                 "days_remaining": days_until_expiry,
                                 "uscis_note": "Aplicar antes da expiração evita problemas de permanência irregular"
                             },
-                            "created_at": datetime.utcnow().isoformat(),
+                            "created_at": datetime.now(timezone.utc).isoformat(),
                             "dismissed": False
                         })
                 except:
@@ -478,7 +478,7 @@ class ProactiveAlertSystem:
         try:
             result = await self.db.case_alerts.update_one(
                 {"alert_id": alert_id, "case_id": case_id},
-                {"$set": {"dismissed": True, "dismissed_at": datetime.utcnow()}},
+                {"$set": {"dismissed": True, "dismissed_at": datetime.now(timezone.utc)}},
                 upsert=True
             )
             return result.modified_count > 0 or result.upserted_id is not None

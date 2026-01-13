@@ -3,13 +3,16 @@ Maria Voice Integration usando Google Gemini
 Vozes naturais e humanizadas para text-to-speech
 """
 
+import logging
 import os
 import base64
 from typing import Dict, Any, Optional
 import google.generativeai as genai
-from datetime import datetime
+from datetime import datetime, timezone
 import tempfile
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 # Configurar Gemini
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY') or os.environ.get('GOOGLE_API_KEY')
@@ -30,7 +33,7 @@ class MariaVoiceService:
         self.available = GEMINI_API_KEY is not None
         
         if not self.available:
-            print("⚠️ GEMINI_API_KEY não configurada. Voz da Maria indisponível.")
+            logger.warning("⚠️ GEMINI_API_KEY não configurada. Voz da Maria indisponível.")
     
     async def text_to_speech(
         self,
@@ -102,11 +105,11 @@ class MariaVoiceService:
                 "language": language,
                 "voice": voice_name,
                 "duration_estimate": len(text) / 10,  # Aproximado
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
         except Exception as e:
-            print(f"❌ Erro no text-to-speech: {e}")
+            logger.error(f"❌ Erro no text-to-speech: {e}")
             return {
                 "success": False,
                 "error": str(e)
@@ -160,11 +163,11 @@ class MariaVoiceService:
                 "transcript": transcript.strip(),
                 "confidence": response.results[0].alternatives[0].confidence if response.results else 0,
                 "language": language,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
         except Exception as e:
-            print(f"❌ Erro no speech-to-text: {e}")
+            logger.error(f"❌ Erro no speech-to-text: {e}")
             return {
                 "success": False,
                 "error": str(e)

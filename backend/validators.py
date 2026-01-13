@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 # validators.py
 # Snippets: normalizador de datas, parser MRZ (passaporte) com checksum,
 # validador de receipt USCIS (I-797) e verificador de SSN "válido".
-from __future__ import annotations
+import logging
 import re
 from datetime import datetime, date
+
+logger = logging.getLogger(__name__)
 
 # -----------------------------
 # 1) Normalizador de datas
@@ -24,7 +28,7 @@ def normalize_date(s: str, prefer_day_first: bool = True) -> str | None:
     patterns_text = ["%b %d, %Y", "%B %d, %Y"]          # "Jan 02, 2025"
 
     # Heurística: tentar ambos; se prefer_day_first, prioriza DF
-    tries = (patterns_df + patterns_mdy + patterns_text) if prefer_day_first \
+    tries = (patterns_df + patterns_mdy + patterns_text) if prefer_day_first\
         else (patterns_mdy + patterns_df + patterns_text)
 
     for fmt in tries:
@@ -401,7 +405,7 @@ def run_validation_tests():
     assert is_plausible_ssn("666-12-3456") is False
     assert is_plausible_ssn("900-12-3456") is False
     
-    print("✅ All validation tests passed!")
+    logger.info("✅ All validation tests passed!")
 
 if __name__ == "__main__":
     run_validation_tests()

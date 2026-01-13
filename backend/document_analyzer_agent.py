@@ -5,14 +5,18 @@ Especialidade: OCR, extração de dados e validação de documentos
 
 import logging
 from typing import Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import re
 import base64
 import json
 import os
 from io import BytesIO
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_KB_PATH = Path(__file__).resolve().parent.parent / "knowledge_base_documents.json"
+
 
 class DocumentAnalyzerAgent:
     """
@@ -23,12 +27,13 @@ class DocumentAnalyzerAgent:
     - Detecção de informações chave
     """
     
-    def __init__(self, knowledge_base_path: str = "/app/knowledge_base_documents.json"):
+    def __init__(self, knowledge_base_path: Optional[str] = None):
         self.supported_documents = [
             'passport', 'driver_license', 'birth_certificate',
             'i20', 'i94', 'visa', 'bank_statement', 'transcript'
         ]
-        self.knowledge_base = self._load_knowledge_base(knowledge_base_path)
+        kb_path = knowledge_base_path or str(DEFAULT_KB_PATH)
+        self.knowledge_base = self._load_knowledge_base(kb_path)
         logger.info(f"✅ Document Analyzer Agent inicializado com {len(self.knowledge_base.get('documents', []))} documentos de referência")
     
     def _load_knowledge_base(self, kb_path: str) -> Dict:
@@ -76,7 +81,7 @@ class DocumentAnalyzerAgent:
                 'extracted_fields': extracted_fields,
                 'validation': validation,
                 'confidence_score': validation.get('confidence', 0),
-                'analyzed_at': datetime.utcnow().isoformat()
+                'analyzed_at': datetime.now(timezone.utc).isoformat()
             }
             
         except Exception as e:

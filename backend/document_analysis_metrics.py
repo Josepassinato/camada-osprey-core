@@ -6,7 +6,7 @@ Sistema de métricas e KPIs para análise de documentos com alta precisão
 import json
 import logging
 from typing import Dict, List, Any, Optional, Tuple
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from dataclasses import dataclass
 from enum import Enum
 import re
@@ -146,7 +146,7 @@ class DocumentAnalysisKPIs:
         """
         return {
             'report_period': f"Last {timeframe_days} days",
-            'generated_at': datetime.utcnow().isoformat(),
+            'generated_at': datetime.now(timezone.utc).isoformat(),
             'total_documents_analyzed': len(self._get_recent_metrics(timeframe_days)),
             'kpis': {
                 'classification_f1_score': {
@@ -180,7 +180,7 @@ class DocumentAnalysisKPIs:
     
     def _get_recent_metrics(self, days: int) -> List[DocumentMetrics]:
         """Obtém métricas dos últimos N dias"""
-        cutoff_date = datetime.utcnow() - timedelta(days=days)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=days)
         return [m for m in self.metrics_history if m.analysis_timestamp >= cutoff_date]
     
     def _get_fields_by_category(self, category: str) -> List[str]:

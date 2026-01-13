@@ -7,7 +7,7 @@ import os
 import stripe
 import logging
 from typing import Dict, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from payment_packages import get_visa_package, calculate_final_price
 from voucher_system import validate_voucher, increment_voucher_usage
 
@@ -92,8 +92,8 @@ async def create_checkout_session(
                 'original_price': original_price,
                 'payment_status': 'pending',
                 'stripe_session_url': session.url,
-                'created_at': datetime.utcnow(),
-                'updated_at': datetime.utcnow()
+                'created_at': datetime.now(timezone.utc),
+                'updated_at': datetime.now(timezone.utc)
             }
             
             await db.payment_transactions.insert_one(transaction)
@@ -146,7 +146,7 @@ async def verify_payment_status(session_id: str, db = None) -> Dict:
                     '$set': {
                         'payment_status': payment_status,
                         'stripe_payment_intent': session.payment_intent,
-                        'updated_at': datetime.utcnow()
+                        'updated_at': datetime.now(timezone.utc)
                     }
                 }
             )
@@ -165,8 +165,8 @@ async def verify_payment_status(session_id: str, db = None) -> Dict:
                         {
                             '$set': {
                                 'payment_status': 'paid',
-                                'payment_date': datetime.utcnow(),
-                                'updated_at': datetime.utcnow()
+                                'payment_date': datetime.now(timezone.utc),
+                                'updated_at': datetime.now(timezone.utc)
                             }
                         }
                     )
@@ -234,7 +234,7 @@ async def handle_stripe_webhook(payload: bytes, sig_header: str, db = None) -> D
                             'payment_status': 'paid',
                             'stripe_payment_intent': session.get('payment_intent'),
                             'webhook_received': True,
-                            'updated_at': datetime.utcnow()
+                            'updated_at': datetime.now(timezone.utc)
                         }
                     }
                 )
@@ -247,8 +247,8 @@ async def handle_stripe_webhook(payload: bytes, sig_header: str, db = None) -> D
                         {
                             '$set': {
                                 'payment_status': 'paid',
-                                'payment_date': datetime.utcnow(),
-                                'updated_at': datetime.utcnow()
+                                'payment_date': datetime.now(timezone.utc),
+                                'updated_at': datetime.now(timezone.utc)
                             }
                         }
                     )

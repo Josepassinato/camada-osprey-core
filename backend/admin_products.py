@@ -7,7 +7,7 @@ import os
 import stripe
 import logging
 from typing import Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from payment_packages import VISA_PACKAGES
 
 logger = logging.getLogger(__name__)
@@ -45,8 +45,8 @@ async def initialize_products_in_db(db):
                 "stripe_product_id": None,  # Será preenchido na sincronização
                 "stripe_price_id": None,    # Será preenchido na sincronização
                 "active": True,
-                "created_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow()
+                "created_at": datetime.now(timezone.utc),
+                "updated_at": datetime.now(timezone.utc)
             }
             products_to_insert.append(product)
         
@@ -130,7 +130,7 @@ async def update_product_price(db, visa_code: str, new_price: float, sync_stripe
             {
                 "$set": {
                     "price": new_price,
-                    "updated_at": datetime.utcnow()
+                    "updated_at": datetime.now(timezone.utc)
                 }
             }
         )
@@ -215,7 +215,7 @@ async def sync_product_to_stripe(db, visa_code: str) -> Dict:
             currency='usd',
             metadata={
                 "visa_code": visa_code,
-                "updated_at": datetime.utcnow().isoformat()
+                "updated_at": datetime.now(timezone.utc).isoformat()
             }
         )
         
@@ -237,7 +237,7 @@ async def sync_product_to_stripe(db, visa_code: str) -> Dict:
                 "$set": {
                     "stripe_product_id": stripe_product_id,
                     "stripe_price_id": stripe_price.id,
-                    "stripe_synced_at": datetime.utcnow()
+                    "stripe_synced_at": datetime.now(timezone.utc)
                 }
             }
         )

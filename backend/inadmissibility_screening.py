@@ -325,10 +325,10 @@ if __name__ == "__main__":
         q["id"]: "no" for q in screening.screening_questions
     }
     result = perform_screening(test_answers_low)
-    print("=== LOW RISK TEST ===")
-    print(f"Risk: {result['risk_level']}")
-    print(f"Can proceed: {result['can_proceed']}")
-    print("\n".join(result['recommendations']))
+    logger.info("=== LOW RISK TEST ===")
+    logger.info(f"Risk: {result['risk_level']}")
+    logger.info(f"Can proceed: {result['can_proceed']}")
+    logger.info("\n".join(result['recommendations']))
     
     # Test case 2: High risk
     test_answers_high = {
@@ -341,8 +341,8 @@ if __name__ == "__main__":
             test_answers_high[q["id"]] = "no"
     
     result = perform_screening(test_answers_high)
-    print("\n\n=== HIGH RISK TEST ===")
-    print(f"Risk: {result['risk_level']}")
-    print(f"Requires attorney: {result['requires_attorney']}")
-    print(f"Can proceed: {result['can_proceed']}")
-    print("\n".join(result['recommendations']))
+    logger.info("\n\n=== HIGH RISK TEST ===")
+    logger.info(f"Risk: {result['risk_level']}")
+    logger.info(f"Requires attorney: {result['requires_attorney']}")
+    logger.info(f"Can proceed: {result['can_proceed']}")
+    logger.info("\n".join(result['recommendations']))

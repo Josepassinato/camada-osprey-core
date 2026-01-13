@@ -25,7 +25,10 @@ logger = logging.getLogger(__name__)
 try:
     import sys
     sys.path.insert(0, str(Path(__file__).parent.parent))
-    from backend.visa_api import generate_package_from_case, FORM_CODE_TO_VISA_TYPE
+    if "visa_api" in sys.modules:
+        from visa_api import generate_package_from_case, FORM_CODE_TO_VISA_TYPE
+    else:
+        from backend.visa_api import generate_package_from_case, FORM_CODE_TO_VISA_TYPE
     AGENTS_AVAILABLE = True
     logger.info("✅ Visa agents loaded successfully for case finalizer")
 except Exception as e:

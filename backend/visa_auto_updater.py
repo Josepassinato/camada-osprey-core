@@ -7,7 +7,7 @@ import asyncio
 import aiohttp
 import json
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from bs4 import BeautifulSoup
@@ -16,7 +16,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from uuid import uuid4
 
 # AI Integration for change detection
-from emergentintegrations.llm.chat import LlmChat
+#from emergentintegrations.llm.chat import LlmChat
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +116,7 @@ class VisaAutoUpdater:
                                 data_type='processing_time',
                                 content=json.dumps(processing_info),
                                 url=url,
-                                scraped_at=datetime.utcnow(),
+                                scraped_at=datetime.now(timezone.utc),
                                 raw_html=html[:1000]  # Store first 1000 chars for debugging
                             ))
                             
@@ -134,7 +134,7 @@ class VisaAutoUpdater:
         processing_info = {
             'form_code': form_code,
             'processing_ranges': [],
-            'last_updated': datetime.utcnow().isoformat()
+            'last_updated': datetime.now(timezone.utc).isoformat()
         }
         
         # Look for processing time tables or divs
@@ -175,7 +175,7 @@ class VisaAutoUpdater:
                         data_type='filing_fee',
                         content=json.dumps(fee_info),
                         url=url,
-                        scraped_at=datetime.utcnow()
+                        scraped_at=datetime.now(timezone.utc)
                     ))
                     
         except Exception as e:
@@ -200,7 +200,7 @@ class VisaAutoUpdater:
                 fee_amount = fee_match.group(2).replace(',', '')
                 fees[form_code] = {
                     'amount': int(fee_amount),
-                    'effective_date': datetime.utcnow().isoformat()
+                    'effective_date': datetime.now(timezone.utc).isoformat()
                 }
         
         return fees
@@ -226,7 +226,7 @@ class VisaAutoUpdater:
                         data_type='visa_bulletin',
                         content=json.dumps(bulletin_data),
                         url=url,
-                        scraped_at=datetime.utcnow()
+                        scraped_at=datetime.now(timezone.utc)
                     ))
                     
         except Exception as e:
@@ -237,7 +237,7 @@ class VisaAutoUpdater:
     def _extract_visa_bulletin_data(self, soup: BeautifulSoup) -> Dict[str, Any]:
         """Extract visa bulletin priority dates"""
         bulletin_data = {
-            'current_month': datetime.utcnow().strftime('%B %Y'),
+            'current_month': datetime.now(timezone.utc).strftime('%B %Y'),
             'priority_dates': {},
             'retrogression_info': []
         }
@@ -269,7 +269,7 @@ class VisaAutoUpdater:
             params = {
                 'conditions[agencies][]': 'homeland-security-department',
                 'conditions[term]': 'USCIS immigration',
-                'conditions[publication_date][gte]': (datetime.utcnow() - timedelta(days=7)).strftime('%Y-%m-%d'),
+                'conditions[publication_date][gte]': (datetime.now(timezone.utc) - timedelta(days=7)).strftime('%Y-%m-%d'),
                 'per_page': 20,
                 'format': 'json'
             }
@@ -291,7 +291,7 @@ class VisaAutoUpdater:
                                 'url': article.get('html_url')
                             }),
                             url=article.get('html_url', ''),
-                            scraped_at=datetime.utcnow()
+                            scraped_at=datetime.now(timezone.utc)
                         ))
                         
         except Exception as e:
@@ -423,7 +423,7 @@ class VisaAutoUpdater:
                 **change,
                 'id': str(uuid4()),
                 'status': 'pending',
-                'created_at': datetime.utcnow()
+                'created_at': datetime.now(timezone.utc)
             }
             
             await self.db.visa_updates.insert_one(update_doc)
@@ -442,7 +442,7 @@ class VisaAutoUpdater:
                 'type': 'visa_updates',
                 'title': f'{pending_count} Visa Updates Pending Review',
                 'message': f'There are {pending_count} automatically detected visa information updates waiting for your review and approval.',
-                'created_at': datetime.utcnow(),
+                'created_at': datetime.now(timezone.utc),
                 'read': False,
                 'priority': 'high' if pending_count > 5 else 'medium'
             })

@@ -7,7 +7,7 @@ e evitam repetir os mesmos erros em processos futuros
 import os
 import logging
 from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 import json
 
@@ -76,7 +76,7 @@ class AgentLearningSystem:
         lesson = {
             "agent_name": agent_name,
             "case_id": case_id,
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(timezone.utc),
             "problem": {
                 "type": problem.get('type'),
                 "description": problem.get('description'),
@@ -390,7 +390,7 @@ class AgentLearningSystem:
         Returns:
             Estatísticas de aprendizado
         """
-        start_date = datetime.utcnow() - timedelta(days=days)
+        start_date = datetime.now(timezone.utc) - timedelta(days=days)
         
         query = {"timestamp": {"$gte": start_date}}
         if agent_name:

@@ -5,7 +5,7 @@ Sistema para upload e gerenciamento de documentos PDF para os agentes de IA
 
 import os
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict, Optional
 from pathlib import Path
 import uuid
@@ -81,8 +81,8 @@ async def save_pdf_to_knowledge_base(
             "extracted_text": extracted_text[:50000],  # Limitar a 50k chars para MongoDB
             "text_length": len(extracted_text),
             "uploaded_by": uploaded_by,
-            "uploaded_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow(),
+            "uploaded_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
             "status": "active"
         }
         
@@ -108,7 +108,7 @@ async def save_pdf_to_knowledge_base(
                 "description": description,
                 "file_size": len(file_content),
                 "text_length": len(extracted_text),
-                "uploaded_at": datetime.utcnow().isoformat()
+                "uploaded_at": datetime.now(timezone.utc).isoformat()
             }
         }
     
@@ -250,7 +250,7 @@ async def delete_knowledge_base_document(db, doc_id: str, deleted_by: str) -> Di
                 "$set": {
                     "status": "deleted",
                     "deleted_by": deleted_by,
-                    "deleted_at": datetime.utcnow()
+                    "deleted_at": datetime.now(timezone.utc)
                 }
             }
         )

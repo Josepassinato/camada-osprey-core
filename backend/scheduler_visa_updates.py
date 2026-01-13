@@ -5,7 +5,7 @@ Runs weekly visa information updates automatically with admin approval workflow
 
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
@@ -57,7 +57,7 @@ class VisaUpdateScheduler:
                     "job_type": "visa_update",
                     "status": "success",
                     "changes_detected": changes_count,
-                    "executed_at": datetime.utcnow(),
+                    "executed_at": datetime.now(timezone.utc),
                     "next_run": self.get_next_run_time()
                 })
             else:
@@ -68,7 +68,7 @@ class VisaUpdateScheduler:
                     "job_type": "visa_update",
                     "status": "error",
                     "error": error,
-                    "executed_at": datetime.utcnow(),
+                    "executed_at": datetime.now(timezone.utc),
                     "next_run": self.get_next_run_time()
                 })
                 
@@ -80,7 +80,7 @@ class VisaUpdateScheduler:
                 "job_type": "visa_update",
                 "status": "critical_error",
                 "error": str(e),
-                "executed_at": datetime.utcnow(),
+                "executed_at": datetime.now(timezone.utc),
                 "next_run": self.get_next_run_time()
             })
     
@@ -213,11 +213,11 @@ if __name__ == "__main__":
         
         # Get status
         status = await scheduler.get_schedule_status()
-        print(f"Scheduler status: {status}")
+        logger.info(f"Scheduler status: {status}")
         
         # Trigger manual update
         await scheduler.trigger_manual_update()
         
-        print("✅ Test completed")
+        logger.info("✅ Test completed")
     
     asyncio.run(test_scheduler())

@@ -4,7 +4,8 @@ Protege APIs contra abuso e ataques DDoS
 """
 
 from fastapi import Request, HTTPException, status
-from datetime import datetime, timedelta
+from starlette.middleware.base import BaseHTTPMiddleware
+from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 import asyncio
 from typing import Dict, Tuple
@@ -61,7 +62,7 @@ class RateLimiter:
         
         async with self.lock:
             # Clean old requests
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             cutoff = now - timedelta(seconds=window_seconds)
             
             # Remove requests older than window
@@ -125,7 +126,7 @@ class RateLimiter:
                 await asyncio.sleep(300)  # Every 5 minutes
                 
                 async with self.lock:
-                    now = datetime.utcnow()
+                    now = datetime.now(timezone.utc)
                     cutoff = now - timedelta(seconds=3600)  # Keep last hour
                     
                     # Clean each IP's request list
@@ -143,6 +144,21 @@ class RateLimiter:
             
             except Exception as e:
                 logger.error(f"Error in rate limiter cleanup: {str(e)}")
+
+
+# Middleware for FastAPI
+class RateLimiterMiddleware(BaseHTTPMiddleware):
+    """
+    Global rate limiter middleware.
+    For route-specific limits, keep using the dependency version.
+    """
+    def __init__(self, app, limit_type: str = "default"):
+        super().__init__(app)
+        self.limit_type = limit_type
+
+    async def dispatch(self, request: Request, call_next):
+        await rate_limiter.check_rate_limit(request, self.limit_type)
+        return await call_next(request)
 
 
 # Global rate limiter instance

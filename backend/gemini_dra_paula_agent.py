@@ -240,8 +240,8 @@ if __name__ == "__main__":
             question="Quais são os requisitos básicos para o visto H-1B?",
             visa_type="H-1B"
         )
-        print("\n=== TEST 1: General Question ===")
-        print(result1["response"][:500])
+        logger.info("\n=== TEST 1: General Question ===")
+        logger.info(result1["response"][:500])
         
         # Test 2: Document validation
         result2 = await agent.validate_document(
@@ -249,8 +249,8 @@ if __name__ == "__main__":
             document_data={"name": "João Silva", "passport_number": "BR123456"},
             visa_type="H-1B"
         )
-        print("\n=== TEST 2: Document Validation ===")
-        print(result2["response"][:500])
+        logger.info("\n=== TEST 2: Document Validation ===")
+        logger.info(result2["response"][:500])
         
         # Test 3: Eligibility check
         result3 = await agent.check_eligibility(
@@ -262,7 +262,7 @@ if __name__ == "__main__":
                 "salary": "$95,000"
             }
         )
-        print("\n=== TEST 3: Eligibility Check ===")
-        print(result3["response"][:500])
+        logger.info("\n=== TEST 3: Eligibility Check ===")
+        logger.info(result3["response"][:500])
     
     asyncio.run(test_agent())

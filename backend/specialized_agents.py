@@ -5,10 +5,10 @@ Multiple expert agents for specific tasks in the immigration process
 import os
 import json
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 import logging
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+#from emergentintegrations.llm.chat import LlmChat, UserMessage
 from document_validation_database import (
     DOCUMENT_VALIDATION_DATABASE, 
     VISA_DOCUMENT_REQUIREMENTS,
@@ -421,7 +421,7 @@ class DocumentValidationAgent(BaseSpecializedAgent):
         Implementa pipeline completo com KPIs mensuráveis
         """
         
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         
         try:
             # PHASE 1: Quality Assessment
@@ -538,7 +538,7 @@ class DocumentValidationAgent(BaseSpecializedAgent):
                 logger.info(f"📊 Enhanced field validation - Average confidence: {enhanced_avg_confidence:.1f}%")
             
             # PHASE 5: Calculate Processing Time and Metrics
-            processing_time = (datetime.utcnow() - start_time).total_seconds() * 1000
+            processing_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
             
             # PHASE 6: Final Decision with KPI Tracking
             # Ensure validation_result is not None to prevent errors
@@ -614,7 +614,7 @@ class DocumentValidationAgent(BaseSpecializedAgent):
             logger.error(f"Erro na validação de alta precisão: {str(e)}")
             
             # Calculate processing time even on error
-            processing_time = (datetime.utcnow() - start_time).total_seconds() * 1000
+            processing_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
             
             # Fallback para sistema original
             fallback_result = await self.validate_document(str(file_content), expected_document_type, {

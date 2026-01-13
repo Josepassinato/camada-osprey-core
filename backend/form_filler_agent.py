@@ -5,11 +5,15 @@ Especialidade: Automação de preenchimento de formulários USCIS
 
 import logging
 from typing import Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import os
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_KB_PATH = Path(__file__).resolve().parent.parent / "knowledge_base_documents.json"
+
 
 class FormFillerAgent:
     """
@@ -20,9 +24,10 @@ class FormFillerAgent:
     - Detecta campos obrigatórios faltantes
     """
     
-    def __init__(self, knowledge_base_path: str = "/app/knowledge_base_documents.json"):
+    def __init__(self, knowledge_base_path: Optional[str] = None):
         self.form_mappings = self._load_form_mappings()
-        self.knowledge_base = self._load_knowledge_base(knowledge_base_path)
+        kb_path = knowledge_base_path or str(DEFAULT_KB_PATH)
+        self.knowledge_base = self._load_knowledge_base(kb_path)
         logger.info(f"✅ Form Filler Agent inicializado com {len(self.knowledge_base.get('documents', []))} documentos de referência")
     
     def _load_knowledge_base(self, kb_path: str) -> Dict:
@@ -142,7 +147,7 @@ class FormFillerAgent:
                 'missing_required': missing_required,
                 'is_complete': is_complete,
                 'completion_percentage': round(completion_percentage, 2),
-                'filled_at': datetime.utcnow().isoformat()
+                'filled_at': datetime.now(timezone.utc).isoformat()
             }
             
         except Exception as e:

@@ -3,9 +3,12 @@
 Script para criar cupons de desconto no Stripe
 """
 
+import logging
 import os
 import stripe
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 # Carregar variáveis de ambiente
 load_dotenv()
@@ -23,26 +26,26 @@ def create_coupon(code, percent_off, name):
             name=name,
             id=code  # ID será o código do cupom
         )
-        print(f"✅ Cupom criado: {coupon.id}")
-        print(f"   Nome: {coupon.name}")
-        print(f"   Desconto: {coupon.percent_off}%")
-        print(f"   Duração: {coupon.duration}")
+        logger.info(f"✅ Cupom criado: {coupon.id}")
+        logger.info(f"   Nome: {coupon.name}")
+        logger.info(f"   Desconto: {coupon.percent_off}%")
+        logger.info(f"   Duração: {coupon.duration}")
         
         # Criar código promocional
         promo_code = stripe.PromotionCode.create(
             coupon=coupon.id,
             code=code
         )
-        print(f"✅ Código promocional criado: {promo_code.code}")
-        print(f"   Ativo: {promo_code.active}")
+        logger.info(f"✅ Código promocional criado: {promo_code.code}")
+        logger.info(f"   Ativo: {promo_code.active}")
         
         return coupon, promo_code
         
     except stripe.error.StripeError as e:
-        print(f"❌ Erro do Stripe: {str(e)}")
+        logger.error(f"❌ Erro do Stripe: {str(e)}")
         return None, None
     except Exception as e:
-        print(f"❌ Erro: {str(e)}")
+        logger.error(f"❌ Erro: {str(e)}")
         return None, None
 
 
@@ -50,30 +53,30 @@ def list_coupons():
     """Lista todos os cupons existentes"""
     try:
         coupons = stripe.Coupon.list(limit=10)
-        print("\n📋 Cupons existentes:")
+        logger.info("\n📋 Cupons existentes:")
         for coupon in coupons.data:
-            print(f"   - {coupon.id}: {coupon.percent_off}% OFF ({coupon.name})")
+            logger.info(f"   - {coupon.id}: {coupon.percent_off}% OFF ({coupon.name})")
         
         promo_codes = stripe.PromotionCode.list(limit=10)
-        print("\n🎟️ Códigos promocionais existentes:")
+        logger.info("\n🎟️ Códigos promocionais existentes:")
         for promo in promo_codes.data:
-            print(f"   - {promo.code}: Cupom {promo.coupon.id} (Ativo: {promo.active})")
+            logger.info(f"   - {promo.code}: Cupom {promo.coupon.id} (Ativo: {promo.active})")
             
     except Exception as e:
-        print(f"❌ Erro ao listar: {str(e)}")
+        logger.error(f"❌ Erro ao listar: {str(e)}")
 
 
 if __name__ == "__main__":
-    print("=" * 50)
-    print("CRIAÇÃO DE CUPONS NO STRIPE")
-    print("=" * 50)
+    logger.info("=" * 50)
+    logger.info("CRIAÇÃO DE CUPONS NO STRIPE")
+    logger.info("=" * 50)
     
     # Listar cupons existentes
     list_coupons()
     
-    print("\n" + "=" * 50)
-    print("CRIANDO NOVO CUPOM")
-    print("=" * 50)
+    logger.info("\n" + "=" * 50)
+    logger.info("CRIANDO NOVO CUPOM")
+    logger.info("=" * 50)
     
     # Criar cupom LANCAMENTO50
     create_coupon(
@@ -82,5 +85,5 @@ if __name__ == "__main__":
         name="Bônus de Lançamento - 50% OFF"
     )
     
-    print("\n✅ Processo concluído!")
-    print("\nAgora os usuários podem usar o código 'LANCAMENTO50' na página de checkout do Stripe.")
+    logger.info("\n✅ Processo concluído!")
+    logger.info("\nAgora os usuários podem usar o código 'LANCAMENTO50' na página de checkout do Stripe.")

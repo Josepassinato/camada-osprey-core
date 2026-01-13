@@ -3,12 +3,15 @@ Visa API Endpoints
 Endpoints para integração com arquitetura multi-agente
 """
 
+import logging
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
 import sys
 from pathlib import Path
 import time
+
+logger = logging.getLogger(__name__)
 
 # Add visa_specialists to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -52,7 +55,7 @@ supervisor.register_specialist('EB-1A', eb1a_agent)
 qa_agent = QualityAssuranceAgent()
 metrics = MetricsTracker()
 
-print(f"✅ {len(supervisor.specialists)} agentes especializados registrados no supervisor")
+logger.info(f"✅ {len(supervisor.specialists)} agentes especializados registrados no supervisor")
 
 
 # ============================================================================

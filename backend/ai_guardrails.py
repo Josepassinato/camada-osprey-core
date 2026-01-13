@@ -305,9 +305,9 @@ if __name__ == "__main__":
     
     for query in test_queries:
         result = validate_query(query)
-        print(f"\nQuery: {query}")
-        print(f"Allowed: {result['allowed']}")
-        print(f"Type: {result['query_type']}")
-        print(f"Confidence: {result['confidence']:.2f}")
+        logger.info(f"\nQuery: {query}")
+        logger.info(f"Allowed: {result['allowed']}")
+        logger.info(f"Type: {result['query_type']}")
+        logger.info(f"Confidence: {result['confidence']:.2f}")
         if not result['allowed']:
-            print(f"Blocked message: {result['blocked_message'][:100]}...")
+            logger.info(f"Blocked message: {result['blocked_message'][:100]}...")

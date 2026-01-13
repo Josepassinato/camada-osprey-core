@@ -4,7 +4,7 @@ Gerencia documentos de referência, templates e padrões
 NÃO fornece aconselhamento jurídico - apenas organização interna
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional
 import PyPDF2
 import io
@@ -48,7 +48,7 @@ class KnowledgeBaseManager:
         
         # Criar documento
         document = {
-            "document_id": f"KB-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}",
+            "document_id": f"KB-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}",
             "filename": filename,
             "category": category,
             "subcategory": subcategory,
@@ -58,8 +58,8 @@ class KnowledgeBaseManager:
             "file_size": len(file_data),
             "extracted_text": extracted_text,
             "uploaded_by": uploaded_by,
-            "upload_date": datetime.utcnow(),
-            "last_updated": datetime.utcnow(),
+            "upload_date": datetime.now(timezone.utc),
+            "last_updated": datetime.now(timezone.utc),
             "version": 1,
             "status": "active",
             "access_count": 0,
@@ -176,7 +176,7 @@ class KnowledgeBaseManager:
     
     async def update_document(self, document_id: str, updates: Dict) -> Dict:
         """Atualiza documento existente"""
-        updates['last_updated'] = datetime.utcnow()
+        updates['last_updated'] = datetime.now(timezone.utc)
         updates['$inc'] = {"version": 1}
         
         result = await self.collection.update_one(
@@ -193,7 +193,7 @@ class KnowledgeBaseManager:
         """Soft delete - marca como inativo"""
         result = await self.collection.update_one(
             {"document_id": document_id},
-            {"$set": {"status": "deleted", "deleted_at": datetime.utcnow()}}
+            {"$set": {"status": "deleted", "deleted_at": datetime.now(timezone.utc)}}
         )
         
         if result.modified_count > 0:

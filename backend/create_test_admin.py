@@ -2,18 +2,21 @@
 Script automatizado para criar usuário admin de teste
 """
 
+import logging
 import asyncio
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
 import bcrypt
 import uuid
 
+logger = logging.getLogger(__name__)
+
 load_dotenv()
 
-MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/')
-DB_NAME = os.environ.get('DB_NAME', 'test_database')
+MONGO_URL = os.environ.get('MONGODB_URI') or os.environ.get('MONGO_URL', 'mongodb://localhost:27017/')
+DB_NAME = os.environ.get('MONGODB_DB') or os.environ.get('DB_NAME', 'test_database')
 
 
 def hash_password(password: str) -> str:
@@ -23,18 +26,18 @@ def hash_password(password: str) -> str:
 async def create_test_admin():
     """Criar usuário admin de teste automaticamente"""
     
-    print("\n" + "="*60)
-    print("  🔐 CRIANDO USUÁRIO ADMIN DE TESTE")
-    print("="*60 + "\n")
+    logger.info("\n" + "="*60)
+    logger.info("  🔐 CRIANDO USUÁRIO ADMIN DE TESTE")
+    logger.info("="*60 + "\n")
     
     try:
         client = AsyncIOMotorClient(MONGO_URL)
         db = client[DB_NAME]
         
         await client.admin.command('ping')
-        print("✅ Conectado ao MongoDB\n")
+        logger.info("✅ Conectado ao MongoDB\n")
     except Exception as e:
-        print(f"❌ Erro ao conectar: {e}")
+        logger.error(f"❌ Erro ao conectar: {e}")
         return
     
     # Dados do admin de teste
@@ -51,18 +54,18 @@ async def create_test_admin():
     existing = await db.users.find_one({"email": test_admin["email"]})
     
     if existing:
-        print(f"⚠️  Usuário '{test_admin['email']}' já existe!")
-        print(f"   Atualizando role para 'admin'...\n")
+        logger.warning(f"⚠️  Usuário '{test_admin['email']}' já existe!")
+        logger.info(f"   Atualizando role para 'admin'...\n")
         
         await db.users.update_one(
             {"email": test_admin["email"]},
             {"$set": {
                 "role": "admin",
-                "updated_at": datetime.utcnow()
+                "updated_at": datetime.now(timezone.utc)
             }}
         )
         
-        print("✅ Role atualizado com sucesso!")
+        logger.info("✅ Role atualizado com sucesso!")
     else:
         # Criar novo usuário
         user_id = str(uuid.uuid4())
@@ -80,25 +83,25 @@ async def create_test_admin():
             "current_country": None,
             "date_of_birth": None,
             "passport_number": None,
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
         }
         
         await db.users.insert_one(user_data)
-        print("✅ Usuário admin criado com sucesso!")
+        logger.info("✅ Usuário admin criado com sucesso!")
     
-    print("\n" + "="*60)
-    print("  📋 CREDENCIAIS DO ADMIN DE TESTE")
-    print("="*60)
-    print(f"\n   Email:    {test_admin['email']}")
-    print(f"   Senha:    {test_admin['password']}")
-    print(f"   Role:     ADMIN")
-    print("\n🔗 Faça login em: http://localhost:3000/login")
-    print("\n💡 Depois do login, você pode acessar:")
-    print("   - http://localhost:3000/admin/visa-updates")
-    print("   - http://localhost:3000/admin/knowledge-base")
-    print("\n⚠️  Este é um usuário de TESTE. Use apenas em desenvolvimento!")
-    print("\n")
+    logger.info("\n" + "="*60)
+    logger.info("  📋 CREDENCIAIS DO ADMIN DE TESTE")
+    logger.info("="*60)
+    logger.info(f"\n   Email:    {test_admin['email']}")
+    logger.info(f"   Senha:    {test_admin['password']}")
+    logger.info(f"   Role:     ADMIN")
+    logger.info("\n🔗 Faça login em: http://localhost:3000/login")
+    logger.info("\n💡 Depois do login, você pode acessar:")
+    logger.info("   - http://localhost:3000/admin/visa-updates")
+    logger.info("   - http://localhost:3000/admin/knowledge-base")
+    logger.warning("\n⚠️  Este é um usuário de TESTE. Use apenas em desenvolvimento!")
+    logger.info("\n")
     
     client.close()
 

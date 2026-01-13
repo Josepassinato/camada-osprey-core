@@ -10,11 +10,14 @@ FLUXO:
 O revisor atua como um "senior attorney" ensinando agentes júnior
 """
 
+import logging
 import json
 import os
 from datetime import datetime
 from typing import Dict, List, Optional
 import sys
+
+logger = logging.getLogger(__name__)
 
 sys.path.insert(0, '/app')
 
@@ -70,9 +73,9 @@ class IterativeLearningSystem:
         """
         instructions = []
         
-        print(f"\n{'='*80}")
-        print(f"📚 GERANDO INSTRUÇÕES DE CORREÇÃO DETALHADAS")
-        print(f"{'='*80}")
+        logger.info(f"\n{'='*80}")
+        logger.info(f"📚 GERANDO INSTRUÇÕES DE CORREÇÃO DETALHADAS")
+        logger.info(f"{'='*80}")
         
         # Instruções para erros críticos
         if review_result.get('critical_errors'):
@@ -258,7 +261,7 @@ class IterativeLearningSystem:
         # Atualizar estatísticas de erros comuns
         for error in review_result.get('critical_errors', []):
             error_type = self._classify_error(error)
-            self.lessons['common_errors'][error_type] = \
+            self.lessons['common_errors'][error_type] =\
                 self.lessons['common_errors'].get(error_type, 0) + 1
         
         # Adicionar instruções ao histórico
@@ -272,7 +275,7 @@ class IterativeLearningSystem:
         
         # Manter apenas últimas 20 instruções
         if len(self.lessons['correction_instructions']) > 20:
-            self.lessons['correction_instructions'] = \
+            self.lessons['correction_instructions'] =\
                 self.lessons['correction_instructions'][-20:]
         
         self._save_lessons()
@@ -314,22 +317,22 @@ class IterativeLearningSystem:
             Dict com resultado final
         """
         
-        print(f"\n{'='*80}")
-        print(f"🔄 INICIANDO LOOP DE APRENDIZADO ITERATIVO")
-        print(f"{'='*80}")
-        print(f"Visa Type: {self.visa_type}")
-        print(f"Max Iterations: {self.max_iterations}")
-        print(f"Lições anteriores: {self.lessons['total_iterations']} iterações registradas")
+        logger.info(f"\n{'='*80}")
+        logger.info(f"🔄 INICIANDO LOOP DE APRENDIZADO ITERATIVO")
+        logger.info(f"{'='*80}")
+        logger.info(f"Visa Type: {self.visa_type}")
+        logger.info(f"Max Iterations: {self.max_iterations}")
+        logger.info(f"Lições anteriores: {self.lessons['total_iterations']} iterações registradas")
         
         current_pdf = initial_pdf_path
         
         for iteration in range(1, self.max_iterations + 1):
-            print(f"\n{'='*80}")
-            print(f"📍 ITERAÇÃO {iteration}/{self.max_iterations}")
-            print(f"{'='*80}")
+            logger.info(f"\n{'='*80}")
+            logger.info(f"📍 ITERAÇÃO {iteration}/{self.max_iterations}")
+            logger.info(f"{'='*80}")
             
             # Revisar pacote atual
-            print(f"\n🔍 Revisando pacote: {current_pdf}")
+            logger.info(f"\n🔍 Revisando pacote: {current_pdf}")
             review_result = self.reviewer.comprehensive_review(current_pdf)
             
             # Registrar iteração
@@ -347,9 +350,9 @@ class IterativeLearningSystem:
             
             # Verificar se foi aprovado
             if review_result['status'] == "APPROVED":
-                print(f"\n{'='*80}")
-                print(f"✅ PACOTE APROVADO NA ITERAÇÃO {iteration}!")
-                print(f"{'='*80}")
+                logger.info(f"\n{'='*80}")
+                logger.info(f"✅ PACOTE APROVADO NA ITERAÇÃO {iteration}!")
+                logger.info(f"{'='*80}")
                 
                 self.lessons['successful_approvals'] += 1
                 
@@ -369,7 +372,7 @@ class IterativeLearningSystem:
                 }
             
             # Se rejeitado, gerar instruções detalhadas
-            print(f"\n❌ Pacote REJEITADO. Gerando instruções de correção...")
+            logger.error(f"\n❌ Pacote REJEITADO. Gerando instruções de correção...")
             instructions = self.generate_detailed_correction_instructions(review_result)
             
             # Salvar instruções em arquivo
@@ -377,27 +380,27 @@ class IterativeLearningSystem:
             with open(instructions_file, 'w', encoding='utf-8') as f:
                 f.write('\n'.join(instructions))
             
-            print(f"\n📄 Instruções salvas em: {instructions_file}")
+            logger.info(f"\n📄 Instruções salvas em: {instructions_file}")
             
             # Aprender com a rejeição
             self.learn_from_rejection(review_result, instructions)
             
             # Se não é a última iteração, gerar nova versão
             if iteration < self.max_iterations:
-                print(f"\n🔧 Gerando versão melhorada baseada nas instruções...")
+                logger.info(f"\n🔧 Gerando versão melhorada baseada nas instruções...")
                 try:
                     current_pdf = generator_function(iteration, instructions, review_result)
-                    print(f"✅ Nova versão gerada: {current_pdf}")
+                    logger.info(f"✅ Nova versão gerada: {current_pdf}")
                 except Exception as e:
-                    print(f"❌ Erro ao gerar nova versão: {e}")
+                    logger.error(f"❌ Erro ao gerar nova versão: {e}")
                     break
             else:
-                print(f"\n⚠️ Número máximo de iterações ({self.max_iterations}) atingido")
+                logger.warning(f"\n⚠️ Número máximo de iterações ({self.max_iterations}) atingido")
         
         # Se chegou aqui, não foi aprovado
-        print(f"\n{'='*80}")
-        print(f"❌ PACOTE NÃO APROVADO APÓS {self.max_iterations} ITERAÇÕES")
-        print(f"{'='*80}")
+        logger.info(f"\n{'='*80}")
+        logger.error(f"❌ PACOTE NÃO APROVADO APÓS {self.max_iterations} ITERAÇÕES")
+        logger.info(f"{'='*80}")
         
         self._save_lessons()
         
@@ -412,25 +415,25 @@ class IterativeLearningSystem:
     
     def print_learning_summary(self):
         """Imprime resumo do aprendizado acumulado"""
-        print(f"\n{'='*80}")
-        print(f"📚 RESUMO DE APRENDIZADO ACUMULADO - {self.visa_type}")
-        print(f"{'='*80}")
-        print(f"Total de iterações executadas: {self.lessons['total_iterations']}")
-        print(f"Aprovações bem-sucedidas: {self.lessons['successful_approvals']}")
+        logger.info(f"\n{'='*80}")
+        logger.info(f"📚 RESUMO DE APRENDIZADO ACUMULADO - {self.visa_type}")
+        logger.info(f"{'='*80}")
+        logger.info(f"Total de iterações executadas: {self.lessons['total_iterations']}")
+        logger.info(f"Aprovações bem-sucedidas: {self.lessons['successful_approvals']}")
         
         if self.lessons['common_errors']:
-            print(f"\n🔴 Erros mais comuns:")
+            logger.error(f"\n🔴 Erros mais comuns:")
             sorted_errors = sorted(self.lessons['common_errors'].items(), 
                                  key=lambda x: x[1], reverse=True)
             for error_type, count in sorted_errors[:5]:
-                print(f"  • {error_type}: {count}x")
+                logger.error(f"  • {error_type}: {count}x")
         
         if self.lessons['best_practices']:
-            print(f"\n💡 Melhores práticas aprendidas:")
+            logger.info(f"\n💡 Melhores práticas aprendidas:")
             for practice in self.lessons['best_practices'][-5:]:
-                print(f"  • {practice}")
+                logger.info(f"  • {practice}")
         
-        print(f"{'='*80}")
+        logger.info(f"{'='*80}")
 
 
 if __name__ == "__main__":
@@ -439,7 +442,7 @@ if __name__ == "__main__":
     learning_system.print_learning_summary()
     
     # Testar geração de instruções com pacote existente
-    print("\n🧪 TESTE: Gerando instruções de correção...")
+    logger.info("\n🧪 TESTE: Gerando instruções de correção...")
     
     if os.path.exists('/app/PROFESSIONAL_H1B_PACKAGE_FERNANDA_SANTOS.pdf'):
         result = learning_system.reviewer.comprehensive_review(
@@ -452,6 +455,6 @@ if __name__ == "__main__":
         with open('/app/SAMPLE_CORRECTION_INSTRUCTIONS.txt', 'w', encoding='utf-8') as f:
             f.write('\n'.join(instructions))
         
-        print(f"\n✅ Instruções de exemplo salvas em: /app/SAMPLE_CORRECTION_INSTRUCTIONS.txt")
-        print(f"\n📄 Primeiras 20 linhas das instruções:")
-        print('\n'.join(instructions[:20]))
+        logger.info(f"\n✅ Instruções de exemplo salvas em: /app/SAMPLE_CORRECTION_INSTRUCTIONS.txt")
+        logger.info(f"\n📄 Primeiras 20 linhas das instruções:")
+        logger.info('\n'.join(instructions[:20]))

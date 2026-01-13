@@ -4,11 +4,11 @@ import logging
 import os
 import uuid
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Callable, Any
 from fastapi import WebSocket, WebSocketDisconnect
 from dataclasses import dataclass, asdict
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+#from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 @dataclass
 class FieldState:
@@ -103,7 +103,7 @@ class VoiceAgent:
             # Store snapshot for session
             self.active_sessions[session_id] = {
                 "snapshot": snapshot_data,
-                "last_update": datetime.utcnow().isoformat()
+                "last_update": datetime.now(timezone.utc).isoformat()
             }
             
             # Generate immediate guidance based on snapshot

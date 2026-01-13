@@ -8,7 +8,7 @@ Run this to backup all knowledge from Dra. Paula's OpenAI Assistant
 import os
 import json
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from openai import AsyncOpenAI
 import logging
 
@@ -54,7 +54,7 @@ async def extract_assistant_knowledge(assistant_id: str = "asst_kkyn65SQFfkloH4S
             "tools": [tool.model_dump() if hasattr(tool, 'model_dump') else str(tool) for tool in assistant.tools],
             "file_ids": assistant.file_ids if hasattr(assistant, 'file_ids') else [],
             "metadata": assistant.metadata,
-            "extracted_at": datetime.utcnow().isoformat()
+            "extracted_at": datetime.now(timezone.utc).isoformat()
         }
         
         # Save configuration
@@ -130,7 +130,7 @@ async def extract_assistant_knowledge(assistant_id: str = "asst_kkyn65SQFfkloH4S
             "has_instructions": bool(assistant.instructions),
             "instructions_length": len(assistant.instructions) if assistant.instructions else 0,
             "files_count": len(assistant.file_ids) if hasattr(assistant, 'file_ids') else 0,
-            "extracted_at": datetime.utcnow().isoformat(),
+            "extracted_at": datetime.now(timezone.utc).isoformat(),
             "files_saved": [
                 config_filename,
                 instructions_filename if assistant.instructions else None,
@@ -144,20 +144,20 @@ async def extract_assistant_knowledge(assistant_id: str = "asst_kkyn65SQFfkloH4S
         logger.info(f"✅ Summary saved to: {summary_filename}")
         
         # Print summary
-        print("\n" + "="*60)
-        print("📊 EXTRACTION SUMMARY")
-        print("="*60)
-        print(f"✅ Assistant ID: {assistant_id}")
-        print(f"✅ Assistant Name: {assistant.name}")
-        print(f"✅ Model: {assistant.model}")
-        print(f"✅ Instructions: {'Yes' if assistant.instructions else 'No'} ({len(assistant.instructions) if assistant.instructions else 0} chars)")
-        print(f"✅ Files: {len(assistant.file_ids) if hasattr(assistant, 'file_ids') else 0}")
-        print("\n📁 Files saved in /app/backend/:")
-        print(f"   - {config_filename}")
+        logger.info("\n" + "="*60)
+        logger.info("📊 EXTRACTION SUMMARY")
+        logger.info("="*60)
+        logger.info(f"✅ Assistant ID: {assistant_id}")
+        logger.info(f"✅ Assistant Name: {assistant.name}")
+        logger.info(f"✅ Model: {assistant.model}")
+        logger.info(f"✅ Instructions: {'Yes' if assistant.instructions else 'No'} ({len(assistant.instructions) if assistant.instructions else 0} chars)")
+        logger.info(f"✅ Files: {len(assistant.file_ids) if hasattr(assistant, 'file_ids') else 0}")
+        logger.info("\n📁 Files saved in /app/backend/:")
+        logger.info(f"   - {config_filename}")
         if assistant.instructions:
-            print(f"   - {instructions_filename}")
-        print(f"   - {summary_filename}")
-        print("="*60)
+            logger.info(f"   - {instructions_filename}")
+        logger.info(f"   - {summary_filename}")
+        logger.info("="*60)
         
         return True
         
@@ -170,22 +170,22 @@ async def extract_assistant_knowledge(assistant_id: str = "asst_kkyn65SQFfkloH4S
 
 async def main():
     """Main execution"""
-    print("\n🔧 OpenAI Assistant Knowledge Extractor")
-    print("="*60)
-    print("This tool extracts knowledge from Dra. Paula's OpenAI Assistant")
-    print("READ-ONLY operation - doesn't modify anything")
-    print("="*60)
+    logger.info("\n🔧 OpenAI Assistant Knowledge Extractor")
+    logger.info("="*60)
+    logger.info("This tool extracts knowledge from Dra. Paula's OpenAI Assistant")
+    logger.info("READ-ONLY operation - doesn't modify anything")
+    logger.info("="*60)
     
     success = await extract_assistant_knowledge()
     
     if success:
-        print("\n✅ Extraction completed successfully!")
-        print("\nNext steps:")
-        print("1. Review extracted files in /app/backend/")
-        print("2. Integrate any new knowledge into dra_paula_knowledge_base.py")
-        print("3. Test gemini_dra_paula_agent.py with extracted knowledge")
+        logger.info("\n✅ Extraction completed successfully!")
+        logger.info("\nNext steps:")
+        logger.info("1. Review extracted files in /app/backend/")
+        logger.info("2. Integrate any new knowledge into dra_paula_knowledge_base.py")
+        logger.info("3. Test gemini_dra_paula_agent.py with extracted knowledge")
     else:
-        print("\n❌ Extraction failed. Check logs for details.")
+        logger.error("\n❌ Extraction failed. Check logs for details.")
 
 
 if __name__ == "__main__":

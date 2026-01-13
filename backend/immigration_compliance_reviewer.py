@@ -15,11 +15,14 @@ VERIFICAÇÕES OBRIGATÓRIAS:
 RESULTADO: Apenas libera para download se 100% conforme
 """
 
+import logging
 import os
 import re
 from typing import Dict, List, Tuple, Optional
 from datetime import datetime, timedelta
 import hashlib
+
+logger = logging.getLogger(__name__)
 
 try:
     import pdfplumber
@@ -193,10 +196,10 @@ class ImmigrationComplianceReviewer:
         if not os.path.exists(pdf_path):
             return self._error_response(f"Arquivo não encontrado: {pdf_path}")
         
-        print(f"\n{'='*80}")
-        print(f"🔍 REVISÃO COMPLETA DE CONFORMIDADE - {self.visa_type}")
-        print(f"{'='*80}")
-        print(f"📄 Arquivo: {pdf_path}")
+        logger.info(f"\n{'='*80}")
+        logger.info(f"🔍 REVISÃO COMPLETA DE CONFORMIDADE - {self.visa_type}")
+        logger.info(f"{'='*80}")
+        logger.info(f"📄 Arquivo: {pdf_path}")
         
         critical_errors = []
         major_errors = []
@@ -206,24 +209,24 @@ class ImmigrationComplianceReviewer:
         try:
             with pdfplumber.open(pdf_path) as pdf:
                 num_pages = len(pdf.pages)
-                print(f"📃 Total de páginas: {num_pages}")
+                logger.info(f"📃 Total de páginas: {num_pages}")
                 
                 # Extrair todo o texto
-                print(f"\n📖 Extraindo texto de todas as páginas...")
+                logger.info(f"\n📖 Extraindo texto de todas as páginas...")
                 pages_text = []
                 for i, page in enumerate(pdf.pages):
                     text = page.extract_text() or ""
                     pages_text.append(text)
                     if (i + 1) % 20 == 0:
-                        print(f"   ✓ Processadas {i + 1} páginas...")
+                        logger.info(f"   ✓ Processadas {i + 1} páginas...")
                 
                 full_text = " ".join(pages_text)
-                print(f"   ✅ Total: {len(full_text):,} caracteres extraídos")
+                logger.info(f"   ✅ Total: {len(full_text):,} caracteres extraídos")
                 
                 # ============================================================
                 # VERIFICAÇÃO 1: FORMULÁRIOS OFICIAIS USCIS
                 # ============================================================
-                print(f"\n📋 VERIFICAÇÃO 1: Formulários Oficiais USCIS")
+                logger.info(f"\n📋 VERIFICAÇÃO 1: Formulários Oficiais USCIS")
                 forms_result = self._verify_official_forms(pages_text, full_text)
                 if forms_result['critical_errors']:
                     critical_errors.extend(forms_result['critical_errors'])
@@ -234,7 +237,7 @@ class ImmigrationComplianceReviewer:
                 # ============================================================
                 # VERIFICAÇÃO 2: DOCUMENTAÇÃO OBRIGATÓRIA
                 # ============================================================
-                print(f"\n📂 VERIFICAÇÃO 2: Documentação Obrigatória")
+                logger.info(f"\n📂 VERIFICAÇÃO 2: Documentação Obrigatória")
                 docs_result = self._verify_required_documents(pages_text, full_text)
                 if docs_result['critical_errors']:
                     critical_errors.extend(docs_result['critical_errors'])
@@ -247,7 +250,7 @@ class ImmigrationComplianceReviewer:
                 # ============================================================
                 # VERIFICAÇÃO 3: VALIDADE DE DOCUMENTOS
                 # ============================================================
-                print(f"\n📅 VERIFICAÇÃO 3: Validade de Documentos")
+                logger.info(f"\n📅 VERIFICAÇÃO 3: Validade de Documentos")
                 validity_result = self._verify_document_validity(pages_text, full_text)
                 if validity_result['critical_errors']:
                     critical_errors.extend(validity_result['critical_errors'])
@@ -258,7 +261,7 @@ class ImmigrationComplianceReviewer:
                 # ============================================================
                 # VERIFICAÇÃO 4: REQUISITOS LEGAIS
                 # ============================================================
-                print(f"\n⚖️ VERIFICAÇÃO 4: Requisitos Legais")
+                logger.info(f"\n⚖️ VERIFICAÇÃO 4: Requisitos Legais")
                 legal_result = self._verify_legal_requirements(pages_text, full_text)
                 if legal_result['critical_errors']:
                     critical_errors.extend(legal_result['critical_errors'])
@@ -269,7 +272,7 @@ class ImmigrationComplianceReviewer:
                 # ============================================================
                 # VERIFICAÇÃO 5: COERÊNCIA E CONSISTÊNCIA
                 # ============================================================
-                print(f"\n✅ VERIFICAÇÃO 5: Coerência e Consistência de Dados")
+                logger.info(f"\n✅ VERIFICAÇÃO 5: Coerência e Consistência de Dados")
                 consistency_result = self._verify_consistency(pages_text, full_text)
                 if consistency_result['critical_errors']:
                     critical_errors.extend(consistency_result['critical_errors'])
@@ -280,7 +283,7 @@ class ImmigrationComplianceReviewer:
                 # ============================================================
                 # VERIFICAÇÃO 6: QUALIDADE PROFISSIONAL
                 # ============================================================
-                print(f"\n📝 VERIFICAÇÃO 6: Qualidade Profissional do Conteúdo")
+                logger.info(f"\n📝 VERIFICAÇÃO 6: Qualidade Profissional do Conteúdo")
                 quality_result = self._verify_professional_quality(pages_text)
                 if quality_result['major_errors']:
                     major_errors.extend(quality_result['major_errors'])
@@ -292,7 +295,7 @@ class ImmigrationComplianceReviewer:
                 # VERIFICAÇÃO 7: DOCUMENTOS DO USUÁRIO (se fornecidos)
                 # ============================================================
                 if user_documents:
-                    print(f"\n📎 VERIFICAÇÃO 7: Documentos Enviados pelo Usuário")
+                    logger.info(f"\n📎 VERIFICAÇÃO 7: Documentos Enviados pelo Usuário")
                     user_docs_result = self._verify_user_documents(user_documents)
                     if user_docs_result['critical_errors']:
                         critical_errors.extend(user_docs_result['critical_errors'])
@@ -337,13 +340,13 @@ class ImmigrationComplianceReviewer:
         
         required_forms = self.requirements.get('required_forms', [])
         
-        print(f"   Formulários obrigatórios para {self.visa_type}: {len(required_forms)}")
+        logger.info(f"   Formulários obrigatórios para {self.visa_type}: {len(required_forms)}")
         
         for form_name in required_forms:
             # Verificar se formulário está presente
             if form_name.upper() in full_text.upper():
                 found_forms.append(form_name)
-                print(f"   ✅ {form_name} - ENCONTRADO")
+                logger.info(f"   ✅ {form_name} - ENCONTRADO")
                 
                 # Verificar se as seções obrigatórias estão presentes
                 if form_name in self.requirements.get('form_sections', {}):
@@ -360,7 +363,7 @@ class ImmigrationComplianceReviewer:
                         )
             else:
                 critical_errors.append(f"❌ FORMULÁRIO OBRIGATÓRIO AUSENTE: {form_name}")
-                print(f"   ❌ {form_name} - NÃO ENCONTRADO")
+                logger.error(f"   ❌ {form_name} - NÃO ENCONTRADO")
         
         # Verificar campos específicos (para LCA, I-20, etc.)
         if self.visa_type == "H-1B":
@@ -384,7 +387,7 @@ class ImmigrationComplianceReviewer:
         errors = []
         required_fields = self.requirements.get('required_fields_in_lca', [])
         
-        print(f"\n   📋 Verificando campos do LCA...")
+        logger.info(f"\n   📋 Verificando campos do LCA...")
         for field in required_fields:
             # Buscar padrões comuns para cada campo
             found = False
@@ -393,24 +396,24 @@ class ImmigrationComplianceReviewer:
                 pattern = r'(LCA.{0,20}Certification|Certification.{0,20}Number).{0,50}[A-Z]-\d{3}-\d{5}-\d{6}'
                 if re.search(pattern, full_text, re.IGNORECASE):
                     found = True
-                    print(f"      ✅ {field}")
+                    logger.info(f"      ✅ {field}")
             elif "Prevailing Wage" in field or "Wage Offered" in field:
                 pattern = r'\$\d{2,3},\d{3}'
                 if re.search(pattern, full_text):
                     found = True
-                    print(f"      ✅ {field}")
+                    logger.info(f"      ✅ {field}")
             elif "SOC Code" in field:
                 pattern = r'\d{2}-\d{4}'
                 if re.search(pattern, full_text):
                     found = True
-                    print(f"      ✅ {field}")
+                    logger.info(f"      ✅ {field}")
             elif field in full_text:
                 found = True
-                print(f"      ✅ {field}")
+                logger.info(f"      ✅ {field}")
             
             if not found:
                 errors.append(f"❌ LCA - Campo obrigatório ausente ou incompleto: {field}")
-                print(f"      ❌ {field} - NÃO ENCONTRADO")
+                logger.error(f"      ❌ {field} - NÃO ENCONTRADO")
         
         return {'errors': errors}
     
@@ -419,13 +422,13 @@ class ImmigrationComplianceReviewer:
         errors = []
         required_fields = self.requirements.get('required_fields_in_i20', [])
         
-        print(f"\n   📋 Verificando campos do Form I-20...")
+        logger.info(f"\n   📋 Verificando campos do Form I-20...")
         for field in required_fields:
             if field not in full_text:
                 errors.append(f"❌ Form I-20 - Campo obrigatório ausente: {field}")
-                print(f"      ❌ {field} - NÃO ENCONTRADO")
+                logger.error(f"      ❌ {field} - NÃO ENCONTRADO")
             else:
-                print(f"      ✅ {field}")
+                logger.info(f"      ✅ {field}")
         
         return {'errors': errors}
     
@@ -438,24 +441,24 @@ class ImmigrationComplianceReviewer:
         
         required_docs = self.requirements.get('required_documents', [])
         
-        print(f"   Documentos obrigatórios: {len(required_docs)}")
+        logger.info(f"   Documentos obrigatórios: {len(required_docs)}")
         
         for doc_name in required_docs:
             # Buscar documento no texto
             if doc_name.upper() in full_text.upper():
                 found_documents.append(doc_name)
-                print(f"   ✅ {doc_name}")
+                logger.info(f"   ✅ {doc_name}")
             else:
                 # Verificar se é documento crítico
                 if any(word in doc_name.upper() for word in ['PASSPORT', 'DIPLOMA', 'LCA', 'FORM', 'I-129', 'I-20']):
                     critical_errors.append(f"❌ DOCUMENTO CRÍTICO AUSENTE: {doc_name}")
-                    print(f"   ❌ {doc_name} - CRÍTICO")
+                    logger.error(f"   ❌ {doc_name} - CRÍTICO")
                 else:
                     major_errors.append(f"⚠️ Documento obrigatório ausente: {doc_name}")
-                    print(f"   ⚠️ {doc_name} - FALTANDO")
+                    logger.warning(f"   ⚠️ {doc_name} - FALTANDO")
         
         coverage = (len(found_documents) / len(required_docs) * 100) if required_docs else 0
-        print(f"\n   📊 Cobertura documental: {coverage:.1f}% ({len(found_documents)}/{len(required_docs)})")
+        logger.info(f"\n   📊 Cobertura documental: {coverage:.1f}% ({len(found_documents)}/{len(required_docs)})")
         
         return {
             'critical_errors': critical_errors,
@@ -470,7 +473,7 @@ class ImmigrationComplianceReviewer:
         critical_errors = []
         warnings = []
         
-        print(f"   Verificando validade de documentos...")
+        logger.info(f"   Verificando validade de documentos...")
         
         # Verificar passaporte não expirado
         passport_pattern = r'[Pp]assport.{0,100}[Ee]xpir.{0,20}(\d{2}/\d{2}/\d{4})'
@@ -482,12 +485,12 @@ class ImmigrationComplianceReviewer:
                     expiry_date = datetime.strptime(date_str, '%m/%d/%Y')
                     if expiry_date < datetime.now():
                         critical_errors.append(f"❌ PASSAPORTE EXPIRADO: {date_str}")
-                        print(f"   ❌ Passaporte expirado: {date_str}")
+                        logger.error(f"   ❌ Passaporte expirado: {date_str}")
                     elif expiry_date < datetime.now() + timedelta(days=180):
                         warnings.append(f"⚠️ Passaporte expira em menos de 6 meses: {date_str}")
-                        print(f"   ⚠️ Passaporte expira em breve: {date_str}")
+                        logger.warning(f"   ⚠️ Passaporte expira em breve: {date_str}")
                     else:
-                        print(f"   ✅ Passaporte válido até: {date_str}")
+                        logger.info(f"   ✅ Passaporte válido até: {date_str}")
                 except:
                     pass
         else:
@@ -496,15 +499,15 @@ class ImmigrationComplianceReviewer:
         # Verificar LCA certificado (H-1B)
         if self.visa_type == "H-1B":
             if "CERTIFIED" in full_text.upper() or "CERTIFICATION" in full_text.upper():
-                print(f"   ✅ LCA aparece como certificado")
+                logger.info(f"   ✅ LCA aparece como certificado")
             else:
                 critical_errors.append("❌ LCA não aparece como CERTIFICADO pelo DOL")
-                print(f"   ❌ LCA não certificado")
+                logger.error(f"   ❌ LCA não certificado")
         
         # Verificar datas de início/fim de emprego (devem ser futuras ou recentes)
         employment_dates = re.findall(r'[Ee]mployment.{0,50}(\d{2}/\d{2}/\d{4})', full_text)
         if employment_dates:
-            print(f"   ✅ Datas de emprego encontradas: {len(employment_dates)}")
+            logger.info(f"   ✅ Datas de emprego encontradas: {len(employment_dates)}")
         
         return {
             'critical_errors': critical_errors,
@@ -518,7 +521,7 @@ class ImmigrationComplianceReviewer:
         
         legal_reqs = self.requirements.get('legal_requirements', [])
         
-        print(f"   Requisitos legais a verificar: {len(legal_reqs)}")
+        logger.info(f"   Requisitos legais a verificar: {len(legal_reqs)}")
         
         for requirement in legal_reqs:
             verified = False
@@ -534,39 +537,39 @@ class ImmigrationComplianceReviewer:
                     
                     if offered >= prevailing:
                         verified = True
-                        print(f"   ✅ Salário oferecido (${offered:,}) >= prevailing wage (${prevailing:,})")
+                        logger.info(f"   ✅ Salário oferecido (${offered:,}) >= prevailing wage (${prevailing:,})")
                     else:
                         critical_errors.append(
                             f"❌ REQUISITO LEGAL NÃO ATENDIDO: Salário oferecido (${offered:,}) "
                             f"< prevailing wage (${prevailing:,})"
                         )
-                        print(f"   ❌ Salário insuficiente")
+                        logger.error(f"   ❌ Salário insuficiente")
             
             elif "specialty occupation" in requirement.lower():
                 if "specialty occupation" in full_text.lower() and "bachelor" in full_text.lower():
                     verified = True
-                    print(f"   ✅ Posição qualifica como specialty occupation")
+                    logger.info(f"   ✅ Posição qualifica como specialty occupation")
             
             elif "bachelor's degree" in requirement.lower():
                 if "bachelor" in full_text.lower() or "master" in full_text.lower():
                     verified = True
-                    print(f"   ✅ Beneficiário possui grau adequado")
+                    logger.info(f"   ✅ Beneficiário possui grau adequado")
             
             elif "ability to pay" in requirement.lower():
                 if "revenue" in full_text.lower() and "assets" in full_text.lower():
                     verified = True
-                    print(f"   ✅ Evidência de capacidade de pagamento presente")
+                    logger.info(f"   ✅ Evidência de capacidade de pagamento presente")
             
             else:
                 # Verificação genérica: buscar palavras-chave do requisito
                 keywords = requirement.lower().split()[:3]
                 if any(kw in full_text.lower() for kw in keywords):
                     verified = True
-                    print(f"   ✅ {requirement[:50]}...")
+                    logger.info(f"   ✅ {requirement[:50]}...")
             
             if not verified:
                 major_errors.append(f"⚠️ Requisito legal não verificado: {requirement}")
-                print(f"   ⚠️ {requirement[:50]}... - NÃO VERIFICADO")
+                logger.warning(f"   ⚠️ {requirement[:50]}... - NÃO VERIFICADO")
         
         return {
             'critical_errors': critical_errors,
@@ -578,7 +581,7 @@ class ImmigrationComplianceReviewer:
         critical_errors = []
         major_errors = []
         
-        print(f"   Verificando consistência de dados...")
+        logger.info(f"   Verificando consistência de dados...")
         
         if self.h1b_data:
             # Validar dados críticos aparecem consistentemente
@@ -594,12 +597,12 @@ class ImmigrationComplianceReviewer:
                 
                 if count == 0:
                     critical_errors.append(f"❌ Dado crítico ausente: {field_name} = {expected_value}")
-                    print(f"   ❌ {field_name} não encontrado")
+                    logger.error(f"   ❌ {field_name} não encontrado")
                 elif count < 3:
                     major_errors.append(f"⚠️ Dado crítico aparece poucas vezes ({count}x): {field_name}")
-                    print(f"   ⚠️ {field_name} aparece apenas {count}x")
+                    logger.warning(f"   ⚠️ {field_name} aparece apenas {count}x")
                 else:
-                    print(f"   ✅ {field_name} consistente ({count}x)")
+                    logger.info(f"   ✅ {field_name} consistente ({count}x)")
         
         # Verificar que não há contradições numéricas
         salary_matches = re.findall(r'\$\d{2,3},\d{3}', full_text)
@@ -607,7 +610,7 @@ class ImmigrationComplianceReviewer:
             unique_salaries = set(salary_matches)
             if len(unique_salaries) > 3:  # Mais de 3 salários diferentes é suspeito
                 major_errors.append(f"⚠️ Múltiplos valores de salário encontrados: {', '.join(list(unique_salaries)[:5])}")
-                print(f"   ⚠️ Múltiplos salários encontrados")
+                logger.warning(f"   ⚠️ Múltiplos salários encontrados")
         
         return {
             'critical_errors': critical_errors,
@@ -619,7 +622,7 @@ class ImmigrationComplianceReviewer:
         major_errors = []
         warnings = []
         
-        print(f"   Verificando qualidade profissional...")
+        logger.info(f"   Verificando qualidade profissional...")
         
         # Detectar páginas com conteúdo muito similar
         similar_count = 0
@@ -633,17 +636,17 @@ class ImmigrationComplianceReviewer:
             major_errors.append(
                 f"⚠️ Conteúdo repetitivo detectado: {similar_count} pares de páginas são >95% similares"
             )
-            print(f"   ⚠️ Conteúdo repetitivo detectado")
+            logger.warning(f"   ⚠️ Conteúdo repetitivo detectado")
         else:
-            print(f"   ✅ Conteúdo único e profissional")
+            logger.info(f"   ✅ Conteúdo único e profissional")
         
         # Verificar comprimento médio de páginas
         avg_length = sum(len(p) for p in pages_text) / len(pages_text)
         if avg_length < 300:
             warnings.append(f"⚠️ Páginas com pouco conteúdo (média: {avg_length:.0f} caracteres)")
-            print(f"   ⚠️ Páginas com pouco conteúdo")
+            logger.warning(f"   ⚠️ Páginas com pouco conteúdo")
         else:
-            print(f"   ✅ Páginas com conteúdo adequado")
+            logger.info(f"   ✅ Páginas com conteúdo adequado")
         
         return {
             'major_errors': major_errors,
@@ -655,7 +658,7 @@ class ImmigrationComplianceReviewer:
         critical_errors = []
         major_errors = []
         
-        print(f"   Verificando documentos do usuário...")
+        logger.info(f"   Verificando documentos do usuário...")
         
         # Verificar que documentos obrigatórios foram enviados
         required_user_docs = ['passport', 'diploma', 'transcripts']
@@ -663,9 +666,9 @@ class ImmigrationComplianceReviewer:
         for doc_type in required_user_docs:
             if doc_type not in user_documents or not user_documents[doc_type]:
                 critical_errors.append(f"❌ Documento do usuário faltando: {doc_type}")
-                print(f"   ❌ {doc_type} não enviado")
+                logger.error(f"   ❌ {doc_type} não enviado")
             else:
-                print(f"   ✅ {doc_type} enviado")
+                logger.info(f"   ✅ {doc_type} enviado")
         
         return {
             'critical_errors': critical_errors,
@@ -713,36 +716,36 @@ class ImmigrationComplianceReviewer:
     
     def _print_final_report(self, status: str, score: int, critical: List, major: List, warnings: List):
         """Imprime relatório final"""
-        print(f"\n{'='*80}")
-        print(f"📊 RESULTADO DA REVISÃO DE CONFORMIDADE")
-        print(f"{'='*80}")
-        print(f"Status: {'✅ ' + status if status == 'APPROVED' else '❌ ' + status}")
-        print(f"Score de Conformidade: {score}/100")
-        print(f"Erros Críticos: {len(critical)}")
-        print(f"Erros Maiores: {len(major)}")
-        print(f"Avisos: {len(warnings)}")
+        logger.info(f"\n{'='*80}")
+        logger.info(f"📊 RESULTADO DA REVISÃO DE CONFORMIDADE")
+        logger.info(f"{'='*80}")
+        logger.error(f"Status: {'✅ ' + status if status == 'APPROVED' else '❌ ' + status}")
+        logger.info(f"Score de Conformidade: {score}/100")
+        logger.error(f"Erros Críticos: {len(critical)}")
+        logger.error(f"Erros Maiores: {len(major)}")
+        logger.warning(f"Avisos: {len(warnings)}")
         
         if critical:
-            print(f"\n❌ ERROS CRÍTICOS ({len(critical)}):")
+            logger.error(f"\n❌ ERROS CRÍTICOS ({len(critical)}):")
             for err in critical[:10]:
-                print(f"  • {err}")
+                logger.info(f"  • {err}")
             if len(critical) > 10:
-                print(f"  ... e mais {len(critical) - 10} erros")
+                logger.error(f"  ... e mais {len(critical) - 10} erros")
         
         if major:
-            print(f"\n⚠️ ERROS MAIORES ({len(major)}):")
+            logger.error(f"\n⚠️ ERROS MAIORES ({len(major)}):")
             for err in major[:10]:
-                print(f"  • {err}")
+                logger.info(f"  • {err}")
             if len(major) > 10:
-                print(f"  ... e mais {len(major) - 10} erros")
+                logger.error(f"  ... e mais {len(major) - 10} erros")
         
         if status == "APPROVED":
-            print(f"\n✅ PACOTE APROVADO - Liberado para download")
+            logger.info(f"\n✅ PACOTE APROVADO - Liberado para download")
         else:
-            print(f"\n❌ PACOTE REJEITADO - NÃO liberado para download")
-            print(f"   Todas as questões devem ser corrigidas antes da liberação")
+            logger.error(f"\n❌ PACOTE REJEITADO - NÃO liberado para download")
+            logger.info(f"   Todas as questões devem ser corrigidas antes da liberação")
         
-        print(f"{'='*80}\n")
+        logger.info(f"{'='*80}\n")
     
     def _error_response(self, message: str) -> Dict:
         """Retorna resposta de erro"""
@@ -768,4 +771,4 @@ if __name__ == "__main__":
     if os.path.exists('/app/PROFESSIONAL_H1B_PACKAGE_FERNANDA_SANTOS.pdf'):
         result = reviewer.comprehensive_review('/app/PROFESSIONAL_H1B_PACKAGE_FERNANDA_SANTOS.pdf')
     else:
-        print("⚠️ Pacote não encontrado para teste")
+        logger.warning("⚠️ Pacote não encontrado para teste")

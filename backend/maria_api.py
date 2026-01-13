@@ -3,11 +3,14 @@ Maria API Endpoints
 Endpoints para chat com a assistente virtual Maria
 """
 
+import logging
 from fastapi import APIRouter, HTTPException, Depends, Request
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
+
+logger = logging.getLogger(__name__)
 
 from maria_agent import maria
 from maria_whatsapp import maria_whatsapp
@@ -107,7 +110,7 @@ async def chat_with_maria(chat_msg: ChatMessage):
                 "maria_response": result["response"],
                 "emotion_detected": result.get("emotion_detected"),
                 "needs_disclaimer": result.get("needs_disclaimer"),
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(timezone.utc),
                 "user_context": user_context
             })
         
@@ -121,7 +124,7 @@ async def chat_with_maria(chat_msg: ChatMessage):
         )
         
     except Exception as e:
-        print(f"❌ Erro no chat com Maria: {e}")
+        logger.error(f"❌ Erro no chat com Maria: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -157,7 +160,7 @@ async def get_welcome_message(user_id: Optional[str] = None):
         }
         
     except Exception as e:
-        print(f"❌ Erro ao gerar welcome message: {e}")
+        logger.error(f"❌ Erro ao gerar welcome message: {e}")
         return {
             "success": True,
             "message": maria.get_welcome_message()
@@ -199,7 +202,7 @@ async def get_conversation_history(conversation_id: str, limit: int = 50):
         }
         
     except Exception as e:
-        print(f"❌ Erro ao buscar histórico: {e}")
+        logger.error(f"❌ Erro ao buscar histórico: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -226,7 +229,7 @@ async def get_maria_analytics():
         
         # Conversas por dia (últimos 7 dias)
         from datetime import timedelta
-        seven_days_ago = datetime.utcnow() - timedelta(days=7)
+        seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
         
         daily_conversations = await db.maria_conversations.aggregate([
             {"$match": {"timestamp": {"$gte": seven_days_ago}}},
@@ -249,7 +252,7 @@ async def get_maria_analytics():
         }
         
     except Exception as e:
-        print(f"❌ Erro ao buscar analytics: {e}")
+        logger.error(f"❌ Erro ao buscar analytics: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -277,7 +280,7 @@ async def text_to_speech(request: dict):
         return result
         
     except Exception as e:
-        print(f"❌ Erro no TTS: {e}")
+        logger.error(f"❌ Erro no TTS: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -307,7 +310,7 @@ async def speech_to_text(request: dict):
         return result
         
     except Exception as e:
-        print(f"❌ Erro no STT: {e}")
+        logger.error(f"❌ Erro no STT: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -329,7 +332,7 @@ async def send_whatsapp(request: dict):
         return result
         
     except Exception as e:
-        print(f"❌ Erro ao enviar WhatsApp: {e}")
+        logger.error(f"❌ Erro ao enviar WhatsApp: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -378,13 +381,13 @@ async def send_welcome_whatsapp(user_id: str):
                 "message_type": "welcome",
                 "success": True,
                 "message_id": result.get("message_id"),
-                "timestamp": datetime.utcnow()
+                "timestamp": datetime.now(timezone.utc)
             })
         
         return result
         
     except Exception as e:
-        print(f"❌ Erro ao enviar boas-vindas WhatsApp: {e}")
+        logger.error(f"❌ Erro ao enviar boas-vindas WhatsApp: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

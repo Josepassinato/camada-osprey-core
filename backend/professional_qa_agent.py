@@ -7,7 +7,7 @@ Garante que nenhum processo incompleto ou com baixa qualidade seja liberado
 import os
 import logging
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 import json
 
@@ -331,7 +331,7 @@ class ProfessionalQAAgent:
         
         # Estrutura do relatório
         report = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "case_id": case_data.get('case_id'),
             "form_code": form_code,
             "form_name": requirements['form'],
@@ -778,7 +778,7 @@ class ProfessionalQAAgent:
     def _generic_review(self, case_data: Dict[str, Any]) -> Dict[str, Any]:
         """Revisão genérica para tipos de visto sem requisitos específicos"""
         return {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "case_id": case_data.get('case_id'),
             "form_code": case_data.get('form_code'),
             "status": "pending_manual_review",

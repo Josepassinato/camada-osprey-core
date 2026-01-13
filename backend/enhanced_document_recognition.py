@@ -8,8 +8,8 @@ import json
 import base64
 from typing import Dict, List, Any, Optional, Tuple
 import logging
-from datetime import datetime
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+from datetime import datetime, timezone
+#from emergentintegrations.llm.chat import LlmChat, UserMessage
 from document_validation_database import (
     get_document_validation_info,
     get_required_documents_for_visa,
@@ -618,7 +618,7 @@ class EnhancedDocumentRecognitionAgent:
                 "identified_document": document_analysis.get('identified_type', 'unknown'),
                 "visa_type": visa_type,
                 "applicant_name": applicant_name,
-                "analysis_timestamp": datetime.utcnow().isoformat()
+                "analysis_timestamp": datetime.now(timezone.utc).isoformat()
             }
         }
     

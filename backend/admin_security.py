@@ -3,13 +3,16 @@ Admin Security Module
 Implementa autenticação e autorização para endpoints administrativos
 """
 
+import logging
 from fastapi import HTTPException, Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Optional, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import jwt
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
+
+logger = logging.getLogger(__name__)
 
 # JWT Configuration
 JWT_SECRET = os.environ.get('JWT_SECRET', 'osprey-secret-key-change-in-production')
@@ -173,7 +176,7 @@ async def log_admin_action(
         
         # Criar log entry
         log_entry = {
-            "log_id": f"audit_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{admin_user.get('id')[:8]}",
+            "log_id": f"audit_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}_{admin_user.get('id')[:8]}",
             "admin_id": admin_user.get('id'),
             "admin_email": admin_user.get('email'),
             "admin_name": f"{admin_user.get('first_name', '')} {admin_user.get('last_name', '')}".strip(),
@@ -184,8 +187,8 @@ async def log_admin_action(
             "success": success,
             "ip_address": ip_address,
             "user_agent": user_agent,
-            "timestamp": datetime.utcnow(),
-            "created_at": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc),
+            "created_at": datetime.now(timezone.utc)
         }
         
         # Inserir no MongoDB
@@ -193,11 +196,11 @@ async def log_admin_action(
         
         # Log também no console para monitoramento
         status = "✅" if success else "❌"
-        print(f"{status} AUDIT: {admin_user.get('email')} - {action} - {resource_type}:{resource_id}")
+        logger.info(f"{status} AUDIT: {admin_user.get('email')} - {action} - {resource_type}:{resource_id}")
         
     except Exception as e:
         # Não falhar a operação principal se o log falhar
-        print(f"⚠️ Failed to log admin action: {e}")
+        logger.error(f"⚠️ Failed to log admin action: {e}")
 
 
 async def get_admin_audit_log(
@@ -276,7 +279,7 @@ class RateLimiter:
         Returns:
             True se dentro do limite, False se excedido
         """
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         window_start = now.timestamp() - window_seconds
         
         # Limpar requests antigas

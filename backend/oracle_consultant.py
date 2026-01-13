@@ -6,9 +6,13 @@ Sistema de consulta à base de conhecimento jurídica para orientar os agentes
 import json
 import os
 from typing import List, Dict, Optional
+from pathlib import Path
 import logging
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_KB_PATH = Path(__file__).resolve().parent.parent / "knowledge_base_documents.json"
+
 
 class ImmigrationOracle:
     """
@@ -19,8 +23,8 @@ class ImmigrationOracle:
     - Checklists e procedimentos
     """
     
-    def __init__(self, kb_path: str = "/app/knowledge_base_documents.json"):
-        self.kb_path = kb_path
+    def __init__(self, kb_path: Optional[str] = None):
+        self.kb_path = kb_path or str(DEFAULT_KB_PATH)
         self.knowledge_base = self._load_knowledge_base()
         logger.info(f"✅ Oráculo inicializado com {len(self.knowledge_base.get('documents', []))} documentos")
     

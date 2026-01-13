@@ -5,7 +5,7 @@ Especialidade: Tradução de documentos multilíngues para inglês/português
 
 import logging
 from typing import Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import re
 
 logger = logging.getLogger(__name__)
@@ -119,7 +119,7 @@ class TranslationAgent:
                 'document_type': document_type,
                 'quality_score': quality_score,
                 'word_count': len(text.split()),
-                'translated_at': datetime.utcnow().isoformat(),
+                'translated_at': datetime.now(timezone.utc).isoformat(),
                 'is_certified': False,  # Requer certificação oficial
                 'note': 'This is an automated translation. USCIS requires certified translations for official documents.'
             }
@@ -223,7 +223,7 @@ to {self.supported_languages.get(target_lang)}, and that the above translation i
 to the best of my knowledge and belief.
 
 Translator's Credentials: {translator_credentials}
-Date: {datetime.utcnow().strftime('%B %d, %Y')}
+Date: {datetime.now(timezone.utc).strftime('%B %d, %Y')}
 
 Signature: ________________________
 {translator_name}
@@ -250,7 +250,7 @@ TRANSLATED TEXT ({self.supported_languages.get(target_lang)}):
             'success': True,
             'certified_document': certified_document,
             'translator_name': translator_name,
-            'certification_date': datetime.utcnow().isoformat(),
+            'certification_date': datetime.now(timezone.utc).isoformat(),
             'is_uscis_compliant': True,
             'note': 'This is a simulated certified translation. For official use, hire a professional certified translator.'
         }
@@ -309,7 +309,7 @@ TRANSLATED TEXT ({self.supported_languages.get(target_lang)}):
             'success': True,
             'total_texts': len(texts),
             'translations': translations,
-            'batch_translated_at': datetime.utcnow().isoformat()
+            'batch_translated_at': datetime.now(timezone.utc).isoformat()
         }
 
 

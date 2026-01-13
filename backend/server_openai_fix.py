@@ -1,7 +1,10 @@
 # Script to replace all OpenAI calls with EmergentIntegrations in server.py
 
+import logging
 import os
 import re
+
+logger = logging.getLogger(__name__)
 
 def fix_openai_calls(file_path):
     with open(file_path, 'r') as f:
@@ -136,7 +139,7 @@ def fix_openai_calls(file_path):
     with open(file_path, 'w') as f:
         f.write(content)
     
-    print("OpenAI calls replaced with EmergentIntegrations")
+    logger.info("OpenAI calls replaced with EmergentIntegrations")
 
 if __name__ == "__main__":
     fix_openai_calls("/app/backend/server.py")

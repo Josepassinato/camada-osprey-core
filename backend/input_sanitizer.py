@@ -5,8 +5,11 @@ Protege contra XSS, SQL Injection, e outras vulnerabilidades
 
 import re
 import html
+import json
 from typing import Any, Dict, List, Union
 import logging
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
 
 logger = logging.getLogger(__name__)
 
@@ -234,3 +237,32 @@ def sanitize_request_body(body: Union[Dict, List, str]) -> Union[Dict, List, str
         return InputSanitizer.sanitize_string(body)
     else:
         return body
+
+
+class InputSanitizerMiddleware(BaseHTTPMiddleware):
+    """
+    Sanitizes JSON request bodies to reduce XSS/SQLi risks.
+    Non-JSON payloads are passed through untouched.
+    """
+    async def dispatch(self, request: Request, call_next):
+        content_type = request.headers.get("content-type", "")
+        if "application/json" in content_type.lower():
+            raw_body = await request.body()
+            if raw_body:
+                try:
+                    data = json.loads(raw_body)
+                    sanitized = sanitize_request_body(data)
+                    sanitized_bytes = json.dumps(sanitized).encode("utf-8")
+
+                    async def receive():
+                        return {
+                            "type": "http.request",
+                            "body": sanitized_bytes,
+                            "more_body": False,
+                        }
+
+                    request = Request(request.scope, receive)
+                except json.JSONDecodeError:
+                    pass
+
+        return await call_next(request)

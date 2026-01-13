@@ -3,10 +3,13 @@ Maria - Assistente Virtual Osprey
 Agente de atendimento motivacional com psicologia positiva
 """
 
+import logging
 import os
 import json
 from typing import Dict, List, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
+
+logger = logging.getLogger(__name__)
 
 # Import Gemini chat
 from maria_gemini_chat import maria_gemini
@@ -261,7 +264,7 @@ Status do Caso: {user_context.get('case_status', 'Iniciando')}
             
             if not gemini_result.get("success"):
                 # Fallback inteligente se Gemini falhar
-                print(f"⚠️ Gemini falhou: {gemini_result.get('error')}")
+                logger.error(f"⚠️ Gemini falhou: {gemini_result.get('error')}")
                 maria_response = self._generate_fallback_response(user_message, user_context)
             else:
                 maria_response = gemini_result["response"]
@@ -276,17 +279,17 @@ Status do Caso: {user_context.get('case_status', 'Iniciando')}
                 "disclaimer_type": "legal" if needs_legal_disclaimer else "prediction" if needs_prediction_disclaimer else None,
                 "disclaimer_text": self.disclaimers.get("legal_question" if needs_legal_disclaimer else "prediction") if (needs_legal_disclaimer or needs_prediction_disclaimer) else None,
                 "emotion_detected": self._detect_emotion(user_message),
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
             return result
             
         except Exception as e:
-            print(f"❌ Erro no chat com Maria: {e}")
+            logger.error(f"❌ Erro no chat com Maria: {e}")
             return {
                 "response": "Desculpe, tive um probleminha técnico 😅 Pode tentar novamente?",
                 "error": str(e),
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
     
     def _detect_legal_question(self, message: str) -> bool:

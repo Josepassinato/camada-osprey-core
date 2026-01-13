@@ -12,18 +12,21 @@ Funcionalidades:
 6. Retorna relatório detalhado com APPROVED/REJECTED
 """
 
+import logging
 import os
 import hashlib
 import re
 from typing import Dict, List, Tuple
 from datetime import datetime
 
+logger = logging.getLogger(__name__)
+
 try:
     import pdfplumber
     PDFPLUMBER_AVAILABLE = True
 except ImportError:
     PDFPLUMBER_AVAILABLE = False
-    print("⚠️ pdfplumber não está instalado. Instale com: pip install pdfplumber")
+    logger.warning("⚠️ pdfplumber não está instalado. Instale com: pip install pdfplumber")
 
 
 class AdvancedImmigrationReviewerAgent:
@@ -90,10 +93,10 @@ class AdvancedImmigrationReviewerAgent:
                 "details": {}
             }
         
-        print(f"\n{'='*80}")
-        print(f"🔍 INICIANDO REVISÃO AVANÇADA DO PACOTE H-1B")
-        print(f"{'='*80}")
-        print(f"📄 Arquivo: {pdf_path}")
+        logger.info(f"\n{'='*80}")
+        logger.info(f"🔍 INICIANDO REVISÃO AVANÇADA DO PACOTE H-1B")
+        logger.info(f"{'='*80}")
+        logger.info(f"📄 Arquivo: {pdf_path}")
         
         errors = []
         warnings = []
@@ -102,14 +105,14 @@ class AdvancedImmigrationReviewerAgent:
         try:
             with pdfplumber.open(pdf_path) as pdf:
                 num_pages = len(pdf.pages)
-                print(f"📃 Total de páginas: {num_pages}")
+                logger.info(f"📃 Total de páginas: {num_pages}")
                 
                 # 1. Verificar número mínimo de páginas
                 if num_pages < self.min_pages:
                     errors.append(f"Pacote muito curto: {num_pages} páginas (mínimo: {self.min_pages})")
                 
                 # 2. Extrair texto de todas as páginas
-                print(f"\n📖 Extraindo texto de todas as páginas...")
+                logger.info(f"\n📖 Extraindo texto de todas as páginas...")
                 pages_text = []
                 pages_hashes = []
                 
@@ -122,16 +125,16 @@ class AdvancedImmigrationReviewerAgent:
                     pages_hashes.append(text_hash)
                     
                     if (i + 1) % 10 == 0:
-                        print(f"   ✓ Processadas {i + 1} páginas...")
+                        logger.info(f"   ✓ Processadas {i + 1} páginas...")
                 
-                print(f"   ✅ Todas as {num_pages} páginas processadas")
+                logger.info(f"   ✅ Todas as {num_pages} páginas processadas")
                 
                 # 3. Detectar páginas duplicadas (exatas)
-                print(f"\n🔎 Detectando páginas duplicadas exatas...")
+                logger.info(f"\n🔎 Detectando páginas duplicadas exatas...")
                 duplicate_pages = self._find_duplicate_pages(pages_hashes)
                 duplicate_percentage = (len(duplicate_pages) / num_pages) * 100
                 
-                print(f"   📊 Páginas duplicadas exatas: {len(duplicate_pages)} ({duplicate_percentage:.1f}%)")
+                logger.info(f"   📊 Páginas duplicadas exatas: {len(duplicate_pages)} ({duplicate_percentage:.1f}%)")
                 
                 if duplicate_percentage > (self.max_duplicate_threshold * 100):
                     errors.append(
@@ -143,11 +146,11 @@ class AdvancedImmigrationReviewerAgent:
                         errors.append(f"   → Páginas idênticas: {', '.join(map(str, sorted(dup_set)))}")
                 
                 # 3.5. Detectar páginas SIMILARES (conteúdo repetitivo com pequenas variações)
-                print(f"\n🔍 Detectando páginas com conteúdo SIMILAR (repetitivo)...")
+                logger.info(f"\n🔍 Detectando páginas com conteúdo SIMILAR (repetitivo)...")
                 similar_pages = self._find_similar_pages(pages_text)
                 similar_percentage = (len(similar_pages) / num_pages) * 100
                 
-                print(f"   📊 Páginas similares/repetitivas: {len(similar_pages)} ({similar_percentage:.1f}%)")
+                logger.info(f"   📊 Páginas similares/repetitivas: {len(similar_pages)} ({similar_percentage:.1f}%)")
                 
                 if similar_percentage > (self.max_duplicate_threshold * 100):
                     errors.append(
@@ -159,7 +162,7 @@ class AdvancedImmigrationReviewerAgent:
                         errors.append(f"   → Páginas {', '.join(map(str, page_nums))} são {similarity:.0f}% similares")
                 
                 # 4. Detectar texto genérico ou placeholder
-                print(f"\n🔍 Detectando texto genérico ou placeholder...")
+                logger.info(f"\n🔍 Detectando texto genérico ou placeholder...")
                 generic_pages = self._find_generic_content(pages_text)
                 
                 if generic_pages:
@@ -168,7 +171,7 @@ class AdvancedImmigrationReviewerAgent:
                         errors.append(f"   → Página {page_num + 1}: {', '.join(phrases)}")
                 
                 # 5. Verificar conteúdo mínimo por página
-                print(f"\n📏 Verificando quantidade de conteúdo por página...")
+                logger.info(f"\n📏 Verificando quantidade de conteúdo por página...")
                 thin_pages = self._find_thin_pages(pages_text)
                 
                 if thin_pages:
@@ -177,18 +180,18 @@ class AdvancedImmigrationReviewerAgent:
                         warnings.append(f"   → Página {page_num + 1}: apenas {char_count} caracteres")
                 
                 # 6. Validar consistência de dados (se modelo fornecido)
-                print(f"\n✅ Validando consistência de dados...")
+                logger.info(f"\n✅ Validando consistência de dados...")
                 if self.h1b_data:
                     consistency_errors = self._validate_data_consistency(pages_text)
                     if consistency_errors:
                         errors.extend(consistency_errors)
                     else:
-                        print(f"   ✅ Todos os dados estão consistentes")
+                        logger.info(f"   ✅ Todos os dados estão consistentes")
                 else:
                     warnings.append("Modelo de dados não fornecido - validação de consistência pulada")
                 
                 # 7. Verificar seções obrigatórias
-                print(f"\n📋 Verificando seções obrigatórias...")
+                logger.info(f"\n📋 Verificando seções obrigatórias...")
                 missing_sections = self._check_required_sections(pages_text)
                 if missing_sections:
                     errors.append(f"Seções obrigatórias faltando: {', '.join(missing_sections)}")
@@ -216,25 +219,25 @@ class AdvancedImmigrationReviewerAgent:
         status = "APPROVED" if score >= 75 and len(errors) == 0 else "REJECTED"
         
         # Relatório final
-        print(f"\n{'='*80}")
-        print(f"📊 RESULTADO DA REVISÃO")
-        print(f"{'='*80}")
-        print(f"Status: {status}")
-        print(f"Score: {score}/100")
-        print(f"Erros: {len(errors)}")
-        print(f"Avisos: {len(warnings)}")
+        logger.info(f"\n{'='*80}")
+        logger.info(f"📊 RESULTADO DA REVISÃO")
+        logger.info(f"{'='*80}")
+        logger.info(f"Status: {status}")
+        logger.info(f"Score: {score}/100")
+        logger.error(f"Erros: {len(errors)}")
+        logger.warning(f"Avisos: {len(warnings)}")
         
         if errors:
-            print(f"\n❌ ERROS ENCONTRADOS:")
+            logger.error(f"\n❌ ERROS ENCONTRADOS:")
             for error in errors:
-                print(f"  • {error}")
+                logger.error(f"  • {error}")
         
         if warnings:
-            print(f"\n⚠️ AVISOS:")
+            logger.warning(f"\n⚠️ AVISOS:")
             for warning in warnings:
-                print(f"  • {warning}")
+                logger.warning(f"  • {warning}")
         
-        print(f"{'='*80}\n")
+        logger.info(f"{'='*80}\n")
         
         return {
             "status": status,
@@ -441,16 +444,16 @@ class AdvancedImmigrationReviewerAgent:
 
 def test_reviewer():
     """Função de teste para o revisor"""
-    print("🧪 Testando Advanced Immigration Reviewer Agent...")
+    logger.info("🧪 Testando Advanced Immigration Reviewer Agent...")
     
     # Importar modelo de dados
     try:
         import sys
         sys.path.insert(0, '/app')
         from h1b_data_model import h1b_data
-        print("✅ Modelo de dados H-1B carregado")
+        logger.info("✅ Modelo de dados H-1B carregado")
     except ImportError as e:
-        print(f"⚠️ Modelo de dados não encontrado: {e}")
+        logger.warning(f"⚠️ Modelo de dados não encontrado: {e}")
         h1b_data = None
     
     # Criar instância do revisor
@@ -464,11 +467,11 @@ def test_reviewer():
     
     for test_file in test_files:
         if os.path.exists(test_file):
-            print(f"\n✅ Encontrado arquivo para teste: {test_file}")
+            logger.info(f"\n✅ Encontrado arquivo para teste: {test_file}")
             result = reviewer.review_package(test_file)
             return result
     
-    print("\n⚠️ Nenhum arquivo PDF encontrado para teste")
+    logger.warning("\n⚠️ Nenhum arquivo PDF encontrado para teste")
     return None
 
 
