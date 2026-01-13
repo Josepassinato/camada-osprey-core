@@ -39,6 +39,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ visaCode, caseId, clientSec
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [isPaymentElementReady, setIsPaymentElementReady] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,7 +118,13 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ visaCode, caseId, clientSec
 
       {/* Payment Element */}
       <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <PaymentElement />
+        <PaymentElement
+          onReady={() => setIsPaymentElementReady(true)}
+          onLoadError={(error) => {
+            console.error('PaymentElement load error:', error);
+            setErrorMessage('Erro ao carregar formulário de pagamento');
+          }}
+        />
       </div>
 
       {errorMessage && (
@@ -130,7 +137,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ visaCode, caseId, clientSec
       {/* Pay Button - Stripe Style */}
       <Button
         type="submit"
-        disabled={!stripe || isProcessing}
+        disabled={!stripe || !isPaymentElementReady || isProcessing}
         className="w-full h-12 text-base font-semibold shadow-lg"
         style={{
           background: 'linear-gradient(180deg, #635BFF 0%, #5649E0 100%)',
@@ -141,6 +148,11 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ visaCode, caseId, clientSec
           <>
             <Loader2 className="h-5 w-5 animate-spin mr-2" />
             Processando pagamento...
+          </>
+        ) : !isPaymentElementReady ? (
+          <>
+            <Loader2 className="h-5 w-5 animate-spin mr-2" />
+            Carregando...
           </>
         ) : finalAmount === 0 ? (
           <>

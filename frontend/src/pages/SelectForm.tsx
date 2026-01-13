@@ -572,9 +572,9 @@ const SelectForm = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-2 mt-4">
-                <Button 
+                <Button
                   variant="outline"
-                  className="text-xs border-black text-black hover:bg-gray-50"
+                  className="text-xs border-black text-black hover:text-black hover:bg-gray-50 shadow-soft hover:shadow-elegant hover:-translate-y-0.5 active:translate-y-0"
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedVisaType(form.code);
@@ -585,8 +585,8 @@ const SelectForm = () => {
                   Ver Detalhes
                 </Button>
                 {form.code === 'I-589' ? (
-                  <Button 
-                    className="text-xs bg-black text-white hover:bg-gray-800"
+                  <Button
+                    className="text-xs bg-black text-white hover:bg-gray-800 shadow-soft hover:shadow-elegant hover:-translate-y-0.5 active:translate-y-0"
                     onClick={(e) => {
                       e.stopPropagation();
                       window.location.href = 'mailto:contato@agentecorujalaw.com?subject=Consulta sobre Asilo (I-589)&body=Olá, gostaria de mais informações sobre o processo de asilo (I-589).';
@@ -595,14 +595,14 @@ const SelectForm = () => {
                     Solicitar Consulta
                   </Button>
                 ) : (
-                  <Button 
-                    className={`text-xs ${
+                  <Button
+                    className={`text-xs shadow-soft hover:shadow-elegant hover:-translate-y-0.5 active:translate-y-0 ${
                       isPremium
                         ? selectedForm === form.code
                           ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 shadow-lg'
                           : 'bg-white border-2 border-purple-600 text-purple-600 hover:bg-purple-50'
-                        : selectedForm === form.code 
-                          ? 'bg-black text-white hover:bg-gray-800' 
+                        : selectedForm === form.code
+                          ? 'bg-black text-white hover:bg-gray-800'
                           : 'bg-white border border-black text-black hover:bg-gray-50'
                     }`}
                     onClick={(e) => {

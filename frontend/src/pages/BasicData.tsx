@@ -154,7 +154,25 @@ const BasicData = () => {
         
         // Load existing basic data if available
         if (data.case.basic_data) {
-          setFormData(data.case.basic_data);
+          // Ensure all fields have string values (not undefined/null) to avoid controlled/uncontrolled input warning
+          setFormData({
+            firstName: data.case.basic_data.firstName || '',
+            middleName: data.case.basic_data.middleName || '',
+            lastName: data.case.basic_data.lastName || '',
+            dateOfBirth: data.case.basic_data.dateOfBirth || '',
+            countryOfBirth: data.case.basic_data.countryOfBirth || '',
+            gender: data.case.basic_data.gender || '',
+            currentAddress: data.case.basic_data.currentAddress || '',
+            city: data.case.basic_data.city || '',
+            state: data.case.basic_data.state || '',
+            zipCode: data.case.basic_data.zipCode || '',
+            phoneNumber: data.case.basic_data.phoneNumber || '',
+            email: data.case.basic_data.email || '',
+            alienNumber: data.case.basic_data.alienNumber || '',
+            socialSecurityNumber: data.case.basic_data.socialSecurityNumber || '',
+            currentStatus: data.case.basic_data.currentStatus || '',
+            statusExpiration: data.case.basic_data.statusExpiration || ''
+          });
         }
         
         // Fetch visa specifications
@@ -181,6 +199,11 @@ const BasicData = () => {
       if (response.ok) {
         const data = await response.json();
         setVisaSpecs(data);
+      } else if (response.status === 404) {
+        // Visa specs endpoint not found - this is optional data, continue without it
+        console.warn(`Visa specs not available for ${formCode} - endpoint returned 404`);
+      } else {
+        console.error(`Failed to fetch visa specs: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
       console.error('Fetch visa specs error:', error);

@@ -74,22 +74,17 @@ const CoverLetterModule: React.FC = () => {
 
   const loadCaseData = async () => {
     if (!caseId) return;
-    
+
     try {
       setLoading(true);
       const sessionToken = localStorage.getItem('osprey_session_token');
-      const response = await makeApiCall(`/auto-application/case/${caseId}?session_token=${sessionToken}`, {
-        method: 'GET'
-      });
+      const data = await makeApiCall(`/auto-application/case/${caseId}?session_token=${sessionToken}`, 'GET');
 
-      if (response.ok) {
-        const data = await response.json();
-        const formCode = data.case?.form_code;
-        if (formCode) {
-          setVisaType(formCode);
-        } else {
-          setError('Tipo de visto não encontrado no caso');
-        }
+      const formCode = data.case?.form_code;
+      if (formCode) {
+        setVisaType(formCode);
+      } else {
+        setError('Tipo de visto não encontrado no caso');
       }
     } catch (error) {
       console.error('Error loading case data:', error);
@@ -111,22 +106,14 @@ const CoverLetterModule: React.FC = () => {
   const generateDirectives = async () => {
     try {
       setLoading(true);
-      const response = await makeApiCall('/llm/dr-paula/generate-directives', {
-        method: 'POST',
-        body: JSON.stringify({
-          visa_type: visaType,
-          language: 'pt',
-          context: 'Aplicação de visto automática'
-        })
+      const data = await makeApiCall('/llm/dr-paula/generate-directives', 'POST', {
+        visa_type: visaType,
+        language: 'pt',
+        context: 'Aplicação de visto automática'
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setDirectivesText(data.directives_text);
-        setDirectives(data.directives_data);
-      } else {
-        throw new Error('Falha ao gerar diretivas');
-      }
+      setDirectivesText(data.directives_text);
+      setDirectives(data.directives_data);
     } catch (error) {
       console.error('Error generating directives:', error);
       setError('Erro ao gerar roteiro informativo');
@@ -149,34 +136,26 @@ const CoverLetterModule: React.FC = () => {
 
     try {
       setLoading(true);
-      const response = await makeApiCall('/llm/dr-paula/review-letter', {
-        method: 'POST',
-        body: JSON.stringify({
-          visa_type: visaType,
-          applicant_letter: userDraft,
-          visa_profile: directives
-        })
+      const data = await makeApiCall('/llm/dr-paula/review-letter', 'POST', {
+        visa_type: visaType,
+        applicant_letter: userDraft,
+        visa_profile: directives
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setReview(data.review);
-        
-        if (data.review?.status === 'ready_for_formatting') {
-          // Carta satisfatória - formatar diretamente
-          await formatOfficialLetter();
-        } else if (data.review?.status === 'needs_questions') {
-          // Carta incompleta - fazer perguntas
-          setQuestions(data.review.questions || []);
-          setCurrentCard(6); // Card de perguntas
-        } else if (data.review?.status === 'complete') {
+      setReview(data.review);
+
+      if (data.review?.status === 'ready_for_formatting') {
+        // Carta satisfatória - formatar diretamente
+        await formatOfficialLetter();
+      } else if (data.review?.status === 'needs_questions') {
+        // Carta incompleta - fazer perguntas
+        setQuestions(data.review.questions || []);
+        setCurrentCard(6); // Card de perguntas
+      } else if (data.review?.status === 'complete') {
           setCurrentCard(5); // Complete letter (caso existente)
         } else {
           setCurrentCard(6); // Fallback para incomplete
         }
-      } else {
-        throw new Error('Falha ao revisar carta');
-      }
     } catch (error) {
       console.error('Error reviewing letter:', error);
       setError('Erro ao revisar carta');
@@ -189,22 +168,14 @@ const CoverLetterModule: React.FC = () => {
   const formatOfficialLetter = async () => {
     try {
       setLoading(true);
-      const response = await makeApiCall('/llm/dr-paula/format-official-letter', {
-        method: 'POST',
-        body: JSON.stringify({
-          visa_type: visaType,
-          applicant_letter: userDraft,
-          visa_profile: directives
-        })
+      const data = await makeApiCall('/llm/dr-paula/format-official-letter', 'POST', {
+        visa_type: visaType,
+        applicant_letter: userDraft,
+        visa_profile: directives
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setFinalLetter(data.formatted_letter);
-        setCurrentCard(7); // Card de aprovação final
-      } else {
-        throw new Error('Falha ao formatar carta');
-      }
+      setFinalLetter(data.formatted_letter);
+      setCurrentCard(7); // Card de aprovação final
     } catch (error) {
       console.error('Error formatting letter:', error);
       setError('Erro ao formatar carta oficial');
@@ -228,23 +199,15 @@ const CoverLetterModule: React.FC = () => {
 
     try {
       setLoading(true);
-      const response = await makeApiCall('/llm/dr-paula/generate-final-letter', {
-        method: 'POST',
-        body: JSON.stringify({
-          visa_type: visaType,
-          original_letter: userDraft,
-          questions_and_answers: questionsAndAnswers,
-          visa_profile: directives
-        })
+      const data = await makeApiCall('/llm/dr-paula/generate-final-letter', 'POST', {
+        visa_type: visaType,
+        original_letter: userDraft,
+        questions_and_answers: questionsAndAnswers,
+        visa_profile: directives
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setFinalLetter(data.final_letter);
-        setCurrentCard(7); // Card de aprovação final
-      } else {
-        throw new Error('Falha ao gerar carta final');
-      }
+      setFinalLetter(data.final_letter);
+      setCurrentCard(7); // Card de aprovação final
     } catch (error) {
       console.error('Error generating final letter:', error);
       setError('Erro ao gerar carta final');
@@ -268,21 +231,14 @@ const CoverLetterModule: React.FC = () => {
 
     try {
       setLoading(true);
-      const response = await makeApiCall(`/process/${caseId}/add-letter`, {
-        method: 'POST',
-        body: JSON.stringify({
-          letter_text: letterToSave,
-          visa_type: visaType,
-          confirmed_by_applicant: true
-        })
+      await makeApiCall(`/process/${caseId}/add-letter`, 'POST', {
+        letter_text: letterToSave,
+        visa_type: visaType,
+        confirmed_by_applicant: true
       });
 
-      if (response.ok) {
-        // Navigate back to documents or next step
-        navigate(`/auto-application/case/${caseId}/documents`);
-      } else {
-        throw new Error('Falha ao salvar carta');
-      }
+      // Navigate back to documents or next step
+      navigate(`/auto-application/case/${caseId}/documents`);
     } catch (error) {
       console.error('Error saving letter:', error);
       setError('Erro ao salvar carta');
@@ -297,22 +253,14 @@ const CoverLetterModule: React.FC = () => {
 
     try {
       setLoading(true);
-      const response = await makeApiCall('/llm/dr-paula/request-complement', {
-        method: 'POST',
-        body: JSON.stringify({
-          visa_type: visaType,
-          issues: review.issues
-        })
+      const data = await makeApiCall('/llm/dr-paula/request-complement', 'POST', {
+        visa_type: visaType,
+        issues: review.issues
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        // Show complement request and go back to editing
-        setError(data.complement_request);
-        setCurrentCard(3);
-      } else {
-        throw new Error('Falha ao solicitar complemento');
-      }
+      // Show complement request and go back to editing
+      setError(data.complement_request);
+      setCurrentCard(3);
     } catch (error) {
       console.error('Error requesting complement:', error);
       setError('Erro ao solicitar complemento');
