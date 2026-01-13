@@ -14,7 +14,12 @@ import { Loader2, CheckCircle, CreditCard, Shield, Lock, AlertCircle, Tag, Check
 import { makeApiCall } from '@/utils/api';
 
 // Configurar Stripe (usar chave pública)
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_live_51PByv6AfnK9GyzVJSxZwdgq3VrYksnja0kN0eSjBq5s4hTVLQQJhgEOhGMKZrfPR7BwPskZhIv6FbUBb4OJ2UjxZXfHxjC00nL6OqN2X');
+// SECURITY: Always set VITE_STRIPE_PUBLISHABLE_KEY in your .env file
+const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+if (!stripeKey) {
+  console.error('VITE_STRIPE_PUBLISHABLE_KEY is not set in environment variables');
+}
+const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
 
 interface CheckoutFormProps {
   visaCode: string;
