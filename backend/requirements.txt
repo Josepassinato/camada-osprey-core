@@ -8,6 +8,7 @@ bcrypt==4.3.0
 black==25.1.0
 boto3==1.40.11
 botocore==1.40.11
+beautifulsoup4==4.12.3
 cachetools==5.5.2
 certifi==2025.8.3
 cffi==1.17.1
@@ -19,7 +20,7 @@ distro==1.9.0
 dnspython==2.7.0
 ecdsa==0.19.1
 email_validator==2.2.0
-# emergentintegrations==0.1.0  # Custom package - not on PyPI
+#emergentintegrations==0.1.0  # Custom package - not on PyPI
 fastapi==0.110.1
 fastuuid==0.13.5
 filelock==3.19.1
@@ -135,6 +136,7 @@ yarl==1.20.1
 zipp==3.23.0
 bcrypt
 APScheduler==3.10.4
+motor>=3.3.1
 
 # Payment Processing
 stripe>=4.0.0
@@ -147,3 +149,4 @@ python-docx>=0.8.11
 # Maria Voice Integration (Google Cloud TTS + STT)
 google-cloud-texttospeech>=2.24.0
 google-cloud-speech>=2.26.0
+sentry-sdk[fastapi]==2.20.0
