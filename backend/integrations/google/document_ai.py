@@ -3,21 +3,16 @@ Google Document AI Integration + Dr. Miguel Enhanced Validation
 Professional OCR and data extraction with AI-powered fraud detection
 """
 
-import os
-import logging
 import asyncio
-import json
-from typing import Dict, Any, Optional, List
+import logging
+import os
 from datetime import datetime
-import base64
-from google.cloud import documentai
-from google.cloud import vision
-from google.api_core import exceptions as google_exceptions
-from google.auth.transport.requests import Request
-from google.oauth2.service_account import Credentials
-from google.oauth2 import service_account
+from typing import Any, Dict, List
+
 import google.auth
 import requests
+from google.auth.transport.requests import Request
+from google.oauth2 import service_account
 
 logger = logging.getLogger(__name__)
 
@@ -25,28 +20,46 @@ class GoogleDocumentAIProcessor:
     """Professional document analysis using Google Cloud Document AI"""
     
     def __init__(self):
-        # Load environment variables from .env file
-        from dotenv import load_dotenv
+        # Load environment variables from .env file in backend root
         from pathlib import Path
-        load_dotenv(Path(__file__).parent / '.env')
+
+        from dotenv import load_dotenv
+
+        # Go up 3 levels: google -> integrations -> backend -> .env
+        backend_root = Path(__file__).parent.parent.parent
+        load_dotenv(backend_root / '.env')
         
         # Configuration from environment variables  
         self.api_key = os.environ.get('GOOGLE_API_KEY')
         self.client_id = os.environ.get('GOOGLE_CLIENT_ID')
         self.client_secret = os.environ.get('GOOGLE_CLIENT_SECRET')
+        self.credentials_path = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
         self.project_id = os.environ.get('GOOGLE_CLOUD_PROJECT_ID', '891629358081')
         self.location = os.environ.get('GOOGLE_DOCUMENT_AI_LOCATION', 'us')
         
         # Check if we have credentials for real mode
+        has_service_account = self.credentials_path and os.path.exists(self.credentials_path)
         has_oauth2 = self.client_id and self.client_secret
         has_api_key = self.api_key
         
-        self.is_mock_mode = not (has_oauth2 or has_api_key)
+        self.is_mock_mode = not (has_service_account or has_oauth2 or has_api_key)
         
         if self.is_mock_mode:
             logger.warning("🧪 Google Document AI in MOCK MODE - No credentials provided")
         else:
-            if has_api_key:
+            if has_service_account:
+                logger.info(f"🔗 Google Document AI initialized with service account for project {self.project_id}")
+                logger.info(f"🔑 Credentials file: {self.credentials_path}")
+                
+                # Use service account for both Document AI and Vision API
+                self.auth_method = "service_account"
+                self.document_ai_endpoint = f"https://{self.location}-documentai.googleapis.com/v1/projects/{self.project_id}/locations/{self.location}/processors"
+                self.vision_endpoint = "https://vision.googleapis.com/v1/images:annotate"
+                
+                # Initialize service account credentials
+                self._init_service_account_credentials()
+                
+            elif has_api_key:
                 logger.info(f"🔗 Google Vision API initialized with API key for project {self.project_id}")
                 logger.info(f"🔑 API Key configured: {self.api_key[:20]}...")
                 
@@ -89,6 +102,38 @@ class GoogleDocumentAIProcessor:
             
         except Exception as e:
             logger.error(f"❌ OAuth2 initialization failed: {e}")
+            self.credentials = None
+    
+    def _init_service_account_credentials(self):
+        """Initialize service account credentials from JSON file"""
+        try:
+            if not self.credentials_path:
+                logger.error("❌ Service account credentials path not set")
+                return
+            
+            if not os.path.exists(self.credentials_path):
+                logger.error(f"❌ Service account credentials file not found: {self.credentials_path}")
+                return
+            
+            # Load service account credentials
+            credentials = service_account.Credentials.from_service_account_file(
+                self.credentials_path,
+                scopes=['https://www.googleapis.com/auth/cloud-platform']
+            )
+            
+            self.credentials = credentials
+            logger.info("✅ Service account credentials loaded successfully")
+            
+            # Verify credentials work
+            try:
+                # Test the credentials by getting an access token
+                credentials.refresh(Request())
+                logger.info("✅ Service account credentials verified")
+            except Exception as e:
+                logger.warning(f"⚠️ Service account credentials verification failed: {e}")
+                
+        except Exception as e:
+            logger.error(f"❌ Service account initialization failed: {e}")
             self.credentials = None
     
     def _create_mock_response(self, filename: str, content_length: int) -> Dict[str, Any]:
@@ -621,9 +666,18 @@ class GoogleDocumentAIProcessor:
 class HybridDocumentValidator:
     """Hybrid validator combining Google Document AI + Dr. Miguel"""
     
+    _google_processor_instance = None  # Class variable for singleton
+    
     def __init__(self):
-        self.google_processor = GoogleDocumentAIProcessor()
+        # Use lazy initialization for google_processor
         self.dr_miguel = None
+    
+    @property
+    def google_processor(self):
+        """Lazy-load singleton GoogleDocumentAIProcessor"""
+        if HybridDocumentValidator._google_processor_instance is None:
+            HybridDocumentValidator._google_processor_instance = GoogleDocumentAIProcessor()
+        return HybridDocumentValidator._google_processor_instance
         
     async def _get_dr_miguel(self):
         """Lazy load Dr. Miguel to avoid circular imports"""
@@ -857,5 +911,23 @@ class HybridDocumentValidator:
         }
 
 
-# Global instance
-hybrid_validator = HybridDocumentValidator()
+# Global instance - lazy loaded
+_hybrid_validator_instance = None
+
+def get_hybrid_validator() -> HybridDocumentValidator:
+    """Get or create the global HybridDocumentValidator instance (lazy-loaded singleton)"""
+    global _hybrid_validator_instance
+    if _hybrid_validator_instance is None:
+        _hybrid_validator_instance = HybridDocumentValidator()
+    return _hybrid_validator_instance
+
+# For backward compatibility, provide a property-like access
+class _HybridValidatorProxy:
+    """Proxy to provide lazy-loaded hybrid_validator with attribute access"""
+    def __getattr__(self, name):
+        return getattr(get_hybrid_validator(), name)
+    
+    def __call__(self, *args, **kwargs):
+        return get_hybrid_validator()(*args, **kwargs)
+
+hybrid_validator = _HybridValidatorProxy()

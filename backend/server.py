@@ -20,32 +20,41 @@ project_root = backend_dir.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Depends, status, Form, Request, Header
-from fastapi.responses import HTMLResponse, FileResponse
-from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
-from bson import ObjectId
-from contextlib import asynccontextmanager
 import os
-import time as time_module
 import uuid
-import logging
-import asyncio
+from contextlib import asynccontextmanager
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
+from dotenv import load_dotenv
+from fastapi import (
+    APIRouter,
+    Depends,
+    FastAPI,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    UploadFile,
+)
+from fastapi.responses import FileResponse, HTMLResponse
+from starlette.middleware.cors import CORSMiddleware
 
 # Load environment variables FIRST before any other imports that might use them
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
+# Configure structured logging EARLY so all imports can use it
+from backend.core.logging import setup_logging
+
+logger = setup_logging()
+
 from backend.core.sentry import init_sentry
 
 init_sentry()
 
-from pydantic import BaseModel, Field, EmailStr
-import pydantic
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, Field
 
 # Import visa API router
 try:
@@ -58,111 +67,105 @@ except ImportError:
 # Configure JSON encoder for ObjectId (Pydantic v2 compatible)
 # pydantic.json.ENCODERS_BY_TYPE[ObjectId] = str  # This is for Pydantic v1
 
-import uuid
-from datetime import datetime, date, timezone, timedelta
 import json
-import bcrypt
+import uuid
+from datetime import datetime, timedelta, timezone
 from enum import Enum
-import base64
-import mimetypes
-import re
-from openai import OpenAI
-import io
-from backend.case.finalizer_complete import case_finalizer_complete
-from backend.visa.specifications import get_visa_specifications, get_required_documents, get_key_questions, get_common_issues
-from backend.visa.document_mapping import get_visa_document_requirements
+
 #from emergentintegrations.llm.chat import LlmChat, UserMessage
 import yaml
-from backend.immigration_expert import ImmigrationExpert, create_immigration_expert
+from openai import OpenAI
+
+from backend.agents.immigration_expert import (
+    create_immigration_expert,
+)
+from backend.case.finalizer_complete import case_finalizer_complete
 from backend.integrations.google import hybrid_validator
-from backend.visa.auto_updater import VisaAutoUpdater
+from backend.visa.specifications import (
+    get_common_issues,
+    get_key_questions,
+    get_required_documents,
+    get_visa_specifications,
+)
 
 # Initialize OpenAI client (v2 API) - will be None if API key not set
 openai_client = None
 if os.environ.get("OPENAI_API_KEY"):
     openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-from backend.agents.specialized import (
-    SpecializedAgentCoordinator,
-    DocumentValidationAgent,
-    create_document_validator,
-    create_form_validator, 
-    create_eligibility_analyst,
-    create_compliance_checker,
-    create_immigration_letter_writer,
-    create_uscis_form_translator,
-    create_urgency_triage
-)
-
-# Payment and Stripe Integration
-from backend.integrations.stripe import handle_stripe_webhook
 import stripe
 
 # Admin Security
 from admin.security import (
-    require_admin, 
-    require_superadmin, 
-    log_admin_action, 
-    get_admin_audit_log,
-    check_admin_rate_limit,
-    AuditAction,
+    require_admin,
 )
-
-# Maria - Assistente Virtual
-import backend.maria_api
+from backend.agents.maria.api import router as maria_api_router
 
 # Professional QA Agent - Quality Assurance System
-from backend.agents.qa import get_qa_agent, get_qa_orchestrator
-
-from backend.core.database import alert_system, client, db, shutdown_db_client, startup_db_client
-from backend.core.serialization import serialize_doc
-from backend.api.auth import router as auth_router
-from backend.api.education import router as education_router
-from backend.api.documents import router as documents_router
-from backend.api.payments import router as payments_router
+from backend.agents.qa import get_qa_agent
+from backend.agents.specialized import (
+    DocumentValidationAgent,
+    create_document_validator,
+)
 from backend.api.admin_products import router as admin_products_router
+from backend.api.agents import router as agents_router
+from backend.api.auth import router as auth_router
 from backend.api.auto_application import router as auto_application_router
 from backend.api.auto_application_ai import router as auto_application_ai_router
-from backend.api.auto_application_downloads import router as auto_application_downloads_router
-from backend.api.auto_application_packages import router as auto_application_packages_router
-from backend.api.agents import router as agents_router
+from backend.api.auto_application_downloads import (
+    router as auto_application_downloads_router,
+)
+from backend.api.auto_application_packages import (
+    router as auto_application_packages_router,
+)
 from backend.api.completeness import router as completeness_router
-from backend.api.friendly_form import router as friendly_form_router
-from backend.api.voice import router as voice_router, ws_router as voice_ws_router
+from backend.api.documents import router as documents_router
 from backend.api.downloads import router as downloads_router
+from backend.api.education import router as education_router
 from backend.api.email_packages import router as email_packages_router
+from backend.api.friendly_form import router as friendly_form_router
 from backend.api.knowledge_base import router as knowledge_base_router
 from backend.api.oracle import router as oracle_router
-from backend.api.specialized_agents import router as specialized_agents_router
-from backend.api.visa_updates_admin import router as visa_updates_admin_router
-from backend.api.uscis_forms import router as uscis_forms_router
 from backend.api.owl_agent import router as owl_agent_router
-from backend.agents.maria.api import router as maria_api_router
-from backend.models.enums import DifficultyLevel, InterviewType, USCISForm, VisaType
-from backend.models.user import UserProgress
-from backend.services.cases import get_progress_percentage, update_case_status_and_progress
+from backend.api.payments import router as payments_router
+from backend.api.specialized_agents import router as specialized_agents_router
+from backend.api.uscis_forms import router as uscis_forms_router
+from backend.api.visa_updates_admin import router as visa_updates_admin_router
+from backend.api.voice import router as voice_router
+from backend.api.voice import ws_router as voice_ws_router
+
+# Auth helpers
+from backend.core.auth import (
+    get_current_user,
+    verify_jwt_token,
+)
+from backend.core.database import (
+    alert_system,
+    db,
+    shutdown_db_client,
+    startup_db_client,
+)
+from backend.core.serialization import serialize_doc
+
+# Payment and Stripe Integration
+from backend.models.enums import USCISForm, VisaType
+from backend.services.cases import (
+    get_progress_percentage,
+)
 
 # LLM configuration via emergentintegrations
 # API key handled directly in LlmChat calls
 
-# Auth helpers
-from backend.core.auth import (
-    JWT_SECRET,
-    JWT_ALGORITHM,
-    create_jwt_token,
-    get_current_user,
-    get_optional_token,
-    hash_password,
-    security,
-    security_optional,
-    verify_password,
-    verify_jwt_token,
-)
 
 # Create the main app without a prefix
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await startup_db_client()
+    
+    # Initialize Google Document AI (triggers credential loading and verification)
+    from backend.integrations.google import hybrid_validator
+    _ = hybrid_validator.google_processor  # Access property to trigger initialization
+    
     try:
         yield
     finally:
@@ -818,7 +821,7 @@ async def accept_finalization_consent(case_id: str, request: dict):
     try:
         # Importação movida para o topo
         
-        consent_hash = request.get("consent_hash", "")
+        request.get("consent_hash", "")
         
         # Aceitar consentimento (implementação simplificada para demonstração)
         result = {
@@ -2223,7 +2226,7 @@ async def get_visa_detailed_information(visa_type: str, process_type: str = "bot
     """
     try:
         from backend.visa.information import get_visa_processing_info
-        
+
         # Normalize visa type (handle variations)
         visa_type_normalized = visa_type.upper().replace("_", "-")
         
@@ -2521,7 +2524,10 @@ async def get_document_validation_info_endpoint(document_type: str):
 async def get_visa_document_requirements_endpoint(visa_type: str):
     """Get required documents for a specific visa type"""
     try:
-        from backend.documents.validation_database import get_required_documents_for_visa, get_document_validation_info
+        from backend.documents.validation_database import (
+            get_document_validation_info,
+            get_required_documents_for_visa,
+        )
         
         required_docs = get_required_documents_for_visa(visa_type)
         
@@ -2635,10 +2641,12 @@ async def process_ai_step(request: dict):
 async def validate_form_data_ai(case, friendly_form_data, basic_data):
     """sistema validation of form data completeness and accuracy"""
     try:
+        from dra_paula_knowledge_base import (
+            get_dra_paula_enhanced_prompt,
+            get_visa_knowledge,
+        )
         from emergentintegrations import EmergentLLM
-        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
-        from agents.oracle import consult_oracle, oracle
-        
+
         # Use OpenAI directly or fallback to EmergentLLM
         openai_key = os.environ.get('OPENAI_API_KEY')
         emergent_key = os.environ.get('EMERGENT_LLM_KEY')
@@ -2725,10 +2733,9 @@ async def validate_form_data_ai(case, friendly_form_data, basic_data):
 async def check_data_consistency_ai(case, friendly_form_data, basic_data):
     """sistema check for data consistency across different form sections"""
     try:
-        from emergentintegrations import EmergentLLM
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt
-        from agents.oracle import consult_oracle, oracle
-        
+        from emergentintegrations import EmergentLLM
+
         # Use OpenAI directly or fallback to EmergentLLM
         openai_key = os.environ.get('OPENAI_API_KEY')
         emergent_key = os.environ.get('EMERGENT_LLM_KEY')
@@ -2792,10 +2799,9 @@ async def check_data_consistency_ai(case, friendly_form_data, basic_data):
 async def translate_data_ai(case, friendly_form_data):
     """sistema translation from Portuguese to English for USCIS forms"""
     try:
-        from emergentintegrations import EmergentLLM
         from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt
-        from agents.oracle import consult_oracle, oracle
-        
+        from emergentintegrations import EmergentLLM
+
         # Use OpenAI directly or fallback to EmergentLLM
         openai_key = os.environ.get('OPENAI_API_KEY')
         emergent_key = os.environ.get('EMERGENT_LLM_KEY')
@@ -2861,10 +2867,12 @@ async def translate_data_ai(case, friendly_form_data):
 async def generate_uscis_form_ai(case, friendly_form_data, basic_data):
     """sistema generation of official USCIS form from friendly data"""
     try:
+        from dra_paula_knowledge_base import (
+            get_dra_paula_enhanced_prompt,
+            get_visa_knowledge,
+        )
         from emergentintegrations import EmergentLLM
-        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
-        from agents.oracle import consult_oracle, oracle
-        
+
         # Use OpenAI directly or fallback to EmergentLLM
         openai_key = os.environ.get('OPENAI_API_KEY')
         emergent_key = os.environ.get('EMERGENT_LLM_KEY')
@@ -2947,10 +2955,12 @@ async def generate_uscis_form_ai(case, friendly_form_data, basic_data):
 async def final_review_ai(case):
     """Final sistema review of the complete USCIS form"""
     try:
+        from dra_paula_knowledge_base import (
+            get_dra_paula_enhanced_prompt,
+            get_visa_knowledge,
+        )
         from emergentintegrations import EmergentLLM
-        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
-        from agents.oracle import consult_oracle, oracle
-        
+
         # Use OpenAI directly or fallback to EmergentLLM
         openai_key = os.environ.get('OPENAI_API_KEY')
         emergent_key = os.environ.get('EMERGENT_LLM_KEY')
@@ -3208,7 +3218,9 @@ async def analyze_document_with_professional_api(
         return analysis_result
         
         # Validate document type against visa requirements (CORRECTED)
-        from backend.documents.validation_database import get_required_documents_for_visa
+        from backend.documents.validation_database import (
+            get_required_documents_for_visa,
+        )
         required_docs = get_required_documents_for_visa(visa_type)
         
         # Log para debug detalhado
@@ -3281,7 +3293,7 @@ async def analyze_document_with_professional_api(
         # FASE 1: Policy Engine Integration (ALWAYS RUNS)
         from backend.compliance.policy_engine import policy_engine
         from backend.documents.catalog import document_catalog
-        
+
         # Initialize base analysis result - SECURE DEFAULT (reject until proven valid)
         analysis_result = {
             "valid": False,
@@ -3450,6 +3462,7 @@ async def analyze_document_with_professional_api(
 # Phase 2 & 3: Enhanced Document Validation Endpoints
 from backend.compliance.policy_engine import policy_engine
 
+
 class DocumentClassificationRequest(BaseModel):
     filename: str
     extracted_text: str
@@ -3503,7 +3516,7 @@ async def extract_document_fields(request: FieldExtractionRequest, current_user 
     """
     try:
         from backend.forms.field_extraction import field_extraction_engine
-        
+
         # Extract fields using the advanced engine
         extraction_result = field_extraction_engine.extract_all_fields(
             request.text_content,
@@ -3529,7 +3542,7 @@ async def analyze_document_language(request: LanguageAnalysisRequest, current_us
     """
     try:
         from backend.utils.translation.gate import translation_gate
-        
+
         # Analyze language and translation requirements
         language_result = translation_gate.analyze_document_language(
             request.text_content,
@@ -3554,7 +3567,7 @@ async def check_document_consistency(request: ConsistencyCheckRequest, current_u
     """
     try:
         from backend.documents.consistency import cross_document_consistency
-        
+
         # Analyze consistency across documents
         consistency_result = cross_document_consistency.analyze_document_consistency(
             request.documents_data,
@@ -3770,8 +3783,9 @@ async def download_master_packet(job_id: str, current_user = Depends(get_current
     """Download do master packet (PDF)"""
     try:
         # Importação movida para o topo
-        from fastapi.responses import FileResponse
         import os
+
+        from fastapi.responses import FileResponse
         
         job_status = case_finalizer_complete.get_job_status(job_id)
         
@@ -3940,7 +3954,8 @@ async def get_success_factors(visa_type: str):
 # ===== END CONVERSATIONAL ASSISTANT & SOCIAL PROOF =====
 
 # ===== ADAPTIVE LANGUAGE SYSTEM =====
-from backend.utils.adaptive_texts import ADAPTIVE_TEXTS, get_text, get_context_texts
+from backend.utils.adaptive_texts import ADAPTIVE_TEXTS, get_context_texts, get_text
+
 
 @api_router.get("/adaptive-texts/{context}")
 async def get_adaptive_texts(context: str, mode: str = "simple"):
@@ -3993,7 +4008,9 @@ async def get_adaptive_text(context: str, key: str, mode: str = "simple"):
 # ===== END ADAPTIVE LANGUAGE SYSTEM =====
 
 # ===== PROACTIVE ALERTS SYSTEM =====
-from backend.utils.proactive_alerts import ProactiveAlertSystem, AlertType, AlertPriority
+from backend.utils.proactive_alerts import (
+    AlertPriority,
+)
 
 # Initialize alert system (will be set in startup event after db is ready)
 alert_system = None
@@ -4089,7 +4106,7 @@ app.add_middleware(
 try:
     from utils.rate_limiter import RateLimiterMiddleware
     from utils.sanitizer import InputSanitizerMiddleware
-    
+
     # Add Rate Limiter Middleware
     app.add_middleware(RateLimiterMiddleware)
     logger.info("✅ Rate Limiter Middleware ATIVADO")
@@ -4102,13 +4119,11 @@ except ImportError as e:
     logger.warning(f"⚠️ Security middlewares not available: {e}")
 # ===== END SECURITY MIDDLEWARES =====
 
-# Configure structured logging
-from backend.core.logging import setup_logging
-
-logger = setup_logging()
+# Logging already configured at top of file
 
 # Import All AI Agents after logger is defined
 from backend.core.agents import set_agents
+
 try:
     from backend.agents.oracle import consult_oracle, oracle
     logger.info("✅ Oráculo Jurídico carregado")
@@ -4118,7 +4133,11 @@ except Exception as e:
     consult_oracle = None
 
 try:
-    from document_analyzer_agent import document_analyzer, analyze_uploaded_document
+    from backend.documents.analyzer import (
+        DocumentAnalyzerAgent,
+        analyze_uploaded_document,
+    )
+    document_analyzer = DocumentAnalyzerAgent()
     logger.info("✅ Document Analyzer Agent carregado")
 except Exception as e:
     logger.warning(f"⚠️ Document Analyzer não disponível: {str(e)}")
@@ -4126,7 +4145,7 @@ except Exception as e:
     analyze_uploaded_document = None
 
 try:
-    from backend.forms.filler import form_filler, fill_form_automatically
+    from backend.forms.filler import fill_form_automatically, form_filler
     logger.info("✅ Form Filler Agent carregado")
 except Exception as e:
     logger.warning(f"⚠️ Form Filler não disponível: {str(e)}")
@@ -4134,7 +4153,7 @@ except Exception as e:
     fill_form_automatically = None
 
 try:
-    from utils.translation.agent import translator, translate_text
+    from utils.translation.agent import translate_text, translator
     logger.info("✅ Translation Agent carregado")
 except Exception as e:
     logger.warning(f"⚠️ Translation Agent não disponível: {str(e)}")
@@ -4212,7 +4231,6 @@ async def health_check():
     
     # Check Maria
     try:
-        from agents.maria.agent import maria
         health_status["services"]["maria"] = {"status": "up"}
     except Exception as e:
         health_status["services"]["maria"] = {
@@ -4390,7 +4408,8 @@ async def restore_backup(backup_name: str):
 
 
 # ===== INADMISSIBILITY SCREENING ENDPOINTS =====
-from backend.compliance.inadmissibility import screening, perform_screening
+from backend.compliance.inadmissibility import perform_screening, screening
+
 
 @api_router.get("/screening/questions")
 async def get_screening_questions():
@@ -4434,7 +4453,11 @@ async def assess_inadmissibility(answers: Dict[str, str]):
 # ===== END INADMISSIBILITY SCREENING =====
 
 # ===== FEEDBACK SYSTEM ENDPOINTS =====
-from backend.learning.feedback import FeedbackSystem, FeedbackType, submit_ai_response_feedback, get_nps_score
+from backend.learning.feedback import (
+    FeedbackSystem,
+    get_nps_score,
+)
+
 
 @api_router.post("/feedback/submit")
 async def submit_feedback(

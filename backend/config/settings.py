@@ -5,10 +5,10 @@ This module provides centralized configuration using Pydantic BaseSettings,
 loading values from environment variables with validation and type safety.
 """
 
-from pydantic_settings import BaseSettings
+from typing import List, Optional
+
 from pydantic import Field, validator
-from typing import Optional, List
-import os
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -180,10 +180,13 @@ class Settings(BaseSettings):
     @validator("log_format")
     def validate_log_format(cls, v):
         """Validate log format is one of the allowed values."""
-        allowed = ["json", "text"]
-        if v.lower() not in allowed:
+        allowed = ["json", "text", "plain"]
+        v_lower = v.lower()
+        if v_lower not in allowed:
             raise ValueError(f"log_format must be one of {allowed}")
-        return v.lower()
+        # Map 'plain' to 'text' for backward compatibility with logging.py
+        # Both 'plain' and 'text' mean human-readable format
+        return "plain" if v_lower in ["plain", "text"] else v_lower
     
     class Config:
         env_file = ".env"

@@ -96,8 +96,11 @@ class SupervisorAgent:
     
     def register_specialist(self, visa_type: str, specialist):
         """Registra um agente especialista"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
         self.specialists[visa_type] = specialist
-        print(f"✅ Especialista registrado: {visa_type}")
+        logger.info(f"✅ Especialista registrado: {visa_type}")
     
     def detect_visa_type(self, user_input: str) -> Optional[str]:
         """
