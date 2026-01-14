@@ -9,14 +9,14 @@ from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 import logging
 #from emergentintegrations.llm.chat import LlmChat, UserMessage
-from document_validation_database import (
+from backend.documents.validation_database import (
     DOCUMENT_VALIDATION_DATABASE, 
     VISA_DOCUMENT_REQUIREMENTS,
     get_document_validation_info,
     get_required_documents_for_visa
 )
-from enhanced_document_recognition import EnhancedDocumentRecognitionAgent
-from document_analysis_metrics import (
+from backend.documents.recognition import EnhancedDocumentRecognitionAgent
+from backend.documents.metrics import (
     DocumentAnalysisKPIs, 
     DocumentMetrics, 
     AdvancedFieldValidators,
@@ -24,8 +24,8 @@ from document_analysis_metrics import (
     ConsistencyChecker,
     DecisionType
 )
-from specialized_document_validators import create_specialized_validators
-from validators import (
+from backend.documents.validators.specialized import create_specialized_validators
+from backend.utils.validators import (
     normalize_date, 
     parse_mrz_td3, 
     is_valid_uscis_receipt, 
@@ -72,7 +72,7 @@ class BaseSpecializedAgent:
             if not self.db:
                 return ""
             
-            from agent_knowledge_helper import get_knowledge_helper
+            from backend.knowledge.helper import get_knowledge_helper
             helper = get_knowledge_helper(self.db)
             
             context = await helper.get_context_for_agent(form_type, agent_role)
@@ -687,7 +687,7 @@ class DocumentValidationAgent(BaseSpecializedAgent):
         """Valida documento usando expertise da Dra. Paula B2C e mapeamento inteligente por visto"""
         try:
             from emergentintegrations import EmergentLLM
-            from visa_document_mapping import get_smart_extraction_prompt, get_visa_document_requirements
+            from backend.visa.document_mapping import get_smart_extraction_prompt, get_visa_document_requirements
             
             # Use OpenAI directly or fallback to EmergentLLM
             openai_key = os.environ.get('OPENAI_API_KEY')
@@ -750,7 +750,7 @@ class DocumentValidationAgent(BaseSpecializedAgent):
     
     def _get_enhanced_validation_prompt(self, document_data: Dict[str, Any], document_type: str, visa_type: str, case_context: Dict[str, Any] = None) -> str:
         """Gera prompt de validação aprimorado com mapeamento inteligente"""
-        from visa_document_mapping import get_visa_document_requirements
+        from backend.visa.document_mapping import get_visa_document_requirements
         
         # Obter requisitos específicos do documento para o tipo de visto
         visa_requirements = get_visa_document_requirements(visa_type)

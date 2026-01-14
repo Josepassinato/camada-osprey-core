@@ -10,12 +10,12 @@ from typing import Dict, List, Any, Optional, Tuple
 import logging
 from datetime import datetime, timezone
 #from emergentintegrations.llm.chat import LlmChat, UserMessage
-from document_validation_database import (
+from backend.documents.validation_database import (
     get_document_validation_info,
     get_required_documents_for_visa,
     validate_document_for_visa
 )
-from visa_document_mapping import VisaDocumentMapper
+from backend.visa.document_mapping import VisaDocumentMapper
 
 logger = logging.getLogger(__name__)
 

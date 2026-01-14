@@ -4,12 +4,17 @@ import os
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-import openai
+from openai import OpenAI
 
 from models.education import PersonalizedTip
 from models.enums import DifficultyLevel, VisaType, InterviewType
 
 logger = logging.getLogger(__name__)
+
+# Initialize OpenAI client (v2 API) - will be None if API key not set
+openai_client = None
+if os.environ.get("OPENAI_API_KEY"):
+    openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 
 async def generate_interview_questions(
@@ -57,7 +62,7 @@ async def generate_interview_questions(
         if not os.environ.get("OPENAI_API_KEY"):
             raise RuntimeError("OPENAI_API_KEY not configured")
 
-        response = openai.chat.completions.create(
+        response = openai_client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {
@@ -120,7 +125,7 @@ async def evaluate_interview_answer(
         IMPORTANTE: Esta é uma ferramenta educativa. Para preparação real, recomende consultoria jurídica.
         """
 
-        response = openai.chat.completions.create(
+        response = openai_client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {
@@ -202,7 +207,7 @@ async def generate_personalized_tips(
         if not os.environ.get("OPENAI_API_KEY"):
             raise RuntimeError("OPENAI_API_KEY not configured")
 
-        response = openai.chat.completions.create(
+        response = openai_client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {
@@ -278,7 +283,7 @@ async def search_knowledge_base(
         - Para casos complexos, recomende consultar um advogado
         """
 
-        response = openai.chat.completions.create(
+        response = openai_client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {

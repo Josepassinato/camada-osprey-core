@@ -8,8 +8,8 @@ import stripe
 import logging
 from typing import Dict, Optional
 from datetime import datetime, timezone
-from payment_packages import get_visa_package, calculate_final_price
-from voucher_system import validate_voucher, increment_voucher_usage
+from backend.packages.payment_packages import get_visa_package, calculate_final_price
+from backend.utils.vouchers import validate_voucher, increment_voucher_usage
 
 logger = logging.getLogger(__name__)
 

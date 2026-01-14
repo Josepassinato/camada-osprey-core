@@ -7,11 +7,11 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Request
 import stripe
 
-from admin_products import get_product_for_checkout
+from backend.admin.products import get_product_for_checkout
 from core.database import db
-from payment_packages import calculate_final_price, get_all_packages, get_visa_package
-from stripe_integration import create_checkout_session, verify_payment_status
-from voucher_system import get_all_active_vouchers, validate_voucher
+from packages.payment_packages import calculate_final_price, get_all_packages, get_visa_package
+from integrations.stripe import create_checkout_session, verify_payment_status
+from utils.vouchers import get_all_active_vouchers, validate_voucher
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +91,7 @@ async def create_payment_intent_endpoint(request: Request):
         voucher_applied = None
 
         if voucher_code:
-            from voucher_system import increment_voucher_usage
+            from backend.utils.vouchers import increment_voucher_usage
 
             validation_result = await validate_voucher(voucher_code, visa_code, db)
 

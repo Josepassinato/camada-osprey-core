@@ -2,14 +2,14 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 
-from admin_products import (
+from backend.admin.products import (
     get_all_products,
     get_product,
     sync_all_products_to_stripe,
     sync_product_to_stripe,
     update_product_price,
 )
-from admin_security import require_admin
+from backend.admin.security import require_admin
 from core.database import db
 
 logger = logging.getLogger(__name__)

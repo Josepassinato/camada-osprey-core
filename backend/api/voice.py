@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 
-from voice_websocket import voice_manager
+from backend.voice.websocket import voice_manager
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ async def validate_form_step(request: dict):
 async def analyze_with_llm(request: dict):
     """Analyze form state using LLM with guardrails"""
     try:
-        from voice_agent import voice_agent
+        from backend.voice.agent import voice_agent
 
         snapshot = {
             "sections": request.get("sections", []),

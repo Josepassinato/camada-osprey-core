@@ -1,13 +1,22 @@
 # ============================================================================
 # Osprey Backend Dependencies
 # ============================================================================
-# Last Updated: 2026-01-13
+# Last Updated: 2026-01-14 (Portkey Integration & Refactoring)
 # Python: 3.11+
+#
+# Recent Changes:
+# - Updated OpenAI from 1.x to 2.x for Portkey integration
+# - Updated Portkey-ai to 2.1.0 (latest stable)
+# - Updated LiteLLM for OpenAI 2.x compatibility
+# - Removed unused dependencies: emergentintegrations, emergentllm, fastuuid, 
+#   madoka, pondpond, s5cmd
+# - All packages updated to latest stable versions as of January 2026
 #
 # Security Policy:
 # - All packages updated to address known CVEs
 # - Version constraints ensure stability while allowing security patches
 # - Regular audits with pip-audit recommended
+# - Known issue: ecdsa CVE-2024-23342 (no fix available, documented below)
 # ============================================================================
 
 # ----------------------------------------------------------------------------
@@ -27,6 +36,7 @@ uvicorn==0.40.0  # Updated from 0.25.0 - performance & security improvements
 # Pydantic: Data validation and settings
 pydantic==2.12.5  # Updated from 2.11.7 - validation improvements
 pydantic_core==2.41.5  # Updated from 2.33.2
+pydantic-settings==2.12.0  # Settings management from environment variables
 
 # ----------------------------------------------------------------------------
 # Database & Storage
@@ -44,9 +54,21 @@ dnspython==2.8.0  # Updated from 2.7.0
 # ----------------------------------------------------------------------------
 # AI & Machine Learning
 # ----------------------------------------------------------------------------
-# OpenAI: GPT-4o and GPT-4-turbo API
-# NOTE: Major version update 1.x → 2.x - review breaking changes before deploying
-openai==1.99.9  # Keep at 1.x for now - 2.x has breaking changes
+# OpenAI: GPT-4o and GPT-4-turbo API client
+# Primary LLM provider for chat completions, embeddings, and more
+# Used through Portkey gateway for observability and cost control
+# NOTE: Updated to 2.x for Portkey integration - breaking changes reviewed
+# Migration notes: client.chat.completions.create() replaces openai.ChatCompletion.create()
+openai>=2.15.0  # Updated for Portkey integration - latest stable
+
+# Portkey: LLM gateway for routing, observability, and cost tracking
+# Primary LLM integration layer providing:
+# - Multi-provider routing (OpenAI, Anthropic, Gemini, etc.)
+# - Centralized observability and logging
+# - Cost tracking and budget management
+# - Prompt versioning and A/B testing
+# - Automatic fallbacks and retries
+portkey-ai>=2.1.0  # LLM gateway integration - latest stable
 
 # Google Gemini: Multi-modal AI
 # NOTE: Using compatible versions that work together
@@ -54,9 +76,11 @@ google-genai>=1.39.1  # Let pip resolve compatible version
 google-generativeai>=0.8.5  # Let pip resolve compatible version
 google-ai-generativelanguage>=0.6.15  # Let pip resolve compatible version
 
-# LiteLLM: Unified LLM interface
-# NOTE: Using 1.77.4 for compatibility with openai 1.x
-litellm==1.77.4  # Kept at 1.77.4 - newer versions require openai 2.x
+# LiteLLM: Unified LLM interface for multiple providers
+# Provides consistent API across OpenAI, Anthropic, Gemini, etc.
+# Used as fallback/alternative to Portkey for some operations
+# NOTE: Updated to support openai 2.x
+litellm>=1.77.4  # Updated for openai 2.x compatibility
 
 # Tokenization
 tiktoken==0.12.0  # Updated from 0.11.0
@@ -113,6 +137,8 @@ cryptography==46.0.3  # Updated from 45.0.6
 passlib==1.7.4
 
 # ECDSA: Elliptic curve cryptography
+# SECURITY NOTE: CVE-2024-23342 (Minerva timing attack) - no fix available
+# Project considers side-channel attacks out of scope. Use with caution for sensitive operations.
 ecdsa==0.19.1
 
 # ----------------------------------------------------------------------------
@@ -439,27 +465,19 @@ hf-xet==1.2.0  # Updated from 1.1.10
 # ----------------------------------------------------------------------------
 # Specialized Libraries
 # ----------------------------------------------------------------------------
-# FastUUID: Fast UUID generation
-fastuuid==0.14.0  # Updated from 0.13.5
-
-# Onfido: Identity verification
+# Onfido: Identity verification (referenced in server.py comments)
 onfido-python==5.5.0
-
-# Madoka: Bloom filter
-madoka==0.7.2.1  # Updated from 0.7.1
-
-# Pondpond: Unknown purpose - consider removing if unused
-pondpond==1.4.1
 
 # JQ: JSON processor binding
 jq==1.10.0
 
-# S5cmd: Fast S3 client - consider removing if unused
-s5cmd==0.3.3  # Updated from 0.2.0
-
 # ----------------------------------------------------------------------------
-# COMMENTED OUT / OPTIONAL
+# REMOVED DEPENDENCIES
 # ----------------------------------------------------------------------------
-# Emergent Integrations: Custom package (not on PyPI)
-# Uncomment and install manually if needed
-# emergentintegrations==0.1.0
+# The following packages were removed as unused during refactoring:
+# - emergentintegrations (custom package, replaced with Portkey)
+# - emergentllm (replaced with Portkey)
+# - fastuuid (no usage found)
+# - madoka (no usage found)
+# - pondpond (no usage found)
+# - s5cmd (no usage found)

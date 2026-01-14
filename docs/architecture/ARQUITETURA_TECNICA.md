@@ -312,7 +312,9 @@ Total: 66 dependências
 ├── backend/                          (51 arquivos Python)
 │   ├── server.py                     (Main FastAPI app)
 │   ├── visa_api.py                   (Multi-agent system API)
-│   ├── case_finalizer_complete.py    (Finalização com agentes)
+│   ├── case/                         (Case management package)
+│   │   ├── finalizer.py              (MVP finalizer)
+│   │   └── finalizer_complete.py     (Complete finalizer with agents)
 │   ├── google_document_ai_integration.py
 │   ├── intelligent_owl_agent.py      (Chatbot)
 │   ├── .env                          (Configurações)

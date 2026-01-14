@@ -297,14 +297,14 @@ backend/
 │   ├── education.py            # Education history endpoints
 │   ├── documents.py            # Document upload, OCR, analysis
 │   ├── payments.py             # Stripe checkout, webhooks, vouchers
-│   ├── admin_products.py       # Admin product management
+│   ├── admin_products.py       # Admin product management (uses backend.admin.products)
 │   ├── owl_agent.py            # Intelligent Owl AI agent flows
 │   ├── auto_application.py     # Auto-application CRUD operations
 │   ├── auto_application_ai.py  # AI processing, QA, validation
 │   ├── auto_application_packages.py  # Package generation, instructions
 │   ├── auto_application_downloads.py # Case package downloads
 │   ├── uscis_forms.py          # USCIS form generation, field mapping
-│   ├── knowledge_base.py       # Admin knowledge base management
+│   ├── knowledge_base.py       # Admin knowledge base management (uses backend.admin.security)
 │   ├── downloads.py            # Generic download endpoints
 │   ├── email_packages.py       # Email delivery via Resend
 │   ├── agents.py               # Agent coordination endpoints
@@ -347,7 +347,7 @@ These files contain agent logic and utilities that will eventually be moved into
 - **Form Filling**: `form_filler_agent.py`, `uscis_form_filler.py`, `friendly_form_structures.py`
 - **QA System**: `professional_qa_agent.py`, `qa_feedback_orchestrator.py`, `advanced_immigration_reviewer.py`
 - **Learning Systems**: `agent_learning_system.py`, `iterative_learning_system.py`, `feedback_system.py`
-- **Admin Tools**: `admin_knowledge_base.py`, `admin_products.py`, `admin_security.py`
+- **Admin Tools**: `backend/admin/knowledge_base.py`, `backend/admin/products.py`, `backend/admin/security.py`
 - **Utilities**: `input_sanitizer.py`, `validators.py`, `rate_limiter.py`, `translation_agent.py`
 - **Scripts**: `create_admin_user.py`, `create_superadmin.py`, `mongodb_backup.py`
 
@@ -937,7 +937,7 @@ async def get_profile(user: dict = Depends(get_current_user)):
 
 **Decorators**:
 ```python
-from admin_security import require_admin, require_superadmin
+from backend.admin.security import require_admin, require_superadmin
 
 @router.post("/knowledge-base")
 async def create_kb_entry(

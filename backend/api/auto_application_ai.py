@@ -5,13 +5,12 @@ import re
 import uuid
 from datetime import datetime, timezone
 
-import openai
+from openai import OpenAI
 from fastapi import APIRouter, HTTPException
 
 from core.database import db
-from professional_qa_agent import get_qa_agent
-from qa_feedback_orchestrator import get_qa_orchestrator
-from visa_specifications import get_visa_specifications
+from agents.qa import get_qa_agent, get_qa_orchestrator
+from backend.visa.specifications import get_visa_specifications
 
 try:
     from emergentintegrations.llm.chat import LlmChat, UserMessage
@@ -22,6 +21,11 @@ except ImportError:  # pragma: no cover - optional dependency in some setups
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api")
+
+# Initialize OpenAI client (v2 API) - will be None if API key not set
+openai_client = None
+if os.environ.get("OPENAI_API_KEY"):
+    openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 
 @router.post("/auto-application/extract-facts")
@@ -176,7 +180,7 @@ Para campos não preenchidos pelo usuário, use:
 Responda apenas com o JSON estruturado, sem explicações adicionais.
 """
 
-        response = openai.chat.completions.create(
+        response = openai_client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {

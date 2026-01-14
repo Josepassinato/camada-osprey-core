@@ -79,8 +79,8 @@ async def upload_document_to_case(
 
         extraction_result = None
         try:
-            from document_data_extractor import process_document_and_update_user
-            from google_document_ai_integration import GoogleDocumentAIProcessor
+            from backend.documents.data_extractor import process_document_and_update_user
+            from integrations.google import GoogleDocumentAIProcessor
 
             doc_processor = GoogleDocumentAIProcessor()
             ocr_result = await doc_processor.process_document(

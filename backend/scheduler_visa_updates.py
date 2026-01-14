@@ -40,7 +40,7 @@ class VisaUpdateScheduler:
         try:
             logger.info("🤖 Starting scheduled visa update scan...")
             
-            from visa_auto_updater import VisaAutoUpdater
+            from backend.visa.auto_updater import VisaAutoUpdater
             
             # Create updater instance
             updater = VisaAutoUpdater(self.db, self.llm_key)

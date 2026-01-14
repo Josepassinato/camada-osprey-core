@@ -84,7 +84,7 @@ class QAFeedbackOrchestrator:
         
         # Inicializar sistema de aprendizado
         if not self.learning_system:
-            from agent_learning_system import get_learning_system
+            from backend.learning.agent_learning import get_learning_system
             self.learning_system = await get_learning_system(db)
         
         logger.info(f"🔄 Iniciando ciclo de QA com Aprendizado Contínuo para case {case_id}")
@@ -442,7 +442,7 @@ class QAFeedbackOrchestrator:
         """Corrige problemas relacionados a formulários e dados"""
         try:
             # Importar agente
-            from form_filler_agent import form_filler
+            from backend.forms.filler import form_filler
             
             if not form_filler:
                 logger.warning("⚠️  Form Filler não disponível")
@@ -528,9 +528,9 @@ class QAFeedbackOrchestrator:
         """Corrige problemas de linguagem, gramática e formatação"""
         try:
             # Importar agente
-            from translation_agent import translation_agent
+            from backend.utils.translation.agent import translator
             
-            if not translation_agent:
+            if not translator:
                 logger.warning("⚠️  Translation Agent não disponível")
                 return {
                     "agent": "translation_agent",
@@ -616,7 +616,7 @@ class QAFeedbackOrchestrator:
         """Corrige problemas específicos de validação USCIS"""
         try:
             # Importar coordinator
-            from specialized_agents import SpecializedAgentCoordinator
+            from agents.specialized import SpecializedAgentCoordinator
             
             # Análise de problemas críticos do USCIS
             critical_fixes = []

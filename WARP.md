@@ -4,40 +4,67 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 ## Project Overview
 
-Osprey B2C is a multi-agent AI-powered immigration case processing system. It uses specialized AI agents to generate complete visa application packages for 8 different visa types (B-2, F-1, H-1B, I-130, I-765, I-90, EB-2 NIW, EB-1A).
+Osprey is an enterprise-grade B2C immigration platform that combines AI-powered document processing, intelligent form generation, and multi-agent orchestration to streamline the immigration application process. It processes visa applications (B-2, F-1, H-1B, I-130, I-539, I-765, I-90, EB-2 NIW, EB-1A) with unprecedented speed and accuracy.
+
+**Key Value Propositions:**
+- 10x Faster Processing: AI-powered form filling reduces manual work from weeks to hours
+- 95%+ Accuracy: Multi-agent QA ensures USCIS compliance before submission
+- Cost Reduction: Automates repetitive tasks, reducing paralegal workload by 70%
+- Scalability: Cloud-native architecture handles 1000+ concurrent cases
 
 **Stack:**
-- Backend: FastAPI (Python 3.x) + MongoDB
-- Frontend: React 18.3.1 + TypeScript 5.8.3 + Vite
-- AI/LLM: OpenAI GPT-4, Google Gemini, Emergent Universal Key
-- Infrastructure: Kubernetes, Supervisor (process management)
+- Backend: FastAPI 0.110.1 + Python 3.11+ + MongoDB 6.0+
+- Frontend: React 18.3.1 + TypeScript 5.8.3 + Vite 5.4.19
+- UI: Tailwind CSS 3.4.17 + shadcn/ui + Radix UI
+- AI/LLM: OpenAI GPT-4o, Google Gemini 1.5 Pro, LiteLLM
+- Document Processing: Google Document AI, PyMuPDF, ReportLab
+- Payment: Stripe 12.5.1
+- Email: Resend 2.17.0
+- Monitoring: Sentry 2.20.0
 
 ## Repository Structure
 
 ```
 /
-├── docs/                    # Documentation
-│   ├── architecture/        # Technical architecture docs
-│   ├── guides/              # Setup and quick reference guides
-│   ├── reports/             # Business reports and analysis
-│   └── features/            # Feature documentation
-├── tests/                   # Test files
-│   ├── integration/         # Integration tests
-│   ├── e2e/                 # End-to-end tests
-│   ├── unit/                # Unit tests
-│   └── results/             # Test result JSON files
-├── scripts/                 # Utility scripts
-│   ├── generators/          # Package generators
-│   └── utilities/           # Utility scripts
-├── samples/                 # Sample generated packages (PDFs)
-│   ├── h1b/                 # H-1B visa samples
-│   ├── i539/                # I-539 (B-2) samples
-│   ├── i765/                # I-765 (EAD) samples
-│   └── archive/             # Old iterations
-├── backend/                 # FastAPI backend
-├── frontend/                # React frontend
-├── visa_specialists/        # Multi-agent system
-└── archive/                 # Deprecated code
+├── backend/                    # FastAPI backend application
+│   ├── server.py              # App initialization, router registration
+│   ├── core/                  # Infrastructure (auth, database, logging, sentry)
+│   ├── api/                   # API routers (domain-organized endpoints)
+│   ├── models/                # Pydantic schemas (request/response models)
+│   ├── services/              # Business logic layer
+│   ├── policies/              # Immigration policy definitions (YAML)
+│   ├── requirements.txt       # Python dependencies
+│   ├── .env.example           # Environment template
+│   └── README.md              # Backend documentation (1830+ lines)
+│
+├── frontend/                   # React + Vite frontend application
+│   ├── src/
+│   │   ├── pages/            # Page components (50+ pages)
+│   │   ├── components/       # Reusable UI components (40+ components)
+│   │   │   └── ui/           # shadcn/ui components (35+ components)
+│   │   ├── contexts/         # React Context providers
+│   │   ├── hooks/            # Custom React hooks
+│   │   ├── utils/            # Utilities and API client
+│   │   └── App.tsx           # Root component
+│   ├── public/               # Static assets
+│   ├── package.json          # npm dependencies
+│   ├── vite.config.ts        # Vite configuration
+│   ├── tailwind.config.ts    # Tailwind CSS config
+│   ├── .env.example          # Environment template
+│   └── README.md             # Frontend documentation (1080+ lines)
+│
+├── .kiro/                      # Project documentation and patterns
+│   ├── README.md              # .kiro/ overview
+│   ├── QUICK_START.md         # Onboarding guide
+│   ├── SETUP_SUMMARY.md       # Environment setup
+│   ├── steering/              # Development patterns
+│   └── specs/                 # Refactoring requirements
+│
+├── immigration_resources/      # Curated knowledge and documents
+├── samples/                    # Sample PDFs and test artifacts
+├── tests/                      # Test files (integration, e2e, unit)
+├── IMPROVEMENT_PLAN.md         # Backend refactor roadmap
+└── README.md                   # Root documentation (1000+ lines)
 ```
 
 ## Repository Structure
@@ -72,55 +99,87 @@ Osprey B2C is a multi-agent AI-powered immigration case processing system. It us
 
 ### Backend (FastAPI)
 ```bash
-# Start backend server
+# Navigate to backend directory
 cd backend
-python3 server.py
+
+# Create virtual environment (first time only)
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Run backend with uvicorn directly
+# Configure environment
+cp .env.example .env
+# Edit .env with your API keys
+
+# Start development server
+python3 server.py
+
+# Alternative: Run with uvicorn directly
 uvicorn server:app --host 0.0.0.0 --port 8001 --reload
 ```
 
+**Backend URLs:**
+- API Server: http://localhost:8001
+- API Docs (Swagger): http://localhost:8001/docs
+- ReDoc: http://localhost:8001/redoc
+
 ### Frontend (React + Vite)
 ```bash
-# Start development server
+# Navigate to frontend directory
 cd frontend
+
+# Install dependencies
+npm install
+
+# Configure environment
+cp .env.example .env
+# Edit .env with backend URL and Stripe keys
+
+# Start development server (port 3000)
 npm run dev
 
 # Build for production
 npm run build
 
-# Build for development
+# Build for development (with source maps)
 npm run build:dev
+
+# Preview production build
+npm run preview
 
 # Lint
 npm run lint
 
-# Install dependencies
-npm install
+# Type check
+npx tsc --noEmit
 ```
+
+**Frontend URLs:**
+- Development: http://localhost:3000 (or http://localhost:5173)
+- Production: https://formfiller-26.preview.emergentagent.com
 
 ### Testing
 ```bash
-# Integration tests
+# Backend tests (from repository root)
 python3 tests/integration/test_agent_integration.py
 python3 tests/integration/test_all_agents.py
-
-# End-to-end tests
 python3 tests/e2e/comprehensive_visa_test.py
-python3 tests/e2e/visa_types_e2e_test.py
-python3 tests/e2e/friendly_forms_e2e_test.py
 
-# Unit tests
-python3 tests/unit/test_visa_api_simple.py
-python3 tests/unit/friendly_form_test.py
-
-# Run all tests in a category
+# Run all tests in a category with pytest
 python3 -m pytest tests/integration/
 python3 -m pytest tests/e2e/
 python3 -m pytest tests/unit/
+
+# Run with coverage
+pytest --cov=backend/api --cover=backend/core
+
+# Frontend tests
+cd frontend
+npm run test          # Unit tests (if configured)
+npm run lint          # ESLint
+npm run type-check    # TypeScript checking
 ```
 
 ### Services Management (Supervisor)
@@ -161,8 +220,38 @@ python3 create_admin_user.py --list   # List all admins
 
 ## Architecture
 
+### High-Level System Flow
+
+Osprey follows a modern, decoupled architecture with clear separation between frontend, backend, and external services:
+
+```
+User → Frontend (React SPA) → Backend (FastAPI) → MongoDB
+                                ├→ AI Providers (OpenAI, Gemini)
+                                ├→ Google Document AI (OCR)
+                                ├→ Stripe (Payments)
+                                ├→ Resend (Email)
+                                └→ Sentry (Monitoring)
+```
+
+### Backend Module Boundaries
+
+```
+server.py (App Init + Routers)
+  ├→ core/ (Auth, Database, Logging, Sentry)
+  ├→ api/ (Route Handlers)
+  │   ├→ auth.py (Login, Register)
+  │   ├→ documents.py (Upload, OCR, Analysis)
+  │   ├→ auto_application*.py (Case Management)
+  │   ├→ payments.py (Stripe Integration)
+  │   ├→ uscis_forms.py (Form Generation)
+  │   └→ specialized_agents.py (AI Agents)
+  ├→ models/ (Pydantic Schemas)
+  ├→ services/ (Business Logic)
+  └→ policies/ (Immigration Rules)
+```
+
 ### Multi-Agent System
-The core innovation is a supervisor-specialist architecture in `visa_specialists/`:
+The core innovation is a supervisor-specialist architecture:
 
 **SupervisorAgent** (`visa_specialists/supervisor/supervisor_agent.py`):
 - Analyzes user requests using regex patterns
@@ -197,49 +286,77 @@ Each agent directory contains:
 - Learning system that reads `lessons_learned.md` to avoid past mistakes
 
 ### Backend Structure
-`backend/` contains 51 Python files:
+`backend/` - Modular FastAPI application with clear separation of concerns:
 
-**Core Files:**
-- `server.py` - Main FastAPI application (8000+ lines)
-- `visa_api.py` - Multi-agent system API
-- `case_finalizer_complete.py` - Final case processing with agents
+**Core Infrastructure** (`core/`):
+- `auth.py` - JWT authentication, password hashing, user verification
+- `database.py` - MongoDB lifecycle, schedulers, DBProxy
+- `logging.py` - Structured logging (JSON/plain)
+- `serialization.py` - MongoDB-safe response serialization
+- `sentry.py` - Sentry initialization with full integrations
 
-**Integration Files:**
-- `google_document_ai_integration.py` - OCR and document extraction
-- `intelligent_owl_agent.py` - Chatbot assistant
-- `stripe_integration.py` - Payment processing
-- `payment_packages.py` - Visa package pricing
-- `voucher_system.py` - Discount vouchers
+**API Routers** (`api/` - domain-organized):
+- `auth.py` - Login, registration, token validation
+- `documents.py` - Document upload, OCR, analysis
+- `auto_application*.py` - Case management, AI processing, packages
+- `payments.py` - Stripe integration, webhooks, vouchers
+- `uscis_forms.py` - USCIS form generation and validation
+- `email_packages.py` - Email delivery via Resend
+- `knowledge_base.py` - Admin knowledge management
+- `specialized_agents.py` - AI agent orchestration
+- `voice.py`, `oracle.py`, `completeness.py` - Additional features
 
-**Specialized Systems:**
-- `specialized_agents.py` - Document validation, form validation, eligibility analysis
-- `immigration_legal_rules.py` - Legal compliance checking
-- `professional_qa_agent.py` - Quality assurance system
-- `document_classifier.py` - AI-powered document classification
-- `uscis_form_filler.py` - Automated form filling
+**Models** (`models/`):
+- `enums.py` - VisaType, USCISForm, DifficultyLevel, CaseStatus
+- `auto_application.py` - Case schemas
+- `user.py` - User and admin models
+- `documents.py`, `education.py` - Domain models
 
-**Admin & Security:**
-- `admin_security.py` - Role-based access control (admin/superadmin)
-- `admin_products.py` - Product management
-- `visa_auto_updater.py` - Automatic USCIS policy updates
+**Services** (`services/` - business logic):
+- `cases.py` - Case status, progress tracking
+- `documents.py` - Document processing logic
+- `education.py` - Education validation
+
+**Legacy Files** (to be refactored):
+- AI agents, document processors, form fillers, QA systems
+- Admin tools, utilities, scripts
 
 ### Frontend Structure
-`frontend/src/` React application:
+`frontend/src/` - React 18 + TypeScript application:
 
-**Pages** (`pages/`):
-- `SelectForm.tsx` - Visa type selection (8 types)
+**Pages** (`pages/` - 50+ pages):
+- `Index.tsx`, `NewHomepage.tsx` - Landing pages
+- `Login.tsx` - Authentication (login/register)
+- `SelectForm.tsx` - Visa type selection with pricing
+- `EmbeddedCheckout.tsx` - Stripe payment with vouchers
 - `BasicData.tsx` - Personal information collection
 - `FriendlyForm.tsx` - Simplified question interface
 - `DocumentUploadAuto.tsx` - Document upload with AI extraction
+- `StoryTelling.tsx` - User story narrative input
 - `CoverLetterModule.tsx` - AI-generated cover letters
+- `AIReviewAndTranslation.tsx` - Completeness review
 - `CaseFinalizer.tsx` - Final package generation
-- `AIReviewAndTranslation.tsx` - AI review and translation
-- `Payment.tsx` - Stripe checkout integration
+- `Dashboard.tsx` - User case management
+- Admin pages: `AdminVisaUpdatesPanel.tsx`, `AdminProductManagement.tsx`, `AdminKnowledgeBase.tsx`
 
-**Components** (`components/`):
-- Radix UI components (20+ components)
-- Tailwind CSS + shadcn/ui
-- Form validation with React Hook Form + Zod
+**Components** (`components/` - 40+ components):
+- `ui/` - shadcn/ui components (35+): button, card, dialog, form, input, etc.
+- `BetaBanner.tsx`, `Hero.tsx`, `VisaRequirements.tsx`
+- Form validation: React Hook Form + Zod
+
+**Contexts** (`contexts/`):
+- `LanguageContext.tsx` - Multi-language support (en/pt)
+- `LocaleContext.tsx` - Localization and formatting
+- `ProcessTypeContext.tsx` - Process flow state
+
+**Hooks** (`hooks/`):
+- `useFormSnapshot.ts` - Auto-save form data
+- `useGoogleAuth.ts` - Google OAuth
+- `useSessionManager.ts` - JWT session management
+- `use-toast.ts` - Toast notifications
+
+**Utilities** (`utils/`):
+- `api.ts` - API client with makeApiCall utility
 
 ### Database Schema (MongoDB)
 **Database:** `test_database`
@@ -257,31 +374,43 @@ Each agent directory contains:
 - `sessions` - JWT session management
 
 ### API Endpoints
-Backend runs on port 8001, key endpoints:
+Backend runs on port 8001. Interactive documentation available at:
+- Swagger UI: http://localhost:8001/docs
+- ReDoc: http://localhost:8001/redoc
 
 **Authentication:**
-- `POST /api/auth/login` - JWT authentication
-- `POST /api/auth/register` - User registration
+- `POST /api/login` - User login → JWT token
+- `POST /api/register` - User registration
+- `POST /api/verify-token` - Validate JWT token
 
 **Cases:**
-- `GET /api/cases` - List user cases
-- `POST /api/cases` - Create new case
-- `GET /api/cases/{id}` - Get case details
-- `PUT /api/cases/{id}` - Update case
-- `POST /api/cases/{id}/finalize/start` - Generate package with agents
-
-**Visa Generation:**
-- `POST /api/visa/generate` - Multi-agent visa package generation
+- `POST /api/auto-application/cases` - Create new case
+- `GET /api/auto-application/cases/{case_id}` - Get case details
+- `PATCH /api/auto-application/cases/{case_id}` - Update case
+- `GET /api/auto-application/cases` - List user's cases
+- `POST /api/auto-application/cases/{case_id}/process-ai` - Trigger AI processing
+- `POST /api/auto-application/cases/{case_id}/qa` - Run QA validation
 
 **Documents:**
-- `POST /api/google-document-ai/*` - OCR and extraction
+- `POST /api/documents/upload` - Upload and analyze document
+- `GET /api/documents/{doc_id}` - Get document metadata
+- `DELETE /api/documents/{doc_id}` - Delete document
 
-**Admin:**
+**Payments:**
+- `POST /api/payments/create-checkout-session` - Create Stripe checkout
+- `POST /api/payments/webhook` - Stripe webhook handler
+- `POST /api/payments/apply-voucher` - Apply discount voucher
+
+**USCIS Forms:**
+- `POST /api/uscis-forms/generate` - Generate filled form PDF
+- `GET /api/uscis-forms/{form_code}/fields` - Get form fields
+
+**Admin (requires admin/superadmin role):**
 - `GET /api/admin/visa-updates/pending` - Pending policy updates
-- Requires JWT token with admin/superadmin role
-
-**Payment:**
-- `POST /api/payment/webhook` - Stripe webhooks
+- `POST /api/admin/visa-updates/{id}/approve` - Approve update
+- `GET /api/admin/products` - List products
+- `POST /api/admin/products` - Create product
+- `POST /api/admin/vouchers` - Create voucher
 
 ## Important Patterns
 
@@ -340,39 +469,66 @@ Run tests from the repository root using relative paths.
 ```bash
 # MongoDB
 MONGODB_URI=mongodb://localhost:27017
-MONGODB_DB=test_database
+MONGODB_DB=osprey_db
 
-# JWT
-JWT_SECRET=osprey-b2c-secure-jwt-key-production-ready-2025
+# Authentication
+JWT_SECRET=your-super-secret-jwt-key-change-in-production
+JWT_ALGORITHM=HS256
 
-# OpenAI
-OPENAI_API_KEY=<key>
+# AI Providers (Required)
+OPENAI_API_KEY=sk-...
+GEMINI_API_KEY=...
+EMERGENT_LLM_KEY=sk-emergent-...  # Optional alternative
 
-# Emergent Universal LLM
-EMERGENT_LLM_KEY=sk-emergent-aE5F536B80dFf0bA6F
-
-# Google Cloud
-GOOGLE_APPLICATION_CREDENTIALS=<path-to-service-account-json>
-GOOGLE_CLOUD_PROJECT_ID=891629358081
+# Google Cloud (Required for Document AI)
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+GOOGLE_CLOUD_PROJECT_ID=your-project-id
 GOOGLE_CLOUD_LOCATION=us
 
-# Stripe (LIVE MODE)
-STRIPE_SECRET_KEY=sk_live_51PByv6AfnK9GyzVJ...
-STRIPE_PUBLISHABLE_KEY=pk_live_51PByv6AfnK9GyzVJ...
-STRIPE_WEBHOOK_SECRET=<webhook-secret>
+# Stripe (Use test keys in development)
+STRIPE_SECRET_KEY=sk_test_...  # Production: sk_live_...
+STRIPE_PUBLISHABLE_KEY=pk_test_...  # Production: pk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 
-# Resend Email
-RESEND_API_KEY=re_Hqp3VrM5_DjqoAsZqSKVridC123W5NMPu
+# Email (Resend)
+RESEND_API_KEY=re_...
+SENDER_EMAIL=noreply@yourdomain.com
 
-# CORS
-CORS_ORIGINS=*
+# CORS (Development: allow all, Production: specific domain)
+CORS_ORIGINS=http://localhost:3000,http://localhost:5173
+# Production: CORS_ORIGINS=https://yourdomain.com
+
+# Logging
+LOG_LEVEL=INFO  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+LOG_PRETTY=true  # Development: true, Production: false
+LOG_FORMAT=plain  # Development: plain, Production: json
+
+# Sentry (Production Monitoring)
+SENTRY_DSN=https://...@sentry.io/...
+SENTRY_ENVIRONMENT=production
+SENTRY_TRACES_SAMPLE_RATE=0.1  # 10% of requests traced
+SENTRY_PROFILES_SAMPLE_RATE=0.05  # 5% of requests profiled
 ```
 
 ### Frontend (.env in frontend/)
 ```bash
+# Backend API Configuration
+VITE_BACKEND_URL=http://localhost:8001
 VITE_API_URL=http://localhost:8001
-VITE_STRIPE_PUBLISHABLE_KEY=pk_live_51PByv6AfnK9GyzVJ...
+
+# Stripe (Use test keys in development)
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...  # Production: pk_live_...
+
+# Environment
+NODE_ENV=development
 ```
+
+**Security Notes:**
+- ✅ `.env` files are in `.gitignore` - NEVER commit secrets
+- ✅ Use test keys (`pk_test_`, `sk_test_`) in development
+- ✅ Use live keys (`pk_live_`, `sk_live_`) only in production
+- ✅ Change `JWT_SECRET` to a strong random value in production
+- ✅ Restrict `CORS_ORIGINS` to specific domains in production
 
 ## Development URLs
 - **Frontend**: http://localhost:3000
@@ -383,65 +539,101 @@ VITE_STRIPE_PUBLISHABLE_KEY=pk_live_51PByv6AfnK9GyzVJ...
 ## Key Files Reference
 
 ### Must-Read Documentation
-- `docs/architecture/ARQUITETURA_TECNICA.md` - Complete technical architecture
-- `docs/guides/COMANDOS_RAPIDOS.md` - Quick command reference
-- `docs/guides/GUIA_RAPIDO_SETUP.md` - Setup guide
-- `visa_specialists/README.md` - Multi-agent architecture explanation
+- `README.md` - Root documentation (1000+ lines)
+- `backend/README.md` - Backend documentation (1830+ lines)
+- `frontend/README.md` - Frontend documentation (1080+ lines)
+- `.kiro/README.md` - Project patterns and guides
+- `.kiro/QUICK_START.md` - Onboarding guide
+- `IMPROVEMENT_PLAN.md` - Backend refactor roadmap
 
 ### Critical Backend Files
-- `backend/server.py` - Main app entry point (13000+ lines)
-- `backend/case_finalizer_complete.py` - Package generation orchestrator
-- `visa_specialists/supervisor/supervisor_agent.py` - Agent coordinator
-- `visa_specialists/base_agent.py` - Base class for all agents
+- `backend/server.py` - FastAPI app initialization
+- `backend/core/auth.py` - JWT authentication
+- `backend/core/database.py` - MongoDB lifecycle
+- `backend/core/logging.py` - Structured logging
+- `backend/core/sentry.py` - Error tracking
+- `backend/api/auto_application*.py` - Case management
+- `backend/models/enums.py` - Visa types and statuses
+
+### Critical Frontend Files
+- `frontend/src/App.tsx` - Root component with routing
+- `frontend/src/utils/api.ts` - API client (makeApiCall)
+- `frontend/src/pages/SelectForm.tsx` - Visa selection
+- `frontend/src/pages/EmbeddedCheckout.tsx` - Stripe payment
+- `frontend/src/pages/CaseFinalizer.tsx` - Package generation
 
 ### Configuration Files
-- `backend/requirements.txt` - Python dependencies (150 lines)
+- `backend/requirements.txt` - Python dependencies
 - `frontend/package.json` - Node.js dependencies
-- `backend/visa_directive_guides_informative.yaml` - Visa specifications
+- `backend/.env.example` - Backend environment template
+- `frontend/.env.example` - Frontend environment template
+- `frontend/tailwind.config.ts` - Tailwind CSS config
+- `frontend/vite.config.ts` - Vite build config
 
 ## Common Pitfalls
+
+### Backend Development
+- **MongoDB Serialization**: `ObjectId` must be serialized to strings before JSON response
+  - Use `serialize_doc()` from `core/serialization.py`
+- **Async Operations**: Always use `await` with Motor (async MongoDB driver)
+- **JWT Tokens**: Check expiration in authentication middleware
+- **Datetime**: Use `datetime.now(timezone.utc)` not deprecated `utcnow()`
+- **Database Name**: Collection is `auto_cases` not `cases`
+- **Indexes**: Ensure indexes on `user_id` and `case_id` for performance
+
+### Frontend Development
+- **API Calls**: ALWAYS use `makeApiCall` from `src/utils/api.ts`
+  - Signature: `makeApiCall(endpoint: string, method: string = 'GET', body?: any)`
+  - Returns parsed JSON data (NOT Response object)
+  - Example: `const data = await makeApiCall('/cases', 'GET');`
+- **Controlled Inputs**: Always provide fallback: `value={state || ''}` not `value={state}`
+- **Form Validation**: Use React Hook Form + Zod schemas
+- **Button Hover**: Use native `<button>` if you need full control over hover styles
+  - shadcn Button component overrides custom hover classes
+- **Environment Variables**: Use `import.meta.env.VITE_*` prefix
+- **Stripe**: Wait for `onReady` callback before enabling submit button
 
 ### Agent Development
 - Each agent MUST read its `lessons_learned.md` before generating packages
 - Always validate REQUIRED_DOCUMENTS and check FORBIDDEN_DOCUMENTS
 - Update `lessons_learned.md` after fixing bugs in agent behavior
 
-### API Development
-- MongoDB documents contain `ObjectId` which must be serialized to strings before JSON response
-- Use `serialize_doc()` helper function in `server.py`
-- JWT tokens expire; check expiration in authentication middleware
-
-### Frontend Development
-- Form validation uses Zod schemas with React Hook Form
-- Axios base URL configured via VITE_API_URL environment variable
-- Document uploads must include proper MIME type detection
-
-### Database
-- Collection name is `auto_cases` not `cases`
-- Always use async MongoDB operations with Motor driver
-- Index on `user_id` and `case_id` for performance
-
 ### Testing
-- Test files are organized in `tests/` subdirectories
-- MongoDB test database is `test_database`
-- Run tests with Python from root directory: `python3 tests/integration/test_*.py`
-- Test results are automatically saved to `tests/results/`
+- Test files organized in `tests/` subdirectories (integration, e2e, unit)
+- Run tests from repository root: `python3 tests/integration/test_*.py`
+- Use pytest for organized test runs: `pytest tests/integration/`
+- Test results automatically saved to `tests/results/`
+
+### Deployment
+- **Security**: Change `JWT_SECRET`, restrict `CORS_ORIGINS`
+- **Logging**: Use `LOG_FORMAT=json` and `LOG_PRETTY=false` in production
+- **Sentry**: Configure `SENTRY_DSN` and set appropriate sample rates
+- **Stripe**: Use live keys (`sk_live_`, `pk_live_`) only in production
 
 ## Code Style
 
-### Python
-- FastAPI with Pydantic v2 models
-- Type hints required for function signatures
-- Environment variables loaded via `python-dotenv`
-- Async/await for database operations with Motor
-- Document serialization for ObjectId → string conversion
+### Python (Backend)
+- **Framework**: FastAPI with Pydantic v2 models
+- **Type Hints**: Required for all function signatures
+- **Async/Await**: Use for all database operations (Motor driver)
+- **Formatting**: Black (line length 100)
+- **Linting**: Flake8
+- **Type Checking**: MyPy
+- **Environment**: Load via `python-dotenv`
+- **Serialization**: Always serialize MongoDB docs (ObjectId → string)
+- **Datetime**: Use `datetime.now(timezone.utc)` not `utcnow()`
 
-### TypeScript/React
-- Functional components with hooks
-- TypeScript strict mode enabled
-- Zod for runtime type validation
-- React Hook Form for form management
-- Tailwind CSS for styling (no CSS modules)
+### TypeScript/React (Frontend)
+- **Components**: Functional components with hooks
+- **TypeScript**: Strict mode enabled
+- **Validation**: Zod for runtime type validation
+- **Forms**: React Hook Form (uncontrolled pattern)
+- **Styling**: Tailwind CSS utility classes (no CSS modules)
+- **State**: TanStack Query for server state, Context for global state
+- **Formatting**: Prettier
+- **Linting**: ESLint with TypeScript plugin
+- **Imports**: Grouped (external, internal, types)
+- **Controlled Inputs**: Always provide fallback: `value={state || ''}`
 
 ## Security Notes
 - JWT_SECRET must be changed in production

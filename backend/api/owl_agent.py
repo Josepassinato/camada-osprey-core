@@ -707,8 +707,10 @@ async def start_owl_session(request: dict):
         if not case_id:
             case_id = f"OWL-{int(time_module.time())}-{uuid.uuid4().hex[:8]}"
 
-        from intelligent_owl_agent import intelligent_owl
-
+        from agents.owl.agent import IntelligentOwlAgent
+        
+        intelligent_owl = IntelligentOwlAgent()
+        
         session_result = await intelligent_owl.start_guided_session(
             case_id=case_id, visa_type=visa_type, user_language=user_language
         )
@@ -753,8 +755,10 @@ async def start_owl_session(request: dict):
 async def get_owl_session(session_id: str):
     """Get current session status and progress"""
     try:
-        from intelligent_owl_agent import intelligent_owl
-
+        from agents.owl.agent import IntelligentOwlAgent
+        
+        intelligent_owl = IntelligentOwlAgent()
+        
         session = await db.owl_sessions.find_one({"session_id": session_id}, {"_id": 0})
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
@@ -781,8 +785,10 @@ async def get_field_guidance(
 ):
     """Get intelligent guidance for a specific field"""
     try:
-        from intelligent_owl_agent import intelligent_owl
-
+        from agents.owl.agent import IntelligentOwlAgent
+        
+        intelligent_owl = IntelligentOwlAgent()
+        
         session = await db.owl_sessions.find_one({"session_id": session_id})
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
@@ -813,8 +819,10 @@ async def get_field_guidance(
 async def validate_field_input(request: dict):
     """Validate user input for a specific field using sistema and Google APIs"""
     try:
-        from intelligent_owl_agent import intelligent_owl
-
+        from agents.owl.agent import IntelligentOwlAgent
+        
+        intelligent_owl = IntelligentOwlAgent()
+        
         session_id = request.get("session_id")
         field_id = request.get("field_id")
         user_input = request.get("user_input", "")

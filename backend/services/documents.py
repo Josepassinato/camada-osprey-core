@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 from models.documents import DocumentPriority, DocumentType, UserDocument
-from specialized_agents import create_document_validator
+from agents.specialized import create_document_validator
 
 logger = logging.getLogger(__name__)
 

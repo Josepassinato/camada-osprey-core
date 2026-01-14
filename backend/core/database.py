@@ -5,11 +5,11 @@ from typing import Optional
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from admin_products import initialize_products_in_db
-from admin_security import init_db as init_admin_security_db
+from backend.admin.products import initialize_products_in_db
+from backend.admin.security import init_db as init_admin_security_db
 from core.auth import set_db as set_auth_db
-import maria_api
-from proactive_alerts import ProactiveAlertSystem
+from backend.agents.maria import api as maria_api
+from backend.utils.proactive_alerts import ProactiveAlertSystem
 
 logger = logging.getLogger(__name__)
 
@@ -178,7 +178,7 @@ async def _start_backup_scheduler():
     try:
         mongo_url = os.environ.get("MONGODB_URI") or os.environ.get("MONGO_URL", "")
         if "localhost" in mongo_url or "127.0.0.1" in mongo_url:
-            from mongodb_backup import mongodb_backup
+            from backend.scripts.mongodb_backup import mongodb_backup
             if mongodb_backup.enabled:
                 asyncio.create_task(mongodb_backup.schedule_daily_backup())
                 logger.info("✅ MongoDB Backup Scheduler started (daily at 3AM UTC)")
@@ -192,7 +192,7 @@ async def _start_backup_scheduler():
 
 async def _start_rate_limiter_cleanup():
     try:
-        from rate_limiter import rate_limiter
+        from backend.utils.rate_limiter import rate_limiter
         asyncio.create_task(rate_limiter.cleanup_old_entries())
         logger.info("✅ Rate Limiter cleanup task started")
     except Exception as rate_limiter_error:

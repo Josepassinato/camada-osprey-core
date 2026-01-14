@@ -7,7 +7,7 @@ from typing import Dict, List, Any, Optional, Tuple
 import logging
 from datetime import datetime, date
 from difflib import SequenceMatcher
-from validators import normalize_date
+from backend.utils.validators import normalize_date
 
 logger = logging.getLogger(__name__)
 

@@ -12,9 +12,9 @@ import uuid
 
 logger = logging.getLogger(__name__)
 
-from maria_agent import maria
-from maria_whatsapp import maria_whatsapp
-from maria_voice import maria_voice
+from agents.maria.agent import maria
+from agents.maria.whatsapp import maria_whatsapp
+from agents.maria.voice import maria_voice
 
 router = APIRouter(prefix="/api/maria", tags=["maria"])
 

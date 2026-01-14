@@ -628,7 +628,7 @@ class HybridDocumentValidator:
     async def _get_dr_miguel(self):
         """Lazy load Dr. Miguel to avoid circular imports"""
         if self.dr_miguel is None:
-            from specialized_agents import DocumentValidationAgent
+            from agents.specialized import DocumentValidationAgent
             self.dr_miguel = DocumentValidationAgent()
         return self.dr_miguel
     

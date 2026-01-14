@@ -220,7 +220,7 @@ def test_direct_autocorrection():
     
     try:
         # Import the document extractor directly
-        from document_data_extractor import process_document_and_update_user
+        from backend.documents.data_extractor import process_document_and_update_user
         from motor.motor_asyncio import AsyncIOMotorClient
         import asyncio
         

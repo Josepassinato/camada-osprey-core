@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from completeness_analyzer import CompletenessAnalyzer, CompletenessLevel
+from backend.case.completeness_analyzer import CompletenessAnalyzer, CompletenessLevel
 from core.database import db
 
 logger = logging.getLogger(__name__)

@@ -65,7 +65,7 @@ class IntelligentOwlAgent:
         
         # Google Integration for validation
         try:
-            from google_document_ai_integration import GoogleDocumentAIProcessor
+            from integrations.google import GoogleDocumentAIProcessor
             self.google_processor = GoogleDocumentAIProcessor()
             logger.info("🔗 Owl Agent: Google API integration initialized")
         except Exception as e:
@@ -87,12 +87,12 @@ class IntelligentOwlAgent:
                 logger.info("🤖 Owl Agent: Emergent LLM client initialized with GPT-4o")
                 return {"type": "emergent", "client": client}
             
-            # Fallback to OpenAI directly
-            import openai
+            # Fallback to OpenAI directly (v2 API with AsyncOpenAI)
+            from openai import AsyncOpenAI
             openai_key = os.environ.get('OPENAI_API_KEY')
             if openai_key:
-                client = openai.OpenAI(api_key=openai_key)
-                logger.info("🤖 Owl Agent: OpenAI client initialized")
+                client = AsyncOpenAI(api_key=openai_key)
+                logger.info("🤖 Owl Agent: AsyncOpenAI client initialized")
                 return {"type": "openai", "client": client}
             else:
                 logger.warning("⚠️ Owl Agent: No AI keys found, using mock responses")
@@ -619,8 +619,8 @@ class IntelligentOwlAgent:
                 )
                 ai_guidance = response.content
             elif self.ai_client["type"] == "openai":
-                response = await asyncio.to_thread(
-                    self.ai_client["client"].chat.completions.create,
+                # Using AsyncOpenAI client (v2 API)
+                response = await self.ai_client["client"].chat.completions.create(
                     model="gpt-4",
                     messages=[{"role": "user", "content": prompt}],
                     max_tokens=300,
@@ -899,8 +899,8 @@ class IntelligentOwlAgent:
                 )
                 ai_response = response.content
             elif self.ai_client["type"] == "openai":
-                response = await asyncio.to_thread(
-                    self.ai_client["client"].chat.completions.create,
+                # Using AsyncOpenAI client (v2 API)
+                response = await self.ai_client["client"].chat.completions.create(
                     model="gpt-4",
                     messages=[{"role": "user", "content": prompt}],
                     max_tokens=200,

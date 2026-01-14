@@ -3,7 +3,7 @@ from datetime import datetime
 
 from fastapi import APIRouter
 
-from specialized_agents import (
+from agents.specialized import (
     SpecializedAgentCoordinator,
     create_compliance_checker,
     create_document_validator,

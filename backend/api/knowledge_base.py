@@ -3,7 +3,7 @@ import logging
 from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile
 from fastapi.responses import Response
 
-from admin_security import require_admin
+from backend.admin.security import require_admin
 from core.database import db
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ async def upload_knowledge_document(
 ):
     """Upload documento para a base de conhecimento interna (admin-only)."""
     try:
-        from knowledge_base_manager import KnowledgeBaseManager
+        from backend.knowledge.manager import KnowledgeBaseManager
 
         kb_manager = KnowledgeBaseManager(db)
         file_data = await file.read()
@@ -50,7 +50,7 @@ async def upload_knowledge_document(
 async def list_knowledge_documents(skip: int = 0, limit: int = 50, admin=Depends(require_admin)):
     """Lista todos os documentos da base de conhecimento (admin-only)."""
     try:
-        from knowledge_base_manager import KnowledgeBaseManager
+        from backend.knowledge.manager import KnowledgeBaseManager
 
         kb_manager = KnowledgeBaseManager(db)
         return await kb_manager.list_all_documents(skip, limit)
@@ -61,7 +61,7 @@ async def list_knowledge_documents(skip: int = 0, limit: int = 50, admin=Depends
 @router.get("/admin/knowledge-base/categories")
 async def get_knowledge_categories(admin=Depends(require_admin)):
     """Retorna categorias disponíveis (admin-only)."""
-    from knowledge_base_manager import KNOWLEDGE_BASE_CATEGORIES, SUPPORTED_FORM_TYPES
+    from backend.knowledge.manager import KNOWLEDGE_BASE_CATEGORIES, SUPPORTED_FORM_TYPES
 
     return {"categories": KNOWLEDGE_BASE_CATEGORIES, "form_types": SUPPORTED_FORM_TYPES}
 
@@ -70,7 +70,7 @@ async def get_knowledge_categories(admin=Depends(require_admin)):
 async def get_knowledge_document(document_id: str, admin=Depends(require_admin)):
     """Busca documento específico por ID (admin-only)."""
     try:
-        from knowledge_base_manager import KnowledgeBaseManager
+        from backend.knowledge.manager import KnowledgeBaseManager
 
         kb_manager = KnowledgeBaseManager(db)
         doc = await kb_manager.get_document_by_id(document_id)
@@ -87,7 +87,7 @@ async def get_knowledge_document(document_id: str, admin=Depends(require_admin))
 async def download_knowledge_document(document_id: str, admin=Depends(require_admin)):
     """Download do arquivo PDF (admin-only)."""
     try:
-        from knowledge_base_manager import KnowledgeBaseManager
+        from backend.knowledge.manager import KnowledgeBaseManager
 
         kb_manager = KnowledgeBaseManager(db)
         doc = await kb_manager.get_document_by_id(document_id)
@@ -108,7 +108,7 @@ async def download_knowledge_document(document_id: str, admin=Depends(require_ad
 async def delete_knowledge_document(document_id: str, admin=Depends(require_admin)):
     """Deleta documento da base (admin-only)."""
     try:
-        from knowledge_base_manager import KnowledgeBaseManager
+        from backend.knowledge.manager import KnowledgeBaseManager
 
         kb_manager = KnowledgeBaseManager(db)
         return await kb_manager.delete_document(document_id)
@@ -120,7 +120,7 @@ async def delete_knowledge_document(document_id: str, admin=Depends(require_admi
 async def get_knowledge_stats(admin=Depends(require_admin)):
     """Estatísticas da base de conhecimento (admin-only)."""
     try:
-        from knowledge_base_manager import KnowledgeBaseManager
+        from backend.knowledge.manager import KnowledgeBaseManager
 
         kb_manager = KnowledgeBaseManager(db)
         return await kb_manager.get_statistics()
@@ -132,7 +132,7 @@ async def get_knowledge_stats(admin=Depends(require_admin)):
 async def search_knowledge_base(q: str, admin=Depends(require_admin)):
     """Busca na base de conhecimento (admin-only)."""
     try:
-        from knowledge_base_manager import KnowledgeBaseManager
+        from backend.knowledge.manager import KnowledgeBaseManager
 
         kb_manager = KnowledgeBaseManager(db)
         return await kb_manager.search_documents(q)

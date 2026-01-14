@@ -10,14 +10,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from core.auth import get_current_user_optional
 from core.database import db
 from services.cases import update_case_status_and_progress
-from visa_specifications import get_visa_specifications
+from backend.visa.specifications import get_visa_specifications
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api")
 
 try:
-    from immigration_legal_rules import apply_legal_rules
+    from backend.compliance.legal_rules import apply_legal_rules
 
     LEGAL_RULES_AVAILABLE = True
     logger.info("✅ Immigration Legal Rules loaded successfully")
@@ -857,7 +857,7 @@ async def get_friendly_form_structure_endpoint(visa_type: str):
         Estrutura completa do formulário com seções, campos, validações e mapeamento para formulário oficial
     """
     try:
-        from friendly_form_structures import get_friendly_form_structure
+        from backend.forms.structures import get_friendly_form_structure
 
         structure = get_friendly_form_structure(visa_type)
 

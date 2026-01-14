@@ -17,7 +17,7 @@ import sys
 import os
 sys.path.append('/app/backend')
 
-from document_data_extractor import DocumentDataExtractor
+from backend.documents.data_extractor import DocumentDataExtractor
 import asyncio
 import json
 
