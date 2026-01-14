@@ -66,7 +66,9 @@ async def admin_update_product_price(
         result = await update_product_price(db, visa_code, float(new_price), sync_stripe)
 
         if not result.get("success"):
-            raise HTTPException(status_code=400, detail=result.get("error", "Erro ao atualizar preço"))
+            raise HTTPException(
+                status_code=400, detail=result.get("error", "Erro ao atualizar preço")
+            )
 
         return result
 

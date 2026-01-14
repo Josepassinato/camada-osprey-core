@@ -19,8 +19,8 @@ VISA_PACKAGES = {
             "Checklist de documentos personalizada",
             "Instruções de envio ao USCIS",
             "Carta com informações de taxas",
-            "Acesso vitalício ao formulário salvo"
-        ]
+            "Acesso vitalício ao formulário salvo",
+        ],
     },
     "I-765": {
         "name": "Autorização de Trabalho (EAD)",
@@ -33,8 +33,8 @@ VISA_PACKAGES = {
             "Checklist de documentos personalizada",
             "Instruções de envio ao USCIS",
             "Carta com informações de taxas",
-            "Acesso vitalício ao formulário salvo"
-        ]
+            "Acesso vitalício ao formulário salvo",
+        ],
     },
     "I-90": {
         "name": "Renovação de Green Card",
@@ -47,10 +47,9 @@ VISA_PACKAGES = {
             "Checklist de documentos personalizada",
             "Instruções de envio ao USCIS",
             "Carta com informações de taxas",
-            "Acesso vitalício ao formulário salvo"
-        ]
+            "Acesso vitalício ao formulário salvo",
+        ],
     },
-    
     # Categoria Especial - $800.00
     "N-400": {
         "name": "Cidadania Americana",
@@ -64,8 +63,8 @@ VISA_PACKAGES = {
             "Instruções de envio ao USCIS",
             "Guia de preparação para teste de cidadania",
             "Perguntas e respostas do teste cívico",
-            "Acesso vitalício ao formulário salvo"
-        ]
+            "Acesso vitalício ao formulário salvo",
+        ],
     },
     "I-589": {
         "name": "Pedido de Asilo",
@@ -79,10 +78,9 @@ VISA_PACKAGES = {
             "Instruções de envio ao USCIS",
             "Orientações para declaração pessoal",
             "Guia de evidências necessárias",
-            "Acesso vitalício ao formulário salvo"
-        ]
+            "Acesso vitalício ao formulário salvo",
+        ],
     },
-    
     # Categoria Intermediária - $460.00
     "F-1": {
         "name": "Visto de Estudante",
@@ -96,8 +94,8 @@ VISA_PACKAGES = {
             "Instruções de envio ao USCIS",
             "Orientações sobre I-20 e SEVIS",
             "Carta com informações de taxas",
-            "Acesso vitalício ao formulário salvo"
-        ]
+            "Acesso vitalício ao formulário salvo",
+        ],
     },
     "I-130": {
         "name": "Petição para Familiar",
@@ -111,8 +109,8 @@ VISA_PACKAGES = {
             "Instruções de envio ao USCIS",
             "Guia de evidências de relacionamento",
             "Carta com informações de taxas",
-            "Acesso vitalício ao formulário salvo"
-        ]
+            "Acesso vitalício ao formulário salvo",
+        ],
     },
     "I-751": {
         "name": "Remoção de Condições",
@@ -126,10 +124,9 @@ VISA_PACKAGES = {
             "Instruções de envio ao USCIS",
             "Guia completo de documentação necessária",
             "Carta com informações de taxas",
-            "Acesso vitalício ao formulário salvo"
-        ]
+            "Acesso vitalício ao formulário salvo",
+        ],
     },
-    
     # Categoria Avançada - $1,400.00
     "H-1B": {
         "name": "Trabalho Especializado",
@@ -144,8 +141,8 @@ VISA_PACKAGES = {
             "Orientações sobre LCA e requisitos",
             "Guia de evidências profissionais",
             "Carta com informações de taxas",
-            "Acesso vitalício ao formulário salvo"
-        ]
+            "Acesso vitalício ao formulário salvo",
+        ],
     },
     "O-1": {
         "name": "Habilidade Extraordinária",
@@ -160,8 +157,8 @@ VISA_PACKAGES = {
             "Guia completo de documentação necessária",
             "Orientações sobre cartas de recomendação",
             "Carta com informações de taxas",
-            "Acesso vitalício ao formulário salvo"
-        ]
+            "Acesso vitalício ao formulário salvo",
+        ],
     },
     "I-485": {
         "name": "Ajuste de Status (Green Card)",
@@ -176,10 +173,9 @@ VISA_PACKAGES = {
             "Orientações sobre EAD e Advance Parole",
             "Guia de preparação para entrevista",
             "Carta com informações de taxas",
-            "Acesso vitalício ao formulário salvo"
-        ]
+            "Acesso vitalício ao formulário salvo",
+        ],
     },
-    
     # Categoria Premium - Vistos de Alto Valor
     "EB-2 NIW": {
         "name": "EB-2 NIW (National Interest Waiver)",
@@ -196,8 +192,8 @@ VISA_PACKAGES = {
             "Orientações sobre comprovação de interesse nacional",
             "Instruções de envio ao USCIS",
             "Carta com informações de taxas",
-            "Acesso vitalício ao formulário salvo"
-        ]
+            "Acesso vitalício ao formulário salvo",
+        ],
     },
     "EB-1A": {
         "name": "EB-1A (Extraordinary Ability)",
@@ -215,54 +211,54 @@ VISA_PACKAGES = {
             "Análise de publicações e contribuições",
             "Instruções de envio ao USCIS",
             "Carta com informações de taxas",
-            "Acesso vitalício ao formulário salvo"
-        ]
-    }
+            "Acesso vitalício ao formulário salvo",
+        ],
+    },
 }
 
 
 def get_visa_price(visa_code: str) -> float:
     """
     Retorna o preço de um visto específico
-    
+
     Args:
         visa_code: Código do visto (ex: "H-1B", "I-539")
-    
+
     Returns:
         Preço em dólares (float)
-    
+
     Raises:
         ValueError: Se o visto não existir
     """
     if visa_code not in VISA_PACKAGES:
         raise ValueError(f"Visto {visa_code} não encontrado")
-    
+
     return VISA_PACKAGES[visa_code]["price"]
 
 
 def get_visa_package(visa_code: str) -> Dict:
     """
     Retorna informações completas do pacote de um visto
-    
+
     Args:
         visa_code: Código do visto (ex: "H-1B", "I-539")
-    
+
     Returns:
         Dicionário com todas informações do pacote
-    
+
     Raises:
         ValueError: Se o visto não existir
     """
     if visa_code not in VISA_PACKAGES:
         raise ValueError(f"Visto {visa_code} não encontrado")
-    
+
     return VISA_PACKAGES[visa_code]
 
 
 def get_all_packages() -> Dict[str, Dict]:
     """
     Retorna todos os pacotes disponíveis
-    
+
     Returns:
         Dicionário com todos os pacotes
     """
@@ -272,27 +268,25 @@ def get_all_packages() -> Dict[str, Dict]:
 def get_packages_by_category(category: str) -> Dict[str, Dict]:
     """
     Retorna pacotes de uma categoria específica
-    
+
     Args:
         category: "basic", "special", "intermediate", "advanced"
-    
+
     Returns:
         Dicionário com pacotes da categoria
     """
     return {
-        code: package 
-        for code, package in VISA_PACKAGES.items() 
-        if package["category"] == category
+        code: package for code, package in VISA_PACKAGES.items() if package["category"] == category
     }
 
 
 def validate_visa_code(visa_code: str) -> bool:
     """
     Valida se um código de visto existe
-    
+
     Args:
         visa_code: Código do visto
-    
+
     Returns:
         True se existe, False caso contrário
     """
@@ -302,21 +296,21 @@ def validate_visa_code(visa_code: str) -> bool:
 def calculate_final_price(visa_code: str, discount_percentage: float = 0.0) -> Dict:
     """
     Calcula preço final com desconto aplicado
-    
+
     Args:
         visa_code: Código do visto
         discount_percentage: Porcentagem de desconto (0-100)
-    
+
     Returns:
         Dict com preço original, desconto e preço final
     """
     if visa_code not in VISA_PACKAGES:
         raise ValueError(f"Visto {visa_code} não encontrado")
-    
+
     original_price = VISA_PACKAGES[visa_code]["price"]
     discount_amount = (original_price * discount_percentage) / 100.0
     final_price = original_price - discount_amount
-    
+
     return {
         "visa_code": visa_code,
         "visa_name": VISA_PACKAGES[visa_code]["name"],
@@ -324,5 +318,5 @@ def calculate_final_price(visa_code: str, discount_percentage: float = 0.0) -> D
         "discount_percentage": discount_percentage,
         "discount_amount": round(discount_amount, 2),
         "final_price": round(final_price, 2),
-        "savings": round(discount_amount, 2)
+        "savings": round(discount_amount, 2),
     }

@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 
 class MessageRole(str, Enum):
     """Message role types for chat completions"""
+
     SYSTEM = "system"
     USER = "user"
     ASSISTANT = "assistant"
@@ -21,16 +22,18 @@ class MessageRole(str, Enum):
 
 class ChatMessage(BaseModel):
     """Individual chat message"""
+
     role: MessageRole
     content: str
     name: Optional[str] = None
-    
+
     class Config:
         use_enum_values = True
 
 
 class LLMRequest(BaseModel):
     """Request model for LLM operations"""
+
     messages: List[ChatMessage]
     model: str = "gpt-4o"
     temperature: float = Field(default=0.7, ge=0.0, le=2.0)
@@ -42,23 +45,24 @@ class LLMRequest(BaseModel):
     prompt_id: Optional[str] = None
     stream: bool = False
     metadata: Dict[str, Any] = Field(default_factory=dict)
-    
+
     class Config:
         json_schema_extra = {
             "example": {
                 "messages": [
                     {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": "Hello!"}
+                    {"role": "user", "content": "Hello!"},
                 ],
                 "model": "gpt-4o",
                 "temperature": 0.7,
-                "max_tokens": 1000
+                "max_tokens": 1000,
             }
         }
 
 
 class LLMUsage(BaseModel):
     """Token usage information"""
+
     prompt_tokens: int
     completion_tokens: int
     total_tokens: int
@@ -66,30 +70,28 @@ class LLMUsage(BaseModel):
 
 class LLMResponse(BaseModel):
     """Response model from LLM operations"""
+
     content: str
     model: str
     usage: LLMUsage
     finish_reason: str
     metadata: Dict[str, Any] = Field(default_factory=dict)
-    
+
     class Config:
         json_schema_extra = {
             "example": {
                 "content": "Hello! How can I help you today?",
                 "model": "gpt-4o",
-                "usage": {
-                    "prompt_tokens": 20,
-                    "completion_tokens": 10,
-                    "total_tokens": 30
-                },
+                "usage": {"prompt_tokens": 20, "completion_tokens": 10, "total_tokens": 30},
                 "finish_reason": "stop",
-                "metadata": {}
+                "metadata": {},
             }
         }
 
 
 class PromptMetadata(BaseModel):
     """Metadata for prompts migrated to Portkey"""
+
     prompt_id: str = Field(..., description="Internal prompt identifier")
     portkey_id: Optional[str] = Field(None, description="Portkey prompt ID once created")
     name: str = Field(..., description="Human-readable prompt name")
@@ -103,7 +105,7 @@ class PromptMetadata(BaseModel):
     migrated: bool = Field(default=False, description="Whether migrated to Portkey")
     migration_date: Optional[datetime] = Field(None, description="Date of migration to Portkey")
     tags: List[str] = Field(default_factory=list, description="Tags for categorization")
-    
+
     class Config:
         json_schema_extra = {
             "example": {
@@ -119,13 +121,14 @@ class PromptMetadata(BaseModel):
                 "source_line": 45,
                 "migrated": True,
                 "migration_date": "2026-01-13T10:00:00Z",
-                "tags": ["maria", "greeting", "conversational"]
+                "tags": ["maria", "greeting", "conversational"],
             }
         }
 
 
 class LLMProvider(str, Enum):
     """Supported LLM providers"""
+
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
     GOOGLE = "google"
@@ -135,6 +138,7 @@ class LLMProvider(str, Enum):
 
 class ModelConfig(BaseModel):
     """Configuration for a specific model"""
+
     name: str
     provider: LLMProvider
     max_tokens: int = 4096
@@ -145,7 +149,7 @@ class ModelConfig(BaseModel):
     supports_streaming: bool = True
     supports_function_calling: bool = False
     context_window: int = 4096
-    
+
     class Config:
         use_enum_values = True
         json_schema_extra = {
@@ -159,6 +163,6 @@ class ModelConfig(BaseModel):
                 "cost_per_1k_output_tokens": 0.015,
                 "supports_streaming": True,
                 "supports_function_calling": True,
-                "context_window": 128000
+                "context_window": 128000,
             }
         }

@@ -118,7 +118,8 @@ async def validate_submission(request: SubmissionValidationRequest):
             "can_submit": can_submit,
             "submission_message": submission_message,
             "analysis": analysis,
-            "requires_confirmation": analysis["level"] == CompletenessLevel.WARNING and not request.confirm_warnings,
+            "requires_confirmation": analysis["level"] == CompletenessLevel.WARNING
+            and not request.confirm_warnings,
         }
 
     except HTTPException:

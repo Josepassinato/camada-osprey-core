@@ -19,7 +19,12 @@ router = APIRouter(prefix="/api")
 async def get_pending_visa_updates(skip: int = 0, limit: int = 20, admin=Depends(require_admin)):
     """Get all pending visa updates for admin review - PROTECTED."""
     try:
-        cursor = db.visa_updates.find({"status": "pending"}).sort("created_at", -1).skip(skip).limit(limit)
+        cursor = (
+            db.visa_updates.find({"status": "pending"})
+            .sort("created_at", -1)
+            .skip(skip)
+            .limit(limit)
+        )
         updates = await cursor.to_list(length=None)
         updates = serialize_doc(updates)
 
@@ -181,7 +186,12 @@ async def get_scheduler_status(admin=Depends(require_admin)):
 
         status = await visa_scheduler.get_schedule_status()
 
-        recent_logs = await db.scheduler_logs.find({"job_type": "visa_update"}).sort("executed_at", -1).limit(5).to_list(length=None)
+        recent_logs = (
+            await db.scheduler_logs.find({"job_type": "visa_update"})
+            .sort("executed_at", -1)
+            .limit(5)
+            .to_list(length=None)
+        )
 
         return {"success": True, **status, "recent_logs": serialize_doc(recent_logs)}
     except Exception as e:

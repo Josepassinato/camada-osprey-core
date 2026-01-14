@@ -86,7 +86,9 @@ async def get_case_anonymous(
                 return {"case": case}
 
         if session_token:
-            case = await db.auto_cases.find_one({"case_id": case_id, "session_token": session_token})
+            case = await db.auto_cases.find_one(
+                {"case_id": case_id, "session_token": session_token}
+            )
         else:
             case = await db.auto_cases.find_one({"case_id": case_id, "user_id": None})
 
@@ -119,7 +121,9 @@ async def update_case_anonymous(
                 update_data["updated_at"] = datetime.now(timezone.utc)
 
                 if "current_step" in update_data and "progress_percentage" not in update_data:
-                    update_data["progress_percentage"] = get_progress_percentage(update_data["current_step"])
+                    update_data["progress_percentage"] = get_progress_percentage(
+                        update_data["current_step"]
+                    )
 
                 if "form_code" in update_data and case.get("status") == "created":
                     update_data["status"] = "form_selected"
@@ -146,7 +150,9 @@ async def update_case_anonymous(
         update_data["updated_at"] = datetime.now(timezone.utc)
 
         if "current_step" in update_data and "progress_percentage" not in update_data:
-            update_data["progress_percentage"] = get_progress_percentage(update_data["current_step"])
+            update_data["progress_percentage"] = get_progress_percentage(
+                update_data["current_step"]
+            )
 
         if "form_code" in update_data and case.get("status") == "created":
             update_data["status"] = "form_selected"

@@ -22,6 +22,7 @@ router = APIRouter(prefix="/api/maria", tags=["maria"])
 # MongoDB será inicializado no startup do server.py
 db = None
 
+
 def init_db(database):
     """Inicializa referência ao banco de dados"""
     global db
@@ -31,6 +32,7 @@ def init_db(database):
 # ============================================================================
 # MODELS
 # ============================================================================
+
 
 class ChatMessage(BaseModel):
     message: str
@@ -51,79 +53,90 @@ class ChatResponse(BaseModel):
 # ENDPOINTS
 # ============================================================================
 
+
 @router.post("/chat", response_model=ChatResponse)
 async def chat_with_maria(chat_msg: ChatMessage):
     """
     Chat com a Maria - Assistente Virtual
-    
+
     Aceita mensagem do usuário e retorna resposta da Maria.
     Salva conversa no MongoDB para histórico.
     """
     try:
         # Gerar ou usar conversation_id existente
         conversation_id = chat_msg.conversation_id or str(uuid.uuid4())
-        
+
         # Buscar contexto do usuário se autenticado
         user_context = None
         conversation_history = []
-        
+
         if chat_msg.user_id and db is not None:
             # Buscar informações do usuário
             user = await db.users.find_one({"id": chat_msg.user_id})
-            
+
             # Buscar caso ativo
-            active_case = await db.auto_cases.find_one({
-                "user_id": chat_msg.user_id,
-                "status": {"$in": ["in_progress", "document_review", "ready_to_submit"]}
-            })
-            
+            active_case = await db.auto_cases.find_one(
+                {
+                    "user_id": chat_msg.user_id,
+                    "status": {"$in": ["in_progress", "document_review", "ready_to_submit"]},
+                }
+            )
+
             if user:
                 user_context = {
                     "name": user.get("first_name", "Usuário"),
-                    "visa_type": active_case.get("form_code") if active_case else "Não especificado",
+                    "visa_type": (
+                        active_case.get("form_code") if active_case else "Não especificado"
+                    ),
                     "progress": active_case.get("progress_percentage", 0) if active_case else 0,
-                    "case_status": active_case.get("status") if active_case else "Iniciando"
+                    "case_status": active_case.get("status") if active_case else "Iniciando",
                 }
-            
+
             # Buscar histórico da conversa
-            history = await db.maria_conversations.find({
-                "conversation_id": conversation_id
-            }).sort("timestamp", 1).to_list(length=10)
-            
+            history = (
+                await db.maria_conversations.find({"conversation_id": conversation_id})
+                .sort("timestamp", 1)
+                .to_list(length=10)
+            )
+
             conversation_history = []
             for msg in history:
                 conversation_history.append({"role": "user", "content": msg.get("user_message")})
-                conversation_history.append({"role": "assistant", "content": msg.get("maria_response")})
-        
+                conversation_history.append(
+                    {"role": "assistant", "content": msg.get("maria_response")}
+                )
+
         # Processar mensagem com Maria
         result = await maria.chat(
             user_message=chat_msg.message,
             conversation_history=conversation_history,
-            user_context=user_context
+            user_context=user_context,
         )
-        
+
         # Salvar conversa no MongoDB
         if db is not None:
-            await db.maria_conversations.insert_one({
-                "conversation_id": conversation_id,
-                "user_id": chat_msg.user_id,
-                "user_message": chat_msg.message,
-                "maria_response": result["response"],
-                "emotion_detected": result.get("emotion_detected"),
-                "needs_disclaimer": result.get("needs_disclaimer"),
-                "timestamp": datetime.now(timezone.utc),
-                "user_context": user_context
-            })
-        
+            await db.maria_conversations.insert_one(
+                {
+                    "conversation_id": conversation_id,
+                    "user_id": chat_msg.user_id,
+                    "user_message": chat_msg.message,
+                    "maria_response": result["response"],
+                    "emotion_detected": result.get("emotion_detected"),
+                    "needs_disclaimer": result.get("needs_disclaimer"),
+                    "timestamp": datetime.now(timezone.utc),
+                    "user_context": user_context,
+                }
+            )
+
         return ChatResponse(
             response=result["response"],
             conversation_id=conversation_id,
             needs_disclaimer=result.get("needs_disclaimer", False),
             disclaimer_text=result.get("disclaimer_text"),
             emotion_detected=result.get("emotion_detected"),
-            timestamp=result["timestamp"]
+            timestamp=result["timestamp"],
         )
-        
+
     except Exception as e:
         logger.error(f"❌ Erro no chat com Maria: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -138,34 +151,33 @@ async def get_welcome_message(user_id: Optional[str] = None):
     try:
         user_name = None
         visa_type = None
-        
+
         if user_id and db is not None:
             user = await db.users.find_one({"id": user_id})
             if user:
                 user_name = user.get("first_name")
-            
-            active_case = await db.auto_cases.find_one({
-                "user_id": user_id,
-                "status": {"$in": ["in_progress", "document_review", "ready_to_submit"]}
-            })
+
+            active_case = await db.auto_cases.find_one(
+                {
+                    "user_id": user_id,
+                    "status": {"$in": ["in_progress", "document_review", "ready_to_submit"]},
+                }
+            )
             if active_case:
                 visa_type = active_case.get("form_code")
-        
+
         welcome_msg = maria.get_welcome_message(user_name, visa_type)
-        
+
         return {
             "success": True,
             "message": welcome_msg,
             "user_name": user_name,
-            "visa_type": visa_type
+            "visa_type": visa_type,
         }
-        
+
     except Exception as e:
         logger.error(f"❌ Erro ao gerar welcome message: {e}")
-        return {
-            "success": True,
-            "message": maria.get_welcome_message()
-        }
+        return {"success": True, "message": maria.get_welcome_message()}
 
 
 @router.get("/conversation/{conversation_id}")
@@ -176,32 +188,39 @@ async def get_conversation_history(conversation_id: str, limit: int = 50):
     try:
         if db is None:
             raise HTTPException(status_code=500, detail="Database not initialized")
-        
-        messages = await db.maria_conversations.find({
-            "conversation_id": conversation_id
-        }).sort("timestamp", 1).limit(limit).to_list(length=limit)
-        
+
+        messages = (
+            await db.maria_conversations.find({"conversation_id": conversation_id})
+            .sort("timestamp", 1)
+            .limit(limit)
+            .to_list(length=limit)
+        )
+
         formatted_messages = []
         for msg in messages:
-            formatted_messages.append({
-                "type": "user",
-                "content": msg.get("user_message"),
-                "timestamp": msg.get("timestamp").isoformat() if msg.get("timestamp") else None
-            })
-            formatted_messages.append({
-                "type": "maria",
-                "content": msg.get("maria_response"),
-                "emotion_detected": msg.get("emotion_detected"),
-                "timestamp": msg.get("timestamp").isoformat() if msg.get("timestamp") else None
-            })
-        
+            formatted_messages.append(
+                {
+                    "type": "user",
+                    "content": msg.get("user_message"),
+                    "timestamp": msg.get("timestamp").isoformat() if msg.get("timestamp") else None,
+                }
+            )
+            formatted_messages.append(
+                {
+                    "type": "maria",
+                    "content": msg.get("maria_response"),
+                    "emotion_detected": msg.get("emotion_detected"),
+                    "timestamp": msg.get("timestamp").isoformat() if msg.get("timestamp") else None,
+                }
+            )
+
         return {
             "success": True,
             "conversation_id": conversation_id,
             "messages": formatted_messages,
-            "total": len(formatted_messages)
+            "total": len(formatted_messages),
         }
-        
+
     except Exception as e:
         logger.error(f"❌ Erro ao buscar histórico: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -215,32 +234,39 @@ async def get_maria_analytics():
     try:
         if db is None:
             raise HTTPException(status_code=500, detail="Database not initialized")
-        
+
         # Total de conversas
         total_conversations = await db.maria_conversations.distinct("conversation_id")
-        
+
         # Total de mensagens
         total_messages = await db.maria_conversations.count_documents({})
-        
+
         # Emoções detectadas
-        emotions = await db.maria_conversations.aggregate([
-            {"$match": {"emotion_detected": {"$ne": None}}},
-            {"$group": {"_id": "$emotion_detected", "count": {"$sum": 1}}}
-        ]).to_list(length=100)
-        
+        emotions = await db.maria_conversations.aggregate(
+            [
+                {"$match": {"emotion_detected": {"$ne": None}}},
+                {"$group": {"_id": "$emotion_detected", "count": {"$sum": 1}}},
+            ]
+        ).to_list(length=100)
+
         # Conversas por dia (últimos 7 dias)
         from datetime import timedelta
+
         seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
-        
-        daily_conversations = await db.maria_conversations.aggregate([
-            {"$match": {"timestamp": {"$gte": seven_days_ago}}},
-            {"$group": {
-                "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$timestamp"}},
-                "count": {"$sum": 1}
-            }},
-            {"$sort": {"_id": 1}}
-        ]).to_list(length=7)
-        
+
+        daily_conversations = await db.maria_conversations.aggregate(
+            [
+                {"$match": {"timestamp": {"$gte": seven_days_ago}}},
+                {
+                    "$group": {
+                        "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$timestamp"}},
+                        "count": {"$sum": 1},
+                    }
+                },
+                {"$sort": {"_id": 1}},
+            ]
+        ).to_list(length=7)
+
         return {
             "success": True,
             "analytics": {
@@ -248,10 +274,12 @@ async def get_maria_analytics():
                 "total_messages": total_messages,
                 "emotions_detected": {item["_id"]: item["count"] for item in emotions},
                 "daily_activity": daily_conversations,
-                "avg_messages_per_conversation": total_messages / len(total_conversations) if len(total_conversations) > 0 else 0
-            }
+                "avg_messages_per_conversation": (
+                    total_messages / len(total_conversations) if len(total_conversations) > 0 else 0
+                ),
+            },
         }
-        
+
     except Exception as e:
         logger.error(f"❌ Erro ao buscar analytics: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -266,20 +294,16 @@ async def text_to_speech(request: dict):
     try:
         text = request.get("text")
         language = request.get("language", "pt-BR")
-        
+
         if not text:
             raise HTTPException(status_code=400, detail="Text is required")
-        
+
         result = await maria_voice.text_to_speech(
-            text=text,
-            language=language,
-            voice_gender="female",
-            speaking_rate=1.0,
-            pitch=0.0
+            text=text, language=language, voice_gender="female", speaking_rate=1.0, pitch=0.0
         )
-        
+
         return result
-        
+
     except Exception as e:
         logger.error(f"❌ Erro no TTS: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -293,23 +317,20 @@ async def speech_to_text(request: dict):
     """
     try:
         import base64
-        
+
         audio_base64 = request.get("audio")
         language = request.get("language", "pt-BR")
-        
+
         if not audio_base64:
             raise HTTPException(status_code=400, detail="Audio is required")
-        
+
         # Decodificar base64
         audio_data = base64.b64decode(audio_base64)
-        
-        result = await maria_voice.speech_to_text(
-            audio_data=audio_data,
-            language=language
-        )
-        
+
+        result = await maria_voice.speech_to_text(audio_data=audio_data, language=language)
+
         return result
-        
+
     except Exception as e:
         logger.error(f"❌ Erro no STT: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -324,14 +345,14 @@ async def send_whatsapp(request: dict):
     try:
         phone = request.get("phone")
         message = request.get("message")
-        
+
         if not phone or not message:
             raise HTTPException(status_code=400, detail="Phone and message are required")
-        
+
         result = await maria_whatsapp.send_message(phone, message)
-        
+
         return result
-        
+
     except Exception as e:
         logger.error(f"❌ Erro ao enviar WhatsApp: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -346,47 +367,43 @@ async def send_welcome_whatsapp(user_id: str):
     try:
         if db is None:
             raise HTTPException(status_code=500, detail="Database not initialized")
-        
+
         # Buscar usuário
         user = await db.users.find_one({"id": user_id})
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        
+
         # Buscar caso ativo
-        case = await db.auto_cases.find_one({
-            "user_id": user_id,
-            "status": {"$in": ["in_progress", "not_started"]}
-        })
-        
+        case = await db.auto_cases.find_one(
+            {"user_id": user_id, "status": {"$in": ["in_progress", "not_started"]}}
+        )
+
         phone = user.get("phone")
         if not phone:
-            return {
-                "success": False,
-                "error": "User has no phone number"
-            }
-        
+            return {"success": False, "error": "User has no phone number"}
+
         user_name = user.get("first_name", "Usuário")
         visa_type = case.get("form_code", "seu visto") if case else "seu visto"
-        
+
         result = await maria_whatsapp.send_welcome_message(
-            phone_number=phone,
-            user_name=user_name,
-            visa_type=visa_type
+            phone_number=phone, user_name=user_name, visa_type=visa_type
         )
-        
+
         # Salvar no log
         if result.get("success") and db:
-            await db.maria_whatsapp_log.insert_one({
-                "user_id": user_id,
-                "phone": phone,
-                "message_type": "welcome",
-                "success": True,
-                "message_id": result.get("message_id"),
-                "timestamp": datetime.now(timezone.utc)
-            })
-        
+            await db.maria_whatsapp_log.insert_one(
+                {
+                    "user_id": user_id,
+                    "phone": phone,
+                    "message_type": "welcome",
+                    "success": True,
+                    "message_id": result.get("message_id"),
+                    "timestamp": datetime.now(timezone.utc),
+                }
+            )
+
         return result
-        
+
     except Exception as e:
         logger.error(f"❌ Erro ao enviar boas-vindas WhatsApp: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -400,19 +417,16 @@ async def whatsapp_status():
     try:
         status = await maria_whatsapp.check_connection_status()
         return status
-        
+
     except Exception as e:
-        return {
-            "connected": False,
-            "error": str(e)
-        }
+        return {"connected": False, "error": str(e)}
 
 
 @router.get("/health")
 async def maria_health_check():
     """Health check do serviço da Maria"""
     whatsapp_status = await maria_whatsapp.check_connection_status()
-    
+
     return {
         "service": "Maria - Assistente Virtual Osprey",
         "status": "active",
@@ -424,10 +438,10 @@ async def maria_health_check():
             "uscis_information": True,
             "sales": True,
             "voice": maria_voice.available,
-            "whatsapp": whatsapp_status.get("connected", False)
+            "whatsapp": whatsapp_status.get("connected", False),
         },
         "integrations": {
             "gemini": maria_voice.available,
-            "baileys": whatsapp_status.get("connected", False)
-        }
+            "baileys": whatsapp_status.get("connected", False),
+        },
     }

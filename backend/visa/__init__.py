@@ -33,19 +33,17 @@ from .specifications import (
 
 __all__ = [
     # Specifications
-    'VISA_SPECIFICATIONS',
-    'get_visa_specifications',
-    'get_required_documents',
-    'get_key_questions',
-    'get_common_issues',
-    
+    "VISA_SPECIFICATIONS",
+    "get_visa_specifications",
+    "get_required_documents",
+    "get_key_questions",
+    "get_common_issues",
     # Document Mapping
-    'VisaDocumentMapper',
-    'visa_document_mapper',
-    'get_visa_document_requirements',
-    'get_smart_extraction_prompt',
-    
+    "VisaDocumentMapper",
+    "visa_document_mapper",
+    "get_visa_document_requirements",
+    "get_smart_extraction_prompt",
     # Information
-    'VISA_DETAILED_INFO',
-    'get_visa_processing_info',
+    "VISA_DETAILED_INFO",
+    "get_visa_processing_info",
 ]

@@ -22,5 +22,5 @@ __all__ = [
     # Stripe integrations
     "create_checkout_session",
     "verify_payment_status",
-    "handle_stripe_webhook"
+    "handle_stripe_webhook",
 ]

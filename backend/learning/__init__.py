@@ -30,5 +30,5 @@ __all__ = [
     "FeedbackRating",
     "submit_ai_response_feedback",
     "submit_form_feedback",
-    "get_nps_score"
+    "get_nps_score",
 ]

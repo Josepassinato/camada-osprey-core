@@ -30,7 +30,9 @@ async def specialized_document_validation(request: dict):
 
         user_name = user_data.get(
             "name",
-            user_data.get("full_name", user_data.get("firstName", "") + " " + user_data.get("lastName", "")),
+            user_data.get(
+                "full_name", user_data.get("firstName", "") + " " + user_data.get("lastName", "")
+            ),
         )
 
         analysis = await validator.validate_document_with_database(
@@ -276,7 +278,11 @@ async def specialized_uscis_form_translation(request: dict):
 
     except Exception as e:
         logger.error(f"Dr. Fernando USCIS translation error: {e}")
-        return {"success": False, "agent": "Dr. Fernando - Tradutor e Validador USCIS", "error": str(e)}
+        return {
+            "success": False,
+            "agent": "Dr. Fernando - Tradutor e Validador USCIS",
+            "error": str(e),
+        }
 
 
 @router.post("/specialized-agents/comprehensive-analysis")

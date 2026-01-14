@@ -31,7 +31,9 @@ async def generate_final_package(request: dict):
         skip_payment = os.getenv("SKIP_PAYMENT_FOR_TESTING", "FALSE").upper() == "TRUE"
 
         if not skip_payment and case.get("payment_status") != "completed":
-            raise HTTPException(status_code=400, detail="Payment required before package generation")
+            raise HTTPException(
+                status_code=400, detail="Payment required before package generation"
+            )
         if skip_payment:
             logger.warning(f"⚠️ BUG P2 FIX: Skipping payment check for case {case_id} (TEST MODE)")
 
@@ -120,7 +122,9 @@ async def generate_final_package(request: dict):
             },
         )
 
-        logger.info(f"✅ BUG P2 FIX: Case {case_id} finalized with status='completed', progress=100%")
+        logger.info(
+            f"✅ BUG P2 FIX: Case {case_id} finalized with status='completed', progress=100%"
+        )
 
         return {
             "message": "Package generated successfully",
@@ -164,7 +168,9 @@ async def get_submission_instructions(case_id: str):
         raise
     except Exception as e:
         logger.error(f"Error generating submission instructions: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error generating submission instructions: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error generating submission instructions: {str(e)}"
+        )
 
 
 def get_uscis_filing_info(form_code: str) -> dict:
@@ -242,33 +248,97 @@ def get_required_documents_checklist(form_code: str) -> list:
     """Get required documents checklist based on form type."""
     checklists = {
         "H-1B": [
-            {"item": "Formulário I-129 completo e assinado", "required": True, "page": "Última página"},
+            {
+                "item": "Formulário I-129 completo e assinado",
+                "required": True,
+                "page": "Última página",
+            },
             {"item": "Diploma de ensino superior", "required": True, "notes": "Cópia autenticada"},
-            {"item": "Histórico acadêmico", "required": True, "notes": "Tradução certificada se necessário"},
-            {"item": "Carta da empresa patrocinadora", "required": True, "notes": "Detalhando a posição"},
-            {"item": "Labor Condition Application (LCA) aprovada", "required": True, "notes": "Certificada pelo DOL"},
-            {"item": "Evidência de qualificações", "required": True, "notes": "Experiência relevante"},
-            {"item": "Cópia do passaporte", "required": True, "notes": "Válido por pelo menos 6 meses"},
+            {
+                "item": "Histórico acadêmico",
+                "required": True,
+                "notes": "Tradução certificada se necessário",
+            },
+            {
+                "item": "Carta da empresa patrocinadora",
+                "required": True,
+                "notes": "Detalhando a posição",
+            },
+            {
+                "item": "Labor Condition Application (LCA) aprovada",
+                "required": True,
+                "notes": "Certificada pelo DOL",
+            },
+            {
+                "item": "Evidência de qualificações",
+                "required": True,
+                "notes": "Experiência relevante",
+            },
+            {
+                "item": "Cópia do passaporte",
+                "required": True,
+                "notes": "Válido por pelo menos 6 meses",
+            },
             {"item": "Cheque ou money order", "required": True, "notes": "Valor total das taxas"},
         ],
         "B-1/B-2": [
-            {"item": "Formulário DS-160 online completo", "required": True, "notes": "Imprimir página de confirmação"},
-            {"item": "Passaporte válido", "required": True, "notes": "Válido por pelo menos 6 meses"},
-            {"item": "Foto 5x5cm recente", "required": True, "notes": "Fundo branco, conforme especificações"},
-            {"item": "Comprovante de renda/vínculos no Brasil", "required": True, "notes": "Holerites, declaração IR"},
+            {
+                "item": "Formulário DS-160 online completo",
+                "required": True,
+                "notes": "Imprimir página de confirmação",
+            },
+            {
+                "item": "Passaporte válido",
+                "required": True,
+                "notes": "Válido por pelo menos 6 meses",
+            },
+            {
+                "item": "Foto 5x5cm recente",
+                "required": True,
+                "notes": "Fundo branco, conforme especificações",
+            },
+            {
+                "item": "Comprovante de renda/vínculos no Brasil",
+                "required": True,
+                "notes": "Holerites, declaração IR",
+            },
             {"item": "Itinerário de viagem", "required": False, "notes": "Se já definido"},
-            {"item": "Carta convite (se aplicável)", "required": False, "notes": "Para visitas familiares/negócios"},
+            {
+                "item": "Carta convite (se aplicável)",
+                "required": False,
+                "notes": "Para visitas familiares/negócios",
+            },
             {"item": "Comprovante de pagamento da taxa", "required": True, "notes": "$185"},
         ],
         "F-1": [
-            {"item": "Formulário DS-160 online completo", "required": True, "notes": "Imprimir página de confirmação"},
-            {"item": "Formulário I-20 da instituição", "required": True, "notes": "Assinado e válido"},
-            {"item": "Passaporte válido", "required": True, "notes": "Válido por pelo menos 6 meses"},
+            {
+                "item": "Formulário DS-160 online completo",
+                "required": True,
+                "notes": "Imprimir página de confirmação",
+            },
+            {
+                "item": "Formulário I-20 da instituição",
+                "required": True,
+                "notes": "Assinado e válido",
+            },
+            {
+                "item": "Passaporte válido",
+                "required": True,
+                "notes": "Válido por pelo menos 6 meses",
+            },
             {"item": "Foto 5x5cm recente", "required": True, "notes": "Fundo branco"},
             {"item": "Comprovante de pagamento SEVIS I-901", "required": True, "notes": "$350"},
-            {"item": "Comprovantes financeiros", "required": True, "notes": "Suficientes para cobrir estudos"},
+            {
+                "item": "Comprovantes financeiros",
+                "required": True,
+                "notes": "Suficientes para cobrir estudos",
+            },
             {"item": "Histórico escolar", "required": True, "notes": "Tradução certificada"},
-            {"item": "Comprovante de proficiência em inglês", "required": False, "notes": "TOEFL, IELTS, etc."},
+            {
+                "item": "Comprovante de proficiência em inglês",
+                "required": False,
+                "notes": "TOEFL, IELTS, etc.",
+            },
         ],
     }
 
@@ -279,8 +349,14 @@ def get_signature_instructions(form_code: str) -> dict:
     """Get signature instructions for the form."""
     signature_guides = {
         "H-1B": {
-            "petitioner_signature": {"location": "Parte 8, Item 1.a", "instructions": "O empregador deve assinar e datar"},
-            "attorney_signature": {"location": "Parte 9 (se aplicável)", "instructions": "Somente se representado por advogado"},
+            "petitioner_signature": {
+                "location": "Parte 8, Item 1.a",
+                "instructions": "O empregador deve assinar e datar",
+            },
+            "attorney_signature": {
+                "location": "Parte 9 (se aplicável)",
+                "instructions": "Somente se representado por advogado",
+            },
             "important_notes": [
                 "Use tinta azul ou preta",
                 "Assinatura deve corresponder ao nome no documento",
@@ -303,7 +379,10 @@ def get_signature_instructions(form_code: str) -> dict:
                 "location": "DS-160 é assinado digitalmente",
                 "instructions": "Confirme todas as informações antes de submeter",
             },
-            "i20_signature": {"location": "Formulário I-20", "instructions": "Estudante deve assinar na página 1"},
+            "i20_signature": {
+                "location": "Formulário I-20",
+                "instructions": "Estudante deve assinar na página 1",
+            },
             "important_notes": [
                 "I-20 deve ser assinado antes da entrevista",
                 "Use tinta azul ou preta para I-20",
@@ -366,31 +445,115 @@ def get_step_by_step_guide(form_code: str) -> list:
     """Get step-by-step submission guide."""
     guides = {
         "H-1B": [
-            {"step": 1, "title": "Revisar Documentação", "description": "Verifique se todos os documentos estão completos e assinados"},
-            {"step": 2, "title": "Preparar Pagamento", "description": "Obtenha cheque bancário ou money order no valor total das taxas"},
-            {"step": 3, "title": "Organizar Pacote", "description": "Coloque documentos na ordem do checklist fornecido"},
-            {"step": 4, "title": "Carta de Apresentação", "description": "Inclua carta explicando o caso e listando documentos"},
-            {"step": 5, "title": "Envio Correio", "description": "Envie via correio registrado para o endereço do USCIS"},
-            {"step": 6, "title": "Acompanhar Caso", "description": "Use o número de recibo para acompanhar no site do USCIS"},
-            {"step": 7, "title": "Aguardar Decisão", "description": "Prazo normal: 2-4 meses (ou 15 dias se premium processing)"},
+            {
+                "step": 1,
+                "title": "Revisar Documentação",
+                "description": "Verifique se todos os documentos estão completos e assinados",
+            },
+            {
+                "step": 2,
+                "title": "Preparar Pagamento",
+                "description": "Obtenha cheque bancário ou money order no valor total das taxas",
+            },
+            {
+                "step": 3,
+                "title": "Organizar Pacote",
+                "description": "Coloque documentos na ordem do checklist fornecido",
+            },
+            {
+                "step": 4,
+                "title": "Carta de Apresentação",
+                "description": "Inclua carta explicando o caso e listando documentos",
+            },
+            {
+                "step": 5,
+                "title": "Envio Correio",
+                "description": "Envie via correio registrado para o endereço do USCIS",
+            },
+            {
+                "step": 6,
+                "title": "Acompanhar Caso",
+                "description": "Use o número de recibo para acompanhar no site do USCIS",
+            },
+            {
+                "step": 7,
+                "title": "Aguardar Decisão",
+                "description": "Prazo normal: 2-4 meses (ou 15 dias se premium processing)",
+            },
         ],
         "B-1/B-2": [
-            {"step": 1, "title": "Completar DS-160", "description": "Preencha o formulário online completamente"},
-            {"step": 2, "title": "Pagar Taxa de Visto", "description": "Pague $185 online e guarde o comprovante"},
-            {"step": 3, "title": "Agendar Entrevista", "description": "Marque entrevista no consulado mais próximo"},
-            {"step": 4, "title": "Preparar Documentos", "description": "Organize todos os documentos conforme checklist"},
-            {"step": 5, "title": "Comparecer à Entrevista", "description": "Chegue 15 minutos antes com todos os documentos"},
-            {"step": 6, "title": "Aguardar Processamento", "description": "3-5 dias úteis após aprovação na entrevista"},
-            {"step": 7, "title": "Retirar Passaporte", "description": "Retire no local indicado ou receba via correio"},
+            {
+                "step": 1,
+                "title": "Completar DS-160",
+                "description": "Preencha o formulário online completamente",
+            },
+            {
+                "step": 2,
+                "title": "Pagar Taxa de Visto",
+                "description": "Pague $185 online e guarde o comprovante",
+            },
+            {
+                "step": 3,
+                "title": "Agendar Entrevista",
+                "description": "Marque entrevista no consulado mais próximo",
+            },
+            {
+                "step": 4,
+                "title": "Preparar Documentos",
+                "description": "Organize todos os documentos conforme checklist",
+            },
+            {
+                "step": 5,
+                "title": "Comparecer à Entrevista",
+                "description": "Chegue 15 minutos antes com todos os documentos",
+            },
+            {
+                "step": 6,
+                "title": "Aguardar Processamento",
+                "description": "3-5 dias úteis após aprovação na entrevista",
+            },
+            {
+                "step": 7,
+                "title": "Retirar Passaporte",
+                "description": "Retire no local indicado ou receba via correio",
+            },
         ],
         "F-1": [
-            {"step": 1, "title": "Pagar Taxa SEVIS", "description": "Pague $350 no site https://www.fmjfee.com/"},
-            {"step": 2, "title": "Aguardar SEVIS", "description": "Aguarde 3 dias úteis para processamento"},
-            {"step": 3, "title": "Completar DS-160", "description": "Preencha formulário online com I-20 em mãos"},
-            {"step": 4, "title": "Pagar Taxa de Visto", "description": "Pague $185 e agende entrevista"},
-            {"step": 5, "title": "Preparar Documentos", "description": "Organize conforme checklist de estudante"},
-            {"step": 6, "title": "Entrevista Consular", "description": "Compareça com I-20 assinado e documentos"},
-            {"step": 7, "title": "Aguardar Aprovação", "description": "3-5 dias úteis para processamento"},
+            {
+                "step": 1,
+                "title": "Pagar Taxa SEVIS",
+                "description": "Pague $350 no site https://www.fmjfee.com/",
+            },
+            {
+                "step": 2,
+                "title": "Aguardar SEVIS",
+                "description": "Aguarde 3 dias úteis para processamento",
+            },
+            {
+                "step": 3,
+                "title": "Completar DS-160",
+                "description": "Preencha formulário online com I-20 em mãos",
+            },
+            {
+                "step": 4,
+                "title": "Pagar Taxa de Visto",
+                "description": "Pague $185 e agende entrevista",
+            },
+            {
+                "step": 5,
+                "title": "Preparar Documentos",
+                "description": "Organize conforme checklist de estudante",
+            },
+            {
+                "step": 6,
+                "title": "Entrevista Consular",
+                "description": "Compareça com I-20 assinado e documentos",
+            },
+            {
+                "step": 7,
+                "title": "Aguardar Aprovação",
+                "description": "3-5 dias úteis para processamento",
+            },
             {"step": 8, "title": "Receber Visto", "description": "Visto será colado no passaporte"},
         ],
     }

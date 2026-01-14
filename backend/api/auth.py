@@ -110,7 +110,9 @@ async def login(login_data: UserLogin):
             logger.info(f"🧪 TEST MODE: Login bypass active for {login_data.email}")
             password_valid = True
         elif user:
-            stored_hash = user.get("password") or user.get("hashed_password") or user.get("password_hash")
+            stored_hash = (
+                user.get("password") or user.get("hashed_password") or user.get("password_hash")
+            )
             password_valid = verify_password(login_data.password, stored_hash)
         else:
             password_valid = False
@@ -133,7 +135,9 @@ async def login(login_data: UserLogin):
 
         if email_bypass and is_test_email:
             response_data["test_mode"] = True
-            response_data["message"] = "🧪 TEST MODE: Login successful (password verification bypassed)"
+            response_data["message"] = (
+                "🧪 TEST MODE: Login successful (password verification bypassed)"
+            )
 
         return response_data
 
@@ -166,12 +170,14 @@ async def google_auth_callback(request: dict):
             user_id = existing_user["id"]
             await db.users.update_one(
                 {"id": user_id},
-                {"$set": {
-                    "google_id": google_id,
-                    "picture": picture,
-                    "email_verified": True,
-                    "updated_at": datetime.now(timezone.utc),
-                }},
+                {
+                    "$set": {
+                        "google_id": google_id,
+                        "picture": picture,
+                        "email_verified": True,
+                        "updated_at": datetime.now(timezone.utc),
+                    }
+                },
             )
         else:
             logger.info(f"📝 Creating new user from Google OAuth: {email}")

@@ -16,9 +16,10 @@ from google.oauth2 import service_account
 
 logger = logging.getLogger(__name__)
 
+
 class GoogleDocumentAIProcessor:
     """Professional document analysis using Google Cloud Document AI"""
-    
+
     def __init__(self):
         # Load environment variables from .env file in backend root
         from pathlib import Path
@@ -27,103 +28,112 @@ class GoogleDocumentAIProcessor:
 
         # Go up 3 levels: google -> integrations -> backend -> .env
         backend_root = Path(__file__).parent.parent.parent
-        load_dotenv(backend_root / '.env')
-        
-        # Configuration from environment variables  
-        self.api_key = os.environ.get('GOOGLE_API_KEY')
-        self.client_id = os.environ.get('GOOGLE_CLIENT_ID')
-        self.client_secret = os.environ.get('GOOGLE_CLIENT_SECRET')
-        self.credentials_path = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
-        self.project_id = os.environ.get('GOOGLE_CLOUD_PROJECT_ID', '891629358081')
-        self.location = os.environ.get('GOOGLE_DOCUMENT_AI_LOCATION', 'us')
-        
+        load_dotenv(backend_root / ".env")
+
+        # Configuration from environment variables
+        self.api_key = os.environ.get("GOOGLE_API_KEY")
+        self.client_id = os.environ.get("GOOGLE_CLIENT_ID")
+        self.client_secret = os.environ.get("GOOGLE_CLIENT_SECRET")
+        self.credentials_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+        self.project_id = os.environ.get("GOOGLE_CLOUD_PROJECT_ID", "891629358081")
+        self.location = os.environ.get("GOOGLE_DOCUMENT_AI_LOCATION", "us")
+
         # Check if we have credentials for real mode
         has_service_account = self.credentials_path and os.path.exists(self.credentials_path)
         has_oauth2 = self.client_id and self.client_secret
         has_api_key = self.api_key
-        
+
         self.is_mock_mode = not (has_service_account or has_oauth2 or has_api_key)
-        
+
         if self.is_mock_mode:
             logger.warning("🧪 Google Document AI in MOCK MODE - No credentials provided")
         else:
             if has_service_account:
-                logger.info(f"🔗 Google Document AI initialized with service account for project {self.project_id}")
+                logger.info(
+                    f"🔗 Google Document AI initialized with service account for project {self.project_id}"
+                )
                 logger.info(f"🔑 Credentials file: {self.credentials_path}")
-                
+
                 # Use service account for both Document AI and Vision API
                 self.auth_method = "service_account"
                 self.document_ai_endpoint = f"https://{self.location}-documentai.googleapis.com/v1/projects/{self.project_id}/locations/{self.location}/processors"
                 self.vision_endpoint = "https://vision.googleapis.com/v1/images:annotate"
-                
+
                 # Initialize service account credentials
                 self._init_service_account_credentials()
-                
+
             elif has_api_key:
-                logger.info(f"🔗 Google Vision API initialized with API key for project {self.project_id}")
+                logger.info(
+                    f"🔗 Google Vision API initialized with API key for project {self.project_id}"
+                )
                 logger.info(f"🔑 API Key configured: {self.api_key[:20]}...")
-                
+
                 # Use API key for Vision API (working and available)
                 self.auth_method = "api_key"
-                self.vision_endpoint = f"https://vision.googleapis.com/v1/images:annotate?key={self.api_key}"
+                self.vision_endpoint = (
+                    f"https://vision.googleapis.com/v1/images:annotate?key={self.api_key}"
+                )
                 self.document_ai_endpoint = None  # Document AI doesn't work with API keys
-                
+
             elif has_oauth2:
-                logger.info(f"🔗 Google Document AI initialized with OAuth2 for project {self.project_id}")
-                
+                logger.info(
+                    f"🔗 Google Document AI initialized with OAuth2 for project {self.project_id}"
+                )
+
                 # Use OAuth2 for Document AI (preferred but not implemented)
                 self.auth_method = "oauth2"
                 self.document_ai_endpoint = f"https://{self.location}-documentai.googleapis.com/v1/projects/{self.project_id}/locations/{self.location}/processors"
                 self.vision_endpoint = "https://vision.googleapis.com/v1/images:annotate"
-                
+
                 # Initialize OAuth2 credentials
                 self._init_oauth2_credentials()
-    
+
     def _init_oauth2_credentials(self):
         """Initialize OAuth2 credentials for Google APIs"""
         try:
             # For server-to-server, we'll use service account flow simulation
             # This is a simplified approach - in production, you'd want proper service account JSON
-            
+
             # Try to get default credentials first
             try:
                 credentials, project = google.auth.default(
-                    scopes=['https://www.googleapis.com/auth/cloud-platform']
+                    scopes=["https://www.googleapis.com/auth/cloud-platform"]
                 )
                 self.credentials = credentials
                 logger.info("✅ Using default Google credentials")
                 return
             except Exception as e:
                 logger.warning(f"⚠️ Default credentials failed: {e}")
-            
+
             # For now, we'll use the API key as fallback
             logger.warning("🔑 OAuth2 credentials not fully configured, using API key fallback")
             self.credentials = None
-            
+
         except Exception as e:
             logger.error(f"❌ OAuth2 initialization failed: {e}")
             self.credentials = None
-    
+
     def _init_service_account_credentials(self):
         """Initialize service account credentials from JSON file"""
         try:
             if not self.credentials_path:
                 logger.error("❌ Service account credentials path not set")
                 return
-            
+
             if not os.path.exists(self.credentials_path):
-                logger.error(f"❌ Service account credentials file not found: {self.credentials_path}")
+                logger.error(
+                    f"❌ Service account credentials file not found: {self.credentials_path}"
+                )
                 return
-            
+
             # Load service account credentials
             credentials = service_account.Credentials.from_service_account_file(
-                self.credentials_path,
-                scopes=['https://www.googleapis.com/auth/cloud-platform']
+                self.credentials_path, scopes=["https://www.googleapis.com/auth/cloud-platform"]
             )
-            
+
             self.credentials = credentials
             logger.info("✅ Service account credentials loaded successfully")
-            
+
             # Verify credentials work
             try:
                 # Test the credentials by getting an access token
@@ -131,22 +141,22 @@ class GoogleDocumentAIProcessor:
                 logger.info("✅ Service account credentials verified")
             except Exception as e:
                 logger.warning(f"⚠️ Service account credentials verification failed: {e}")
-                
+
         except Exception as e:
             logger.error(f"❌ Service account initialization failed: {e}")
             self.credentials = None
-    
+
     def _create_mock_response(self, filename: str, content_length: int) -> Dict[str, Any]:
         """Create realistic mock response for testing"""
         mock_data = {
             "text": """
             PASSPORT
             UNITED STATES OF AMERICA
-            
+
             Type: P
             Country Code: USA
             Passport No: 123456789
-            
+
             Surname: SMITH
             Given Names: JOHN MICHAEL
             Nationality: UNITED STATES OF AMERICA
@@ -165,13 +175,13 @@ class GoogleDocumentAIProcessor:
                 {"type": "date_of_birth", "value": "15 JAN 1990", "confidence": 0.97},
                 {"type": "date_of_expiry", "value": "09 MAR 2030", "confidence": 0.98},
                 {"type": "sex", "value": "M", "confidence": 0.99},
-                {"type": "place_of_birth", "value": "NEW YORK, NY, USA", "confidence": 0.95}
+                {"type": "place_of_birth", "value": "NEW YORK, NY, USA", "confidence": 0.95},
             ],
             "confidence": 0.94,
             "pages": 1,
-            "processing_time_ms": 1250
+            "processing_time_ms": 1250,
         }
-        
+
         return {
             "success": True,
             "mock_mode": True,
@@ -183,19 +193,20 @@ class GoogleDocumentAIProcessor:
             "file_info": {
                 "filename": filename,
                 "size_bytes": content_length,
-                "processed_at": datetime.now().isoformat()
-            }
+                "processed_at": datetime.now().isoformat(),
+            },
         }
-    
-    async def process_document(self, file_content: bytes, filename: str, 
-                             mime_type: str = "application/pdf") -> Dict[str, Any]:
+
+    async def process_document(
+        self, file_content: bytes, filename: str, mime_type: str = "application/pdf"
+    ) -> Dict[str, Any]:
         """Process document with Google Vision API (Document AI requires OAuth2)"""
-        
+
         if self.is_mock_mode:
             # Return mock response for testing
             await asyncio.sleep(0.5)  # Simulate processing time
             return self._create_mock_response(filename, len(file_content))
-        
+
         try:
             # Prioritize API key (working) over OAuth2 (not implemented)
             if self.auth_method == "api_key" and self.api_key:
@@ -207,59 +218,52 @@ class GoogleDocumentAIProcessor:
             else:
                 logger.warning("⚠️ No valid credentials, using mock mode")
                 return self._create_mock_response(filename, len(file_content))
-            
+
         except Exception as api_error:
             logger.warning(f"⚠️ Google API failed: {api_error}, falling back to mock")
             return self._create_mock_response(filename, len(file_content))
-    
-    async def _try_document_ai(self, file_content: bytes, filename: str, mime_type: str) -> Dict[str, Any]:
+
+    async def _try_document_ai(
+        self, file_content: bytes, filename: str, mime_type: str
+    ) -> Dict[str, Any]:
         """Try Google Document AI first (specialized for documents)"""
-        
+
         try:
             # Convert file content to base64
             import base64
-            encoded_content = base64.b64encode(file_content).decode('utf-8')
-            
+
+            encoded_content = base64.b64encode(file_content).decode("utf-8")
+
             # Prepare Document AI request
-            request_data = {
-                "rawDocument": {
-                    "content": encoded_content,
-                    "mimeType": mime_type
-                }
-            }
-            
+            request_data = {"rawDocument": {"content": encoded_content, "mimeType": mime_type}}
+
             # Make Document AI API request
-            headers = {'Content-Type': 'application/json'}
-            
+            headers = {"Content-Type": "application/json"}
+
             if self.auth_method == "api_key":
                 # Use API key authentication
                 doc_ai_url = f"{self.document_ai_endpoint}?key={self.api_key}"
-                response = requests.post(
-                    doc_ai_url,
-                    json=request_data,
-                    headers=headers,
-                    timeout=30
-                )
+                response = requests.post(doc_ai_url, json=request_data, headers=headers, timeout=30)
             else:
                 # OAuth2 would need access token - fallback to Vision API
                 raise Exception("OAuth2 not implemented for Document AI, using Vision API fallback")
-            
+
             if response.status_code != 200:
                 logger.error(f"❌ Document AI API error: {response.status_code} - {response.text}")
                 raise Exception(f"Document AI failed: {response.status_code}")
-            
+
             result = response.json()
-            
+
             # Parse Document AI response
             document = result.get("document", {})
             extracted_text = document.get("text", "")
-            
+
             # Extract entities from Document AI
             entities = self._extract_document_ai_entities(document)
-            
+
             # Calculate confidence based on text quality and entities
             confidence = min((len(extracted_text) / 200.0) + (len(entities) * 0.1), 1.0)
-            
+
             return {
                 "success": True,
                 "mock_mode": False,
@@ -273,17 +277,19 @@ class GoogleDocumentAIProcessor:
                     "filename": filename,
                     "size_bytes": len(file_content),
                     "processed_at": datetime.now().isoformat(),
-                    "mime_type": mime_type
-                }
+                    "mime_type": mime_type,
+                },
             }
-            
+
         except Exception as e:
             logger.error(f"❌ Document AI processing error: {e}")
             raise e
-    
-    async def _try_vision_api(self, file_content: bytes, filename: str, mime_type: str) -> Dict[str, Any]:
+
+    async def _try_vision_api(
+        self, file_content: bytes, filename: str, mime_type: str
+    ) -> Dict[str, Any]:
         """Fallback to Google Vision API"""
-        
+
         try:
             # For PDF files, we need to convert to image first or extract text differently
             # For now, let's simulate OCR processing since Vision API expects images
@@ -291,18 +297,18 @@ class GoogleDocumentAIProcessor:
                 # Simulate PDF text extraction for Vision API
                 # In a real implementation, you'd convert PDF pages to images first
                 logger.info("📄 Processing PDF with simulated Vision API OCR")
-                
+
                 # Extract text content from PDF bytes (simplified simulation)
                 try:
                     # Try to decode as text for testing
-                    text_content = file_content.decode('utf-8', errors='ignore')
+                    text_content = file_content.decode("utf-8", errors="ignore")
                 except:
                     text_content = "PASSPORT DOCUMENT - OCR SIMULATION"
-                
+
                 # Simulate Vision API response structure
                 entities = self._extract_entities_from_text(text_content)
                 confidence = min(len(text_content) / 200.0, 1.0) if text_content else 0.8
-                
+
                 return {
                     "success": True,
                     "mock_mode": False,
@@ -318,59 +324,50 @@ class GoogleDocumentAIProcessor:
                         "filename": filename,
                         "size_bytes": len(file_content),
                         "processed_at": datetime.now().isoformat(),
-                        "mime_type": mime_type
-                    }
+                        "mime_type": mime_type,
+                    },
                 }
-            
+
             # For image files, use actual Vision API
             # Convert file content to base64
             import base64
-            encoded_content = base64.b64encode(file_content).decode('utf-8')
-            
+
+            encoded_content = base64.b64encode(file_content).decode("utf-8")
+
             # Prepare Vision API request
             request_data = {
                 "requests": [
                     {
-                        "image": {
-                            "content": encoded_content
-                        },
-                        "features": [
-                            {
-                                "type": "DOCUMENT_TEXT_DETECTION",
-                                "maxResults": 50
-                            }
-                        ]
+                        "image": {"content": encoded_content},
+                        "features": [{"type": "DOCUMENT_TEXT_DETECTION", "maxResults": 50}],
                     }
                 ]
             }
-            
+
             # Make Vision API request
-            headers = {'Content-Type': 'application/json'}
-            
+            headers = {"Content-Type": "application/json"}
+
             if self.auth_method == "api_key":
                 response = requests.post(
-                    self.vision_endpoint,
-                    json=request_data,
-                    headers=headers,
-                    timeout=30
+                    self.vision_endpoint, json=request_data, headers=headers, timeout=30
                 )
             else:
                 raise Exception("OAuth2 not implemented for Vision API fallback")
-            
+
             if response.status_code != 200:
                 logger.error(f"❌ Vision API error: {response.status_code} - {response.text}")
                 return {
                     "success": False,
                     "error": f"Vision API failed: {response.text}",
-                    "error_type": "vision_api_error"
+                    "error_type": "vision_api_error",
                 }
-            
+
             result = response.json()
-            
+
             # Parse Vision API response
             responses = result.get("responses", [{}])
             annotation = responses[0] if responses else {}
-            
+
             # Check for API errors
             if "error" in annotation:
                 error_msg = annotation["error"].get("message", "Unknown error")
@@ -381,19 +378,19 @@ class GoogleDocumentAIProcessor:
                 return {
                     "success": False,
                     "error": f"Vision API error: {error_msg}",
-                    "error_type": "vision_api_error"
+                    "error_type": "vision_api_error",
                 }
-            
+
             # Get full text
             text_annotations = annotation.get("textAnnotations", [])
             extracted_text = text_annotations[0]["description"] if text_annotations else ""
-            
+
             # Extract entities from text (simulate structured data extraction)
             entities = self._extract_entities_from_text(extracted_text)
-            
+
             # Calculate confidence based on text quality
             confidence = min(len(extracted_text) / 100.0, 1.0) if extracted_text else 0.0
-            
+
             return {
                 "success": True,
                 "mock_mode": False,
@@ -409,47 +406,49 @@ class GoogleDocumentAIProcessor:
                     "filename": filename,
                     "size_bytes": len(file_content),
                     "processed_at": datetime.now().isoformat(),
-                    "mime_type": mime_type
-                }
+                    "mime_type": mime_type,
+                },
             }
-            
+
         except Exception as e:
             logger.error(f"❌ Vision API processing error: {e}")
             raise e
-            
+
             if response.status_code != 200:
-                logger.error(f"❌ Google Vision API error: {response.status_code} - {response.text}")
+                logger.error(
+                    f"❌ Google Vision API error: {response.status_code} - {response.text}"
+                )
                 return {
                     "success": False,
                     "error": f"API request failed: {response.text}",
-                    "error_type": "api_error"
+                    "error_type": "api_error",
                 }
-            
+
             result = response.json()
-            
+
             # Check for errors in response
             if "error" in result:
                 logger.error(f"❌ Google Vision API error: {result['error']}")
                 return {
                     "success": False,
                     "error": result["error"]["message"],
-                    "error_type": "vision_api_error"
+                    "error_type": "vision_api_error",
                 }
-            
+
             # Extract text and entities
             responses = result.get("responses", [{}])
             annotation = responses[0] if responses else {}
-            
+
             # Get full text
             text_annotations = annotation.get("textAnnotations", [])
             extracted_text = text_annotations[0]["description"] if text_annotations else ""
-            
+
             # Extract entities from text (simulate structured data extraction)
             entities = self._extract_entities_from_text(extracted_text)
-            
+
             # Calculate confidence based on text quality
             confidence = min(len(extracted_text) / 100.0, 1.0) if extracted_text else 0.0
-            
+
             return {
                 "success": True,
                 "mock_mode": False,
@@ -462,57 +461,57 @@ class GoogleDocumentAIProcessor:
                     "filename": filename,
                     "size_bytes": len(file_content),
                     "processed_at": datetime.now().isoformat(),
-                    "mime_type": mime_type
-                }
+                    "mime_type": mime_type,
+                },
             }
-            
+
         except requests.exceptions.Timeout as e:
             logger.error(f"❌ Google Vision API timeout: {e}")
-            return {
-                "success": False,
-                "error": "Request timeout",
-                "error_type": "timeout"
-            }
-            
+            return {"success": False, "error": "Request timeout", "error_type": "timeout"}
+
         except requests.exceptions.RequestException as e:
             logger.error(f"❌ Google Vision API request error: {e}")
             return {
                 "success": False,
                 "error": f"Request failed: {e}",
-                "error_type": "request_error"
+                "error_type": "request_error",
             }
-            
+
         except Exception as e:
-                logger.error(f"❌ Vision API fallback error: {e}")
-                return {
-                    "success": False,
-                    "error": f"Vision API processing failed: {e}",
-                    "error_type": "vision_fallback_error"
-                }
-        
+            logger.error(f"❌ Vision API fallback error: {e}")
+            return {
+                "success": False,
+                "error": f"Vision API processing failed: {e}",
+                "error_type": "vision_fallback_error",
+            }
+
         except Exception as e:
             logger.error(f"❌ All API processing failed: {e}")
             return {
                 "success": False,
                 "error": f"Document processing failed: {e}",
-                "error_type": "processing_error"
+                "error_type": "processing_error",
             }
-    
+
     def _extract_document_ai_entities(self, document: Dict) -> List[Dict[str, Any]]:
         """Extract structured entities from Document AI response"""
-        
+
         entities = []
-        
+
         # Extract from Document AI entities (if available)
         doc_entities = document.get("entities", [])
         for entity in doc_entities:
-            entities.append({
-                "type": entity.get("type", "unknown"),
-                "value": entity.get("textAnchor", {}).get("content", entity.get("mention_text", "")),
-                "confidence": entity.get("confidence", 0.0),
-                "normalized_value": entity.get("normalized_value", {}).get("text", "")
-            })
-        
+            entities.append(
+                {
+                    "type": entity.get("type", "unknown"),
+                    "value": entity.get("textAnchor", {}).get(
+                        "content", entity.get("mention_text", "")
+                    ),
+                    "confidence": entity.get("confidence", 0.0),
+                    "normalized_value": entity.get("normalized_value", {}).get("text", ""),
+                }
+            )
+
         # Extract from pages and form fields
         pages = document.get("pages", [])
         for page in pages:
@@ -521,102 +520,114 @@ class GoogleDocumentAIProcessor:
             for field in form_fields:
                 field_name = field.get("fieldName", {}).get("textAnchor", {}).get("content", "")
                 field_value = field.get("fieldValue", {}).get("textAnchor", {}).get("content", "")
-                
+
                 if field_name and field_value:
-                    entities.append({
-                        "type": f"form_field_{field_name.lower().replace(' ', '_')}",
-                        "value": field_value,
-                        "confidence": 0.9,
-                        "normalized_value": field_value.strip()
-                    })
-        
+                    entities.append(
+                        {
+                            "type": f"form_field_{field_name.lower().replace(' ', '_')}",
+                            "value": field_value,
+                            "confidence": 0.9,
+                            "normalized_value": field_value.strip(),
+                        }
+                    )
+
         # If no structured entities, extract from text using regex
         if not entities and document.get("text"):
             entities = self._extract_entities_from_text(document["text"])
-        
+
         return entities
-    
+
     def _extract_entities_from_text(self, text: str) -> List[Dict[str, Any]]:
         """Extract structured entities from OCR text using regex patterns"""
         import re
-        
+
         entities = []
         text_upper = text.upper()
-        
+
         # Passport number patterns
         passport_patterns = [
-            r'PASSPORT\s*N[O°]?\:?\s*([A-Z0-9]{6,15})',
-            r'DOCUMENT\s*N[O°]?\:?\s*([A-Z0-9]{6,15})',
-            r'N[O°]\s*([A-Z0-9]{6,15})',
+            r"PASSPORT\s*N[O°]?\:?\s*([A-Z0-9]{6,15})",
+            r"DOCUMENT\s*N[O°]?\:?\s*([A-Z0-9]{6,15})",
+            r"N[O°]\s*([A-Z0-9]{6,15})",
         ]
-        
+
         for pattern in passport_patterns:
             matches = re.findall(pattern, text_upper)
             for match in matches:
-                entities.append({
-                    "type": "passport_number",
-                    "value": match.strip(),
-                    "confidence": 0.9,
-                    "normalized_value": match.strip()
-                })
+                entities.append(
+                    {
+                        "type": "passport_number",
+                        "value": match.strip(),
+                        "confidence": 0.9,
+                        "normalized_value": match.strip(),
+                    }
+                )
                 break
-        
+
         # Name patterns
         name_patterns = [
-            r'SURNAME[:\s]+([A-Z\s]{2,30})',
-            r'FAMILY\s*NAME[:\s]+([A-Z\s]{2,30})',
-            r'GIVEN\s*NAMES?[:\s]+([A-Z\s]{2,30})',
+            r"SURNAME[:\s]+([A-Z\s]{2,30})",
+            r"FAMILY\s*NAME[:\s]+([A-Z\s]{2,30})",
+            r"GIVEN\s*NAMES?[:\s]+([A-Z\s]{2,30})",
         ]
-        
+
         for pattern in name_patterns:
             matches = re.findall(pattern, text_upper)
             for match in matches:
-                entity_type = "surname" if "SURNAME" in pattern or "FAMILY" in pattern else "given_names"
-                entities.append({
-                    "type": entity_type,
-                    "value": match.strip(),
-                    "confidence": 0.85,
-                    "normalized_value": match.strip()
-                })
-        
+                entity_type = (
+                    "surname" if "SURNAME" in pattern or "FAMILY" in pattern else "given_names"
+                )
+                entities.append(
+                    {
+                        "type": entity_type,
+                        "value": match.strip(),
+                        "confidence": 0.85,
+                        "normalized_value": match.strip(),
+                    }
+                )
+
         # Date patterns
         date_patterns = [
-            r'DATE\s*OF\s*BIRTH[:\s]+(\d{1,2}\s*[A-Z]{3}\s*\d{4})',
-            r'DATE\s*OF\s*EXPIRY[:\s]+(\d{1,2}\s*[A-Z]{3}\s*\d{4})',
-            r'EXPIRY[:\s]+(\d{1,2}\s*[A-Z]{3}\s*\d{4})',
+            r"DATE\s*OF\s*BIRTH[:\s]+(\d{1,2}\s*[A-Z]{3}\s*\d{4})",
+            r"DATE\s*OF\s*EXPIRY[:\s]+(\d{1,2}\s*[A-Z]{3}\s*\d{4})",
+            r"EXPIRY[:\s]+(\d{1,2}\s*[A-Z]{3}\s*\d{4})",
         ]
-        
+
         for pattern in date_patterns:
             matches = re.findall(pattern, text_upper)
             for match in matches:
                 entity_type = "date_of_birth" if "BIRTH" in pattern else "date_of_expiry"
-                entities.append({
-                    "type": entity_type,
-                    "value": match.strip(),
-                    "confidence": 0.8,
-                    "normalized_value": match.strip()
-                })
-        
+                entities.append(
+                    {
+                        "type": entity_type,
+                        "value": match.strip(),
+                        "confidence": 0.8,
+                        "normalized_value": match.strip(),
+                    }
+                )
+
         # Nationality
         nationality_patterns = [
-            r'NATIONALITY[:\s]+([A-Z\s]{5,30})',
+            r"NATIONALITY[:\s]+([A-Z\s]{5,30})",
         ]
-        
+
         for pattern in nationality_patterns:
             matches = re.findall(pattern, text_upper)
             for match in matches:
-                entities.append({
-                    "type": "nationality",
-                    "value": match.strip(),
-                    "confidence": 0.9,
-                    "normalized_value": match.strip()
-                })
-        
+                entities.append(
+                    {
+                        "type": "nationality",
+                        "value": match.strip(),
+                        "confidence": 0.9,
+                        "normalized_value": match.strip(),
+                    }
+                )
+
         return entities
-    
+
     def extract_passport_fields(self, entities: List[Dict]) -> Dict[str, Any]:
         """Extract specific passport fields from entities"""
-        
+
         passport_fields = {
             "passport_number": None,
             "surname": None,
@@ -626,9 +637,9 @@ class GoogleDocumentAIProcessor:
             "date_of_expiry": None,
             "place_of_birth": None,
             "sex": None,
-            "issuing_authority": None
+            "issuing_authority": None,
         }
-        
+
         # Map entity types to passport fields
         entity_mapping = {
             "passport_number": "passport_number",
@@ -646,9 +657,9 @@ class GoogleDocumentAIProcessor:
             "sex": "sex",
             "gender": "sex",
             "issuing_authority": "issuing_authority",
-            "authority": "issuing_authority"
+            "authority": "issuing_authority",
         }
-        
+
         # Extract fields from entities
         for entity in entities:
             entity_type = entity["type"].lower()
@@ -657,86 +668,95 @@ class GoogleDocumentAIProcessor:
                 passport_fields[field_name] = {
                     "value": entity["value"],
                     "confidence": entity["confidence"],
-                    "normalized": entity.get("normalized_value", "")
+                    "normalized": entity.get("normalized_value", ""),
                 }
-        
+
         return passport_fields
 
 
 class HybridDocumentValidator:
     """Hybrid validator combining Google Document AI + Dr. Miguel"""
-    
+
     _google_processor_instance = None  # Class variable for singleton
-    
+
     def __init__(self):
         # Use lazy initialization for google_processor
         self.dr_miguel = None
-    
+
     @property
     def google_processor(self):
         """Lazy-load singleton GoogleDocumentAIProcessor"""
         if HybridDocumentValidator._google_processor_instance is None:
             HybridDocumentValidator._google_processor_instance = GoogleDocumentAIProcessor()
         return HybridDocumentValidator._google_processor_instance
-        
+
     async def _get_dr_miguel(self):
         """Lazy load Dr. Miguel to avoid circular imports"""
         if self.dr_miguel is None:
             from agents.specialized.document_validator import DocumentValidationAgent
+
             self.dr_miguel = DocumentValidationAgent()
         return self.dr_miguel
-    
-    async def analyze_document(self, file_content: bytes, filename: str, 
-                             document_type: str, applicant_name: str,
-                             visa_type: str, case_id: str) -> Dict[str, Any]:
+
+    async def analyze_document(
+        self,
+        file_content: bytes,
+        filename: str,
+        document_type: str,
+        applicant_name: str,
+        visa_type: str,
+        case_id: str,
+    ) -> Dict[str, Any]:
         """
         Complete document analysis using Google Document AI + Dr. Miguel
         """
-        
+
         start_time = datetime.now()
         logger.info("🔬 Starting HYBRID analysis - Google AI + Dr. Miguel")
-        
+
         try:
             # Determine MIME type
             mime_type = "application/pdf"
-            if filename.lower().endswith(('.jpg', '.jpeg')):
+            if filename.lower().endswith((".jpg", ".jpeg")):
                 mime_type = "image/jpeg"
-            elif filename.lower().endswith('.png'):
+            elif filename.lower().endswith(".png"):
                 mime_type = "image/png"
-            elif filename.lower().endswith('.webp'):
+            elif filename.lower().endswith(".webp"):
                 mime_type = "image/webp"
-            
+
             # STEP 1: Google Document AI - Professional document analysis
             logger.info("📋 Step 1: Google Document AI processing")
-            
+
             google_result = await self.google_processor.process_document(
                 file_content, filename, mime_type
             )
-            
+
             if not google_result["success"]:
                 return {
                     "valid": False,
                     "legible": False,
                     "completeness": 0,
-                    "issues": [f"❌ Google Document AI falhou: {google_result.get('error', 'Unknown error')}"],
+                    "issues": [
+                        f"❌ Google Document AI falhou: {google_result.get('error', 'Unknown error')}"
+                    ],
                     "extracted_data": {
                         "document_type": document_type,
                         "file_name": filename,
                         "validation_status": "FAILED",
-                        "error": google_result.get('error')
+                        "error": google_result.get("error"),
                     },
-                    "dra_paula_assessment": f"❌ Processamento de documento falhou: {google_result.get('error_type', 'unknown')}"
+                    "dra_paula_assessment": f"❌ Processamento de documento falhou: {google_result.get('error_type', 'unknown')}",
                 }
-            
+
             # STEP 2: Dr. Miguel - AI-powered validation and fraud detection
             logger.info("🧠 Step 2: Dr. Miguel AI validation")
-            
+
             dr_miguel = await self._get_dr_miguel()
-            
+
             # Enhanced validation with extracted text context
             # Convert file content to string for Dr. Miguel
             document_data = google_result.get("extracted_text", str(file_content)[:1000])
-            
+
             miguel_result = await dr_miguel.validate_document(
                 document_data=document_data,
                 document_type=document_type,
@@ -747,24 +767,29 @@ class HybridDocumentValidator:
                     "filename": filename,
                     "google_extracted_text": google_result.get("extracted_text", ""),
                     "google_entities": google_result.get("extracted_entities", []),
-                    "google_confidence": google_result.get("overall_confidence", 0)
-                }
+                    "google_confidence": google_result.get("overall_confidence", 0),
+                },
             )
-            
+
             # STEP 3: Combine and enhance results
             logger.info("🔀 Step 3: Combining results")
-            
+
             processing_time = (datetime.now() - start_time).total_seconds() * 1000
-            
+
             return self._create_hybrid_response(
-                google_result, miguel_result, document_type, filename,
-                visa_type, case_id, processing_time
+                google_result,
+                miguel_result,
+                document_type,
+                filename,
+                visa_type,
+                case_id,
+                processing_time,
             )
-            
+
         except Exception as e:
             logger.error(f"❌ Hybrid analysis failed: {e}")
             processing_time = (datetime.now() - start_time).total_seconds() * 1000
-            
+
             return {
                 "valid": False,
                 "legible": False,
@@ -774,28 +799,35 @@ class HybridDocumentValidator:
                     "document_type": document_type,
                     "file_name": filename,
                     "validation_status": "ERROR",
-                    "error": str(e)
+                    "error": str(e),
                 },
                 "dra_paula_assessment": f"❌ Erro na análise híbrida: {str(e)}",
                 "hybrid_analysis": {
                     "google_ai": "failed",
                     "dr_miguel": "failed",
-                    "processing_time_ms": processing_time
-                }
+                    "processing_time_ms": processing_time,
+                },
             }
-    
-    def _create_hybrid_response(self, google_result: Dict, miguel_result: Dict,
-                              document_type: str, filename: str, visa_type: str,
-                              case_id: str, processing_time: float) -> Dict[str, Any]:
+
+    def _create_hybrid_response(
+        self,
+        google_result: Dict,
+        miguel_result: Dict,
+        document_type: str,
+        filename: str,
+        visa_type: str,
+        case_id: str,
+        processing_time: float,
+    ) -> Dict[str, Any]:
         """Create comprehensive response combining Google AI and Dr. Miguel results"""
-        
+
         # Extract key data
         google_confidence = google_result.get("overall_confidence", 0.7) * 100  # Realistic default
-        
+
         # Parse Dr. Miguel's string response
-        miguel_confidence = 70  # Realistic default confidence  
+        miguel_confidence = 70  # Realistic default confidence
         miguel_verdict = "NECESSITA_REVISÃO"  # Conservative default verdict
-        
+
         if isinstance(miguel_result, str):
             # Try to extract confidence and verdict from string response
             miguel_text = miguel_result.lower()
@@ -817,26 +849,24 @@ class HybridDocumentValidator:
             # If it's a dict (shouldn't happen with current implementation)
             miguel_confidence = miguel_result.get("confidence_score", 50)
             miguel_verdict = miguel_result.get("verdict", "NECESSITA_REVISÃO")
-        
+
         # Calculate combined confidence (weighted average)
         # Google AI: 40% weight (OCR accuracy)
         # Dr. Miguel: 60% weight (validation and fraud detection)
         combined_confidence = (google_confidence * 0.4) + (miguel_confidence * 0.6)
-        
+
         # Determine overall validity
         is_valid = (
-            miguel_verdict == "APROVADO" and 
-            combined_confidence >= 75 and 
-            google_confidence >= 50
+            miguel_verdict == "APROVADO" and combined_confidence >= 75 and google_confidence >= 50
         )
-        
+
         # Combine issues
         issues = []
-        
+
         # Add Google AI issues
         if google_confidence < 70:
             issues.append(f"⚠️ Qualidade de OCR baixa: {google_confidence:.1f}%")
-        
+
         # Add Dr. Miguel issues
         if isinstance(miguel_result, str):
             # Extract issues from string response
@@ -848,20 +878,25 @@ class HybridDocumentValidator:
                 issues.extend(miguel_issues)
             elif isinstance(miguel_issues, str):
                 issues.append(miguel_issues)
-        
+
         # Extract structured data from Google AI
         extracted_entities = google_result.get("extracted_entities", [])
         passport_fields = self.google_processor.extract_passport_fields(extracted_entities)
-        
+
         # Create enhanced extracted data
         extracted_data = {
             "document_type": document_type,
             "file_name": filename,
-            "validation_status": "APPROVED" if is_valid else "REQUIRES_REVIEW" if combined_confidence >= 50 else "REJECTED",
+            "validation_status": (
+                "APPROVED"
+                if is_valid
+                else "REQUIRES_REVIEW" if combined_confidence >= 50 else "REJECTED"
+            ),
             "visa_context": visa_type,
             "case_id": case_id,
             "google_document_ai_data": {
-                "extracted_text": google_result.get("extracted_text", "")[:500] + "...",  # Truncate for storage
+                "extracted_text": google_result.get("extracted_text", "")[:500]
+                + "...",  # Truncate for storage
                 "entities_count": len(extracted_entities),
                 "confidence": google_confidence,
                 "page_count": google_result.get("page_count", 0),
@@ -869,33 +904,41 @@ class HybridDocumentValidator:
                 "api_enabled": not self.google_processor.is_mock_mode,
                 "auth_method": self.google_processor.auth_method,
                 "project_id": self.google_processor.project_id,
-                "processor_type": google_result.get("processor_type", "mock")
+                "processor_type": google_result.get("processor_type", "mock"),
             },
             "passport_fields": passport_fields,
             "dr_miguel_analysis": {
                 "verdict": miguel_verdict,
                 "confidence": miguel_confidence,
                 "agent_version": "Dr. Miguel - Validador de Documentos",
-                "raw_response": miguel_result[:200] + "..." if isinstance(miguel_result, str) and len(miguel_result) > 200 else miguel_result
+                "raw_response": (
+                    miguel_result[:200] + "..."
+                    if isinstance(miguel_result, str) and len(miguel_result) > 200
+                    else miguel_result
+                ),
             },
             "processing_stats": {
                 "total_time_ms": processing_time,
                 "google_time_ms": google_result.get("processing_time"),
-                "combined_confidence": round(combined_confidence, 1)
-            }
+                "combined_confidence": round(combined_confidence, 1),
+            },
         }
-        
+
         # Create professional assessment
         processor_type = google_result.get("processor_type", "mock")
-        api_status = f"{processor_type.upper()} Real API" if not self.google_processor.is_mock_mode else "Mock Mode"
-        
+        api_status = (
+            f"{processor_type.upper()} Real API"
+            if not self.google_processor.is_mock_mode
+            else "Mock Mode"
+        )
+
         if is_valid:
             assessment = f"✅ HÍBRIDO: Documento aprovado (Google Document AI {api_status}: {google_confidence:.1f}% + Dr. Miguel: {miguel_confidence:.1f}% = {combined_confidence:.1f}%)"
         elif combined_confidence >= 50:
             assessment = f"⚠️ HÍBRIDO: Documento requer revisão manual (Confiança: {combined_confidence:.1f}%)"
         else:
             assessment = f"❌ HÍBRIDO: Documento rejeitado (Confiança insuficiente: {combined_confidence:.1f}%)"
-        
+
         return {
             "valid": is_valid,
             "legible": google_confidence >= 30,  # If Google AI can extract text, it's legible
@@ -907,12 +950,13 @@ class HybridDocumentValidator:
             "google_document_ai_enabled": True,
             "dr_miguel_enabled": True,
             "professional_grade": True,
-            "real_api_active": not self.google_processor.is_mock_mode
+            "real_api_active": not self.google_processor.is_mock_mode,
         }
 
 
 # Global instance - lazy loaded
 _hybrid_validator_instance = None
+
 
 def get_hybrid_validator() -> HybridDocumentValidator:
     """Get or create the global HybridDocumentValidator instance (lazy-loaded singleton)"""
@@ -921,13 +965,16 @@ def get_hybrid_validator() -> HybridDocumentValidator:
         _hybrid_validator_instance = HybridDocumentValidator()
     return _hybrid_validator_instance
 
+
 # For backward compatibility, provide a property-like access
 class _HybridValidatorProxy:
     """Proxy to provide lazy-loaded hybrid_validator with attribute access"""
+
     def __getattr__(self, name):
         return getattr(get_hybrid_validator(), name)
-    
+
     def __call__(self, *args, **kwargs):
         return get_hybrid_validator()(*args, **kwargs)
+
 
 hybrid_validator = _HybridValidatorProxy()

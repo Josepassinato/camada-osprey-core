@@ -35,32 +35,34 @@ async def analyze_document_with_ai(document: UserDocument) -> Dict[str, Any]:
         if document.mime_type.startswith("image/"):
             content = extract_text_from_base64_image(document.content_base64)
         else:
-            content = f"Document type: {document.document_type}, Filename: {document.original_filename}"
+            content = (
+                f"Document type: {document.document_type}, Filename: {document.original_filename}"
+            )
 
         user_data = getattr(document, "user_data", {})
 
         validation_prompt = f"""
         VALIDAÇÃO RIGOROSA DE DOCUMENTO - DR. MIGUEL MELHORADO
-        
+
         DADOS CRÍTICOS PARA VALIDAÇÃO:
         - Tipo de Documento Esperado: {document.document_type}
         - Conteúdo do Documento: {content[:1500]}
         - Dados do Usuário: {user_data}
         - Nome do Arquivo: {document.original_filename}
-        
+
         VALIDAÇÕES OBRIGATÓRIAS:
         1. TIPO CORRETO: Verificar se é exatamente do tipo "{document.document_type}"
         2. NOME CORRETO: Verificar se nome no documento corresponde ao aplicante
         3. AUTENTICIDADE: Verificar se é documento genuíno
         4. VALIDADE: Verificar se não está vencido
         5. ACEITABILIDADE USCIS: Confirmar se atende padrões USCIS
-        
+
         INSTRUÇÕES CRÍTICAS:
         - Se tipo de documento não for o esperado → REJEITAR
-        - Se nome não corresponder ao aplicante → REJEITAR  
+        - Se nome não corresponder ao aplicante → REJEITAR
         - Se documento vencido → REJEITAR
         - Explicar claramente qualquer problema encontrado
-        
+
         RESPOSTA OBRIGATÓRIA EM JSON:
         {{
             "document_type_identified": "string",
@@ -76,7 +78,7 @@ async def analyze_document_with_ai(document: UserDocument) -> Dict[str, Any]:
             "suggestions": ["improvement suggestions"],
             "rejection_reason": "specific reason if rejected"
         }}
-        
+
         Faça validação técnica rigorosa conforme protocolo Dr. Miguel.
         """
 
@@ -143,7 +145,11 @@ def determine_document_priority(
     document_type: DocumentType, expiration_date: Optional[datetime]
 ) -> DocumentPriority:
     """Determine document priority based on type and expiration."""
-    high_priority_docs = [DocumentType.passport, DocumentType.medical_exam, DocumentType.police_clearance]
+    high_priority_docs = [
+        DocumentType.passport,
+        DocumentType.medical_exam,
+        DocumentType.police_clearance,
+    ]
 
     if document_type in high_priority_docs:
         return DocumentPriority.high

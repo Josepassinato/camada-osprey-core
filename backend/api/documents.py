@@ -69,16 +69,24 @@ async def upload_document_to_case(
 
         result = await db.application_cases.update_one(
             {"case_id": case_id},
-            {"$push": {"documents": document_record, "uploaded_documents": document_record}, "$set": {"updated_at": datetime.now(timezone.utc)}},
+            {
+                "$push": {"documents": document_record, "uploaded_documents": document_record},
+                "$set": {"updated_at": datetime.now(timezone.utc)},
+            },
         )
 
         if result.matched_count == 0:
             await db.auto_cases.update_one(
                 {"case_id": case_id},
-                {"$push": {"documents": document_record, "uploaded_documents": document_record}, "$set": {"updated_at": datetime.now(timezone.utc)}},
+                {
+                    "$push": {"documents": document_record, "uploaded_documents": document_record},
+                    "$set": {"updated_at": datetime.now(timezone.utc)},
+                },
             )
 
-        logger.info(f"✅ Document uploaded: {file.filename} ({len(content)} bytes) - Type: {document_type}")
+        logger.info(
+            f"✅ Document uploaded: {file.filename} ({len(content)} bytes) - Type: {document_type}"
+        )
 
         extraction_result = None
         try:
@@ -117,7 +125,9 @@ async def upload_document_to_case(
             doc_count = len(case.get("uploaded_documents", []))
             if doc_count >= 3:
                 collection_name = "auto_cases" if case.get("session_token") else "application_cases"
-                await update_case_status_and_progress(case_id, "documents_uploaded", collection_name)
+                await update_case_status_and_progress(
+                    case_id, "documents_uploaded", collection_name
+                )
 
         response_data = {
             "success": True,
@@ -167,7 +177,11 @@ async def upload_document(
         if len(content) > 10 * 1024 * 1024:
             raise HTTPException(status_code=400, detail="File too large (max 10MB)")
 
-        mime_type = file.content_type or mimetypes.guess_type(file.filename)[0] or "application/octet-stream"
+        mime_type = (
+            file.content_type
+            or mimetypes.guess_type(file.filename)[0]
+            or "application/octet-stream"
+        )
         if not validate_file_type(mime_type):
             raise HTTPException(status_code=400, detail="Unsupported file type")
 
@@ -248,7 +262,9 @@ async def get_user_documents(current_user=Depends(get_current_user)):
     """Get all user documents."""
     try:
         documents = (
-            await db.documents.find({"user_id": current_user["id"]}, {"_id": 0, "content_base64": 0})
+            await db.documents.find(
+                {"user_id": current_user["id"]}, {"_id": 0, "content_base64": 0}
+            )
             .sort("created_at", -1)
             .to_list(100)
         )
@@ -351,7 +367,9 @@ async def get_validation_capabilities(current_user=Depends(get_current_user)):
 async def get_document_details(document_id: str, current_user=Depends(get_current_user)):
     """Get document details including sistema analysis."""
     try:
-        document = await db.documents.find_one({"id": document_id, "user_id": current_user["id"]}, {"_id": 0})
+        document = await db.documents.find_one(
+            {"id": document_id, "user_id": current_user["id"]}, {"_id": 0}
+        )
         if not document:
             raise HTTPException(status_code=404, detail="Document not found")
 
@@ -431,7 +449,9 @@ async def delete_document(document_id: str, current_user=Depends(get_current_use
 async def reanalyze_document(document_id: str, current_user=Depends(get_current_user)):
     """Reanalyze document with sistema."""
     try:
-        document_data = await db.documents.find_one({"id": document_id, "user_id": current_user["id"]})
+        document_data = await db.documents.find_one(
+            {"id": document_id, "user_id": current_user["id"]}
+        )
         if not document_data:
             raise HTTPException(status_code=404, detail="Document not found")
 
@@ -447,10 +467,21 @@ async def reanalyze_document(document_id: str, current_user=Depends(get_current_
 
         await db.documents.update_one(
             {"id": document_id},
-            {"$set": {"ai_analysis": ai_analysis, "ai_suggestions": suggestions, "status": status.value, "updated_at": datetime.now(timezone.utc)}},
+            {
+                "$set": {
+                    "ai_analysis": ai_analysis,
+                    "ai_suggestions": suggestions,
+                    "status": status.value,
+                    "updated_at": datetime.now(timezone.utc),
+                }
+            },
         )
 
-        return {"message": "Document reanalyzed successfully", "analysis": ai_analysis, "status": status.value}
+        return {
+            "message": "Document reanalyzed successfully",
+            "analysis": ai_analysis,
+            "status": status.value,
+        }
 
     except HTTPException:
         raise

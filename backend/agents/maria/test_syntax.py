@@ -11,19 +11,19 @@ import sys
 def test_syntax():
     """Test Python syntax for all Maria modules"""
     print("Testing Maria agent module syntax...")
-    
+
     base_path = os.path.dirname(__file__)
     files_to_test = [
-        '__init__.py',
-        'agent.py',
-        'api.py',
-        'gemini_chat.py',
-        'voice.py',
-        'whatsapp.py'
+        "__init__.py",
+        "agent.py",
+        "api.py",
+        "gemini_chat.py",
+        "voice.py",
+        "whatsapp.py",
     ]
-    
+
     all_passed = True
-    
+
     for filename in files_to_test:
         filepath = os.path.join(base_path, filename)
         try:
@@ -32,11 +32,11 @@ def test_syntax():
         except py_compile.PyCompileError as e:
             print(f"  ❌ {filename} - syntax error: {e}")
             all_passed = False
-    
+
     if all_passed:
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("🎉 ALL SYNTAX CHECKS PASSED!")
-        print("="*60)
+        print("=" * 60)
         print("\nMaria agent files have correct Python syntax:")
         print("- __init__.py: ✅")
         print("- agent.py: ✅")
@@ -48,6 +48,7 @@ def test_syntax():
     else:
         print("\n❌ Some files have syntax errors")
         return False
+
 
 if __name__ == "__main__":
     success = test_syntax()

@@ -23,7 +23,7 @@ ADAPTIVE_TEXTS = {
             "email": "Seu e-mail",
             "email_help": "E-mail que você usa sempre",
             "passport": "Número do passaporte",
-            "passport_help": "Aquele número no seu passaporte"
+            "passport_help": "Aquele número no seu passaporte",
         },
         "technical": {
             "section_title": "Personal Information",
@@ -41,10 +41,9 @@ ADAPTIVE_TEXTS = {
             "email": "Email Address",
             "email_help": "Valid email for correspondence",
             "passport": "Passport Number",
-            "passport_help": "As shown on valid passport"
-        }
+            "passport_help": "As shown on valid passport",
+        },
     },
-    
     # ===== I-130 ESPECÍFICO =====
     "i130": {
         "simple": {
@@ -63,7 +62,7 @@ ADAPTIVE_TEXTS = {
             "us_entry": "Quando você entrou nos EUA?",
             "us_entry_help": "Se já esteve lá, quando foi?",
             "immigration_status": "Qual sua situação de imigração?",
-            "immigration_status_help": "Turista? Estudante? Sem visto? Pediu asilo?"
+            "immigration_status_help": "Turista? Estudante? Sem visto? Pediu asilo?",
         },
         "technical": {
             "petitioner": "Petitioner Information",
@@ -81,10 +80,9 @@ ADAPTIVE_TEXTS = {
             "us_entry": "Date of Entry to U.S.",
             "us_entry_help": "If applicable, date of last entry",
             "immigration_status": "Current Immigration Status",
-            "immigration_status_help": "B-2, F-1, H-1B, pending asylum, etc."
-        }
+            "immigration_status_help": "B-2, F-1, H-1B, pending asylum, etc.",
+        },
     },
-    
     # ===== H-1B ESPECÍFICO =====
     "h1b": {
         "simple": {
@@ -101,7 +99,7 @@ ADAPTIVE_TEXTS = {
             "education": "Sua formação",
             "education_help": "Faculdade que você fez, diploma que tem",
             "experience": "Experiência de trabalho",
-            "experience_help": "Onde trabalhou antes e por quanto tempo"
+            "experience_help": "Onde trabalhou antes e por quanto tempo",
         },
         "technical": {
             "employer": "Sponsoring Employer",
@@ -117,10 +115,9 @@ ADAPTIVE_TEXTS = {
             "education": "Educational Qualifications",
             "education_help": "Degree, major, institution",
             "experience": "Work Experience",
-            "experience_help": "Previous employment and duration"
-        }
+            "experience_help": "Previous employment and duration",
+        },
     },
-    
     # ===== I-539 ESPECÍFICO =====
     "i539": {
         "simple": {
@@ -135,7 +132,7 @@ ADAPTIVE_TEXTS = {
             "financial_support": "Como você está se sustentando?",
             "financial_support_help": "De onde vem o dinheiro para suas despesas?",
             "ties_home_country": "O que te prende ao seu país?",
-            "ties_home_country_help": "Família, casa, trabalho que te espera"
+            "ties_home_country_help": "Família, casa, trabalho que te espera",
         },
         "technical": {
             "current_status": "Current Nonimmigrant Status",
@@ -149,10 +146,9 @@ ADAPTIVE_TEXTS = {
             "financial_support": "Financial Support",
             "financial_support_help": "Source of funds during stay",
             "ties_home_country": "Ties to Home Country",
-            "ties_home_country_help": "Family, property, employment"
-        }
+            "ties_home_country_help": "Family, property, employment",
+        },
     },
-    
     # ===== DOCUMENTOS =====
     "documents": {
         "simple": {
@@ -169,7 +165,7 @@ ADAPTIVE_TEXTS = {
             "financial_docs": "Documentos de dinheiro",
             "financial_docs_help": "Extrato do banco, recibo de salário",
             "translation_note": "📝 Documentos não em inglês precisam ser traduzidos",
-            "format_note": "📎 Aceita: PDF, JPG, PNG (máx 10MB cada)"
+            "format_note": "📎 Aceita: PDF, JPG, PNG (máx 10MB cada)",
         },
         "technical": {
             "section_title": "Supporting Documents",
@@ -185,10 +181,9 @@ ADAPTIVE_TEXTS = {
             "financial_docs": "Financial Documentation",
             "financial_docs_help": "Bank statements, pay stubs, tax returns",
             "translation_note": "📝 Non-English documents require certified translation",
-            "format_note": "📎 Accepted: PDF, JPG, PNG (max 10MB each)"
-        }
+            "format_note": "📎 Accepted: PDF, JPG, PNG (max 10MB each)",
+        },
     },
-    
     # ===== AÇÕES/BOTÕES =====
     "actions": {
         "simple": {
@@ -206,7 +201,7 @@ ADAPTIVE_TEXTS = {
             "next_step": "Próximo Passo",
             "previous_step": "Passo Anterior",
             "finish": "Finalizar",
-            "start": "Começar"
+            "start": "Começar",
         },
         "technical": {
             "continue": "Continue",
@@ -223,10 +218,9 @@ ADAPTIVE_TEXTS = {
             "next_step": "Next",
             "previous_step": "Previous",
             "finish": "Complete",
-            "start": "Begin"
-        }
+            "start": "Begin",
+        },
     },
-    
     # ===== VALIDAÇÕES E ERROS =====
     "validation": {
         "simple": {
@@ -239,7 +233,7 @@ ADAPTIVE_TEXTS = {
             "numbers_only": "Só pode ter números",
             "letters_only": "Só pode ter letras",
             "file_too_large": "Arquivo muito grande (máx 10MB)",
-            "invalid_format": "Formato não aceito"
+            "invalid_format": "Formato não aceito",
         },
         "technical": {
             "required": "Required field",
@@ -251,10 +245,9 @@ ADAPTIVE_TEXTS = {
             "numbers_only": "Numeric characters only",
             "letters_only": "Alphabetic characters only",
             "file_too_large": "File size exceeds 10MB limit",
-            "invalid_format": "Unsupported file format"
-        }
+            "invalid_format": "Unsupported file format",
+        },
     },
-    
     # ===== STATUS E PROGRESSO =====
     "status": {
         "simple": {
@@ -267,7 +260,7 @@ ADAPTIVE_TEXTS = {
             "under_review": "Em Análise",
             "draft": "Rascunho",
             "submitted": "Enviado",
-            "processing": "Processando"
+            "processing": "Processando",
         },
         "technical": {
             "not_started": "Not Started",
@@ -279,10 +272,9 @@ ADAPTIVE_TEXTS = {
             "under_review": "Under Review",
             "draft": "Draft",
             "submitted": "Submitted",
-            "processing": "Processing"
-        }
+            "processing": "Processing",
+        },
     },
-    
     # ===== AVISOS E INFORMAÇÕES =====
     "alerts": {
         "simple": {
@@ -295,7 +287,7 @@ ADAPTIVE_TEXTS = {
             "data_security": "🔒 Seus dados estão seguros e criptografados",
             "progress_saved": "✅ Progresso salvo com sucesso!",
             "incomplete_warning": "⚠️ Algumas informações importantes estão faltando",
-            "success": "🎉 Sucesso!"
+            "success": "🎉 Sucesso!",
         },
         "technical": {
             "legal_disclaimer": "⚖️ Disclaimer: This information is educational. For specific legal advice, consult a licensed immigration attorney.",
@@ -307,21 +299,22 @@ ADAPTIVE_TEXTS = {
             "data_security": "🔒 Your data is encrypted and secure",
             "progress_saved": "✅ Progress saved successfully",
             "incomplete_warning": "⚠️ Required information is incomplete",
-            "success": "🎉 Success!"
-        }
-    }
+            "success": "🎉 Success!",
+        },
+    },
 }
+
 
 # Função helper para obter texto
 def get_text(context: str, key: str, mode: str = "simple") -> str:
     """
     Obtém texto adaptado baseado no contexto e modo de linguagem
-    
+
     Args:
         context: Contexto do texto (ex: "personal_info", "i130", etc)
         key: Chave específica do texto
         mode: "simple" ou "technical"
-    
+
     Returns:
         Texto no modo especificado ou fallback para modo simples
     """
@@ -334,15 +327,16 @@ def get_text(context: str, key: str, mode: str = "simple") -> str:
         except KeyError:
             return f"[{key}]"  # Retorna a chave se não encontrar nada
 
+
 # Função para obter todo um contexto
 def get_context_texts(context: str, mode: str = "simple") -> dict:
     """
     Obtém todos os textos de um contexto específico
-    
+
     Args:
         context: Contexto desejado
         mode: "simple" ou "technical"
-    
+
     Returns:
         Dicionário com todos os textos do contexto
     """

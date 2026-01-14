@@ -26,7 +26,9 @@ except ImportError as e:
 
 
 @router.post("/case/{case_id}/friendly-form")
-async def submit_friendly_form(case_id: str, request: dict, current_user=Depends(get_current_user_optional)):
+async def submit_friendly_form(
+    case_id: str, request: dict, current_user=Depends(get_current_user_optional)
+):
     """
     Submit and validate friendly form data with AI analysis.
     This endpoint:
@@ -68,12 +70,18 @@ async def submit_friendly_form(case_id: str, request: dict, current_user=Depends
             status_atual = str(friendly_form_data.get("status_atual", "")).upper()
             status_solicitado = str(friendly_form_data.get("status_solicitado", "")).upper()
 
-            logger.info(f"🔍 Attempting auto-detection - status_atual: {status_atual}, status_solicitado: {status_solicitado}")
+            logger.info(
+                f"🔍 Attempting auto-detection - status_atual: {status_atual}, status_solicitado: {status_solicitado}"
+            )
 
             # Enhanced detection logic with better patterns
             # I-539: Extension or Change of Status
             if "B-2" in status_atual or "B2" in status_atual or "TOURIST" in status_atual:
-                if "EXTENSION" in status_solicitado or "EXTENSÃO" in status_solicitado or "B-2" in status_solicitado:
+                if (
+                    "EXTENSION" in status_solicitado
+                    or "EXTENSÃO" in status_solicitado
+                    or "B-2" in status_solicitado
+                ):
                     detected_visa = "I-539"
                     logger.info("✅ Detected I-539 (B-2 Extension)")
 
@@ -83,7 +91,11 @@ async def submit_friendly_form(case_id: str, request: dict, current_user=Depends
                 logger.info("✅ Detected I-539 (Explicit)")
 
             # F-1 Student Visa
-            if "F-1" in status_solicitado or "F1" in status_solicitado or "STUDENT" in status_solicitado:
+            if (
+                "F-1" in status_solicitado
+                or "F1" in status_solicitado
+                or "STUDENT" in status_solicitado
+            ):
                 detected_visa = "I-539"  # F-1 uses I-539 for status change
                 logger.info("✅ Detected I-539 (F-1 Status Change)")
 
@@ -103,7 +115,11 @@ async def submit_friendly_form(case_id: str, request: dict, current_user=Depends
                 logger.info("✅ Detected I-140 (EB-1A)")
 
             # I-589 Asylum
-            if "ASYLUM" in status_solicitado or "ASILO" in status_solicitado or "I-589" in status_solicitado:
+            if (
+                "ASYLUM" in status_solicitado
+                or "ASILO" in status_solicitado
+                or "I-589" in status_solicitado
+            ):
                 detected_visa = "I-589"
                 logger.info("✅ Detected I-589 (Asylum)")
 
@@ -111,7 +127,12 @@ async def submit_friendly_form(case_id: str, request: dict, current_user=Depends
                 # Update case with detected visa type
                 result = await db.auto_cases.update_one(
                     {"case_id": case_id},
-                    {"$set": {"form_code": detected_visa, "updated_at": datetime.now(timezone.utc)}},
+                    {
+                        "$set": {
+                            "form_code": detected_visa,
+                            "updated_at": datetime.now(timezone.utc),
+                        }
+                    },
                 )
                 visa_type = detected_visa
                 logger.info(
@@ -133,7 +154,9 @@ async def submit_friendly_form(case_id: str, request: dict, current_user=Depends
         if LEGAL_RULES_AVAILABLE:
             logger.info(f"Applying legal rules validation for visa type: {visa_type}")
             try:
-                legal_rules_passed, legal_messages = apply_legal_rules(friendly_form_data, visa_type)
+                legal_rules_passed, legal_messages = apply_legal_rules(
+                    friendly_form_data, visa_type
+                )
                 if not legal_rules_passed or legal_messages:
                     for message in legal_messages:
                         # Categorize messages by type
@@ -164,7 +187,9 @@ async def submit_friendly_form(case_id: str, request: dict, current_user=Depends
                                     "type": "legal_rule",
                                 }
                             )
-                    logger.warning(f"Legal validation found {len(legal_validation_issues)} issues/warnings")
+                    logger.warning(
+                        f"Legal validation found {len(legal_validation_issues)} issues/warnings"
+                    )
             except Exception as e:
                 logger.error(f"Error applying legal rules: {e}")
                 legal_validation_issues.append(
@@ -234,7 +259,9 @@ async def submit_friendly_form(case_id: str, request: dict, current_user=Depends
             update_data["current_step"] = "friendly-form-partial"
 
         # 🆕 BUG FIX DEBUG: Log what we're saving
-        logger.info(f"🔍 About to save simplified_form_responses with {len(friendly_form_data)} fields")
+        logger.info(
+            f"🔍 About to save simplified_form_responses with {len(friendly_form_data)} fields"
+        )
         logger.info(f"🔍 Sample data: {dict(list(friendly_form_data.items())[:3])}")
 
         result = await db.auto_cases.update_one({"case_id": case_id}, {"$set": update_data})
@@ -246,9 +273,13 @@ async def submit_friendly_form(case_id: str, request: dict, current_user=Depends
         # 🆕 BUG FIX DEBUG: Verify data was saved
         saved_case = await db.auto_cases.find_one({"case_id": case_id})
         saved_simplified = saved_case.get("simplified_form_responses", {})
-        logger.info(f"🔍 Verification: simplified_form_responses has {len(saved_simplified)} fields after save")
+        logger.info(
+            f"🔍 Verification: simplified_form_responses has {len(saved_simplified)} fields after save"
+        )
         if len(saved_simplified) == 0 and len(friendly_form_data) > 0:
-            logger.error(f"⚠️ DATA LOSS DETECTED! Sent {len(friendly_form_data)} fields but saved 0!")
+            logger.error(
+                f"⚠️ DATA LOSS DETECTED! Sent {len(friendly_form_data)} fields but saved 0!"
+            )
 
         # STEP 4: Return validation result to user
         response = {
@@ -270,7 +301,9 @@ async def submit_friendly_form(case_id: str, request: dict, current_user=Depends
         raise HTTPException(status_code=500, detail=f"Error processing friendly form: {str(e)}")
 
 
-async def validate_friendly_form_ai(case: dict, friendly_form_data: dict, basic_data: dict, visa_type: str):
+async def validate_friendly_form_ai(
+    case: dict, friendly_form_data: dict, basic_data: dict, visa_type: str
+):
     """
     Enhanced AI-powered validation of friendly form data.
 
@@ -298,11 +331,15 @@ async def validate_friendly_form_ai(case: dict, friendly_form_data: dict, basic_
         completion_percentage = programmatic_result["completion_percentage"]
         missing_fields = programmatic_result["missing_fields"]
 
-        logger.info(f"📊 Programmatic validation: {completion_percentage}% complete, {len(validation_issues)} issues found")
+        logger.info(
+            f"📊 Programmatic validation: {completion_percentage}% complete, {len(validation_issues)} issues found"
+        )
 
         # If completion is very low, skip AI validation (no point)
         if completion_percentage < 30:
-            logger.warning(f"⚠️ Completion too low ({completion_percentage}%), skipping AI validation")
+            logger.warning(
+                f"⚠️ Completion too low ({completion_percentage}%), skipping AI validation"
+            )
             return {
                 "validation_issues": validation_issues,
                 "overall_status": "rejected",
@@ -374,7 +411,7 @@ Formulário Amigável: {json.dumps(friendly_form_data, indent=2, ensure_ascii=Fa
 4. Verificar LÓGICA do pedido (ex: motivo da mudança de status faz sentido?)
 5. Sugerir MELHORIAS nos textos e respostas
 
-**IMPORTANTE**: 
+**IMPORTANTE**:
 - NÃO repita os problemas já listados acima
 - Foque em análise semântica e coerência
 - Se não encontrar problemas adicionais, retorne array vazio em "additional_issues"
@@ -614,7 +651,9 @@ def get_required_fields_by_visa_type_old(visa_type: str) -> dict:
     return get_required_fields_by_visa_type(visa_type)
 
 
-def validate_fields_programmatically(friendly_form_data: dict, basic_data: dict, visa_type: str) -> dict:
+def validate_fields_programmatically(
+    friendly_form_data: dict, basic_data: dict, visa_type: str
+) -> dict:
     """
     Perform programmatic validation before AI validation
     This is faster and more reliable for basic checks
@@ -651,7 +690,9 @@ def validate_fields_programmatically(friendly_form_data: dict, basic_data: dict,
             filled_count += 1
 
             if "email" in validation_rules:
-                if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", str(field_value)):
+                if not re.match(
+                    r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", str(field_value)
+                ):
                     validation_issues.append(
                         {
                             "field": field_name,
@@ -701,7 +742,11 @@ def validate_fields_programmatically(friendly_form_data: dict, basic_data: dict,
 
     base_completion = int((filled_count / total_required) * 100) if total_required > 0 else 0
 
-    format_errors = [i for i in validation_issues if i.get("severity") == "error" and i.get("issue") != "Campo obrigatório não preenchido"]
+    format_errors = [
+        i
+        for i in validation_issues
+        if i.get("severity") == "error" and i.get("issue") != "Campo obrigatório não preenchido"
+    ]
     format_warnings = [i for i in validation_issues if i.get("severity") == "warning"]
 
     penalty = (len(format_errors) * 5) + (len(format_warnings) * 2)

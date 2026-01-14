@@ -12,8 +12,4 @@ from .document_ai import (
     hybrid_validator,
 )
 
-__all__ = [
-    "GoogleDocumentAIProcessor",
-    "HybridDocumentValidator",
-    "hybrid_validator"
-]
+__all__ = ["GoogleDocumentAIProcessor", "HybridDocumentValidator", "hybrid_validator"]

@@ -43,14 +43,14 @@ eb2_niw_agent = EB2NIWAgent()
 eb1a_agent = EB1AAgent()
 
 # Register specialists
-supervisor.register_specialist('B-2', b2_agent)
-supervisor.register_specialist('H-1B', h1b_agent)
-supervisor.register_specialist('F-1', f1_agent)
-supervisor.register_specialist('I-130', i130_agent)
-supervisor.register_specialist('I-765', i765_agent)
-supervisor.register_specialist('I-90', i90_agent)
-supervisor.register_specialist('EB-2 NIW', eb2_niw_agent)
-supervisor.register_specialist('EB-1A', eb1a_agent)
+supervisor.register_specialist("B-2", b2_agent)
+supervisor.register_specialist("H-1B", h1b_agent)
+supervisor.register_specialist("F-1", f1_agent)
+supervisor.register_specialist("I-130", i130_agent)
+supervisor.register_specialist("I-765", i765_agent)
+supervisor.register_specialist("I-90", i90_agent)
+supervisor.register_specialist("EB-2 NIW", eb2_niw_agent)
+supervisor.register_specialist("EB-1A", eb1a_agent)
 
 # Initialize QA and Metrics
 qa_agent = QualityAssuranceAgent()
@@ -65,21 +65,21 @@ logger.info(f"✅ {len(supervisor.specialists)} agentes especializados registrad
 
 # Mapping between frontend form codes and agent visa types
 FORM_CODE_TO_VISA_TYPE = {
-    'I-539': 'B-2',        # Tourist visa extension ✅ IMPLEMENTED
-    'F-1': 'F-1',          # Student visa ✅ IMPLEMENTED
-    'I-130': 'I-130',      # Family-based ✅ IMPLEMENTED
-    'I-765': 'I-765',      # EAD ✅ IMPLEMENTED
-    'I-90': 'I-90',        # Green card renewal ✅ IMPLEMENTED
-    'EB-2 NIW': 'EB-2 NIW',  # National Interest Waiver ✅ IMPLEMENTED
-    'EB-1A': 'EB-1A',      # Extraordinary Ability ✅ IMPLEMENTED
-    'H-1B': 'H-1B',        # Work visa ✅ IMPLEMENTED
+    "I-539": "B-2",  # Tourist visa extension ✅ IMPLEMENTED
+    "F-1": "F-1",  # Student visa ✅ IMPLEMENTED
+    "I-130": "I-130",  # Family-based ✅ IMPLEMENTED
+    "I-765": "I-765",  # EAD ✅ IMPLEMENTED
+    "I-90": "I-90",  # Green card renewal ✅ IMPLEMENTED
+    "EB-2 NIW": "EB-2 NIW",  # National Interest Waiver ✅ IMPLEMENTED
+    "EB-1A": "EB-1A",  # Extraordinary Ability ✅ IMPLEMENTED
+    "H-1B": "H-1B",  # Work visa ✅ IMPLEMENTED
 }
 
 
 def transform_case_data_for_agent(case_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Transforma dados do caso (formato MongoDB/Frontend) para formato esperado pelos agentes.
-    
+
     Args:
         case_data: Dados do caso do MongoDB contendo:
             - form_code: Código do formulário (I-539, F-1, etc.)
@@ -87,149 +87,151 @@ def transform_case_data_for_agent(case_data: Dict[str, Any]) -> Dict[str, Any]:
             - simplified_form_responses: Respostas do formulário simplificado
             - user_story_text: História do usuário
             - uploaded_documents: Lista de documentos
-            
+
     Returns:
         Dict formatado para os agentes com estrutura:
             - visa_type: Tipo do visto para o supervisor
             - applicant_data: Dados do aplicante formatados
     """
-    form_code = case_data.get('form_code')
-    basic_data = case_data.get('basic_data', {})
-    simplified_responses = case_data.get('simplified_form_responses', {})
-    user_story = case_data.get('user_story_text', '')
-    
+    form_code = case_data.get("form_code")
+    basic_data = case_data.get("basic_data", {})
+    simplified_responses = case_data.get("simplified_form_responses", {})
+    user_story = case_data.get("user_story_text", "")
+
     # Map form code to visa type
     visa_type = FORM_CODE_TO_VISA_TYPE.get(form_code)
-    
+
     if not visa_type:
         raise ValueError(f"Unsupported form code: {form_code}")
-    
+
     # Check if agent is available
     if visa_type not in supervisor.specialists:
         raise ValueError(
             f"Agent for {visa_type} not yet implemented. "
             f"Available agents: {list(supervisor.specialists.keys())}"
         )
-    
+
     # Build base applicant data structure
     applicant_data = {
-        'personal_info': {
-            'full_name': f"{basic_data.get('firstName', '')} {basic_data.get('middleName', '')} {basic_data.get('lastName', '')}".strip(),
-            'first_name': basic_data.get('firstName', ''),
-            'middle_name': basic_data.get('middleName', ''),
-            'last_name': basic_data.get('lastName', ''),
-            'date_of_birth': basic_data.get('dateOfBirth', ''),
-            'country_of_birth': basic_data.get('countryOfBirth', ''),
-            'gender': basic_data.get('gender', ''),
-            'current_address': basic_data.get('currentAddress', ''),
-            'city': basic_data.get('city', ''),
-            'state': basic_data.get('state', ''),
-            'zip_code': basic_data.get('zipCode', ''),
-            'phone': basic_data.get('phoneNumber', ''),
-            'email': basic_data.get('email', ''),
+        "personal_info": {
+            "full_name": f"{basic_data.get('firstName', '')} {basic_data.get('middleName', '')} {basic_data.get('lastName', '')}".strip(),
+            "first_name": basic_data.get("firstName", ""),
+            "middle_name": basic_data.get("middleName", ""),
+            "last_name": basic_data.get("lastName", ""),
+            "date_of_birth": basic_data.get("dateOfBirth", ""),
+            "country_of_birth": basic_data.get("countryOfBirth", ""),
+            "gender": basic_data.get("gender", ""),
+            "current_address": basic_data.get("currentAddress", ""),
+            "city": basic_data.get("city", ""),
+            "state": basic_data.get("state", ""),
+            "zip_code": basic_data.get("zipCode", ""),
+            "phone": basic_data.get("phoneNumber", ""),
+            "email": basic_data.get("email", ""),
         },
-        'immigration_info': {
-            'alien_number': basic_data.get('alienNumber', ''),
-            'ssn': basic_data.get('socialSecurityNumber', ''),
-            'current_status': basic_data.get('currentStatus', ''),
-            'status_expiration': basic_data.get('statusExpiration', ''),
+        "immigration_info": {
+            "alien_number": basic_data.get("alienNumber", ""),
+            "ssn": basic_data.get("socialSecurityNumber", ""),
+            "current_status": basic_data.get("currentStatus", ""),
+            "status_expiration": basic_data.get("statusExpiration", ""),
         },
-        'user_story': user_story,
-        'simplified_responses': simplified_responses,
+        "user_story": user_story,
+        "simplified_responses": simplified_responses,
     }
-    
+
     # Visa-specific transformations
-    if visa_type == 'B-2':
+    if visa_type == "B-2":
         # B-2 Extension specific data
-        applicant_data['extension_details'] = {
-            'reason_for_extension': simplified_responses.get('extension_reason', 'Tourist purposes'),
-            'requested_duration': simplified_responses.get('requested_duration', '6 months'),
-            'arrival_date': simplified_responses.get('arrival_date', ''),
-            'current_i94_expiration': basic_data.get('statusExpiration', ''),
+        applicant_data["extension_details"] = {
+            "reason_for_extension": simplified_responses.get(
+                "extension_reason", "Tourist purposes"
+            ),
+            "requested_duration": simplified_responses.get("requested_duration", "6 months"),
+            "arrival_date": simplified_responses.get("arrival_date", ""),
+            "current_i94_expiration": basic_data.get("statusExpiration", ""),
         }
-        
-    elif visa_type == 'F-1':
+
+    elif visa_type == "F-1":
         # F-1 Student specific data
-        applicant_data['education_info'] = {
-            'school_name': simplified_responses.get('school_name', ''),
-            'program_name': simplified_responses.get('program_name', ''),
-            'degree_level': simplified_responses.get('degree_level', ''),
-            'start_date': simplified_responses.get('program_start_date', ''),
-            'end_date': simplified_responses.get('program_end_date', ''),
-            'sevis_id': simplified_responses.get('sevis_id', ''),
-            'i20_issue_date': simplified_responses.get('i20_issue_date', ''),
+        applicant_data["education_info"] = {
+            "school_name": simplified_responses.get("school_name", ""),
+            "program_name": simplified_responses.get("program_name", ""),
+            "degree_level": simplified_responses.get("degree_level", ""),
+            "start_date": simplified_responses.get("program_start_date", ""),
+            "end_date": simplified_responses.get("program_end_date", ""),
+            "sevis_id": simplified_responses.get("sevis_id", ""),
+            "i20_issue_date": simplified_responses.get("i20_issue_date", ""),
         }
-        applicant_data['financial_info'] = {
-            'funding_source': simplified_responses.get('funding_source', ''),
-            'annual_expenses': simplified_responses.get('annual_expenses', ''),
-            'sponsor_info': simplified_responses.get('sponsor_info', {}),
+        applicant_data["financial_info"] = {
+            "funding_source": simplified_responses.get("funding_source", ""),
+            "annual_expenses": simplified_responses.get("annual_expenses", ""),
+            "sponsor_info": simplified_responses.get("sponsor_info", {}),
         }
-    
-    elif visa_type == 'I-130':
+
+    elif visa_type == "I-130":
         # I-130 Family-based specific data
-        applicant_data['relationship_info'] = {
-            'relationship_type': simplified_responses.get('relationship_type', ''),
-            'petitioner_role': simplified_responses.get('petitioner_role', ''),
+        applicant_data["relationship_info"] = {
+            "relationship_type": simplified_responses.get("relationship_type", ""),
+            "petitioner_role": simplified_responses.get("petitioner_role", ""),
         }
-        applicant_data['petitioner_info'] = {
-            'full_name': simplified_responses.get('petitioner_name', ''),
-            'status': simplified_responses.get('petitioner_status', 'U.S. Citizen'),
+        applicant_data["petitioner_info"] = {
+            "full_name": simplified_responses.get("petitioner_name", ""),
+            "status": simplified_responses.get("petitioner_status", "U.S. Citizen"),
         }
-    
-    elif visa_type == 'I-765':
+
+    elif visa_type == "I-765":
         # I-765 EAD specific data
-        applicant_data['ead_data'] = {
-            'category': simplified_responses.get('ead_category', '(c)(9)'),
-            'category_description': simplified_responses.get('category_description', ''),
-            'reason': simplified_responses.get('ead_reason', ''),
-            'application_type': simplified_responses.get('application_type', 'Initial'),
+        applicant_data["ead_data"] = {
+            "category": simplified_responses.get("ead_category", "(c)(9)"),
+            "category_description": simplified_responses.get("category_description", ""),
+            "reason": simplified_responses.get("ead_reason", ""),
+            "application_type": simplified_responses.get("application_type", "Initial"),
         }
-    
-    elif visa_type == 'I-90':
+
+    elif visa_type == "I-90":
         # I-90 Green Card specific data
-        applicant_data['greencard_info'] = {
-            'alien_number': immigration.get('alien_number', ''),
-            'card_number': simplified_responses.get('card_number', ''),
-            'expiration_date': simplified_responses.get('card_expiration', ''),
-            'date_became_pr': simplified_responses.get('pr_date', ''),
-            'reason': simplified_responses.get('replacement_reason', 'renewal'),
-            'detailed_reason': simplified_responses.get('detailed_reason', ''),
+        applicant_data["greencard_info"] = {
+            "alien_number": simplified_responses.get("alien_number", ""),
+            "card_number": simplified_responses.get("card_number", ""),
+            "expiration_date": simplified_responses.get("card_expiration", ""),
+            "date_became_pr": simplified_responses.get("pr_date", ""),
+            "reason": simplified_responses.get("replacement_reason", "renewal"),
+            "detailed_reason": simplified_responses.get("detailed_reason", ""),
         }
-    
-    elif visa_type == 'EB-2 NIW':
+
+    elif visa_type == "EB-2 NIW":
         # EB-2 NIW specific data
-        applicant_data['professional_info'] = {
-            'field': simplified_responses.get('field_of_expertise', ''),
-            'years_experience': simplified_responses.get('years_experience', '10+'),
-            'publications': simplified_responses.get('publications_count', '0'),
-            'citations': simplified_responses.get('citations_count', '0'),
-            'patents': simplified_responses.get('patents_count', '0'),
-            'impact_evidence': simplified_responses.get('impact_description', ''),
+        applicant_data["professional_info"] = {
+            "field": simplified_responses.get("field_of_expertise", ""),
+            "years_experience": simplified_responses.get("years_experience", "10+"),
+            "publications": simplified_responses.get("publications_count", "0"),
+            "citations": simplified_responses.get("citations_count", "0"),
+            "patents": simplified_responses.get("patents_count", "0"),
+            "impact_evidence": simplified_responses.get("impact_description", ""),
         }
-        applicant_data['education_info'] = {
-            'highest_degree': simplified_responses.get('highest_degree', ''),
-            'field_of_study': simplified_responses.get('field_of_study', ''),
-            'institution': simplified_responses.get('institution', ''),
+        applicant_data["education_info"] = {
+            "highest_degree": simplified_responses.get("highest_degree", ""),
+            "field_of_study": simplified_responses.get("field_of_study", ""),
+            "institution": simplified_responses.get("institution", ""),
         }
-    
-    elif visa_type == 'EB-1A':
+
+    elif visa_type == "EB-1A":
         # EB-1A Extraordinary Ability specific data
-        applicant_data['professional_info'] = {
-            'field': simplified_responses.get('field_of_expertise', ''),
-            'years_experience': simplified_responses.get('years_experience', ''),
+        applicant_data["professional_info"] = {
+            "field": simplified_responses.get("field_of_expertise", ""),
+            "years_experience": simplified_responses.get("years_experience", ""),
         }
-        applicant_data['achievements'] = {
-            'awards': simplified_responses.get('awards_count', '0'),
-            'publications': simplified_responses.get('publications_count', '0'),
-            'citations': simplified_responses.get('citations_count', '0'),
-            'judging': simplified_responses.get('judging_instances', '0'),
-            'organizations': simplified_responses.get('organizations', ''),
+        applicant_data["achievements"] = {
+            "awards": simplified_responses.get("awards_count", "0"),
+            "publications": simplified_responses.get("publications_count", "0"),
+            "citations": simplified_responses.get("citations_count", "0"),
+            "judging": simplified_responses.get("judging_instances", "0"),
+            "organizations": simplified_responses.get("organizations", ""),
         }
-    
+
     return {
-        'visa_type': visa_type,
-        'applicant_data': applicant_data,
-        'form_code': form_code,
+        "visa_type": visa_type,
+        "applicant_data": applicant_data,
+        "form_code": form_code,
     }
 
 
@@ -237,11 +239,11 @@ def generate_package_from_case(case_data: Dict[str, Any], enable_qa: bool = True
     """
     Gera pacote de visto a partir dos dados do caso.
     Esta é a função principal que deve ser chamada pelo case_finalizer.
-    
+
     Args:
         case_data: Dados completos do caso do MongoDB
         enable_qa: Se deve executar QA review
-        
+
     Returns:
         Resultado da geração com:
             - success: bool
@@ -252,75 +254,73 @@ def generate_package_from_case(case_data: Dict[str, Any], enable_qa: bool = True
             - error: str (se falhou)
     """
     start_time = time.time()
-    
+
     try:
         # Transform data
         transformed = transform_case_data_for_agent(case_data)
-        
-        visa_type = transformed['visa_type']
-        applicant_data = transformed['applicant_data']
-        
+
+        visa_type = transformed["visa_type"]
+        applicant_data = transformed["applicant_data"]
+
         # Create user request description
-        full_name = applicant_data['personal_info']['full_name']
+        full_name = applicant_data["personal_info"]["full_name"]
         user_request = f"Generate {visa_type} visa package for {full_name}"
-        
+
         # Process with supervisor
         result = supervisor.process_request(user_request, applicant_data)
-        
-        if not result['success']:
+
+        if not result["success"]:
             return {
-                'success': False,
-                'error': result.get('error', 'Unknown error'),
-                'visa_type': visa_type,
-                'processing_time': time.time() - start_time,
+                "success": False,
+                "error": result.get("error", "Unknown error"),
+                "visa_type": visa_type,
+                "processing_time": time.time() - start_time,
             }
-        
+
         # QA Review (optional)
         qa_report = None
         if enable_qa:
-            qa_report = qa_agent.review_package(
-                result['result'],
-                result['validation']
-            )
-        
+            qa_report = qa_agent.review_package(result["result"], result["validation"])
+
         processing_time = time.time() - start_time
-        
+
         # Track metrics
         metrics.track_request(
             visa_type=visa_type,
             success=True,
             processing_time=processing_time,
-            validation_result=result['validation'],
-            qa_score=qa_report['overall_score'] if qa_report else None
+            validation_result=result["validation"],
+            qa_score=qa_report["overall_score"] if qa_report else None,
         )
-        
+
         return {
-            'success': True,
-            'visa_type': visa_type,
-            'package_result': result['result'],
-            'validation': result['validation'],
-            'qa_report': qa_report,
-            'processing_time': processing_time,
+            "success": True,
+            "visa_type": visa_type,
+            "package_result": result["result"],
+            "validation": result["validation"],
+            "qa_report": qa_report,
+            "processing_time": processing_time,
         }
-        
+
     except ValueError as e:
         # Validation or unsupported visa type
         return {
-            'success': False,
-            'error': str(e),
-            'processing_time': time.time() - start_time,
+            "success": False,
+            "error": str(e),
+            "processing_time": time.time() - start_time,
         }
     except Exception as e:
         # Unexpected error
         return {
-            'success': False,
-            'error': f"Unexpected error: {str(e)}",
-            'processing_time': time.time() - start_time,
+            "success": False,
+            "error": f"Unexpected error: {str(e)}",
+            "processing_time": time.time() - start_time,
         }
 
 
 class VisaRequest(BaseModel):
     """Request model para geração de pacote"""
+
     visa_type: str
     user_request: str
     applicant_data: Optional[Dict[str, Any]] = None
@@ -329,6 +329,7 @@ class VisaRequest(BaseModel):
 
 class VisaResponse(BaseModel):
     """Response model"""
+
     success: bool
     visa_type: Optional[str] = None
     package_result: Optional[Dict[str, Any]] = None
@@ -342,7 +343,7 @@ class VisaResponse(BaseModel):
 async def generate_visa_package(request: VisaRequest):
     """
     Gera pacote de visto usando arquitetura multi-agente
-    
+
     Process:
     1. Supervisor analisa requisição
     2. Delega para especialista apropriado
@@ -352,67 +353,53 @@ async def generate_visa_package(request: VisaRequest):
     6. Métricas registradas
     """
     start_time = time.time()
-    
+
     try:
         # Process request
-        result = supervisor.process_request(
-            request.user_request,
-            request.applicant_data or {}
-        )
-        
-        if not result['success']:
+        result = supervisor.process_request(request.user_request, request.applicant_data or {})
+
+        if not result["success"]:
             processing_time = time.time() - start_time
-            
+
             # Track failed request
-            if result.get('visa_type'):
+            if result.get("visa_type"):
                 metrics.track_request(
-                    visa_type=result['visa_type'],
-                    success=False,
-                    processing_time=processing_time
+                    visa_type=result["visa_type"], success=False, processing_time=processing_time
                 )
-            
+
             return VisaResponse(
-                success=False,
-                error=result.get('error'),
-                processing_time=processing_time
+                success=False, error=result.get("error"), processing_time=processing_time
             )
-        
+
         # QA Review (if enabled)
         qa_report = None
         if request.enable_qa:
-            qa_report = qa_agent.review_package(
-                result['result'],
-                result['validation']
-            )
-        
+            qa_report = qa_agent.review_package(result["result"], result["validation"])
+
         processing_time = time.time() - start_time
-        
+
         # Track successful request
         metrics.track_request(
-            visa_type=result['visa_type'],
+            visa_type=result["visa_type"],
             success=True,
             processing_time=processing_time,
-            validation_result=result['validation'],
-            qa_score=qa_report['overall_score'] if qa_report else None
+            validation_result=result["validation"],
+            qa_score=qa_report["overall_score"] if qa_report else None,
         )
-        
+
         return VisaResponse(
             success=True,
-            visa_type=result['visa_type'],
-            package_result=result['result'],
-            validation=result['validation'],
+            visa_type=result["visa_type"],
+            package_result=result["result"],
+            validation=result["validation"],
             qa_report=qa_report,
-            processing_time=processing_time
+            processing_time=processing_time,
         )
-    
+
     except Exception as e:
         processing_time = time.time() - start_time
-        
-        return VisaResponse(
-            success=False,
-            error=str(e),
-            processing_time=processing_time
-        )
+
+        return VisaResponse(success=False, error=str(e), processing_time=processing_time)
 
 
 @router.get("/detect-type")
@@ -422,11 +409,11 @@ async def detect_visa_type(user_input: str):
     """
     try:
         visa_type = supervisor.detect_visa_type(user_input)
-        
+
         return {
-            'success': True,
-            'visa_type': visa_type,
-            'has_specialist': visa_type in supervisor.specialists if visa_type else False
+            "success": True,
+            "visa_type": visa_type,
+            "has_specialist": visa_type in supervisor.specialists if visa_type else False,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -439,18 +426,12 @@ async def get_checklist(visa_type: str):
     """
     try:
         if visa_type not in supervisor.specialists:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Specialist for {visa_type} not found"
-            )
-        
+            raise HTTPException(status_code=404, detail=f"Specialist for {visa_type} not found")
+
         specialist = supervisor.specialists[visa_type]
         checklist = specialist.get_package_checklist()
-        
-        return {
-            'success': True,
-            'checklist': checklist
-        }
+
+        return {"success": True, "checklist": checklist}
     except HTTPException:
         raise
     except Exception as e:
@@ -462,10 +443,7 @@ async def list_specialists():
     """
     Lista todos os especialistas disponíveis
     """
-    return {
-        'success': True,
-        'specialists': list(supervisor.specialists.keys())
-    }
+    return {"success": True, "specialists": list(supervisor.specialists.keys())}
 
 
 @router.get("/metrics")
@@ -475,11 +453,8 @@ async def get_metrics():
     """
     try:
         dashboard_data = metrics.get_dashboard_data()
-        
-        return {
-            'success': True,
-            'metrics': dashboard_data
-        }
+
+        return {"success": True, "metrics": dashboard_data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -490,11 +465,11 @@ async def health_check():
     Health check do sistema multi-agente
     """
     return {
-        'success': True,
-        'supervisor': 'active',
-        'specialists': len(supervisor.specialists),
-        'qa_agent': 'active',
-        'metrics_tracker': 'active'
+        "success": True,
+        "supervisor": "active",
+        "specialists": len(supervisor.specialists),
+        "qa_agent": "active",
+        "metrics_tracker": "active",
     }
 
 
@@ -503,7 +478,7 @@ async def generate_from_case_endpoint(case_data: Dict[str, Any], enable_qa: bool
     """
     Endpoint para gerar pacote a partir dos dados do caso.
     Usado pelo case_finalizer_complete.
-    
+
     Args:
         case_data: Dados completos do caso do MongoDB
         enable_qa: Se deve executar QA review
@@ -512,10 +487,7 @@ async def generate_from_case_endpoint(case_data: Dict[str, Any], enable_qa: bool
         result = generate_package_from_case(case_data, enable_qa)
         return result
     except Exception as e:
-        return {
-            'success': False,
-            'error': str(e)
-        }
+        return {"success": False, "error": str(e)}
 
 
 @router.get("/supported-forms")
@@ -525,24 +497,26 @@ async def get_supported_forms():
     """
     supported = []
     not_supported = []
-    
+
     for form_code, visa_type in FORM_CODE_TO_VISA_TYPE.items():
         status = {
-            'form_code': form_code,
-            'visa_type': visa_type,
-            'has_agent': visa_type in supervisor.specialists,
-            'agent_status': 'active' if visa_type in supervisor.specialists else 'pending_implementation'
+            "form_code": form_code,
+            "visa_type": visa_type,
+            "has_agent": visa_type in supervisor.specialists,
+            "agent_status": (
+                "active" if visa_type in supervisor.specialists else "pending_implementation"
+            ),
         }
-        
-        if status['has_agent']:
+
+        if status["has_agent"]:
             supported.append(status)
         else:
             not_supported.append(status)
-    
+
     return {
-        'success': True,
-        'total_forms': len(FORM_CODE_TO_VISA_TYPE),
-        'supported_count': len(supported),
-        'supported_forms': supported,
-        'not_yet_supported': not_supported
+        "success": True,
+        "total_forms": len(FORM_CODE_TO_VISA_TYPE),
+        "supported_count": len(supported),
+        "supported_forms": supported,
+        "not_yet_supported": not_supported,
     }

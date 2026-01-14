@@ -121,7 +121,12 @@ Responda apenas com o JSON estruturado, sem explicações adicionais.
         if case_id:
             await db.auto_cases.update_one(
                 {"case_id": case_id},
-                {"$set": {"ai_extracted_facts": extracted_facts, "updated_at": datetime.now(timezone.utc)}},
+                {
+                    "$set": {
+                        "ai_extracted_facts": extracted_facts,
+                        "updated_at": datetime.now(timezone.utc),
+                    }
+                },
             )
 
         return {
@@ -432,7 +437,9 @@ async def run_professional_qa_review(case_id: str):
                 f"✅ Case {case_id} APROVADO na revisão QA (score: {qa_report['overall_score']:.1%})"
             )
         else:
-            logger.warning(f"❌ Case {case_id} REJEITADO na revisão QA: {qa_report['approval']['reason']}")
+            logger.warning(
+                f"❌ Case {case_id} REJEITADO na revisão QA: {qa_report['approval']['reason']}"
+            )
 
         return {
             "success": True,
@@ -466,7 +473,9 @@ async def run_qa_cycle_with_feedback(case_id: str, request: dict = None):
         max_iterations = request_data.get("max_iterations", 5)
 
         logger.info(f"🔄 Iniciando ciclo de QA com feedback loop para case {case_id}")
-        logger.info(f"   Max iterações: {max_iterations}, Auto-fix: {request_data.get('auto_fix', True)}")
+        logger.info(
+            f"   Max iterações: {max_iterations}, Auto-fix: {request_data.get('auto_fix', True)}"
+        )
 
         qa_agent = get_qa_agent()
         orchestrator = get_qa_orchestrator(db)

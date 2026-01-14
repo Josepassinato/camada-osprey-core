@@ -52,10 +52,8 @@ async def send_package_email(request: SendPackageEmailRequest):
                 detail="Email service not configured. Please contact support.",
             )
 
-        pdf_filename = (
-            request.package_filename.replace(".zip", "_DETALHADO.pdf").replace(
-                "_F1_COMPLETE_PACKAGE", "_PACOTE_COMPLETO"
-            )
+        pdf_filename = request.package_filename.replace(".zip", "_DETALHADO.pdf").replace(
+            "_F1_COMPLETE_PACKAGE", "_PACOTE_COMPLETO"
         )
         file_path = f"/app/{pdf_filename}"
 
@@ -78,7 +76,9 @@ async def send_package_email(request: SendPackageEmailRequest):
 
         file_base64 = base64.b64encode(file_content).decode("utf-8")
 
-        backend_url = os.environ.get("BACKEND_URL", "https://formfiller-26.preview.emergentagent.com")
+        backend_url = os.environ.get(
+            "BACKEND_URL", "https://formfiller-26.preview.emergentagent.com"
+        )
         download_link = f"{backend_url}/api/download/package/{pdf_filename}"
 
         html_content = f"""
@@ -252,7 +252,12 @@ async def request_package_by_email(case_id: str, request: RequestPackageEmailReq
 
         await db.auto_application_cases.update_one(
             {"case_id": case_id},
-            {"$set": {"basic_data.email": request.user_email, "updated_at": datetime.now(timezone.utc)}},
+            {
+                "$set": {
+                    "basic_data.email": request.user_email,
+                    "updated_at": datetime.now(timezone.utc),
+                }
+            },
         )
 
         user_name = case.get("basic_data", {}).get("full_name", "Usuário")

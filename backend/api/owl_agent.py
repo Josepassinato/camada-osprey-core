@@ -21,6 +21,7 @@ router = APIRouter(prefix="/api")
 
 # ===== OWL AGENT AUTHENTICATION & PERSISTENCE SYSTEM =====
 
+
 @router.post("/owl-agent/auth/register")
 async def register_owl_user(request: dict):
     """Register user for saving progress with email and password"""
@@ -35,7 +36,9 @@ async def register_owl_user(request: dict):
         is_test_email = email.endswith(f"@{test_email_domain}")
 
         if not email or not password or len(password) < 6:
-            raise HTTPException(status_code=400, detail="Email and password (min 6 chars) are required")
+            raise HTTPException(
+                status_code=400, detail="Email and password (min 6 chars) are required"
+            )
 
         existing_user = await db.owl_users.find_one({"email": email})
         if existing_user:
@@ -119,7 +122,10 @@ async def login_owl_user(request: dict):
         )
 
         sessions = await db.owl_sessions.find(
-            {"user_email": email, "status": {"$in": ["active", "paused", "saved_for_later", "in_progress"]}}
+            {
+                "user_email": email,
+                "status": {"$in": ["active", "paused", "saved_for_later", "in_progress"]},
+            }
         ).to_list(length=None)
 
         serialized_sessions = serialize_doc(sessions)
@@ -127,14 +133,20 @@ async def login_owl_user(request: dict):
         response_data = {
             "success": True,
             "message": "Login successful",
-            "user": {"user_id": user["user_id"], "email": user["email"], "name": user.get("name", "")},
+            "user": {
+                "user_id": user["user_id"],
+                "email": user["email"],
+                "name": user.get("name", ""),
+            },
             "saved_sessions": serialized_sessions,
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
         if email_bypass and is_test_email:
             response_data["test_mode"] = True
-            response_data["message"] = "🧪 TEST MODE: Login successful (password verification bypassed)"
+            response_data["message"] = (
+                "🧪 TEST MODE: Login successful (password verification bypassed)"
+            )
 
         return response_data
 
@@ -181,7 +193,10 @@ async def save_session_for_later(request: dict):
 
         await db.owl_users.update_one(
             {"user_id": user["user_id"]},
-            {"$addToSet": {"active_sessions": session_id}, "$set": {"last_activity": datetime.now(timezone.utc)}},
+            {
+                "$addToSet": {"active_sessions": session_id},
+                "$set": {"last_activity": datetime.now(timezone.utc)},
+            },
         )
 
         return {
@@ -210,14 +225,19 @@ async def get_user_sessions(user_email: str):
             raise HTTPException(status_code=404, detail="User not found")
 
         sessions_cursor = db.owl_sessions.find(
-            {"user_email": user_email, "status": {"$in": ["active", "paused", "saved_for_later", "in_progress"]}}
+            {
+                "user_email": user_email,
+                "status": {"$in": ["active", "paused", "saved_for_later", "in_progress"]},
+            }
         ).sort("last_updated", -1)
 
         sessions = await sessions_cursor.to_list(length=None)
         serialized_sessions = serialize_doc(sessions)
 
         for session in serialized_sessions:
-            responses_count = await db.owl_responses.count_documents({"session_id": session["session_id"]})
+            responses_count = await db.owl_responses.count_documents(
+                {"session_id": session["session_id"]}
+            )
             session["progress_percentage"] = min(
                 100, (responses_count / session.get("total_fields", 1)) * 100
             )
@@ -263,7 +283,9 @@ async def resume_saved_session(request: dict):
         if not session_id or not user_email:
             raise HTTPException(status_code=400, detail="session_id and user_email are required")
 
-        session = await db.owl_sessions.find_one({"session_id": session_id, "user_email": user_email})
+        session = await db.owl_sessions.find_one(
+            {"session_id": session_id, "user_email": user_email}
+        )
 
         if not session:
             raise HTTPException(status_code=404, detail="Session not found or access denied")
@@ -301,6 +323,7 @@ async def resume_saved_session(request: dict):
 
 
 # ===== OWL AGENT FINAL PHASE - PAYMENT & DOWNLOAD SYSTEM =====
+
 
 @router.post("/owl-agent/initiate-payment")
 async def initiate_owl_payment(request: dict):
@@ -443,7 +466,10 @@ async def get_owl_payment_status(stripe_session_id: str):
 
         checkout_status = await stripe_checkout.get_checkout_status(stripe_session_id)
 
-        if checkout_status.payment_status == "paid" and payment.get("payment_status") != "completed":
+        if (
+            checkout_status.payment_status == "paid"
+            and payment.get("payment_status") != "completed"
+        ):
             await db.payment_transactions.update_one(
                 {"stripe_session_id": stripe_session_id},
                 {
@@ -471,7 +497,9 @@ async def get_owl_payment_status(stripe_session_id: str):
                 },
             )
 
-        updated_payment = await db.payment_transactions.find_one({"stripe_session_id": stripe_session_id})
+        updated_payment = await db.payment_transactions.find_one(
+            {"stripe_session_id": stripe_session_id}
+        )
         serialized_payment = serialize_doc(updated_payment)
 
         return {
@@ -520,10 +548,17 @@ async def process_owl_delivery(stripe_session_id: str, payment: dict):
 
         await db.payment_transactions.update_one(
             {"stripe_session_id": stripe_session_id},
-            {"$set": {"download_id": download_data["download_id"], "delivery_processed_at": datetime.now(timezone.utc)}},
+            {
+                "$set": {
+                    "download_id": download_data["download_id"],
+                    "delivery_processed_at": datetime.now(timezone.utc),
+                }
+            },
         )
 
-        logger.info(f"Owl delivery processed for session {owl_session_id}, method: {delivery_method}")
+        logger.info(
+            f"Owl delivery processed for session {owl_session_id}, method: {delivery_method}"
+        )
 
     except Exception as e:
         logger.error(f"Error processing owl delivery: {e}")
@@ -551,7 +586,10 @@ async def download_owl_form(download_id: str):
 
         await db.owl_downloads.update_one(
             {"download_id": download_id},
-            {"$inc": {"download_count": 1}, "$set": {"last_downloaded_at": datetime.now(timezone.utc)}},
+            {
+                "$inc": {"download_count": 1},
+                "$set": {"last_downloaded_at": datetime.now(timezone.utc)},
+            },
         )
 
         pdf_bytes = base64.b64decode(pdf_data)
@@ -588,7 +626,9 @@ async def generate_final_uscis_form(owl_session_id: str) -> dict:
 
         form_template = await get_uscis_form_template(session["visa_type"])
 
-        filled_form = await map_responses_to_uscis_form(responses, form_template, session["visa_type"])
+        filled_form = await map_responses_to_uscis_form(
+            responses, form_template, session["visa_type"]
+        )
 
         pdf_data = await generate_final_uscis_pdf(filled_form, session["visa_type"], owl_session_id)
 
@@ -669,9 +709,13 @@ async def generate_final_uscis_pdf(filled_form: dict, visa_type: str, session_id
             y_position -= 15
 
         c.setFont("Helvetica-Bold", 8)
-        c.drawString(50, 50, f"Gerado em: {datetime.now(timezone.utc).strftime('%d/%m/%Y %H:%M:%S')} UTC")
+        c.drawString(
+            50, 50, f"Gerado em: {datetime.now(timezone.utc).strftime('%d/%m/%Y %H:%M:%S')} UTC"
+        )
         c.drawString(50, 35, f"Sessão: {session_id}")
-        c.drawString(50, 20, "AVISO: Seus dados serão DELETADOS do sistema Osprey após este download!")
+        c.drawString(
+            50, 20, "AVISO: Seus dados serão DELETADOS do sistema Osprey após este download!"
+        )
 
         c.save()
         buffer.seek(0)
@@ -710,9 +754,9 @@ async def start_owl_session(request: dict):
             case_id = f"OWL-{int(time_module.time())}-{uuid.uuid4().hex[:8]}"
 
         from agents.owl.agent import IntelligentOwlAgent
-        
+
         intelligent_owl = IntelligentOwlAgent()
-        
+
         session_result = await intelligent_owl.start_guided_session(
             case_id=case_id, visa_type=visa_type, user_language=user_language
         )
@@ -758,9 +802,9 @@ async def get_owl_session(session_id: str):
     """Get current session status and progress"""
     try:
         from agents.owl.agent import IntelligentOwlAgent
-        
+
         intelligent_owl = IntelligentOwlAgent()
-        
+
         session = await db.owl_sessions.find_one({"session_id": session_id}, {"_id": 0})
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
@@ -788,9 +832,9 @@ async def get_field_guidance(
     """Get intelligent guidance for a specific field"""
     try:
         from agents.owl.agent import IntelligentOwlAgent
-        
+
         intelligent_owl = IntelligentOwlAgent()
-        
+
         session = await db.owl_sessions.find_one({"session_id": session_id})
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
@@ -822,9 +866,9 @@ async def validate_field_input(request: dict):
     """Validate user input for a specific field using sistema and Google APIs"""
     try:
         from agents.owl.agent import IntelligentOwlAgent
-        
+
         intelligent_owl = IntelligentOwlAgent()
-        
+
         session_id = request.get("session_id")
         field_id = request.get("field_id")
         user_input = request.get("user_input", "")
@@ -848,7 +892,10 @@ async def validate_field_input(request: dict):
         if validation_result.get("overall_score", 0) >= 70:
             await db.owl_sessions.update_one(
                 {"session_id": session_id},
-                {"$addToSet": {"completed_fields": field_id}, "$set": {"last_updated": datetime.now(timezone.utc)}},
+                {
+                    "$addToSet": {"completed_fields": field_id},
+                    "$set": {"last_updated": datetime.now(timezone.utc)},
+                },
             )
 
         return {
@@ -891,7 +938,12 @@ async def save_field_response(request: dict):
 
         await db.owl_sessions.update_one(
             {"session_id": session_id},
-            {"$set": {"last_updated": datetime.now(timezone.utc), f"responses.{field_id}": user_response}},
+            {
+                "$set": {
+                    "last_updated": datetime.now(timezone.utc),
+                    f"responses.{field_id}": user_response,
+                }
+            },
         )
 
         return {
@@ -976,7 +1028,9 @@ async def download_generated_form(form_id: str):
         return Response(
             content=pdf_bytes,
             media_type="application/pdf",
-            headers={"Content-Disposition": f"attachment; filename=uscis_{form['visa_type']}_{form['case_id']}.pdf"},
+            headers={
+                "Content-Disposition": f"attachment; filename=uscis_{form['visa_type']}_{form['case_id']}.pdf"
+            },
         )
 
     except HTTPException:
@@ -996,17 +1050,41 @@ async def get_uscis_form_template(visa_type: str) -> Dict[str, Any]:
                 "part1_petition_info": ["petition_type", "requested_action", "total_workers"],
                 "part2_petitioner_info": ["company_name", "trade_name", "address", "ein"],
                 "part3_processing_info": ["consulate_processing", "change_of_status"],
-                "part4_beneficiary_info": ["full_name", "date_of_birth", "country_of_birth", "address"],
-                "part5_h_classification": ["h1b_classification", "academic_degree", "specialty_occupation"],
-                "part6_h_specific": ["lca_number", "wage_rate", "employment_start_date", "employment_end_date"],
+                "part4_beneficiary_info": [
+                    "full_name",
+                    "date_of_birth",
+                    "country_of_birth",
+                    "address",
+                ],
+                "part5_h_classification": [
+                    "h1b_classification",
+                    "academic_degree",
+                    "specialty_occupation",
+                ],
+                "part6_h_specific": [
+                    "lca_number",
+                    "wage_rate",
+                    "employment_start_date",
+                    "employment_end_date",
+                ],
             },
         },
         "F-1": {
             "form_number": "I-20",
             "form_title": "Certificate of Eligibility for Nonimmigrant Student Status",
             "sections": {
-                "student_info": ["full_name", "date_of_birth", "country_of_birth", "country_of_citizenship"],
-                "school_info": ["institution_name", "school_code", "program_of_study", "education_level"],
+                "student_info": [
+                    "full_name",
+                    "date_of_birth",
+                    "country_of_birth",
+                    "country_of_citizenship",
+                ],
+                "school_info": [
+                    "institution_name",
+                    "school_code",
+                    "program_of_study",
+                    "education_level",
+                ],
                 "financial_info": ["funding_source", "estimated_expenses", "sponsor_info"],
                 "program_info": ["program_start_date", "program_end_date", "english_proficiency"],
             },
@@ -1017,7 +1095,11 @@ async def get_uscis_form_template(visa_type: str) -> Dict[str, Any]:
             "sections": {
                 "applicant_info": ["full_name", "other_names", "date_of_birth", "country_of_birth"],
                 "current_status": ["current_immigration_status", "i94_number", "entry_date"],
-                "basis_for_application": ["adjustment_category", "priority_date", "petition_receipt"],
+                "basis_for_application": [
+                    "adjustment_category",
+                    "priority_date",
+                    "petition_receipt",
+                ],
                 "background": ["immigration_history", "criminal_history", "medical_exam"],
             },
         },

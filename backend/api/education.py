@@ -29,7 +29,9 @@ router = APIRouter(prefix="/api")
 
 
 @router.get("/education/guides")
-async def get_visa_guides(visa_type: Optional[VisaType] = None, current_user=Depends(get_current_user)):
+async def get_visa_guides(
+    visa_type: Optional[VisaType] = None, current_user=Depends(get_current_user)
+):
     """Get available visa guides."""
     try:
         guides_data = {
@@ -45,7 +47,11 @@ async def get_visa_guides(visa_type: Optional[VisaType] = None, current_user=Dep
                     {"title": "Timeline", "content": "Cronograma típico"},
                     {"title": "Dicas de Sucesso", "content": "Conselhos práticos"},
                 ],
-                "requirements": ["Oferta de emprego", "Graduação superior", "Especialização na área"],
+                "requirements": [
+                    "Oferta de emprego",
+                    "Graduação superior",
+                    "Especialização na área",
+                ],
                 "common_mistakes": ["Documentação incompleta", "Não demonstrar especialização"],
                 "success_tips": ["Prepare documentação detalhada", "Demonstre expertise única"],
             },
@@ -61,9 +67,19 @@ async def get_visa_guides(visa_type: Optional[VisaType] = None, current_user=Dep
                     {"title": "Entrevista Consular", "content": "Preparação para entrevista"},
                     {"title": "Vida nos EUA", "content": "Dicas para estudantes"},
                 ],
-                "requirements": ["Aceitação em escola aprovada", "Recursos financeiros", "Intenção de retorno"],
-                "common_mistakes": ["Demonstrar intenção imigratória", "Recursos financeiros insuficientes"],
-                "success_tips": ["Demonstre laços com país de origem", "Tenha recursos financeiros claros"],
+                "requirements": [
+                    "Aceitação em escola aprovada",
+                    "Recursos financeiros",
+                    "Intenção de retorno",
+                ],
+                "common_mistakes": [
+                    "Demonstrar intenção imigratória",
+                    "Recursos financeiros insuficientes",
+                ],
+                "success_tips": [
+                    "Demonstre laços com país de origem",
+                    "Tenha recursos financeiros claros",
+                ],
             },
             VisaType.family: {
                 "title": "Reunificação Familiar",
@@ -77,8 +93,15 @@ async def get_visa_guides(visa_type: Optional[VisaType] = None, current_user=Dep
                     {"title": "Prioridades", "content": "Sistema de prioridades"},
                     {"title": "Adjustment vs Consular", "content": "Diferentes caminhos"},
                 ],
-                "requirements": ["Relacionamento qualificado", "Documentos comprobatórios", "Sponsor qualificado"],
-                "common_mistakes": ["Documentos familiares inadequados", "Não comprovar relacionamento genuíno"],
+                "requirements": [
+                    "Relacionamento qualificado",
+                    "Documentos comprobatórios",
+                    "Sponsor qualificado",
+                ],
+                "common_mistakes": [
+                    "Documentos familiares inadequados",
+                    "Não comprovar relacionamento genuíno",
+                ],
                 "success_tips": ["Documente bem o relacionamento", "Mantenha registros detalhados"],
             },
         }
@@ -125,7 +148,9 @@ async def complete_guide(visa_type: VisaType, current_user=Depends(get_current_u
 
 
 @router.post("/education/interview/start")
-async def start_interview_simulation(request: InterviewStart, current_user=Depends(get_current_user)):
+async def start_interview_simulation(
+    request: InterviewStart, current_user=Depends(get_current_user)
+):
     """Start a new interview simulation."""
     try:
         questions = await generate_interview_questions(
@@ -156,18 +181,26 @@ async def start_interview_simulation(request: InterviewStart, current_user=Depen
 
 
 @router.post("/education/interview/{session_id}/answer")
-async def submit_interview_answer(session_id: str, answer_data: InterviewAnswer, current_user=Depends(get_current_user)):
+async def submit_interview_answer(
+    session_id: str, answer_data: InterviewAnswer, current_user=Depends(get_current_user)
+):
     """Submit an answer to interview question."""
     try:
-        session = await db.interview_sessions.find_one({"id": session_id, "user_id": current_user["id"]})
+        session = await db.interview_sessions.find_one(
+            {"id": session_id, "user_id": current_user["id"]}
+        )
         if not session:
             raise HTTPException(status_code=404, detail="Interview session not found")
 
-        question = next((q for q in session["questions"] if q["id"] == answer_data.question_id), None)
+        question = next(
+            (q for q in session["questions"] if q["id"] == answer_data.question_id), None
+        )
         if not question:
             raise HTTPException(status_code=404, detail="Question not found")
 
-        feedback = await evaluate_interview_answer(question, answer_data.answer, VisaType(session["visa_type"]))
+        feedback = await evaluate_interview_answer(
+            question, answer_data.answer, VisaType(session["visa_type"])
+        )
 
         answer_record = {
             "question_id": answer_data.question_id,
@@ -178,7 +211,10 @@ async def submit_interview_answer(session_id: str, answer_data: InterviewAnswer,
 
         await db.interview_sessions.update_one(
             {"id": session_id},
-            {"$push": {"answers": answer_record}, "$set": {"updated_at": datetime.now(timezone.utc)}},
+            {
+                "$push": {"answers": answer_record},
+                "$set": {"updated_at": datetime.now(timezone.utc)},
+            },
         )
 
         return {"feedback": feedback, "next_question_index": len(session.get("answers", [])) + 1}
@@ -194,7 +230,9 @@ async def submit_interview_answer(session_id: str, answer_data: InterviewAnswer,
 async def complete_interview_session(session_id: str, current_user=Depends(get_current_user)):
     """Complete interview session and get final feedback."""
     try:
-        session = await db.interview_sessions.find_one({"id": session_id, "user_id": current_user["id"]})
+        session = await db.interview_sessions.find_one(
+            {"id": session_id, "user_id": current_user["id"]}
+        )
         if not session:
             raise HTTPException(status_code=404, detail="Interview session not found")
 
@@ -254,17 +292,24 @@ async def complete_interview_session(session_id: str, current_user=Depends(get_c
 async def get_personalized_tips(current_user=Depends(get_current_user)):
     """Get personalized tips for user."""
     try:
-        existing_tips = await db.personalized_tips.find(
-            {"user_id": current_user["id"]}, {"_id": 0}
-        ).sort("created_at", -1).limit(10).to_list(10)
+        existing_tips = (
+            await db.personalized_tips.find({"user_id": current_user["id"]}, {"_id": 0})
+            .sort("created_at", -1)
+            .limit(10)
+            .to_list(10)
+        )
 
         if not existing_tips:
-            applications = await db.applications.find({"user_id": current_user["id"]}, {"_id": 0}).to_list(100)
+            applications = await db.applications.find(
+                {"user_id": current_user["id"]}, {"_id": 0}
+            ).to_list(100)
             documents = await db.documents.find(
                 {"user_id": current_user["id"]}, {"_id": 0, "content_base64": 0}
             ).to_list(100)
 
-            tips = await generate_personalized_tips(current_user["id"], current_user, applications, documents)
+            tips = await generate_personalized_tips(
+                current_user["id"], current_user, applications, documents
+            )
 
             for tip in tips:
                 await db.personalized_tips.insert_one(tip.dict())
@@ -282,7 +327,9 @@ async def get_personalized_tips(current_user=Depends(get_current_user)):
 async def mark_tip_as_read(tip_id: str, current_user=Depends(get_current_user)):
     """Mark a tip as read."""
     try:
-        await db.personalized_tips.update_one({"id": tip_id, "user_id": current_user["id"]}, {"$set": {"is_read": True}})
+        await db.personalized_tips.update_one(
+            {"id": tip_id, "user_id": current_user["id"]}, {"$set": {"is_read": True}}
+        )
         return {"message": "Tip marked as read"}
 
     except Exception as e:

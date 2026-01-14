@@ -18,14 +18,14 @@ from .payment_packages import (
 
 __all__ = [
     # Generator
-    'USCISPackageGenerator',
-    'generate_final_package',
+    "USCISPackageGenerator",
+    "generate_final_package",
     # Payment packages
-    'VISA_PACKAGES',
-    'get_visa_price',
-    'get_visa_package',
-    'get_all_packages',
-    'get_packages_by_category',
-    'validate_visa_code',
-    'calculate_final_price'
+    "VISA_PACKAGES",
+    "get_visa_price",
+    "get_visa_package",
+    "get_all_packages",
+    "get_packages_by_category",
+    "validate_visa_code",
+    "calculate_final_price",
 ]

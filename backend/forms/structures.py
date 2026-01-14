@@ -17,7 +17,7 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
     """
     Estrutura completa do formulário amigável para I-539
     (Application to Extend/Change Nonimmigrant Status)
-    
+
     Baseado no formulário oficial I-539 da USCIS
     """
     return {
@@ -37,7 +37,7 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "placeholder": "João Silva Santos",
                         "validation": "min:3",
                         "official_mapping": "Pt1Line1a_FamilyName, Pt1Line1b_GivenName",
-                        "help_text": "Digite seu nome exatamente como aparece no passaporte"
+                        "help_text": "Digite seu nome exatamente como aparece no passaporte",
                     },
                     {
                         "id": "data_nascimento",
@@ -47,7 +47,7 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "placeholder": "1990-05-15",
                         "validation": "date|past",
                         "official_mapping": "Pt1Line3a_DateOfBirth",
-                        "help_text": "Formato: YYYY-MM-DD"
+                        "help_text": "Formato: YYYY-MM-DD",
                     },
                     {
                         "id": "pais_nascimento",
@@ -55,7 +55,7 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "type": "country",
                         "required": True,
                         "placeholder": "Brazil",
-                        "official_mapping": "Pt1Line4_CountryOfBirth"
+                        "official_mapping": "Pt1Line4_CountryOfBirth",
                     },
                     {
                         "id": "pais_cidadania",
@@ -63,7 +63,7 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "type": "country",
                         "required": True,
                         "placeholder": "Brazil",
-                        "official_mapping": "Pt1Line5_CountryOfCitizenship"
+                        "official_mapping": "Pt1Line5_CountryOfCitizenship",
                     },
                     {
                         "id": "sexo",
@@ -71,9 +71,9 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": True,
                         "options": ["Masculino", "Feminino"],
-                        "official_mapping": "Pt1Line6_Gender"
-                    }
-                ]
+                        "official_mapping": "Pt1Line6_Gender",
+                    },
+                ],
             },
             {
                 "id": "documentos_viagem",
@@ -87,14 +87,14 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "required": True,
                         "placeholder": "BR123456789",
                         "validation": "min:5|alphanumeric",
-                        "official_mapping": "Pt1Line6_PassportNumber"
+                        "official_mapping": "Pt1Line6_PassportNumber",
                     },
                     {
                         "id": "pais_emissao_passaporte",
                         "label": "País de Emissão do Passaporte",
                         "type": "country",
                         "required": True,
-                        "official_mapping": "Pt1Line7_PassportCountryOfIssuance"
+                        "official_mapping": "Pt1Line7_PassportCountryOfIssuance",
                     },
                     {
                         "id": "data_expiracao_passaporte",
@@ -102,7 +102,7 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "type": "date",
                         "required": True,
                         "validation": "date|future",
-                        "official_mapping": "Pt1Line8_PassportExpirationDate"
+                        "official_mapping": "Pt1Line8_PassportExpirationDate",
                     },
                     {
                         "id": "numero_i94",
@@ -112,7 +112,7 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "placeholder": "1234567890",
                         "validation": "numeric|length:11",
                         "official_mapping": "Pt1Line9_I94Number",
-                        "help_text": "Encontre em: https://i94.cbp.dhs.gov/"
+                        "help_text": "Encontre em: https://i94.cbp.dhs.gov/",
                     },
                     {
                         "id": "data_ultima_entrada",
@@ -120,7 +120,7 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "type": "date",
                         "required": True,
                         "validation": "date|past",
-                        "official_mapping": "Pt1Line10_DateOfLastEntry"
+                        "official_mapping": "Pt1Line10_DateOfLastEntry",
                     },
                     {
                         "id": "local_entrada",
@@ -128,9 +128,9 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "type": "text",
                         "required": True,
                         "placeholder": "JFK Airport, New York",
-                        "official_mapping": "Pt1Line11_PlaceOfLastEntry"
-                    }
-                ]
+                        "official_mapping": "Pt1Line11_PlaceOfLastEntry",
+                    },
+                ],
             },
             {
                 "id": "status_imigratorio",
@@ -142,8 +142,24 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "label": "Status Atual de Não-Imigrante",
                         "type": "select",
                         "required": True,
-                        "options": ["F-1", "F-2", "M-1", "M-2", "J-1", "J-2", "B-1", "B-2", "H-1B", "H-4", "L-1", "L-2", "O-1", "O-3", "Other"],
-                        "official_mapping": "Pt2Line1_CurrentNonimmigrantStatus"
+                        "options": [
+                            "F-1",
+                            "F-2",
+                            "M-1",
+                            "M-2",
+                            "J-1",
+                            "J-2",
+                            "B-1",
+                            "B-2",
+                            "H-1B",
+                            "H-4",
+                            "L-1",
+                            "L-2",
+                            "O-1",
+                            "O-3",
+                            "Other",
+                        ],
+                        "official_mapping": "Pt2Line1_CurrentNonimmigrantStatus",
                     },
                     {
                         "id": "data_expiracao_status",
@@ -152,27 +168,40 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "required": True,
                         "validation": "date",
                         "official_mapping": "Pt2Line2_ExpirationOfAuthorizedStay",
-                        "help_text": "Data que aparece no seu I-94"
+                        "help_text": "Data que aparece no seu I-94",
                     },
                     {
                         "id": "tipo_pedido",
                         "label": "O que você está solicitando?",
                         "type": "select",
                         "required": True,
-                        "options": [
-                            "Extensão do mesmo status",
-                            "Mudança para outro status"
-                        ],
-                        "official_mapping": "Pt2_ApplicationType"
+                        "options": ["Extensão do mesmo status", "Mudança para outro status"],
+                        "official_mapping": "Pt2_ApplicationType",
                     },
                     {
                         "id": "status_solicitado",
                         "label": "Status Solicitado (se mudança)",
                         "type": "select",
                         "required": False,
-                        "options": ["F-1", "F-2", "M-1", "M-2", "J-1", "J-2", "B-1", "B-2", "H-1B", "H-4", "L-1", "L-2", "O-1", "O-3", "Other"],
+                        "options": [
+                            "F-1",
+                            "F-2",
+                            "M-1",
+                            "M-2",
+                            "J-1",
+                            "J-2",
+                            "B-1",
+                            "B-2",
+                            "H-1B",
+                            "H-4",
+                            "L-1",
+                            "L-2",
+                            "O-1",
+                            "O-3",
+                            "Other",
+                        ],
                         "official_mapping": "Pt2Line3_RequestedNonimmigrantStatus",
-                        "conditional": "tipo_pedido == 'Mudança para outro status'"
+                        "conditional": "tipo_pedido == 'Mudança para outro status'",
                     },
                     {
                         "id": "numero_sevis",
@@ -182,9 +211,9 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "placeholder": "N0123456789",
                         "validation": "alphanumeric",
                         "official_mapping": "Pt2Line4_SEVISNumber",
-                        "conditional": "status_atual in ['F-1', 'F-2', 'M-1', 'M-2', 'J-1', 'J-2'] or status_solicitado in ['F-1', 'F-2', 'M-1', 'M-2', 'J-1', 'J-2']"
-                    }
-                ]
+                        "conditional": "status_atual in ['F-1', 'F-2', 'M-1', 'M-2', 'J-1', 'J-2'] or status_solicitado in ['F-1', 'F-2', 'M-1', 'M-2', 'J-1', 'J-2']",
+                    },
+                ],
             },
             {
                 "id": "endereco_contato",
@@ -198,7 +227,7 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "required": True,
                         "placeholder": "123 Main Street, Apt 4B",
                         "validation": "min:10",
-                        "official_mapping": "Pt1Line7a_StreetNumberName"
+                        "official_mapping": "Pt1Line7a_StreetNumberName",
                     },
                     {
                         "id": "cidade",
@@ -206,15 +235,66 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "type": "text",
                         "required": True,
                         "placeholder": "New York",
-                        "official_mapping": "Pt1Line7c_CityOrTown"
+                        "official_mapping": "Pt1Line7c_CityOrTown",
                     },
                     {
                         "id": "estado",
                         "label": "Estado",
                         "type": "select",
                         "required": True,
-                        "options": ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"],
-                        "official_mapping": "Pt1Line7d_State"
+                        "options": [
+                            "AL",
+                            "AK",
+                            "AZ",
+                            "AR",
+                            "CA",
+                            "CO",
+                            "CT",
+                            "DE",
+                            "FL",
+                            "GA",
+                            "HI",
+                            "ID",
+                            "IL",
+                            "IN",
+                            "IA",
+                            "KS",
+                            "KY",
+                            "LA",
+                            "ME",
+                            "MD",
+                            "MA",
+                            "MI",
+                            "MN",
+                            "MS",
+                            "MO",
+                            "MT",
+                            "NE",
+                            "NV",
+                            "NH",
+                            "NJ",
+                            "NM",
+                            "NY",
+                            "NC",
+                            "ND",
+                            "OH",
+                            "OK",
+                            "OR",
+                            "PA",
+                            "RI",
+                            "SC",
+                            "SD",
+                            "TN",
+                            "TX",
+                            "UT",
+                            "VT",
+                            "VA",
+                            "WA",
+                            "WV",
+                            "WI",
+                            "WY",
+                        ],
+                        "official_mapping": "Pt1Line7d_State",
                     },
                     {
                         "id": "cep",
@@ -223,7 +303,7 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "required": True,
                         "placeholder": "10001",
                         "validation": "numeric|length:5",
-                        "official_mapping": "Pt1Line7e_ZipCode"
+                        "official_mapping": "Pt1Line7e_ZipCode",
                     },
                     {
                         "id": "telefone",
@@ -232,7 +312,7 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "required": True,
                         "placeholder": "+1 (555) 123-4567",
                         "validation": "phone",
-                        "official_mapping": "Pt1Line9_DaytimeTelephone"
+                        "official_mapping": "Pt1Line9_DaytimeTelephone",
                     },
                     {
                         "id": "email",
@@ -241,9 +321,9 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "required": True,
                         "placeholder": "seu.email@example.com",
                         "validation": "email",
-                        "official_mapping": "Pt1Line8_Email"
-                    }
-                ]
+                        "official_mapping": "Pt1Line8_Email",
+                    },
+                ],
             },
             {
                 "id": "informacoes_adicionais",
@@ -258,7 +338,7 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "placeholder": "Descreva por que você precisa estender ou mudar seu status...",
                         "validation": "min:100",
                         "official_mapping": "Pt4_AdditionalInformation",
-                        "help_text": "Seja específico e detalhado. Mínimo 100 caracteres."
+                        "help_text": "Seja específico e detalhado. Mínimo 100 caracteres.",
                     },
                     {
                         "id": "data_desejada_permanencia",
@@ -266,13 +346,13 @@ def get_i539_friendly_form_structure() -> Dict[str, Any]:
                         "type": "date",
                         "required": True,
                         "validation": "date|future",
-                        "official_mapping": "Pt2Line5_DateOfIntendedDeparture"
-                    }
-                ]
-            }
+                        "official_mapping": "Pt2Line5_DateOfIntendedDeparture",
+                    },
+                ],
+            },
         ],
         "total_fields": 27,
-        "estimated_time": "20-30 minutos"
+        "estimated_time": "20-30 minutos",
     }
 
 
@@ -280,7 +360,7 @@ def get_i589_friendly_form_structure() -> Dict[str, Any]:
     """
     Estrutura completa do formulário amigável para I-589
     (Application for Asylum and for Withholding of Removal)
-    
+
     Baseado no formulário oficial I-589 da USCIS
     """
     return {
@@ -297,7 +377,7 @@ def get_i589_friendly_form_structure() -> Dict[str, Any]:
                         "label": "Nome Completo",
                         "type": "text",
                         "required": True,
-                        "official_mapping": "PartA_FamilyName, PartA_FirstName, PartA_MiddleName"
+                        "official_mapping": "PartA_FamilyName, PartA_FirstName, PartA_MiddleName",
                     },
                     {
                         "id": "data_nascimento",
@@ -305,35 +385,35 @@ def get_i589_friendly_form_structure() -> Dict[str, Any]:
                         "type": "date",
                         "required": True,
                         "validation": "date|past",
-                        "official_mapping": "PartA_DateOfBirth"
+                        "official_mapping": "PartA_DateOfBirth",
                     },
                     {
                         "id": "pais_nascimento",
                         "label": "País de Nascimento",
                         "type": "country",
                         "required": True,
-                        "official_mapping": "PartA_CountryOfBirth"
+                        "official_mapping": "PartA_CountryOfBirth",
                     },
                     {
                         "id": "nacionalidade",
                         "label": "Nacionalidade Atual",
                         "type": "country",
                         "required": True,
-                        "official_mapping": "PartA_Nationality"
+                        "official_mapping": "PartA_Nationality",
                     },
                     {
                         "id": "raca_etnia_tribo",
                         "label": "Raça, Grupo Étnico ou Tribo",
                         "type": "text",
                         "required": False,
-                        "official_mapping": "PartA_Race_Ethnic_TribalGroup"
+                        "official_mapping": "PartA_Race_Ethnic_TribalGroup",
                     },
                     {
                         "id": "religiao",
                         "label": "Religião",
                         "type": "text",
                         "required": False,
-                        "official_mapping": "PartA_Religion"
+                        "official_mapping": "PartA_Religion",
                     },
                     {
                         "id": "sexo",
@@ -341,7 +421,7 @@ def get_i589_friendly_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": True,
                         "options": ["Masculino", "Feminino"],
-                        "official_mapping": "PartA_Sex"
+                        "official_mapping": "PartA_Sex",
                     },
                     {
                         "id": "estado_civil",
@@ -349,9 +429,9 @@ def get_i589_friendly_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": True,
                         "options": ["Solteiro(a)", "Casado(a)", "Divorciado(a)", "Viúvo(a)"],
-                        "official_mapping": "PartA_MaritalStatus"
-                    }
-                ]
+                        "official_mapping": "PartA_MaritalStatus",
+                    },
+                ],
             },
             {
                 "id": "documentos_viagem",
@@ -363,7 +443,7 @@ def get_i589_friendly_form_structure() -> Dict[str, Any]:
                         "type": "text",
                         "required": True,
                         "validation": "min:5",
-                        "official_mapping": "PartA_PassportNumber"
+                        "official_mapping": "PartA_PassportNumber",
                     },
                     {
                         "id": "numero_i94",
@@ -371,7 +451,7 @@ def get_i589_friendly_form_structure() -> Dict[str, Any]:
                         "type": "text",
                         "required": True,
                         "validation": "numeric",
-                        "official_mapping": "PartA_I94Number"
+                        "official_mapping": "PartA_I94Number",
                     },
                     {
                         "id": "data_chegada_eua",
@@ -379,14 +459,14 @@ def get_i589_friendly_form_structure() -> Dict[str, Any]:
                         "type": "date",
                         "required": True,
                         "validation": "date|past",
-                        "official_mapping": "PartA_DateOfArrival"
+                        "official_mapping": "PartA_DateOfArrival",
                     },
                     {
                         "id": "local_chegada",
                         "label": "Local de Chegada nos EUA",
                         "type": "text",
                         "required": True,
-                        "official_mapping": "PartA_PlaceOfArrival"
+                        "official_mapping": "PartA_PlaceOfArrival",
                     },
                     {
                         "id": "status_entrada",
@@ -394,9 +474,9 @@ def get_i589_friendly_form_structure() -> Dict[str, Any]:
                         "type": "text",
                         "required": True,
                         "placeholder": "B-2, F-1, etc.",
-                        "official_mapping": "PartA_StatusAtEntry"
-                    }
-                ]
+                        "official_mapping": "PartA_StatusAtEntry",
+                    },
+                ],
             },
             {
                 "id": "endereco_atual",
@@ -408,22 +488,73 @@ def get_i589_friendly_form_structure() -> Dict[str, Any]:
                         "type": "text",
                         "required": True,
                         "validation": "min:10",
-                        "official_mapping": "PartA_CurrentAddress"
+                        "official_mapping": "PartA_CurrentAddress",
                     },
                     {
                         "id": "cidade",
                         "label": "Cidade",
                         "type": "text",
                         "required": True,
-                        "official_mapping": "PartA_City"
+                        "official_mapping": "PartA_City",
                     },
                     {
                         "id": "estado",
                         "label": "Estado",
                         "type": "select",
                         "required": True,
-                        "options": ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"],
-                        "official_mapping": "PartA_State"
+                        "options": [
+                            "AL",
+                            "AK",
+                            "AZ",
+                            "AR",
+                            "CA",
+                            "CO",
+                            "CT",
+                            "DE",
+                            "FL",
+                            "GA",
+                            "HI",
+                            "ID",
+                            "IL",
+                            "IN",
+                            "IA",
+                            "KS",
+                            "KY",
+                            "LA",
+                            "ME",
+                            "MD",
+                            "MA",
+                            "MI",
+                            "MN",
+                            "MS",
+                            "MO",
+                            "MT",
+                            "NE",
+                            "NV",
+                            "NH",
+                            "NJ",
+                            "NM",
+                            "NY",
+                            "NC",
+                            "ND",
+                            "OH",
+                            "OK",
+                            "OR",
+                            "PA",
+                            "RI",
+                            "SC",
+                            "SD",
+                            "TN",
+                            "TX",
+                            "UT",
+                            "VT",
+                            "VA",
+                            "WA",
+                            "WV",
+                            "WI",
+                            "WY",
+                        ],
+                        "official_mapping": "PartA_State",
                     },
                     {
                         "id": "cep",
@@ -431,14 +562,14 @@ def get_i589_friendly_form_structure() -> Dict[str, Any]:
                         "type": "text",
                         "required": True,
                         "validation": "numeric|length:5",
-                        "official_mapping": "PartA_ZipCode"
+                        "official_mapping": "PartA_ZipCode",
                     },
                     {
                         "id": "telefone",
                         "label": "Telefone",
                         "type": "tel",
                         "required": True,
-                        "official_mapping": "PartA_Telephone"
+                        "official_mapping": "PartA_Telephone",
                     },
                     {
                         "id": "email",
@@ -446,9 +577,9 @@ def get_i589_friendly_form_structure() -> Dict[str, Any]:
                         "type": "email",
                         "required": True,
                         "validation": "email",
-                        "official_mapping": "PartA_Email"
-                    }
-                ]
+                        "official_mapping": "PartA_Email",
+                    },
+                ],
             },
             {
                 "id": "motivo_asilo",
@@ -465,9 +596,9 @@ def get_i589_friendly_form_structure() -> Dict[str, Any]:
                             "Religião",
                             "Nacionalidade",
                             "Opinião Política",
-                            "Pertencimento a Grupo Social Particular"
+                            "Pertencimento a Grupo Social Particular",
                         ],
-                        "official_mapping": "PartB_FearBasis"
+                        "official_mapping": "PartB_FearBasis",
                     },
                     {
                         "id": "historia_perseguicao",
@@ -477,7 +608,7 @@ def get_i589_friendly_form_structure() -> Dict[str, Any]:
                         "placeholder": "Descreva os eventos específicos, quando ocorreram, quem te perseguiu, por que...",
                         "validation": "min:500",
                         "official_mapping": "PartB_DetailedExplanation",
-                        "help_text": "Seja o mais detalhado possível. Mínimo 500 caracteres."
+                        "help_text": "Seja o mais detalhado possível. Mínimo 500 caracteres.",
                     },
                     {
                         "id": "retornar_seguro",
@@ -485,14 +616,14 @@ def get_i589_friendly_form_structure() -> Dict[str, Any]:
                         "type": "textarea",
                         "required": True,
                         "validation": "min:200",
-                        "official_mapping": "PartB_WhyCannotReturn"
-                    }
-                ]
-            }
+                        "official_mapping": "PartB_WhyCannotReturn",
+                    },
+                ],
+            },
         ],
         "total_fields": 28,
         "estimated_time": "45-60 minutos",
-        "warning": "Este formulário é mais complexo e requer documentação extensa."
+        "warning": "Este formulário é mais complexo e requer documentação extensa.",
     }
 
 
@@ -500,7 +631,7 @@ def get_eb1a_friendly_form_structure() -> Dict[str, Any]:
     """
     Estrutura completa do formulário amigável para EB-1A
     (Employment-Based First Preference - Extraordinary Ability)
-    
+
     Baseado no formulário oficial I-140 da USCIS
     """
     return {
@@ -516,7 +647,7 @@ def get_eb1a_friendly_form_structure() -> Dict[str, Any]:
                         "label": "Nome Completo",
                         "type": "text",
                         "required": True,
-                        "official_mapping": "Pt1_FamilyName, Pt1_GivenName"
+                        "official_mapping": "Pt1_FamilyName, Pt1_GivenName",
                     },
                     {
                         "id": "data_nascimento",
@@ -524,21 +655,21 @@ def get_eb1a_friendly_form_structure() -> Dict[str, Any]:
                         "type": "date",
                         "required": True,
                         "validation": "date|past",
-                        "official_mapping": "Pt1_DateOfBirth"
+                        "official_mapping": "Pt1_DateOfBirth",
                     },
                     {
                         "id": "pais_nascimento",
                         "label": "País de Nascimento",
                         "type": "country",
                         "required": True,
-                        "official_mapping": "Pt1_CountryOfBirth"
+                        "official_mapping": "Pt1_CountryOfBirth",
                     },
                     {
                         "id": "numero_passaporte",
                         "label": "Número do Passaporte",
                         "type": "text",
                         "required": True,
-                        "official_mapping": "Pt1_PassportNumber"
+                        "official_mapping": "Pt1_PassportNumber",
                     },
                     {
                         "id": "email",
@@ -546,9 +677,9 @@ def get_eb1a_friendly_form_structure() -> Dict[str, Any]:
                         "type": "email",
                         "required": True,
                         "validation": "email",
-                        "official_mapping": "Pt1_Email"
-                    }
-                ]
+                        "official_mapping": "Pt1_Email",
+                    },
+                ],
             },
             {
                 "id": "area_expertise",
@@ -559,14 +690,8 @@ def get_eb1a_friendly_form_structure() -> Dict[str, Any]:
                         "label": "Campo de Atuação",
                         "type": "select",
                         "required": True,
-                        "options": [
-                            "Ciências",
-                            "Artes",
-                            "Educação",
-                            "Negócios",
-                            "Atletismo"
-                        ],
-                        "official_mapping": "Pt2_FieldOfExtraordinaryAbility"
+                        "options": ["Ciências", "Artes", "Educação", "Negócios", "Atletismo"],
+                        "official_mapping": "Pt2_FieldOfExtraordinaryAbility",
                     },
                     {
                         "id": "descricao_expertise",
@@ -575,9 +700,9 @@ def get_eb1a_friendly_form_structure() -> Dict[str, Any]:
                         "required": True,
                         "placeholder": "Ex: Inteligência Artificial e Machine Learning...",
                         "validation": "min:100",
-                        "official_mapping": "Pt2_SpecificArea"
-                    }
-                ]
+                        "official_mapping": "Pt2_SpecificArea",
+                    },
+                ],
             },
             {
                 "id": "criterios_uscis",
@@ -590,7 +715,7 @@ def get_eb1a_friendly_form_structure() -> Dict[str, Any]:
                         "type": "textarea",
                         "required": False,
                         "placeholder": "Liste prêmios recebidos com datas e descrições...",
-                        "official_mapping": "Pt3_Criterion1_Awards"
+                        "official_mapping": "Pt3_Criterion1_Awards",
                     },
                     {
                         "id": "associacoes_memberships",
@@ -598,7 +723,7 @@ def get_eb1a_friendly_form_structure() -> Dict[str, Any]:
                         "type": "textarea",
                         "required": False,
                         "placeholder": "Liste associações profissionais de elite...",
-                        "official_mapping": "Pt3_Criterion2_Membership"
+                        "official_mapping": "Pt3_Criterion2_Membership",
                     },
                     {
                         "id": "publicacoes_midia",
@@ -606,7 +731,7 @@ def get_eb1a_friendly_form_structure() -> Dict[str, Any]:
                         "type": "textarea",
                         "required": False,
                         "placeholder": "Liste publicações, artigos, entrevistas...",
-                        "official_mapping": "Pt3_Criterion3_PublishedMaterial"
+                        "official_mapping": "Pt3_Criterion3_PublishedMaterial",
                     },
                     {
                         "id": "juiz_trabalhos",
@@ -614,7 +739,7 @@ def get_eb1a_friendly_form_structure() -> Dict[str, Any]:
                         "type": "textarea",
                         "required": False,
                         "placeholder": "Descreva experiências como revisor, avaliador...",
-                        "official_mapping": "Pt3_Criterion4_Judging"
+                        "official_mapping": "Pt3_Criterion4_Judging",
                     },
                     {
                         "id": "contribuicoes_originais",
@@ -623,7 +748,7 @@ def get_eb1a_friendly_form_structure() -> Dict[str, Any]:
                         "required": False,
                         "placeholder": "Descreva pesquisas, inovações, descobertas...",
                         "validation": "min:200",
-                        "official_mapping": "Pt3_Criterion5_OriginalContributions"
+                        "official_mapping": "Pt3_Criterion5_OriginalContributions",
                     },
                     {
                         "id": "publicacoes_academicas",
@@ -631,7 +756,7 @@ def get_eb1a_friendly_form_structure() -> Dict[str, Any]:
                         "type": "textarea",
                         "required": False,
                         "placeholder": "Liste publicações científicas com citações...",
-                        "official_mapping": "Pt3_Criterion6_ScholarlyArticles"
+                        "official_mapping": "Pt3_Criterion6_ScholarlyArticles",
                     },
                     {
                         "id": "exibicoes_artisticas",
@@ -639,7 +764,7 @@ def get_eb1a_friendly_form_structure() -> Dict[str, Any]:
                         "type": "textarea",
                         "required": False,
                         "placeholder": "Para artistas: liste exposições, performances...",
-                        "official_mapping": "Pt3_Criterion7_ArtisticExhibitions"
+                        "official_mapping": "Pt3_Criterion7_ArtisticExhibitions",
                     },
                     {
                         "id": "papel_critico",
@@ -647,7 +772,7 @@ def get_eb1a_friendly_form_structure() -> Dict[str, Any]:
                         "type": "textarea",
                         "required": False,
                         "placeholder": "Descreva posições de liderança...",
-                        "official_mapping": "Pt3_Criterion8_CriticalRole"
+                        "official_mapping": "Pt3_Criterion8_CriticalRole",
                     },
                     {
                         "id": "salario_alto",
@@ -655,7 +780,7 @@ def get_eb1a_friendly_form_structure() -> Dict[str, Any]:
                         "type": "textarea",
                         "required": False,
                         "placeholder": "Forneça evidências de remuneração alta...",
-                        "official_mapping": "Pt3_Criterion9_HighSalary"
+                        "official_mapping": "Pt3_Criterion9_HighSalary",
                     },
                     {
                         "id": "sucesso_comercial",
@@ -663,9 +788,9 @@ def get_eb1a_friendly_form_structure() -> Dict[str, Any]:
                         "type": "textarea",
                         "required": False,
                         "placeholder": "Para artistas: vendas de discos, bilheteria...",
-                        "official_mapping": "Pt3_Criterion10_CommercialSuccess"
-                    }
-                ]
+                        "official_mapping": "Pt3_Criterion10_CommercialSuccess",
+                    },
+                ],
             },
             {
                 "id": "plano_futuro",
@@ -678,14 +803,14 @@ def get_eb1a_friendly_form_structure() -> Dict[str, Any]:
                         "required": True,
                         "placeholder": "Descreva planos de pesquisa, emprego, projetos...",
                         "validation": "min:200",
-                        "official_mapping": "Pt4_IntentionToContinue"
+                        "official_mapping": "Pt4_IntentionToContinue",
                     }
-                ]
-            }
+                ],
+            },
         ],
         "total_fields": 20,
         "estimated_time": "60-90 minutos",
-        "warning": "EB-1A requer documentação extensa. Você deve demonstrar pelo menos 3 dos 10 critérios com evidências sólidas."
+        "warning": "EB-1A requer documentação extensa. Você deve demonstrar pelo menos 3 dos 10 critérios com evidências sólidas.",
     }
 
 
@@ -696,11 +821,13 @@ def get_f1_friendly_form_structure() -> Dict[str, Any]:
     Inclui validações jurídicas conforme diretrizes de advogados de imigração
     """
     base_structure = get_i539_friendly_form_structure()
-    
+
     # Add F-1 specific fields
     base_structure["form_name"] = "Extensão de Visto de Estudante (F-1)"
-    base_structure["warning"] = "Para estudantes F-1, você também precisará do Form I-20 atualizado da sua escola."
-    
+    base_structure["warning"] = (
+        "Para estudantes F-1, você também precisará do Form I-20 atualizado da sua escola."
+    )
+
     # Add student-specific section with legal validation fields
     student_section = {
         "id": "informacoes_estudante",
@@ -713,7 +840,7 @@ def get_f1_friendly_form_structure() -> Dict[str, Any]:
                 "type": "text",
                 "required": True,
                 "placeholder": "Harvard University",
-                "official_mapping": "Pt3_SchoolName"
+                "official_mapping": "Pt3_SchoolName",
             },
             {
                 "id": "programa_estudo",
@@ -721,7 +848,7 @@ def get_f1_friendly_form_structure() -> Dict[str, Any]:
                 "type": "text",
                 "required": True,
                 "placeholder": "Bachelor of Science in Computer Science",
-                "official_mapping": "Pt3_ProgramOfStudy"
+                "official_mapping": "Pt3_ProgramOfStudy",
             },
             {
                 "id": "data_conclusao_esperada",
@@ -729,19 +856,23 @@ def get_f1_friendly_form_structure() -> Dict[str, Any]:
                 "type": "date",
                 "required": True,
                 "validation": "date|future",
-                "official_mapping": "Pt3_ExpectedCompletionDate"
+                "official_mapping": "Pt3_ExpectedCompletionDate",
             },
             {
                 "id": "trabalhando_cpt_opt",
                 "label": "Você está trabalhando sob CPT ou OPT?",
                 "type": "select",
                 "required": True,
-                "options": ["Não", "CPT (Curricular Practical Training)", "OPT (Optional Practical Training)"],
-                "official_mapping": "Pt3_EmploymentStatus"
-            }
-        ]
+                "options": [
+                    "Não",
+                    "CPT (Curricular Practical Training)",
+                    "OPT (Optional Practical Training)",
+                ],
+                "official_mapping": "Pt3_EmploymentStatus",
+            },
+        ],
     }
-    
+
     # LEGAL VALIDATION SECTION - F1 Requirements
     legal_validation_section = {
         "id": "validacao_legal_f1",
@@ -754,7 +885,7 @@ def get_f1_friendly_form_structure() -> Dict[str, Any]:
                 "type": "select",
                 "required": True,
                 "options": ["none", "TOEFL", "IELTS", "Duolingo", "Cambridge", "PTE", "Outro"],
-                "help_text": "❌ OBRIGATÓRIO: Prova de proficiência em inglês é necessária para admissão em instituições educacionais nos EUA"
+                "help_text": "❌ OBRIGATÓRIO: Prova de proficiência em inglês é necessária para admissão em instituições educacionais nos EUA",
             },
             {
                 "id": "has_i20_issued",
@@ -762,7 +893,7 @@ def get_f1_friendly_form_structure() -> Dict[str, Any]:
                 "type": "select",
                 "required": True,
                 "options": ["yes", "no"],
-                "help_text": "❌ OBRIGATÓRIO: O I-20 deve estar emitido antes de prosseguir com a aplicação"
+                "help_text": "❌ OBRIGATÓRIO: O I-20 deve estar emitido antes de prosseguir com a aplicação",
             },
             {
                 "id": "sevis_fee_paid",
@@ -770,7 +901,7 @@ def get_f1_friendly_form_structure() -> Dict[str, Any]:
                 "type": "select",
                 "required": True,
                 "options": ["yes", "no"],
-                "help_text": "❌ OBRIGATÓRIO: Taxa SEVIS deve estar paga. Acesse: https://www.fmjfee.com/"
+                "help_text": "❌ OBRIGATÓRIO: Taxa SEVIS deve estar paga. Acesse: https://www.fmjfee.com/",
             },
             {
                 "id": "current_visa_status",
@@ -778,7 +909,7 @@ def get_f1_friendly_form_structure() -> Dict[str, Any]:
                 "type": "select",
                 "required": False,
                 "options": ["F1", "B2", "J1", "H1B", "Outro", "Nenhum (primeira aplicação)"],
-                "help_text": "Se você está mudando de B2 para F1, deve esperar 90 dias desde a entrada nos EUA"
+                "help_text": "Se você está mudando de B2 para F1, deve esperar 90 dias desde a entrada nos EUA",
             },
             {
                 "id": "entry_date_usa",
@@ -786,7 +917,7 @@ def get_f1_friendly_form_structure() -> Dict[str, Any]:
                 "type": "date",
                 "required": False,
                 "validation": "date|past",
-                "help_text": "Necessário se estiver mudando de outro status (ex: B2 → F1)"
+                "help_text": "Necessário se estiver mudando de outro status (ex: B2 → F1)",
             },
             {
                 "id": "plans_to_work",
@@ -794,7 +925,7 @@ def get_f1_friendly_form_structure() -> Dict[str, Any]:
                 "type": "select",
                 "required": True,
                 "options": ["no", "yes"],
-                "help_text": "Trabalho para estudantes F-1 possui restrições legais"
+                "help_text": "Trabalho para estudantes F-1 possui restrições legais",
             },
             {
                 "id": "work_type",
@@ -802,7 +933,7 @@ def get_f1_friendly_form_structure() -> Dict[str, Any]:
                 "type": "select",
                 "required": False,
                 "options": ["on_campus", "off_campus", "opt", "cpt"],
-                "help_text": "❌ Trabalho off-campus NÃO é permitido. Apenas on-campus (máx 20h/semana) ou OPT após conclusão"
+                "help_text": "❌ Trabalho off-campus NÃO é permitido. Apenas on-campus (máx 20h/semana) ou OPT após conclusão",
             },
             {
                 "id": "work_hours_per_week",
@@ -811,7 +942,7 @@ def get_f1_friendly_form_structure() -> Dict[str, Any]:
                 "required": False,
                 "placeholder": "20",
                 "validation": "numeric",
-                "help_text": "❌ Trabalho on-campus limitado a 20 horas por semana durante o período letivo"
+                "help_text": "❌ Trabalho on-campus limitado a 20 horas por semana durante o período letivo",
             },
             {
                 "id": "plans_to_travel_during_process",
@@ -819,15 +950,15 @@ def get_f1_friendly_form_structure() -> Dict[str, Any]:
                 "type": "select",
                 "required": True,
                 "options": ["no", "yes"],
-                "help_text": "⚠️ ATENÇÃO CRÍTICA: Viajar para fora dos EUA durante o processo CANCELA seu pedido!"
-            }
-        ]
+                "help_text": "⚠️ ATENÇÃO CRÍTICA: Viajar para fora dos EUA durante o processo CANCELA seu pedido!",
+            },
+        ],
     }
-    
+
     base_structure["sections"].append(student_section)
     base_structure["sections"].append(legal_validation_section)
     base_structure["total_fields"] = 40
-    
+
     return base_structure
 
 
@@ -837,10 +968,12 @@ def get_h1b_friendly_form_structure() -> Dict[str, Any]:
     Usa formulário I-539 com campos específicos para H-1B
     """
     base_structure = get_i539_friendly_form_structure()
-    
+
     base_structure["form_name"] = "Extensão/Mudança para Visto H-1B (Trabalho Especializado)"
-    base_structure["warning"] = "Para H-1B, você precisará de uma petição I-129 aprovada do seu empregador."
-    
+    base_structure["warning"] = (
+        "Para H-1B, você precisará de uma petição I-129 aprovada do seu empregador."
+    )
+
     # Add H-1B specific section
     h1b_section = {
         "id": "informacoes_emprego",
@@ -853,7 +986,7 @@ def get_h1b_friendly_form_structure() -> Dict[str, Any]:
                 "type": "text",
                 "required": True,
                 "placeholder": "Google LLC",
-                "official_mapping": "Pt3_EmployerName"
+                "official_mapping": "Pt3_EmployerName",
             },
             {
                 "id": "cargo",
@@ -861,7 +994,7 @@ def get_h1b_friendly_form_structure() -> Dict[str, Any]:
                 "type": "text",
                 "required": True,
                 "placeholder": "Software Engineer",
-                "official_mapping": "Pt3_JobTitle"
+                "official_mapping": "Pt3_JobTitle",
             },
             {
                 "id": "salario_anual",
@@ -870,7 +1003,7 @@ def get_h1b_friendly_form_structure() -> Dict[str, Any]:
                 "required": True,
                 "placeholder": "120000",
                 "validation": "numeric",
-                "official_mapping": "Pt3_AnnualSalary"
+                "official_mapping": "Pt3_AnnualSalary",
             },
             {
                 "id": "numero_petição_i129",
@@ -878,7 +1011,7 @@ def get_h1b_friendly_form_structure() -> Dict[str, Any]:
                 "type": "text",
                 "required": True,
                 "placeholder": "EAC1234567890",
-                "official_mapping": "Pt3_I129ReceiptNumber"
+                "official_mapping": "Pt3_I129ReceiptNumber",
             },
             {
                 "id": "data_aprovacao_i129",
@@ -886,14 +1019,14 @@ def get_h1b_friendly_form_structure() -> Dict[str, Any]:
                 "type": "date",
                 "required": True,
                 "validation": "date|past",
-                "official_mapping": "Pt3_I129ApprovalDate"
-            }
-        ]
+                "official_mapping": "Pt3_I129ApprovalDate",
+            },
+        ],
     }
-    
+
     base_structure["sections"].append(h1b_section)
     base_structure["total_fields"] = 32
-    
+
     return base_structure
 
 
@@ -904,11 +1037,13 @@ def get_b2_friendly_form_structure() -> Dict[str, Any]:
     Inclui validações jurídicas conforme diretrizes de advogados de imigração
     """
     base_structure = get_i539_friendly_form_structure()
-    
+
     base_structure["form_name"] = "Extensão de Visto de Turista (B-2)"
     base_structure["estimated_time"] = "15-20 minutos"
-    base_structure["warning"] = "Extensões de B-2 são normalmente concedidas apenas em casos de emergência ou circunstâncias extraordinárias."
-    
+    base_structure["warning"] = (
+        "Extensões de B-2 são normalmente concedidas apenas em casos de emergência ou circunstâncias extraordinárias."
+    )
+
     # Add tourist-specific section
     tourist_section = {
         "id": "motivo_extensao_turista",
@@ -924,9 +1059,9 @@ def get_b2_friendly_form_structure() -> Dict[str, Any]:
                     "Emergência médica pessoal",
                     "Emergência médica familiar",
                     "Questões legais urgentes",
-                    "Outro motivo extraordinário"
+                    "Outro motivo extraordinário",
                 ],
-                "official_mapping": "Pt4_ReasonForExtension"
+                "official_mapping": "Pt4_ReasonForExtension",
             },
             {
                 "id": "explicacao_detalhada",
@@ -936,7 +1071,7 @@ def get_b2_friendly_form_structure() -> Dict[str, Any]:
                 "placeholder": "Descreva a situação que justifica a extensão...",
                 "validation": "min:200",
                 "official_mapping": "Pt4_DetailedExplanation",
-                "help_text": "Seja específico. Extensões de B-2 são difíceis de obter sem motivo válido."
+                "help_text": "Seja específico. Extensões de B-2 são difíceis de obter sem motivo válido.",
             },
             {
                 "id": "fundos_manutencao",
@@ -945,11 +1080,11 @@ def get_b2_friendly_form_structure() -> Dict[str, Any]:
                 "required": True,
                 "placeholder": "Poupanças pessoais, suporte familiar, etc.",
                 "validation": "min:50",
-                "official_mapping": "Pt4_FinancialSupport"
-            }
-        ]
+                "official_mapping": "Pt4_FinancialSupport",
+            },
+        ],
     }
-    
+
     # LEGAL VALIDATION SECTION - B2 Requirements
     legal_validation_section = {
         "id": "validacao_legal_b2",
@@ -962,7 +1097,7 @@ def get_b2_friendly_form_structure() -> Dict[str, Any]:
                 "type": "select",
                 "required": True,
                 "options": ["Visto B-2", "Visto B-1", "ESTA", "Outro visto"],
-                "help_text": "❌ ATENÇÃO: ESTA não pode ser estendido. Você deve sair dos EUA e retornar."
+                "help_text": "❌ ATENÇÃO: ESTA não pode ser estendido. Você deve sair dos EUA e retornar.",
             },
             {
                 "id": "entry_date_usa",
@@ -970,7 +1105,7 @@ def get_b2_friendly_form_structure() -> Dict[str, Any]:
                 "type": "date",
                 "required": True,
                 "validation": "date|past",
-                "help_text": "❌ OBRIGATÓRIO: Você deve esperar pelo menos 90 dias desde a entrada para solicitar extensão"
+                "help_text": "❌ OBRIGATÓRIO: Você deve esperar pelo menos 90 dias desde a entrada para solicitar extensão",
             },
             {
                 "id": "i94_expiration_date",
@@ -978,7 +1113,7 @@ def get_b2_friendly_form_structure() -> Dict[str, Any]:
                 "type": "date",
                 "required": True,
                 "validation": "date",
-                "help_text": "❌ OBRIGATÓRIO: Verifique em https://i94.cbp.dhs.gov/"
+                "help_text": "❌ OBRIGATÓRIO: Verifique em https://i94.cbp.dhs.gov/",
             },
             {
                 "id": "extension_duration_months",
@@ -987,7 +1122,7 @@ def get_b2_friendly_form_structure() -> Dict[str, Any]:
                 "required": True,
                 "placeholder": "6",
                 "validation": "numeric",
-                "help_text": "⚠️ A extensão padrão é de 6 meses. Períodos maiores podem ser negados."
+                "help_text": "⚠️ A extensão padrão é de 6 meses. Períodos maiores podem ser negados.",
             },
             {
                 "id": "plans_to_travel_during_process",
@@ -995,7 +1130,7 @@ def get_b2_friendly_form_structure() -> Dict[str, Any]:
                 "type": "select",
                 "required": True,
                 "options": ["no", "yes"],
-                "help_text": "🚨 ATENÇÃO CRÍTICA: Sair dos EUA durante o processo CANCELA automaticamente seu pedido!"
+                "help_text": "🚨 ATENÇÃO CRÍTICA: Sair dos EUA durante o processo CANCELA automaticamente seu pedido!",
             },
             {
                 "id": "has_i94",
@@ -1003,15 +1138,15 @@ def get_b2_friendly_form_structure() -> Dict[str, Any]:
                 "type": "select",
                 "required": True,
                 "options": ["yes", "no"],
-                "help_text": "❌ OBRIGATÓRIO: Baixe em https://i94.cbp.dhs.gov/"
-            }
-        ]
+                "help_text": "❌ OBRIGATÓRIO: Baixe em https://i94.cbp.dhs.gov/",
+            },
+        ],
     }
-    
+
     base_structure["sections"].append(tourist_section)
     base_structure["sections"].append(legal_validation_section)
     base_structure["total_fields"] = 36
-    
+
     return base_structure
 
 
@@ -1021,10 +1156,12 @@ def get_l1_friendly_form_structure() -> Dict[str, Any]:
     Formulário I-539 para extensão/mudança
     """
     base_structure = get_i539_friendly_form_structure()
-    
+
     base_structure["form_name"] = "Extensão/Mudança L-1 (Transferência Intra-Empresa)"
-    base_structure["warning"] = "Para L-1, você precisará de petição I-129 aprovada e comprovação de relacionamento entre empresas."
-    
+    base_structure["warning"] = (
+        "Para L-1, você precisará de petição I-129 aprovada e comprovação de relacionamento entre empresas."
+    )
+
     l1_section = {
         "id": "informacoes_l1",
         "title": "6. Informações L-1",
@@ -1034,14 +1171,14 @@ def get_l1_friendly_form_structure() -> Dict[str, Any]:
                 "label": "Nome da Empresa nos EUA",
                 "type": "text",
                 "required": True,
-                "official_mapping": "Pt3_USCompanyName"
+                "official_mapping": "Pt3_USCompanyName",
             },
             {
                 "id": "empresa_origem",
                 "label": "Nome da Empresa no País de Origem",
                 "type": "text",
                 "required": True,
-                "official_mapping": "Pt3_ForeignCompanyName"
+                "official_mapping": "Pt3_ForeignCompanyName",
             },
             {
                 "id": "tipo_l1",
@@ -1049,14 +1186,14 @@ def get_l1_friendly_form_structure() -> Dict[str, Any]:
                 "type": "select",
                 "required": True,
                 "options": ["L-1A (Executivo/Gerente)", "L-1B (Conhecimento Especializado)"],
-                "official_mapping": "Pt3_L1Type"
+                "official_mapping": "Pt3_L1Type",
             },
             {
                 "id": "cargo_eua",
                 "label": "Cargo nos EUA",
                 "type": "text",
                 "required": True,
-                "official_mapping": "Pt3_JobTitleUS"
+                "official_mapping": "Pt3_JobTitleUS",
             },
             {
                 "id": "tempo_empresa_origem",
@@ -1065,14 +1202,14 @@ def get_l1_friendly_form_structure() -> Dict[str, Any]:
                 "required": True,
                 "validation": "numeric",
                 "official_mapping": "Pt3_TimeWithForeignCompany",
-                "help_text": "Mínimo 1 ano nos últimos 3 anos"
-            }
-        ]
+                "help_text": "Mínimo 1 ano nos últimos 3 anos",
+            },
+        ],
     }
-    
+
     base_structure["sections"].append(l1_section)
     base_structure["total_fields"] = 32
-    
+
     return base_structure
 
 
@@ -1082,10 +1219,12 @@ def get_o1_friendly_form_structure() -> Dict[str, Any]:
     Formulário I-539 para dependentes O-3 ou extensão
     """
     base_structure = get_i539_friendly_form_structure()
-    
+
     base_structure["form_name"] = "Extensão/Mudança O-1 (Habilidade Extraordinária)"
-    base_structure["warning"] = "Para O-1, você precisa demonstrar habilidade extraordinária contínua e petição I-129 aprovada."
-    
+    base_structure["warning"] = (
+        "Para O-1, você precisa demonstrar habilidade extraordinária contínua e petição I-129 aprovada."
+    )
+
     o1_section = {
         "id": "informacoes_o1",
         "title": "6. Informações O-1",
@@ -1095,8 +1234,11 @@ def get_o1_friendly_form_structure() -> Dict[str, Any]:
                 "label": "Categoria O-1",
                 "type": "select",
                 "required": True,
-                "options": ["O-1A (Ciências, Educação, Negócios, Atletismo)", "O-1B (Artes, Cinema, TV)"],
-                "official_mapping": "Pt3_O1Category"
+                "options": [
+                    "O-1A (Ciências, Educação, Negócios, Atletismo)",
+                    "O-1B (Artes, Cinema, TV)",
+                ],
+                "official_mapping": "Pt3_O1Category",
             },
             {
                 "id": "area_especialidade",
@@ -1104,7 +1246,7 @@ def get_o1_friendly_form_structure() -> Dict[str, Any]:
                 "type": "text",
                 "required": True,
                 "placeholder": "Ex: Artificial Intelligence Research",
-                "official_mapping": "Pt3_FieldOfExpertise"
+                "official_mapping": "Pt3_FieldOfExpertise",
             },
             {
                 "id": "realizacoes_principais",
@@ -1113,21 +1255,21 @@ def get_o1_friendly_form_structure() -> Dict[str, Any]:
                 "required": True,
                 "placeholder": "Liste prêmios, publicações, reconhecimentos...",
                 "validation": "min:200",
-                "official_mapping": "Pt3_MajorAchievements"
+                "official_mapping": "Pt3_MajorAchievements",
             },
             {
                 "id": "empregador_patrocinador",
                 "label": "Empregador/Agente Patrocinador",
                 "type": "text",
                 "required": True,
-                "official_mapping": "Pt3_PetitionerName"
-            }
-        ]
+                "official_mapping": "Pt3_PetitionerName",
+            },
+        ],
     }
-    
+
     base_structure["sections"].append(o1_section)
     base_structure["total_fields"] = 31
-    
+
     return base_structure
 
 
@@ -1153,7 +1295,7 @@ def get_green_card_renewal_form_structure() -> Dict[str, Any]:
                         "label": "Nome Completo (como está no Green Card)",
                         "type": "text",
                         "required": True,
-                        "placeholder": "João Silva Santos"
+                        "placeholder": "João Silva Santos",
                     },
                     {
                         "id": "alien_registration_number",
@@ -1161,7 +1303,7 @@ def get_green_card_renewal_form_structure() -> Dict[str, Any]:
                         "type": "text",
                         "required": True,
                         "placeholder": "A123456789",
-                        "help_text": "Número de 9 dígitos no seu Green Card"
+                        "help_text": "Número de 9 dígitos no seu Green Card",
                     },
                     {
                         "id": "green_card_expiration_date",
@@ -1169,14 +1311,14 @@ def get_green_card_renewal_form_structure() -> Dict[str, Any]:
                         "type": "date",
                         "required": True,
                         "validation": "date",
-                        "help_text": "❌ OBRIGATÓRIO: Data de vencimento para validar período de renovação"
+                        "help_text": "❌ OBRIGATÓRIO: Data de vencimento para validar período de renovação",
                     },
                     {
                         "id": "data_emissao_green_card",
                         "label": "Data de Emissão do Green Card",
                         "type": "date",
                         "required": True,
-                        "validation": "date|past"
+                        "validation": "date|past",
                     },
                     {
                         "id": "categoria_green_card",
@@ -1190,10 +1332,10 @@ def get_green_card_renewal_form_structure() -> Dict[str, Any]:
                             "EB-2 - Advanced Degree",
                             "EB-3 - Skilled Worker",
                             "DV - Diversity Visa",
-                            "Outro"
-                        ]
-                    }
-                ]
+                            "Outro",
+                        ],
+                    },
+                ],
             },
             {
                 "id": "endereco_atual",
@@ -1205,21 +1347,21 @@ def get_green_card_renewal_form_structure() -> Dict[str, Any]:
                         "label": "Endereço Completo",
                         "type": "text",
                         "required": True,
-                        "placeholder": "123 Main Street, Apt 4B"
+                        "placeholder": "123 Main Street, Apt 4B",
                     },
                     {
                         "id": "cidade",
                         "label": "Cidade",
                         "type": "text",
                         "required": True,
-                        "placeholder": "New York"
+                        "placeholder": "New York",
                     },
                     {
                         "id": "estado",
                         "label": "Estado",
                         "type": "text",
                         "required": True,
-                        "placeholder": "NY"
+                        "placeholder": "NY",
                     },
                     {
                         "id": "cep",
@@ -1227,9 +1369,9 @@ def get_green_card_renewal_form_structure() -> Dict[str, Any]:
                         "type": "text",
                         "required": True,
                         "placeholder": "10001",
-                        "validation": "numeric"
-                    }
-                ]
+                        "validation": "numeric",
+                    },
+                ],
             },
             {
                 "id": "motivo_renovacao",
@@ -1246,10 +1388,10 @@ def get_green_card_renewal_form_structure() -> Dict[str, Any]:
                             "Green Card perdido ou roubado",
                             "Green Card danificado",
                             "Mudança de nome",
-                            "Erro no Green Card original"
-                        ]
+                            "Erro no Green Card original",
+                        ],
                     }
-                ]
+                ],
             },
             {
                 "id": "validacao_legal_green_card",
@@ -1262,7 +1404,7 @@ def get_green_card_renewal_form_structure() -> Dict[str, Any]:
                         "type": "date",
                         "required": True,
                         "validation": "date",
-                        "help_text": "⚠️ Se vencido, você pode continuar mas considere renovar"
+                        "help_text": "⚠️ Se vencido, você pode continuar mas considere renovar",
                     },
                     {
                         "id": "has_current_visa_copy",
@@ -1270,7 +1412,7 @@ def get_green_card_renewal_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": True,
                         "options": ["yes", "no"],
-                        "help_text": "Necessário anexar cópia (frente e verso)"
+                        "help_text": "Necessário anexar cópia (frente e verso)",
                     },
                     {
                         "id": "has_passport_photos",
@@ -1278,11 +1420,11 @@ def get_green_card_renewal_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": True,
                         "options": ["yes", "no"],
-                        "help_text": "❌ OBRIGATÓRIO: 2 fotos padrão passaporte"
-                    }
-                ]
-            }
-        ]
+                        "help_text": "❌ OBRIGATÓRIO: 2 fotos padrão passaporte",
+                    },
+                ],
+            },
+        ],
     }
 
 
@@ -1307,23 +1449,23 @@ def get_marriage_adjustment_form_structure() -> Dict[str, Any]:
                         "label": "Nome Completo",
                         "type": "text",
                         "required": True,
-                        "placeholder": "João Silva Santos"
+                        "placeholder": "João Silva Santos",
                     },
                     {
                         "id": "data_nascimento",
                         "label": "Data de Nascimento",
                         "type": "date",
                         "required": True,
-                        "validation": "date|past"
+                        "validation": "date|past",
                     },
                     {
                         "id": "pais_nascimento",
                         "label": "País de Nascimento",
                         "type": "country",
                         "required": True,
-                        "placeholder": "Brazil"
-                    }
-                ]
+                        "placeholder": "Brazil",
+                    },
+                ],
             },
             {
                 "id": "informacoes_casamento",
@@ -1335,21 +1477,21 @@ def get_marriage_adjustment_form_structure() -> Dict[str, Any]:
                         "type": "date",
                         "required": True,
                         "validation": "date|past",
-                        "help_text": "❌ OBRIGATÓRIO: Data do casamento legal"
+                        "help_text": "❌ OBRIGATÓRIO: Data do casamento legal",
                     },
                     {
                         "id": "local_casamento",
                         "label": "Local do Casamento (Cidade, Estado/País)",
                         "type": "text",
                         "required": True,
-                        "placeholder": "Las Vegas, Nevada"
+                        "placeholder": "Las Vegas, Nevada",
                     },
                     {
                         "id": "nome_conjuge",
                         "label": "Nome Completo do Cônjuge (Peticionário)",
                         "type": "text",
                         "required": True,
-                        "placeholder": "Mary Johnson"
+                        "placeholder": "Mary Johnson",
                     },
                     {
                         "id": "conjuge_cidadao_americano",
@@ -1357,9 +1499,9 @@ def get_marriage_adjustment_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": True,
                         "options": ["yes", "no"],
-                        "help_text": "Para ajuste por casamento, cônjuge deve ser cidadão ou residente permanente"
-                    }
-                ]
+                        "help_text": "Para ajuste por casamento, cônjuge deve ser cidadão ou residente permanente",
+                    },
+                ],
             },
             {
                 "id": "validacao_legal_marriage",
@@ -1372,7 +1514,7 @@ def get_marriage_adjustment_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": True,
                         "options": ["yes", "no"],
-                        "help_text": "❌ AJUSTE DE STATUS APENAS NOS EUA: Se não, deve fazer processo consular"
+                        "help_text": "❌ AJUSTE DE STATUS APENAS NOS EUA: Se não, deve fazer processo consular",
                     },
                     {
                         "id": "legal_entry",
@@ -1380,22 +1522,28 @@ def get_marriage_adjustment_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": True,
                         "options": ["yes", "no"],
-                        "help_text": "❌ ENTRADA LEGAL OBRIGATÓRIA: Com visto válido (B2, F1, etc.)"
+                        "help_text": "❌ ENTRADA LEGAL OBRIGATÓRIA: Com visto válido (B2, F1, etc.)",
                     },
                     {
                         "id": "entry_visa_type",
                         "label": "Com qual visto você entrou?",
                         "type": "select",
                         "required": True,
-                        "options": ["B-2 (Turista)", "F-1 (Estudante)", "H-1B (Trabalho)", "J-1 (Intercâmbio)", "Outro"],
-                        "help_text": "💡 Concurrent filing aceito para entrada legal com visto de visitante"
+                        "options": [
+                            "B-2 (Turista)",
+                            "F-1 (Estudante)",
+                            "H-1B (Trabalho)",
+                            "J-1 (Intercâmbio)",
+                            "Outro",
+                        ],
+                        "help_text": "💡 Concurrent filing aceito para entrada legal com visto de visitante",
                     },
                     {
                         "id": "entry_date_usa",
                         "label": "Data de Entrada nos EUA",
                         "type": "date",
                         "required": True,
-                        "validation": "date|past"
+                        "validation": "date|past",
                     },
                     {
                         "id": "i94_expiration_date",
@@ -1403,9 +1551,9 @@ def get_marriage_adjustment_form_structure() -> Dict[str, Any]:
                         "type": "date",
                         "required": True,
                         "validation": "date",
-                        "help_text": "Verifique em https://i94.cbp.dhs.gov/"
-                    }
-                ]
+                        "help_text": "Verifique em https://i94.cbp.dhs.gov/",
+                    },
+                ],
             },
             {
                 "id": "formularios_obrigatorios",
@@ -1418,7 +1566,7 @@ def get_marriage_adjustment_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": True,
                         "options": ["yes", "no"],
-                        "help_text": "❌ OBRIGATÓRIO"
+                        "help_text": "❌ OBRIGATÓRIO",
                     },
                     {
                         "id": "has_i_130a",
@@ -1426,7 +1574,7 @@ def get_marriage_adjustment_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": True,
                         "options": ["yes", "no"],
-                        "help_text": "❌ OBRIGATÓRIO"
+                        "help_text": "❌ OBRIGATÓRIO",
                     },
                     {
                         "id": "has_i_485",
@@ -1434,7 +1582,7 @@ def get_marriage_adjustment_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": True,
                         "options": ["yes", "no"],
-                        "help_text": "❌ OBRIGATÓRIO"
+                        "help_text": "❌ OBRIGATÓRIO",
                     },
                     {
                         "id": "has_i_864",
@@ -1442,9 +1590,9 @@ def get_marriage_adjustment_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": True,
                         "options": ["yes", "no"],
-                        "help_text": "❌ OBRIGATÓRIO: Seu cônjuge deve preencher"
-                    }
-                ]
+                        "help_text": "❌ OBRIGATÓRIO: Seu cônjuge deve preencher",
+                    },
+                ],
             },
             {
                 "id": "formularios_opcionais",
@@ -1456,7 +1604,7 @@ def get_marriage_adjustment_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": True,
                         "options": ["yes", "no"],
-                        "help_text": "💡 RECOMENDADO: Permite trabalhar enquanto aguarda o Green Card"
+                        "help_text": "💡 RECOMENDADO: Permite trabalhar enquanto aguarda o Green Card",
                     },
                     {
                         "id": "has_i_765",
@@ -1464,7 +1612,7 @@ def get_marriage_adjustment_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": False,
                         "options": ["yes", "no"],
-                        "help_text": "Incluir se deseja trabalhar"
+                        "help_text": "Incluir se deseja trabalhar",
                     },
                     {
                         "id": "wants_travel_permit",
@@ -1472,7 +1620,7 @@ def get_marriage_adjustment_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": True,
                         "options": ["yes", "no"],
-                        "help_text": "💡 RECOMENDADO: Permite viajar internacionalmente durante o processo"
+                        "help_text": "💡 RECOMENDADO: Permite viajar internacionalmente durante o processo",
                     },
                     {
                         "id": "has_i_131",
@@ -1480,9 +1628,9 @@ def get_marriage_adjustment_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": False,
                         "options": ["yes", "no"],
-                        "help_text": "Incluir se deseja viajar"
-                    }
-                ]
+                        "help_text": "Incluir se deseja viajar",
+                    },
+                ],
             },
             {
                 "id": "documentacao_marriage",
@@ -1493,32 +1641,32 @@ def get_marriage_adjustment_form_structure() -> Dict[str, Any]:
                         "label": "Cópia do passaporte válido",
                         "type": "select",
                         "required": True,
-                        "options": ["yes", "no"]
+                        "options": ["yes", "no"],
                     },
                     {
                         "id": "has_birth_certificate",
                         "label": "Certidão de nascimento traduzida",
                         "type": "select",
                         "required": True,
-                        "options": ["yes", "no"]
+                        "options": ["yes", "no"],
                     },
                     {
                         "id": "has_marriage_certificate",
                         "label": "Certidão de casamento (traduzida se necessário)",
                         "type": "select",
                         "required": True,
-                        "options": ["yes", "no"]
+                        "options": ["yes", "no"],
                     },
                     {
                         "id": "has_passport_photos",
                         "label": "2 fotos tamanho passaporte",
                         "type": "select",
                         "required": True,
-                        "options": ["yes", "no"]
-                    }
-                ]
-            }
-        ]
+                        "options": ["yes", "no"],
+                    },
+                ],
+            },
+        ],
     }
 
 
@@ -1542,22 +1690,22 @@ def get_f1_reinstatement_form_structure() -> Dict[str, Any]:
                         "id": "nome_completo",
                         "label": "Nome Completo",
                         "type": "text",
-                        "required": True
+                        "required": True,
                     },
                     {
                         "id": "data_nascimento",
                         "label": "Data de Nascimento",
                         "type": "date",
                         "required": True,
-                        "validation": "date|past"
+                        "validation": "date|past",
                     },
                     {
                         "id": "numero_passaporte",
                         "label": "Número do Passaporte",
                         "type": "text",
-                        "required": True
-                    }
-                ]
+                        "required": True,
+                    },
+                ],
             },
             {
                 "id": "status_f1_anterior",
@@ -1569,21 +1717,21 @@ def get_f1_reinstatement_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": True,
                         "options": ["F1", "Outro"],
-                        "help_text": "❌ Reinstatement é apenas para quem tinha status F-1"
+                        "help_text": "❌ Reinstatement é apenas para quem tinha status F-1",
                     },
                     {
                         "id": "nome_escola_anterior",
                         "label": "Nome da Escola Anterior",
                         "type": "text",
                         "required": True,
-                        "placeholder": "Harvard University"
+                        "placeholder": "Harvard University",
                     },
                     {
                         "id": "data_encerramento_status",
                         "label": "Data de Encerramento do Status F-1",
                         "type": "date",
                         "required": True,
-                        "validation": "date|past"
+                        "validation": "date|past",
                     },
                     {
                         "id": "f1_termination_reason",
@@ -1592,9 +1740,9 @@ def get_f1_reinstatement_form_structure() -> Dict[str, Any]:
                         "required": True,
                         "placeholder": "Explique detalhadamente por que seu status F-1 foi encerrado...",
                         "validation": "min:100",
-                        "help_text": "❌ OBRIGATÓRIO: Explique as circunstâncias"
-                    }
-                ]
+                        "help_text": "❌ OBRIGATÓRIO: Explique as circunstâncias",
+                    },
+                ],
             },
             {
                 "id": "novo_i20_reinstatement",
@@ -1604,7 +1752,7 @@ def get_f1_reinstatement_form_structure() -> Dict[str, Any]:
                         "id": "nome_escola_nova",
                         "label": "Nome da Escola (pode ser a mesma)",
                         "type": "text",
-                        "required": True
+                        "required": True,
                     },
                     {
                         "id": "has_new_i20_for_reinstatement",
@@ -1612,7 +1760,7 @@ def get_f1_reinstatement_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": True,
                         "options": ["yes", "no"],
-                        "help_text": "❌ OBRIGATÓRIO: Você precisa de novo I-20 da escola"
+                        "help_text": "❌ OBRIGATÓRIO: Você precisa de novo I-20 da escola",
                     },
                     {
                         "id": "i20_indicates_reinstatement",
@@ -1620,16 +1768,16 @@ def get_f1_reinstatement_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": True,
                         "options": ["yes", "no"],
-                        "help_text": "❌ OBRIGATÓRIO: I-20 deve indicar que é para Reinstatement"
+                        "help_text": "❌ OBRIGATÓRIO: I-20 deve indicar que é para Reinstatement",
                     },
                     {
                         "id": "data_inicio_programa",
                         "label": "Data de Início do Programa",
                         "type": "date",
                         "required": True,
-                        "validation": "date"
-                    }
-                ]
+                        "validation": "date",
+                    },
+                ],
             },
             {
                 "id": "validacao_legal_reinstatement",
@@ -1641,7 +1789,7 @@ def get_f1_reinstatement_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": True,
                         "options": ["yes", "no"],
-                        "help_text": "❌ OBRIGATÓRIO: Formulário I-539 é necessário para Reinstatement"
+                        "help_text": "❌ OBRIGATÓRIO: Formulário I-539 é necessário para Reinstatement",
                     },
                     {
                         "id": "motivo_atraso_aplicacao",
@@ -1649,7 +1797,7 @@ def get_f1_reinstatement_form_structure() -> Dict[str, Any]:
                         "type": "textarea",
                         "required": True,
                         "placeholder": "Explique as razões do atraso...",
-                        "validation": "min:100"
+                        "validation": "min:100",
                     },
                     {
                         "id": "vai_retomar_estudos_imediatamente",
@@ -1657,28 +1805,28 @@ def get_f1_reinstatement_form_structure() -> Dict[str, Any]:
                         "type": "select",
                         "required": True,
                         "options": ["yes", "no"],
-                        "help_text": "⚠️ IMPORTANTE: Você deve retornar às aulas IMEDIATAMENTE após receber o I-20"
+                        "help_text": "⚠️ IMPORTANTE: Você deve retornar às aulas IMEDIATAMENTE após receber o I-20",
                     },
                     {
                         "id": "has_passport_photos",
                         "label": "Você possui 2 fotos tamanho passaporte?",
                         "type": "select",
                         "required": True,
-                        "options": ["yes", "no"]
-                    }
-                ]
-            }
-        ]
+                        "options": ["yes", "no"],
+                    },
+                ],
+            },
+        ],
     }
 
 
 def get_friendly_form_structure(visa_type: str) -> Dict[str, Any]:
     """
     Retorna a estrutura completa do formulário amigável para o tipo de visto especificado
-    
+
     Args:
         visa_type: Código do visto (I-539, I-589, EB-1A, F-1, H-1B, B-2, L-1, O-1, etc.)
-        
+
     Returns:
         Dict com a estrutura completa do formulário
     """
@@ -1689,7 +1837,6 @@ def get_friendly_form_structure(visa_type: str) -> Dict[str, Any]:
         "EB-1A": get_eb1a_friendly_form_structure,
         "EB1A": get_eb1a_friendly_form_structure,
         "I-140": get_eb1a_friendly_form_structure,
-        
         # Specific visa types
         "F-1": get_f1_friendly_form_structure,
         "F1": get_f1_friendly_form_structure,
@@ -1701,7 +1848,6 @@ def get_friendly_form_structure(visa_type: str) -> Dict[str, Any]:
         "L1": get_l1_friendly_form_structure,
         "O-1": get_o1_friendly_form_structure,
         "O1": get_o1_friendly_form_structure,
-        
         # New legal validation forms
         "I-90": get_green_card_renewal_form_structure,
         "GREEN-CARD-RENEWAL": get_green_card_renewal_form_structure,
@@ -1710,9 +1856,9 @@ def get_friendly_form_structure(visa_type: str) -> Dict[str, Any]:
         "ADJUSTMENT-OF-STATUS": get_marriage_adjustment_form_structure,
         "I-539-REINSTATEMENT": get_f1_reinstatement_form_structure,
         "F1-REINSTATEMENT": get_f1_reinstatement_form_structure,
-        "REINSTATEMENT": get_f1_reinstatement_form_structure
+        "REINSTATEMENT": get_f1_reinstatement_form_structure,
     }
-    
+
     structure_func = structures.get(visa_type)
     if structure_func:
         return structure_func()
@@ -1723,16 +1869,16 @@ def get_friendly_form_structure(visa_type: str) -> Dict[str, Any]:
 def get_all_required_fields(visa_type: str) -> List[str]:
     """
     Retorna lista de todos os campos obrigatórios para um tipo de visto
-    
+
     Args:
         visa_type: Código do visto
-        
+
     Returns:
         Lista de IDs de campos obrigatórios
     """
     structure = get_friendly_form_structure(visa_type)
     required_fields = []
-    
+
     for section in structure.get("sections", []):
         for field in section.get("fields", []):
             if field.get("required", False):
@@ -1740,5 +1886,5 @@ def get_all_required_fields(visa_type: str) -> List[str]:
                 conditional = field.get("conditional")
                 if not conditional:  # Always required
                     required_fields.append(field["id"])
-    
+
     return required_fields

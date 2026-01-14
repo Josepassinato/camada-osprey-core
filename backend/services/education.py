@@ -32,30 +32,30 @@ async def generate_interview_questions(
 
         prompt = f"""
         Gere 10 perguntas de entrevista para imigração americana:
-        
+
         Tipo de entrevista: {interview_type.value}
         Tipo de visto: {visa_type.value}
         Nível: {difficulty_map[difficulty_level]}
-        
+
         Para cada pergunta, forneça:
         - A pergunta em inglês (como seria feita pelo oficial)
         - Tradução em português
         - Dicas de como responder
         - Pontos importantes a mencionar
-        
+
         Retorne APENAS um JSON array:
         [
             {{
                 "id": "q1",
                 "question_en": "pergunta em inglês",
-                "question_pt": "pergunta em português", 
+                "question_pt": "pergunta em português",
                 "category": "categoria",
                 "difficulty": "{difficulty_level.value}",
                 "tips": ["dica1", "dica2"],
                 "key_points": ["ponto1", "ponto2"]
             }}
         ]
-        
+
         IMPORTANTE: Estas são perguntas educativas para preparação. Para casos reais, recomende consultoria jurídica.
         """
 
@@ -111,7 +111,7 @@ async def evaluate_interview_answer(
         Pergunta: {question.get('question_pt')}
         Resposta do usuário: {answer}
         Tipo de visto: {visa_type.value}
-        
+
         Forneça feedback APENAS em JSON:
         {{
             "score": [0-100],
@@ -121,7 +121,7 @@ async def evaluate_interview_answer(
             "improved_answer": "exemplo de resposta melhorada",
             "confidence_level": "baixo|médio|alto"
         }}
-        
+
         IMPORTANTE: Esta é uma ferramenta educativa. Para preparação real, recomende consultoria jurídica.
         """
 
@@ -183,7 +183,11 @@ async def generate_personalized_tips(
             doc
             for doc in documents
             if doc.get("expiration_date")
-            and (datetime.fromisoformat(doc["expiration_date"].replace("Z", "+00:00")) - datetime.now(timezone.utc)).days <= 30
+            and (
+                datetime.fromisoformat(doc["expiration_date"].replace("Z", "+00:00"))
+                - datetime.now(timezone.utc)
+            ).days
+            <= 30
         ]
 
         user_context = f"""
@@ -192,7 +196,7 @@ async def generate_personalized_tips(
         Aplicações ativas: {len(active_applications)}
         Documentos pendentes: {len(pending_docs)}
         Documentos expirando: {len(expiring_docs)}
-        
+
         Gere 5 dicas personalizadas para este usuário em formato JSON:
         [
             {{
@@ -260,13 +264,15 @@ async def search_knowledge_base(
 ) -> Dict[str, Any]:
     """Search knowledge base using sistema."""
     try:
-        context_filter = f"para visto {visa_type.value}" if visa_type else "para imigração americana"
+        context_filter = (
+            f"para visto {visa_type.value}" if visa_type else "para imigração americana"
+        )
 
         prompt = f"""
         Responda esta pergunta sobre imigração americana {context_filter}:
-        
+
         Pergunta: {query}
-        
+
         Forneça uma resposta educativa e informativa em JSON:
         {{
             "answer": "resposta detalhada e precisa",
@@ -276,8 +282,8 @@ async def search_knowledge_base(
             "warnings": ["aviso importante se aplicável"],
             "confidence": "alto|médio|baixo"
         }}
-        
-        IMPORTANTE: 
+
+        IMPORTANTE:
         - Esta é informação educativa para auto-aplicação
         - Sempre mencione que não substitui consultoria jurídica
         - Para casos complexos, recomende consultar um advogado
@@ -304,10 +310,16 @@ async def search_knowledge_base(
         except json.JSONDecodeError:
             return {
                 "answer": "Desculpe, não foi possível processar sua pergunta no momento. Tente reformulá-la ou consulte nossa seção de guias interativos.",
-                "related_topics": ["Guias de Visto", "Simulador de Entrevista", "Gestão de Documentos"],
+                "related_topics": [
+                    "Guias de Visto",
+                    "Simulador de Entrevista",
+                    "Gestão de Documentos",
+                ],
                 "next_steps": ["Explore os guias interativos", "Use o simulador de entrevista"],
                 "resources": ["Centro de Ajuda", "Chat com sistema"],
-                "warnings": ["Esta é uma ferramenta educativa - não substitui consultoria jurídica"],
+                "warnings": [
+                    "Esta é uma ferramenta educativa - não substitui consultoria jurídica"
+                ],
                 "confidence": "baixo",
             }
 

@@ -23,7 +23,9 @@ def get_progress_percentage(step: str) -> int:
     return step_map.get(step, 0)
 
 
-async def update_case_status_and_progress(case_id: str, new_step: str, collection_name: str = "auto_cases"):
+async def update_case_status_and_progress(
+    case_id: str, new_step: str, collection_name: str = "auto_cases"
+):
     """
     Update case status and progress based on new step.
 

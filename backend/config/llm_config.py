@@ -14,6 +14,7 @@ from pydantic_settings import BaseSettings
 
 class LLMProvider(str, Enum):
     """Supported LLM providers."""
+
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
     GOOGLE = "google"
@@ -22,238 +23,136 @@ class LLMProvider(str, Enum):
 
 class ModelConfig(BaseModel):
     """Configuration for a specific LLM model."""
-    
-    name: str = Field(
-        ...,
-        description="Model identifier (e.g., 'gpt-4o', 'claude-3-opus')"
-    )
-    provider: LLMProvider = Field(
-        ...,
-        description="Provider for this model"
-    )
-    max_tokens: int = Field(
-        default=4096,
-        ge=1,
-        description="Maximum tokens for model output"
-    )
-    context_window: int = Field(
-        default=128000,
-        ge=1,
-        description="Maximum context window size"
-    )
+
+    name: str = Field(..., description="Model identifier (e.g., 'gpt-4o', 'claude-3-opus')")
+    provider: LLMProvider = Field(..., description="Provider for this model")
+    max_tokens: int = Field(default=4096, ge=1, description="Maximum tokens for model output")
+    context_window: int = Field(default=128000, ge=1, description="Maximum context window size")
     temperature: float = Field(
-        default=0.7,
-        ge=0.0,
-        le=2.0,
-        description="Default temperature for generation"
+        default=0.7, ge=0.0, le=2.0, description="Default temperature for generation"
     )
     fallback_models: List[str] = Field(
-        default_factory=list,
-        description="List of fallback model names if this model fails"
+        default_factory=list, description="List of fallback model names if this model fails"
     )
     cost_per_1k_input_tokens: float = Field(
-        default=0.0,
-        ge=0.0,
-        description="Cost per 1000 input tokens in USD"
+        default=0.0, ge=0.0, description="Cost per 1000 input tokens in USD"
     )
     cost_per_1k_output_tokens: float = Field(
-        default=0.0,
-        ge=0.0,
-        description="Cost per 1000 output tokens in USD"
+        default=0.0, ge=0.0, description="Cost per 1000 output tokens in USD"
     )
     supports_streaming: bool = Field(
-        default=True,
-        description="Whether model supports streaming responses"
+        default=True, description="Whether model supports streaming responses"
     )
     supports_function_calling: bool = Field(
-        default=True,
-        description="Whether model supports function/tool calling"
+        default=True, description="Whether model supports function/tool calling"
     )
-    supports_vision: bool = Field(
-        default=False,
-        description="Whether model supports image inputs"
-    )
+    supports_vision: bool = Field(default=False, description="Whether model supports image inputs")
 
 
 class PortkeyConfig(BaseModel):
     """Portkey-specific configuration."""
-    
+
     retry_count: int = Field(
-        default=3,
-        ge=0,
-        le=10,
-        description="Number of retries for failed requests"
+        default=3, ge=0, le=10, description="Number of retries for failed requests"
     )
     retry_delay: float = Field(
-        default=1.0,
-        ge=0.0,
-        description="Initial delay between retries in seconds"
+        default=1.0, ge=0.0, description="Initial delay between retries in seconds"
     )
-    timeout: int = Field(
-        default=60,
-        ge=1,
-        description="Request timeout in seconds"
-    )
-    enable_caching: bool = Field(
-        default=True,
-        description="Enable Portkey semantic caching"
-    )
-    cache_ttl: int = Field(
-        default=3600,
-        ge=0,
-        description="Cache TTL in seconds (0 = no expiry)"
-    )
+    timeout: int = Field(default=60, ge=1, description="Request timeout in seconds")
+    enable_caching: bool = Field(default=True, description="Enable Portkey semantic caching")
+    cache_ttl: int = Field(default=3600, ge=0, description="Cache TTL in seconds (0 = no expiry)")
     enable_fallbacks: bool = Field(
-        default=True,
-        description="Enable automatic fallback to alternative models"
+        default=True, description="Enable automatic fallback to alternative models"
     )
     enable_load_balancing: bool = Field(
-        default=False,
-        description="Enable load balancing across providers"
+        default=False, description="Enable load balancing across providers"
     )
     trace_requests: bool = Field(
-        default=True,
-        description="Enable request tracing in Portkey dashboard"
+        default=True, description="Enable request tracing in Portkey dashboard"
     )
 
 
 class RateLimitConfig(BaseModel):
     """Rate limiting configuration."""
-    
-    requests_per_minute: int = Field(
-        default=60,
-        ge=1,
-        description="Maximum requests per minute"
-    )
-    tokens_per_minute: int = Field(
-        default=90000,
-        ge=1,
-        description="Maximum tokens per minute"
-    )
-    requests_per_day: int = Field(
-        default=10000,
-        ge=1,
-        description="Maximum requests per day"
-    )
+
+    requests_per_minute: int = Field(default=60, ge=1, description="Maximum requests per minute")
+    tokens_per_minute: int = Field(default=90000, ge=1, description="Maximum tokens per minute")
+    requests_per_day: int = Field(default=10000, ge=1, description="Maximum requests per day")
 
 
 class CostBudgetConfig(BaseModel):
     """Cost budget configuration."""
-    
-    daily_budget_usd: float = Field(
-        default=100.0,
-        ge=0.0,
-        description="Maximum daily spend in USD"
-    )
+
+    daily_budget_usd: float = Field(default=100.0, ge=0.0, description="Maximum daily spend in USD")
     monthly_budget_usd: float = Field(
-        default=3000.0,
-        ge=0.0,
-        description="Maximum monthly spend in USD"
+        default=3000.0, ge=0.0, description="Maximum monthly spend in USD"
     )
     alert_threshold_percent: float = Field(
-        default=80.0,
-        ge=0.0,
-        le=100.0,
-        description="Alert when budget reaches this percentage"
+        default=80.0, ge=0.0, le=100.0, description="Alert when budget reaches this percentage"
     )
     hard_limit: bool = Field(
-        default=False,
-        description="Hard stop when budget exceeded (vs. alert only)"
+        default=False, description="Hard stop when budget exceeded (vs. alert only)"
     )
 
 
 class LLMSettings(BaseSettings):
     """LLM configuration settings loaded from environment variables."""
-    
+
     # Portkey Configuration
     portkey_api_key: Optional[str] = Field(
-        default=None,
-        description="Portkey API key for LLM gateway"
+        default=None, description="Portkey API key for LLM gateway"
     )
     portkey_base_url: str = Field(
-        default="https://api.portkey.ai/v1",
-        description="Portkey API base URL"
+        default="https://api.portkey.ai/v1", description="Portkey API base URL"
     )
-    
+
     # Virtual Keys (per provider)
     portkey_virtual_key_openai: Optional[str] = Field(
-        default=None,
-        description="Portkey virtual key for OpenAI"
+        default=None, description="Portkey virtual key for OpenAI"
     )
     portkey_virtual_key_anthropic: Optional[str] = Field(
-        default=None,
-        description="Portkey virtual key for Anthropic"
+        default=None, description="Portkey virtual key for Anthropic"
     )
     portkey_virtual_key_google: Optional[str] = Field(
-        default=None,
-        description="Portkey virtual key for Google"
+        default=None, description="Portkey virtual key for Google"
     )
-    
+
     # Default Model Configuration
-    default_model: str = Field(
-        default="gpt-4o",
-        description="Default model to use for LLM calls"
-    )
+    default_model: str = Field(default="gpt-4o", description="Default model to use for LLM calls")
     default_temperature: float = Field(
-        default=0.7,
-        ge=0.0,
-        le=2.0,
-        description="Default temperature for generation"
+        default=0.7, ge=0.0, le=2.0, description="Default temperature for generation"
     )
     default_max_tokens: int = Field(
-        default=4096,
-        ge=1,
-        description="Default max tokens for generation"
+        default=4096, ge=1, description="Default max tokens for generation"
     )
-    
+
     # Feature Flags
     enable_portkey: bool = Field(
-        default=True,
-        description="Enable Portkey integration (disable for local dev)"
+        default=True, description="Enable Portkey integration (disable for local dev)"
     )
-    enable_caching: bool = Field(
-        default=True,
-        description="Enable LLM response caching"
-    )
-    enable_fallbacks: bool = Field(
-        default=True,
-        description="Enable automatic model fallbacks"
-    )
-    enable_cost_tracking: bool = Field(
-        default=True,
-        description="Enable cost tracking and budgets"
-    )
-    
+    enable_caching: bool = Field(default=True, description="Enable LLM response caching")
+    enable_fallbacks: bool = Field(default=True, description="Enable automatic model fallbacks")
+    enable_cost_tracking: bool = Field(default=True, description="Enable cost tracking and budgets")
+
     # Rate Limiting
     rate_limit_requests_per_minute: int = Field(
-        default=60,
-        ge=1,
-        description="Maximum LLM requests per minute"
+        default=60, ge=1, description="Maximum LLM requests per minute"
     )
     rate_limit_tokens_per_minute: int = Field(
-        default=90000,
-        ge=1,
-        description="Maximum tokens per minute"
+        default=90000, ge=1, description="Maximum tokens per minute"
     )
-    
+
     # Cost Budgets
     cost_budget_daily_usd: float = Field(
-        default=100.0,
-        ge=0.0,
-        description="Daily cost budget in USD"
+        default=100.0, ge=0.0, description="Daily cost budget in USD"
     )
     cost_budget_monthly_usd: float = Field(
-        default=3000.0,
-        ge=0.0,
-        description="Monthly cost budget in USD"
+        default=3000.0, ge=0.0, description="Monthly cost budget in USD"
     )
     cost_alert_threshold: float = Field(
-        default=80.0,
-        ge=0.0,
-        le=100.0,
-        description="Alert threshold as percentage of budget"
+        default=80.0, ge=0.0, le=100.0, description="Alert threshold as percentage of budget"
     )
-    
+
     @validator("portkey_api_key")
     def validate_portkey_key(cls, v, values):
         """Validate Portkey API key is set when Portkey is enabled."""
@@ -263,33 +162,33 @@ class LLMSettings(BaseSettings):
                 "Set PORTKEY_API_KEY environment variable."
             )
         return v
-    
+
     @property
     def portkey_config(self) -> PortkeyConfig:
         """Get Portkey configuration."""
         return PortkeyConfig(
             enable_caching=self.enable_caching,
             enable_fallbacks=self.enable_fallbacks,
-            trace_requests=True
+            trace_requests=True,
         )
-    
+
     @property
     def rate_limit_config(self) -> RateLimitConfig:
         """Get rate limit configuration."""
         return RateLimitConfig(
             requests_per_minute=self.rate_limit_requests_per_minute,
-            tokens_per_minute=self.rate_limit_tokens_per_minute
+            tokens_per_minute=self.rate_limit_tokens_per_minute,
         )
-    
+
     @property
     def cost_budget_config(self) -> CostBudgetConfig:
         """Get cost budget configuration."""
         return CostBudgetConfig(
             daily_budget_usd=self.cost_budget_daily_usd,
             monthly_budget_usd=self.cost_budget_monthly_usd,
-            alert_threshold_percent=self.cost_alert_threshold
+            alert_threshold_percent=self.cost_alert_threshold,
         )
-    
+
     @property
     def virtual_keys(self) -> Dict[str, Optional[str]]:
         """Get all virtual keys by provider."""
@@ -298,7 +197,7 @@ class LLMSettings(BaseSettings):
             LLMProvider.ANTHROPIC: self.portkey_virtual_key_anthropic,
             LLMProvider.GOOGLE: self.portkey_virtual_key_google,
         }
-    
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
@@ -320,7 +219,7 @@ DEFAULT_MODELS: Dict[str, ModelConfig] = {
         cost_per_1k_output_tokens=0.015,
         supports_streaming=True,
         supports_function_calling=True,
-        supports_vision=True
+        supports_vision=True,
     ),
     "gpt-4-turbo": ModelConfig(
         name="gpt-4-turbo",
@@ -333,7 +232,7 @@ DEFAULT_MODELS: Dict[str, ModelConfig] = {
         cost_per_1k_output_tokens=0.03,
         supports_streaming=True,
         supports_function_calling=True,
-        supports_vision=True
+        supports_vision=True,
     ),
     "gpt-3.5-turbo": ModelConfig(
         name="gpt-3.5-turbo",
@@ -346,7 +245,7 @@ DEFAULT_MODELS: Dict[str, ModelConfig] = {
         cost_per_1k_output_tokens=0.0015,
         supports_streaming=True,
         supports_function_calling=True,
-        supports_vision=False
+        supports_vision=False,
     ),
     "gemini-1.5-pro": ModelConfig(
         name="gemini-1.5-pro",
@@ -359,7 +258,7 @@ DEFAULT_MODELS: Dict[str, ModelConfig] = {
         cost_per_1k_output_tokens=0.005,
         supports_streaming=True,
         supports_function_calling=True,
-        supports_vision=True
+        supports_vision=True,
     ),
     "gemini-1.5-flash": ModelConfig(
         name="gemini-1.5-flash",
@@ -372,7 +271,7 @@ DEFAULT_MODELS: Dict[str, ModelConfig] = {
         cost_per_1k_output_tokens=0.0003,
         supports_streaming=True,
         supports_function_calling=True,
-        supports_vision=True
+        supports_vision=True,
     ),
     "claude-3-opus": ModelConfig(
         name="claude-3-opus-20240229",
@@ -385,7 +284,7 @@ DEFAULT_MODELS: Dict[str, ModelConfig] = {
         cost_per_1k_output_tokens=0.075,
         supports_streaming=True,
         supports_function_calling=True,
-        supports_vision=True
+        supports_vision=True,
     ),
     "claude-3-sonnet": ModelConfig(
         name="claude-3-sonnet-20240229",
@@ -398,7 +297,7 @@ DEFAULT_MODELS: Dict[str, ModelConfig] = {
         cost_per_1k_output_tokens=0.015,
         supports_streaming=True,
         supports_function_calling=True,
-        supports_vision=True
+        supports_vision=True,
     ),
     "claude-3-haiku": ModelConfig(
         name="claude-3-haiku-20240307",
@@ -411,7 +310,7 @@ DEFAULT_MODELS: Dict[str, ModelConfig] = {
         cost_per_1k_output_tokens=0.00125,
         supports_streaming=True,
         supports_function_calling=True,
-        supports_vision=True
+        supports_vision=True,
     ),
 }
 
@@ -423,13 +322,13 @@ llm_settings = LLMSettings()
 def get_model_config(model_name: str) -> ModelConfig:
     """
     Get configuration for a specific model.
-    
+
     Args:
         model_name: Name of the model
-        
+
     Returns:
         ModelConfig for the specified model
-        
+
     Raises:
         ValueError: If model is not configured
     """
@@ -444,10 +343,10 @@ def get_model_config(model_name: str) -> ModelConfig:
 def get_provider_virtual_key(provider: LLMProvider) -> Optional[str]:
     """
     Get Portkey virtual key for a specific provider.
-    
+
     Args:
         provider: LLM provider
-        
+
     Returns:
         Virtual key for the provider, or None if not configured
     """

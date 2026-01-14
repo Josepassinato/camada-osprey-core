@@ -37,7 +37,9 @@ async def download_package_by_case_id(case_id: str):
                 break
 
         if not file_path or not os.path.exists(file_path):
-            logger.warning(f"Arquivo do pacote não encontrado para case {case_id}. Gerando PDF básico.")
+            logger.warning(
+                f"Arquivo do pacote não encontrado para case {case_id}. Gerando PDF básico."
+            )
 
             try:
                 from reportlab.lib.pagesizes import letter
@@ -79,7 +81,9 @@ async def download_package_by_case_id(case_id: str):
                         c.drawString(1.2 * inch, y_position, f"Email: {basic_data['email']}")
                         y_position -= 0.25 * inch
                     if basic_data.get("country_of_birth"):
-                        c.drawString(1.2 * inch, y_position, f"País: {basic_data['country_of_birth']}")
+                        c.drawString(
+                            1.2 * inch, y_position, f"País: {basic_data['country_of_birth']}"
+                        )
 
                 c.setFont("Helvetica-Oblique", 9)
                 c.drawString(1 * inch, 1 * inch, "Este é um documento gerado automaticamente.")
@@ -103,7 +107,10 @@ async def download_package_by_case_id(case_id: str):
             path=file_path,
             media_type="application/pdf",
             filename=filename,
-            headers={"Content-Disposition": f"attachment; filename={filename}", "X-Case-ID": case_id},
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}",
+                "X-Case-ID": case_id,
+            },
         )
 
     except HTTPException:

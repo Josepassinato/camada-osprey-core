@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class MariaAgent(BaseAgent):
     """
     Maria - Assistente Virtual Osprey
-    
+
     Responsabilidades:
     - Atendimento ao cliente (chat e voz)
     - Apoio emocional com psicologia positiva
@@ -24,13 +24,13 @@ class MariaAgent(BaseAgent):
     - Divulgação e vendas do sistema Osprey
     - Acompanhamento proativo via WhatsApp
     """
-    
+
     def __init__(self, llm_client=None):
         super().__init__(llm_client=llm_client, agent_name="maria")
         self.personality = self._load_personality()
         self.knowledge_base = self._load_knowledge_base()
         self.disclaimers = self._load_disclaimers()
-        
+
     def _load_personality(self) -> Dict[str, Any]:
         """Define a personalidade da Maria"""
         return {
@@ -45,7 +45,7 @@ class MariaAgent(BaseAgent):
                 "Paciente e compreensiva",
                 "Profissional mas próxima",
                 "Conhecedora dos processos USCIS",
-                "Treinada em psicologia positiva"
+                "Treinada em psicologia positiva",
             ],
             "communication_style": {
                 "greetings": ["Olá", "Oi", "Que bom te ver", "Seja bem-vindo(a)"],
@@ -55,17 +55,17 @@ class MariaAgent(BaseAgent):
                     "Entendo como você se sente",
                     "É totalmente normal sentir isso",
                     "Você não está sozinho(a) nessa jornada",
-                    "Estou aqui para te apoiar"
+                    "Estou aqui para te apoiar",
                 ],
                 "motivation_phrases": [
                     "Você está indo muito bem!",
                     "Cada passo te aproxima do seu objetivo",
                     "Acredito em você!",
-                    "Você é capaz de realizar esse sonho"
-                ]
-            }
+                    "Você é capaz de realizar esse sonho",
+                ],
+            },
         }
-    
+
     def _load_knowledge_base(self) -> Dict[str, Any]:
         """Carrega base de conhecimento USCIS e Osprey"""
         return {
@@ -80,8 +80,8 @@ class MariaAgent(BaseAgent):
                     "I-765 (EAD)",
                     "I-90 (Green Card)",
                     "EB-2 NIW",
-                    "EB-1A"
-                ]
+                    "EB-1A",
+                ],
             },
             "osprey_benefits": [
                 "Sistema guiado passo a passo",
@@ -91,25 +91,25 @@ class MariaAgent(BaseAgent):
                 "Mais rápido que fazer sozinho",
                 "QA automático (85-96% score)",
                 "Suporte contínuo da Maria",
-                "Base de conhecimento USCIS completa"
+                "Base de conhecimento USCIS completa",
             ],
             "emotional_support": {
                 "anxiety": [
                     "É normal sentir ansiedade durante o processo de imigração.",
                     "Respirar fundo pode ajudar: inspire por 4s, segure 4s, expire 4s.",
                     "Foque no que você pode controlar: preparar documentos, seguir instruções.",
-                    "Lembre-se: você já deu o primeiro passo!"
+                    "Lembre-se: você já deu o primeiro passo!",
                 ],
                 "frustration": [
                     "Entendo sua frustração. O processo pode ser longo e complexo.",
                     "Você não está sozinho. Já ajudei centenas de pessoas que sentiram o mesmo.",
-                    "Vamos resolver isso juntos, um passo de cada vez."
+                    "Vamos resolver isso juntos, um passo de cada vez.",
                 ],
                 "celebration": [
                     "Parabéns! 🎉 Cada documento enviado é uma vitória!",
                     "Você está fazendo um trabalho incrível!",
-                    "Continue assim! Você está cada vez mais perto!"
-                ]
+                    "Continue assim! Você está cada vez mais perto!",
+                ],
             },
             "timelines": {
                 "I-539": "4-8 meses",
@@ -119,10 +119,10 @@ class MariaAgent(BaseAgent):
                 "I-765": "3-8 meses",
                 "I-90": "8-12 meses",
                 "EB-2 NIW": "12-18 meses",
-                "EB-1A": "8-12 meses"
-            }
+                "EB-1A": "8-12 meses",
+            },
         }
-    
+
     def _load_disclaimers(self) -> Dict[str, str]:
         """Disclaimers legais"""
         return {
@@ -139,21 +139,21 @@ class MariaAgent(BaseAgent):
             "prediction": (
                 "⚠️ Não posso prever resultados de casos individuais. Cada caso é único e "
                 "analisado pelo USCIS de acordo com seus próprios critérios."
-            )
+            ),
         }
-    
+
     async def process(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Process user message and return Maria's response
-        
+
         This is the main entry point for the BaseAgent interface.
-        
+
         Args:
             input_data: Dict containing:
                 - message: User's message
                 - user_context: Optional user context (name, visa_type, etc.)
                 - conversation_history: Optional conversation history
-        
+
         Returns:
             Dict containing:
                 - response: Maria's response text
@@ -164,50 +164,48 @@ class MariaAgent(BaseAgent):
         user_message = input_data.get("message", "")
         user_context = input_data.get("user_context", {})
         conversation_history = input_data.get("conversation_history", [])
-        
+
         # Detect special cases
         emotion = self._detect_emotion(user_message)
         requires_legal = self._detect_legal_question(user_message)
         requires_prediction = self._detect_prediction_question(user_message)
-        
+
         # Build messages for LLM
         system_prompt = self.get_system_prompt()
         messages = self._build_messages(
             system_prompt=system_prompt,
             user_message=user_message,
-            conversation_history=conversation_history
+            conversation_history=conversation_history,
         )
-        
+
         try:
             # Call LLM
             response_text = await self._call_llm(
-                messages=messages,
-                model=self.default_model,
-                temperature=self.default_temperature
+                messages=messages, model=self.default_model, temperature=self.default_temperature
             )
-            
+
             return {
                 "response": response_text,
                 "emotion_detected": emotion,
                 "requires_legal_advice": requires_legal,
                 "requires_prediction": requires_prediction,
-                "success": True
+                "success": True,
             }
-            
+
         except Exception as e:
             logger.error(f"Error in Maria process: {e}")
             # Fallback to rule-based response
             fallback_response = self._generate_fallback_response(user_message, user_context)
-            
+
             return {
                 "response": fallback_response,
                 "emotion_detected": emotion,
                 "requires_legal_advice": requires_legal,
                 "requires_prediction": requires_prediction,
                 "success": False,
-                "error": str(e)
+                "error": str(e),
             }
-    
+
     def get_system_prompt(self) -> str:
         """Gera o system prompt para o GPT"""
         return f"""Você é a Maria, a assistente virtual da Osprey - uma plataforma de imigração americana.
@@ -289,23 +287,25 @@ Que tal começarmos? Em que posso te ajudar especificamente hoje?"
 
 Seja sempre assim: empática, motivacional e útil! 💙
 """
-    
-    async def chat(self, user_message: str, conversation_history: List[Dict] = None, user_context: Dict = None) -> Dict[str, Any]:
+
+    async def chat(
+        self, user_message: str, conversation_history: List[Dict] = None, user_context: Dict = None
+    ) -> Dict[str, Any]:
         """
         Processa mensagem do usuário e retorna resposta da Maria
-        
+
         Args:
             user_message: Mensagem do usuário
             conversation_history: Histórico da conversa
             user_context: Contexto do usuário (nome, caso, etc.)
-        
+
         Returns:
             Dict com resposta, tipo, disclaimer se necessário
         """
         try:
             # Preparar system prompt
             system_prompt = self.get_system_prompt()
-            
+
             # Adicionar contexto do usuário se disponível
             if user_context:
                 context_msg = f"""\n\n## CONTEXTO DO USUÁRIO
@@ -315,102 +315,137 @@ Progresso: {user_context.get('progress', '0')}%
 Status do Caso: {user_context.get('case_status', 'Iniciando')}
 """
                 system_prompt += context_msg
-            
+
             # Preparar mensagens para LLM
-            messages = [
-                ChatMessage(role=MessageRole.SYSTEM, content=system_prompt)
-            ]
-            
+            messages = [ChatMessage(role=MessageRole.SYSTEM, content=system_prompt)]
+
             # Adicionar histórico
             if conversation_history:
                 for msg in conversation_history[-10:]:  # Últimas 10 mensagens
                     role = MessageRole.USER if msg.get("role") == "user" else MessageRole.ASSISTANT
                     messages.append(ChatMessage(role=role, content=msg.get("content", "")))
-            
+
             # Adicionar mensagem atual do usuário
             messages.append(ChatMessage(role=MessageRole.USER, content=user_message))
-            
+
             # Chamar LLM via abstraction layer
             try:
                 maria_response = await self._call_llm(
                     messages=[msg.model_dump() for msg in messages],
                     model="gemini-2.0-flash-exp",  # Gemini é mais natural para conversação
                     temperature=0.8,  # Mais criativa para conversação
-                    max_tokens=1000
+                    max_tokens=1000,
                 )
             except Exception as llm_error:
                 logger.error(f"⚠️ LLM call failed: {llm_error}")
                 # Fallback inteligente se LLM falhar
                 maria_response = self._generate_fallback_response(user_message, user_context)
-            
+
             # Detectar se precisa de disclaimer adicional
             needs_legal_disclaimer = self._detect_legal_question(user_message)
             needs_prediction_disclaimer = self._detect_prediction_question(user_message)
-            
+
             result = {
                 "response": maria_response,
                 "needs_disclaimer": needs_legal_disclaimer or needs_prediction_disclaimer,
-                "disclaimer_type": "legal" if needs_legal_disclaimer else "prediction" if needs_prediction_disclaimer else None,
-                "disclaimer_text": self.disclaimers.get("legal_question" if needs_legal_disclaimer else "prediction") if (needs_legal_disclaimer or needs_prediction_disclaimer) else None,
+                "disclaimer_type": (
+                    "legal"
+                    if needs_legal_disclaimer
+                    else "prediction" if needs_prediction_disclaimer else None
+                ),
+                "disclaimer_text": (
+                    self.disclaimers.get(
+                        "legal_question" if needs_legal_disclaimer else "prediction"
+                    )
+                    if (needs_legal_disclaimer or needs_prediction_disclaimer)
+                    else None
+                ),
                 "emotion_detected": self._detect_emotion(user_message),
-                "timestamp": datetime.now(timezone.utc).isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
-            
+
             return result
-            
+
         except Exception as e:
             logger.error(f"❌ Erro no chat com Maria: {e}")
             return {
                 "response": "Desculpe, tive um probleminha técnico 😅 Pode tentar novamente?",
                 "error": str(e),
-                "timestamp": datetime.now(timezone.utc).isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
-    
+
     def _detect_legal_question(self, message: str) -> bool:
         """Detecta se a pergunta requer aconselhamento jurídico"""
         legal_keywords = [
-            "devo", "posso", "preciso", "tenho que", "sou obrigado",
-            "vai ser aprovado", "vou ser negado", "o que fazer se",
-            "interpretar", "lei diz", "regulamento", "meu caso",
-            "specific to my situation", "legal advice"
+            "devo",
+            "posso",
+            "preciso",
+            "tenho que",
+            "sou obrigado",
+            "vai ser aprovado",
+            "vou ser negado",
+            "o que fazer se",
+            "interpretar",
+            "lei diz",
+            "regulamento",
+            "meu caso",
+            "specific to my situation",
+            "legal advice",
         ]
         message_lower = message.lower()
         return any(keyword in message_lower for keyword in legal_keywords)
-    
+
     def _detect_prediction_question(self, message: str) -> bool:
         """Detecta se a pergunta pede previsão de resultado"""
         prediction_keywords = [
-            "vou ser aprovado", "vou conseguir", "chances de",
-            "probabilidade", "vai dar certo", "será que",
-            "will i get approved", "chances are"
+            "vou ser aprovado",
+            "vou conseguir",
+            "chances de",
+            "probabilidade",
+            "vai dar certo",
+            "será que",
+            "will i get approved",
+            "chances are",
         ]
         message_lower = message.lower()
         return any(keyword in message_lower for keyword in prediction_keywords)
-    
+
     def _detect_emotion(self, message: str) -> Optional[str]:
         """Detecta emoção na mensagem do usuário"""
         message_lower = message.lower()
-        
+
         # Ansiedade
-        if any(word in message_lower for word in ["ansioso", "nervoso", "preocupado", "medo", "anxious", "worried"]):
+        if any(
+            word in message_lower
+            for word in ["ansioso", "nervoso", "preocupado", "medo", "anxious", "worried"]
+        ):
             return "anxiety"
-        
+
         # Frustração
-        if any(word in message_lower for word in ["frustrado", "cansado", "difícil", "complicado", "frustrated"]):
+        if any(
+            word in message_lower
+            for word in ["frustrado", "cansado", "difícil", "complicado", "frustrated"]
+        ):
             return "frustration"
-        
+
         # Felicidade/Progresso
-        if any(word in message_lower for word in ["consegui", "terminei", "completei", "obrigado", "thanks"]):
+        if any(
+            word in message_lower
+            for word in ["consegui", "terminei", "completei", "obrigado", "thanks"]
+        ):
             return "celebration"
-        
+
         return None
-    
+
     def _generate_fallback_response(self, user_message: str, user_context: Dict = None) -> str:
         """Gera resposta inteligente quando Gemini não está disponível"""
         message_lower = user_message.lower()
-        
+
         # Saudações
-        if any(word in message_lower for word in ["olá", "oi", "hello", "hi", "bom dia", "boa tarde", "boa noite"]):
+        if any(
+            word in message_lower
+            for word in ["olá", "oi", "hello", "hi", "bom dia", "boa tarde", "boa noite"]
+        ):
             name = user_context.get("name", "amigo(a)") if user_context else "amigo(a)"
             return f"""Olá {name}! 👋 Que bom te ver aqui!
 
@@ -423,9 +458,12 @@ Como posso te ajudar hoje? Posso:
 ✅ Explicar os benefícios da Osprey
 
 É só me perguntar! 😊"""
-        
+
         # Ansiedade/Preocupação
-        if any(word in message_lower for word in ["ansioso", "nervoso", "preocupado", "medo", "anxious"]):
+        if any(
+            word in message_lower
+            for word in ["ansioso", "nervoso", "preocupado", "medo", "anxious"]
+        ):
             return """Entendo completamente como você se sente 😊 A ansiedade é uma reação totalmente normal durante o processo de imigração.
 
 Algumas dicas que podem ajudar:
@@ -436,7 +474,7 @@ Algumas dicas que podem ajudar:
 Lembre-se: você não está sozinho nessa jornada! Estou aqui para te apoiar. 💙
 
 Quer conversar sobre alguma etapa específica que te preocupa?"""
-        
+
         # Perguntas sobre processo
         if "quanto tempo" in message_lower or "prazo" in message_lower or "demora" in message_lower:
             return """Os prazos de processamento variam bastante por tipo de visto:
@@ -444,13 +482,13 @@ Quer conversar sobre alguma etapa específica que te preocupa?"""
 ⏱️ **Timelines estimados**:
 - I-539 (B-2): 4-8 meses
 - F-1: Varia (consulado)
-- I-130: 10-24 meses  
+- I-130: 10-24 meses
 - I-765: 3-8 meses
 
 ⚠️ Importante: Esses são prazos gerais. Cada caso é único e pode variar.
 
 Quer saber mais sobre algum visto específico?"""
-        
+
         # Perguntas sobre Osprey
         if "osprey" in message_lower or "preço" in message_lower or "custo" in message_lower:
             return """A Osprey é uma plataforma incrível que te ajuda com imigração! 🦅
@@ -464,7 +502,7 @@ Quer saber mais sobre algum visto específico?"""
 Muito mais acessível que outras formas convencionais, com qualidade profissional!
 
 Posso te explicar mais sobre como funciona?"""
-        
+
         # Resposta padrão motivacional
         return f"""Obrigada por sua mensagem! 😊
 
@@ -479,12 +517,12 @@ Posso te explicar mais sobre como funciona?"""
 {self.disclaimers['initial']}
 
 Pode me fazer suas perguntas! Vou fazer o meu melhor para te ajudar. 💙"""
-    
+
     def get_welcome_message(self, user_name: str = None, visa_type: str = None) -> str:
         """Gera mensagem de boas-vindas personalizada"""
         name = user_name if user_name else "amigo(a)"
         visa_info = f"sua aplicação de {visa_type}" if visa_type else "sua jornada de imigração"
-        
+
         return f"""Olá {name}! 👋 Eu sou a Maria, sua assistente pessoal da Osprey!
 
 Vi que você iniciou {visa_info} e estou aqui para te apoiar em cada etapa dessa jornada. 🌟
@@ -495,7 +533,7 @@ Pode contar comigo para:
 ✅ Lembrar de prazos importantes
 ✅ Explicar cada passo do caminho
 
-Sempre que precisar, é só me chamar! 
+Sempre que precisar, é só me chamar!
 
 {self.disclaimers['initial']}
 

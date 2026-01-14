@@ -43,9 +43,13 @@ async def startup_db_client():
     global client, db, alert_system, visa_scheduler
 
     try:
-        mongo_url = os.environ.get("MONGODB_URI") or os.environ.get("MONGO_URL", "mongodb://localhost:27017/")
+        mongo_url = os.environ.get("MONGODB_URI") or os.environ.get(
+            "MONGO_URL", "mongodb://localhost:27017/"
+        )
         client = AsyncIOMotorClient(mongo_url)
-        db_obj = client[os.environ.get("MONGODB_DB") or os.environ.get("DB_NAME", "osprey_immigration_db")]
+        db_obj = client[
+            os.environ.get("MONGODB_DB") or os.environ.get("DB_NAME", "osprey_immigration_db")
+        ]
         db.set(db_obj)
 
         await client.admin.command("ping")
@@ -92,12 +96,17 @@ async def shutdown_db_client():
 
 async def _create_indexes(db):
     try:
+
         async def safe_create_index(collection, keys, **kwargs):
             try:
                 await collection.create_index(keys, **kwargs)
             except Exception as e:
                 error_msg = str(e)
-                if "already exists" not in error_msg.lower() and "IndexOptionsConflict" not in error_msg and "IndexKeySpecsConflict" not in error_msg:
+                if (
+                    "already exists" not in error_msg.lower()
+                    and "IndexOptionsConflict" not in error_msg
+                    and "IndexKeySpecsConflict" not in error_msg
+                ):
                     logger.warning(f"Error creating index {keys} on {collection.name}: {error_msg}")
 
         await safe_create_index(db.auto_cases, "case_id", unique=True)
@@ -137,7 +146,9 @@ async def _create_indexes(db):
         await safe_create_index(db.owl_users, "user_id", unique=True)
         await safe_create_index(db.owl_users, "created_at")
 
-        await safe_create_index(db.payment_transactions, "stripe_session_id", unique=True, sparse=True)
+        await safe_create_index(
+            db.payment_transactions, "stripe_session_id", unique=True, sparse=True
+        )
         await safe_create_index(db.payment_transactions, "owl_session_id")
         await safe_create_index(db.payment_transactions, "user_email")
         await safe_create_index(db.payment_transactions, "payment_status")
@@ -179,6 +190,7 @@ async def _start_backup_scheduler():
         mongo_url = os.environ.get("MONGODB_URI") or os.environ.get("MONGO_URL", "")
         if "localhost" in mongo_url or "127.0.0.1" in mongo_url:
             from backend.scripts.mongodb_backup import mongodb_backup
+
             if mongodb_backup.enabled:
                 asyncio.create_task(mongodb_backup.schedule_daily_backup())
                 logger.info("✅ MongoDB Backup Scheduler started (daily at 3AM UTC)")
@@ -193,6 +205,7 @@ async def _start_backup_scheduler():
 async def _start_rate_limiter_cleanup():
     try:
         from backend.utils.rate_limiter import rate_limiter
+
         asyncio.create_task(rate_limiter.cleanup_old_entries())
         logger.info("✅ Rate Limiter cleanup task started")
     except Exception as rate_limiter_error:

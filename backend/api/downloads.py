@@ -82,9 +82,11 @@ async def list_downloads():
                 {
                     "filename": filename,
                     "size": size,
-                    "size_human": f"{size / 1024:.1f} KB"
-                    if size < 1024 * 1024
-                    else f"{size / (1024 * 1024):.1f} MB",
+                    "size_human": (
+                        f"{size / 1024:.1f} KB"
+                        if size < 1024 * 1024
+                        else f"{size / (1024 * 1024):.1f} MB"
+                    ),
                     "download_url": f"/api/download/package/{filename}",
                 }
             )

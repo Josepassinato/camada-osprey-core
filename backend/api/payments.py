@@ -69,7 +69,7 @@ async def create_payment_intent_endpoint(request: Request):
                             "voucher_code": "TESTING_MODE",
                             "payment_date": datetime.now(timezone.utc),
                             "method": "testing_bypass",
-                        }
+                        },
                     }
                 },
             )
@@ -104,7 +104,9 @@ async def create_payment_intent_endpoint(request: Request):
                 final_price = original_price * (1 - discount_percentage / 100)
                 voucher_applied = voucher_code
                 await increment_voucher_usage(voucher_code, db)
-                logger.info(f"✅ Voucher {voucher_code} aplicado: {discount_percentage}% de desconto")
+                logger.info(
+                    f"✅ Voucher {voucher_code} aplicado: {discount_percentage}% de desconto"
+                )
             else:
                 logger.warning(f"⚠️  Voucher {voucher_code} inválido: {validation_result.message}")
 
@@ -138,7 +140,7 @@ async def create_payment_intent_endpoint(request: Request):
                             "voucher_code": voucher_code,
                             "payment_date": datetime.now(timezone.utc),
                             "method": "free_voucher",
-                        }
+                        },
                     }
                 },
             )
@@ -265,7 +267,7 @@ async def create_payment_checkout(request: Request):
                             "payment_date": datetime.now(timezone.utc),
                             "method": "testing_bypass",
                             "session_id": fake_session_id,
-                        }
+                        },
                     }
                 },
             )
@@ -285,7 +287,9 @@ async def create_payment_checkout(request: Request):
             raise HTTPException(status_code=503, detail="Stripe API key not configured")
 
         frontend_url = os.environ.get("REACT_APP_BACKEND_URL", "http://localhost:3000")
-        success_url = f"{frontend_url}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&case_id={case_id}"
+        success_url = (
+            f"{frontend_url}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&case_id={case_id}"
+        )
         cancel_url = f"{frontend_url}/payment/cancel?case_id={case_id}"
 
         result = await create_checkout_session(
@@ -298,7 +302,9 @@ async def create_payment_checkout(request: Request):
         )
 
         if not result.get("success"):
-            raise HTTPException(status_code=400, detail=result.get("error", "Erro ao criar checkout"))
+            raise HTTPException(
+                status_code=400, detail=result.get("error", "Erro ao criar checkout")
+            )
 
         return result
 
@@ -318,7 +324,9 @@ async def get_payment_status(session_id: str):
 
         result = await verify_payment_status(session_id, db)
         if not result.get("success"):
-            raise HTTPException(status_code=400, detail=result.get("error", "Erro ao verificar pagamento"))
+            raise HTTPException(
+                status_code=400, detail=result.get("error", "Erro ao verificar pagamento")
+            )
 
         return result
 
@@ -383,7 +391,12 @@ async def get_visa_package_info(visa_code: str, voucher_code: Optional[str] = No
 
         price_info = calculate_final_price(visa_code, discount_percentage)
 
-        return {"success": True, "package": package, "price_info": price_info, "voucher_info": voucher_info}
+        return {
+            "success": True,
+            "package": package,
+            "price_info": price_info,
+            "voucher_info": voucher_info,
+        }
 
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

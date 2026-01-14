@@ -89,7 +89,9 @@ async def generate_uscis_form(case_id: str):
 
         logger.info(f"💾 PDF saved to disk: {pdf_path}")
 
-        collection = db.application_cases if case_collection == "application_cases" else db.auto_cases
+        collection = (
+            db.application_cases if case_collection == "application_cases" else db.auto_cases
+        )
         await collection.update_one(
             {"case_id": case_id},
             {
@@ -142,7 +144,9 @@ async def download_uscis_form(case_id: str):
 
         generated_form = case.get("generated_form")
         if not generated_form:
-            raise HTTPException(status_code=404, detail="Form not generated yet. Please call /generate-form first.")
+            raise HTTPException(
+                status_code=404, detail="Form not generated yet. Please call /generate-form first."
+            )
 
         pdf_base64 = generated_form.get("content_base64")
         pdf_bytes = base64.b64decode(pdf_base64)

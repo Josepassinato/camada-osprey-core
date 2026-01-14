@@ -8,18 +8,18 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Set environment variables
-os.environ['LOG_LEVEL'] = 'INFO'
-os.environ['LOG_FORMAT'] = 'plain'
-os.environ['LOG_PRETTY'] = 'true'
+os.environ["LOG_LEVEL"] = "INFO"
+os.environ["LOG_FORMAT"] = "plain"
+os.environ["LOG_PRETTY"] = "true"
 
 # Setup logging first
 from backend.core.logging import setup_logging
 
 logger = setup_logging()
 
-print("\n" + "="*60)
+print("\n" + "=" * 60)
 print("Testing Google Document AI Initialization")
-print("="*60 + "\n")
+print("=" * 60 + "\n")
 
 # Import and initialize Google Document AI
 from backend.integrations.google.document_ai import (
@@ -39,6 +39,6 @@ _ = validator.google_processor
 print("\n--- Accessing google_processor property again (should reuse) ---")
 _ = validator.google_processor
 
-print("\n" + "="*60)
+print("\n" + "=" * 60)
 print("✅ Initialization test completed!")
-print("="*60 + "\n")
+print("=" * 60 + "\n")
