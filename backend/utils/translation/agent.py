@@ -4,9 +4,9 @@ Especialidade: Tradução de documentos multilíngues para inglês/português
 """
 
 import logging
-from typing import Dict, List, Optional
-from datetime import datetime, timezone
 import re
+from datetime import datetime, timezone
+from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

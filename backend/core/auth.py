@@ -1,11 +1,11 @@
 import os
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import bcrypt
 import jwt
 from fastapi import Depends, Header, HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 JWT_SECRET = os.environ.get("JWT_SECRET", "osprey-secret-key-change-in-production")
 JWT_ALGORITHM = "HS256"

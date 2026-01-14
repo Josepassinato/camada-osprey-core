@@ -6,14 +6,13 @@ This module provides a safe transition with automatic fallback
 without breaking existing functionality.
 """
 
-import os
 import logging
-from typing import Dict, List, Any, Optional
+import os
+from typing import Any, Dict
 
 from backend.agents.base import BaseAgent
 from backend.agents.dra_paula.gemini_agent import DraPaulaGeminiAgent
 from backend.agents.dra_paula.knowledge_base import dra_paula_knowledge
-from backend.llm.exceptions import LLMException
 
 logger = logging.getLogger(__name__)
 

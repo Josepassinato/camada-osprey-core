@@ -3,14 +3,14 @@ Admin Knowledge Base Management
 Sistema para upload e gerenciamento de documentos PDF para os agentes de IA
 """
 
-import os
-import logging
-from datetime import datetime, timezone
-from typing import List, Dict, Optional
-from pathlib import Path
-import uuid
-import PyPDF2
 import io
+import logging
+import uuid
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Dict, List, Optional
+
+import PyPDF2
 
 logger = logging.getLogger(__name__)
 

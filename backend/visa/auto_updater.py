@@ -3,17 +3,17 @@ Visa Information Auto-Updater System
 Automatically monitors USCIS, State Department, and Federal Register for changes
 """
 
-import asyncio
-import aiohttp
 import json
-import re
-from datetime import datetime, timedelta, timezone
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
-from bs4 import BeautifulSoup
 import logging
-from motor.motor_asyncio import AsyncIOMotorDatabase
+import re
+from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
 from uuid import uuid4
+
+import aiohttp
+from bs4 import BeautifulSoup
+from motor.motor_asyncio import AsyncIOMotorDatabase
 
 # AI Integration for change detection using Portkey
 try:
@@ -500,4 +500,3 @@ class VisaAutoUpdater:
 async def schedule_weekly_updates():
     """Schedule function to be called weekly"""
     # This would be called by a scheduler like APScheduler or Celery
-    pass

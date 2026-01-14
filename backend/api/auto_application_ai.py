@@ -5,12 +5,12 @@ import re
 import uuid
 from datetime import datetime, timezone
 
-from openai import OpenAI
 from fastapi import APIRouter, HTTPException
+from openai import OpenAI
 
-from core.database import db
 from agents.qa import get_qa_agent, get_qa_orchestrator
 from backend.visa.specifications import get_visa_specifications
+from core.database import db
 
 try:
     from emergentintegrations.llm.chat import LlmChat, UserMessage

@@ -3,13 +3,14 @@ Simple Rate Limiter for FastAPI
 Protege APIs contra abuso e ataques DDoS
 """
 
-from fastapi import Request, HTTPException, status
-from starlette.middleware.base import BaseHTTPMiddleware
-from datetime import datetime, timedelta, timezone
-from collections import defaultdict
 import asyncio
-from typing import Dict, Tuple
 import logging
+from collections import defaultdict
+from datetime import datetime, timedelta, timezone
+from typing import Dict
+
+from fastapi import HTTPException, Request, status
+from starlette.middleware.base import BaseHTTPMiddleware
 
 logger = logging.getLogger(__name__)
 

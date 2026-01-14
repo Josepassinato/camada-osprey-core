@@ -5,10 +5,9 @@ Integração não-oficial do WhatsApp para mensagens proativas
 
 import logging
 import os
-import asyncio
-import json
-from typing import Dict, Any, Optional
 from datetime import datetime, timezone
+from typing import Any, Dict, Optional
+
 import aiohttp
 
 logger = logging.getLogger(__name__)

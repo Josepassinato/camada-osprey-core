@@ -5,6 +5,7 @@ Script para criar cupons de desconto no Stripe
 
 import logging
 import os
+
 import stripe
 from dotenv import load_dotenv
 

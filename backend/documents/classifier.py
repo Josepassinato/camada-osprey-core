@@ -2,11 +2,11 @@
 Automated Document Classification System
 Content-based automatic document classification system
 """
-import re
-from typing import Dict, List, Any, Optional, Tuple
-import logging
-from collections import Counter
 import json
+import logging
+import re
+from collections import Counter
+from typing import Any, Dict, List, Optional
 
 from backend.agents.base import BaseAgent
 from backend.llm.portkey_client import LLMClient

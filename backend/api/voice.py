@@ -43,7 +43,7 @@ async def validate_form_step(request: dict):
         if not step_id:
             raise HTTPException(status_code=400, detail="stepId is required")
 
-        from validate_endpoint import form_validator
+        from backend.utils.form_validator import form_validator
 
         result = form_validator.validate_step(step_id, form_data)
 

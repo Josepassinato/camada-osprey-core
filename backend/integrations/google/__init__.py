@@ -6,7 +6,11 @@ Contains integrations with Google services:
 - Vision API for image analysis
 """
 
-from .document_ai import GoogleDocumentAIProcessor, HybridDocumentValidator, hybrid_validator
+from .document_ai import (
+    GoogleDocumentAIProcessor,
+    HybridDocumentValidator,
+    hybrid_validator,
+)
 
 __all__ = [
     "GoogleDocumentAIProcessor",

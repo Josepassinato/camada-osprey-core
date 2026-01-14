@@ -3,13 +3,10 @@ Sistema de Alertas Proativos Inteligentes
 Monitora aplicações e gera alertas contextuais para guiar usuários
 """
 
-import os
-import json
 import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from enum import Enum
-from bson import ObjectId
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -158,7 +155,7 @@ class ProactiveAlertSystem:
         alerts = []
         
         progress = case.get("progress", 0)
-        status = case.get("status", "")
+        case.get("status", "")
         updated_at = case.get("updated_at")
         
         # Verificar se usuário parou no meio

@@ -1,8 +1,8 @@
-import re
-from datetime import datetime, date
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
 import logging
+import re
+from dataclasses import dataclass
+from datetime import date, datetime
+from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 
@@ -38,9 +38,7 @@ class FormValidator:
     def validate_step(self, step_id: str, form_data: Dict[str, Any]) -> ValidateResult:
         """Validate form data for a specific step"""
         try:
-            errors = []
-            missing_required = []
-            suggestions = []
+            pass
             
             if step_id == "personal":
                 return self._validate_personal_info(form_data)

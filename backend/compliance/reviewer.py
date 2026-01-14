@@ -18,9 +18,8 @@ RESULTADO: Apenas libera para download se 100% conforme
 import logging
 import os
 import re
-from typing import Dict, List, Tuple, Optional
 from datetime import datetime, timedelta
-import hashlib
+from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

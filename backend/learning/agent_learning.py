@@ -4,12 +4,9 @@ Os agentes construtores aprendem com cada correção do QA Agent
 e evitam repetir os mesmos erros em processos futuros
 """
 
-import os
 import logging
-from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta, timezone
-from collections import defaultdict
-import json
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -345,7 +342,7 @@ class AgentLearningSystem:
         
         # Verificar dados do caso para calcular risco
         basic_data = case_data.get('basic_data', {})
-        form_responses = case_data.get('simplified_form_responses', {})
+        case_data.get('simplified_form_responses', {})
         documents = case_data.get('documents', [])
         
         # Risco de missing_field

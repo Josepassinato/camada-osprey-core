@@ -4,17 +4,18 @@ Endpoints para chat com a assistente virtual Maria
 """
 
 import logging
-from fastapi import APIRouter, HTTPException, Depends, Request
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-from datetime import datetime, timezone
 import uuid
+from datetime import datetime, timezone
+from typing import Optional
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
 from .agent import maria
-from .whatsapp import maria_whatsapp
 from .voice import maria_voice
+from .whatsapp import maria_whatsapp
 
 router = APIRouter(prefix="/api/maria", tags=["maria"])
 

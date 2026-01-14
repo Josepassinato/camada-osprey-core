@@ -4,12 +4,12 @@ Gerencia documentos de referência, templates e padrões
 NÃO fornece aconselhamento jurídico - apenas organização interna
 """
 
+import io
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
+
 import PyPDF2
-import io
-import json
-import re
+
 
 class KnowledgeBaseManager:
     """Gerenciador da Base de Conhecimento Interna"""
@@ -70,7 +70,7 @@ class KnowledgeBaseManager:
         }
         
         # Inserir no banco
-        result = await self.collection.insert_one(document)
+        await self.collection.insert_one(document)
         
         return {
             "success": True,
@@ -120,7 +120,7 @@ class KnowledgeBaseManager:
         required_docs = []
         for doc in docs:
             # Tentar extrair lista de documentos do texto
-            text = doc.get('extracted_text', '')
+            doc.get('extracted_text', '')
             # Você pode melhorar isso com regex ou parsers específicos
             required_docs.append({
                 "source_document": doc['filename'],

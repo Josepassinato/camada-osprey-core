@@ -10,7 +10,7 @@ Mapeamento:
 - Seções organizadas logicamente para o usuário
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 def get_i539_friendly_form_structure() -> Dict[str, Any]:

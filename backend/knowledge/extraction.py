@@ -5,12 +5,13 @@ This ONLY reads data, doesn't modify anything
 Run this to backup all knowledge from Dra. Paula's OpenAI Assistant
 """
 
-import os
-import json
 import asyncio
-from datetime import datetime, timezone
-from openai import AsyncOpenAI
+import json
 import logging
+import os
+from datetime import datetime, timezone
+
+from openai import AsyncOpenAI
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

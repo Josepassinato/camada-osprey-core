@@ -1,13 +1,19 @@
 import logging
 import os
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 
 from core.auth import create_jwt_token, get_current_user, hash_password, verify_password
 from core.database import db
-from models.user import UserCreate, UserLogin, UserProfile, UserProfileUpdate, UserProgress
+from models.user import (
+    UserCreate,
+    UserLogin,
+    UserProfile,
+    UserProfileUpdate,
+    UserProgress,
+)
 
 logger = logging.getLogger(__name__)
 

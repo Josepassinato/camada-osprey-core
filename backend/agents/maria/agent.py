@@ -4,10 +4,8 @@ Agente de atendimento motivacional com psicologia positiva
 """
 
 import logging
-import os
-import json
-from typing import Dict, List, Any, Optional
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 
 from agents.base import BaseAgent
 from llm.types import ChatMessage, MessageRole

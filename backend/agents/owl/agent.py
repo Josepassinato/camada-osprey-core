@@ -7,19 +7,17 @@ validation, and multi-language support.
 Migrated from intelligent_owl_agent.py to backend/agents/owl/agent.py
 """
 
-import os
-import logging
 import json
-import asyncio
-from typing import Dict, Any, List, Optional, Tuple
-from datetime import datetime
+import logging
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
-from ..base import BaseAgent
+from ...llm.exceptions import LLMException
 from ...llm.portkey_client import LLMClient
 from ...llm.types import ChatMessage, MessageRole
-from ...llm.exceptions import LLMException
+from ..base import BaseAgent
 
 logger = logging.getLogger(__name__)
 
@@ -783,10 +781,11 @@ class IntelligentOwlAgent(BaseAgent):
         if rules.get("format") == "date" and user_input.strip():
             try:
                 from datetime import datetime
+
                 # Try multiple date formats
                 for fmt in ["%d/%m/%Y", "%Y-%m-%d", "%m/%d/%Y"]:
                     try:
-                        date_obj = datetime.strptime(user_input, fmt)
+                        datetime.strptime(user_input, fmt)
                         break
                     except ValueError:
                         continue
@@ -861,7 +860,7 @@ class IntelligentOwlAgent(BaseAgent):
     async def _validate_phone_with_google(self, phone: str) -> Dict[str, Any]:
         """Validate phone number format"""
         import re
-        
+
         # Basic phone validation
         phone_patterns = [
             r'^\+55\s?\(?\d{2}\)?\s?\d{4,5}-?\d{4}$',  # Brazilian format
@@ -880,7 +879,7 @@ class IntelligentOwlAgent(BaseAgent):
     async def _validate_email_with_google(self, email: str) -> Dict[str, Any]:
         """Validate email format and deliverability"""
         import re
-        
+
         # Basic email validation
         email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         is_valid = re.match(email_pattern, email) is not None

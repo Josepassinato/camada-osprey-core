@@ -4,12 +4,9 @@ Preenche formulário I-129 usando sistema de overlay com coordenadas fixas
 Resolve o problema de PDFs não-editáveis (O-1, H-1B, L-1)
 """
 
-import io
 import logging
-from typing import Dict, Any, Optional
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-from PyPDF2 import PdfReader, PdfWriter
+from typing import Any, Dict
+
 import fitz  # PyMuPDF
 
 logger = logging.getLogger(__name__)

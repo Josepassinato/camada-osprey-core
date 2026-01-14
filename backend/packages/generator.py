@@ -3,17 +3,25 @@ Sistema de Geração de Pacote Final para USCIS
 Gera todos os documentos necessários para envio
 """
 
-import os
-from datetime import datetime
-from typing import Dict, List, Any
-from reportlab.lib.pagesizes import letter
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
-import zipfile
 import io
+import zipfile
+from datetime import datetime
+from typing import Dict
+
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.units import inch
+from reportlab.platypus import (
+    PageBreak,
+    Paragraph,
+    SimpleDocTemplate,
+    Spacer,
+    Table,
+    TableStyle,
+)
+
 
 class USCISPackageGenerator:
     """Gera pacote completo para envio ao USCIS"""

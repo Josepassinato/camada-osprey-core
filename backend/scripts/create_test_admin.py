@@ -2,14 +2,15 @@
 Script automatizado para criar usuário admin de teste
 """
 
-import logging
 import asyncio
+import logging
 import os
-from datetime import datetime, timezone
-from motor.motor_asyncio import AsyncIOMotorClient
-from dotenv import load_dotenv
-import bcrypt
 import uuid
+from datetime import datetime, timezone
+
+import bcrypt
+from dotenv import load_dotenv
+from motor.motor_asyncio import AsyncIOMotorClient
 
 logger = logging.getLogger(__name__)
 

@@ -4,7 +4,8 @@ Facilita consulta de documentos durante o processamento
 """
 
 import logging
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
+
 from backend.knowledge.manager import KnowledgeBaseManager
 
 logger = logging.getLogger(__name__)

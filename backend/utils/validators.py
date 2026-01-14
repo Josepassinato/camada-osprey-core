@@ -5,7 +5,7 @@ from __future__ import annotations
 # validador de receipt USCIS (I-797) e verificador de SSN "válido".
 import logging
 import re
-from datetime import datetime, date
+from datetime import date, datetime
 
 logger = logging.getLogger(__name__)
 

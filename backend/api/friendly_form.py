@@ -3,14 +3,13 @@ import logging
 import os
 import re
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from backend.visa.specifications import get_visa_specifications
 from core.auth import get_current_user_optional
 from core.database import db
 from services.cases import update_case_status_and_progress
-from backend.visa.specifications import get_visa_specifications
 
 logger = logging.getLogger(__name__)
 

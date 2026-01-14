@@ -3,15 +3,16 @@ Script para criar usuário admin no MongoDB
 Uso: python create_admin_user.py
 """
 
-import logging
 import asyncio
+import logging
 import os
 import sys
-from datetime import datetime, timezone
-from motor.motor_asyncio import AsyncIOMotorClient
-from dotenv import load_dotenv
-import bcrypt
 import uuid
+from datetime import datetime, timezone
+
+import bcrypt
+from dotenv import load_dotenv
+from motor.motor_asyncio import AsyncIOMotorClient
 
 logger = logging.getLogger(__name__)
 

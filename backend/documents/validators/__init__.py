@@ -6,12 +6,12 @@ This package contains specialized document validators for different document typ
 
 try:
     from .specialized import (
-        ValidationResult,
-        PassportValidator,
         I797Validator,
+        PassportValidator,
         TranslationCertificateValidator,
+        ValidationResult,
     )
-except ImportError as e:
+except ImportError:
     # Graceful degradation if imports fail
     ValidationResult = None
     PassportValidator = None

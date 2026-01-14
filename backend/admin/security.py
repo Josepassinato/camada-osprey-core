@@ -4,13 +4,13 @@ Implementa autenticação e autorização para endpoints administrativos
 """
 
 import logging
-from fastapi import HTTPException, Depends, Request
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from typing import Optional, Dict, Any
-from datetime import datetime, timezone
-import jwt
 import os
-from motor.motor_asyncio import AsyncIOMotorClient
+from datetime import datetime, timezone
+from typing import Any, Dict, Optional
+
+import jwt
+from fastapi import Depends, HTTPException, Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 logger = logging.getLogger(__name__)
 

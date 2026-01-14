@@ -5,32 +5,23 @@ Specialized agent for document validation and authenticity checking.
 Dr. Miguel - Expert in forensic document analysis with 15+ years of experience.
 """
 
-import os
 import json
 import logging
-import hashlib
 from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 
 from agents.base import BaseAgent
-from llm.portkey_client import LLMClient
-from llm.types import ChatMessage, MessageRole
-from documents.validation_database import (
-    DOCUMENT_VALIDATION_DATABASE,
-    VISA_DOCUMENT_REQUIREMENTS,
-    get_document_validation_info,
-    get_required_documents_for_visa
+from documents.metrics import (
+    DecisionType,
+    QualityAssessment,
 )
 from documents.recognition import EnhancedDocumentRecognitionAgent
-from documents.metrics import (
-    DocumentAnalysisKPIs,
-    DocumentMetrics,
-    AdvancedFieldValidators,
-    QualityAssessment,
-    ConsistencyChecker,
-    DecisionType
+from documents.validation_database import (
+    get_document_validation_info,
+    get_required_documents_for_visa,
 )
 from documents.validators.specialized import create_specialized_validators
+from llm.portkey_client import LLMClient
 
 logger = logging.getLogger(__name__)
 
@@ -120,10 +111,10 @@ class DocumentValidationAgent(BaseAgent):
     def get_system_prompt(self) -> str:
         """Get the system prompt for Dr. Miguel"""
         from agents.dra_paula.knowledge_base import (
+            dra_paula_knowledge,
             get_dra_paula_enhanced_prompt,
-            dra_paula_knowledge
         )
-        
+
         # Get enhanced prompt with Dra. Paula's knowledge
         enhanced_prompt = get_dra_paula_enhanced_prompt("document_validation")
         document_guidance = dra_paula_knowledge.get_document_guidance()

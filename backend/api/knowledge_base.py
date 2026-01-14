@@ -61,7 +61,10 @@ async def list_knowledge_documents(skip: int = 0, limit: int = 50, admin=Depends
 @router.get("/admin/knowledge-base/categories")
 async def get_knowledge_categories(admin=Depends(require_admin)):
     """Retorna categorias disponíveis (admin-only)."""
-    from backend.knowledge.manager import KNOWLEDGE_BASE_CATEGORIES, SUPPORTED_FORM_TYPES
+    from backend.knowledge.manager import (
+        KNOWLEDGE_BASE_CATEGORIES,
+        SUPPORTED_FORM_TYPES,
+    )
 
     return {"categories": KNOWLEDGE_BASE_CATEGORIES, "form_types": SUPPORTED_FORM_TYPES}
 

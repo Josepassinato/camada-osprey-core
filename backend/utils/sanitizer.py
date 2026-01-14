@@ -3,11 +3,12 @@ Input Sanitization and Validation
 Protege contra XSS, SQL Injection, e outras vulnerabilidades
 """
 
-import re
 import html
 import json
-from typing import Any, Dict, List, Union
 import logging
+import re
+from typing import Any, Dict, List, Union
+
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 

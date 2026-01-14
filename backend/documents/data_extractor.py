@@ -4,10 +4,9 @@ Extrai dados de documentos oficiais e corrige automaticamente o cadastro do usu√
 """
 
 import logging
-import json
 import re
-from typing import Dict, Any, Optional, List, Tuple
 from datetime import datetime, timezone
+from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 

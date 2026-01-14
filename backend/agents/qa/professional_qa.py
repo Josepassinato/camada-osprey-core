@@ -4,12 +4,10 @@ Agente de revisão profissional treinado com requisitos USCIS
 Garante que nenhum processo incompleto ou com baixa qualidade seja liberado
 """
 
-import os
 import logging
-from typing import Dict, Any, List, Optional
+import os
 from datetime import datetime, timezone
-from pathlib import Path
-import json
+from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 
@@ -629,7 +627,7 @@ class ProfessionalQAAgent:
         issues = []
         score = 1.0
         
-        critical_checks = requirements.get('critical_checks', [])
+        requirements.get('critical_checks', [])
         
         # 🆕 P1-8: Bypass payment/AI checks in test mode
         if self.test_mode:

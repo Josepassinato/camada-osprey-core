@@ -3,8 +3,8 @@ import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
-from models.documents import DocumentPriority, DocumentType, UserDocument
 from agents.specialized import create_document_validator
+from models.documents import DocumentPriority, DocumentType, UserDocument
 
 logger = logging.getLogger(__name__)
 

@@ -8,13 +8,13 @@ Specializes in:
 - Key information detection
 """
 
-import logging
-from typing import Dict, List, Optional
-from datetime import datetime, timezone
-import re
 import json
+import logging
 import os
+import re
+from datetime import datetime, timezone
 from pathlib import Path
+from typing import Dict, Optional
 
 from agents.base import BaseAgent
 from llm.portkey_client import LLMClient

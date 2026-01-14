@@ -9,12 +9,9 @@ AGORA COM SISTEMA DE APRENDIZADO CONTÍNUO:
 - Aplicam correções preventivas baseadas em histórico
 """
 
-import os
 import logging
-from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime, timezone
-from pathlib import Path
-import json
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -456,7 +453,7 @@ class QAFeedbackOrchestrator:
             fixes_applied = []
             
             basic_data = case_data.get('basic_data', {})
-            form_responses = case_data.get('simplified_form_responses', {})
+            case_data.get('simplified_form_responses', {})
             
             # Aplicar correções básicas
             for problem in problems:
@@ -616,8 +613,8 @@ class QAFeedbackOrchestrator:
         """Corrige problemas específicos de validação USCIS"""
         try:
             # Importar coordinator
-            from agents.specialized.coordinator import SpecializedAgentCoordinator
-            
+            pass
+
             # Análise de problemas críticos do USCIS
             critical_fixes = []
             
@@ -699,7 +696,7 @@ class QAFeedbackOrchestrator:
         if not self.learning_system:
             return
         
-        case_id = case_data.get('case_id')
+        case_data.get('case_id')
         form_code = case_data.get('form_code')
         
         logger.info(f"🧠 Aplicando correções preventivas baseadas em aprendizado...")

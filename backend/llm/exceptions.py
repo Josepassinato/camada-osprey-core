@@ -4,7 +4,7 @@ LLM Exception Classes
 Custom exceptions for LLM operations with detailed error information.
 """
 
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 
 class LLMException(Exception):

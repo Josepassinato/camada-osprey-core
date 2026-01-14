@@ -5,35 +5,31 @@ Unified LLM client with Portkey integration for observability, cost tracking,
 and multi-provider routing.
 """
 
-import os
 import asyncio
 import logging
-from typing import Optional, Dict, Any, List, AsyncIterator, Union
-from datetime import datetime, timedelta
+import os
+from datetime import datetime
+from typing import Any, AsyncIterator, Dict, List, Optional, Union
 
 try:
-    from portkey_ai import Portkey, PORTKEY_GATEWAY_URL
+    from portkey_ai import Portkey
     PORTKEY_AVAILABLE = True
 except ImportError:
     PORTKEY_AVAILABLE = False
     logging.warning("portkey-ai not installed. LLM client will not function.")
 
-from .types import (
-    ChatMessage,
-    LLMRequest,
-    LLMResponse,
-    LLMUsage,
-    MessageRole,
-)
 from .exceptions import (
+    LLMCircuitBreakerError,
     LLMException,
     LLMProviderError,
     LLMRateLimitError,
-    LLMCostLimitError,
     LLMTimeoutError,
     PromptNotFoundError,
-    LLMCircuitBreakerError,
-    LLMValidationError,
+)
+from .types import (
+    ChatMessage,
+    LLMResponse,
+    LLMUsage,
 )
 
 logger = logging.getLogger(__name__)

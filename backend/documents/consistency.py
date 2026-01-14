@@ -2,11 +2,10 @@
 Cross-Document Consistency Engine - Phase 3
 Advanced system for cross-document consistency verification
 """
-import re
-from typing import Dict, List, Any, Optional, Tuple
 import logging
-from datetime import datetime, date
+import re
 from difflib import SequenceMatcher
+from typing import Any, Dict, List, Optional, Tuple
 
 from backend.utils.validators import normalize_date
 

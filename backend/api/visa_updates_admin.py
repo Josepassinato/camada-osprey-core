@@ -6,9 +6,9 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request
 
 from backend.admin.security import AuditAction, log_admin_action, require_admin
+from backend.visa.auto_updater import VisaAutoUpdater
 from core.database import db, visa_scheduler
 from core.serialization import serialize_doc
-from backend.visa.auto_updater import VisaAutoUpdater
 
 logger = logging.getLogger(__name__)
 

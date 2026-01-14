@@ -2,14 +2,10 @@
 Case Finalizer MVP - Auditoria, PDF Merge, Instruções e Consentimento
 Sistema simplificado para finalização de casos de imigração
 """
-import os
+import logging
 import uuid
 from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional, Tuple
-import logging
-from pathlib import Path
-import hashlib
-import json
+from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 

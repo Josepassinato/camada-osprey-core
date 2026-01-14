@@ -4,9 +4,8 @@ Mostra casos reais (anonimizados) de sucesso para build trust
 """
 
 import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime
 import random
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

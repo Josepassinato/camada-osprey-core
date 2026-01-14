@@ -8,8 +8,8 @@ This package contains:
 - QAFeedbackOrchestrator: Orchestrates feedback loops between QA and builder agents
 """
 
-from .professional_qa import ProfessionalQAAgent, get_qa_agent
 from .feedback_orchestrator import QAFeedbackOrchestrator, get_qa_orchestrator
+from .professional_qa import ProfessionalQAAgent, get_qa_agent
 
 __all__ = [
     "ProfessionalQAAgent",

@@ -3,7 +3,7 @@ Pacotes de Pagamento por Categoria de Visto
 Sistema de preços para "Agente Coruja" - Mudança de Status
 """
 
-from typing import Dict, List
+from typing import Dict
 
 # Definição de preços por categoria de visto
 VISA_PACKAGES = {

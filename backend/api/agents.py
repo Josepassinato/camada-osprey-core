@@ -5,11 +5,11 @@ from fastapi import APIRouter, Form, HTTPException, UploadFile
 from core.agents import (
     analyze_uploaded_document,
     document_analyzer,
-    form_filler,
     fill_form_automatically,
+    form_filler,
     oracle,
-    translator,
     translate_text,
+    translator,
 )
 
 logger = logging.getLogger(__name__)
@@ -153,7 +153,7 @@ async def translate_endpoint(data: dict):
         text = data.get("text")
         source_lang = data.get("source_lang", "pt")
         target_lang = data.get("target_lang", "en")
-        document_type = data.get("document_type")
+        data.get("document_type")
 
         result = translate_text(text, source_lang, target_lang)
 

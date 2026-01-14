@@ -11,15 +11,15 @@ Modules:
 """
 
 from backend.learning.agent_learning import AgentLearningSystem, get_learning_system
-from backend.learning.iterative_learning import IterativeLearningSystem
 from backend.learning.feedback import (
+    FeedbackRating,
     FeedbackSystem,
     FeedbackType,
-    FeedbackRating,
+    get_nps_score,
     submit_ai_response_feedback,
     submit_form_feedback,
-    get_nps_score
 )
+from backend.learning.iterative_learning import IterativeLearningSystem
 
 __all__ = [
     "AgentLearningSystem",

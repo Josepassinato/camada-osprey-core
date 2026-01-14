@@ -2,13 +2,13 @@
 Immigration Expert Agent Integration
 Specialized agent for immigration advice and validation (Dra. Paula B2C)
 """
-import logging
 import json
-from typing import Optional, Dict, Any
+import logging
+from typing import Any, Dict, Optional
 
-from agents.base import BaseAgent
-from llm.portkey_client import LLMClient
-from llm.types import ChatMessage, MessageRole
+from backend.agents.base import BaseAgent
+from backend.llm.portkey_client import LLMClient
+from backend.llm.types import ChatMessage, MessageRole
 
 logger = logging.getLogger(__name__)
 

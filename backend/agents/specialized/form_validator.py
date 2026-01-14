@@ -6,11 +6,10 @@ Dra. Ana - Expert in USCIS form validation.
 """
 
 import logging
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 from agents.base import BaseAgent
 from llm.portkey_client import LLMClient
-from llm.types import ChatMessage, MessageRole
 
 logger = logging.getLogger(__name__)
 

@@ -7,6 +7,7 @@ and providing helpful error messages when configuration is invalid.
 
 import sys
 from typing import List, Tuple
+
 from pydantic import ValidationError
 
 
@@ -22,6 +23,7 @@ def validate_configuration() -> Tuple[bool, List[str]]:
     # Validate main settings
     try:
         from .settings import settings
+
         # Access a required field to trigger validation
         _ = settings.jwt_secret
     except ValidationError as e:
@@ -32,6 +34,7 @@ def validate_configuration() -> Tuple[bool, List[str]]:
     # Validate LLM settings
     try:
         from .llm_config import llm_settings
+
         # Access fields to trigger validation
         _ = llm_settings.default_model
         
@@ -83,8 +86,8 @@ def print_configuration_summary():
     
     Useful for debugging and verifying configuration in different environments.
     """
-    from .settings import settings
     from .llm_config import llm_settings
+    from .settings import settings
     
     print()
     print("=" * 80)

@@ -3,14 +3,13 @@ Document Analysis Metrics System
 Sistema de métricas e KPIs para análise de documentos com alta precisão
 """
 
-import json
 import logging
-from typing import Dict, List, Any, Optional, Tuple
-from datetime import datetime, timedelta, timezone
-from dataclasses import dataclass
-from enum import Enum
 import re
 import statistics
+from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
+from enum import Enum
+from typing import Any, Dict, List, Tuple
 
 logger = logging.getLogger(__name__)
 

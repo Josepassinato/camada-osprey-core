@@ -4,9 +4,8 @@ Gemini offers more natural conversation
 """
 
 import logging
-import os
-from typing import Dict, List, Any, Optional
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 
 from backend.llm.portkey_client import LLMClient
 from backend.llm.types import ChatMessage, MessageRole

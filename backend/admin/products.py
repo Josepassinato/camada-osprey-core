@@ -3,11 +3,13 @@ Admin - Gerenciamento de Produtos e Preços
 Sistema para atualizar preços e sincronizar com Stripe
 """
 
-import os
-import stripe
 import logging
-from typing import Dict, List, Optional
+import os
 from datetime import datetime, timezone
+from typing import Dict, List, Optional
+
+import stripe
+
 from backend.packages.payment_packages import VISA_PACKAGES
 
 logger = logging.getLogger(__name__)

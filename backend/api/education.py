@@ -1,14 +1,19 @@
 import logging
 import uuid
 from datetime import datetime, timezone
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
 from core.auth import get_current_user
 from core.database import db
-from typing import Optional
-
-from models.education import InterviewAnswer, InterviewSession, InterviewStart, KnowledgeBaseQuery, VisaGuide
+from models.education import (
+    InterviewAnswer,
+    InterviewSession,
+    InterviewStart,
+    KnowledgeBaseQuery,
+    VisaGuide,
+)
 from models.enums import DifficultyLevel, VisaType
 from models.user import UserProgress
 from services.education import (

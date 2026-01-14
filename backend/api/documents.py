@@ -6,13 +6,16 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from fastapi.responses import Response
 
 from core.auth import get_current_user
 from core.database import db
 from models.documents import DocumentStatus, DocumentType, DocumentUpdate, UserDocument
 from services.cases import update_case_status_and_progress
-from services.documents import analyze_document_with_ai, determine_document_priority, validate_file_type
+from services.documents import (
+    analyze_document_with_ai,
+    determine_document_priority,
+    validate_file_type,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +82,9 @@ async def upload_document_to_case(
 
         extraction_result = None
         try:
-            from backend.documents.data_extractor import process_document_and_update_user
+            from backend.documents.data_extractor import (
+                process_document_and_update_user,
+            )
             from integrations.google import GoogleDocumentAIProcessor
 
             doc_processor = GoogleDocumentAIProcessor()

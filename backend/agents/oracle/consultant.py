@@ -4,10 +4,10 @@ Sistema de consulta à base de conhecimento jurídica para orientar os agentes
 """
 
 import json
-import os
-from typing import List, Dict, Optional
-from pathlib import Path
 import logging
+import os
+from pathlib import Path
+from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

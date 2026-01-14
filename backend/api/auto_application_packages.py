@@ -1,12 +1,13 @@
 import logging
 import os
 from datetime import datetime, timezone
-from typing import Optional
 
 from fastapi import APIRouter, HTTPException
 
+from backend.visa.specifications import (
+    get_visa_specifications,
+)
 from core.database import db
-from backend.visa.specifications import get_common_issues, get_key_questions, get_required_documents, get_visa_specifications
 
 logger = logging.getLogger(__name__)
 

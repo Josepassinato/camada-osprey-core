@@ -6,7 +6,7 @@ Dra. Patricia - Expert in USCIS compliance.
 """
 
 import logging
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 from agents.base import BaseAgent
 from llm.portkey_client import LLMClient

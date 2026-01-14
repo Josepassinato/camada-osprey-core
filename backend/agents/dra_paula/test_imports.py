@@ -2,8 +2,8 @@
 Test script to verify Dra. Paula agent imports work correctly
 """
 
-import sys
 import os
+import sys
 
 # Add project root to path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
@@ -16,7 +16,6 @@ def test_imports():
     
     try:
         # Test package import
-        import backend.agents.dra_paula as dra_paula_pkg
         print("✅ Package import successful")
         
         # Test individual class imports

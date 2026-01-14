@@ -3,14 +3,13 @@ Maria Voice Integration usando Google Gemini
 Vozes naturais e humanizadas para text-to-speech
 """
 
+import base64
 import logging
 import os
-import base64
-from typing import Dict, Any, Optional
-import google.generativeai as genai
 from datetime import datetime, timezone
-import tempfile
-from pathlib import Path
+from typing import Any, Dict
+
+import google.generativeai as genai
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +65,7 @@ class MariaVoiceService:
             # Nota: Gemini Text-to-Speech ainda está em preview
             # Por enquanto, vamos usar Google Cloud TTS via Gemini API
             from google.cloud import texttospeech
-            
+
             # Configurar cliente
             client = texttospeech.TextToSpeechClient()
             

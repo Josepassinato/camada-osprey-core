@@ -3,13 +3,12 @@ MongoDB Automatic Backup System
 Cria backups diários do banco de dados
 """
 
-import os
-import subprocess
+import asyncio
 import logging
+import os
+import shutil
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-import asyncio
-import shutil
 
 logger = logging.getLogger(__name__)
 
@@ -154,7 +153,7 @@ class MongoDBBackup:
                             logger.info(f"Removing old backup: {backup_dir.name}")
                             shutil.rmtree(backup_dir)
                     
-                    except Exception as e:
+                    except Exception:
                         logger.warning(f"Could not parse backup date: {backup_dir.name}")
         
         except Exception as e:

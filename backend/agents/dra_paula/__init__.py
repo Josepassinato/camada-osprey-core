@@ -12,7 +12,10 @@ Modules:
 
 from backend.agents.dra_paula.gemini_agent import DraPaulaGeminiAgent
 from backend.agents.dra_paula.hybrid_agent import HybridDraPaulaAgent
-from backend.agents.dra_paula.knowledge_base import DraPaulaKnowledgeBase, dra_paula_knowledge
+from backend.agents.dra_paula.knowledge_base import (
+    DraPaulaKnowledgeBase,
+    dra_paula_knowledge,
+)
 
 __all__ = [
     "DraPaulaGeminiAgent",

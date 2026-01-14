@@ -5,11 +5,11 @@ Runs weekly visa information updates automatically with admin approval workflow
 
 import asyncio
 import logging
+import os
 from datetime import datetime, timezone
+
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-from apscheduler.triggers.interval import IntervalTrigger
-import os
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class VisaUpdateScheduler:
             logger.info("🤖 Starting scheduled visa update scan...")
             
             from backend.visa.auto_updater import VisaAutoUpdater
-            
+
             # Create updater instance
             updater = VisaAutoUpdater(self.db, self.llm_key)
             
@@ -196,8 +196,9 @@ if __name__ == "__main__":
     import sys
     sys.path.insert(0, '/app/backend')
     
-    from motor.motor_asyncio import AsyncIOMotorClient
     import os
+
+    from motor.motor_asyncio import AsyncIOMotorClient
     
     async def test_scheduler():
         # Connect to MongoDB

@@ -1,11 +1,12 @@
 """
 Script para remover índices duplicados do MongoDB
 """
-import logging
 import asyncio
+import logging
 import os
-from motor.motor_asyncio import AsyncIOMotorClient
+
 from dotenv import load_dotenv
+from motor.motor_asyncio import AsyncIOMotorClient
 
 logger = logging.getLogger(__name__)
 

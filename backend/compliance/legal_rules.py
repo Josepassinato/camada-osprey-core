@@ -6,7 +6,7 @@ Este módulo contém todas as regras legais específicas que devem ser aplicadas
 na validação de formulários e processos de imigração.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, List, Tuple
 
 

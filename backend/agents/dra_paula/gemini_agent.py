@@ -6,14 +6,12 @@ This implementation uses the unified LLM client for Gemini access,
 providing observability, cost tracking, and multi-provider routing.
 """
 
-import os
 import json
 import logging
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict
 
 from backend.agents.base import BaseAgent
 from backend.agents.dra_paula.knowledge_base import dra_paula_knowledge
-from backend.llm.types import ChatMessage, MessageRole
 
 logger = logging.getLogger(__name__)
 

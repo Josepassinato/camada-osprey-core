@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 from openai import OpenAI
 
 from models.education import PersonalizedTip
-from models.enums import DifficultyLevel, VisaType, InterviewType
+from models.enums import DifficultyLevel, InterviewType, VisaType
 
 logger = logging.getLogger(__name__)
 

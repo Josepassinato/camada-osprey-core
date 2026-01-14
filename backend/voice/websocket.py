@@ -1,8 +1,10 @@
 import asyncio
 import json
 import logging
-from typing import Dict, Set
-from fastapi import WebSocket, WebSocketDisconnect
+from typing import Dict
+
+from fastapi import WebSocket
+
 from backend.voice.agent import voice_agent
 
 logger = logging.getLogger(__name__)

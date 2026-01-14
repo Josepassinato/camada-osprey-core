@@ -4,29 +4,30 @@ Endpoints para integração com arquitetura multi-agente
 """
 
 import logging
+import sys
+import time
+from pathlib import Path
+from typing import Any, Dict, Optional
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Any, Optional
-import sys
-from pathlib import Path
-import time
 
 logger = logging.getLogger(__name__)
 
 # Add visa_specialists to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from visa_specialists.supervisor.supervisor_agent import SupervisorAgent
 from visa_specialists.b2_extension.b2_agent import B2ExtensionAgent
-from visa_specialists.h1b_worker.h1b_agent import H1BWorkerAgent
+from visa_specialists.eb1a_extraordinary.eb1a_agent import EB1AAgent
+from visa_specialists.eb2_niw.eb2_niw_agent import EB2NIWAgent
 from visa_specialists.f1_student.f1_agent import F1StudentAgent
+from visa_specialists.h1b_worker.h1b_agent import H1BWorkerAgent
+from visa_specialists.i90_greencard.i90_agent import I90GreenCardAgent
 from visa_specialists.i130_family.i130_agent import I130FamilyAgent
 from visa_specialists.i765_ead.i765_agent import I765EADAgent
-from visa_specialists.i90_greencard.i90_agent import I90GreenCardAgent
-from visa_specialists.eb2_niw.eb2_niw_agent import EB2NIWAgent
-from visa_specialists.eb1a_extraordinary.eb1a_agent import EB1AAgent
-from visa_specialists.qa_agent import QualityAssuranceAgent
 from visa_specialists.metrics_tracker import MetricsTracker
+from visa_specialists.qa_agent import QualityAssuranceAgent
+from visa_specialists.supervisor.supervisor_agent import SupervisorAgent
 
 router = APIRouter(prefix="/api/visa", tags=["visa"])
 

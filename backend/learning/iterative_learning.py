@@ -10,19 +10,20 @@ FLUXO:
 O revisor atua como um "senior attorney" ensinando agentes júnior
 """
 
-import logging
 import json
+import logging
 import os
-from datetime import datetime
-from typing import Dict, List, Optional
 import sys
+from datetime import datetime
+from typing import Dict, List
 
 logger = logging.getLogger(__name__)
 
 sys.path.insert(0, '/app')
 
-from backend.compliance.reviewer import ImmigrationComplianceReviewer
 from h1b_data_model import h1b_data
+
+from backend.compliance.reviewer import ImmigrationComplianceReviewer
 
 
 class IterativeLearningSystem:

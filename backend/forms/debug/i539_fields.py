@@ -5,8 +5,9 @@ Discover the actual field names in the I-539 template
 """
 
 import logging
-import pypdf
 import os
+
+import pypdf
 
 logger = logging.getLogger(__name__)
 

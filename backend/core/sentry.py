@@ -2,8 +2,8 @@ import logging
 import os
 
 import sentry_sdk
-from sentry_sdk.integrations.asyncio import AsyncioIntegration
 from sentry_sdk.integrations.aiohttp import AioHttpIntegration
+from sentry_sdk.integrations.asyncio import AsyncioIntegration
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.httpx import HttpxIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration

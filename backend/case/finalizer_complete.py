@@ -2,22 +2,18 @@
 Case Finalizer Complete - Versão Full com PDF Merging, Templates e Knowledge Base Completo
 Sistema completo para finalização de casos de imigração com merge real de PDFs
 """
-import os
+import hashlib
+import logging
 import uuid
 from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional, Tuple
-import logging
 from pathlib import Path
-import hashlib
-import json
+from typing import Any, Dict, List, Optional
+
 from PyPDF2 import PdfReader, PdfWriter
+from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
-from reportlab.lib.units import inch
-import tempfile
-import base64
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer
 
 logger = logging.getLogger(__name__)
 
@@ -27,10 +23,10 @@ try:
     sys.path.insert(0, str(Path(__file__).parent.parent))
     # Try relative import first (when running from backend directory)
     try:
-        from visa.api import generate_package_from_case, FORM_CODE_TO_VISA_TYPE
+        from visa.api import FORM_CODE_TO_VISA_TYPE, generate_package_from_case
     except ImportError:
         # Fall back to absolute import (when running from project root)
-        from backend.visa.api import generate_package_from_case, FORM_CODE_TO_VISA_TYPE
+        from backend.visa.api import FORM_CODE_TO_VISA_TYPE, generate_package_from_case
     AGENTS_AVAILABLE = True
     logger.info("✅ Visa agents loaded successfully for case finalizer")
 except Exception as e:

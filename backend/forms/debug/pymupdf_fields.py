@@ -4,6 +4,7 @@ Debug I-539 PDF Fields using PyMuPDF
 """
 
 import logging
+
 import fitz
 
 logger = logging.getLogger(__name__)

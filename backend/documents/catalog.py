@@ -2,9 +2,9 @@
 Document Catalog - Catálogo oficial de tipos de documentos
 Conforme especificação técnica completa para validação de documentos imigratórios
 """
+import logging
 from enum import Enum
 from typing import Dict, List, Optional
-import logging
 
 logger = logging.getLogger(__name__)
 

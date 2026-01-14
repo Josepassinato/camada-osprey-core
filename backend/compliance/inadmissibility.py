@@ -5,8 +5,8 @@ Baseado em INA §212 (Inadmissibilidades)
 """
 
 import logging
-from typing import Dict, List, Tuple
 from enum import Enum
+from typing import Dict, List
 
 logger = logging.getLogger(__name__)
 

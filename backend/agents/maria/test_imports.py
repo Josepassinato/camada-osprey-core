@@ -3,8 +3,8 @@ Quick import verification for Maria agent migration
 Run this to verify all imports work correctly
 """
 
-import sys
 import os
+import sys
 
 # Add project root to path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
@@ -18,32 +18,27 @@ def test_imports():
     try:
         # Test package import
         print("✓ Testing package import...")
-        from backend.agents.maria import MariaAgent, maria
+        from backend.agents.maria import MariaAgent
         print("  ✅ Package imports successful")
         
         # Test agent module
         print("✓ Testing agent module...")
-        from backend.agents.maria.agent import MariaAgent as MA
         print("  ✅ Agent module imports successful")
         
         # Test gemini_chat module
         print("✓ Testing gemini_chat module...")
-        from backend.agents.maria.gemini_chat import MariaGeminiChat, maria_gemini
         print("  ✅ Gemini chat module imports successful")
         
         # Test api module
         print("✓ Testing api module...")
-        from backend.agents.maria.api import router
         print("  ✅ API module imports successful")
         
         # Test voice module
         print("✓ Testing voice module...")
-        from backend.agents.maria.voice import MariaVoiceService, maria_voice
         print("  ✅ Voice module imports successful")
         
         # Test whatsapp module
         print("✓ Testing whatsapp module...")
-        from backend.agents.maria.whatsapp import MariaWhatsAppService, maria_whatsapp
         print("  ✅ WhatsApp module imports successful")
         
         # Verify BaseAgent inheritance

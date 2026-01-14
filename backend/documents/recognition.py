@@ -3,19 +3,18 @@ Enhanced Document Recognition System
 Advanced document recognition and validation system with AI
 """
 
-import os
-import json
 import base64
-from typing import Dict, List, Any, Optional, Tuple
+import json
 import logging
+import os
 from datetime import datetime, timezone
+from typing import Any, Dict, List
 
-from documents.validation_database import (
-    get_document_validation_info,
-    get_required_documents_for_visa,
-    validate_document_for_visa
-)
 from backend.visa.document_mapping import VisaDocumentMapper
+from documents.validation_database import (
+    get_required_documents_for_visa,
+    validate_document_for_visa,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +106,7 @@ class EnhancedDocumentRecognitionAgent:
         """
         
         # Convert file to base64 for API
-        file_base64 = base64.b64encode(file_content).decode('utf-8')
+        base64.b64encode(file_content).decode('utf-8')
         
         prompt = f"""
         SISTEMA AVANÇADO DE IDENTIFICAÇÃO VISUAL DE DOCUMENTOS
@@ -382,7 +381,7 @@ class EnhancedDocumentRecognitionAgent:
         required_docs = get_required_documents_for_visa(visa_type)
         
         # Get visa-specific validation criteria
-        visa_mapping = self.visa_mapper.get_document_mapping(visa_type, identified_type)
+        self.visa_mapper.get_document_mapping(visa_type, identified_type)
         
         prompt = f"""
         ANÁLISE DE RELEVÂNCIA PARA VISTO {visa_type}

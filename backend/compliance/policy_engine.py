@@ -2,19 +2,19 @@
 Policy Engine - Motor de políticas baseado em YAML (Enhanced Phase 2)
 Processa políticas de validação de documentos com extração avançada de campos e translation gate
 """
-import yaml
-import os
-import re
-from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
 import logging
+import re
 from datetime import datetime
-from backend.documents.catalog import document_catalog, DocumentType
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import yaml
+
+from backend.documents.classifier import document_classifier
+from backend.documents.consistency import cross_document_consistency
 from backend.documents.quality_checker import DocumentQualityChecker
 from backend.forms.field_extraction import field_extraction_engine
 from backend.utils.translation.gate import translation_gate
-from backend.documents.consistency import cross_document_consistency
-from backend.documents.classifier import document_classifier
 
 logger = logging.getLogger(__name__)
 

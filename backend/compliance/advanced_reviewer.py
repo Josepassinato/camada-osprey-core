@@ -12,12 +12,12 @@ Funcionalidades:
 6. Retorna relatório detalhado com APPROVED/REJECTED
 """
 
+import hashlib
 import logging
 import os
-import hashlib
 import re
-from typing import Dict, List, Tuple
 from datetime import datetime
+from typing import Dict, List, Tuple
 
 logger = logging.getLogger(__name__)
 

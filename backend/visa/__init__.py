@@ -16,24 +16,19 @@ Modules:
     api: API endpoints for visa operations
 """
 
-from .specifications import (
-    VISA_SPECIFICATIONS,
-    get_visa_specifications,
-    get_required_documents,
-    get_key_questions,
-    get_common_issues
-)
-
 from .document_mapping import (
     VisaDocumentMapper,
-    visa_document_mapper,
+    get_smart_extraction_prompt,
     get_visa_document_requirements,
-    get_smart_extraction_prompt
+    visa_document_mapper,
 )
-
-from .information import (
-    VISA_DETAILED_INFO,
-    get_visa_processing_info
+from .information import VISA_DETAILED_INFO, get_visa_processing_info
+from .specifications import (
+    VISA_SPECIFICATIONS,
+    get_common_issues,
+    get_key_questions,
+    get_required_documents,
+    get_visa_specifications,
 )
 
 __all__ = [

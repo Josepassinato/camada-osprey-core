@@ -3,11 +3,8 @@ Dra. Paula B2C - Base de Conhecimento Centralizada
 Sistema integrado de conhecimento especializado em imigração americana para todos os agentes de IA
 """
 
-import os
-import json
-from datetime import datetime
-from typing import Dict, List, Any, Optional
 import logging
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 

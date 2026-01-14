@@ -4,13 +4,17 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Request
 import stripe
+from fastapi import APIRouter, HTTPException, Request
 
 from backend.admin.products import get_product_for_checkout
 from core.database import db
-from packages.payment_packages import calculate_final_price, get_all_packages, get_visa_package
 from integrations.stripe import create_checkout_session, verify_payment_status
+from packages.payment_packages import (
+    calculate_final_price,
+    get_all_packages,
+    get_visa_package,
+)
 from utils.vouchers import get_all_active_vouchers, validate_voucher
 
 logger = logging.getLogger(__name__)

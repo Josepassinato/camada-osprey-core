@@ -3,12 +3,11 @@ Specialized Document Validators
 Validadores específicos por tipo de documento baseados no plano de alta precisão
 """
 
-import re
 import logging
-from typing import Dict, List, Any, Optional, Tuple
-from datetime import datetime
+import re
 from dataclasses import dataclass
-import hashlib
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

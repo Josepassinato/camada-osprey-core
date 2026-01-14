@@ -5,14 +5,15 @@ Coordinates multiple specialized agents for comprehensive analysis.
 """
 
 import logging
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, Optional
 
 from agents.base import BaseAgent
 from llm.portkey_client import LLMClient
-from .document_validator import DocumentValidationAgent
-from .form_validator import FormValidationAgent
-from .eligibility_analyst import EligibilityAnalysisAgent
+
 from .compliance_checker import ComplianceCheckAgent
+from .document_validator import DocumentValidationAgent
+from .eligibility_analyst import EligibilityAnalysisAgent
+from .form_validator import FormValidationAgent
 from .letter_writer import ImmigrationLetterWriterAgent
 from .translator import USCISFormTranslatorAgent
 from .triage import UrgencyTriageAgent

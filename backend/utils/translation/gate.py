@@ -2,10 +2,9 @@
 Translation Gate System - Phase 2
 Sistema avançado de detecção de idioma e enforcement de requisitos de tradução
 """
-import re
-from typing import Dict, List, Any, Optional, Tuple
 import logging
-from collections import Counter
+import re
+from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 

@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response, StreamingResponse
 
 from core.database import db
@@ -357,7 +357,10 @@ async def initiate_owl_payment(request: dict):
         package = packages[package_key]
         amount = package["amount"]
 
-        from emergentintegrations.payments.stripe.checkout import CheckoutSessionRequest, StripeCheckout
+        from emergentintegrations.payments.stripe.checkout import (
+            CheckoutSessionRequest,
+            StripeCheckout,
+        )
 
         stripe_api_key = os.environ.get("STRIPE_API_KEY")
         if not stripe_api_key:
@@ -607,7 +610,6 @@ async def generate_final_uscis_pdf(filled_form: dict, visa_type: str, session_id
     """Generate final PDF with privacy notice"""
     try:
         from reportlab.lib.pagesizes import letter
-        from reportlab.lib.units import inch
         from reportlab.pdfgen import canvas
 
         buffer = io.BytesIO()
@@ -1067,7 +1069,6 @@ async def generate_uscis_pdf(filled_form: Dict, visa_type: str) -> str:
     """Generate PDF from filled form data"""
     try:
         from reportlab.lib.pagesizes import letter
-        from reportlab.lib.units import inch
         from reportlab.pdfgen import canvas
 
         buffer = io.BytesIO()

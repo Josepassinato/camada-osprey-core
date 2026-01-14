@@ -2,13 +2,13 @@
 Document Quality Checker - Fase 1
 Análise básica de qualidade de documentos conforme especificação técnica
 """
-import os
-import mimetypes
-from PIL import Image, ImageStat
-import PyPDF2
-from typing import Dict, Any, List
-import logging
 import io
+import logging
+import mimetypes
+from typing import Any, Dict
+
+import PyPDF2
+from PIL import Image, ImageStat
 
 logger = logging.getLogger(__name__)
 

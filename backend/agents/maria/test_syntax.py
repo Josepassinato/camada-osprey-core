@@ -3,9 +3,10 @@ Syntax verification for Maria agent migration
 Tests that all files have correct Python syntax
 """
 
+import os
 import py_compile
 import sys
-import os
+
 
 def test_syntax():
     """Test Python syntax for all Maria modules"""

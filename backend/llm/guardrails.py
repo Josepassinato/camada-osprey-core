@@ -4,10 +4,10 @@ Previne que a IA forneça "legal advice" não autorizado
 Implementa filtros e classificação de queries
 """
 
-import re
 import logging
-from typing import Dict, Tuple, List
+import re
 from enum import Enum
+from typing import Dict, Tuple
 
 logger = logging.getLogger(__name__)
 

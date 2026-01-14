@@ -2,18 +2,17 @@
 Enhanced Field Extraction Engine - Phase 2
 Sistema avançado de extração de campos usando regex aprimorado e validadores de alta precisão
 """
-import re
-from typing import Dict, List, Any, Optional, Tuple
 import logging
+import re
+from typing import Any, Dict, List
+
 from backend.utils.validators import (
-    normalize_date, 
-    parse_mrz_td3, 
-    is_valid_uscis_receipt,
-    is_plausible_ssn,
-    validate_passport_number_with_nationality,
-    validate_date_with_context,
+    enhance_field_validation,
     extract_and_validate_mrz,
-    enhance_field_validation
+    is_plausible_ssn,
+    is_valid_uscis_receipt,
+    validate_date_with_context,
+    validate_passport_number_with_nationality,
 )
 
 logger = logging.getLogger(__name__)

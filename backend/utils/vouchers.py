@@ -3,10 +3,11 @@ Sistema de Vouchers/Cupons de Desconto
 Agente Coruja - Bônus de Lançamento e Promoções
 """
 
-from datetime import datetime, timedelta
-from typing import Optional, Dict, List
-from pydantic import BaseModel
 import logging
+from datetime import datetime
+from typing import Dict, List, Optional
+
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 

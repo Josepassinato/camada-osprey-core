@@ -7,9 +7,9 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 from backend.admin.products import initialize_products_in_db
 from backend.admin.security import init_db as init_admin_security_db
-from core.auth import set_db as set_auth_db
 from backend.agents.maria import api as maria_api
 from backend.utils.proactive_alerts import ProactiveAlertSystem
+from core.auth import set_db as set_auth_db
 
 logger = logging.getLogger(__name__)
 
@@ -160,7 +160,7 @@ async def _create_indexes(db):
 
 async def _start_visa_scheduler(db):
     try:
-        from scheduler_visa_updates import get_visa_update_scheduler
+        from backend.utils.scheduler import get_visa_update_scheduler
 
         llm_key = os.environ.get("EMERGENT_LLM_KEY")
         if llm_key:

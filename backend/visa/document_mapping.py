@@ -3,16 +3,21 @@ Visa Document Mapping - Sistema inteligente de mapeamento de documentos e dados 
 Baseado no conhecimento especializado da Dra. Paula B2C
 """
 
-import os
 import json
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List
 
 # Handle both absolute and relative imports
 try:
-    from backend.agents.dra_paula.knowledge_base import dra_paula_knowledge, get_visa_knowledge
+    from backend.agents.dra_paula.knowledge_base import (
+        dra_paula_knowledge,
+        get_visa_knowledge,
+    )
 except ImportError:
     try:
-        from agents.dra_paula.knowledge_base import dra_paula_knowledge, get_visa_knowledge
+        from agents.dra_paula.knowledge_base import (
+            dra_paula_knowledge,
+            get_visa_knowledge,
+        )
     except ImportError:
         # Fallback if knowledge base not available
         dra_paula_knowledge = {}

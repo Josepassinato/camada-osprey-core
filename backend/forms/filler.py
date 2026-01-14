@@ -39,14 +39,13 @@ For now, clients can:
 - Or wait for overlay implementation
 """
 
-import os
 import io
-from datetime import datetime
-from typing import Dict, Any, Optional, List
-import fitz  # PyMuPDF
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
 import logging
+import os
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+import fitz  # PyMuPDF
 
 logger = logging.getLogger(__name__)
 
@@ -410,10 +409,11 @@ class USCISFormFiller:
             # ===== NEW OVERLAY SYSTEM =====
             # Use i129_overlay_filler for coordinate-based filling
             try:
-                from backend.forms.i129_overlay import fill_i129_form
-                import tempfile
                 import os
-                
+                import tempfile
+
+                from backend.forms.i129_overlay import fill_i129_form
+
                 # Preparar dados para overlay
                 friendly_data = {
                     **basic_data,
@@ -559,7 +559,7 @@ class USCISFormFiller:
             simplified_form.get("data_nascimento") or 
             basic_data.get("date_of_birth", "")
         )
-        dob_parts = dob.split("-") if dob else ["", "", ""]
+        dob.split("-") if dob else ["", "", ""]
         
         # Parse address - try friendly form first (with _eua suffix)
         address = (

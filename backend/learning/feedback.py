@@ -5,9 +5,9 @@ Suporta thumbs up/down, ratings 1-5, e comentários
 """
 
 import logging
-from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta, timezone
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

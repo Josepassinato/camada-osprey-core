@@ -3,13 +3,15 @@ Integração Stripe para Pagamentos
 Agente Coruja - Mudança de Status
 """
 
-import os
-import stripe
 import logging
-from typing import Dict, Optional
+import os
 from datetime import datetime, timezone
-from payment_packages import get_visa_package, calculate_final_price
-from utils.vouchers import validate_voucher, increment_voucher_usage
+from typing import Dict, Optional
+
+import stripe
+
+from backend.packages.payment_packages import get_visa_package
+from backend.utils.vouchers import increment_voucher_usage
 
 logger = logging.getLogger(__name__)
 

@@ -1,24 +1,18 @@
 """
 Translation Service - Serviço de Tradução Automática
-Traduz respostas do usuário para inglês usando Gemini
+Traduz respostas do usuário para inglês usando OpenAI via Portkey
 """
 
-import os
 import logging
-from typing import Dict, Optional, List
+import os
+from typing import Dict
 
-# Conditional import for emergentintegrations (will be replaced with Portkey in Phase 2)
-try:
-    from emergentintegrations.llm.chat import LlmChat, UserMessage
-    EMERGENT_AVAILABLE = True
-except ImportError:
-    EMERGENT_AVAILABLE = False
-    LlmChat = None
-    UserMessage = None
+from openai import AsyncOpenAI
 
 logger = logging.getLogger(__name__)
 
-EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
+# Get OpenAI API key
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 
 
 class TranslationService:
@@ -28,14 +22,14 @@ class TranslationService:
     """
     
     def __init__(self):
-        self.api_key = EMERGENT_LLM_KEY
-        self.available = EMERGENT_LLM_KEY is not None and EMERGENT_AVAILABLE
+        self.api_key = OPENAI_API_KEY
+        self.available = OPENAI_API_KEY is not None
+        self.client = AsyncOpenAI(api_key=self.api_key) if self.available else None
         
         if not self.available:
-            if not EMERGENT_AVAILABLE:
-                logger.warning("⚠️ emergentintegrations not installed - tradução desabilitada")
-            elif not EMERGENT_LLM_KEY:
-                logger.warning("⚠️ EMERGENT_LLM_KEY não configurada - tradução desabilitada")
+            logger.warning("⚠️ OPENAI_API_KEY not configured - translation disabled")
+        else:
+            logger.info("✅ Translation service initialized with OpenAI")
     
     async def translate_field(
         self, 
@@ -74,19 +68,25 @@ class TranslationService:
             # Criar prompt para tradução contextualizada
             prompt = self._create_translation_prompt(text, source_language, context)
             
-            # Criar chat
-            chat = LlmChat(
-                api_key=self.api_key,
-                session_id=f"translation_{hash(text)}",
-                system_message="You are a professional translator for USCIS immigration forms. Translate accurately and formally."
-            ).with_model("gemini", "gemini-2.0-flash")
-            
-            # Enviar mensagem
-            user_msg = UserMessage(text=prompt)
-            response = await chat.send_message(user_msg)
+            # Call OpenAI for translation
+            response = await self.client.chat.completions.create(
+                model="gpt-4o-mini",  # Fast and cost-effective for translation
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a professional translator for USCIS immigration forms. Translate accurately and formally."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.3,  # Low temperature for consistent translations
+                max_tokens=500
+            )
             
             # Extrair tradução
-            translated_text = response.strip()
+            translated_text = response.choices[0].message.content.strip()
             
             # Remover aspas se existirem
             if translated_text.startswith('"') and translated_text.endswith('"'):
