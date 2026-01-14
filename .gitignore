@@ -69,6 +69,9 @@ backend/dist/
 # ============================================
 /coverage
 .nyc_output
+.pytest_cache/
+test-results/
+*.test.log
 
 # ============================================
 # Next.js
@@ -103,6 +106,14 @@ chainlit.md
 .ac
 
 # ============================================
+# Migration and Refactoring Artifacts
+# ============================================
+*_OLD.py
+*_DEPRECATED.py
+*.migration.log
+.migration/
+
+# ============================================
 # Deployment
 # ============================================
 .vercel
@@ -114,6 +125,14 @@ agenthub/agents/youtube/db
 *.db
 *.sqlite
 *.sqlite3
+
+# ============================================
+# Backend Backups and Generated Files
+# ============================================
+backend/backups/
+backups/
+*.backup
+*.BACKUP__
 
 # ============================================
 # Archive Files and Large Assets
@@ -131,6 +150,13 @@ agenthub/agents/youtube/db
 # ============================================
 .cache/
 .parcel-cache/
+
+# ============================================
+# LLM and AI Integration Caches
+# ============================================
+.portkey/
+.llm_cache/
+*.prompt.cache
 
 # ============================================
 # Mobile Development
