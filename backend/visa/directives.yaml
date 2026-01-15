@@ -242,6 +242,44 @@ I485:
     - FINANCIAL_DOCUMENTS
     - POLICE_CERTIFICATES
 
+I765:
+  title: "Roteiro informativo — I-765 (Application for Employment Authorization)"
+  directives:
+    - id: eligibility_category
+      pt: "O aplicante deve especificar claramente sua categoria de elegibilidade (c)(3), (c)(9), (c)(26), etc. conforme instruções do USCIS."
+      en: "The applicant must clearly specify their eligibility category (c)(3), (c)(9), (c)(26), etc. according to USCIS instructions."
+      required: true
+    - id: current_status
+      pt: "O aplicante deve comprovar seu status imigratório atual que o torna elegível para autorização de trabalho."
+      en: "The applicant must prove their current immigration status that makes them eligible for employment authorization."
+      required: true
+    - id: supporting_documents
+      pt: "O aplicante deve apresentar documentos específicos para sua categoria de elegibilidade (I-20, I-94, recibo de asilo, etc.)."
+      en: "The applicant must present specific documents for their eligibility category (I-20, I-94, asylum receipt, etc.)."
+      required: true
+    - id: previous_ead
+      pt: "Se aplicável, o aplicante deve informar sobre autorizações de trabalho anteriores e explicar mudanças de circunstâncias."
+      en: "If applicable, the applicant must inform about previous employment authorizations and explain changes in circumstances."
+      required: false
+    - id: economic_necessity
+      pt: "Para certas categorias (F-1 OPT), o aplicante deve demonstrar necessidade econômica ou elegibilidade específica."
+      en: "For certain categories (F-1 OPT), the applicant must demonstrate economic necessity or specific eligibility."
+      required: false
+    - id: passport_photos
+      pt: "O aplicante deve incluir duas fotos tipo passaporte recentes seguindo as especificações do USCIS."
+      en: "The applicant must include two recent passport-style photos following USCIS specifications."
+      required: true
+    - id: fee_payment
+      pt: "O aplicante deve incluir o pagamento correto da taxa de processamento ou solicitar isenção se elegível."
+      en: "The applicant must include correct processing fee payment or request waiver if eligible."
+      required: true
+  attachments_suggested:
+    - PASSPORT_PHOTOS
+    - I94_RECORD
+    - STATUS_DOCUMENTS
+    - PREVIOUS_EAD_COPY
+    - SUPPORTING_EVIDENCE
+
 # Avisos e disclaimers padrão
 disclaimer:
   pt: "Esta lista é informativa, baseada nas exigências públicas do USCIS, e não substitui consulta jurídica profissional."

@@ -147,8 +147,20 @@ class LLMClient:
         self.api_key = api_key or os.getenv("PORTKEY_API_KEY")
         self.fallback_mode = False
         
+        # Check if Portkey is explicitly disabled via environment variable
+        enable_portkey = os.getenv("ENABLE_PORTKEY", "true").lower() in ("true", "1", "yes")
+        
+        if not enable_portkey:
+            if fallback_to_openai:
+                logger.info("Portkey disabled via ENABLE_PORTKEY=false. Using direct OpenAI client.")
+                self.fallback_mode = True
+            else:
+                raise ValueError(
+                    "Portkey is disabled but fallback_to_openai=False. "
+                    "Either enable Portkey or allow OpenAI fallback."
+                )
         # Check if we should use Portkey or fallback
-        if not PORTKEY_AVAILABLE:
+        elif not PORTKEY_AVAILABLE:
             if fallback_to_openai:
                 logger.warning("portkey-ai not installed. Falling back to direct OpenAI client.")
                 self.fallback_mode = True

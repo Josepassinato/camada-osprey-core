@@ -961,13 +961,21 @@ async def generate_visa_directives(request: dict):
         language = request.get("language", "pt")
         context = request.get("context", "")
 
+        # Normalize visa type (remove hyphens for YAML lookup)
+        normalized_visa_type = visa_type.replace("-", "").replace("_", "")
+
         # Load directives from YAML file
         yaml_path = ROOT_DIR / "visa" / "directives.yaml"
 
         with open(yaml_path, "r", encoding="utf-8") as f:
             directives_data = yaml.safe_load(f)
 
-        visa_directives = directives_data.get(visa_type, {})
+        # Try to find directives with normalized key
+        visa_directives = None
+        for key in directives_data.keys():
+            if key.replace("-", "").replace("_", "").upper() == normalized_visa_type.upper():
+                visa_directives = directives_data[key]
+                break
 
         if not visa_directives:
             return {
