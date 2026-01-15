@@ -418,39 +418,49 @@ This implementation plan breaks down the backend refactoring and Portkey integra
   - Update imports
   - _Requirements: 1.11, 5.1_
 
-## Phase 7: Prompt Migration to Portkey
+## Phase 7: Prompt Migration to Portkey (HYBRID APPROACH)
 
-- [x] 30. Audit and document all prompts
+- [ ] 30. Audit and document all prompts ⚠️ **PARTIALLY COMPLETED**
 
-  - [x] 30.1 Create prompt migration document
+  - [x] 30.1 Create prompt extraction and migration infrastructure ✅
 
-    - Create `backend/PROMPTS_TO_PORTKEY.md`
-    - Add document structure and introduction
-    - Add links to Portkey documentation
+    - Create `backend/scripts/portkey_prompt_migrator.py` - main orchestrator
+    - Create `backend/scripts/prompt_extractor.py` - AST-based prompt extraction
+    - Create `backend/scripts/portkey_api_client.py` - Portkey API wrapper
+    - Create `backend/PROMPT_MIGRATION_WORKPLAN.md` - AI-trackable progress doc
     - _Requirements: 3.1, 3.11_
+    - **Status**: ✅ Completed - All 4 scripts created (1,280 lines total)
 
-  - [x] 30.2 Identify all prompts in codebase
+  - [ ] 30.2 Extract and catalog all prompts programmatically ⚠️ **INCOMPLETE**
 
-    - Search for all hardcoded prompts in Python files
-    - Search for system messages in LLM calls
-    - Document each prompt with location, purpose, and parameters
+    - Run AST parser to extract prompts from all Python files
+    - Identify system prompts, user prompts, multi-turn conversations
+    - Detect variables using regex/AST analysis
+    - Generate `backend/prompts_catalog.json` with structured metadata
+    - Generate `backend/PROMPT_EXTRACTION_REPORT.md` for review
     - _Requirements: 3.2, 3.3_
+    - **Status**: ⚠️ Partially Complete - Only 22 of ~85 prompts extracted
+    - **Issue**: AST parser needs enhancement to find all prompt patterns
 
-  - [x] 30.3 Document prompt specifications
+  - [ ] 30.3 Create prompts in Portkey via UI (MANUAL) ⏳ **NOT STARTED**
 
-    - For each prompt, document:
-      - Recommended model (GPT-4o, Gemini, etc.)
-      - Message types (system, user, assistant)
-      - Variables/parameters
-      - Configuration (temperature, max_tokens)
-      - Expected response format
-    - _Requirements: 3.3, 3.4, 3.5, 3.6, 3.7, 3.8_
+    - **CRITICAL DISCOVERY**: Portkey API does not support prompt creation yet
+    - Prompts must be created manually in Portkey UI
+    - Use generated CSV/JSON files to facilitate manual creation
+    - Store Portkey prompt IDs back in catalog after creation
+    - _Requirements: 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.10_
+    - **Status**: ⏳ Not Started - Awaiting manual UI creation
+    - **Blockers**: 
+      - Portkey API lacks prompt creation endpoint (docs say "CRUD: coming soon 🚀")
+      - Need to create all prompts manually in UI first
+      - Then retrieve prompt IDs and update catalog
 
-  - [x] 30.4 Create Portkey migration instructions
-    - Write step-by-step instructions for creating prompts in Portkey UI
-    - Include screenshots or examples
-    - Document before/after code patterns
+  - [x] 30.4 Generate import files for manual creation ✅
+    - Create CSV export for easy viewing/editing
+    - Create JSON export for potential bulk import
+    - Create manual creation guide with step-by-step instructions
     - _Requirements: 3.9, 3.12_
+    - **Status**: ✅ Completed - CSV and JSON export files generated
 
 - [ ] 31. Migrate prompts to Portkey
 
