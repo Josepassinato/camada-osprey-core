@@ -8,6 +8,8 @@ import ProcessTypeBadge from "@/components/ProcessTypeBadge";
 import { useProcessType } from "@/contexts/ProcessTypeContext";
 import { makeApiCall } from "@/utils/api";
 import { CheckCircle2, AlertCircle, FileText, Loader2 } from "lucide-react";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface DirectiveData {
   id: string;
@@ -49,6 +51,45 @@ interface FinalLetter {
   compliance_score: number;
   ready_for_approval: boolean;
 }
+
+// Document type translations to Portuguese
+const DOCUMENT_TRANSLATIONS: Record<string, string> = {
+  'PASSPORT_PHOTOS': 'Fotos tipo passaporte',
+  'I94_RECORD': 'Registro I-94 (Comprovante de entrada nos EUA)',
+  'STATUS_DOCUMENTS': 'Documentos de status atual',
+  'PREVIOUS_EAD_COPY': 'Cópia de autorizações de trabalho anteriores (se houver)',
+  'SUPPORTING_EVIDENCE': 'Evidências de suporte específicas',
+  'EMPLOYMENT_OFFER_LETTER': 'Carta de oferta de emprego',
+  'LCA_CERTIFIED': 'LCA certificado',
+  'DEGREE_CERTIFICATE': 'Certificado de diploma',
+  'CREDENTIAL_EVALUATION': 'Avaliação de credenciais',
+  'CORPORATE_DOCUMENTS': 'Documentos corporativos',
+  'ORGANIZATIONAL_CHART': 'Organograma da empresa',
+  'FINANCIAL_STATEMENTS': 'Demonstrações financeiras',
+  'CONSULTATION_LETTERS': 'Cartas de consulta de especialistas',
+  'AWARDS_CERTIFICATES': 'Certificados de prêmios',
+  'MEDIA_COVERAGE': 'Cobertura de mídia',
+  'SCHOLARLY_PUBLICATIONS': 'Publicações acadêmicas',
+  'MEMBERSHIP_CERTIFICATES': 'Certificados de associação',
+  'I20_FORM': 'Formulário I-20',
+  'FINANCIAL_DOCUMENTS': 'Documentos financeiros',
+  'BANK_STATEMENTS': 'Extratos bancários',
+  'SCHOLARSHIP_LETTERS': 'Cartas de bolsa de estudos',
+  'ENGLISH_PROFICIENCY_TEST': 'Teste de proficiência em inglês',
+  'INVITATION_LETTER': 'Carta convite',
+  'EMPLOYMENT_LETTER': 'Carta de emprego',
+  'PROPERTY_DOCUMENTS': 'Documentos de propriedade',
+  'TRAVEL_ITINERARY': 'Itinerário de viagem',
+  'MARRIAGE_CERTIFICATE': 'Certidão de casamento',
+  'JOINT_FINANCIAL_DOCUMENTS': 'Documentos financeiros conjuntos',
+  'PHOTOS_TOGETHER': 'Fotos juntos',
+  'CORRESPONDENCE': 'Correspondências',
+  'DIVORCE_CERTIFICATES': 'Certidões de divórcio',
+  'I693_MEDICAL_EXAM': 'Exame médico I-693',
+  'PRIORITY_DATE_EVIDENCE': 'Evidência de data de prioridade',
+  'SUPPORTING_PETITION': 'Petição de suporte',
+  'POLICE_CERTIFICATES': 'Certidões policiais',
+};
 
 const CoverLetterModule: React.FC = () => {
   const { caseId } = useParams<{ caseId: string }>();
@@ -368,17 +409,22 @@ const CoverLetterModule: React.FC = () => {
               ) : (
                 <div className="space-y-4">
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="whitespace-pre-wrap text-gray-700">
-                      {directivesText}
+                    <div className="prose prose-sm max-w-none text-gray-700">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {directivesText}
+                      </ReactMarkdown>
                     </div>
                   </div>
                   
-                  {directives?.attachments_suggested && (
-                    <div>
-                      <h4 className="font-medium text-gray-900 mb-2">Anexos Sugeridos:</h4>
-                      <ul className="list-disc pl-5 space-y-1 text-gray-700">
+                  {directives?.attachments_suggested && directives.attachments_suggested.length > 0 && (
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                      <h4 className="font-semibold text-blue-900 mb-3">📎 Documentos Sugeridos para Anexar:</h4>
+                      <ul className="space-y-2 text-blue-800">
                         {directives.attachments_suggested.map((attachment, index) => (
-                          <li key={index}>{attachment}</li>
+                          <li key={index} className="flex items-start">
+                            <span className="mr-2">•</span>
+                            <span>{DOCUMENT_TRANSLATIONS[attachment] || attachment}</span>
+                          </li>
                         ))}
                       </ul>
                     </div>
