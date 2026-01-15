@@ -1875,7 +1875,7 @@ async def get_dashboard(current_user=Depends(get_current_user)):
         }
 
     except Exception as e:
-        logger.error(f"Error getting dashboard: {str(e)}")
+        logger.error(f"Error getting dashboard: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Error getting dashboard: {str(e)}")
 
 

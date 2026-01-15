@@ -9,7 +9,7 @@ from backend.admin.products import initialize_products_in_db
 from backend.admin.security import init_db as init_admin_security_db
 from backend.agents.maria import api as maria_api
 from backend.utils.proactive_alerts import ProactiveAlertSystem
-from core.auth import set_db as set_auth_db
+from backend.core.auth import set_db as set_auth_db
 
 logger = logging.getLogger(__name__)
 
