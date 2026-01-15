@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile
 from fastapi.responses import Response
 
 from backend.admin.security import require_admin
-from core.database import db
+from backend.core.database import db
 
 logger = logging.getLogger(__name__)
 

@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from backend.case.completeness_analyzer import CompletenessAnalyzer, CompletenessLevel
-from core.database import db
+from backend.core.database import db
 
 logger = logging.getLogger(__name__)
 

@@ -4,10 +4,10 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from core.auth import get_current_user, get_current_user_optional
-from core.database import db
-from models.auto_application import AutoApplicationCase, CaseCreate, CaseUpdate
-from services.cases import get_progress_percentage
+from backend.core.auth import get_current_user, get_current_user_optional
+from backend.core.database import db
+from backend.models.auto_application import AutoApplicationCase, CaseCreate, CaseUpdate
+from backend.services.cases import get_progress_percentage
 
 logger = logging.getLogger(__name__)
 

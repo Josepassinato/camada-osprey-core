@@ -7,9 +7,9 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 
 from backend.visa.specifications import get_visa_specifications
-from core.auth import get_current_user_optional
-from core.database import db
-from services.cases import update_case_status_and_progress
+from backend.core.auth import get_current_user_optional
+from backend.core.database import db
+from backend.services.cases import update_case_status_and_progress
 
 logger = logging.getLogger(__name__)
 

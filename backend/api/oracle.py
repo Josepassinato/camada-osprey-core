@@ -2,7 +2,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from core.agents import consult_oracle, oracle
+from backend.core.agents import consult_oracle, oracle
 
 logger = logging.getLogger(__name__)
 

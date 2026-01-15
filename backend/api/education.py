@@ -5,18 +5,18 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from core.auth import get_current_user
-from core.database import db
-from models.education import (
+from backend.core.auth import get_current_user
+from backend.core.database import db
+from backend.models.education import (
     InterviewAnswer,
     InterviewSession,
     InterviewStart,
     KnowledgeBaseQuery,
     VisaGuide,
 )
-from models.enums import DifficultyLevel, VisaType
-from models.user import UserProgress
-from services.education import (
+from backend.models.enums import DifficultyLevel, VisaType
+from backend.models.user import UserProgress
+from backend.services.education import (
     evaluate_interview_answer,
     generate_interview_questions,
     generate_personalized_tips,

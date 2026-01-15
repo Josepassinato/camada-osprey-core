@@ -7,11 +7,11 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
-from core.auth import get_current_user
-from core.database import db
-from models.documents import DocumentStatus, DocumentType, DocumentUpdate, UserDocument
-from services.cases import update_case_status_and_progress
-from services.documents import (
+from backend.core.auth import get_current_user
+from backend.core.database import db
+from backend.models.documents import DocumentStatus, DocumentType, DocumentUpdate, UserDocument
+from backend.services.cases import update_case_status_and_progress
+from backend.services.documents import (
     analyze_document_with_ai,
     determine_document_priority,
     validate_file_type,

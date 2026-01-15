@@ -5,9 +5,9 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from core.auth import create_jwt_token, get_current_user, hash_password, verify_password
-from core.database import db
-from models.user import (
+from backend.core.auth import create_jwt_token, get_current_user, hash_password, verify_password
+from backend.core.database import db
+from backend.models.user import (
     UserCreate,
     UserLogin,
     UserProfile,

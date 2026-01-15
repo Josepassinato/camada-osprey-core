@@ -7,8 +7,8 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
 
 from backend.forms.filler import form_filler as uscis_form_filler
-from core.database import db
-from services.cases import update_case_status_and_progress
+from backend.core.database import db
+from backend.services.cases import update_case_status_and_progress
 
 logger = logging.getLogger(__name__)
 

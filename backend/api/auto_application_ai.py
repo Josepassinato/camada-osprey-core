@@ -10,7 +10,7 @@ from openai import OpenAI
 
 from agents.qa import get_qa_agent, get_qa_orchestrator
 from backend.visa.specifications import get_visa_specifications
-from core.database import db
+from backend.core.database import db
 
 try:
     from emergentintegrations.llm.chat import LlmChat, UserMessage

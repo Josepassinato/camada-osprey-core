@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException
 from backend.visa.specifications import (
     get_visa_specifications,
 )
-from core.database import db
+from backend.core.database import db
 
 logger = logging.getLogger(__name__)
 

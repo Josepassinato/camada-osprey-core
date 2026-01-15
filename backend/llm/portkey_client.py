@@ -129,6 +129,7 @@ class LLMClient:
         max_retries: int = 3,
         timeout: float = 60.0,
         enable_circuit_breaker: bool = True,
+        fallback_to_openai: bool = True,
     ):
         """
         Initialize LLM client
@@ -141,38 +142,73 @@ class LLMClient:
             max_retries: Maximum retry attempts for failed requests
             timeout: Request timeout in seconds
             enable_circuit_breaker: Enable circuit breaker for failing providers
+            fallback_to_openai: If True, fall back to direct OpenAI when Portkey unavailable
         """
-        if not PORTKEY_AVAILABLE:
-            raise ImportError(
-                "portkey-ai package not installed. " "Install with: pip install portkey-ai"
-            )
-
         self.api_key = api_key or os.getenv("PORTKEY_API_KEY")
-        if not self.api_key:
-            raise ValueError(
-                "Portkey API key required. Set PORTKEY_API_KEY environment variable "
-                "or pass api_key parameter."
-            )
+        self.fallback_mode = False
+        
+        # Check if we should use Portkey or fallback
+        if not PORTKEY_AVAILABLE:
+            if fallback_to_openai:
+                logger.warning("portkey-ai not installed. Falling back to direct OpenAI client.")
+                self.fallback_mode = True
+            else:
+                raise ImportError(
+                    "portkey-ai package not installed. " "Install with: pip install portkey-ai"
+                )
+        elif not self.api_key:
+            if fallback_to_openai:
+                logger.warning(
+                    "PORTKEY_API_KEY not set. Falling back to direct OpenAI client. "
+                    "Set PORTKEY_API_KEY for observability and cost tracking."
+                )
+                self.fallback_mode = True
+            else:
+                raise ValueError(
+                    "Portkey API key required. Set PORTKEY_API_KEY environment variable "
+                    "or pass api_key parameter."
+                )
 
         self.virtual_key = virtual_key or os.getenv("PORTKEY_VIRTUAL_KEY")
         self.max_retries = max_retries
         self.timeout = timeout
 
-        # Initialize Portkey client
-        portkey_kwargs = {
-            "api_key": self.api_key,
-        }
+        # Initialize client (Portkey or OpenAI fallback)
+        if self.fallback_mode:
+            # Use direct OpenAI client
+            try:
+                from openai import AsyncOpenAI
+                openai_key = os.getenv("OPENAI_API_KEY")
+                if not openai_key:
+                    raise ValueError(
+                        "OPENAI_API_KEY required when using fallback mode. "
+                        "Set OPENAI_API_KEY environment variable."
+                    )
+                self.openai_client = AsyncOpenAI(api_key=openai_key)
+                self.portkey = None
+                logger.info("LLMClient initialized with direct OpenAI fallback")
+            except ImportError:
+                raise ImportError(
+                    "openai package not installed. Install with: pip install openai"
+                )
+        else:
+            # Initialize Portkey client
+            portkey_kwargs = {
+                "api_key": self.api_key,
+            }
 
-        if self.virtual_key:
-            portkey_kwargs["virtual_key"] = self.virtual_key
+            if self.virtual_key:
+                portkey_kwargs["virtual_key"] = self.virtual_key
 
-        if config:
-            portkey_kwargs["config"] = config
+            if config:
+                portkey_kwargs["config"] = config
 
-        if base_url:
-            portkey_kwargs["base_url"] = base_url
+            if base_url:
+                portkey_kwargs["base_url"] = base_url
 
-        self.portkey = Portkey(**portkey_kwargs)
+            self.portkey = Portkey(**portkey_kwargs)
+            self.openai_client = None
+            logger.info("LLMClient initialized with Portkey integration")
 
         # Circuit breaker
         self.circuit_breaker = CircuitBreaker() if enable_circuit_breaker else None
@@ -181,8 +217,6 @@ class LLMClient:
         self._total_requests = 0
         self._total_tokens = 0
         self._total_cost = 0.0
-
-        logger.info("LLMClient initialized with Portkey integration")
 
     async def chat_completion(
         self,
@@ -318,7 +352,12 @@ class LLMClient:
     async def _execute_chat_completion(self, request_params: Dict[str, Any]) -> LLMResponse:
         """Execute the actual chat completion call"""
         try:
-            response = self.portkey.chat.completions.create(**request_params)
+            if self.fallback_mode:
+                # Use direct OpenAI client
+                response = await self.openai_client.chat.completions.create(**request_params)
+            else:
+                # Use Portkey client
+                response = self.portkey.chat.completions.create(**request_params)
 
             # Extract response data
             choice = response.choices[0]
@@ -338,12 +377,13 @@ class LLMClient:
                 finish_reason=choice.finish_reason,
                 metadata={
                     "id": response.id,
-                    "created": response.created,
+                    "created": response.created if hasattr(response, "created") else None,
+                    "fallback_mode": self.fallback_mode,
                 },
             )
 
         except Exception as e:
-            logger.error(f"Portkey API error: {e}")
+            logger.error(f"{'OpenAI' if self.fallback_mode else 'Portkey'} API error: {e}")
             raise
 
     async def stream_completion(
@@ -397,13 +437,22 @@ class LLMClient:
         request_params.update(kwargs)
 
         try:
-            stream = self.portkey.chat.completions.create(**request_params)
-
-            for chunk in stream:
-                if chunk.choices and len(chunk.choices) > 0:
-                    delta = chunk.choices[0].delta
-                    if hasattr(delta, "content") and delta.content:
-                        yield delta.content
+            if self.fallback_mode:
+                # Use direct OpenAI streaming
+                stream = await self.openai_client.chat.completions.create(**request_params)
+                async for chunk in stream:
+                    if chunk.choices and len(chunk.choices) > 0:
+                        delta = chunk.choices[0].delta
+                        if hasattr(delta, "content") and delta.content:
+                            yield delta.content
+            else:
+                # Use Portkey streaming
+                stream = self.portkey.chat.completions.create(**request_params)
+                for chunk in stream:
+                    if chunk.choices and len(chunk.choices) > 0:
+                        delta = chunk.choices[0].delta
+                        if hasattr(delta, "content") and delta.content:
+                            yield delta.content
 
         except Exception as e:
             logger.error(f"Streaming error: {e}")
@@ -419,6 +468,8 @@ class LLMClient:
         """
         Execute completion using Portkey prompt template
 
+        Note: This feature requires Portkey and will raise an error in fallback mode.
+
         Args:
             prompt_id: Portkey prompt template ID
             variables: Variables to substitute in prompt
@@ -431,7 +482,14 @@ class LLMClient:
         Raises:
             PromptNotFoundError: Prompt template not found
             LLMProviderError: Provider returned an error
+            NotImplementedError: Called in fallback mode (Portkey required)
         """
+        if self.fallback_mode:
+            raise NotImplementedError(
+                "Prompt templates require Portkey integration. "
+                "Set PORTKEY_API_KEY to use this feature."
+            )
+            
         try:
             request_params = {
                 "prompt_id": prompt_id,

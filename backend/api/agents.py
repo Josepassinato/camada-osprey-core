@@ -2,7 +2,7 @@ import logging
 
 from fastapi import APIRouter, Form, HTTPException, UploadFile
 
-from core.agents import (
+from backend.core.agents import (
     analyze_uploaded_document,
     document_analyzer,
     fill_form_automatically,

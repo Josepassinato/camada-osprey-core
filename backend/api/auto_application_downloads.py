@@ -5,7 +5,7 @@ import os
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 
-from core.database import db
+from backend.core.database import db
 
 logger = logging.getLogger(__name__)
 

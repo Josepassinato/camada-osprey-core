@@ -8,7 +8,7 @@ import stripe
 from fastapi import APIRouter, HTTPException, Request
 
 from backend.admin.products import get_product_for_checkout
-from core.database import db
+from backend.core.database import db
 from integrations.stripe import create_checkout_session, verify_payment_status
 from packages.payment_packages import (
     calculate_final_price,

@@ -100,7 +100,7 @@ class LLMSettings(BaseSettings):
 
     # Portkey Configuration
     portkey_api_key: Optional[str] = Field(
-        default=None, description="Portkey API key for LLM gateway"
+        default=None, description="Portkey API key for LLM gateway", alias="PORTKEY_API_KEY"
     )
     portkey_base_url: str = Field(
         default="https://api.portkey.ai/v1", description="Portkey API base URL"
@@ -128,7 +128,7 @@ class LLMSettings(BaseSettings):
 
     # Feature Flags
     enable_portkey: bool = Field(
-        default=True, description="Enable Portkey integration (disable for local dev)"
+        default=True, description="Enable Portkey integration (disable for local dev)", alias="ENABLE_PORTKEY"
     )
     enable_caching: bool = Field(default=True, description="Enable LLM response caching")
     enable_fallbacks: bool = Field(default=True, description="Enable automatic model fallbacks")
@@ -157,9 +157,13 @@ class LLMSettings(BaseSettings):
     def validate_portkey_key(cls, v, values):
         """Validate Portkey API key is set when Portkey is enabled."""
         if values.get("enable_portkey", True) and not v:
-            raise ValueError(
-                "portkey_api_key is required when enable_portkey=True. "
-                "Set PORTKEY_API_KEY environment variable."
+            # Log warning but don't fail - allow fallback to direct OpenAI
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(
+                "⚠️  PORTKEY_API_KEY not set. Portkey features disabled. "
+                "LLM client will fall back to direct OpenAI. "
+                "Set PORTKEY_API_KEY for observability and cost tracking."
             )
         return v
 
@@ -202,7 +206,8 @@ class LLMSettings(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = False
-        env_prefix = "LLM_"
+        # Removed env_prefix to allow direct variable names (PORTKEY_API_KEY, ENABLE_PORTKEY)
+        # Individual fields use aliases where needed
         extra = "ignore"  # Ignore extra fields from .env that don't belong to LLMSettings
 
 

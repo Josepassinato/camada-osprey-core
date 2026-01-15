@@ -7,7 +7,7 @@ import resend
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr
 
-from core.database import db
+from backend.core.database import db
 
 logger = logging.getLogger(__name__)
 

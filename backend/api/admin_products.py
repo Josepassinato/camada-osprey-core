@@ -10,7 +10,7 @@ from backend.admin.products import (
     update_product_price,
 )
 from backend.admin.security import require_admin
-from core.database import db
+from backend.core.database import db
 
 logger = logging.getLogger(__name__)
 

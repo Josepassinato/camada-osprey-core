@@ -11,8 +11,8 @@ from bson import ObjectId
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response, StreamingResponse
 
-from core.database import db
-from core.serialization import serialize_doc
+from backend.core.database import db
+from backend.core.serialization import serialize_doc
 
 logger = logging.getLogger(__name__)
 
