@@ -9,6 +9,7 @@ import {
   Bot,
   User
 } from "lucide-react";
+import { makeApiCall } from "@/utils/api";
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -62,8 +63,17 @@ const Chat = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const messageToSend = inputMessage;
     setInputMessage("");
     setIsLoading(true);
+
+    // Add placeholder for assistant message
+    const assistantMessageIndex = messages.length + 1;
+    setMessages(prev => [...prev, {
+      role: 'assistant',
+      content: '',
+      timestamp: new Date().toISOString()
+    }]);
 
     try {
       const token = localStorage.getItem('osprey_token');
@@ -72,33 +82,71 @@ const Chat = () => {
         return;
       }
 
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/chat`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: inputMessage,
-          session_id: sessionId
-        }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/maria/chat/stream`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: messageToSend,
+            conversation_id: sessionId,
+            user_id: null  // Will be extracted from token on backend
+          }),
+        }
+      );
 
-      if (response.ok) {
-        const data = await response.json();
-        const assistantMessage: ChatMessage = {
-          role: 'assistant',
-          content: data.response,
-          timestamp: new Date().toISOString()
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-      } else {
-        const errorMessage: ChatMessage = {
-          role: 'assistant',
-          content: 'Desculpe, ocorreu um erro ao processar sua mensagem. Tente novamente.',
-          timestamp: new Date().toISOString()
-        };
-        setMessages(prev => [...prev, errorMessage]);
+      if (!response.ok) {
+        throw new Error('Failed to get response');
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedContent = '';
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                
+                if (data.error) {
+                  throw new Error(data.error);
+                }
+
+                if (data.content) {
+                  accumulatedContent += data.content;
+                  
+                  // Update the assistant message with accumulated content
+                  setMessages(prev => {
+                    const newMessages = [...prev];
+                    newMessages[assistantMessageIndex] = {
+                      role: 'assistant',
+                      content: accumulatedContent,
+                      timestamp: new Date().toISOString()
+                    };
+                    return newMessages;
+                  });
+                }
+
+                if (data.done) {
+                  break;
+                }
+              } catch (e) {
+                // Skip invalid JSON
+              }
+            }
+          }
+        }
       }
     } catch (error) {
       console.error('Chat error:', error);
@@ -107,7 +155,11 @@ const Chat = () => {
         content: 'Erro de conexão. Verifique sua internet e tente novamente.',
         timestamp: new Date().toISOString()
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => {
+        const newMessages = [...prev];
+        newMessages[assistantMessageIndex] = errorMessage;
+        return newMessages;
+      });
     } finally {
       setIsLoading(false);
     }

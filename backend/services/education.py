@@ -63,7 +63,7 @@ async def generate_interview_questions(
             raise RuntimeError("OPENAI_API_KEY not configured")
 
         response = openai_client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",  # Faster than gpt-4
             messages=[
                 {
                     "role": "system",
@@ -126,7 +126,7 @@ async def evaluate_interview_answer(
         """
 
         response = openai_client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",  # Faster than gpt-4
             messages=[
                 {
                     "role": "system",
@@ -212,7 +212,7 @@ async def generate_personalized_tips(
             raise RuntimeError("OPENAI_API_KEY not configured")
 
         response = openai_client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",  # Faster than gpt-4
             messages=[
                 {
                     "role": "system",
@@ -290,7 +290,7 @@ async def search_knowledge_base(
         """
 
         response = openai_client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",  # Faster than gpt-4
             messages=[
                 {
                     "role": "system",

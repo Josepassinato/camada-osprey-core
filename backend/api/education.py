@@ -169,8 +169,15 @@ async def start_interview_simulation(
         await db.interview_sessions.insert_one(session.dict())
 
         return {
-            "session_id": session.id,
-            "questions": questions,
+            "session": {
+                "session_id": session.id,
+                "interview_type": session.interview_type,
+                "visa_type": session.visa_type,
+                "difficulty": request.difficulty_level or DifficultyLevel.beginner,
+                "questions": questions,
+                "current_question": 0,
+                "created_at": session.created_at.isoformat(),
+            },
             "total_questions": len(questions),
             "estimated_duration": len(questions) * 2,
         }

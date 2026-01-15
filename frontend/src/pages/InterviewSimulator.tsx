@@ -14,8 +14,11 @@ import {
   Star
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { makeApiCall } from "@/utils/api";
+import { LoadingModal } from "@/components/LoadingModal";
 
 interface InterviewQuestion {
+  id: string;
   question_en: string;
   question_pt: string;
   tips: string[];
@@ -61,39 +64,21 @@ const InterviewSimulator = () => {
     setError("");
 
     try {
-      const token = localStorage.getItem('osprey_token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/education/interview/start`,
+      const data = await makeApiCall<{ session: InterviewSession }>(
+        '/education/interview/start',
+        'POST',
         {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            interview_type: interviewType,
-            visa_type: visaType,
-            difficulty: difficulty,
-          }),
+          interview_type: interviewType,
+          visa_type: visaType,
+          difficulty_level: difficulty,
         }
       );
 
-      if (response.ok) {
-        const data = await response.json();
-        setSession(data.session);
-        setShowSetup(false);
-      } else {
-        const errorData = await response.json();
-        setError(errorData.detail || 'Erro ao iniciar simulação');
-      }
+      setSession(data.session);
+      setShowSetup(false);
     } catch (error) {
       console.error('Start session error:', error);
-      setError('Erro de conexão. Tente novamente.');
+      setError('Erro ao iniciar simulação. Tente novamente.');
     } finally {
       setIsLoading(false);
     }
@@ -104,30 +89,20 @@ const InterviewSimulator = () => {
 
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('osprey_token');
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/education/interview/${session.session_id}/answer`,
+      const currentQuestion = session.questions[session.current_question];
+      const data = await makeApiCall<{ feedback: InterviewFeedback }>(
+        `/education/interview/${session.session_id}/answer`,
+        'POST',
         {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            answer: currentAnswer,
-          }),
+          question_id: currentQuestion.id,
+          answer: currentAnswer,
         }
       );
 
-      if (response.ok) {
-        const data = await response.json();
-        setFeedback(data.feedback);
-      } else {
-        setError('Erro ao enviar resposta');
-      }
+      setFeedback(data.feedback);
     } catch (error) {
       console.error('Submit answer error:', error);
-      setError('Erro de conexão');
+      setError('Erro ao enviar resposta');
     } finally {
       setIsLoading(false);
     }
@@ -146,23 +121,18 @@ const InterviewSimulator = () => {
       setFeedback(null);
     } else {
       // Complete interview
+      setIsLoading(true);
       try {
-        const token = localStorage.getItem('osprey_token');
-        const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/education/interview/${session.session_id}/complete`,
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          }
+        await makeApiCall(
+          `/education/interview/${session.session_id}/complete`,
+          'POST'
         );
-
-        if (response.ok) {
-          setSessionCompleted(true);
-        }
+        setSessionCompleted(true);
       } catch (error) {
         console.error('Complete interview error:', error);
+        setError('Erro ao finalizar entrevista');
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -309,10 +279,13 @@ const InterviewSimulator = () => {
                 <Button 
                   onClick={startSession}
                   disabled={isLoading}
-                  className="w-full bg-gray-700 text-white hover:bg-gray-800"
+                  className="w-full bg-[#4f46e5] text-white hover:bg-[#4338ca] flex items-center justify-center gap-2"
                 >
                   {isLoading ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      Gerando perguntas...
+                    </>
                   ) : (
                     <>
                       <Play className="h-4 w-4" />
@@ -324,6 +297,12 @@ const InterviewSimulator = () => {
             </Card>
           </div>
         </div>
+        
+        {/* Loading Modal */}
+        <LoadingModal 
+          isOpen={isLoading} 
+          message="Gerando perguntas" 
+        />
       </div>
     );
   }
@@ -454,10 +433,13 @@ const InterviewSimulator = () => {
                   <Button 
                     onClick={submitAnswer}
                     disabled={isLoading || !currentAnswer.trim()}
-                    className="bg-gray-700 text-white hover:bg-gray-800"
+                    className="bg-[#4f46e5] text-white hover:bg-[#4338ca] flex items-center justify-center gap-2"
                   >
                     {isLoading ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        Analisando resposta...
+                      </>
                     ) : (
                       'Enviar Resposta'
                     )}
@@ -465,15 +447,25 @@ const InterviewSimulator = () => {
                 ) : (
                   <Button 
                     onClick={nextQuestion}
-                    className="bg-gray-700 text-white hover:bg-gray-800"
+                    disabled={isLoading}
+                    className="bg-[#4f46e5] text-white hover:bg-[#4338ca] flex items-center justify-center gap-2"
                   >
-                    {session.current_question < session.questions.length - 1 ? (
+                    {isLoading ? (
                       <>
-                        Próxima Pergunta
-                        <ArrowRight className="h-4 w-4" />
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        Carregando...
                       </>
                     ) : (
-                      'Finalizar Entrevista'
+                      <>
+                        {session.current_question < session.questions.length - 1 ? (
+                          <>
+                            Próxima Pergunta
+                            <ArrowRight className="h-4 w-4" />
+                          </>
+                        ) : (
+                          'Finalizar Entrevista'
+                        )}
+                      </>
                     )}
                   </Button>
                 )}
@@ -591,6 +583,16 @@ const InterviewSimulator = () => {
           </div>
         </div>
       </div>
+      
+      {/* Loading Modal */}
+      <LoadingModal 
+        isOpen={isLoading} 
+        message={
+          !session ? "Gerando perguntas" : 
+          feedback ? "Carregando próxima pergunta" : 
+          "Analisando sua resposta"
+        } 
+      />
     </div>
   );
 };

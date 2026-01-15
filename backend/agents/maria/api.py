@@ -142,6 +142,84 @@ async def chat_with_maria(chat_msg: ChatMessage):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/chat/stream")
+async def chat_with_maria_stream(chat_msg: ChatMessage):
+    """
+    Streaming chat with Maria - Real-time typing effect
+    
+    Returns Server-Sent Events (SSE) stream for progressive response rendering
+    """
+    from fastapi.responses import StreamingResponse
+    import json
+    
+    async def generate_stream():
+        try:
+            conversation_id = chat_msg.conversation_id or str(uuid.uuid4())
+            
+            # Buscar contexto do usuário
+            user_context = None
+            conversation_history = []
+
+            if chat_msg.user_id and db is not None:
+                user = await db.users.find_one({"id": chat_msg.user_id})
+                active_case = await db.auto_cases.find_one(
+                    {
+                        "user_id": chat_msg.user_id,
+                        "status": {"$in": ["in_progress", "document_review", "ready_to_submit"]},
+                    }
+                )
+
+                if user:
+                    user_context = {
+                        "name": user.get("first_name", "Usuário"),
+                        "visa_type": active_case.get("form_code") if active_case else "Não especificado",
+                        "progress": active_case.get("progress_percentage", 0) if active_case else 0,
+                        "case_status": active_case.get("status") if active_case else "Iniciando",
+                    }
+
+                history = (
+                    await db.maria_conversations.find({"conversation_id": conversation_id})
+                    .sort("timestamp", 1)
+                    .to_list(length=10)
+                )
+
+                for msg in history:
+                    conversation_history.append({"role": "user", "content": msg.get("user_message")})
+                    conversation_history.append({"role": "assistant", "content": msg.get("maria_response")})
+
+            # Stream response from Maria
+            full_response = ""
+            async for chunk in maria.chat_stream(
+                user_message=chat_msg.message,
+                conversation_history=conversation_history,
+                user_context=user_context,
+            ):
+                full_response += chunk
+                yield f"data: {json.dumps({'content': chunk, 'done': False, 'conversation_id': conversation_id})}\n\n"
+
+            # Save to database
+            if db is not None:
+                await db.maria_conversations.insert_one(
+                    {
+                        "conversation_id": conversation_id,
+                        "user_id": chat_msg.user_id,
+                        "user_message": chat_msg.message,
+                        "maria_response": full_response,
+                        "timestamp": datetime.now(timezone.utc),
+                        "user_context": user_context,
+                    }
+                )
+
+            # Send completion signal
+            yield f"data: {json.dumps({'content': '', 'done': True, 'conversation_id': conversation_id})}\n\n"
+
+        except Exception as e:
+            logger.error(f"❌ Erro no streaming chat: {e}")
+            yield f"data: {json.dumps({'error': str(e), 'done': True})}\n\n"
+
+    return StreamingResponse(generate_stream(), media_type="text/event-stream")
+
+
 @router.get("/welcome")
 async def get_welcome_message(user_id: Optional[str] = None):
     """

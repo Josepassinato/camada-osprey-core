@@ -21,10 +21,13 @@ export const makeApiCall = async (endpoint: string, method: string = 'GET', body
   
   console.log('🔘 API Call:', url);
   
+  const token = localStorage.getItem('osprey_token');
+  
   const options: RequestInit = {
     method,
     headers: {
       'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
     },
   };
   

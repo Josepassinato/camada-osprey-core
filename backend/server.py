@@ -1879,25 +1879,10 @@ async def get_dashboard(current_user=Depends(get_current_user)):
         raise HTTPException(status_code=500, detail=f"Error getting dashboard: {str(e)}")
 
 
-# Chat history route (keeping existing)
-@api_router.get("/chat/history")
-async def get_chat_history(current_user=Depends(get_current_user)):
-    """Get user's chat history with sistema"""
-    try:
-        sessions = (
-            await db.chat_sessions.find({"user_id": current_user["id"]}, {"_id": 0})
-            .sort("last_updated", -1)
-            .to_list(50)
-        )
+# ============================================================================
+# BASIC ROUTES
+# ============================================================================
 
-        return {"chat_sessions": sessions}
-
-    except Exception as e:
-        logger.error(f"Error getting chat history: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error getting chat history: {str(e)}")
-
-
-# Basic routes (keeping existing)
 @api_router.get("/")
 async def root():
     return {"message": "OSPREY Immigration API B2C - Ready to help with your immigration journey!"}
@@ -1917,119 +1902,9 @@ async def get_status_checks():
     return [StatusCheck(**status_check) for status_check in status_checks]
 
 
-# sistema-powered routes (keeping existing with user tracking)
-@api_router.post("/chat", response_model=ChatResponse)
-async def immigration_chat(request: ChatRequest, current_user=Depends(get_current_user)):
-    """Chat assistente especializado em imigração usando OpenAI"""
-    try:
-        session_id = request.session_id or str(uuid.uuid4())
-
-        # ===== AI GUARDRAILS - VALIDAÇÃO DE QUERY =====
-        from backend.llm.guardrails import guardrails
-
-        should_block, blocked_message, query_type = guardrails.should_block_query(request.message)
-
-        if should_block:
-            # Query bloqueada - retornar mensagem de aviso
-            logger.warning(f"🛡️ Chat query blocked for user {current_user['id']}: type={query_type}")
-
-            # Salvar tentativa bloqueada para analytics
-            await db.blocked_queries.insert_one(
-                {
-                    "user_id": current_user["id"],
-                    "session_id": session_id,
-                    "query": request.message,
-                    "query_type": query_type.value,
-                    "timestamp": datetime.now(timezone.utc),
-                    "blocked_message": blocked_message,
-                }
-            )
-
-            return ChatResponse(
-                message=blocked_message, session_id=session_id, context=request.context
-            )
-        # ===== END AI GUARDRAILS =====
-
-        # Get conversation history from MongoDB
-        conversation = await db.chat_sessions.find_one({"session_id": session_id})
-
-        # Build conversation context with ENHANCED safety instructions
-        messages = [
-            {
-                "role": "system",
-                "content": f"""Você é Maria, assistente de documentos da OSPREY Immigration - uma plataforma B2C.
-
-Usuário: {current_user['first_name']} {current_user['last_name']}
-
-🚫 LIMITES CRÍTICOS (NÃO VIOLE):
-1. NUNCA recomende qual visto aplicar ("Você deve aplicar X")
-2. NUNCA avalie chances de aprovação ("Suas chances são boas")
-3. NUNCA diga se usuário é elegível ("Você se qualifica")
-4. NUNCA forneça estratégias legais específicas
-5. NUNCA interprete leis para casos individuais
-
-✅ O QUE VOCÊ PODE FAZER:
-- Explicar requisitos GERAIS publicados pelo USCIS
-- Listar documentos necessários para cada visto
-- Orientar sobre como preencher formulários
-- Explicar diferenças entre vistos (geral)
-- Sugerir consulta com advogado quando apropriado
-
-📋 SEMPRE INCLUA:
-- Disclaimer que você não é advogada
-- Recomendação de advogado para perguntas complexas
-- Informação GERAL, não análise de caso específico
-
-IMPORTANTE: Esta é uma ferramenta de auto-aplicação. Você NÃO fornece serviços jurídicos.
-
-Responda sempre em português, seja clara e profissional.""",
-            }
-        ]
-
-        # Add conversation history
-        if conversation and "messages" in conversation:
-            messages.extend(conversation["messages"][-10:])
-
-        # Add current message
-        messages.append({"role": "user", "content": request.message})
-
-        # Call OpenAI
-        response = openai_client.chat.completions.create(
-            model="gpt-4", messages=messages, max_tokens=1000, temperature=0.7
-        )
-
-        ai_response = response.choices[0].message.content
-
-        # ===== SANITIZE AI RESPONSE =====
-        # Sanitizar resposta para remover frases problemáticas
-        ai_response = guardrails.sanitize_ai_response(ai_response)
-
-        # Adicionar disclaimer de segurança se necessário
-        ai_response = guardrails.add_safety_disclaimer(ai_response, query_type)
-        # ===== END SANITIZATION =====
-
-        # Save conversation to MongoDB
-        current_time = datetime.now(timezone.utc)
-        new_messages = [
-            {"role": "user", "content": request.message, "timestamp": current_time.isoformat()},
-            {"role": "assistant", "content": ai_response, "timestamp": current_time.isoformat()},
-        ]
-
-        await db.chat_sessions.update_one(
-            {"session_id": session_id},
-            {
-                "$push": {"messages": {"$each": new_messages}},
-                "$set": {"user_id": current_user["id"], "last_updated": current_time},
-            },
-            upsert=True,
-        )
-
-        return ChatResponse(message=ai_response, session_id=session_id, context=request.context)
-
-    except Exception as e:
-        logger.error(f"Error in chat endpoint: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error processing chat: {str(e)}")
-
+# ============================================================================
+# DOCUMENT ANALYSIS & TRANSLATION (Legacy - Consider moving to separate router)
+# ============================================================================
 
 @api_router.post("/analyze-document")
 async def analyze_document(
