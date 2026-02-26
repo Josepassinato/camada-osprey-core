@@ -16,8 +16,10 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# JWT Configuration
-JWT_SECRET = os.environ.get('JWT_SECRET', 'osprey-secret-key-change-in-production')
+# JWT Configuration - MUST be set via environment variable
+JWT_SECRET = os.environ.get('JWT_SECRET')
+if not JWT_SECRET:
+    raise RuntimeError("JWT_SECRET environment variable is required. Set it to a strong random secret.")
 JWT_ALGORITHM = "HS256"
 
 from pydantic import BaseModel, Field, EmailStr
@@ -142,8 +144,8 @@ db = None
 # LLM configuration via emergentintegrations
 # API key handled directly in LlmChat calls
 
-# JWT configuration
-JWT_SECRET = os.environ.get('JWT_SECRET', 'osprey-secret-key-change-in-production')
+# JWT configuration - uses value set at module level (validated on startup)
+# JWT_SECRET already defined above - no fallback allowed
 JWT_ALGORITHM = "HS256"
 security = HTTPBearer()
 security_optional = HTTPBearer(auto_error=False)
@@ -1129,20 +1131,8 @@ async def search_knowledge_base(query: str, visa_type: Optional[VisaType] = None
 async def signup(user_data: UserCreate):
     """Register a new user"""
     try:
-        # EMAIL BYPASS FOR TESTING
-        email_bypass = os.environ.get('EMAIL_BYPASS_FOR_TESTING', 'FALSE').upper() == 'TRUE'
-        test_email_domain = os.environ.get('TEST_EMAIL_DOMAIN', 'test.local')
-        
-        is_test_email = user_data.email.endswith(f"@{test_email_domain}")
-        
-        if email_bypass and is_test_email:
-            logger.info(f"🧪 TEST MODE: Email bypass active for {user_data.email}")
-            # In test mode with test email, skip email validation
-            # Auto-verify email
-            email_verified = True
-        else:
-            # Production mode or real email
-            email_verified = False
+        # Email verification - always require in production
+        email_verified = False
         
         # Check if user already exists
         existing_user = await db.users.find_one({"email": user_data.email})
@@ -1166,7 +1156,7 @@ async def signup(user_data: UserCreate):
             "date_of_birth": None,
             "passport_number": None,
             "email_verified": email_verified,
-            "is_test_user": is_test_email if email_bypass else False,
+            "is_test_user": False,
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow()
         }
@@ -1191,11 +1181,6 @@ async def signup(user_data: UserCreate):
             }
         }
         
-        # Add test mode indicator if applicable
-        if email_bypass and is_test_email:
-            response_data["test_mode"] = True
-            response_data["message"] = "🧪 TEST MODE: User created (email verification bypassed)"
-        
         return response_data
     
     except Exception as e:
@@ -1206,19 +1191,9 @@ async def signup(user_data: UserCreate):
 async def login(login_data: UserLogin):
     """Login user"""
     try:
-        # EMAIL BYPASS FOR TESTING
-        email_bypass = os.environ.get('EMAIL_BYPASS_FOR_TESTING', 'FALSE').upper() == 'TRUE'
-        test_email_domain = os.environ.get('TEST_EMAIL_DOMAIN', 'test.local')
-        
-        is_test_email = login_data.email.endswith(f"@{test_email_domain}")
-        
         user = await db.users.find_one({"email": login_data.email})
-        
-        # Test mode bypass: Accept any password for test emails
-        if email_bypass and is_test_email and user:
-            logger.info(f"🧪 TEST MODE: Login bypass active for {login_data.email}")
-            password_valid = True  # Bypass password check in test mode
-        elif user:
+
+        if user:
             password_valid = verify_password(login_data.password, user["password"])
         else:
             password_valid = False
@@ -1238,11 +1213,6 @@ async def login(login_data: UserLogin):
                 "last_name": user["last_name"]
             }
         }
-        
-        # Add test mode indicator if applicable
-        if email_bypass and is_test_email:
-            response_data["test_mode"] = True
-            response_data["message"] = "🧪 TEST MODE: Login successful (password verification bypassed)"
         
         return response_data
     
@@ -4602,13 +4572,9 @@ async def generate_final_package(request: dict):
         if not case:
             raise HTTPException(status_code=404, detail="Case not found")
         
-        # 🆕 BUG P2 FIX: Verify payment status (with test mode bypass)
-        skip_payment = os.getenv("SKIP_PAYMENT_FOR_TESTING", "FALSE").upper() == "TRUE"
-        
-        if not skip_payment and case.get("payment_status") != "completed":
+        # Verify payment status before package generation
+        if case.get("payment_status") != "completed":
             raise HTTPException(status_code=400, detail="Payment required before package generation")
-        elif skip_payment:
-            logger.info(f"⚠️ BUG P2 FIX: Skipping payment check for case {case_id} (TEST MODE)")
         
         # Get form specifications
         form_code = case.get("form_code")
@@ -7400,7 +7366,7 @@ def verify_jwt_token(token: str):
         import jwt
         
         # Use the same JWT secret as the main authentication
-        SECRET_KEY = os.environ.get('JWT_SECRET', 'osprey-secret-key-change-in-production')
+        SECRET_KEY = os.environ.get('JWT_SECRET', '')
         
         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
         return payload
@@ -8982,59 +8948,44 @@ async def download_master_packet(job_id: str, current_user = Depends(get_current
 async def register_owl_user(request: dict):
     """Register user for saving progress with email and password"""
     try:
-        # EMAIL BYPASS FOR TESTING
-        email_bypass = os.environ.get('EMAIL_BYPASS_FOR_TESTING', 'FALSE').upper() == 'TRUE'
-        test_email_domain = os.environ.get('TEST_EMAIL_DOMAIN', 'test.local')
-        
         email = request.get("email", "").strip().lower()
         password = request.get("password", "")
         name = request.get("name", "")
-        
-        is_test_email = email.endswith(f"@{test_email_domain}")
-        
+
         if not email or not password or len(password) < 6:
             raise HTTPException(status_code=400, detail="Email and password (min 6 chars) are required")
-        
+
         # Check if user already exists
         existing_user = await db.owl_users.find_one({"email": email})
         if existing_user:
             raise HTTPException(status_code=409, detail="User already exists")
-        
+
         # Hash password
         import bcrypt
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        
+
         # Create user
         user_data = {
             "user_id": f"owl_user_{int(time_module.time())}_{uuid.uuid4().hex[:8]}",
             "email": email,
             "name": name,
             "password_hash": hashed_password,
-            "email_verified": True if (email_bypass and is_test_email) else False,
-            "is_test_user": is_test_email if email_bypass else False,
+            "email_verified": False,
+            "is_test_user": False,
             "created_at": datetime.utcnow(),
             "active_sessions": [],
             "completed_applications": []
         }
-        
+
         result = await db.owl_users.insert_one(user_data)
-        
-        if email_bypass and is_test_email:
-            logger.info(f"🧪 TEST MODE: Owl user registered with email bypass for {email}")
-        
-        response_data = {
+
+        return {
             "success": True,
             "message": "User registered successfully",
             "user_id": user_data["user_id"],
             "email": email,
             "timestamp": datetime.utcnow().isoformat()
         }
-        
-        if email_bypass and is_test_email:
-            response_data["test_mode"] = True
-            response_data["message"] = "🧪 TEST MODE: User registered (email verification bypassed)"
-        
-        return response_data
         
     except HTTPException:
         raise
@@ -9046,30 +8997,20 @@ async def register_owl_user(request: dict):
 async def login_owl_user(request: dict):
     """Login user to access saved progress"""
     try:
-        # EMAIL BYPASS FOR TESTING
-        email_bypass = os.environ.get('EMAIL_BYPASS_FOR_TESTING', 'FALSE').upper() == 'TRUE'
-        test_email_domain = os.environ.get('TEST_EMAIL_DOMAIN', 'test.local')
-        
         email = request.get("email", "").strip().lower()
         password = request.get("password", "")
-        
-        is_test_email = email.endswith(f"@{test_email_domain}")
-        
+
         if not email or not password:
             raise HTTPException(status_code=400, detail="Email and password are required")
-        
+
         # Find user
         user = await db.owl_users.find_one({"email": email})
         if not user:
             raise HTTPException(status_code=401, detail="Invalid email or password")
-        
-        # Verify password - bypass for test emails
+
+        # Verify password
         import bcrypt
-        if email_bypass and is_test_email:
-            logger.info(f"🧪 TEST MODE: Owl login bypass active for {email}")
-            password_valid = True
-        else:
-            password_valid = bcrypt.checkpw(password.encode('utf-8'), user["password_hash"])
+        password_valid = bcrypt.checkpw(password.encode('utf-8'), user["password_hash"])
         
         if not password_valid:
             raise HTTPException(status_code=401, detail="Invalid email or password")
@@ -9100,10 +9041,6 @@ async def login_owl_user(request: dict):
             "saved_sessions": serialized_sessions,
             "timestamp": datetime.utcnow().isoformat()
         }
-        
-        if email_bypass and is_test_email:
-            response_data["test_mode"] = True
-            response_data["message"] = "🧪 TEST MODE: Login successful (password verification bypassed)"
         
         return response_data
         
@@ -10594,24 +10531,48 @@ async def get_alerts_summary(case_id: str):
 # ===== END PROACTIVE ALERTS SYSTEM =====
 
 
+_cors_origins = os.environ.get('CORS_ORIGINS', '')
+if not _cors_origins:
+    logger.warning("CORS_ORIGINS not set. Defaulting to localhost only. Set CORS_ORIGINS env var for production.")
+    _cors_origins = 'http://localhost:3000,http://localhost:5173'
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=[origin.strip() for origin in _cors_origins.split(',') if origin.strip()],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"],
 )
+
+# ===== SECURITY HEADERS MIDDLEWARE =====
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response: Response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        if os.environ.get("ENABLE_HSTS", "").upper() == "TRUE":
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        return response
+
+app.add_middleware(SecurityHeadersMiddleware)
+print("✅ Security Headers Middleware ATIVADO")
 
 # ===== SECURITY MIDDLEWARES (ATIVADOS) =====
 # Import security middlewares
 try:
     from rate_limiter import RateLimiterMiddleware
     from input_sanitizer import InputSanitizerMiddleware
-    
+
     # Add Rate Limiter Middleware
     app.add_middleware(RateLimiterMiddleware)
     print("✅ Rate Limiter Middleware ATIVADO")
-    
+
     # Add Input Sanitizer Middleware
     app.add_middleware(InputSanitizerMiddleware)
     print("✅ Input Sanitizer Middleware ATIVADO")
@@ -10866,61 +10827,6 @@ async def create_payment_intent_endpoint(request: Request):
         if not visa_code or not case_id:
             raise HTTPException(status_code=400, detail="visa_code e case_id são obrigatórios")
         
-        # TESTING MODE: Skip payment if enabled
-        skip_payment = os.environ.get('SKIP_PAYMENT_FOR_TESTING', 'FALSE').upper() == 'TRUE'
-        
-        if skip_payment:
-            logger.info(f"🧪 TESTING MODE: Skipping payment for {visa_code} - {case_id}")
-            
-            # Get product info for display
-            product = await get_product_for_checkout(db, visa_code)
-            original_price = product['price'] if product else 0
-            
-            # Mark as paid directly (testing mode)
-            transaction = {
-                "transaction_id": f"TEST-{case_id}",
-                "case_id": case_id,
-                "visa_code": visa_code,
-                "amount": 0.0,
-                "original_amount": original_price,
-                "discount_percentage": 100.0,
-                "voucher_code": "TESTING_MODE",
-                "currency": "usd",
-                "status": "completed",
-                "payment_method": "testing_mode",
-                "created_at": datetime.utcnow()
-            }
-            await db.payment_transactions.insert_one(transaction)
-            
-            # Update case as paid
-            await db.auto_cases.update_one(
-                {"case_id": case_id},
-                {
-                    "$set": {
-                        "payment_status": "completed",
-                        "payment_info": {
-                            "amount": 0.0,
-                            "original_amount": original_price,
-                            "discount": 100.0,
-                            "voucher_code": "TESTING_MODE",
-                            "payment_date": datetime.utcnow(),
-                            "method": "testing_bypass"
-                        }
-                    }
-                }
-            )
-            
-            return {
-                "success": True,
-                "free": True,
-                "testing_mode": True,
-                "message": "🧪 TESTING MODE: Payment skipped for testing purposes",
-                "original_price": original_price,
-                "final_price": 0.0,
-                "discount_percentage": 100.0,
-                "package": product
-            }
-        
         # Buscar informações do produto
         product = await get_product_for_checkout(db, visa_code)
         
@@ -11076,67 +10982,6 @@ async def create_payment_checkout(request: Request):
         
         if not visa_code or not case_id:
             raise HTTPException(status_code=400, detail="visa_code e case_id são obrigatórios")
-        
-        # TESTING MODE: Skip payment if enabled
-        skip_payment = os.environ.get('SKIP_PAYMENT_FOR_TESTING', 'FALSE').upper() == 'TRUE'
-        
-        if skip_payment:
-            logger.info(f"🧪 TESTING MODE: Skipping checkout for {visa_code} - {case_id}")
-            
-            # Get product info
-            product = await get_product_for_checkout(db, visa_code)
-            original_price = product['price'] if product else 0
-            
-            # Generate fake session ID for testing
-            fake_session_id = f"test_session_{case_id}_{datetime.utcnow().timestamp()}"
-            
-            # Mark as paid
-            transaction = {
-                "transaction_id": f"TEST-CHECKOUT-{case_id}",
-                "stripe_session_id": fake_session_id,
-                "case_id": case_id,
-                "visa_code": visa_code,
-                "amount": 0.0,
-                "original_amount": original_price,
-                "discount_percentage": 100.0,
-                "voucher_code": "TESTING_MODE",
-                "currency": "usd",
-                "status": "completed",
-                "payment_method": "testing_mode",
-                "created_at": datetime.utcnow()
-            }
-            await db.payment_transactions.insert_one(transaction)
-            
-            # Update case
-            await db.auto_cases.update_one(
-                {"case_id": case_id},
-                {
-                    "$set": {
-                        "payment_status": "completed",
-                        "payment_info": {
-                            "amount": 0.0,
-                            "original_amount": original_price,
-                            "discount": 100.0,
-                            "voucher_code": "TESTING_MODE",
-                            "payment_date": datetime.utcnow(),
-                            "method": "testing_bypass",
-                            "session_id": fake_session_id
-                        }
-                    }
-                }
-            )
-            
-            # Return success URL (skip actual checkout)
-            frontend_url = os.environ.get('REACT_APP_BACKEND_URL', 'http://localhost:3000')
-            
-            return {
-                "success": True,
-                "testing_mode": True,
-                "message": "🧪 Payment skipped for testing",
-                "session_id": fake_session_id,
-                "redirect_url": f"{frontend_url}/payment/success?session_id={fake_session_id}&case_id={case_id}",
-                "skip_checkout": True
-            }
         
         # URLs de redirecionamento
         frontend_url = os.environ.get('REACT_APP_BACKEND_URL', 'http://localhost:3000')

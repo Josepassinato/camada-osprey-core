@@ -37,10 +37,17 @@ async def create_test_admin():
         print(f"❌ Erro ao conectar: {e}")
         return
     
-    # Dados do admin de teste
+    # Dados do admin - use env vars para email e senha
+    admin_email = os.environ.get('ADMIN_EMAIL', 'admin@osprey.com')
+    admin_password = os.environ.get('ADMIN_PASSWORD')
+    if not admin_password:
+        import secrets
+        admin_password = secrets.token_urlsafe(16)
+        print(f"⚠️  ADMIN_PASSWORD not set. Generated random password: {admin_password}")
+
     test_admin = {
-        "email": "admin@osprey.com",
-        "password": "admin123",
+        "email": admin_email,
+        "password": admin_password,
         "first_name": "Admin",
         "last_name": "Osprey",
         "phone": "+5511999999999",

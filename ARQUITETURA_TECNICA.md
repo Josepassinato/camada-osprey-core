@@ -184,7 +184,7 @@ Collections:
 - **Uso**: Acesso unificado a múltiplos LLMs
 - **Suporta**: OpenAI, Anthropic Claude, Google Gemini
 - **Biblioteca**: `emergentintegrations`
-- **Key**: `sk-emergent-aE5F536B80dFf0bA6F`
+- **Key**: Configurada via variavel de ambiente `EMERGENT_LLM_KEY` (nunca hardcode)
 
 ### 3. **Google Cloud APIs**
 

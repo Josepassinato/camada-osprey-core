@@ -145,7 +145,7 @@ def test_ai_fact_extraction():
                 
                 # Verify security: no hardcoded keys in response
                 response_text = response.text
-                if 'sk-emergent-aE5F536B80dFf0bA6F' in response_text:
+                if os.environ.get('EMERGENT_LLM_KEY', '') and os.environ.get('EMERGENT_LLM_KEY', '') in response_text:
                     print("❌ SECURITY ISSUE: Hardcoded API key found in AI response!")
                     return False
                 else:
@@ -216,7 +216,7 @@ def test_ai_chat():
             
             # Verify security: no hardcoded keys in response
             response_text = response.text
-            if 'sk-emergent-aE5F536B80dFf0bA6F' in response_text:
+            if os.environ.get('EMERGENT_LLM_KEY', '') and os.environ.get('EMERGENT_LLM_KEY', '') in response_text:
                 print("❌ SECURITY ISSUE: Hardcoded API key found in chat response!")
                 return False
             else:

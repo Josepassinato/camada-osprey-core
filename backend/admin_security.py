@@ -11,8 +11,10 @@ import jwt
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
 
-# JWT Configuration
-JWT_SECRET = os.environ.get('JWT_SECRET', 'osprey-secret-key-change-in-production')
+# JWT Configuration - MUST be set via environment variable
+JWT_SECRET = os.environ.get('JWT_SECRET')
+if not JWT_SECRET:
+    raise RuntimeError("JWT_SECRET environment variable is required. Set it to a strong random secret.")
 JWT_ALGORITHM = "HS256"
 
 security = HTTPBearer()

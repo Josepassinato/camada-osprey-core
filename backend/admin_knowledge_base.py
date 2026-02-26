@@ -295,13 +295,17 @@ async def search_knowledge_base(db, query: str, category: Optional[str] = None) 
         Lista de documentos relevantes
     """
     try:
+        # Sanitize query to prevent regex injection
+        import re
+        sanitized_query = re.escape(query)
+
         # Criar filtro de busca
         search_filter = {
             "status": "active",
             "$or": [
-                {"extracted_text": {"$regex": query, "$options": "i"}},
-                {"description": {"$regex": query, "$options": "i"}},
-                {"filename": {"$regex": query, "$options": "i"}}
+                {"extracted_text": {"$regex": sanitized_query, "$options": "i"}},
+                {"description": {"$regex": sanitized_query, "$options": "i"}},
+                {"filename": {"$regex": sanitized_query, "$options": "i"}}
             ]
         }
         

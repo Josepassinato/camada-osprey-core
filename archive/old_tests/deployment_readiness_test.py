@@ -773,7 +773,7 @@ def test_7_environment_configuration():
             
             # Check for hardcoded API keys in response
             hardcoded_patterns = [
-                "sk-emergent-aE5F536B80dFf0bA6F",  # The actual key
+                os.environ.get('EMERGENT_LLM_KEY', ''),  # Check from env var, never hardcode
                 "sk-proj-",  # OpenAI key pattern
                 "mongodb://",  # MongoDB URL
                 "JWT_SECRET"  # JWT secret

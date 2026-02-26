@@ -617,12 +617,11 @@ export const OspreyOwlTutor: React.FC<OspreyOwlTutorProps> = ({
                           {message.severity === 'info' && <Info className="h-4 w-4" />}
                         </div>
                         <div className="flex-1">
-                          <p 
-                            className="leading-relaxed"
-                            dangerouslySetInnerHTML={{ 
-                              __html: message.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') 
-                            }}
-                          />
+                          <p className="leading-relaxed">
+                            {message.text.split(/\*\*(.*?)\*\*/g).map((part: string, i: number) =>
+                              i % 2 === 1 ? <strong key={i}>{part}</strong> : part
+                            )}
+                          </p>
                           
                           {/* Actions */}
                           {message.actions && message.actions.length > 0 && (

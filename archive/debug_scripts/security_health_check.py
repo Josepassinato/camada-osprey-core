@@ -81,7 +81,7 @@ def test_auto_application_start_h1b():
                 
                 # Verify security: no hardcoded keys in response
                 response_text = response.text
-                if 'sk-emergent-aE5F536B80dFf0bA6F' in response_text:
+                if os.environ.get('EMERGENT_LLM_KEY', '') and os.environ.get('EMERGENT_LLM_KEY', '') in response_text:
                     print("❌ SECURITY ISSUE: Hardcoded API key found in response!")
                     return False
                 else:
@@ -128,7 +128,7 @@ def test_auto_application_start_b1b2():
                 
                 # Verify security: no hardcoded keys in response
                 response_text = response.text
-                if 'sk-emergent-aE5F536B80dFf0bA6F' in response_text:
+                if os.environ.get('EMERGENT_LLM_KEY', '') and os.environ.get('EMERGENT_LLM_KEY', '') in response_text:
                     print("❌ SECURITY ISSUE: Hardcoded API key found in response!")
                     return False
                 else:
@@ -175,7 +175,7 @@ def test_auto_application_start_f1():
                 
                 # Verify security: no hardcoded keys in response
                 response_text = response.text
-                if 'sk-emergent-aE5F536B80dFf0bA6F' in response_text:
+                if os.environ.get('EMERGENT_LLM_KEY', '') and os.environ.get('EMERGENT_LLM_KEY', '') in response_text:
                     print("❌ SECURITY ISSUE: Hardcoded API key found in response!")
                     return False
                 else:
@@ -228,7 +228,7 @@ def test_get_case_by_id():
                 
                 # Verify security: no hardcoded keys in response
                 response_text = response.text
-                if 'sk-emergent-aE5F536B80dFf0bA6F' in response_text:
+                if os.environ.get('EMERGENT_LLM_KEY', '') and os.environ.get('EMERGENT_LLM_KEY', '') in response_text:
                     print(f"   ❌ SECURITY ISSUE: Hardcoded API key found in {visa_type} response!")
                     return False
                 else:
@@ -290,7 +290,7 @@ def test_submission_instructions():
                 
                 # Verify security: no hardcoded keys in response
                 response_text = response.text
-                if 'sk-emergent-aE5F536B80dFf0bA6F' in response_text:
+                if os.environ.get('EMERGENT_LLM_KEY', '') and os.environ.get('EMERGENT_LLM_KEY', '') in response_text:
                     print(f"   ❌ SECURITY ISSUE: Hardcoded API key found in {visa_type} instructions!")
                     return False
                 else:
@@ -366,7 +366,8 @@ def test_backend_logs_for_security():
             print("✅ Backend logs retrieved successfully")
             
             # Check for hardcoded API keys in logs
-            if 'sk-emergent-aE5F536B80dFf0bA6F' in logs:
+            emergent_key = os.environ.get('EMERGENT_LLM_KEY', '')
+            if emergent_key and emergent_key in logs:
                 print("❌ SECURITY ISSUE: Hardcoded API key found in backend logs!")
                 return False
             else:
