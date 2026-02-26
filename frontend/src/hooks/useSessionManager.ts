@@ -14,10 +14,20 @@ interface UseSessionManagerOptions {
   sessionTimeoutMinutes?: number;
 }
 
+/**
+ * Generate a cryptographically secure session token
+ */
+function generateSecureToken(): string {
+  const array = new Uint8Array(24);
+  crypto.getRandomValues(array);
+  const hex = Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
+  return `sess_${hex}`;
+}
+
 export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
-  const { 
-    persistAcrossTabs = true, 
-    sessionTimeoutMinutes = 120 
+  const {
+    persistAcrossTabs = true,
+    sessionTimeoutMinutes = 120
   } = options;
 
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
@@ -33,26 +43,19 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
       const stored = storage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored) as SessionData;
-        
+
         // Check if session is expired
         const lastActivity = new Date(parsed.lastActivity);
         const now = new Date();
         const minutesSinceActivity = (now.getTime() - lastActivity.getTime()) / (1000 * 60);
-        
+
         if (minutesSinceActivity < sessionTimeoutMinutes) {
           setSessionData(parsed);
-          console.log('🔐 Session restored:', { 
-            caseId: parsed.caseId, 
-            step: parsed.currentStep,
-            minutes: Math.round(minutesSinceActivity)
-          });
         } else {
-          console.log('🔐 Session expired, clearing storage');
           storage.removeItem(STORAGE_KEY);
         }
       }
-    } catch (error) {
-      console.error('🔐 Error loading session:', error);
+    } catch {
       storage.removeItem(STORAGE_KEY);
     } finally {
       setIsLoading(false);
@@ -64,17 +67,16 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     if (sessionData) {
       try {
         storage.setItem(STORAGE_KEY, JSON.stringify(sessionData));
-        console.log('🔐 Session saved:', { caseId: sessionData.caseId, step: sessionData.currentStep });
-      } catch (error) {
-        console.error('🔐 Error saving session:', error);
+      } catch {
+        // Storage full or unavailable
       }
     }
   }, [sessionData]);
 
   // Create new session
   const createSession = useCallback((caseId?: string, userId?: string) => {
-    const sessionToken = `sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+    const sessionToken = generateSecureToken();
+
     const newSession: SessionData = {
       sessionToken,
       caseId: caseId || null,
@@ -85,23 +87,16 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     };
 
     setSessionData(newSession);
-    
+
     // Also store legacy session token for backward compatibility
     storage.setItem('osprey_session_token', sessionToken);
-    
-    console.log('🔐 New session created:', { 
-      sessionToken: sessionToken.slice(-8),
-      caseId,
-      userId: userId || 'anonymous'
-    });
-    
+
     return newSession;
   }, []);
 
   // Update session data
   const updateSession = useCallback((updates: Partial<SessionData>) => {
     if (!sessionData) {
-      console.warn('🔐 Cannot update session: no active session');
       return;
     }
 
@@ -112,12 +107,6 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     };
 
     setSessionData(updatedSession);
-    
-    console.log('🔐 Session updated:', { 
-      caseId: updatedSession.caseId,
-      step: updatedSession.currentStep,
-      updates: Object.keys(updates)
-    });
   }, [sessionData]);
 
   // Set case ID
@@ -143,7 +132,6 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     storage.removeItem(STORAGE_KEY);
     storage.removeItem('osprey_session_token');
     storage.removeItem('osprey_anonymous_id');
-    console.log('🔐 Session cleared');
   }, []);
 
   // Get session token for API calls

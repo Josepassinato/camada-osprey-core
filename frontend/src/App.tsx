@@ -43,6 +43,8 @@ import { OwlPaymentSuccessPage } from "./pages/OwlPaymentSuccessPage";
 import AdminVisaUpdatesPanel from "./pages/AdminVisaUpdatesPanel";
 import AdminProductManagement from "./pages/AdminProductManagement";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
+import ErrorBoundary from "./components/ErrorBoundary";
 // import AdaptiveFormExample from "./pages/AdaptiveFormExample"; // Temporariamente desabilitado
 import ProactiveAlertsDemo from "./pages/ProactiveAlertsDemo";
 import PaymentPage from "./pages/PaymentPage";
@@ -68,20 +70,21 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+            <ErrorBoundary>
             <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/documents" element={<Documents />} />
-          <Route path="/documents/upload" element={<DocumentUpload />} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
+          <Route path="/documents/upload" element={<ProtectedRoute><DocumentUpload /></ProtectedRoute>} />
           <Route path="/education" element={<Education />} />
           <Route path="/education/guides/:visaType" element={<GuideDetail />} />
           <Route path="/education/interview" element={<InterviewSimulator />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/applications" element={<Applications />} />
-          <Route path="/applications/new" element={<NewApplication />} />
-          <Route path="/applications/:applicationId" element={<ApplicationDetail />} />
+          <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+          <Route path="/applications" element={<ProtectedRoute><Applications /></ProtectedRoute>} />
+          <Route path="/applications/new" element={<ProtectedRoute><NewApplication /></ProtectedRoute>} />
+          <Route path="/applications/:applicationId" element={<ProtectedRoute><ApplicationDetail /></ProtectedRoute>} />
           <Route path="/auto-application/start" element={<NewHomepage />} />
           <Route path="/" element={<NewHomepage />} />
           <Route path="/auto-application/select-form" element={<SelectForm />} />
@@ -141,6 +144,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+      </ErrorBoundary>
       </BrowserRouter>
     </TooltipProvider>
     </ProcessTypeProvider>

@@ -563,10 +563,11 @@ def verify_password(password: str, hashed: str) -> bool:
     return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
 
 def create_jwt_token(user_id: str, email: str) -> str:
+    jwt_expiration_hours = int(os.environ.get('JWT_EXPIRATION_HOURS', '24'))
     payload = {
         "user_id": user_id,
         "email": email,
-        "exp": datetime.utcnow() + timedelta(days=30)
+        "exp": datetime.utcnow() + timedelta(hours=jwt_expiration_hours)
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
@@ -1131,18 +1132,27 @@ async def search_knowledge_base(query: str, visa_type: Optional[VisaType] = None
 async def signup(user_data: UserCreate):
     """Register a new user"""
     try:
+        # Password complexity validation
+        password = user_data.password
+        if len(password) < 8:
+            raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+        if not any(c.isupper() for c in password):
+            raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter")
+        if not any(c.isdigit() for c in password):
+            raise HTTPException(status_code=400, detail="Password must contain at least one number")
+
         # Email verification - always require in production
         email_verified = False
-        
+
         # Check if user already exists
         existing_user = await db.users.find_one({"email": user_data.email})
         if existing_user:
             raise HTTPException(status_code=400, detail="Email already registered")
-        
-        # Create user
+
+        # Create user - ALWAYS set role to "user" on public signup
         user_id = str(uuid.uuid4())
-        hashed_password = hash_password(user_data.password)
-        
+        hashed_password = hash_password(password)
+
         user_doc = {
             "id": user_id,
             "email": user_data.email,
@@ -1150,7 +1160,7 @@ async def signup(user_data: UserCreate):
             "first_name": user_data.first_name,
             "last_name": user_data.last_name,
             "phone": user_data.phone,
-            "role": user_data.role if user_data.role in ["user", "admin", "superadmin"] else "user",  # Default to "user"
+            "role": "user",  # Always "user" on public signup - admin only via admin scripts
             "country_of_birth": None,
             "current_country": None,
             "date_of_birth": None,
@@ -1919,10 +1929,11 @@ async def upload_document_to_case(
     case_id: str,
     file: UploadFile = File(...),
     document_type: str = Form(...),
-    description: Optional[str] = Form(None)
+    description: Optional[str] = Form(None),
+    authorization: Optional[str] = Header(None)
 ):
     """
-    Upload de documento para um caso específico - SEM AUTENTICAÇÃO (para testes)
+    Upload de documento para um caso específico
     """
     try:
         # Validar caso existe
@@ -5443,14 +5454,14 @@ async def review_applicant_letter(request: dict):
                 try:
                     review_data = json.loads(json_str)
                     logger.info("Successfully parsed JSON using method 1")
-                except:
+                except (json.JSONDecodeError, ValueError):
                     # Method 2: Try to find JSON within code blocks
                     json_matches = re.findall(r'```json\s*(.*?)\s*```', response, re.DOTALL)
                     if json_matches:
                         try:
                             review_data = json.loads(json_matches[0])
                             logger.info("Successfully parsed JSON using method 2 (code blocks)")
-                        except:
+                        except (json.JSONDecodeError, ValueError):
                             json_str = None
                     else:
                         json_str = None
@@ -7847,7 +7858,7 @@ async def validate_form_data_ai(case, friendly_form_data, basic_data):
         
         try:
             ai_response = json.loads(response_text.strip())
-        except:
+        except (json.JSONDecodeError, ValueError):
             ai_response = {"validation_issues": [], "overall_status": "approved", "completion_percentage": 100}
         
         return {

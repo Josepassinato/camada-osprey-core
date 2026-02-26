@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const OAUTH_BACKEND_URL = import.meta.env.VITE_OAUTH_BACKEND_URL || 'https://demobackend.emergentagent.com';
+
 export const useGoogleAuth = () => {
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -9,7 +11,7 @@ export const useGoogleAuth = () => {
   useEffect(() => {
     // Check if there's a session_id in the URL fragment
     const hash = window.location.hash;
-    
+
     if (hash && hash.includes('session_id=')) {
       processGoogleAuth(hash);
     }
@@ -28,10 +30,8 @@ export const useGoogleAuth = () => {
         throw new Error('Session ID not found');
       }
 
-      console.log('🔐 Processing Google OAuth session...');
-
       // Call Emergent Auth API to get session data
-      const response = await fetch('https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data', {
+      const response = await fetch(`${OAUTH_BACKEND_URL}/auth/v1/env/oauth/session-data`, {
         method: 'GET',
         headers: {
           'X-Session-ID': sessionId,
@@ -43,7 +43,6 @@ export const useGoogleAuth = () => {
       }
 
       const sessionData = await response.json();
-      console.log('✅ Google OAuth session data received:', sessionData);
 
       // Now send this to our backend to create/update user and set cookie
       const backendResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/google-callback`, {
@@ -51,7 +50,7 @@ export const useGoogleAuth = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Important for cookies
+        credentials: 'include',
         body: JSON.stringify({
           session_token: sessionData.session_token,
           email: sessionData.email,
@@ -66,7 +65,6 @@ export const useGoogleAuth = () => {
       }
 
       const userData = await backendResponse.json();
-      console.log('✅ User authenticated:', userData);
 
       // Store user data in localStorage
       localStorage.setItem('osprey_user', JSON.stringify(userData.user));
@@ -77,14 +75,13 @@ export const useGoogleAuth = () => {
 
       // Redirect to dashboard
       navigate('/dashboard');
-      
+
     } catch (err) {
-      console.error('❌ Google Auth error:', err);
       setError(err instanceof Error ? err.message : 'Authentication failed');
-      
+
       // Clean up URL on error
       window.history.replaceState(null, '', window.location.pathname);
-      
+
       // Redirect to login after a delay
       setTimeout(() => {
         navigate('/login');

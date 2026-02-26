@@ -13,8 +13,12 @@ import { Input } from '@/components/ui/input';
 import { Loader2, CheckCircle, CreditCard, Shield, Lock, AlertCircle, Tag, Check } from 'lucide-react';
 import { makeApiCall } from '@/utils/api';
 
-// Configurar Stripe (usar chave pública)
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_live_51PByv6AfnK9GyzVJSxZwdgq3VrYksnja0kN0eSjBq5s4hTVLQQJhgEOhGMKZrfPR7BwPskZhIv6FbUBb4OJ2UjxZXfHxjC00nL6OqN2X');
+// Configurar Stripe - chave publica DEVE vir de env var
+const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+if (!stripeKey) {
+  console.error('VITE_STRIPE_PUBLISHABLE_KEY is not configured. Stripe checkout will not work.');
+}
+const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
 
 interface CheckoutFormProps {
   visaCode: string;

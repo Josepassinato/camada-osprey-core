@@ -106,12 +106,13 @@ const PaymentAndDownload = () => {
     try {
       const sessionToken = localStorage.getItem('osprey_session_token');
       
-      let url = `${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}`;
+      const url = `${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}`;
+      const headers: Record<string, string> = {};
       if (sessionToken && sessionToken !== 'null') {
-        url += `?session_token=${sessionToken}`;
+        headers['X-Session-Token'] = sessionToken;
       }
-      
-      const response = await fetch(url);
+
+      const response = await fetch(url, { headers });
 
       if (response.ok) {
         const data = await response.json();
