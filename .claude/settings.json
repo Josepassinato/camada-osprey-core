@@ -1,0 +1,36 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport sys, json\ndata = json.loads(sys.stdin.read())\nfile_path = data.get('tool_input', {}).get('file_path', '')\nsensitive_files = ['server.py', 'stripe_integration.py', 'admin_security.py', 'visa_api.py', 'auth']\nif any(s in file_path for s in sensitive_files):\n    print(json.dumps({'decision': 'allow', 'reason': f'SECURITY NOTE: Editing sensitive file {file_path}. Run ./security/scan-file.sh {file_path} after changes.'}))\nelse:\n    print(json.dumps({'decision': 'allow'}))\n\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport sys, json\ndata = json.loads(sys.stdin.read())\nfile_path = data.get('tool_input', {}).get('file_path', '')\nif file_path.endswith('.py'):\n    import subprocess\n    result = subprocess.run(['bandit', '-q', file_path], capture_output=True, text=True, timeout=15)\n    if result.stdout.strip():\n        issues = result.stdout.strip().count('>> Issue:')\n        print(f'Bandit found {issues} security issue(s) in {file_path}')\n        print(result.stdout[:500])\n\""
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '=== Osprey Security Arsenal Active ===' && echo 'Available commands:' && echo '  ./security/scan-quick.sh    - Quick security scan (30s)' && echo '  ./security/scan-all.sh      - Full comprehensive scan' && echo '  ./security/scan-file.sh <f> - Scan specific file' && echo '  ./security/scan-semgrep.sh  - Semgrep with custom rules' && echo '=== REMINDER: This project handles sensitive immigration data and LIVE Stripe payments ==='"
+          }
+        ]
+      }
+    ]
+  }
+}

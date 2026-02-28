@@ -1,0 +1,179 @@
+rules:
+  # ===========================================================================
+  # Osprey-Specific Semgrep Rules
+  # Regras customizadas para detectar vulnerabilidades no projeto Osprey
+  # ===========================================================================
+
+  # ---------------------------------------------------------------------------
+  # NoSQL Injection
+  # ---------------------------------------------------------------------------
+  - id: osprey-nosql-injection-find
+    patterns:
+      - pattern: |
+          $COLLECTION.find_one({..., $KEY: $REQUEST.$ATTR, ...})
+      - metavariable-regex:
+          metavariable: $REQUEST
+          regex: (request|req|body|data|params|query)
+    message: >
+      Potential NoSQL injection in MongoDB find_one(). User input from
+      $REQUEST.$ATTR is passed directly to a MongoDB query without validation.
+      Use Pydantic models or explicit type casting to validate input.
+    severity: ERROR
+    languages: [python]
+
+  - id: osprey-nosql-injection-aggregate
+    pattern: $COLLECTION.aggregate([..., {$KEY: $REQUEST.$ATTR}, ...])
+    message: >
+      Potential NoSQL injection in MongoDB aggregate(). Validate and sanitize
+      all user input before passing to aggregation pipeline.
+    severity: ERROR
+    languages: [python]
+
+  # ---------------------------------------------------------------------------
+  # Authentication / Authorization
+  # ---------------------------------------------------------------------------
+  - id: osprey-missing-auth-case-endpoint
+    patterns:
+      - pattern: |
+          @app.$METHOD("/api/auto-application/case/{$ID}")
+          async def $FUNC($PARAMS):
+              ...
+      - pattern-not: |
+          @app.$METHOD("/api/auto-application/case/{$ID}")
+          async def $FUNC(..., current_user = Depends(...), ...):
+              ...
+    message: >
+      Case endpoint missing authentication. All /api/auto-application/case/
+      endpoints must require authentication via Depends(get_current_user).
+    severity: WARNING
+    languages: [python]
+
+  - id: osprey-missing-auth-admin-endpoint
+    patterns:
+      - pattern: |
+          @app.$METHOD("/api/admin/$PATH")
+          async def $FUNC($PARAMS):
+              ...
+      - pattern-not: |
+          @app.$METHOD("/api/admin/$PATH")
+          async def $FUNC(..., current_user = Depends(...), ...):
+              ...
+    message: >
+      Admin endpoint without authentication! All /api/admin/ endpoints
+      MUST require admin-level authentication.
+    severity: ERROR
+    languages: [python]
+
+  - id: osprey-idor-case-access
+    pattern: |
+      case = await $DB.$COLLECTION.find_one({"case_id": $CASE_ID})
+    message: >
+      Potential IDOR vulnerability. When fetching a case by case_id, always
+      also filter by user_id to prevent unauthorized access:
+      {"case_id": case_id, "user_id": current_user["user_id"]}
+    severity: WARNING
+    languages: [python]
+
+  # ---------------------------------------------------------------------------
+  # Stripe / Payment Security
+  # ---------------------------------------------------------------------------
+  - id: osprey-stripe-amount-from-client
+    pattern: |
+      amount = $REQUEST.$ATTR
+      ...
+      stripe.PaymentIntent.create(amount=$AMOUNT, ...)
+    message: >
+      Payment amount comes from client request. Always calculate payment
+      amounts server-side based on the product/visa type, never trust
+      client-provided amounts.
+    severity: ERROR
+    languages: [python]
+
+  - id: osprey-stripe-webhook-no-verify
+    patterns:
+      - pattern: |
+          async def $FUNC(...):
+              ...
+              $DATA = await request.json()
+              ...
+      - metavariable-regex:
+          metavariable: $FUNC
+          regex: .*(stripe|webhook|payment).*
+      - pattern-not: |
+          stripe.Webhook.construct_event(...)
+    message: >
+      Stripe webhook handler may not verify webhook signatures. Always use
+      stripe.Webhook.construct_event() to verify the webhook came from Stripe.
+    severity: ERROR
+    languages: [python]
+
+  # ---------------------------------------------------------------------------
+  # Sensitive Data Exposure
+  # ---------------------------------------------------------------------------
+  - id: osprey-sensitive-data-in-logs
+    pattern: |
+      $LOGGER.$METHOD(..., $DATA, ...)
+    message: >
+      Check that sensitive immigration data (A-numbers, SSN, passport numbers)
+      is not being logged. Use structured logging with data masking.
+    severity: INFO
+    languages: [python]
+
+  - id: osprey-cors-wildcard
+    pattern: |
+      CORSMiddleware(..., allow_origins=["*"], ...)
+    message: >
+      CORS is configured to allow all origins. In production, restrict
+      allow_origins to your specific frontend domain(s).
+    severity: ERROR
+    languages: [python]
+
+  # ---------------------------------------------------------------------------
+  # JWT Security
+  # ---------------------------------------------------------------------------
+  - id: osprey-jwt-hardcoded-secret
+    patterns:
+      - pattern: jwt.encode($PAYLOAD, "...", ...)
+      - pattern-not: jwt.encode($PAYLOAD, $VAR, ...)
+    message: >
+      JWT secret is hardcoded. Use environment variable:
+      jwt.encode(payload, os.environ["JWT_SECRET"], algorithm="HS256")
+    severity: ERROR
+    languages: [python]
+
+  - id: osprey-jwt-weak-algorithm
+    pattern: jwt.encode(..., algorithm="none", ...)
+    message: >
+      JWT using 'none' algorithm is insecure. Use HS256 or RS256.
+    severity: ERROR
+    languages: [python]
+
+  # ---------------------------------------------------------------------------
+  # File Upload Security
+  # ---------------------------------------------------------------------------
+  - id: osprey-unrestricted-file-upload
+    patterns:
+      - pattern: |
+          async def $FUNC(..., file: UploadFile, ...):
+              ...
+              $PATH = ... + file.filename
+              ...
+      - pattern-not: |
+          ... secure_filename ...
+    message: >
+      File upload may be vulnerable to path traversal. Sanitize filenames
+      using werkzeug.utils.secure_filename() or equivalent before saving.
+    severity: WARNING
+    languages: [python]
+
+  # ---------------------------------------------------------------------------
+  # Command Injection
+  # ---------------------------------------------------------------------------
+  - id: osprey-command-injection
+    patterns:
+      - pattern: subprocess.$FUNC($CMD, shell=True, ...)
+    message: >
+      subprocess with shell=True is vulnerable to command injection.
+      Use shell=False and pass arguments as a list.
+    severity: ERROR
+    languages: [python]
