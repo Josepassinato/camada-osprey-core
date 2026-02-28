@@ -24,12 +24,12 @@ class AccountConfig:
 
 @dataclass
 class KillSwitchConfig:
-    """Kill switch thresholds."""
-    max_daily_loss_pct: float = 3.0        # % of balance
-    max_total_drawdown_pct: float = 10.0   # % of initial balance
-    max_open_positions: int = 10
-    max_lot_size: float = 1.0              # max per-position
-    max_total_exposure: float = 5.0        # total lots across positions
+    """Kill switch thresholds - calibrated for ~660 EUR account."""
+    max_daily_loss_pct: float = 3.0        # ~20 EUR/day max loss
+    max_total_drawdown_pct: float = 10.0   # ~66 EUR max drawdown total
+    max_open_positions: int = 5            # conservative for small account
+    max_lot_size: float = 0.10             # max 0.10 lots per position
+    max_total_exposure: float = 0.30       # max 0.30 lots total
     pause_after_consecutive_losses: int = 3
     enabled: bool = True
 
@@ -39,7 +39,7 @@ class DashboardConfig:
     """Dashboard display settings."""
     refresh_interval_sec: int = 5
     show_closed_trades: int = 10   # last N closed trades
-    currency: str = "USD"
+    currency: str = "EUR"
     timezone: str = "America/Sao_Paulo"
 
 
@@ -48,14 +48,14 @@ class ZuluTradeConfig:
     """ZuluTrade integration settings."""
     followed_traders: list = field(default_factory=list)
     zuluguard_enabled: bool = True
-    zuluguard_max_loss_per_trader: float = 200.0  # USD
+    zuluguard_max_loss_per_trader: float = 50.0  # EUR - conservative for 660 EUR account
 
 
 @dataclass
 class Config:
     """Master configuration."""
     # Which account to use: "demo" or "real"
-    active_mode: str = "demo"
+    active_mode: str = "real"
 
     # Account credentials
     demo_account: AccountConfig = field(default_factory=lambda: AccountConfig(
@@ -66,8 +66,8 @@ class Config:
     ))
     real_account: AccountConfig = field(default_factory=lambda: AccountConfig(
         server="ActivTrades-Server",
-        login=0,
-        password="",
+        login=958831,
+        password="",  # Set via: trading-monitor setup (stored in ~/.trading_monitor/config.json)
         label="real"
     ))
 

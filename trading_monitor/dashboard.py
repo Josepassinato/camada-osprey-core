@@ -307,43 +307,36 @@ class SimulationDashboard(Dashboard):
         self._sim_data = self._generate_sim_data()
 
     def _generate_sim_data(self) -> dict:
-        """Generate simulated account data."""
+        """Generate simulated data matching ActivTrades #958831."""
         return {
             "info": AccountInfo(
-                login=self.config.active_account.login or 12345678,
-                server=self.config.active_account.server,
-                balance=10000.00,
-                equity=10150.00,
-                margin=450.00,
-                free_margin=9700.00,
-                margin_level=2255.56,
-                profit=150.00,
-                currency="USD",
-                leverage=500,
-                name="Demo User",
-                company="ActivTrades",
+                login=958831,
+                server="ActivTrades-Server",
+                balance=657.68,
+                equity=661.42,
+                margin=12.50,
+                free_margin=648.92,
+                margin_level=5291.36,
+                profit=3.74,
+                currency="EUR",
+                leverage=400,
+                name="CARMARGO PASSINATO",
+                company="ActivTrades Plc",
             ),
             "positions": [
                 Position(
-                    ticket=100001, symbol="EURUSD", type="buy",
-                    volume=0.10, open_price=1.08450, current_price=1.08520,
-                    profit=7.00, swap=-0.50, commission=-0.70,
+                    ticket=200001, symbol="EURUSD", type="buy",
+                    volume=0.02, open_price=1.08450, current_price=1.08520,
+                    profit=1.40, swap=-0.10, commission=-0.14,
                     open_time=datetime.now(), sl=1.08200, tp=1.08800,
                     magic=10001, comment="ZuluTrade"
                 ),
                 Position(
-                    ticket=100002, symbol="GBPUSD", type="sell",
-                    volume=0.05, open_price=1.26780, current_price=1.26650,
-                    profit=6.50, swap=-0.30, commission=-0.35,
-                    open_time=datetime.now(), sl=1.27000, tp=1.26400,
-                    magic=10002, comment="ZuluTrade"
-                ),
-                Position(
-                    ticket=100003, symbol="XAUUSD", type="buy",
-                    volume=0.02, open_price=2650.50, current_price=2655.80,
-                    profit=10.60, swap=-1.20, commission=-0.50,
+                    ticket=200002, symbol="XAUUSD", type="buy",
+                    volume=0.01, open_price=2650.50, current_price=2655.80,
+                    profit=2.34, swap=-0.30, commission=-0.10,
                     open_time=datetime.now(), sl=2640.00, tp=2670.00,
-                    magic=10001, comment="ZuluTrade"
+                    magic=10002, comment="ZuluTrade"
                 ),
             ],
         }
