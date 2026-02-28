@@ -410,6 +410,14 @@ def cmd_portfolio(args):
             print()
 
 
+def cmd_web(args):
+    """Launch web dashboard."""
+    from .web.app import run_server
+    port = args.port if hasattr(args, 'port') else 8080
+    host = args.host if hasattr(args, 'host') else "0.0.0.0"
+    run_server(host=host, port=port)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Trading Monitor - ActivTrades + ZuluTrade Control System"
@@ -431,6 +439,10 @@ def main():
     subparsers.add_parser("traders", help="Analyze and score traders")
     subparsers.add_parser("portfolio", help="Show recommended portfolio")
 
+    web_parser = subparsers.add_parser("web", help="Launch web dashboard")
+    web_parser.add_argument("--port", type=int, default=8080, help="Port (default: 8080)")
+    web_parser.add_argument("--host", default="0.0.0.0", help="Host (default: 0.0.0.0)")
+
     args = parser.parse_args()
 
     commands = {
@@ -445,6 +457,7 @@ def main():
         "config": cmd_config,
         "traders": cmd_traders,
         "portfolio": cmd_portfolio,
+        "web": cmd_web,
     }
 
     if args.command in commands:
