@@ -1,0 +1,3 @@
+# Trading Monitor - Dependencies
+rich>=13.0.0          # Terminal UI dashboard
+# MetaTrader5>=5.0.45  # Uncomment on Windows for live MT5 connection
