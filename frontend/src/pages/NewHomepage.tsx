@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import { makeApiCall } from "@/utils/api";
 import MariaChatWidget from "@/components/MariaChatWidget";
@@ -81,11 +82,33 @@ const NewHomepage = () => {
           <nav className="hidden md:flex items-center space-x-8">
             <a href="#como-funciona" className="text-gray-700 hover:text-purple-600 transition-colors font-medium">Como Funciona</a>
             <a href="#precos" className="text-gray-700 hover:text-purple-600 transition-colors font-medium">Preços</a>
-            <button
-              className="border-2 border-purple-600 bg-white text-purple-600 font-semibold px-4 py-2 rounded-lg transition-all hover:bg-purple-600 hover:text-white"
-            >
-              Entrar
-            </button>
+            
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button
+                  className="border-2 border-purple-600 bg-white text-purple-600 font-semibold px-4 py-2 rounded-lg transition-all hover:bg-purple-600 hover:text-white"
+                >
+                  Entrar
+                </button>
+              </SignInButton>
+            </SignedOut>
+            
+            <SignedIn>
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="border-2 border-purple-600 bg-white text-purple-600 font-semibold px-4 py-2 rounded-lg transition-all hover:bg-purple-600 hover:text-white"
+              >
+                Dashboard
+              </button>
+              <UserButton 
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    avatarBox: "w-10 h-10"
+                  }
+                }}
+              />
+            </SignedIn>
           </nav>
         </div>
       </header>

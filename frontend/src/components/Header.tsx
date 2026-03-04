@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Sparkles, ChevronDown, User, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -7,29 +8,15 @@ const Header = () => {
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
 
-    // Check for logged in user
-    const userData = localStorage.getItem('osprey_user');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('osprey_token');
-    localStorage.removeItem('osprey_user');
-    setUser(null);
-    navigate('/');
-  };
 
   const navigation = [
     { name: "Serviços", href: "#services", hasDropdown: true },
@@ -93,41 +80,41 @@ const Header = () => {
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-4">
-            {user ? (
-              <>
-                <Button 
-                  variant="ghost" 
-                  className="font-medium"
-                  onClick={() => navigate('/dashboard')}
-                >
-                  <User className="h-4 w-4" />
-                  Dashboard
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={handleLogout}
-                >
-                  <LogOut className="h-4 w-4" />
-                  Sair
-                </Button>
-              </>
-            ) : (
-              <>
+            <SignedOut>
+              <SignInButton mode="modal">
                 <Button 
                   variant="ghost" 
                   className="font-medium hover:bg-orange-50 hover:text-orange-600"
-                  onClick={() => navigate('/login')}
                 >
                   Entrar
                 </Button>
-                <Button 
-                  className="bg-black text-white hover:bg-gray-800 font-medium"
-                  onClick={() => navigate('/signup')}
-                >
-                  Começar Agora
-                </Button>
-              </>
-            )}
+              </SignInButton>
+              <Button 
+                className="bg-black text-white hover:bg-gray-800 font-medium"
+                onClick={() => navigate('/signup')}
+              >
+                Começar Agora
+              </Button>
+            </SignedOut>
+            
+            <SignedIn>
+              <Button 
+                variant="ghost" 
+                className="font-medium"
+                onClick={() => navigate('/dashboard')}
+              >
+                <User className="h-4 w-4" />
+                Dashboard
+              </Button>
+              <UserButton 
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    avatarBox: "w-10 h-10"
+                  }
+                }}
+              />
+            </SignedIn>
           </div>
 
           {/* Mobile menu button */}
@@ -161,54 +148,49 @@ const Header = () => {
               ))}
               
               <div className="pt-4 border-t border-white/20 space-y-3">
-                {user ? (
-                  <>
+                <SignedOut>
+                  <SignInButton mode="modal">
                     <Button 
                       variant="ghost" 
                       className="w-full justify-start font-medium"
-                      onClick={() => {
-                        navigate('/dashboard');
-                        setIsMobileMenuOpen(false);
-                      }}
-                    >
-                      <User className="h-4 w-4" />
-                      Dashboard
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start"
-                      onClick={() => {
-                        handleLogout();
-                        setIsMobileMenuOpen(false);
-                      }}
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Sair
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start font-medium"
-                      onClick={() => {
-                        navigate('/login');
-                        setIsMobileMenuOpen(false);
-                      }}
                     >
                       Entrar
                     </Button>
-                    <Button 
-                      className="w-full bg-black text-white hover:bg-gray-800 font-medium"
-                      onClick={() => {
-                        navigate('/signup');
-                        setIsMobileMenuOpen(false);
+                  </SignInButton>
+                  <Button 
+                    className="w-full bg-black text-white hover:bg-gray-800 font-medium"
+                    onClick={() => {
+                      navigate('/signup');
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    Começar Agora
+                  </Button>
+                </SignedOut>
+                
+                <SignedIn>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start font-medium"
+                    onClick={() => {
+                      navigate('/dashboard');
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    <User className="h-4 w-4" />
+                    Dashboard
+                  </Button>
+                  <div className="px-4">
+                    <UserButton 
+                      afterSignOutUrl="/"
+                      appearance={{
+                        elements: {
+                          avatarBox: "w-10 h-10"
+                        }
                       }}
-                    >
-                      Começar Agora
-                    </Button>
-                  </>
-                )}
+                    />
+                  </div>
+                </SignedIn>
               </div>
             </nav>
           </div>

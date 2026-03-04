@@ -696,10 +696,8 @@ const DocumentUploadAuto = () => {
     try {
       const sessionToken = localStorage.getItem('osprey_session_token');
       
-      let url = `${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}`;
-      if (sessionToken && sessionToken !== 'null') {
-        url += `?session_token=${sessionToken}`;
-      }
+      // Use PATCH endpoint for better performance
+      const url = `${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}`;
 
       const documents = [...(case_?.uploaded_documents || []), file.id];
       const documentAnalysis = {
@@ -707,31 +705,47 @@ const DocumentUploadAuto = () => {
         [file.id]: analysis
       };
 
-      await fetch(url, {
-        method: 'PUT',
+      const requestBody: any = {
+        uploaded_documents: documents,
+        document_analysis: documentAnalysis,
+        status: 'documents_uploaded'
+      };
+
+      // Add session_token to body if anonymous
+      if (sessionToken && sessionToken !== 'null') {
+        requestBody.session_token = sessionToken;
+      }
+
+      const response = await fetch(url, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          uploaded_documents: documents,
-          document_analysis: documentAnalysis,
-          status: 'documents_uploaded'
-        }),
+        body: JSON.stringify(requestBody),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Failed to save document to case:', errorData);
+        throw new Error(`Failed to save document: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Document saved to case:', result);
+      
+      // Update local case state
+      setCase(result.case);
 
     } catch (error) {
       console.error('Save document error:', error);
+      setError('Erro ao salvar documento. Tente novamente.');
     }
   };
 
   const saveExtractedDataToCase = async () => {
     try {
       const sessionToken = localStorage.getItem('osprey_session_token');
-      
-      let url = `${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}`;
-      if (sessionToken && sessionToken !== 'null') {
-        url += `?session_token=${sessionToken}`;
-      }
+      const url = `${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}`;
 
       // Consolidate all extracted data from documents
       const extractedFacts: any = {
@@ -748,7 +762,7 @@ const DocumentUploadAuto = () => {
           // Map passport data
           if (doc.id === 'passport' && data) {
             if (data.full_name) extractedFacts.personal_info.full_name = data.full_name;
-            if (data.document_number) extractedFacts.document_info.passport_number = data.document_number;
+            if (data.passport_number) extractedFacts.document_info.passport_number = data.passport_number;
             if (data.expiration_date) extractedFacts.document_info.passport_expiry = data.expiration_date;
             if (data.country_of_issue) extractedFacts.personal_info.nationality = data.country_of_issue;
           }
@@ -762,22 +776,35 @@ const DocumentUploadAuto = () => {
         }
       });
 
-      // Save extracted facts to case
-      await fetch(url, {
-        method: 'PUT',
+      const requestBody: any = {
+        ai_extracted_facts: extractedFacts,
+        status: 'documents_analyzed'
+      };
+
+      // Add session_token to body if anonymous
+      if (sessionToken && sessionToken !== 'null') {
+        requestBody.session_token = sessionToken;
+      }
+
+      const response = await fetch(url, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ai_extracted_facts: extractedFacts,
-          status: 'documents_analyzed'
-        }),
+        body: JSON.stringify(requestBody),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Failed to save extracted data:', errorData);
+        throw new Error(`Failed to save extracted data: ${response.status}`);
+      }
 
       console.log('✅ Dados extraídos dos documentos salvos:', extractedFacts);
 
     } catch (error) {
       console.error('Save extracted data error:', error);
+      // Don't throw - allow navigation to continue even if this fails
     }
   };
 
@@ -829,9 +856,39 @@ const DocumentUploadAuto = () => {
   };
 
   const continueToNextStep = async () => {
-    // Save extracted data to case before navigation
-    await saveExtractedDataToCase();
-    navigate(`/auto-application/case/${caseId}/friendly-form`);
+    try {
+      // Save extracted data to case before navigation
+      await saveExtractedDataToCase();
+      
+      // Update case status to documents_uploaded
+      const sessionToken = localStorage.getItem('osprey_session_token');
+      const url = `${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}`;
+      
+      const requestBody: any = {
+        status: 'documents_uploaded',
+        current_step: 'documents',
+        progress_percentage: 60
+      };
+
+      if (sessionToken && sessionToken !== 'null') {
+        requestBody.session_token = sessionToken;
+      }
+
+      await fetch(url, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      // Navigate to dashboard to show completed application
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error completing document upload:', error);
+      // Still navigate even if update fails
+      navigate('/dashboard');
+    }
   };
 
   if (isLoading) {

@@ -26,6 +26,7 @@ class AutoApplicationCase(BaseModel):
     session_token: Optional[str] = None
     form_code: Optional[USCISForm] = None
     status: CaseStatus = CaseStatus.created
+    is_anonymous: bool = True  # True for anonymous cases, False for authenticated users
 
     process_type: Optional[str] = None
 

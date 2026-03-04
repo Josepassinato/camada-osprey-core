@@ -50,6 +50,7 @@ async def start_auto_application(
                 process_type=case_data.process_type,
                 session_token=case_data.session_token,
                 user_id=current_user["id"],
+                is_anonymous=False,  # Authenticated user
                 basic_data=initial_basic_data,
                 expires_at=datetime.now(timezone.utc) + timedelta(days=30),
             )
@@ -58,6 +59,7 @@ async def start_auto_application(
                 form_code=case_data.form_code,
                 process_type=case_data.process_type,
                 session_token=case_data.session_token,
+                is_anonymous=True,  # Anonymous user
                 basic_data=initial_basic_data,
                 expires_at=datetime.now(timezone.utc) + timedelta(days=7),
             )
@@ -308,6 +310,7 @@ async def claim_anonymous_case(case_id: str, current_user=Depends(get_current_us
             {
                 "$set": {
                     "user_id": current_user["id"],
+                    "is_anonymous": False,  # No longer anonymous
                     "session_token": None,
                     "expires_at": None,
                     "updated_at": datetime.now(timezone.utc),

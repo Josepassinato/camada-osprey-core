@@ -77,7 +77,7 @@ const FriendlyForm = () => {
         filled: !!(responses[section.id]?.[field.id] || field.value)
       }))
     })),
-    visa_type: caseData?.form_code,
+    visa_type: case_?.form_code,
     step: 'friendly_form',
     completion_percentage: Math.round((formSections.filter(s => s.completed).length / formSections.length) * 100)
   }, {
@@ -569,25 +569,44 @@ const FriendlyForm = () => {
     try {
       const sessionToken = localStorage.getItem('osprey_session_token');
       
-      let url = `${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}`;
+      // Use PATCH endpoint for more flexible updates
+      const updateData: any = {
+        simplified_form_responses: responses,
+        status: 'form_filled'
+      };
+
       if (sessionToken && sessionToken !== 'null') {
-        url += `?session_token=${sessionToken}`;
+        updateData.session_token = sessionToken;
       }
 
-      await fetch(url, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          simplified_form_responses: responses,
-          status: 'form_filled'
-        }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auto-application/case/${caseId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updateData),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Save error response:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        });
+        throw new Error(errorData.detail || 'Failed to save form data');
+      }
+
+      const data = await response.json();
+      console.log('✅ Form data saved successfully:', data);
       
     } catch (error) {
-      console.error('Save form data error:', error);
+      console.error('❌ Save form data error:', error);
       setError('Erro ao salvar formulário');
+      throw error;
     } finally {
       setIsSaving(false);
     }
@@ -632,7 +651,18 @@ const FriendlyForm = () => {
           <input
             type="text"
             value={fieldValue}
-            onChange={(e) => handleFieldChange(sectionId, field.id, e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              handleFieldChange(sectionId, field.id, value);
+              
+              // Auto-fetch address for CEP field
+              if (field.id === 'cep' && field.validation === 'cep') {
+                const cleanCep = value.replace(/[^0-9]/g, '');
+                if (cleanCep.length === 8) {
+                  fetchAddressByCEP(cleanCep);
+                }
+              }
+            }}
             placeholder={field.placeholder}
             className="w-full p-2 text-sm border border-gray-200 rounded focus:ring-2 focus:ring-black focus:border-black"
           />
@@ -939,9 +969,13 @@ const FriendlyForm = () => {
             fieldElement?.focus();
             fieldElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
           } else if (event === 'expand:section') {
-            setActiveSection(payload.sectionId);
+            // Find section index and navigate to it
+            const sectionIndex = formSections.findIndex(s => s.id === payload.sectionId);
+            if (sectionIndex !== -1) {
+              setCurrentSection(sectionIndex);
+            }
           } else if (event === 'save:progress') {
-            setShowSaveModal(true);
+            saveFormData();
           }
         }}
         isEnabled={true}
