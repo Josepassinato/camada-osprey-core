@@ -41,8 +41,8 @@ export class RegistryService {
     );
   }
 
-  private computeAgentId(botId: string, vendor: string): string {
-    return ethers.keccak256(ethers.toUtf8Bytes(`${vendor}:${botId}`));
+  private computeAgentId(botId: string): string {
+    return ethers.keccak256(ethers.toUtf8Bytes(botId));
   }
 
   private computeMetadataHash(data: RegisterBotRequest): string {
@@ -66,48 +66,45 @@ export class RegistryService {
     }
 
     // 3. Register on-chain
-    const agentId = this.computeAgentId(bot.botId, bot.vendor);
+    const agentId = this.computeAgentId(bot.botId);
     const metadataHash = this.computeMetadataHash(bot);
 
     const tx = await this.contract.registerAgent(agentId, metadataHash);
     const receipt = await tx.wait();
 
     // 4. Save to DB
-    await prisma.agentRegistration.create({
+    await prisma.verifiedAgent.create({
       data: {
+        botId: bot.botId,
         agentPublicId: agentId,
-        name: bot.name,
-        vendor: bot.vendor,
-        version: bot.version,
-        capabilities: bot.capabilities,
-        certLevel: "certified",
-        txHash: receipt.hash,
+        metadataHash,
+        onChainTxHash: receipt.hash,
       },
     });
 
     return { txHash: receipt.hash, agentId, certification };
   }
 
-  async revokeBot(botId: string, vendor: string, reasonCode: string): Promise<string> {
-    const agentId = this.computeAgentId(botId, vendor);
+  async revokeBot(botId: string, reasonCode: string): Promise<string> {
+    const agentId = this.computeAgentId(botId);
     const tx = await this.contract.revokeAgent(agentId, reasonCode);
     const receipt = await tx.wait();
 
-    await prisma.agentRegistration.updateMany({
-      where: { agentPublicId: agentId },
+    await prisma.verifiedAgent.update({
+      where: { botId },
       data: { active: false, revokedAt: new Date(), revokeReason: reasonCode },
     });
 
     return receipt.hash;
   }
 
-  async isBotActive(botId: string, vendor: string): Promise<boolean> {
-    const agentId = this.computeAgentId(botId, vendor);
+  async isBotActive(botId: string): Promise<boolean> {
+    const agentId = this.computeAgentId(botId);
     return this.contract.isAgentActive(agentId);
   }
 
-  async getBot(botId: string, vendor: string): Promise<AgentRecord> {
-    const agentId = this.computeAgentId(botId, vendor);
+  async getBot(botId: string): Promise<AgentRecord> {
+    const agentId = this.computeAgentId(botId);
     const [active, registeredAt, revokedAt, metadataHash, reasonCode] =
       await this.contract.getAgent(agentId);
 

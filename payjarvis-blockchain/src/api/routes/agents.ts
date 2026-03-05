@@ -14,7 +14,6 @@ const registerBotSchema = z.object({
 
 const revokeBotSchema = z.object({
   botId: z.string().min(1),
-  vendor: z.string().min(1),
   reasonCode: z.string().min(1),
 });
 
@@ -29,36 +28,32 @@ export async function agentsRoutes(app: FastifyInstance) {
   // Revoke a bot
   app.post("/revoke", async (request, reply) => {
     const body = revokeBotSchema.parse(request.body);
-    const txHash = await registryService.revokeBot(
-      body.botId,
-      body.vendor,
-      body.reasonCode
-    );
+    const txHash = await registryService.revokeBot(body.botId, body.reasonCode);
     return { txHash, revoked: true };
   });
 
   // Check if bot is active on-chain
-  app.get<{ Querystring: { botId: string; vendor: string } }>(
+  app.get<{ Querystring: { botId: string } }>(
     "/active",
     async (request, reply) => {
-      const { botId, vendor } = request.query;
-      if (!botId || !vendor) {
-        return reply.code(400).send({ error: "botId and vendor are required" });
+      const { botId } = request.query;
+      if (!botId) {
+        return reply.code(400).send({ error: "botId is required" });
       }
-      const active = await registryService.isBotActive(botId, vendor);
+      const active = await registryService.isBotActive(botId);
       return { active };
     }
   );
 
   // Get bot details from on-chain
-  app.get<{ Querystring: { botId: string; vendor: string } }>(
+  app.get<{ Querystring: { botId: string } }>(
     "/details",
     async (request, reply) => {
-      const { botId, vendor } = request.query;
-      if (!botId || !vendor) {
-        return reply.code(400).send({ error: "botId and vendor are required" });
+      const { botId } = request.query;
+      if (!botId) {
+        return reply.code(400).send({ error: "botId is required" });
       }
-      const bot = await registryService.getBot(botId, vendor);
+      const bot = await registryService.getBot(botId);
       return bot;
     }
   );

@@ -1,28 +1,13 @@
 import { createJWT, ES256KSigner } from "did-jwt";
-import { config } from "../config";
+import { PrismaClient } from "@prisma/client";
+import { randomUUID } from "crypto";
 
-export interface CredentialSubject {
-  id: string;
-  agentName: string;
-  vendor: string;
-  certificationLevel: string;
-  registeredAt: string;
-  capabilities: string[];
-}
+const prisma = new PrismaClient();
 
-export interface VerifiableCredential {
-  jwt: string;
-  decoded: {
-    iss: string;
-    sub: string;
-    vc: {
-      "@context": string[];
-      type: string[];
-      credentialSubject: CredentialSubject;
-      issuanceDate: string;
-      expirationDate?: string;
-    };
-  };
+export interface AgentCredentialPayload {
+  botId: string;
+  agentPublicId: string;
+  certifiedAt: string;
 }
 
 export class VCIssuer {
@@ -30,29 +15,34 @@ export class VCIssuer {
   private issuerDid: string;
 
   constructor() {
-    this.issuerDid = config.ISSUER_DID;
-    const privateKeyBytes = Buffer.from(config.ISSUER_PRIVATE_KEY_HEX, "hex");
+    this.issuerDid = process.env.ISSUER_DID!;
+    const privateKeyBytes = Buffer.from(process.env.ISSUER_PRIVATE_KEY_HEX!, "hex");
     this.signer = ES256KSigner(privateKeyBytes);
   }
 
   async issueAgentCredential(
-    subject: CredentialSubject,
+    payload: AgentCredentialPayload,
     expiresInDays: number = 365
-  ): Promise<VerifiableCredential> {
+  ): Promise<{ jwt: string; credentialId: string }> {
     const now = new Date();
-    const expiration = new Date(now.getTime() + expiresInDays * 24 * 60 * 60 * 1000);
+    const expiresAt = new Date(now.getTime() + expiresInDays * 24 * 60 * 60 * 1000);
+    const credentialId = randomUUID();
 
     const vcPayload = {
-      sub: subject.id,
+      sub: payload.botId,
       vc: {
         "@context": [
           "https://www.w3.org/2018/credentials/v1",
           "https://payjarvis.io/credentials/v1",
         ],
         type: ["VerifiableCredential", "PayJarvisAgentCertification"],
-        credentialSubject: subject,
+        credentialSubject: {
+          id: payload.botId,
+          agentPublicId: payload.agentPublicId,
+          certifiedAt: payload.certifiedAt,
+        },
         issuanceDate: now.toISOString(),
-        expirationDate: expiration.toISOString(),
+        expirationDate: expiresAt.toISOString(),
       },
     };
 
@@ -61,14 +51,23 @@ export class VCIssuer {
       signer: this.signer,
     });
 
-    return {
-      jwt,
-      decoded: {
-        iss: this.issuerDid,
-        sub: subject.id,
-        vc: vcPayload.vc,
-      },
-    };
+    // Find the VerifiedAgent and link the credential
+    const agent = await prisma.verifiedAgent.findUnique({
+      where: { botId: payload.botId },
+    });
+
+    if (agent) {
+      await prisma.agentCredential.create({
+        data: {
+          agentId: agent.id,
+          credentialId,
+          credential: vcPayload,
+          expiresAt,
+        },
+      });
+    }
+
+    return { jwt, credentialId };
   }
 
   async issueAnchorProofCredential(
@@ -92,7 +91,6 @@ export class VCIssuer {
           eventCount,
           periodStart,
           periodEnd,
-          chain: config.ANCHOR_CHAIN,
         },
         issuanceDate: new Date().toISOString(),
       },

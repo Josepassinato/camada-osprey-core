@@ -7,75 +7,49 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model DecisionEvent {
-  id           String   @id @default(cuid())
-  botId        String
-  merchantId   String
-  amount       Decimal  @db.Decimal(18, 2)
-  currency     String   @db.VarChar(3)
-  decision     String   // approved | pending | blocked
-  timestamp    DateTime @default(now())
-  policyId     String?
-  anchored     Boolean  @default(false)
-  anchorTxHash String?
-  createdAt    DateTime @default(now())
-
-  @@index([anchored])
-  @@index([botId])
-  @@index([merchantId])
-  @@index([timestamp])
-  @@map("decision_events")
-}
-
 model AnchorRecord {
-  id          String   @id @default(cuid())
-  merkleRoot  String
+  id          String   @id @default(uuid())
+  merkleRoot  String   @unique
   periodStart DateTime
   periodEnd   DateTime
   periodSalt  String
   eventCount  Int
   chainId     Int
-  status      String   @default("pending") // pending | confirmed | failed
-  txHash      String?  @unique
+  txHash      String?
   blockNumber Int?
+  status      String   @default("pending") // pending | confirmed | failed
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  @@index([txHash])
-  @@index([status])
   @@map("anchor_records")
 }
 
-model AgentRegistration {
-  id             String   @id @default(cuid())
-  agentPublicId  String   @unique
-  name           String
-  vendor         String
-  version        String
-  capabilities   String[]
-  certLevel      String   @default("basic")
-  txHash         String
-  active         Boolean  @default(true)
-  registeredAt   DateTime @default(now())
-  revokedAt      DateTime?
-  revokeReason   String?
-  createdAt      DateTime @default(now())
+model VerifiedAgent {
+  id            String   @id @default(uuid())
+  botId         String   @unique
+  agentPublicId String   @unique
+  metadataHash  String
+  onChainTxHash String?
+  active        Boolean  @default(true)
+  revokedAt     DateTime?
+  revokeReason  String?
+  certifiedAt   DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  @@index([agentPublicId])
-  @@index([vendor, name])
-  @@map("agent_registrations")
+  credentials   AgentCredential[]
+
+  @@map("verified_agents")
 }
 
-model IssuedCredential {
-  id              String   @id @default(cuid())
-  credentialType  String
-  subjectId       String
-  jwt             String   @db.Text
-  issuerDid       String
-  issuanceDate    DateTime
-  expirationDate  DateTime?
-  createdAt       DateTime @default(now())
+model AgentCredential {
+  id            String   @id @default(uuid())
+  agentId       String
+  agent         VerifiedAgent @relation(fields: [agentId], references: [id])
+  credentialId  String   @unique
+  credential    Json
+  issuedAt      DateTime @default(now())
+  expiresAt     DateTime
+  revoked       Boolean  @default(false)
 
-  @@index([subjectId])
-  @@index([credentialType])
-  @@map("issued_credentials")
+  @@map("agent_credentials")
 }
