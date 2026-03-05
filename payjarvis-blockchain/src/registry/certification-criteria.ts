@@ -1,75 +1,49 @@
-import { AgentMetadata } from "./registry-service";
+export interface BotMetrics {
+  trustScore: number
+  ownerVerified: boolean
+  approvedTxCount: number
+  daysActive: number
+  blockedLast7Days: number
+  hasPolicyConfigured: boolean
+}
 
 export interface CertificationResult {
-  eligible: boolean;
-  level: "basic" | "standard" | "premium";
-  reason: string;
-  checks: CriteriaCheck[];
+  eligible: boolean
+  reasons: string[]
 }
 
-export interface CriteriaCheck {
-  name: string;
-  passed: boolean;
-  detail: string;
+export const CERTIFICATION_THRESHOLDS = {
+  minTrustScore: 65,
+  minApprovedTx: 10,
+  minDaysActive: 3,
+  maxBlockedLast7Days: 0,
+  requirePolicyConfigured: true,
+  requireOwnerVerified: true
 }
 
-const REQUIRED_FIELDS: (keyof AgentMetadata)[] = ["name", "version", "vendor", "capabilities"];
+export function evaluateCertification(metrics: BotMetrics): CertificationResult {
+  const reasons: string[] = []
 
-export function evaluateAgent(metadata: AgentMetadata): CertificationResult {
-  const checks: CriteriaCheck[] = [];
+  if (metrics.trustScore < CERTIFICATION_THRESHOLDS.minTrustScore)
+    reasons.push(`trustScore ${metrics.trustScore} < ${CERTIFICATION_THRESHOLDS.minTrustScore}`)
 
-  // Check required fields
-  for (const field of REQUIRED_FIELDS) {
-    const value = metadata[field];
-    const passed = value !== undefined && value !== null && value !== "";
-    checks.push({
-      name: `field_${field}`,
-      passed,
-      detail: passed ? `${field} is present` : `${field} is missing or empty`,
-    });
-  }
+  if (!metrics.ownerVerified)
+    reasons.push('ownerVerified is false')
 
-  // Check capabilities
-  const hasCaps = Array.isArray(metadata.capabilities) && metadata.capabilities.length > 0;
-  checks.push({
-    name: "has_capabilities",
-    passed: hasCaps,
-    detail: hasCaps
-      ? `${metadata.capabilities.length} capabilities declared`
-      : "No capabilities declared",
-  });
+  if (metrics.approvedTxCount < CERTIFICATION_THRESHOLDS.minApprovedTx)
+    reasons.push(`approvedTxCount ${metrics.approvedTxCount} < ${CERTIFICATION_THRESHOLDS.minApprovedTx}`)
 
-  // Check version format (semver-like)
-  const semverRegex = /^\d+\.\d+\.\d+/;
-  const validVersion = semverRegex.test(metadata.version || "");
-  checks.push({
-    name: "valid_version",
-    passed: validVersion,
-    detail: validVersion ? "Version follows semver" : "Version does not follow semver format",
-  });
+  if (metrics.daysActive < CERTIFICATION_THRESHOLDS.minDaysActive)
+    reasons.push(`daysActive ${metrics.daysActive} < ${CERTIFICATION_THRESHOLDS.minDaysActive}`)
 
-  // Determine eligibility
-  const allPassed = checks.every((c) => c.passed);
-  if (!allPassed) {
-    const failed = checks.filter((c) => !c.passed).map((c) => c.name);
-    return {
-      eligible: false,
-      level: "basic",
-      reason: `Failed checks: ${failed.join(", ")}`,
-      checks,
-    };
-  }
+  if (metrics.blockedLast7Days > CERTIFICATION_THRESHOLDS.maxBlockedLast7Days)
+    reasons.push(`blocked events in last 7 days: ${metrics.blockedLast7Days}`)
 
-  // Determine level based on capabilities count
-  const capCount = metadata.capabilities.length;
-  let level: CertificationResult["level"] = "basic";
-  if (capCount >= 10) level = "premium";
-  else if (capCount >= 5) level = "standard";
+  if (!metrics.hasPolicyConfigured)
+    reasons.push('no spending policy configured')
 
   return {
-    eligible: true,
-    level,
-    reason: `Agent meets ${level} certification criteria`,
-    checks,
-  };
+    eligible: reasons.length === 0,
+    reasons
+  }
 }

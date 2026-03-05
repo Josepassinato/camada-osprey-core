@@ -1,6 +1,8 @@
 import { ethers } from "ethers";
-import { config } from "../config";
-import { CertificationCriteria, evaluateAgent } from "./certification-criteria";
+import { PrismaClient } from "@prisma/client";
+import { evaluateCertification, BotMetrics } from "./certification-criteria";
+
+const prisma = new PrismaClient();
 
 const REGISTRY_ABI = [
   "function registerAgent(bytes32 agentPublicId, bytes32 metadataHash) external",
@@ -9,12 +11,12 @@ const REGISTRY_ABI = [
   "function getAgent(bytes32 agentPublicId) external view returns (bool active, uint256 registeredAt, uint256 revokedAt, bytes32 metadataHash, string reasonCode)",
 ];
 
-export interface AgentMetadata {
+export interface RegisterBotRequest {
+  botId: string;
   name: string;
-  version: string;
   vendor: string;
+  version: string;
   capabilities: string[];
-  certificationLevel: string;
 }
 
 export interface AgentRecord {
@@ -27,63 +29,85 @@ export interface AgentRecord {
 
 export class RegistryService {
   private contract: ethers.Contract;
-  private signer: ethers.Wallet;
+  private wallet: ethers.Wallet;
 
   constructor() {
-    const rpcUrl = config.ANCHOR_CHAIN === "polygon"
-      ? config.POLYGON_RPC_URL
-      : config.AMOY_RPC_URL;
-
-    const provider = new ethers.JsonRpcProvider(rpcUrl);
-    this.signer = new ethers.Wallet(config.DEPLOYER_PRIVATE_KEY, provider);
+    const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+    this.wallet = new ethers.Wallet(process.env.PUBLISHER_PRIVATE_KEY!, provider);
     this.contract = new ethers.Contract(
-      config.REGISTRY_CONTRACT_ADDRESS,
+      process.env.REGISTRY_CONTRACT_ADDRESS!,
       REGISTRY_ABI,
-      this.signer
+      this.wallet
     );
   }
 
-  private computeAgentId(agentName: string, vendor: string): string {
-    return ethers.keccak256(
-      ethers.toUtf8Bytes(`${vendor}:${agentName}`)
-    );
+  private computeAgentId(botId: string, vendor: string): string {
+    return ethers.keccak256(ethers.toUtf8Bytes(`${vendor}:${botId}`));
   }
 
-  private computeMetadataHash(metadata: AgentMetadata): string {
-    return ethers.keccak256(
-      ethers.toUtf8Bytes(JSON.stringify(metadata))
-    );
+  private computeMetadataHash(data: RegisterBotRequest): string {
+    return ethers.keccak256(ethers.toUtf8Bytes(JSON.stringify(data)));
   }
 
-  async registerAgent(metadata: AgentMetadata): Promise<{ txHash: string; agentId: string }> {
-    const criteria = evaluateAgent(metadata);
-    if (!criteria.eligible) {
-      throw new Error(`Agent does not meet certification criteria: ${criteria.reason}`);
+  async registerBot(bot: RegisterBotRequest): Promise<{
+    txHash: string;
+    agentId: string;
+    certification: { eligible: boolean; reasons: string[] };
+  }> {
+    // 1. Fetch live metrics from PayJarvis core
+    const metrics = await this.fetchBotMetrics(bot.botId);
+
+    // 2. Evaluate certification
+    const certification = evaluateCertification(metrics);
+    if (!certification.eligible) {
+      throw new Error(
+        `Bot does not meet certification criteria: ${certification.reasons.join("; ")}`
+      );
     }
 
-    const agentId = this.computeAgentId(metadata.name, metadata.vendor);
-    const metadataHash = this.computeMetadataHash(metadata);
+    // 3. Register on-chain
+    const agentId = this.computeAgentId(bot.botId, bot.vendor);
+    const metadataHash = this.computeMetadataHash(bot);
 
     const tx = await this.contract.registerAgent(agentId, metadataHash);
     const receipt = await tx.wait();
 
-    return { txHash: receipt.hash, agentId };
+    // 4. Save to DB
+    await prisma.agentRegistration.create({
+      data: {
+        agentPublicId: agentId,
+        name: bot.name,
+        vendor: bot.vendor,
+        version: bot.version,
+        capabilities: bot.capabilities,
+        certLevel: "certified",
+        txHash: receipt.hash,
+      },
+    });
+
+    return { txHash: receipt.hash, agentId, certification };
   }
 
-  async revokeAgent(agentName: string, vendor: string, reasonCode: string): Promise<string> {
-    const agentId = this.computeAgentId(agentName, vendor);
+  async revokeBot(botId: string, vendor: string, reasonCode: string): Promise<string> {
+    const agentId = this.computeAgentId(botId, vendor);
     const tx = await this.contract.revokeAgent(agentId, reasonCode);
     const receipt = await tx.wait();
+
+    await prisma.agentRegistration.updateMany({
+      where: { agentPublicId: agentId },
+      data: { active: false, revokedAt: new Date(), revokeReason: reasonCode },
+    });
+
     return receipt.hash;
   }
 
-  async isAgentActive(agentName: string, vendor: string): Promise<boolean> {
-    const agentId = this.computeAgentId(agentName, vendor);
+  async isBotActive(botId: string, vendor: string): Promise<boolean> {
+    const agentId = this.computeAgentId(botId, vendor);
     return this.contract.isAgentActive(agentId);
   }
 
-  async getAgent(agentName: string, vendor: string): Promise<AgentRecord> {
-    const agentId = this.computeAgentId(agentName, vendor);
+  async getBot(botId: string, vendor: string): Promise<AgentRecord> {
+    const agentId = this.computeAgentId(botId, vendor);
     const [active, registeredAt, revokedAt, metadataHash, reasonCode] =
       await this.contract.getAgent(agentId);
 
@@ -94,5 +118,30 @@ export class RegistryService {
       metadataHash,
       reasonCode,
     };
+  }
+
+  async checkCertification(botId: string): Promise<{
+    eligible: boolean;
+    reasons: string[];
+    metrics: BotMetrics;
+  }> {
+    const metrics = await this.fetchBotMetrics(botId);
+    const result = evaluateCertification(metrics);
+    return { ...result, metrics };
+  }
+
+  private async fetchBotMetrics(botId: string): Promise<BotMetrics> {
+    const res = await fetch(
+      `${process.env.PAYJARVIS_API_URL}/internal/bots/${botId}/metrics`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.INTERNAL_API_KEY}`,
+        },
+      }
+    );
+    if (!res.ok) {
+      throw new Error(`Failed to fetch metrics for bot ${botId}: ${res.status}`);
+    }
+    return res.json();
   }
 }

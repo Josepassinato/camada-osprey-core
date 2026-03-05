@@ -4,67 +4,75 @@ import { RegistryService } from "../../registry/registry-service";
 
 const registryService = new RegistryService();
 
-const registerAgentSchema = z.object({
+const registerBotSchema = z.object({
+  botId: z.string().min(1),
   name: z.string().min(1),
   version: z.string().regex(/^\d+\.\d+\.\d+/),
   vendor: z.string().min(1),
   capabilities: z.array(z.string()).min(1),
-  certificationLevel: z.string().default("basic"),
 });
 
-const revokeAgentSchema = z.object({
-  name: z.string().min(1),
+const revokeBotSchema = z.object({
+  botId: z.string().min(1),
   vendor: z.string().min(1),
   reasonCode: z.string().min(1),
 });
 
 export async function agentsRoutes(app: FastifyInstance) {
-  // Register a new agent on-chain
+  // Register a bot on-chain (checks certification criteria first)
   app.post("/register", async (request, reply) => {
-    const body = registerAgentSchema.parse(request.body);
-
-    const result = await registryService.registerAgent(body);
+    const body = registerBotSchema.parse(request.body);
+    const result = await registryService.registerBot(body);
     return reply.code(201).send(result);
   });
 
-  // Revoke an agent
+  // Revoke a bot
   app.post("/revoke", async (request, reply) => {
-    const body = revokeAgentSchema.parse(request.body);
-
-    const txHash = await registryService.revokeAgent(
-      body.name,
+    const body = revokeBotSchema.parse(request.body);
+    const txHash = await registryService.revokeBot(
+      body.botId,
       body.vendor,
       body.reasonCode
     );
-
     return { txHash, revoked: true };
   });
 
-  // Check if agent is active
-  app.get<{ Querystring: { name: string; vendor: string } }>(
+  // Check if bot is active on-chain
+  app.get<{ Querystring: { botId: string; vendor: string } }>(
     "/active",
     async (request, reply) => {
-      const { name, vendor } = request.query;
-      if (!name || !vendor) {
-        return reply.code(400).send({ error: "name and vendor are required" });
+      const { botId, vendor } = request.query;
+      if (!botId || !vendor) {
+        return reply.code(400).send({ error: "botId and vendor are required" });
       }
-
-      const active = await registryService.isAgentActive(name, vendor);
+      const active = await registryService.isBotActive(botId, vendor);
       return { active };
     }
   );
 
-  // Get agent details
-  app.get<{ Querystring: { name: string; vendor: string } }>(
+  // Get bot details from on-chain
+  app.get<{ Querystring: { botId: string; vendor: string } }>(
     "/details",
     async (request, reply) => {
-      const { name, vendor } = request.query;
-      if (!name || !vendor) {
-        return reply.code(400).send({ error: "name and vendor are required" });
+      const { botId, vendor } = request.query;
+      if (!botId || !vendor) {
+        return reply.code(400).send({ error: "botId and vendor are required" });
       }
+      const bot = await registryService.getBot(botId, vendor);
+      return bot;
+    }
+  );
 
-      const agent = await registryService.getAgent(name, vendor);
-      return agent;
+  // Check certification eligibility (dry-run, no on-chain write)
+  app.get<{ Querystring: { botId: string } }>(
+    "/certification",
+    async (request, reply) => {
+      const { botId } = request.query;
+      if (!botId) {
+        return reply.code(400).send({ error: "botId is required" });
+      }
+      const result = await registryService.checkCertification(botId);
+      return result;
     }
   );
 }
