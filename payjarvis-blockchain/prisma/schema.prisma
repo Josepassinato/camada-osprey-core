@@ -29,16 +29,19 @@ model DecisionEvent {
 
 model AnchorRecord {
   id          String   @id @default(cuid())
-  txHash      String   @unique
-  recordIndex Int
   merkleRoot  String
-  eventCount  Int
   periodStart DateTime
   periodEnd   DateTime
   periodSalt  String
+  eventCount  Int
+  chainId     Int
+  status      String   @default("pending") // pending | confirmed | failed
+  txHash      String?  @unique
+  blockNumber Int?
   createdAt   DateTime @default(now())
 
   @@index([txHash])
+  @@index([status])
   @@map("anchor_records")
 }
 

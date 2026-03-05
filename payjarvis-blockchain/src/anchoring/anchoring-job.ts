@@ -1,83 +1,19 @@
 import cron from "node-cron";
-import { randomBytes } from "crypto";
-import { PrismaClient } from "@prisma/client";
 import { AnchoringService } from "./anchoring-service";
-import { DecisionLeaf } from "./merkle-builder";
-import { config } from "../config";
 
-const prisma = new PrismaClient();
 const anchoringService = new AnchoringService();
-
-async function fetchPendingDecisions(): Promise<DecisionLeaf[]> {
-  const rows = await prisma.decisionEvent.findMany({
-    where: { anchored: false },
-    orderBy: { timestamp: "asc" },
-    take: 10000,
-  });
-
-  return rows.map((row) => ({
-    decisionId: row.id,
-    botId: row.botId,
-    merchantId: row.merchantId,
-    amount: row.amount.toNumber(),
-    currency: row.currency,
-    decision: row.decision as DecisionLeaf["decision"],
-    timestamp: row.timestamp.getTime(),
-    policyId: row.policyId ?? undefined,
-  }));
-}
-
-async function markDecisionsAnchored(decisionIds: string[], anchorTxHash: string) {
-  await prisma.decisionEvent.updateMany({
-    where: { id: { in: decisionIds } },
-    data: { anchored: true, anchorTxHash },
-  });
-}
-
-function generatePeriodSalt(): string {
-  return randomBytes(32).toString("hex");
-}
+const ANCHOR_CRON = process.env.ANCHOR_CRON || "0 */6 * * *";
+const PERIOD_HOURS = parseInt(process.env.ANCHOR_PERIOD_HOURS || "6", 10);
 
 async function runAnchoringCycle() {
-  console.log(`[anchoring-job] Starting cycle at ${new Date().toISOString()}`);
+  const now = new Date();
+  const periodEnd = now;
+  const periodStart = new Date(now.getTime() - PERIOD_HOURS * 60 * 60 * 1000);
 
-  const decisions = await fetchPendingDecisions();
-  if (decisions.length === 0) {
-    console.log("[anchoring-job] No pending decisions, skipping.");
-    return;
-  }
+  console.log(`[anchoring-job] Starting cycle at ${now.toISOString()}`);
+  console.log(`[anchoring-job] Period: ${periodStart.toISOString()} → ${periodEnd.toISOString()}`);
 
-  const periodStart = Math.min(...decisions.map((d) => d.timestamp));
-  const periodEnd = Math.max(...decisions.map((d) => d.timestamp));
-  const periodSalt = config.PERIOD_SALT || generatePeriodSalt();
-
-  console.log(`[anchoring-job] Anchoring ${decisions.length} decisions (period: ${periodStart}-${periodEnd})`);
-
-  const result = await anchoringService.anchorDecisions(
-    decisions,
-    periodStart,
-    periodEnd,
-    periodSalt
-  );
-
-  console.log(`[anchoring-job] Anchored! TX: ${result.txHash}, Record #${result.recordIndex}`);
-
-  await markDecisionsAnchored(
-    decisions.map((d) => d.decisionId),
-    result.txHash
-  );
-
-  await prisma.anchorRecord.create({
-    data: {
-      txHash: result.txHash,
-      recordIndex: result.recordIndex,
-      merkleRoot: result.merkleRoot,
-      eventCount: result.eventCount,
-      periodStart: new Date(result.periodStart),
-      periodEnd: new Date(result.periodEnd),
-      periodSalt,
-    },
-  });
+  await anchoringService.anchorPeriod(periodStart, periodEnd);
 
   console.log("[anchoring-job] Cycle complete.");
 }
@@ -91,8 +27,8 @@ if (process.argv.includes("--once")) {
       process.exit(1);
     });
 } else {
-  console.log(`[anchoring-job] Scheduling cron: ${config.ANCHOR_CRON}`);
-  cron.schedule(config.ANCHOR_CRON, () => {
+  console.log(`[anchoring-job] Scheduling cron: ${ANCHOR_CRON}`);
+  cron.schedule(ANCHOR_CRON, () => {
     runAnchoringCycle().catch((err) => {
       console.error("[anchoring-job] Cycle error:", err);
     });

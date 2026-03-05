@@ -1,8 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { AnchoringService } from "../../anchoring/anchoring-service";
-import { buildMerkleTree, getMerkleProof, verifyProof, DecisionLeaf } from "../../anchoring/merkle-builder";
-import { config } from "../../config";
+import { buildMerkleTree, getMerkleProof, verifyProof } from "../../anchoring/merkle-builder";
 
 const anchoringService = new AnchoringService();
 
@@ -18,12 +17,8 @@ const decisionLeafSchema = z.object({
 });
 
 const anchorRequestSchema = z.object({
-  decisions: z.array(decisionLeafSchema).min(1),
-  periodStart: z.number(),
-  periodEnd: z.number(),
-  periodSalt: z.string().optional(),
-  schemaVersion: z.number().default(1),
-  issuerId: z.string().optional(),
+  periodStart: z.string().datetime(),
+  periodEnd: z.string().datetime(),
 });
 
 const verifyRequestSchema = z.object({
@@ -34,20 +29,16 @@ const verifyRequestSchema = z.object({
 });
 
 export async function proofsRoutes(app: FastifyInstance) {
-  // Anchor decisions on-chain
+  // Anchor a period on-chain (fetches decisions from PayJarvis core)
   app.post("/anchor", async (request, reply) => {
     const body = anchorRequestSchema.parse(request.body);
 
-    const result = await anchoringService.anchorDecisions(
-      body.decisions,
-      body.periodStart,
-      body.periodEnd,
-      body.periodSalt ?? config.PERIOD_SALT,
-      body.schemaVersion,
-      body.issuerId
+    await anchoringService.anchorPeriod(
+      new Date(body.periodStart),
+      new Date(body.periodEnd)
     );
 
-    return reply.code(201).send(result);
+    return reply.code(201).send({ status: "anchored" });
   });
 
   // Build merkle tree and return root + proofs (off-chain)
