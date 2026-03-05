@@ -7,20 +7,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model AuditEvent {
-  id          String   @id @default(cuid())
-  agentId     String
-  action      String
-  timestamp   DateTime @default(now())
-  payloadHash String
-  anchored    Boolean  @default(false)
+model DecisionEvent {
+  id           String   @id @default(cuid())
+  botId        String
+  merchantId   String
+  amount       Decimal  @db.Decimal(18, 2)
+  currency     String   @db.VarChar(3)
+  decision     String   // approved | pending | blocked
+  timestamp    DateTime @default(now())
+  policyId     String?
+  anchored     Boolean  @default(false)
   anchorTxHash String?
-  createdAt   DateTime @default(now())
+  createdAt    DateTime @default(now())
 
   @@index([anchored])
-  @@index([agentId])
+  @@index([botId])
+  @@index([merchantId])
   @@index([timestamp])
-  @@map("audit_events")
+  @@map("decision_events")
 }
 
 model AnchorRecord {
@@ -31,6 +35,7 @@ model AnchorRecord {
   eventCount  Int
   periodStart DateTime
   periodEnd   DateTime
+  periodSalt  String
   createdAt   DateTime @default(now())
 
   @@index([txHash])

@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { buildMerkleTree, AuditEvent } from "./merkle-builder";
+import { buildMerkleTree, DecisionLeaf } from "./merkle-builder";
 import { config } from "../config";
 
 const ANCHORING_ABI = [
@@ -36,20 +36,21 @@ export class AnchoringService {
     );
   }
 
-  async anchorEvents(
-    events: AuditEvent[],
+  async anchorDecisions(
+    decisions: DecisionLeaf[],
     periodStart: number,
     periodEnd: number,
+    periodSalt: string = config.PERIOD_SALT,
     schemaVersion: number = 1,
     issuerId: string = config.ISSUER_DID
   ): Promise<AnchorResult> {
-    const { root } = buildMerkleTree(events);
+    const { root } = buildMerkleTree(decisions, periodSalt);
 
     const tx = await this.contract.anchorRoot(
       root,
       periodStart,
       periodEnd,
-      events.length,
+      decisions.length,
       schemaVersion,
       issuerId
     );
@@ -70,7 +71,7 @@ export class AnchoringService {
       txHash: receipt.hash,
       recordIndex,
       merkleRoot: root,
-      eventCount: events.length,
+      eventCount: decisions.length,
       periodStart,
       periodEnd,
     };

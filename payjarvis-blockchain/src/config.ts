@@ -19,6 +19,7 @@ const envSchema = z.object({
   // Anchoring
   ANCHOR_CRON: z.string().default("0 */6 * * *"), // every 6 hours
   ANCHOR_CHAIN: z.enum(["polygon", "amoy"]).default("amoy"),
+  PERIOD_SALT: z.string().min(16),
 
   // Credentials
   ISSUER_DID: z.string().startsWith("did:"),

@@ -1,51 +1,63 @@
-import { MerkleTree } from "merkletreejs";
-import { sha256 } from "@noble/hashes/sha256";
-import { bytesToHex } from "@noble/hashes/utils";
+import { MerkleTree } from 'merkletreejs'
+import { keccak256 } from 'ethers'
 
-export interface AuditEvent {
-  eventId: string;
-  agentId: string;
-  action: string;
-  timestamp: number;
-  payload: string;
+export interface DecisionLeaf {
+  decisionId: string
+  botId: string
+  merchantId: string
+  amount: number
+  currency: string
+  decision: 'approved' | 'pending' | 'blocked'
+  timestamp: number
+  policyId?: string
 }
 
-function hashEvent(event: AuditEvent): Buffer {
-  const data = `${event.eventId}:${event.agentId}:${event.action}:${event.timestamp}:${event.payload}`;
-  return Buffer.from(sha256(Buffer.from(data)));
+export function hashLeaf(leaf: DecisionLeaf, periodSalt: string): Buffer {
+  const data = JSON.stringify({
+    v: 1,
+    decisionId: keccak256(Buffer.from(leaf.decisionId + periodSalt)),
+    botId: keccak256(Buffer.from(leaf.botId + periodSalt)),
+    merchantId: keccak256(Buffer.from(leaf.merchantId + periodSalt)),
+    amount: leaf.amount,
+    currency: leaf.currency,
+    decision: leaf.decision,
+    timestamp: leaf.timestamp,
+    policyId: leaf.policyId ?? null
+  })
+  return Buffer.from(keccak256(Buffer.from(data)).slice(2), 'hex')
 }
 
-export function buildMerkleTree(events: AuditEvent[]): {
-  tree: MerkleTree;
-  root: string;
-  leaves: string[];
-} {
-  if (events.length === 0) {
-    throw new Error("Cannot build Merkle tree from empty events");
+export function buildMerkleTree(leaves: DecisionLeaf[], periodSalt: string) {
+  const hashedLeaves = leaves.map(l => hashLeaf(l, periodSalt))
+  const tree = new MerkleTree(hashedLeaves, (data: Buffer) =>
+    Buffer.from(keccak256(data).slice(2), 'hex'),
+    { sortPairs: true }
+  )
+  return {
+    tree,
+    root: tree.getHexRoot(),
+    leaves: hashedLeaves
   }
-
-  const leaves = events.map(hashEvent);
-  const tree = new MerkleTree(leaves, (data: Buffer) => Buffer.from(sha256(data)), {
-    sortPairs: true,
-  });
-
-  const root = tree.getHexRoot();
-  const leafHexes = leaves.map((l) => "0x" + bytesToHex(l));
-
-  return { tree, root, leaves: leafHexes };
 }
 
-export function getProof(tree: MerkleTree, event: AuditEvent): string[] {
-  const leaf = hashEvent(event);
-  return tree.getHexProof(leaf);
+export function getMerkleProof(
+  tree: MerkleTree,
+  leaf: DecisionLeaf,
+  periodSalt: string
+): string[] {
+  const hashedLeaf = hashLeaf(leaf, periodSalt)
+  return tree.getHexProof(hashedLeaf)
 }
 
 export function verifyProof(
-  tree: MerkleTree,
-  event: AuditEvent,
   proof: string[],
+  leaf: DecisionLeaf,
+  periodSalt: string,
   root: string
 ): boolean {
-  const leaf = hashEvent(event);
-  return tree.verify(proof, leaf, root);
+  const hashedLeaf = hashLeaf(leaf, periodSalt)
+  const tree = new MerkleTree([], (data: Buffer) =>
+    Buffer.from(keccak256(data).slice(2), 'hex')
+  )
+  return tree.verify(proof, hashedLeaf, root)
 }

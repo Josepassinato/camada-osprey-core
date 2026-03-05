@@ -1,45 +1,48 @@
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { AnchoringService } from "../../anchoring/anchoring-service";
-import { buildMerkleTree, getProof, verifyProof, AuditEvent } from "../../anchoring/merkle-builder";
+import { buildMerkleTree, getMerkleProof, verifyProof, DecisionLeaf } from "../../anchoring/merkle-builder";
+import { config } from "../../config";
 
 const anchoringService = new AnchoringService();
 
+const decisionLeafSchema = z.object({
+  decisionId: z.string(),
+  botId: z.string(),
+  merchantId: z.string(),
+  amount: z.number(),
+  currency: z.string(),
+  decision: z.enum(["approved", "pending", "blocked"]),
+  timestamp: z.number(),
+  policyId: z.string().optional(),
+});
+
 const anchorRequestSchema = z.object({
-  events: z.array(z.object({
-    eventId: z.string(),
-    agentId: z.string(),
-    action: z.string(),
-    timestamp: z.number(),
-    payload: z.string(),
-  })).min(1),
+  decisions: z.array(decisionLeafSchema).min(1),
   periodStart: z.number(),
   periodEnd: z.number(),
+  periodSalt: z.string().optional(),
   schemaVersion: z.number().default(1),
   issuerId: z.string().optional(),
 });
 
 const verifyRequestSchema = z.object({
-  event: z.object({
-    eventId: z.string(),
-    agentId: z.string(),
-    action: z.string(),
-    timestamp: z.number(),
-    payload: z.string(),
-  }),
+  decision: decisionLeafSchema,
   proof: z.array(z.string()),
+  periodSalt: z.string(),
   merkleRoot: z.string(),
 });
 
 export async function proofsRoutes(app: FastifyInstance) {
-  // Anchor events on-chain
+  // Anchor decisions on-chain
   app.post("/anchor", async (request, reply) => {
     const body = anchorRequestSchema.parse(request.body);
 
-    const result = await anchoringService.anchorEvents(
-      body.events,
+    const result = await anchoringService.anchorDecisions(
+      body.decisions,
       body.periodStart,
       body.periodEnd,
+      body.periodSalt ?? config.PERIOD_SALT,
       body.schemaVersion,
       body.issuerId
     );
@@ -50,30 +53,24 @@ export async function proofsRoutes(app: FastifyInstance) {
   // Build merkle tree and return root + proofs (off-chain)
   app.post("/merkle", async (request, reply) => {
     const body = z.object({
-      events: z.array(z.object({
-        eventId: z.string(),
-        agentId: z.string(),
-        action: z.string(),
-        timestamp: z.number(),
-        payload: z.string(),
-      })).min(1),
+      decisions: z.array(decisionLeafSchema).min(1),
+      periodSalt: z.string(),
     }).parse(request.body);
 
-    const { tree, root, leaves } = buildMerkleTree(body.events);
+    const { tree, root, leaves } = buildMerkleTree(body.decisions, body.periodSalt);
 
-    const proofs = body.events.map((event) => ({
-      eventId: event.eventId,
-      proof: getProof(tree, event),
+    const proofs = body.decisions.map((decision) => ({
+      decisionId: decision.decisionId,
+      proof: getMerkleProof(tree, decision, body.periodSalt),
     }));
 
-    return { root, leaves, proofs };
+    return { root, leaves: leaves.map((l) => "0x" + l.toString("hex")), proofs };
   });
 
-  // Verify a single event proof off-chain
+  // Verify a single decision proof off-chain
   app.post("/verify", async (request, reply) => {
     const body = verifyRequestSchema.parse(request.body);
-    const { tree } = buildMerkleTree([body.event]);
-    const valid = verifyProof(tree, body.event, body.proof, body.merkleRoot);
+    const valid = verifyProof(body.proof, body.decision, body.periodSalt, body.merkleRoot);
     return { valid };
   });
 

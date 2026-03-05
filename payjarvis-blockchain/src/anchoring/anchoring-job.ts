@@ -1,55 +1,69 @@
 import cron from "node-cron";
+import { randomBytes } from "crypto";
 import { PrismaClient } from "@prisma/client";
 import { AnchoringService } from "./anchoring-service";
-import { AuditEvent } from "./merkle-builder";
+import { DecisionLeaf } from "./merkle-builder";
 import { config } from "../config";
 
 const prisma = new PrismaClient();
 const anchoringService = new AnchoringService();
 
-async function fetchPendingEvents(): Promise<AuditEvent[]> {
-  const rows = await prisma.auditEvent.findMany({
+async function fetchPendingDecisions(): Promise<DecisionLeaf[]> {
+  const rows = await prisma.decisionEvent.findMany({
     where: { anchored: false },
     orderBy: { timestamp: "asc" },
     take: 10000,
   });
 
   return rows.map((row) => ({
-    eventId: row.id,
-    agentId: row.agentId,
-    action: row.action,
+    decisionId: row.id,
+    botId: row.botId,
+    merchantId: row.merchantId,
+    amount: row.amount.toNumber(),
+    currency: row.currency,
+    decision: row.decision as DecisionLeaf["decision"],
     timestamp: row.timestamp.getTime(),
-    payload: row.payloadHash,
+    policyId: row.policyId ?? undefined,
   }));
 }
 
-async function markEventsAnchored(eventIds: string[], anchorTxHash: string) {
-  await prisma.auditEvent.updateMany({
-    where: { id: { in: eventIds } },
+async function markDecisionsAnchored(decisionIds: string[], anchorTxHash: string) {
+  await prisma.decisionEvent.updateMany({
+    where: { id: { in: decisionIds } },
     data: { anchored: true, anchorTxHash },
   });
+}
+
+function generatePeriodSalt(): string {
+  return randomBytes(32).toString("hex");
 }
 
 async function runAnchoringCycle() {
   console.log(`[anchoring-job] Starting cycle at ${new Date().toISOString()}`);
 
-  const events = await fetchPendingEvents();
-  if (events.length === 0) {
-    console.log("[anchoring-job] No pending events, skipping.");
+  const decisions = await fetchPendingDecisions();
+  if (decisions.length === 0) {
+    console.log("[anchoring-job] No pending decisions, skipping.");
     return;
   }
 
-  const periodStart = Math.min(...events.map((e) => e.timestamp));
-  const periodEnd = Math.max(...events.map((e) => e.timestamp));
+  const periodStart = Math.min(...decisions.map((d) => d.timestamp));
+  const periodEnd = Math.max(...decisions.map((d) => d.timestamp));
+  const periodSalt = config.PERIOD_SALT || generatePeriodSalt();
 
-  console.log(`[anchoring-job] Anchoring ${events.length} events (period: ${periodStart}-${periodEnd})`);
+  console.log(`[anchoring-job] Anchoring ${decisions.length} decisions (period: ${periodStart}-${periodEnd})`);
 
-  const result = await anchoringService.anchorEvents(events, periodStart, periodEnd);
+  const result = await anchoringService.anchorDecisions(
+    decisions,
+    periodStart,
+    periodEnd,
+    periodSalt
+  );
 
   console.log(`[anchoring-job] Anchored! TX: ${result.txHash}, Record #${result.recordIndex}`);
 
-  await markEventsAnchored(
-    events.map((e) => e.eventId),
+  await markDecisionsAnchored(
+    decisions.map((d) => d.decisionId),
     result.txHash
   );
 
@@ -61,6 +75,7 @@ async function runAnchoringCycle() {
       eventCount: result.eventCount,
       periodStart: new Date(result.periodStart),
       periodEnd: new Date(result.periodEnd),
+      periodSalt,
     },
   });
 
