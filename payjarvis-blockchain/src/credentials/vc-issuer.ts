@@ -1,9 +1,7 @@
 import { createJWT, ES256KSigner } from "did-jwt";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../db/prisma";
 import { randomUUID } from "crypto";
 import { config } from "../config";
-
-const prisma = new PrismaClient();
 
 export interface AgentCredentialPayload {
   botId: string;
@@ -29,6 +27,14 @@ export class VCIssuer {
     const expiresAt = new Date(now.getTime() + expiresInDays * 24 * 60 * 60 * 1000);
     const credentialId = randomUUID();
 
+    const agent = await prisma.verifiedAgent.findUnique({
+      where: { botId: payload.botId },
+    });
+
+    if (!agent) {
+      throw new Error(`VerifiedAgent not found for botId: ${payload.botId}`);
+    }
+
     const vcPayload = {
       sub: payload.botId,
       vc: {
@@ -52,21 +58,14 @@ export class VCIssuer {
       signer: this.signer,
     });
 
-    // Find the VerifiedAgent and link the credential
-    const agent = await prisma.verifiedAgent.findUnique({
-      where: { botId: payload.botId },
+    await prisma.agentCredential.create({
+      data: {
+        agentId: agent.id,
+        credentialId,
+        credential: vcPayload,
+        expiresAt,
+      },
     });
-
-    if (agent) {
-      await prisma.agentCredential.create({
-        data: {
-          agentId: agent.id,
-          credentialId,
-          credential: vcPayload,
-          expiresAt,
-        },
-      });
-    }
 
     return { jwt, credentialId };
   }

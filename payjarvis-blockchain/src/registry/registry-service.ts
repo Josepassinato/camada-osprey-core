@@ -1,8 +1,7 @@
 import { ethers } from "ethers";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../db/prisma";
+import { config } from "../config";
 import { evaluateCertification, BotMetrics } from "./certification-criteria";
-
-const prisma = new PrismaClient();
 
 const REGISTRY_ABI = [
   "function registerAgent(bytes32 agentPublicId, bytes32 metadataHash) external",
@@ -32,10 +31,10 @@ export class RegistryService {
   private wallet: ethers.Wallet;
 
   constructor() {
-    const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
-    this.wallet = new ethers.Wallet(process.env.PUBLISHER_PRIVATE_KEY!, provider);
+    const provider = new ethers.JsonRpcProvider(config.RPC_URL);
+    this.wallet = new ethers.Wallet(config.PUBLISHER_PRIVATE_KEY, provider);
     this.contract = new ethers.Contract(
-      process.env.REGISTRY_CONTRACT_ADDRESS!,
+      config.REGISTRY_CONTRACT_ADDRESS,
       REGISTRY_ABI,
       this.wallet
     );
@@ -54,10 +53,8 @@ export class RegistryService {
     agentId: string;
     certification: { eligible: boolean; reasons: string[] };
   }> {
-    // 1. Fetch live metrics from PayJarvis core
     const metrics = await this.fetchBotMetrics(bot.botId);
 
-    // 2. Evaluate certification
     const certification = evaluateCertification(metrics);
     if (!certification.eligible) {
       throw new Error(
@@ -65,14 +62,12 @@ export class RegistryService {
       );
     }
 
-    // 3. Register on-chain
     const agentId = this.computeAgentId(bot.botId);
     const metadataHash = this.computeMetadataHash(bot);
 
     const tx = await this.contract.registerAgent(agentId, metadataHash);
     const receipt = await tx.wait();
 
-    // 4. Save to DB
     await prisma.verifiedAgent.create({
       data: {
         botId: bot.botId,
@@ -129,10 +124,10 @@ export class RegistryService {
 
   private async fetchBotMetrics(botId: string): Promise<BotMetrics> {
     const res = await fetch(
-      `${process.env.PAYJARVIS_API_URL}/internal/bots/${botId}/metrics`,
+      `${config.PAYJARVIS_API_URL}/internal/bots/${botId}/metrics`,
       {
         headers: {
-          Authorization: `Bearer ${process.env.INTERNAL_API_KEY}`,
+          Authorization: `Bearer ${config.INTERNAL_API_KEY}`,
         },
       }
     );

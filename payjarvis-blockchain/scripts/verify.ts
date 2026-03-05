@@ -1,21 +1,22 @@
-import hre from "hardhat";
+import hre, { ethers } from "hardhat";
 
 async function main() {
   const registryAddress = process.env.REGISTRY_CONTRACT_ADDRESS;
   const anchoringAddress = process.env.ANCHORING_CONTRACT_ADDRESS;
-  const deployerAddress = process.env.DEPLOYER_ADDRESS;
 
-  if (!registryAddress || !anchoringAddress || !deployerAddress) {
+  if (!registryAddress || !anchoringAddress) {
     throw new Error(
-      "Set REGISTRY_CONTRACT_ADDRESS, ANCHORING_CONTRACT_ADDRESS, and DEPLOYER_ADDRESS env vars"
+      "Set REGISTRY_CONTRACT_ADDRESS and ANCHORING_CONTRACT_ADDRESS env vars"
     );
   }
+
+  const [deployer] = await ethers.getSigners();
 
   console.log("Verifying PayJarvisRegistry...");
   try {
     await hre.run("verify:verify", {
       address: registryAddress,
-      constructorArguments: [deployerAddress],
+      constructorArguments: [deployer.address],
     });
     console.log("PayJarvisRegistry verified!");
   } catch (err) {
@@ -26,7 +27,7 @@ async function main() {
   try {
     await hre.run("verify:verify", {
       address: anchoringAddress,
-      constructorArguments: [deployerAddress],
+      constructorArguments: [deployer.address],
     });
     console.log("PayJarvisAnchoring verified!");
   } catch (err) {

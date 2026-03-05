@@ -17,7 +17,7 @@ app.addHook("onRequest", async (request, reply) => {
 
   const apiKey = request.headers["x-api-key"];
   if (apiKey !== config.API_KEY) {
-    reply.code(401).send({ error: "Unauthorized" });
+    return reply.code(401).send({ error: "Unauthorized" });
   }
 });
 
