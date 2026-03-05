@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AuditEvent {
+  id          String   @id @default(cuid())
+  agentId     String
+  action      String
+  timestamp   DateTime @default(now())
+  payloadHash String
+  anchored    Boolean  @default(false)
+  anchorTxHash String?
+  createdAt   DateTime @default(now())
+
+  @@index([anchored])
+  @@index([agentId])
+  @@index([timestamp])
+  @@map("audit_events")
+}
+
+model AnchorRecord {
+  id          String   @id @default(cuid())
+  txHash      String   @unique
+  recordIndex Int
+  merkleRoot  String
+  eventCount  Int
+  periodStart DateTime
+  periodEnd   DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([txHash])
+  @@map("anchor_records")
+}
+
+model AgentRegistration {
+  id             String   @id @default(cuid())
+  agentPublicId  String   @unique
+  name           String
+  vendor         String
+  version        String
+  capabilities   String[]
+  certLevel      String   @default("basic")
+  txHash         String
+  active         Boolean  @default(true)
+  registeredAt   DateTime @default(now())
+  revokedAt      DateTime?
+  revokeReason   String?
+  createdAt      DateTime @default(now())
+
+  @@index([agentPublicId])
+  @@index([vendor, name])
+  @@map("agent_registrations")
+}
+
+model IssuedCredential {
+  id              String   @id @default(cuid())
+  credentialType  String
+  subjectId       String
+  jwt             String   @db.Text
+  issuerDid       String
+  issuanceDate    DateTime
+  expirationDate  DateTime?
+  createdAt       DateTime @default(now())
+
+  @@index([subjectId])
+  @@index([credentialType])
+  @@map("issued_credentials")
+}
