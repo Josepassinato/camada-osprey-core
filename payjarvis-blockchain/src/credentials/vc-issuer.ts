@@ -1,6 +1,7 @@
 import { createJWT, ES256KSigner } from "did-jwt";
 import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "crypto";
+import { config } from "../config";
 
 const prisma = new PrismaClient();
 
@@ -15,8 +16,8 @@ export class VCIssuer {
   private issuerDid: string;
 
   constructor() {
-    this.issuerDid = process.env.ISSUER_DID!;
-    const privateKeyBytes = Buffer.from(process.env.ISSUER_PRIVATE_KEY_HEX!, "hex");
+    this.issuerDid = `did:web:${new URL(config.ISSUER_ID).hostname}`;
+    const privateKeyBytes = Buffer.from(config.VC_PRIVATE_KEY_HEX, "hex");
     this.signer = ES256KSigner(privateKeyBytes);
   }
 

@@ -8,37 +8,29 @@ const envSchema = z.object({
   // Blockchain
   RPC_URL: z.string().url(),
   PUBLISHER_PRIVATE_KEY: z.string().min(64),
-  CHAIN_ID: z.coerce.number().default(80002),
+  DEPLOY_PRIVATE_KEY: z.string().min(64).optional(),
+  CHAIN_ID: z.coerce.number().default(84532),
   ANCHORING_CONTRACT_ADDRESS: z.string().startsWith("0x"),
   REGISTRY_CONTRACT_ADDRESS: z.string().startsWith("0x"),
 
-  // Legacy / Hardhat deploy support
-  DEPLOYER_PRIVATE_KEY: z.string().min(64).optional(),
-  POLYGON_RPC_URL: z.string().url().default("https://polygon-rpc.com"),
-  AMOY_RPC_URL: z.string().url().default("https://rpc-amoy.polygon.technology"),
-  POLYGONSCAN_API_KEY: z.string().default(""),
-
   // PayJarvis Core integration
   PAYJARVIS_API_URL: z.string().url(),
-  INTERNAL_API_KEY: z.string().min(16),
-  ISSUER_ID: z.string().default("payjarvis.com"),
+  INTERNAL_API_KEY: z.string().min(1),
+  ISSUER_ID: z.string().default("https://payjarvis.com"),
 
   // API
-  API_PORT: z.coerce.number().default(3100),
-  API_HOST: z.string().default("0.0.0.0"),
+  PORT: z.coerce.number().default(3003),
+  API_KEY: z.string().min(32),
 
   // Anchoring
   ANCHOR_CRON: z.string().default("0 */6 * * *"),
   ANCHOR_PERIOD_HOURS: z.coerce.number().default(6),
 
-  // Credentials
-  ISSUER_DID: z.string().startsWith("did:"),
-  ISSUER_PRIVATE_KEY_HEX: z.string().min(64),
+  // VC Credentials (secp256k1)
+  VC_PRIVATE_KEY_HEX: z.string().min(64),
+  VC_PUBLIC_KEY_HEX: z.string().optional(),
 
   // Security
-  API_KEY: z.string().min(32),
-
-  // Environment
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
 });
 

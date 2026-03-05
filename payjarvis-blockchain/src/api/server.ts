@@ -31,8 +31,8 @@ app.register(credentialsRoutes, { prefix: "/api/v1/credentials" });
 
 async function start() {
   try {
-    await app.listen({ port: config.API_PORT, host: config.API_HOST });
-    console.log(`PayJarvis Blockchain API running on ${config.API_HOST}:${config.API_PORT}`);
+    await app.listen({ port: config.PORT, host: "0.0.0.0" });
+    console.log(`PayJarvis Blockchain API running on 0.0.0.0:${config.PORT}`);
   } catch (err) {
     app.log.error(err);
     process.exit(1);
