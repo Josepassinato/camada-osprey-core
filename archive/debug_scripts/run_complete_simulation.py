@@ -11,8 +11,8 @@ from datetime import datetime
 
 sys.path.insert(0, '/app')
 
-from backend.iterative_learning_system import IterativeLearningSystem
-from backend.immigration_compliance_reviewer import ImmigrationComplianceReviewer
+from backend.learning.iterative_learning import IterativeLearningSystem
+from backend.compliance.reviewer import ImmigrationComplianceReviewer
 from h1b_data_model import h1b_data
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch

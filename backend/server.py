@@ -1,197 +1,203 @@
-from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Depends, status, Form, WebSocket, WebSocketDisconnect, Request, Header
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi.responses import HTMLResponse, FileResponse
-from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
-from bson import ObjectId
-import os
-import time as time_module
-import uuid
-import logging
-import asyncio
+"""
+Osprey Backend Server
+
+FastAPI application for immigration platform.
+
+Run from project root:
+    python3 run_server.py
+
+Or from backend directory (legacy):
+    python3 server.py
+"""
+
+import sys
 from pathlib import Path
+
+# Ensure backend package is importable
+# This allows running from both project root and backend directory
+backend_dir = Path(__file__).parent
+project_root = backend_dir.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+import os
+import uuid
+from uuid import uuid4
+from contextlib import asynccontextmanager
+from pathlib import Path
+
+from dotenv import load_dotenv
+from fastapi import (
+    APIRouter,
+    Depends,
+    FastAPI,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    UploadFile,
+)
+from fastapi.responses import FileResponse, HTMLResponse
+from starlette.middleware.cors import CORSMiddleware
 
 # Load environment variables FIRST before any other imports that might use them
 ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+load_dotenv(ROOT_DIR / ".env")
 
-# JWT Configuration
-JWT_SECRET = os.environ.get('JWT_SECRET', 'osprey-secret-key-change-in-production')
-JWT_ALGORITHM = "HS256"
+# Configure structured logging EARLY so all imports can use it
+from backend.core.logging import setup_logging
 
-from pydantic import BaseModel, Field, EmailStr
-import pydantic
-from typing import List, Optional, Dict, Any
+logger = setup_logging()
+
+from backend.core.sentry import init_sentry
+
+init_sentry()
+
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, Field
 
 # Import visa API router
 try:
-    from visa_api import router as visa_router
+    from visa.api import router as visa_router
+
     VISA_API_AVAILABLE = True
 except ImportError:
     VISA_API_AVAILABLE = False
-    print("⚠️  Visa API not available")
-
-# Import immigration legal rules
-try:
-    from immigration_legal_rules import apply_legal_rules, ImmigrationLegalRules
-    LEGAL_RULES_AVAILABLE = True
-    print("✅ Immigration Legal Rules loaded successfully")
-except ImportError as e:
-    LEGAL_RULES_AVAILABLE = False
-    print(f"⚠️  Immigration Legal Rules not available: {e}")
+    logger.warning("⚠️  Visa API not available")
 
 # Configure JSON encoder for ObjectId (Pydantic v2 compatible)
 # pydantic.json.ENCODERS_BY_TYPE[ObjectId] = str  # This is for Pydantic v1
 
-# Helper function to convert MongoDB documents to JSON-serializable format
-def serialize_doc(doc):
-    """Convert MongoDB document to JSON-serializable format"""
-    if doc is None:
-        return None
-    if isinstance(doc, list):
-        return [serialize_doc(item) for item in doc]
-    if isinstance(doc, dict):
-        result = {}
-        for key, value in doc.items():
-            if key == '_id' and isinstance(value, ObjectId):
-                result[key] = str(value)
-            elif isinstance(value, ObjectId):
-                result[key] = str(value)
-            elif isinstance(value, datetime):
-                result[key] = value.isoformat()
-            elif isinstance(value, (dict, list)):
-                result[key] = serialize_doc(value)
-            else:
-                result[key] = value
-        return result
-    return doc
-import uuid
-from datetime import datetime, date, timezone, timedelta
 import json
-import jwt
-import bcrypt
+import uuid
+from datetime import datetime, timedelta, timezone
 from enum import Enum
-import base64
-import mimetypes
-import re
-import openai
-import io
-from case_finalizer_complete import case_finalizer_complete
-from visa_specifications import get_visa_specifications, get_required_documents, get_key_questions, get_common_issues
-from visa_document_mapping import get_visa_document_requirements
-from uscis_form_filler import form_filler as uscis_form_filler
-from emergentintegrations.llm.chat import LlmChat, UserMessage
-import openai
-import yaml
-from immigration_expert import ImmigrationExpert, create_immigration_expert
-from google_document_ai_integration import hybrid_validator
-from visa_auto_updater import VisaAutoUpdater
 
-# Configure OpenAI
-openai.api_key = os.environ.get('OPENAI_API_KEY')
-from specialized_agents import (
-    SpecializedAgentCoordinator,
-    DocumentValidationAgent,
-    create_document_validator,
-    create_form_validator, 
-    create_eligibility_analyst,
-    create_compliance_checker,
-    create_immigration_letter_writer,
-    create_uscis_form_translator,
-    create_urgency_triage
+# from emergentintegrations.llm.chat import LlmChat, UserMessage
+import yaml
+from openai import OpenAI
+
+from backend.agents.immigration_expert import (
+    create_immigration_expert,
+)
+from backend.case.finalizer_complete import case_finalizer_complete
+from backend.integrations.google import hybrid_validator
+from backend.services.ai_form_processing import (
+    check_data_consistency_ai,
+    final_review_ai,
+    generate_uscis_form_ai,
+    translate_data_ai,
+    validate_form_data_ai,
+)
+from backend.visa.specifications import (
+    get_common_issues,
+    get_key_questions,
+    get_required_documents,
+    get_visa_specifications,
 )
 
-# Payment and Stripe Integration
-from payment_packages import get_visa_package, get_all_packages, calculate_final_price
-from voucher_system import validate_voucher, get_all_active_vouchers
-from stripe_integration import create_checkout_session, verify_payment_status, handle_stripe_webhook
+# Initialize OpenAI client (v2 API) - will be None if API key not set
+openai_client = None
+if os.environ.get("OPENAI_API_KEY"):
+    openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+
 import stripe
 
 # Admin Security
-from admin_security import (
-    require_admin, 
-    require_superadmin, 
-    log_admin_action, 
-    get_admin_audit_log,
-    check_admin_rate_limit,
-    AuditAction,
-    init_db as init_admin_security_db
+from admin.security import (
+    require_admin,
 )
-from admin_products import (
-    initialize_products_in_db,
-    get_all_products,
-    get_product,
-    update_product_price,
-    sync_product_to_stripe,
-    sync_all_products_to_stripe,
-    get_product_for_checkout
-)
-
-# Maria - Assistente Virtual
-import maria_api
+from backend.agents.maria.api import router as maria_api_router
 
 # Professional QA Agent - Quality Assurance System
-from professional_qa_agent import get_qa_agent
-from qa_feedback_orchestrator import get_qa_orchestrator
+from backend.agents.qa import get_qa_agent
+from backend.agents.specialized import (
+    DocumentValidationAgent,
+    create_document_validator,
+)
+from backend.api.admin_products import router as admin_products_router
+from backend.api.agents import router as agents_router
+from backend.api.auth import router as auth_router
+from backend.api.auto_application import router as auto_application_router
+from backend.api.auto_application_ai import router as auto_application_ai_router
+from backend.api.auto_application_downloads import (
+    router as auto_application_downloads_router,
+)
+from backend.api.auto_application_packages import (
+    router as auto_application_packages_router,
+)
+from backend.api.completeness import router as completeness_router
+from backend.api.documents import router as documents_router
+from backend.api.downloads import router as downloads_router
+from backend.api.education import router as education_router
+from backend.api.email_packages import router as email_packages_router
+from backend.api.friendly_form import router as friendly_form_router
+from backend.api.knowledge_base import router as knowledge_base_router
+from backend.api.oracle import router as oracle_router
+from backend.api.owl_agent import router as owl_agent_router
+from backend.api.payments import router as payments_router
+from backend.api.specialized_agents import router as specialized_agents_router
+from backend.api.uscis_forms import router as uscis_forms_router
+from backend.api.visa_updates_admin import router as visa_updates_admin_router
+from backend.api.voice import router as voice_router
+from backend.api.voice import ws_router as voice_ws_router
 
-# MongoDB connection - initialized in startup event
-client = None
-db = None
+# Auth helpers
+from backend.core.auth import (
+    get_current_user,
+    verify_jwt_token,
+)
+from backend.core.database import (
+    alert_system,
+    db,
+    shutdown_db_client,
+    startup_db_client,
+)
+from backend.core.serialization import serialize_doc
+
+# Payment and Stripe Integration
+from backend.models.enums import USCISForm, VisaType
+from backend.services.cases import (
+    get_progress_percentage,
+)
 
 # LLM configuration via emergentintegrations
 # API key handled directly in LlmChat calls
 
-# JWT configuration
-JWT_SECRET = os.environ.get('JWT_SECRET', 'osprey-secret-key-change-in-production')
-JWT_ALGORITHM = "HS256"
-security = HTTPBearer()
-security_optional = HTTPBearer(auto_error=False)
 
 # Create the main app without a prefix
-app = FastAPI(title="OSPREY Immigration API - B2C", version="2.0.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await startup_db_client()
+
+    # Initialize Google Document AI (triggers credential loading and verification)
+    from backend.integrations.google import hybrid_validator
+
+    _ = hybrid_validator.google_processor  # Access property to trigger initialization
+
+    try:
+        yield
+    finally:
+        await shutdown_db_client()
+
+
+app = FastAPI(title="OSPREY Immigration API - B2C", version="2.0.0", lifespan=lifespan)
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+
 # Enums
 class ApplicationStatus(str, Enum):
     not_started = "not_started"
-    in_progress = "in_progress" 
+    in_progress = "in_progress"
     document_review = "document_review"
     ready_to_submit = "ready_to_submit"
     submitted = "submitted"
     approved = "approved"
     denied = "denied"
 
-class VisaType(str, Enum):
-    h1b = "h1b"
-    l1 = "l1"
-    o1 = "o1"
-    eb5 = "eb5"
-    f1 = "f1"
-    b1b2 = "b1b2"
-    green_card = "green_card"
-    family = "family"
-
-class USCISForm(str, Enum):
-    N400 = "N-400"  # Application for Naturalization
-    I130 = "I-130"  # Petition for Alien Relative
-    I765 = "I-765"  # Application for Employment Authorization
-    I485 = "I-485"  # Application to Register or Adjust Status
-    I90 = "I-90"    # Application to Replace Permanent Resident Card
-    I751 = "I-751"  # Petition to Remove Conditions on Residence
-    I131 = "I-131"  # Application for Travel Document
-    I129 = "I-129"  # Nonimmigrant Worker Petition
-    I140 = "I-140"  # Immigrant Petition for Alien Worker (EB-1A, EB-2 NIW) - 🆕 ADDED
-    I589 = "I-589"  # Application for Asylum
-    I539 = "I-539"  # Application to Extend/Change Nonimmigrant Status
-    O1 = "O-1"      # Extraordinary Ability (part of I-129)
-    H1B = "H-1B"    # Specialty Occupation (part of I-129)
-    L1 = "L-1"      # Intracompany Transferee (part of I-129) - 🆕 ADDED
-    B1B2 = "B-1/B-2"  # Business/Tourism Visitor Visa
-    F1 = "F-1"      # Student Visa
-    AR11 = "AR-11"  # Change of Address
 
 class UpdateSource(str, Enum):
     USCIS = "uscis"
@@ -199,11 +205,13 @@ class UpdateSource(str, Enum):
     FEDERAL_REGISTER = "federal_register"
     MANUAL = "manual"
 
+
 class UpdateStatus(str, Enum):
     PENDING = "pending"
-    APPROVED = "approved" 
+    APPROVED = "approved"
     REJECTED = "rejected"
     AUTO_APPLIED = "auto_applied"
+
 
 class UpdateType(str, Enum):
     PROCESSING_TIME = "processing_time"
@@ -211,6 +219,7 @@ class UpdateType(str, Enum):
     FORM_REQUIREMENT = "form_requirement"
     VISA_BULLETIN = "visa_bulletin"
     REGULATION_CHANGE = "regulation_change"
+
 
 # Models for Visa Information Updates
 class VisaUpdate(BaseModel):
@@ -231,6 +240,7 @@ class VisaUpdate(BaseModel):
     approved_date: Optional[datetime] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
+
 class VisaInformation(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     form_code: USCISForm
@@ -243,93 +253,6 @@ class VisaInformation(BaseModel):
     version: int = 1
     is_active: bool = True
 
-class CaseStatus(str, Enum):
-    created = "created"
-    form_selected = "form_selected"
-    basic_data = "basic_data"
-    documents_uploaded = "documents_uploaded"
-    story_completed = "story_completed"
-    form_filled = "form_filled"
-    reviewed = "reviewed"
-    paid = "paid"
-    completed = "completed"
-
-class DocumentType(str, Enum):
-    passport = "passport"
-    birth_certificate = "birth_certificate"
-    marriage_certificate = "marriage_certificate"
-    divorce_certificate = "divorce_certificate"
-    education_diploma = "education_diploma"
-    education_transcript = "education_transcript"
-    employment_letter = "employment_letter"
-    bank_statement = "bank_statement"
-    tax_return = "tax_return"
-    medical_exam = "medical_exam"
-    police_clearance = "police_clearance"
-    sponsor_documents = "sponsor_documents"
-    photos = "photos"
-    form_i130 = "form_i130"
-    form_ds160 = "form_ds160"
-    other = "other"
-
-class DocumentStatus(str, Enum):
-    pending_review = "pending_review"
-    approved = "approved"
-    requires_improvement = "requires_improvement"
-    expired = "expired"
-    missing_info = "missing_info"
-
-class DocumentPriority(str, Enum):
-    high = "high"
-    medium = "medium"
-    low = "low"
-
-class DifficultyLevel(str, Enum):
-    beginner = "beginner"
-    intermediate = "intermediate"
-    advanced = "advanced"
-
-class InterviewType(str, Enum):
-    consular = "consular"
-    adjustment_of_status = "adjustment_of_status"
-    asylum = "asylum"
-    naturalization = "naturalization"
-
-# User Models (keeping existing ones)
-class UserCreate(BaseModel):
-    email: EmailStr
-    password: str
-    first_name: str
-    last_name: str
-    phone: Optional[str] = None
-    role: str = "user"  # "user" | "admin" | "superadmin"
-
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
-
-class UserProfile(BaseModel):
-    id: str
-    email: str
-    first_name: str
-    last_name: str
-    phone: Optional[str] = None
-    role: str = "user"  # "user" | "admin" | "superadmin"
-    country_of_birth: Optional[str] = None
-    current_country: Optional[str] = None
-    date_of_birth: Optional[str] = None
-    passport_number: Optional[str] = None
-    created_at: datetime
-    updated_at: datetime
-
-class UserProfileUpdate(BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    phone: Optional[str] = None
-    country_of_birth: Optional[str] = None
-    current_country: Optional[str] = None
-    date_of_birth: Optional[str] = None
-    passport_number: Optional[str] = None
 
 class UserApplication(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -343,181 +266,14 @@ class UserApplication(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
+
 class ApplicationCreate(BaseModel):
     visa_type: VisaType
+
 
 class ApplicationUpdate(BaseModel):
     status: Optional[ApplicationStatus] = None
 
-# Auto-Application System Models
-class AutoApplicationCase(BaseModel):
-    case_id: str = Field(default_factory=lambda: f"OSP-{str(uuid.uuid4())[:8].upper()}")
-    user_id: Optional[str] = None  # Allow anonymous cases
-    session_token: Optional[str] = None  # For anonymous tracking
-    form_code: Optional[USCISForm] = None
-    status: CaseStatus = CaseStatus.created
-    
-    # Process Type
-    process_type: Optional[str] = None  # 'consular' or 'change_of_status'
-    
-    # Progress Tracking
-    progress_percentage: int = 0  # 0-100%
-    current_step: Optional[str] = None
-    
-    # Basic Data
-    basic_data: Optional[Dict[str, Any]] = None
-    
-    # Documents
-    uploaded_documents: List[str] = []
-    document_analysis: Optional[Dict[str, Any]] = None
-    
-    # User Story
-    user_story_text: Optional[str] = None
-    user_story_audio_url: Optional[str] = None
-    ai_extracted_facts: Optional[Dict[str, Any]] = None
-    
-    # Form Data
-    simplified_form_responses: Optional[Dict[str, Any]] = None
-    official_form_data: Optional[Dict[str, Any]] = None
-    uscis_form_generated: bool = False
-    
-    # I-765 EAD specific data
-    ead_data: Optional[Dict[str, Any]] = None
-    
-    # AI Processing Tracking
-    ai_processing: Optional[Dict[str, Any]] = None
-    
-    # Payment & Final
-    payment_status: Optional[str] = None
-    payment_id: Optional[str] = None
-    final_package_generated: bool = False
-    final_package_url: Optional[str] = None
-    completed_at: Optional[datetime] = None
-    
-    # Metadata
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-    expires_at: Optional[datetime] = None  # For anonymous cases
-    
-class CaseCreate(BaseModel):
-    form_code: Optional[USCISForm] = None
-    process_type: Optional[str] = None  # 'consular' or 'change_of_status'
-    session_token: Optional[str] = None  # For anonymous users
-    
-class CaseUpdate(BaseModel):
-    form_code: Optional[USCISForm] = None
-    process_type: Optional[str] = None  # 'consular' or 'change_of_status'
-    status: Optional[CaseStatus] = None
-    basic_data: Optional[Dict[str, Any]] = None
-    user_story_text: Optional[str] = None
-    simplified_form_responses: Optional[Dict[str, Any]] = None
-    progress_percentage: Optional[int] = None
-    current_step: Optional[str] = None
-    # I-765 EAD specific fields
-    ead_data: Optional[Dict[str, Any]] = None
-    # Letters (cover letter, personal statement, etc.)
-    letters: Optional[Dict[str, Any]] = None
-    # Forms completion tracking
-    forms: Optional[Dict[str, Any]] = None
-
-# Document Models (keeping existing ones)
-class UserDocument(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    user_id: str
-    filename: str
-    original_filename: str
-    document_type: DocumentType
-    content_base64: str
-    mime_type: str
-    file_size: int
-    status: DocumentStatus = DocumentStatus.pending_review
-    ai_analysis: Optional[Dict[str, Any]] = None
-    ai_suggestions: List[str] = []
-    expiration_date: Optional[datetime] = None
-    issue_date: Optional[datetime] = None
-    priority: DocumentPriority = DocumentPriority.medium
-    tags: List[str] = []
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-
-class DocumentUpload(BaseModel):
-    document_type: DocumentType
-    tags: Optional[List[str]] = []
-    expiration_date: Optional[str] = None
-    issue_date: Optional[str] = None
-
-class DocumentUpdate(BaseModel):
-    document_type: Optional[DocumentType] = None
-    status: Optional[DocumentStatus] = None
-    expiration_date: Optional[str] = None
-    issue_date: Optional[str] = None
-    tags: Optional[List[str]] = None
-    priority: Optional[DocumentPriority] = None
-
-# Education Models (NEW)
-class VisaGuide(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    visa_type: VisaType
-    title: str
-    description: str
-    difficulty_level: DifficultyLevel
-    estimated_time_minutes: int
-    sections: List[Dict[str, Any]]
-    requirements: List[str]
-    common_mistakes: List[str]
-    success_tips: List[str]
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-
-class InterviewSession(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    user_id: str
-    interview_type: InterviewType
-    visa_type: VisaType
-    questions: List[Dict[str, Any]]
-    answers: List[Dict[str, Any]] = []
-    ai_feedback: Optional[Dict[str, Any]] = None
-    score: Optional[int] = None
-    duration_minutes: Optional[int] = None
-    completed: bool = False
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-
-class InterviewStart(BaseModel):
-    interview_type: InterviewType
-    visa_type: VisaType
-    difficulty_level: Optional[DifficultyLevel] = DifficultyLevel.beginner
-
-class InterviewAnswer(BaseModel):
-    question_id: str
-    answer: str
-
-class PersonalizedTip(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    user_id: str
-    tip_category: str  # document, application, interview, etc.
-    title: str
-    content: str
-    priority: str  # high, medium, low
-    visa_type: Optional[VisaType] = None
-    is_read: bool = False
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-
-class KnowledgeBaseQuery(BaseModel):
-    query: str
-    visa_type: Optional[VisaType] = None
-    category: Optional[str] = None
-
-class UserProgress(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    user_id: str
-    guides_completed: List[str] = []
-    interviews_completed: List[str] = []
-    knowledge_queries: int = 0
-    total_study_time_minutes: int = 0
-    achievement_badges: List[str] = []
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 # Existing models (keeping them)
 class StatusCheck(BaseModel):
@@ -525,3610 +281,54 @@ class StatusCheck(BaseModel):
     client_name: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
+
 class StatusCheckCreate(BaseModel):
     client_name: str
+
 
 class ChatRequest(BaseModel):
     message: str
     session_id: Optional[str] = None
     context: Optional[Dict[str, Any]] = None
 
+
 class ChatResponse(BaseModel):
     message: str
     session_id: str
     context: Optional[Dict[str, Any]] = None
+
 
 class DocumentAnalysisRequest(BaseModel):
     document_text: str
     document_type: Optional[str] = None
     analysis_type: str = "general"
 
+
 class VisaRecommendationRequest(BaseModel):
     personal_info: Dict[str, Any]
     current_status: Optional[str] = None
     goals: List[str] = []
+
 
 class TranslationRequest(BaseModel):
     text: str
     source_language: str = "auto"
     target_language: str = "en"
 
-# Authentication helpers (keeping existing ones)
-def hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-def verify_password(password: str, hashed: str) -> bool:
-    return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
-
-def create_jwt_token(user_id: str, email: str) -> str:
-    payload = {
-        "user_id": user_id,
-        "email": email,
-        "exp": datetime.utcnow() + timedelta(days=30)
-    }
-    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
-
-async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    try:
-        payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        user_id = payload.get("user_id")
-        if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid token")
-        
-        user = await db.users.find_one({"id": user_id})
-        if not user:
-            raise HTTPException(status_code=401, detail="User not found")
-        
-        return user
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
-# Custom optional authentication dependency
-async def get_optional_token(authorization: Optional[str] = Header(None)):
-    """Extract Bearer token from Authorization header if present"""
-    if not authorization:
-        return None
-    
-    if not authorization.startswith("Bearer "):
-        return None
-    
-    token = authorization.replace("Bearer ", "")
-    return token
-
-# Helper function for optional authentication - PRODUCTION READY
-async def get_current_user_optional(token: Optional[str] = Depends(get_optional_token)):
-    """Get current user if authenticated, None if not - RELIABLE VERSION"""    
-    if not token:
-        return None
-    
-    try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        user_id = payload.get("user_id")
-        
-        if not user_id:
-            return None
-        
-        user = await db.users.find_one({"id": user_id})
-        return user
-        
-    except Exception:
-        return None
-
-# Document helper functions (keeping existing ones)
-def extract_text_from_base64_image(base64_content: str) -> str:
-    """Extract text from base64 image using OCR simulation"""
-    # In a real implementation, you would use OCR libraries like pytesseract
-    # For now, we'll return a placeholder
-    return "Extracted text from document using OCR"
-
-def validate_file_type(mime_type: str) -> bool:
-    """Validate if file type is supported"""
-    supported_types = [
-        'application/pdf',
-        'image/jpeg',
-        'image/png',
-        'image/tiff',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    ]
-    return mime_type in supported_types
-
-async def analyze_document_with_ai(document: UserDocument) -> Dict[str, Any]:
-    """Analyze document with Dr. Miguel's improved validation"""
-    try:
-        # Use Dr. Miguel for rigorous document validation
-        validator = create_document_validator()
-        
-        # For text-based documents, extract text
-        if document.mime_type.startswith('image/'):
-            content = extract_text_from_base64_image(document.content_base64)
-        else:
-            content = f"Document type: {document.document_type}, Filename: {document.original_filename}"
-
-        # Get user information for name validation (if available)
-        # This would need to be passed from the upload context
-        user_data = getattr(document, 'user_data', {})
-        
-        validation_prompt = f"""
-        VALIDAÇÃO RIGOROSA DE DOCUMENTO - DR. MIGUEL MELHORADO
-        
-        DADOS CRÍTICOS PARA VALIDAÇÃO:
-        - Tipo de Documento Esperado: {document.document_type}
-        - Conteúdo do Documento: {content[:1500]}
-        - Dados do Usuário: {user_data}
-        - Nome do Arquivo: {document.original_filename}
-        
-        VALIDAÇÕES OBRIGATÓRIAS:
-        1. TIPO CORRETO: Verificar se é exatamente do tipo "{document.document_type}"
-        2. NOME CORRETO: Verificar se nome no documento corresponde ao aplicante
-        3. AUTENTICIDADE: Verificar se é documento genuíno
-        4. VALIDADE: Verificar se não está vencido
-        5. ACEITABILIDADE USCIS: Confirmar se atende padrões USCIS
-        
-        INSTRUÇÕES CRÍTICAS:
-        - Se tipo de documento não for o esperado → REJEITAR
-        - Se nome não corresponder ao aplicante → REJEITAR  
-        - Se documento vencido → REJEITAR
-        - Explicar claramente qualquer problema encontrado
-        
-        RESPOSTA OBRIGATÓRIA EM JSON:
-        {{
-            "document_type_identified": "string",
-            "type_correct": true/false,
-            "name_validation": "approved|rejected|cannot_verify",
-            "belongs_to_applicant": true/false,
-            "validity_status": "valid|invalid|expired|unclear",
-            "uscis_acceptable": true/false,
-            "critical_issues": ["array of issues"],
-            "verdict": "APROVADO|REJEITADO|NECESSITA_REVISÃO",
-            "completeness_score": 0-100,
-            "key_information": ["extracted info"],
-            "suggestions": ["improvement suggestions"],
-            "rejection_reason": "specific reason if rejected"
-        }}
-        
-        Faça validação técnica rigorosa conforme protocolo Dr. Miguel.
-        """
-        
-        session_id = f"doc_analysis_{document.id}"
-        dr_miguel_analysis = await validator._call_agent(validation_prompt, session_id)
-
-        # Parse Dr. Miguel's JSON response
-        analysis_text = dr_miguel_analysis.strip()
-        # Remove markdown formatting if present
-        analysis_text = analysis_text.replace('```json', '').replace('```', '').strip()
-        
-        try:
-            miguel_result = json.loads(analysis_text)
-            
-            # Convert Dr. Miguel's format to expected format
-            analysis = {
-                "completeness_score": miguel_result.get("completeness_score", 50),
-                "validity_status": miguel_result.get("validity_status", "unclear"),
-                "key_information": miguel_result.get("key_information", []),
-                "missing_information": [],
-                "suggestions": miguel_result.get("suggestions", []),
-                "expiration_warnings": [],
-                "quality_issues": miguel_result.get("critical_issues", []),
-                "next_steps": [],
-                # Additional Dr. Miguel specific fields
-                "dr_miguel_validation": {
-                    "document_type_identified": miguel_result.get("document_type_identified"),
-                    "type_correct": miguel_result.get("type_correct"),
-                    "belongs_to_applicant": miguel_result.get("belongs_to_applicant"),
-                    "verdict": miguel_result.get("verdict"),
-                    "rejection_reason": miguel_result.get("rejection_reason"),
-                    "uscis_acceptable": miguel_result.get("uscis_acceptable")
-                }
-            }
-            
-        except json.JSONDecodeError:
-            # Fallback analysis if JSON parsing fails
-            logger.warning(f"Failed to parse Dr. Miguel analysis: {analysis_text}")
-            analysis = {
-                "completeness_score": 25,  # Low score for parsing failure
-                "validity_status": "unclear",
-                "key_information": ["Análise pendente - erro na validação"],
-                "missing_information": ["Validação completa necessária"],
-                "suggestions": ["Documento precisa ser revalidado pelo Dr. Miguel"],
-                "expiration_warnings": [],
-                "quality_issues": ["Erro na análise automática"],
-                "next_steps": ["Reenviar documento ou contactar suporte"],
-                "dr_miguel_validation": {
-                    "verdict": "NECESSITA_REVISÃO",
-                    "rejection_reason": "Erro na análise automática"
-                }
-            }
-
-        return analysis
-
-    except Exception as e:
-        logger.error(f"Error analyzing document with sistema: {str(e)}")
-        # Return basic analysis if sistema fails
-        return {
-            "completeness_score": 50,
-            "validity_status": "unclear",
-            "key_information": ["Documento carregado"],
-            "missing_information": ["Análise automática não disponível"],
-            "suggestions": ["Revise o documento manualmente"],
-            "expiration_warnings": [],
-            "quality_issues": ["Análise automática falhou"],
-            "next_steps": ["Upload realizado, aguarde revisão manual"]
-        }
-
-def determine_document_priority(document_type: DocumentType, expiration_date: Optional[datetime]) -> DocumentPriority:
-    """Determine document priority based on type and expiration"""
-    high_priority_docs = [DocumentType.passport, DocumentType.medical_exam, DocumentType.police_clearance]
-    
-    if document_type in high_priority_docs:
-        return DocumentPriority.high
-    
-    if expiration_date:
-        days_to_expire = (expiration_date - datetime.utcnow()).days
-        if days_to_expire <= 30:
-            return DocumentPriority.high
-        elif days_to_expire <= 90:
-            return DocumentPriority.medium
-    
-    return DocumentPriority.low
-
-def get_progress_percentage(step: str) -> int:
-    """Helper function to calculate progress percentage based on step"""
-    step_map = {
-        "created": 0,
-        "form_selected": 20,
-        "story_recorded": 30,
-        "friendly_form_partial": 45,
-        "friendly-form-complete": 50,
-        "documents_uploaded": 60,
-        "ai_processing": 70,
-        "form_generated": 80,
-        "qa_passed": 90,
-        "finalized": 100
-    }
-    return step_map.get(step, 0)
-
-async def update_case_status_and_progress(case_id: str, new_step: str, collection_name: str = "auto_cases"):
-    """
-    🆕 P1-5: Helper function to update case status and progress progressively
-    
-    Args:
-        case_id: Case ID
-        new_step: New step name
-        collection_name: Which collection (auto_cases or application_cases)
-    """
-    progress = get_progress_percentage(new_step)
-    
-    # Map step to status
-    step_to_status = {
-        "created": "created",
-        "form_selected": "form_selected",
-        "story_recorded": "in_progress",
-        "friendly_form_partial": "in_progress",
-        "friendly-form-complete": "in_progress",
-        "documents_uploaded": "in_progress",
-        "ai_processing": "processing",
-        "form_generated": "processing",
-        "qa_passed": "ready_for_submission",
-        "finalized": "completed"
-    }
-    
-    status = step_to_status.get(new_step, "in_progress")
-    
-    collection = db[collection_name]
-    await collection.update_one(
-        {"case_id": case_id},
-        {
-            "$set": {
-                "current_step": new_step,
-                "progress_percentage": progress,
-                "status": status,
-                "updated_at": datetime.utcnow()
-            }
-        }
-    )
-    
-    logger.info(f"📊 Case {case_id} updated: {new_step} ({progress}%) - Status: {status}")
-
-# Education helper functions (NEW)
-async def generate_interview_questions(interview_type: InterviewType, visa_type: VisaType, difficulty_level: DifficultyLevel) -> List[Dict[str, Any]]:
-    """Generate interview questions using sistema"""
-    try:
-        difficulty_map = {
-            DifficultyLevel.beginner: "perguntas básicas e introdutórias",
-            DifficultyLevel.intermediate: "perguntas moderadas com alguns detalhes",
-            DifficultyLevel.advanced: "perguntas complexas e cenários desafiadores"
-        }
-        
-        prompt = f"""
-        Gere 10 perguntas de entrevista para imigração americana:
-        
-        Tipo de entrevista: {interview_type.value}
-        Tipo de visto: {visa_type.value}
-        Nível: {difficulty_map[difficulty_level]}
-        
-        Para cada pergunta, forneça:
-        - A pergunta em inglês (como seria feita pelo oficial)
-        - Tradução em português
-        - Dicas de como responder
-        - Pontos importantes a mencionar
-        
-        Retorne APENAS um JSON array:
-        [
-            {{
-                "id": "q1",
-                "question_en": "pergunta em inglês",
-                "question_pt": "pergunta em português", 
-                "category": "categoria",
-                "difficulty": "{difficulty_level.value}",
-                "tips": ["dica1", "dica2"],
-                "key_points": ["ponto1", "ponto2"]
-            }}
-        ]
-        
-        IMPORTANTE: Estas são perguntas educativas para preparação. Para casos reais, recomende consultoria jurídica.
-        """
-
-        response = openai.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "Você é um especialista em entrevistas de imigração. Responda APENAS em JSON válido."
-                },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            max_tokens=2000,
-            temperature=0.3
-        )
-
-        questions_text = response.choices[0].message.content.strip()
-        questions_text = questions_text.replace('```json', '').replace('```', '').strip()
-        
-        try:
-            questions = json.loads(questions_text)
-            return questions
-        except json.JSONDecodeError:
-            # Fallback questions
-            return [
-                {
-                    "id": "q1",
-                    "question_en": "What is the purpose of your visit to the United States?",
-                    "question_pt": "Qual é o propósito da sua visita aos Estados Unidos?",
-                    "category": "purpose",
-                    "difficulty": difficulty_level.value,
-                    "tips": ["Seja claro e direto", "Mencione detalhes específicos"],
-                    "key_points": ["Propósito específico", "Duração planejada"]
-                }
-            ]
-
-    except Exception as e:
-        logger.error(f"Error generating interview questions: {str(e)}")
-        return []
-
-async def evaluate_interview_answer(question: Dict[str, Any], answer: str, visa_type: VisaType) -> Dict[str, Any]:
-    """Evaluate interview answer using sistema"""
-    try:
-        prompt = f"""
-        Avalie esta resposta de entrevista de imigração:
-
-        Pergunta: {question.get('question_pt')}
-        Resposta do usuário: {answer}
-        Tipo de visto: {visa_type.value}
-        
-        Forneça feedback APENAS em JSON:
-        {{
-            "score": [0-100],
-            "strengths": ["ponto forte 1", "ponto forte 2"],
-            "weaknesses": ["ponto fraco 1", "ponto fraco 2"],
-            "suggestions": ["sugestão 1", "sugestão 2"],
-            "improved_answer": "exemplo de resposta melhorada",
-            "confidence_level": "baixo|médio|alto"
-        }}
-        
-        IMPORTANTE: Esta é uma ferramenta educativa. Para preparação real, recomende consultoria jurídica.
-        """
-
-        response = openai.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "Você é um especialista em avaliação de entrevistas de imigração. Responda APENAS em JSON."
-                },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            max_tokens=1000,
-            temperature=0.3
-        )
-
-        feedback_text = response.choices[0].message.content.strip()
-        feedback_text = feedback_text.replace('```json', '').replace('```', '').strip()
-        
-        try:
-            feedback = json.loads(feedback_text)
-            return feedback
-        except json.JSONDecodeError:
-            return {
-                "score": 70,
-                "strengths": ["Resposta fornecida"],
-                "weaknesses": ["Análise automática não disponível"],
-                "suggestions": ["Revise sua resposta"],
-                "improved_answer": "Desenvolva mais detalhes na sua resposta",
-                "confidence_level": "médio"
-            }
-
-    except Exception as e:
-        logger.error(f"Error evaluating interview answer: {str(e)}")
-        return {
-            "score": 50,
-            "strengths": ["Tentativa de resposta"],
-            "weaknesses": ["Análise não disponível"],
-            "suggestions": ["Tente novamente"],
-            "improved_answer": "Resposta mais detalhada seria ideal",
-            "confidence_level": "baixo"
-        }
-
-async def generate_personalized_tips(user_id: str, user_profile: dict, applications: List[dict], documents: List[dict]) -> List[PersonalizedTip]:
-    """Generate personalized tips based on user profile and progress"""
-    tips = []
-    
-    try:
-        # Analyze user's current status
-        active_applications = [app for app in applications if app.get('status') in ['in_progress', 'document_review']]
-        pending_docs = [doc for doc in documents if doc.get('status') == 'pending_review']
-        expiring_docs = [doc for doc in documents if doc.get('expiration_date') and 
-                        (datetime.fromisoformat(doc['expiration_date'].replace('Z', '+00:00')) - datetime.utcnow()).days <= 30]
-        
-        # Generate tips based on user's situation
-        user_context = f"""
-        Usuário: {user_profile.get('first_name', '')} {user_profile.get('last_name', '')}
-        País de nascimento: {user_profile.get('country_of_birth', 'Não informado')}
-        Aplicações ativas: {len(active_applications)}
-        Documentos pendentes: {len(pending_docs)}
-        Documentos expirando: {len(expiring_docs)}
-        
-        Gere 5 dicas personalizadas para este usuário em formato JSON:
-        [
-            {{
-                "category": "document|application|interview|preparation",
-                "title": "Título da dica",
-                "content": "Conteúdo detalhado da dica",
-                "priority": "high|medium|low"
-            }}
-        ]
-        """
-
-        response = openai.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "Você é um consultor educativo de imigração. Forneça dicas práticas em português. Sempre mencione que não oferece consultoria jurídica."
-                },
-                {
-                    "role": "user",
-                    "content": user_context
-                }
-            ],
-            max_tokens=1500,
-            temperature=0.7
-        )
-
-        tips_text = response.choices[0].message.content.strip()
-        tips_text = tips_text.replace('```json', '').replace('```', '').strip()
-        
-        try:
-            tips_data = json.loads(tips_text)
-            for tip_data in tips_data:
-                tip = PersonalizedTip(
-                    user_id=user_id,
-                    tip_category=tip_data.get('category', 'general'),
-                    title=tip_data.get('title', ''),
-                    content=tip_data.get('content', ''),
-                    priority=tip_data.get('priority', 'medium')
-                )
-                tips.append(tip)
-        except json.JSONDecodeError:
-            pass
-
-    except Exception as e:
-        logger.error(f"Error generating personalized tips: {str(e)}")
-    
-    # Add fallback tips if generation failed
-    if not tips:
-        tips.append(PersonalizedTip(
-            user_id=user_id,
-            tip_category="preparation",
-            title="Organize seus documentos",
-            content="Mantenha todos os seus documentos organizados e atualizados para facilitar o processo de aplicação.",
-            priority="high"
-        ))
-    
-    return tips
-
-async def search_knowledge_base(query: str, visa_type: Optional[VisaType] = None) -> Dict[str, Any]:
-    """Search knowledge base using sistema"""
-    try:
-        context_filter = f"para visto {visa_type.value}" if visa_type else "para imigração americana"
-        
-        prompt = f"""
-        Responda esta pergunta sobre imigração americana {context_filter}:
-        
-        Pergunta: {query}
-        
-        Forneça uma resposta educativa e informativa em JSON:
-        {{
-            "answer": "resposta detalhada e precisa",
-            "related_topics": ["tópico1", "tópico2", "tópico3"],
-            "next_steps": ["passo1", "passo2"],
-            "resources": ["recurso1", "recurso2"],
-            "warnings": ["aviso importante se aplicável"],
-            "confidence": "alto|médio|baixo"
-        }}
-        
-        IMPORTANTE: 
-        - Esta é informação educativa para auto-aplicação
-        - Sempre mencione que não substitui consultoria jurídica
-        - Para casos complexos, recomende consultar um advogado
-        """
-
-        response = openai.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "Você é uma base de conhecimento educativa sobre imigração americana. Forneça informações precisas em português, sempre com disclaimers sobre consultoria jurídica."
-                },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            max_tokens=1500,
-            temperature=0.3
-        )
-
-        result_text = response.choices[0].message.content.strip()
-        result_text = result_text.replace('```json', '').replace('```', '').strip()
-        
-        try:
-            result = json.loads(result_text)
-            return result
-        except json.JSONDecodeError:
-            return {
-                "answer": "Desculpe, não foi possível processar sua pergunta no momento. Tente reformulá-la ou consulte nossa seção de guias interativos.",
-                "related_topics": ["Guias de Visto", "Simulador de Entrevista", "Gestão de Documentos"],
-                "next_steps": ["Explore os guias interativos", "Use o simulador de entrevista"],
-                "resources": ["Centro de Ajuda", "Chat com sistema"],
-                "warnings": ["Esta é uma ferramenta educativa - não substitui consultoria jurídica"],
-                "confidence": "baixo"
-            }
-
-    except Exception as e:
-        logger.error(f"Error searching knowledge base: {str(e)}")
-        return {
-            "answer": "Erro ao processar consulta. Tente novamente.",
-            "related_topics": [],
-            "next_steps": [],
-            "resources": [],
-            "warnings": ["Sistema temporariamente indisponível"],
-            "confidence": "baixo"
-        }
-
-# Authentication routes (keeping existing ones)
-@api_router.post("/auth/signup")
-async def signup(user_data: UserCreate):
-    """Register a new user"""
-    try:
-        # EMAIL BYPASS FOR TESTING
-        email_bypass = os.environ.get('EMAIL_BYPASS_FOR_TESTING', 'FALSE').upper() == 'TRUE'
-        test_email_domain = os.environ.get('TEST_EMAIL_DOMAIN', 'test.local')
-        
-        is_test_email = user_data.email.endswith(f"@{test_email_domain}")
-        
-        if email_bypass and is_test_email:
-            logger.info(f"🧪 TEST MODE: Email bypass active for {user_data.email}")
-            # In test mode with test email, skip email validation
-            # Auto-verify email
-            email_verified = True
-        else:
-            # Production mode or real email
-            email_verified = False
-        
-        # Check if user already exists
-        existing_user = await db.users.find_one({"email": user_data.email})
-        if existing_user:
-            raise HTTPException(status_code=400, detail="Email already registered")
-        
-        # Create user
-        user_id = str(uuid.uuid4())
-        hashed_password = hash_password(user_data.password)
-        
-        user_doc = {
-            "id": user_id,
-            "email": user_data.email,
-            "password": hashed_password,
-            "first_name": user_data.first_name,
-            "last_name": user_data.last_name,
-            "phone": user_data.phone,
-            "role": user_data.role if user_data.role in ["user", "admin", "superadmin"] else "user",  # Default to "user"
-            "country_of_birth": None,
-            "current_country": None,
-            "date_of_birth": None,
-            "passport_number": None,
-            "email_verified": email_verified,
-            "is_test_user": is_test_email if email_bypass else False,
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
-        }
-        
-        await db.users.insert_one(user_doc)
-        
-        # Initialize user progress
-        progress = UserProgress(user_id=user_id)
-        await db.user_progress.insert_one(progress.dict())
-        
-        # Create JWT token
-        token = create_jwt_token(user_id, user_data.email)
-        
-        response_data = {
-            "message": "User created successfully",
-            "token": token,
-            "user": {
-                "id": user_id,
-                "email": user_data.email,
-                "first_name": user_data.first_name,
-                "last_name": user_data.last_name
-            }
-        }
-        
-        # Add test mode indicator if applicable
-        if email_bypass and is_test_email:
-            response_data["test_mode"] = True
-            response_data["message"] = "🧪 TEST MODE: User created (email verification bypassed)"
-        
-        return response_data
-    
-    except Exception as e:
-        logger.error(f"Error in signup: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error creating user: {str(e)}")
-
-@api_router.post("/auth/login")
-async def login(login_data: UserLogin):
-    """Login user"""
-    try:
-        # EMAIL BYPASS FOR TESTING
-        email_bypass = os.environ.get('EMAIL_BYPASS_FOR_TESTING', 'FALSE').upper() == 'TRUE'
-        test_email_domain = os.environ.get('TEST_EMAIL_DOMAIN', 'test.local')
-        
-        is_test_email = login_data.email.endswith(f"@{test_email_domain}")
-        
-        user = await db.users.find_one({"email": login_data.email})
-        
-        # Test mode bypass: Accept any password for test emails
-        if email_bypass and is_test_email and user:
-            logger.info(f"🧪 TEST MODE: Login bypass active for {login_data.email}")
-            password_valid = True  # Bypass password check in test mode
-        elif user:
-            password_valid = verify_password(login_data.password, user["password"])
-        else:
-            password_valid = False
-        
-        if not user or not password_valid:
-            raise HTTPException(status_code=401, detail="Invalid email or password")
-        
-        token = create_jwt_token(user["id"], user["email"])
-        
-        response_data = {
-            "message": "Login successful",
-            "token": token,
-            "user": {
-                "id": user["id"],
-                "email": user["email"],
-                "first_name": user["first_name"],
-                "last_name": user["last_name"]
-            }
-        }
-        
-        # Add test mode indicator if applicable
-        if email_bypass and is_test_email:
-            response_data["test_mode"] = True
-            response_data["message"] = "🧪 TEST MODE: Login successful (password verification bypassed)"
-        
-        return response_data
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error in login: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error logging in: {str(e)}")
-
-@api_router.post("/auth/google-callback")
-async def google_auth_callback(request: dict):
-    """Process Google OAuth callback from Emergent Auth"""
-    try:
-        # Extract data from request
-        session_token = request.get('session_token')
-        email = request.get('email')
-        name = request.get('name')
-        picture = request.get('picture')
-        google_id = request.get('id')
-        
-        if not email or not session_token:
-            raise HTTPException(status_code=400, detail="Missing required fields")
-        
-        logger.info(f"🔐 Google OAuth callback for: {email}")
-        
-        # Check if user already exists
-        existing_user = await db.users.find_one({"email": email})
-        
-        if existing_user:
-            # Update existing user
-            logger.info(f"✅ Existing user found: {email}")
-            user_id = existing_user["id"]
-            
-            # Update Google-specific fields
-            await db.users.update_one(
-                {"id": user_id},
-                {"$set": {
-                    "google_id": google_id,
-                    "picture": picture,
-                    "email_verified": True,
-                    "updated_at": datetime.utcnow()
-                }}
-            )
-        else:
-            # Create new user
-            logger.info(f"📝 Creating new user from Google OAuth: {email}")
-            user_id = str(uuid.uuid4())
-            
-            # Split name into first and last
-            name_parts = name.split(' ', 1) if name else ['', '']
-            first_name = name_parts[0]
-            last_name = name_parts[1] if len(name_parts) > 1 else ''
-            
-            user_doc = {
-                "id": user_id,
-                "email": email,
-                "password": None,  # No password for Google OAuth users
-                "first_name": first_name,
-                "last_name": last_name,
-                "phone": None,
-                "role": "user",
-                "google_id": google_id,
-                "picture": picture,
-                "email_verified": True,
-                "country_of_birth": None,
-                "current_country": None,
-                "date_of_birth": None,
-                "passport_number": None,
-                "created_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow()
-            }
-            
-            await db.users.insert_one(user_doc)
-            
-            # Initialize user progress
-            progress = UserProgress(user_id=user_id)
-            await db.user_progress.insert_one(progress.dict())
-        
-        # Store session in database
-        from datetime import timezone, timedelta
-        session_doc = {
-            "user_id": user_id,
-            "session_token": session_token,
-            "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
-            "created_at": datetime.now(timezone.utc)
-        }
-        await db.oauth_sessions.insert_one(session_doc)
-        
-        # Create our own JWT token
-        token = create_jwt_token(user_id, email)
-        
-        # Get updated user data
-        user = await db.users.find_one({"id": user_id})
-        
-        logger.info(f"✅ Google OAuth successful for: {email}")
-        
-        return {
-            "message": "Google authentication successful",
-            "token": token,
-            "session_token": session_token,
-            "user": {
-                "id": user_id,
-                "email": email,
-                "first_name": user.get("first_name", ""),
-                "last_name": user.get("last_name", ""),
-                "picture": picture
-            }
-        }
-    
-    except Exception as e:
-        logger.error(f"Error in Google OAuth callback: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Authentication error: {str(e)}")
-
-@api_router.post("/case/{case_id}/generate-form")
-@api_router.get("/case/{case_id}/generate-form")
-async def generate_uscis_form(case_id: str):
-    """
-    🔧 Generate Filled USCIS Form
-    
-    Automatically fills the official USCIS form based on case type:
-    - I-539: Extension/Change of Status
-    - I-589: Asylum Application
-    - I-140: EB-1A Extraordinary Ability
-    
-    Returns the filled PDF ready for submission to USCIS
-    """
-    try:
-        # Get case and determine which collection it's in
-        case = await db.application_cases.find_one({"case_id": case_id})
-        case_collection = "application_cases"
-        
-        if not case:
-            case = await db.auto_cases.find_one({"case_id": case_id})
-            case_collection = "auto_cases"
-        
-        if not case:
-            raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
-        
-        # Determine form type
-        visa_type = case.get("visa_type") or case.get("form_code") or ""
-        visa_type = visa_type.upper()
-        
-        logger.info(f"📝 Generating form for case {case_id}, type: {visa_type}")
-        
-        # Generate appropriate form using USCIS form filler
-        # 🆕 EXPANDED: Now supports all major visa types
-        if visa_type == "I-539":
-            pdf_bytes = uscis_form_filler.fill_i539(case)
-            filename = f"I-539_{case_id}.pdf"
-        elif visa_type == "I-589":
-            pdf_bytes = uscis_form_filler.fill_i589(case)
-            filename = f"I-589_{case_id}.pdf"
-        elif visa_type == "EB-1A" or visa_type == "EB1A" or visa_type == "I-140":
-            pdf_bytes = uscis_form_filler.fill_i140(case)
-            filename = f"I-140_{case_id}.pdf"
-        elif visa_type == "O-1" or visa_type == "O1":
-            pdf_bytes = uscis_form_filler.fill_o1(case)
-            filename = f"I-129-O1_{case_id}.pdf"
-        elif visa_type == "H-1B" or visa_type == "H1B":
-            pdf_bytes = uscis_form_filler.fill_h1b(case)
-            filename = f"I-129-H1B_{case_id}.pdf"
-        elif visa_type == "L-1" or visa_type == "L1":
-            pdf_bytes = uscis_form_filler.fill_l1(case)
-            filename = f"I-129-L1_{case_id}.pdf"
-        elif visa_type == "F-1" or visa_type == "F1":
-            pdf_bytes = uscis_form_filler.fill_f1(case)
-            filename = f"I-539-F1_{case_id}.pdf"
-        elif visa_type == "I-129":
-            # Generic I-129 (will try to determine category from data)
-            pdf_bytes = uscis_form_filler.fill_i129(case)
-            filename = f"I-129_{case_id}.pdf"
-        else:
-            # Try to map common visa types to their forms
-            if "B-" in visa_type or "TOURIST" in visa_type or "EXTENSION" in visa_type:
-                logger.info(f"ℹ️ Mapping {visa_type} to I-539")
-                pdf_bytes = uscis_form_filler.fill_i539(case)
-                filename = f"I-539_{case_id}.pdf"
-            elif "ASYLUM" in visa_type or "ASILO" in visa_type:
-                logger.info(f"ℹ️ Mapping {visa_type} to I-589")
-                pdf_bytes = uscis_form_filler.fill_i589(case)
-                filename = f"I-589_{case_id}.pdf"
-            else:
-                raise HTTPException(
-                    status_code=400, 
-                    detail=f"Form generation not supported for visa type: {visa_type}. Supported types: I-539, I-589, I-140, O-1, H-1B, L-1, F-1"
-                )
-        
-        # 🆕 P0-4: Persist PDF to disk
-        import base64
-        import os
-        
-        pdf_base64 = base64.b64encode(pdf_bytes).decode('utf-8')
-        
-        # Create downloads directory if it doesn't exist
-        download_dir = "/app/downloads/forms"
-        os.makedirs(download_dir, exist_ok=True)
-        
-        # Save PDF to disk
-        pdf_path = os.path.join(download_dir, filename)
-        with open(pdf_path, 'wb') as f:
-            f.write(pdf_bytes)
-        
-        logger.info(f"💾 PDF saved to disk: {pdf_path}")
-        
-        # Update the correct collection
-        collection = db.application_cases if case_collection == "application_cases" else db.auto_cases
-        await collection.update_one(
-            {"case_id": case_id},
-            {
-                "$set": {
-                    "generated_form": {
-                        "filename": filename,
-                        "content_base64": pdf_base64,
-                        "generated_at": datetime.utcnow(),
-                        "form_type": visa_type,
-                        "file_size": len(pdf_bytes)
-                    },
-                    "generated_pdf_path": pdf_path,  # 🆕 Save file path
-                    "uscis_form_generated": True,  # 🆕 Flag for tracking
-                    "updated_at": datetime.utcnow()
-                }
-            }
-        )
-        
-        logger.info(f"✅ Form generated: {filename} ({len(pdf_bytes)} bytes)")
-        
-        # 🆕 P1-5: Update progress status after form generation
-        await update_case_status_and_progress(case_id, "form_generated", case_collection)
-        
-        return {
-            "success": True,
-            "message": "USCIS form generated successfully",
-            "case_id": case_id,
-            "form_type": visa_type,
-            "filename": filename,
-            "file_size": len(pdf_bytes),
-            "download_url": f"/api/case/{case_id}/download-form"
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"❌ Error generating form: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error generating form: {str(e)}")
-
-@api_router.get("/case/{case_id}/download-form")
-async def download_uscis_form(case_id: str):
-    """
-    📥 Download Filled USCIS Form
-    
-    Downloads the pre-generated USCIS form PDF
-    """
-    try:
-        from fastapi.responses import Response
-        import base64
-        
-        # Get case
-        case = await db.application_cases.find_one({"case_id": case_id})
-        if not case:
-            case = await db.auto_cases.find_one({"case_id": case_id})
-        
-        if not case:
-            raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
-        
-        # Check if form was generated
-        generated_form = case.get("generated_form")
-        if not generated_form:
-            raise HTTPException(
-                status_code=404, 
-                detail="Form not generated yet. Please call /generate-form first."
-            )
-        
-        # Decode PDF
-        pdf_base64 = generated_form.get("content_base64")
-        pdf_bytes = base64.b64decode(pdf_base64)
-        filename = generated_form.get("filename", "form.pdf")
-        
-        logger.info(f"📥 Downloading form: {filename} ({len(pdf_bytes)} bytes)")
-        
-        # Return PDF
-        return Response(
-            content=pdf_bytes,
-            media_type="application/pdf",
-            headers={
-                "Content-Disposition": f"attachment; filename={filename}",
-                "Content-Length": str(len(pdf_bytes))
-            }
-        )
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"❌ Error downloading form: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error downloading form: {str(e)}")
-
-# User profile routes (keeping existing ones)
-@api_router.get("/profile", response_model=UserProfile)
-async def get_profile(current_user = Depends(get_current_user)):
-    """Get user profile"""
-    return UserProfile(**current_user)
-
-@api_router.put("/profile")
-async def update_profile(profile_data: UserProfileUpdate, current_user = Depends(get_current_user)):
-    """Update user profile"""
-    try:
-        update_data = profile_data.dict(exclude_unset=True)
-        update_data["updated_at"] = datetime.utcnow()
-        
-        await db.users.update_one(
-            {"id": current_user["id"]},
-            {"$set": update_data}
-        )
-        
-        updated_user = await db.users.find_one({"id": current_user["id"]})
-        return {"message": "Profile updated successfully", "user": UserProfile(**updated_user)}
-    
-    except Exception as e:
-        logger.error(f"Error updating profile: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error updating profile: {str(e)}")
-
-# Education routes (NEW)
-@api_router.get("/education/guides")
-async def get_visa_guides(visa_type: Optional[VisaType] = None, current_user = Depends(get_current_user)):
-    """Get available visa guides"""
-    try:
-        # Predefined guides data (in production, this would come from database)
-        guides_data = {
-            VisaType.h1b: {
-                "title": "Guia Completo H1-B",
-                "description": "Tudo sobre o visto de trabalho H1-B",
-                "difficulty_level": "intermediate",
-                "estimated_time_minutes": 45,
-                "sections": [
-                    {"title": "Requisitos Básicos", "content": "Lista de requisitos essenciais"},
-                    {"title": "Processo de Aplicação", "content": "Passo a passo detalhado"},
-                    {"title": "Documentos Necessários", "content": "Checklist completo"},
-                    {"title": "Timeline", "content": "Cronograma típico"},
-                    {"title": "Dicas de Sucesso", "content": "Conselhos práticos"}
-                ],
-                "requirements": ["Oferta de emprego", "Graduação superior", "Especialização na área"],
-                "common_mistakes": ["Documentação incompleta", "Não demonstrar especialização"],
-                "success_tips": ["Prepare documentação detalhada", "Demonstre expertise única"]
-            },
-            VisaType.f1: {
-                "title": "Guia Completo F1",
-                "description": "Visto de estudante para universidades americanas",
-                "difficulty_level": "beginner",
-                "estimated_time_minutes": 30,
-                "sections": [
-                    {"title": "Elegibilidade", "content": "Critérios de elegibilidade"},
-                    {"title": "Escolha da Escola", "content": "Como escolher instituição"},
-                    {"title": "Processo I-20", "content": "Obtenção do formulário I-20"},
-                    {"title": "Entrevista Consular", "content": "Preparação para entrevista"},
-                    {"title": "Vida nos EUA", "content": "Dicas para estudantes"}
-                ],
-                "requirements": ["Aceitação em escola aprovada", "Recursos financeiros", "Intenção de retorno"],
-                "common_mistakes": ["Demonstrar intenção imigratória", "Recursos financeiros insuficientes"],
-                "success_tips": ["Demonstre laços com país de origem", "Tenha recursos financeiros claros"]
-            },
-            VisaType.family: {
-                "title": "Reunificação Familiar",
-                "description": "Processos de imigração baseados em família",
-                "difficulty_level": "intermediate",
-                "estimated_time_minutes": 50,
-                "sections": [
-                    {"title": "Tipos de Petição", "content": "Diferentes categorias familiares"},
-                    {"title": "Processo I-130", "content": "Petição para parente"},
-                    {"title": "Documentos Familiares", "content": "Comprovação de relacionamento"},
-                    {"title": "Prioridades", "content": "Sistema de prioridades"},
-                    {"title": "Adjustment vs Consular", "content": "Diferentes caminhos"}
-                ],
-                "requirements": ["Relacionamento qualificado", "Documentos comprobatórios", "Sponsor qualificado"],
-                "common_mistakes": ["Documentos familiares inadequados", "Não comprovar relacionamento genuíno"],
-                "success_tips": ["Documente bem o relacionamento", "Mantenha registros detalhados"]
-            }
-        }
-        
-        if visa_type:
-            guide_data = guides_data.get(visa_type)
-            if guide_data:
-                guide = VisaGuide(
-                    visa_type=visa_type,
-                    **guide_data
-                )
-                return {"guide": guide.dict()}
-            else:
-                raise HTTPException(status_code=404, detail="Guide not found")
-        else:
-            # Return all guides
-            all_guides = []
-            for v_type, guide_data in guides_data.items():
-                guide = VisaGuide(
-                    visa_type=v_type,
-                    **guide_data
-                )
-                all_guides.append(guide.dict())
-            return {"guides": all_guides}
-            
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error getting visa guides: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error getting guides: {str(e)}")
-
-@api_router.post("/education/guides/{visa_type}/complete")
-async def complete_guide(visa_type: VisaType, current_user = Depends(get_current_user)):
-    """Mark a guide as completed"""
-    try:
-        # Update user progress
-        await db.user_progress.update_one(
-            {"user_id": current_user["id"]},
-            {
-                "$addToSet": {"guides_completed": visa_type.value},
-                "$inc": {"total_study_time_minutes": 30},  # Estimated time
-                "$set": {"updated_at": datetime.utcnow()}
-            },
-            upsert=True
-        )
-        
-        return {"message": f"Guide {visa_type.value} marked as completed"}
-        
-    except Exception as e:
-        logger.error(f"Error completing guide: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error completing guide: {str(e)}")
-
-@api_router.post("/education/interview/start")
-async def start_interview_simulation(request: InterviewStart, current_user = Depends(get_current_user)):
-    """Start a new interview simulation"""
-    try:
-        # Generate questions
-        questions = await generate_interview_questions(
-            request.interview_type,
-            request.visa_type,
-            request.difficulty_level or DifficultyLevel.beginner
-        )
-        
-        # Create interview session
-        session = InterviewSession(
-            user_id=current_user["id"],
-            interview_type=request.interview_type,
-            visa_type=request.visa_type,
-            questions=questions
-        )
-        
-        await db.interview_sessions.insert_one(session.dict())
-        
-        return {
-            "session_id": session.id,
-            "questions": questions,
-            "total_questions": len(questions),
-            "estimated_duration": len(questions) * 2  # 2 minutes per question
-        }
-        
-    except Exception as e:
-        logger.error(f"Error starting interview simulation: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error starting interview: {str(e)}")
-
-@api_router.post("/education/interview/{session_id}/answer")
-async def submit_interview_answer(
-    session_id: str, 
-    answer_data: InterviewAnswer, 
-    current_user = Depends(get_current_user)
-):
-    """Submit an answer to interview question"""
-    try:
-        # Get interview session
-        session = await db.interview_sessions.find_one({
-            "id": session_id,
-            "user_id": current_user["id"]
-        })
-        
-        if not session:
-            raise HTTPException(status_code=404, detail="Interview session not found")
-        
-        # Find the question
-        question = next((q for q in session["questions"] if q["id"] == answer_data.question_id), None)
-        if not question:
-            raise HTTPException(status_code=404, detail="Question not found")
-        
-        # Evaluate answer
-        feedback = await evaluate_interview_answer(
-            question,
-            answer_data.answer,
-            VisaType(session["visa_type"])
-        )
-        
-        # Update session with answer
-        answer_record = {
-            "question_id": answer_data.question_id,
-            "answer": answer_data.answer,
-            "feedback": feedback,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-        
-        await db.interview_sessions.update_one(
-            {"id": session_id},
-            {
-                "$push": {"answers": answer_record},
-                "$set": {"updated_at": datetime.utcnow()}
-            }
-        )
-        
-        return {
-            "feedback": feedback,
-            "next_question_index": len(session.get("answers", [])) + 1
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error submitting interview answer: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error submitting answer: {str(e)}")
-
-@api_router.post("/education/interview/{session_id}/complete")
-async def complete_interview_session(session_id: str, current_user = Depends(get_current_user)):
-    """Complete interview session and get final feedback"""
-    try:
-        # Get interview session
-        session = await db.interview_sessions.find_one({
-            "id": session_id,
-            "user_id": current_user["id"]
-        })
-        
-        if not session:
-            raise HTTPException(status_code=404, detail="Interview session not found")
-        
-        answers = session.get("answers", [])
-        if not answers:
-            raise HTTPException(status_code=400, detail="No answers submitted")
-        
-        # Calculate overall score
-        scores = [answer.get("feedback", {}).get("score", 0) for answer in answers]
-        overall_score = sum(scores) // len(scores) if scores else 0
-        
-        # Generate overall feedback
-        overall_feedback = {
-            "overall_score": overall_score,
-            "questions_answered": len(answers),
-            "average_confidence": "médio",  # Simplified for demo
-            "strengths": ["Respostas completas", "Boa preparação"],
-            "areas_for_improvement": ["Desenvolver mais detalhes", "Praticar mais"],
-            "recommendations": [
-                "Continue praticando com diferentes cenários",
-                "Revise os guias interativos relacionados",
-                "Considere praticar com diferentes níveis de dificuldade"
-            ]
-        }
-        
-        # Update session as completed
-        await db.interview_sessions.update_one(
-            {"id": session_id},
-            {
-                "$set": {
-                    "completed": True,
-                    "score": overall_score,
-                    "ai_feedback": overall_feedback,
-                    "duration_minutes": 15,  # Simplified
-                    "updated_at": datetime.utcnow()
-                }
-            }
-        )
-        
-        # Update user progress
-        await db.user_progress.update_one(
-            {"user_id": current_user["id"]},
-            {
-                "$addToSet": {"interviews_completed": session_id},
-                "$inc": {"total_study_time_minutes": 15},
-                "$set": {"updated_at": datetime.utcnow()}
-            },
-            upsert=True
-        )
-        
-        return {
-            "overall_feedback": overall_feedback,
-            "session_completed": True
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error completing interview session: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error completing interview: {str(e)}")
-
-@api_router.get("/education/tips")
-async def get_personalized_tips(current_user = Depends(get_current_user)):
-    """Get personalized tips for user"""
-    try:
-        # Get existing tips
-        existing_tips = await db.personalized_tips.find(
-            {"user_id": current_user["id"]}, {"_id": 0}
-        ).sort("created_at", -1).limit(10).to_list(10)
-        
-        # If no recent tips, generate new ones
-        if not existing_tips:
-            # Get user data for context
-            applications = await db.applications.find({"user_id": current_user["id"]}, {"_id": 0}).to_list(100)
-            documents = await db.documents.find(
-                {"user_id": current_user["id"]}, 
-                {"_id": 0, "content_base64": 0}
-            ).to_list(100)
-            
-            # Generate new tips
-            tips = await generate_personalized_tips(current_user["id"], current_user, applications, documents)
-            
-            # Save tips to database
-            for tip in tips:
-                await db.personalized_tips.insert_one(tip.dict())
-            
-            existing_tips = [tip.dict() for tip in tips]
-        
-        return {"tips": existing_tips}
-        
-    except Exception as e:
-        logger.error(f"Error getting personalized tips: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error getting tips: {str(e)}")
-
-@api_router.post("/education/tips/{tip_id}/read")
-async def mark_tip_as_read(tip_id: str, current_user = Depends(get_current_user)):
-    """Mark a tip as read"""
-    try:
-        await db.personalized_tips.update_one(
-            {"id": tip_id, "user_id": current_user["id"]},
-            {"$set": {"is_read": True}}
-        )
-        
-        return {"message": "Tip marked as read"}
-        
-    except Exception as e:
-        logger.error(f"Error marking tip as read: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error marking tip as read: {str(e)}")
-
-@api_router.post("/education/knowledge-base/search")
-async def search_knowledge(query_data: KnowledgeBaseQuery, current_user = Depends(get_current_user)):
-    """Search the knowledge base"""
-    try:
-        # Search knowledge base
-        result = await search_knowledge_base(query_data.query, query_data.visa_type)
-        
-        # Update user progress
-        await db.user_progress.update_one(
-            {"user_id": current_user["id"]},
-            {
-                "$inc": {"knowledge_queries": 1},
-                "$set": {"updated_at": datetime.utcnow()}
-            },
-            upsert=True
-        )
-        
-        # Log the search for analytics
-        search_log = {
-            "id": str(uuid.uuid4()),
-            "user_id": current_user["id"],
-            "query": query_data.query,
-            "visa_type": query_data.visa_type.value if query_data.visa_type else None,
-            "category": query_data.category,
-            "timestamp": datetime.utcnow()
-        }
-        await db.knowledge_searches.insert_one(search_log)
-        
-        return result
-        
-    except Exception as e:
-        logger.error(f"Error searching knowledge base: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error searching knowledge base: {str(e)}")
-
-@api_router.get("/education/progress")
-async def get_user_progress(current_user = Depends(get_current_user)):
-    """Get user's education progress"""
-    try:
-        progress = await db.user_progress.find_one(
-            {"user_id": current_user["id"]}, {"_id": 0}
-        )
-        
-        if not progress:
-            # Initialize progress if doesn't exist
-            progress = UserProgress(user_id=current_user["id"])
-            await db.user_progress.insert_one(progress.dict())
-            progress = progress.dict()
-        
-        # Get additional stats
-        total_interviews = await db.interview_sessions.count_documents({
-            "user_id": current_user["id"],
-            "completed": True
-        })
-        
-        recent_tips = await db.personalized_tips.count_documents({
-            "user_id": current_user["id"],
-            "is_read": False
-        })
-        
-        progress["total_completed_interviews"] = total_interviews
-        progress["unread_tips_count"] = recent_tips
-        
-        return {"progress": progress}
-        
-    except Exception as e:
-        logger.error(f"Error getting user progress: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error getting progress: {str(e)}")
-
-# Document routes (keeping existing ones with modifications for education integration)
-@api_router.post("/case/{case_id}/upload-document")
-async def upload_document_to_case(
-    case_id: str,
-    file: UploadFile = File(...),
-    document_type: str = Form(...),
-    description: Optional[str] = Form(None)
-):
-    """
-    Upload de documento para um caso específico - SEM AUTENTICAÇÃO (para testes)
-    """
-    try:
-        # Validar caso existe
-        case = await db.application_cases.find_one({"case_id": case_id})
-        if not case:
-            case = await db.auto_cases.find_one({"case_id": case_id})
-        
-        if not case:
-            raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
-        
-        # Validar arquivo
-        if not file:
-            raise HTTPException(status_code=400, detail="No file uploaded")
-        
-        content = await file.read()
-        if len(content) == 0:
-            raise HTTPException(status_code=400, detail="Empty file")
-        
-        # Size limit: 10MB
-        if len(content) > 10 * 1024 * 1024:
-            raise HTTPException(status_code=400, detail="File too large (max 10MB)")
-        
-        # Converter para base64
-        content_base64 = base64.b64encode(content).decode('utf-8')
-        mime_type = file.content_type or 'application/octet-stream'
-        
-        # Criar registro do documento
-        doc_id = str(uuid.uuid4())
-        document_record = {
-            "id": doc_id,
-            "case_id": case_id,
-            "filename": file.filename,
-            "document_type": document_type,
-            "description": description,
-            "content_base64": content_base64,
-            "mime_type": mime_type,
-            "file_size": len(content),
-            "uploaded_at": datetime.utcnow(),
-            "status": "uploaded"
-        }
-        
-        # Atualizar caso com o novo documento (try both collections and both fields)
-        result = await db.application_cases.update_one(
-            {"case_id": case_id},
-            {
-                "$push": {
-                    "documents": document_record,
-                    "uploaded_documents": document_record
-                },
-                "$set": {"updated_at": datetime.utcnow()}
-            }
-        )
-        
-        # If not found in application_cases, try auto_cases
-        if result.matched_count == 0:
-            await db.auto_cases.update_one(
-                {"case_id": case_id},
-                {
-                    "$push": {
-                        "documents": document_record,
-                        "uploaded_documents": document_record
-                    },
-                    "$set": {"updated_at": datetime.utcnow()}
-                }
-            )
-        
-        logger.info(f"✅ Document uploaded: {file.filename} ({len(content)} bytes) - Type: {document_type}")
-        
-        # 🆕 AUTO-EXTRACTION AND CORRECTION: Extract data from document and auto-correct user info
-        extraction_result = None
-        try:
-            from document_data_extractor import process_document_and_update_user
-            from google_document_ai_integration import GoogleDocumentAIProcessor
-            
-            # Processar documento com Google Document AI para extrair texto
-            doc_processor = GoogleDocumentAIProcessor()
-            ocr_result = await doc_processor.process_document(
-                file_content=content,
-                filename=file.filename,
-                mime_type=mime_type
-            )
-            
-            if ocr_result.get("success") and ocr_result.get("extracted_text"):
-                # Obter user_id do caso
-                user_id = case.get("user_id") or case.get("applicant_email")
-                
-                if user_id:
-                    # Processar e atualizar usuário se necessário
-                    extraction_result = await process_document_and_update_user(
-                        document_text=ocr_result["extracted_text"],
-                        document_type=document_type,
-                        user_id=user_id,
-                        db=db
-                    )
-                    
-                    if extraction_result.get("auto_corrected"):
-                        logger.info(f"🔄 User data auto-corrected based on {document_type}")
-                        logger.info(f"📝 Corrections: {extraction_result.get('corrections_made')}")
-        
-        except Exception as extract_error:
-            logger.warning(f"⚠️ Document extraction/correction failed: {str(extract_error)}")
-            # Continuar sem extração - não é crítico
-        
-        # 🆕 P1-5: Update progress status after document upload
-        # Get current document count
-        case = await db.auto_cases.find_one({"case_id": case_id})
-        if not case:
-            case = await db.application_cases.find_one({"case_id": case_id})
-        
-        if case:
-            doc_count = len(case.get('uploaded_documents', []))
-            # Update status if we have minimum documents (3+)
-            if doc_count >= 3:
-                collection_name = "auto_cases" if case.get("session_token") else "application_cases"
-                await update_case_status_and_progress(case_id, "documents_uploaded", collection_name)
-        
-        response_data = {
-            "success": True,
-            "message": "Document uploaded successfully",
-            "document_id": doc_id,
-            "case_id": case_id,
-            "filename": file.filename,
-            "document_type": document_type,
-            "file_size": len(content)
-        }
-        
-        # Adicionar informações de extração se disponível
-        if extraction_result:
-            response_data["extraction"] = {
-                "successful": extraction_result.get("extraction_successful", False),
-                "auto_corrected": extraction_result.get("auto_corrected", False),
-                "corrections_made": extraction_result.get("corrections_made"),
-                "message": extraction_result.get("message")
-            }
-        
-        return response_data
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"❌ Erro no upload: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error uploading document: {str(e)}")
-
-@api_router.post("/documents/upload")
-async def upload_document(
-    file: UploadFile = File(...),
-    document_type: DocumentType = Form(...),
-    tags: str = Form(""),
-    expiration_date: Optional[str] = Form(None),
-    issue_date: Optional[str] = Form(None),
-    current_user = Depends(get_current_user)
-):
-    """Upload a document with sistema analysis"""
-    try:
-        # Validate file
-        if not file:
-            raise HTTPException(status_code=400, detail="No file uploaded")
-        
-        content = await file.read()
-        if len(content) == 0:
-            raise HTTPException(status_code=400, detail="Empty file")
-        
-        # Size limit: 10MB
-        if len(content) > 10 * 1024 * 1024:
-            raise HTTPException(status_code=400, detail="File too large (max 10MB)")
-        
-        # Validate file type
-        mime_type = file.content_type or mimetypes.guess_type(file.filename)[0] or 'application/octet-stream'
-        if not validate_file_type(mime_type):
-            raise HTTPException(status_code=400, detail="Unsupported file type")
-        
-        # Convert to base64
-        content_base64 = base64.b64encode(content).decode('utf-8')
-        
-        # Parse dates
-        exp_date = None
-        iss_date = None
-        try:
-            if expiration_date:
-                exp_date = datetime.fromisoformat(expiration_date.replace('Z', '+00:00'))
-            if issue_date:
-                iss_date = datetime.fromisoformat(issue_date.replace('Z', '+00:00'))
-        except ValueError:
-            pass  # Ignore invalid dates
-        
-        # Parse tags
-        tag_list = [tag.strip() for tag in tags.split(',') if tag.strip()] if tags else []
-        
-        # Determine priority
-        priority = determine_document_priority(document_type, exp_date)
-        
-        # Create document record
-        document = UserDocument(
-            user_id=current_user["id"],
-            filename=f"{document_type}_{uuid.uuid4().hex[:8]}_{file.filename}",
-            original_filename=file.filename,
-            document_type=document_type,
-            content_base64=content_base64,
-            mime_type=mime_type,
-            file_size=len(content),
-            expiration_date=exp_date,
-            issue_date=iss_date,
-            priority=priority,
-            tags=tag_list
-        )
-        
-        # Save to database
-        await db.documents.insert_one(document.dict())
-        
-        # Analyze with sistema in background
-        try:
-            ai_analysis = await analyze_document_with_ai(document)
-            
-            # Update document with sistema analysis
-            suggestions = ai_analysis.get('suggestions', [])
-            status = DocumentStatus.approved if ai_analysis.get('validity_status') == 'valid' else DocumentStatus.requires_improvement
-            
-            await db.documents.update_one(
-                {"id": document.id},
-                {
-                    "$set": {
-                        "ai_analysis": ai_analysis,
-                        "ai_suggestions": suggestions,
-                        "status": status.value,
-                        "updated_at": datetime.utcnow()
-                    }
-                }
-            )
-            
-        except Exception as ai_error:
-            logger.error(f"sistema analysis failed: {str(ai_error)}")
-            # Continue without sistema analysis
-        
-        return {
-            "message": "Document uploaded successfully",
-            "document_id": document.id,
-            "filename": document.filename,
-            "status": "uploaded",
-            "ai_analysis_status": "completed"
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error uploading document: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error uploading document: {str(e)}")
-
-@api_router.get("/documents")
-async def get_user_documents(current_user = Depends(get_current_user)):
-    """Get all user documents"""
-    try:
-        documents = await db.documents.find(
-            {"user_id": current_user["id"]}, 
-            {"_id": 0, "content_base64": 0}  # Exclude binary content from list
-        ).sort("created_at", -1).to_list(100)
-        
-        # Calculate stats
-        total_docs = len(documents)
-        approved_docs = len([doc for doc in documents if doc.get('status') == 'approved'])
-        expired_docs = len([doc for doc in documents if doc.get('status') == 'expired'])
-        pending_docs = len([doc for doc in documents if doc.get('status') == 'pending_review'])
-        
-        # Upcoming expirations (next 90 days)
-        upcoming_expirations = []
-        now = datetime.utcnow()
-        for doc in documents:
-            exp_date = doc.get('expiration_date')
-            if exp_date:
-                if isinstance(exp_date, str):
-                    exp_date = datetime.fromisoformat(exp_date.replace('Z', '+00:00'))
-                days_to_expire = (exp_date - now).days
-                if 0 <= days_to_expire <= 90:
-                    upcoming_expirations.append({
-                        "document_id": doc["id"],
-                        "document_type": doc["document_type"],
-                        "filename": doc["original_filename"],
-                        "expiration_date": exp_date.isoformat(),
-                        "days_to_expire": days_to_expire
-                    })
-        
-        # Sort by expiration date
-        upcoming_expirations.sort(key=lambda x: x['days_to_expire'])
-        
-        return {
-            "documents": documents,
-            "stats": {
-                "total": total_docs,
-                "approved": approved_docs,
-                "expired": expired_docs,
-                "pending": pending_docs,
-                "completion_rate": int((approved_docs / total_docs * 100)) if total_docs > 0 else 0
-            },
-            "upcoming_expirations": upcoming_expirations[:10]  # Next 10 expiring
-        }
-        
-    except Exception as e:
-        logger.error(f"Error getting documents: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error getting documents: {str(e)}")
-
-@api_router.get("/documents/validation-capabilities")
-async def get_validation_capabilities(current_user = Depends(get_current_user)):
-    """
-    Get information about available validation capabilities (Phase 2 & 3 features)
-    """
-    try:
-        return {
-            "status": "success",
-            "capabilities": {
-                "phase_2_features": {
-                    "enhanced_field_extraction": True,
-                    "translation_gate": True,
-                    "advanced_regex_patterns": True,
-                    "high_precision_validators": True,
-                    "language_detection": True
-                },
-                "phase_3_features": {
-                    "auto_document_classification": True,
-                    "cross_document_consistency": True,
-                    "multi_document_validation": True,
-                    "advanced_ocr_integration": True,
-                    "comprehensive_scoring": True
-                },
-                "supported_document_types": [
-                    "PASSPORT_ID_PAGE", "BIRTH_CERTIFICATE", "MARRIAGE_CERT",
-                    "DEGREE_CERTIFICATE", "EMPLOYMENT_OFFER_LETTER", "I797_NOTICE",
-                    "I94_RECORD", "PAY_STUB", "TAX_RETURN_1040", "TRANSLATION_CERTIFICATE"
-                ],
-                "supported_languages": ["english", "portuguese", "spanish"],
-                "validation_engines": {
-                    "policy_engine": "Enhanced YAML-based validation",
-                    "field_extractor": "Advanced regex with ML validation",
-                    "translation_gate": "Language detection and requirements",
-                    "consistency_engine": "Cross-document verification",
-                    "document_classifier": "sistema-powered type detection"
-                }
-            },
-            "version": "2.0.0-phase3",
-            "timestamp": datetime.utcnow().isoformat()
-        }
-        
-    except Exception as e:
-        logger.error(f"Error getting validation capabilities: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to get capabilities: {str(e)}")
-
-@api_router.get("/documents/{document_id}")
-async def get_document_details(document_id: str, current_user = Depends(get_current_user)):
-    """Get document details including sistema analysis"""
-    try:
-        document = await db.documents.find_one({
-            "id": document_id,
-            "user_id": current_user["id"]
-        }, {"_id": 0})
-        
-        if not document:
-            raise HTTPException(status_code=404, detail="Document not found")
-        
-        return document
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error getting document details: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error getting document details: {str(e)}")
-
-@api_router.put("/documents/{document_id}")
-async def update_document(
-    document_id: str, 
-    update_data: DocumentUpdate, 
-    current_user = Depends(get_current_user)
-):
-    """Update document information"""
-    try:
-        # Verify document belongs to user
-        document = await db.documents.find_one({
-            "id": document_id,
-            "user_id": current_user["id"]
-        })
-        
-        if not document:
-            raise HTTPException(status_code=404, detail="Document not found")
-        
-        # Prepare update data
-        update_dict = update_data.dict(exclude_unset=True)
-        
-        # Parse dates if provided
-        if 'expiration_date' in update_dict and update_dict['expiration_date']:
-            try:
-                update_dict['expiration_date'] = datetime.fromisoformat(
-                    update_dict['expiration_date'].replace('Z', '+00:00')
-                )
-            except ValueError:
-                del update_dict['expiration_date']
-        
-        if 'issue_date' in update_dict and update_dict['issue_date']:
-            try:
-                update_dict['issue_date'] = datetime.fromisoformat(
-                    update_dict['issue_date'].replace('Z', '+00:00')
-                )
-            except ValueError:
-                del update_dict['issue_date']
-        
-        update_dict["updated_at"] = datetime.utcnow()
-        
-        # Update document
-        await db.documents.update_one(
-            {"id": document_id},
-            {"$set": update_dict}
-        )
-        
-        updated_doc = await db.documents.find_one({"id": document_id}, {"_id": 0})
-        return {"message": "Document updated successfully", "document": updated_doc}
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error updating document: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error updating document: {str(e)}")
-
-@api_router.delete("/documents/{document_id}")
-async def delete_document(document_id: str, current_user = Depends(get_current_user)):
-    """Delete a document"""
-    try:
-        # Verify document belongs to user
-        document = await db.documents.find_one({
-            "id": document_id,
-            "user_id": current_user["id"]
-        })
-        
-        if not document:
-            raise HTTPException(status_code=404, detail="Document not found")
-        
-        # Delete document
-        await db.documents.delete_one({"id": document_id})
-        
-        return {"message": "Document deleted successfully"}
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error deleting document: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error deleting document: {str(e)}")
-
-@api_router.post("/documents/{document_id}/reanalyze")
-async def reanalyze_document(document_id: str, current_user = Depends(get_current_user)):
-    """Reanalyze document with sistema"""
-    try:
-        # Get document
-        document_data = await db.documents.find_one({
-            "id": document_id,
-            "user_id": current_user["id"]
-        })
-        
-        if not document_data:
-            raise HTTPException(status_code=404, detail="Document not found")
-        
-        # Create document object for analysis
-        document = UserDocument(**document_data)
-        
-        # Analyze with sistema
-        ai_analysis = await analyze_document_with_ai(document)
-        
-        # Update document with new analysis
-        suggestions = ai_analysis.get('suggestions', [])
-        status = DocumentStatus.approved if ai_analysis.get('validity_status') == 'valid' else DocumentStatus.requires_improvement
-        
-        await db.documents.update_one(
-            {"id": document_id},
-            {
-                "$set": {
-                    "ai_analysis": ai_analysis,
-                    "ai_suggestions": suggestions,
-                    "status": status.value,
-                    "updated_at": datetime.utcnow()
-                }
-            }
-        )
-        
-        return {
-            "message": "Document reanalyzed successfully",
-            "analysis": ai_analysis,
-            "status": status.value
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error reanalyzing document: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error reanalyzing document: {str(e)}")
-
-# Auto-Application System Endpoints
-# Remove debug endpoints - production ready
-# @api_router.get("/debug/auth-header") - REMOVED
-# @api_router.get("/debug/current-user") - REMOVED
-
-@api_router.post("/auto-application/start")
-async def start_auto_application(case_data: CaseCreate, current_user = Depends(get_current_user_optional)):
-    """Start a new auto-application case (anonymous or authenticated)"""
-    try:
-        # 🆕 P0-3: Pre-populate basic_data with empty structure for all required fields
-        initial_basic_data = {
-            "full_name": "",
-            "email": "",
-            "phone": "",
-            "date_of_birth": "",
-            "country_of_birth": "",
-            "passport_number": "",
-            "passport_country": "",
-            "passport_issue_date": "",
-            "passport_expiration_date": "",
-            "current_address": "",
-            "mailing_address": ""
-        }
-        
-        # Create case with or without user association
-        if current_user:
-            # Authenticated user - associate case with user
-            # Try to pre-fill from user profile if available
-            user_profile = await db.users.find_one({"id": current_user["id"]})
-            if user_profile:
-                if user_profile.get("email"):
-                    initial_basic_data["email"] = user_profile["email"]
-                if user_profile.get("full_name"):
-                    initial_basic_data["full_name"] = user_profile["full_name"]
-                if user_profile.get("phone"):
-                    initial_basic_data["phone"] = user_profile["phone"]
-            
-            case = AutoApplicationCase(
-                form_code=case_data.form_code,
-                process_type=case_data.process_type,
-                session_token=case_data.session_token,
-                user_id=current_user["id"],
-                basic_data=initial_basic_data,
-                expires_at=datetime.utcnow() + timedelta(days=30)  # Longer expiration for authenticated users
-            )
-        else:
-            # Anonymous user - create temporary case
-            case = AutoApplicationCase(
-                form_code=case_data.form_code,
-                process_type=case_data.process_type,
-                session_token=case_data.session_token,
-                basic_data=initial_basic_data,
-                expires_at=datetime.utcnow() + timedelta(days=7)
-            )
-        
-        await db.auto_cases.insert_one(case.dict())
-        
-        return {"message": "Auto-application case created successfully", "case": case}
-    
-    except Exception as e:
-        logger.error(f"Error starting auto-application: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error starting auto-application: {str(e)}")
-
-@api_router.get("/auto-application/case/{case_id}")
-async def get_case_anonymous(case_id: str, session_token: Optional[str] = None, current_user = Depends(get_current_user_optional)):
-    """Get a specific case by ID (anonymous or authenticated)"""
-    try:
-        # Try authenticated user first
-        if current_user:
-            case = await db.auto_cases.find_one({
-                "case_id": case_id,
-                "user_id": current_user["id"]
-            })
-            if case:
-                if "_id" in case:
-                    del case["_id"]
-                return {"case": case}
-        
-        # If not found or not authenticated, try anonymous lookup
-        if session_token:
-            case = await db.auto_cases.find_one({
-                "case_id": case_id,
-                "session_token": session_token
-            })
-        else:
-            case = await db.auto_cases.find_one({
-                "case_id": case_id,
-                "user_id": None
-            })
-        
-        if not case:
-            raise HTTPException(status_code=404, detail="Case not found")
-        
-        # Remove MongoDB ObjectId
-        if "_id" in case:
-            del case["_id"]
-            
-        return {"case": case}
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error getting case: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error getting case: {str(e)}")
-
-@api_router.put("/auto-application/case/{case_id}")
-async def update_case_anonymous(case_id: str, case_update: CaseUpdate, session_token: Optional[str] = None, current_user = Depends(get_current_user_optional)):
-    """Update a specific case (anonymous or authenticated)"""
-    try:
-        # Try authenticated user first
-        if current_user:
-            case = await db.auto_cases.find_one({
-                "case_id": case_id,
-                "user_id": current_user["id"]
-            })
-            if case:
-                update_data = case_update.dict(exclude_none=True)
-                update_data["updated_at"] = datetime.utcnow()
-                
-                # Auto-calculate progress if current_step is provided but progress_percentage is not
-                if "current_step" in update_data and "progress_percentage" not in update_data:
-                    update_data["progress_percentage"] = get_progress_percentage(update_data["current_step"])
-                
-                # If form_code is provided and status is still created, update status and progress
-                if "form_code" in update_data and case.get("status") == "created":
-                    update_data["status"] = "form_selected"
-                    if "progress_percentage" not in update_data:
-                        update_data["progress_percentage"] = 20
-                
-                await db.auto_cases.update_one(
-                    {"case_id": case_id},
-                    {"$set": update_data}
-                )
-                
-                updated_case = await db.auto_cases.find_one({"case_id": case_id})
-                if "_id" in updated_case:
-                    del updated_case["_id"]
-                    
-                return {"message": "Case updated successfully", "case": updated_case}
-        
-        # Anonymous update
-        query = {"case_id": case_id}
-        if session_token:
-            query["session_token"] = session_token
-        else:
-            query["user_id"] = None
-        
-        case = await db.auto_cases.find_one(query)
-        if not case:
-            raise HTTPException(status_code=404, detail="Case not found")
-        
-        update_data = case_update.dict(exclude_none=True)
-        update_data["updated_at"] = datetime.utcnow()
-        
-        # Auto-calculate progress if current_step is provided but progress_percentage is not
-        if "current_step" in update_data and "progress_percentage" not in update_data:
-            update_data["progress_percentage"] = get_progress_percentage(update_data["current_step"])
-        
-        # If form_code is provided and status is still created, update status and progress
-        if "form_code" in update_data and case.get("status") == "created":
-            update_data["status"] = "form_selected"
-            if "progress_percentage" not in update_data:
-                update_data["progress_percentage"] = 20
-        
-        await db.auto_cases.update_one(
-            {"case_id": case_id},
-            {"$set": update_data}
-        )
-        
-        updated_case = await db.auto_cases.find_one({"case_id": case_id})
-        if "_id" in updated_case:
-            del updated_case["_id"]
-            
-        return {"message": "Case updated successfully", "case": updated_case}
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error updating case: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error updating case: {str(e)}")
-
-@api_router.patch("/auto-application/case/{case_id}")
-async def patch_case_data(case_id: str, update_data: dict, current_user = Depends(get_current_user_optional)):
-    """Efficiently update specific case fields with optimized data persistence"""
-    try:
-        # Validate case access
-        query = {"case_id": case_id}
-        if current_user:
-            query["user_id"] = current_user["id"]
-        else:
-            session_token = update_data.get("session_token")
-            if session_token:
-                query["session_token"] = session_token
-            else:
-                query["user_id"] = None
-        
-        case = await db.auto_cases.find_one(query)
-        if not case:
-            raise HTTPException(status_code=404, detail="Case not found")
-        
-        # Prepare optimized update with only changed fields
-        sanitized_update = {}
-        allowed_fields = [
-            "status", "basic_data", "user_story_text", "simplified_form_responses", 
-            "progress_percentage", "current_step", "documents", "extracted_facts",
-            "official_form_data", "ai_generated_uscis_form"
-        ]
-        
-        for field in allowed_fields:
-            if field in update_data and update_data[field] is not None:
-                sanitized_update[field] = update_data[field]
-        
-        # Always update timestamp
-        sanitized_update["updated_at"] = datetime.utcnow()
-        
-        # Use atomic update
-        result = await db.auto_cases.update_one(
-            {"case_id": case_id},
-            {"$set": sanitized_update}
-        )
-        
-        if result.modified_count == 0:
-            return {"message": "No changes made to case"}
-        
-        # Return updated case
-        updated_case = await db.auto_cases.find_one({"case_id": case_id})
-        if "_id" in updated_case:
-            del updated_case["_id"]
-            
-        return {
-            "message": "Case updated efficiently", 
-            "case": updated_case,
-            "fields_updated": list(sanitized_update.keys())
-        }
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error patching case: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error patching case: {str(e)}")
-
-@api_router.post("/auto-application/case/{case_id}/batch-update")
-async def batch_update_case_data(case_id: str, request: dict, current_user = Depends(get_current_user_optional)):
-    """Process multiple case updates in a single transaction for better performance"""
-    try:
-        # Validate case access
-        query = {"case_id": case_id}
-        if current_user:
-            query["user_id"] = current_user["id"]
-        
-        case = await db.auto_cases.find_one(query)
-        if not case:
-            raise HTTPException(status_code=404, detail="Case not found")
-        
-        # Extract updates from request
-        updates = request.get("updates", [])
-        
-        # Process batch updates atomically
-        combined_update = {"updated_at": datetime.utcnow()}
-        
-        for update in updates:
-            operation = update.get("operation", "set")
-            field = update.get("field")
-            value = update.get("value")
-            
-            if not field:
-                continue
-                
-            if operation == "set":
-                combined_update[field] = value
-            elif operation == "append" and field in case and isinstance(case[field], list):
-                if field not in combined_update:
-                    combined_update[field] = case[field].copy()
-                if isinstance(combined_update[field], list):
-                    combined_update[field].append(value)
-            elif operation == "merge" and isinstance(value, dict):
-                if field not in combined_update:
-                    combined_update[field] = case.get(field, {}).copy() if isinstance(case.get(field), dict) else {}
-                combined_update[field].update(value)
-        
-        # Execute atomic batch update
-        result = await db.auto_cases.update_one(
-            {"case_id": case_id},
-            {"$set": combined_update}
-        )
-        
-        if result.modified_count == 0:
-            return {"message": "No changes made in batch update"}
-        
-        return {
-            "message": f"Batch update completed successfully",
-            "updates_processed": len(updates),
-            "fields_modified": list(combined_update.keys())
-        }
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error in batch update: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error in batch update: {str(e)}")
-
-@api_router.post("/auto-application/case/{case_id}/claim")
-async def claim_anonymous_case(case_id: str, current_user = Depends(get_current_user)):
-    """Claim an anonymous case when user registers/logs in"""
-    try:
-        # Find anonymous case
-        case = await db.auto_cases.find_one({
-            "case_id": case_id,
-            "user_id": None
-        })
-        
-        if not case:
-            raise HTTPException(status_code=404, detail="Anonymous case not found")
-        
-        # Assign to current user
-        await db.auto_cases.update_one(
-            {"case_id": case_id},
-            {"$set": {
-                "user_id": current_user["id"],
-                "session_token": None,
-                "expires_at": None,
-                "updated_at": datetime.utcnow()
-            }}
-        )
-        
-        return {"message": "Case claimed successfully"}
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error claiming case: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error claiming case: {str(e)}")
-
-@api_router.post("/case/{case_id}/friendly-form")
-async def submit_friendly_form(case_id: str, request: dict, current_user = Depends(get_current_user_optional)):
-    """
-    Submit and validate friendly form data with AI analysis.
-    This endpoint:
-    1. Receives data from user-friendly form (in Portuguese or user's language)
-    2. Validates data completeness and coherence using AI
-    3. Notifies user of any missing or incorrect information
-    4. Saves validated data for later use in official USCIS forms
-    """
-    try:
-        # Extract form data from request
-        friendly_form_data = request.get("friendly_form_data", {})
-        basic_data = request.get("basic_data", {})
-        
-        # 🆕 BUG FIX DEBUG: Log incoming data
-        logger.info(f"🔍 Received friendly_form_data: {len(friendly_form_data)} keys")
-        logger.info(f"🔍 Keys: {list(friendly_form_data.keys())}")
-        
-        if not case_id:
-            raise HTTPException(status_code=400, detail="case_id is required")
-        
-        # Get case from database
-        query = {"case_id": case_id}
-        if current_user:
-            query["user_id"] = current_user["id"]
-        
-        case = await db.auto_cases.find_one(query)
-        if not case:
-            raise HTTPException(status_code=404, detail="Case not found")
-        
-        # Get visa type for specific validation
-        # 🆕 BUG P1 FIX: Improved auto-detect form_code from friendly form data
-        visa_type = case.get('form_code', 'N/A')
-        
-        logger.info(f"🔍 Current form_code for case {case_id}: {visa_type}")
-        
-        if not visa_type or visa_type == 'N/A':
-            # Try to detect from friendly form data
-            detected_visa = None
-            status_atual = str(friendly_form_data.get('status_atual', '')).upper()
-            status_solicitado = str(friendly_form_data.get('status_solicitado', '')).upper()
-            
-            logger.info(f"🔍 Attempting auto-detection - status_atual: {status_atual}, status_solicitado: {status_solicitado}")
-            
-            # Enhanced detection logic with better patterns
-            # I-539: Extension or Change of Status
-            if ('B-2' in status_atual or 'B2' in status_atual or 'TOURIST' in status_atual):
-                if 'EXTENSION' in status_solicitado or 'EXTENSÃO' in status_solicitado or 'B-2' in status_solicitado:
-                    detected_visa = 'I-539'
-                    logger.info(f"✅ Detected I-539 (B-2 Extension)")
-            
-            # Check if explicitly asking for I-539
-            if 'I-539' in status_solicitado or 'I539' in status_solicitado:
-                detected_visa = 'I-539'
-                logger.info(f"✅ Detected I-539 (Explicit)")
-            
-            # F-1 Student Visa
-            if 'F-1' in status_solicitado or 'F1' in status_solicitado or 'STUDENT' in status_solicitado:
-                detected_visa = 'I-539'  # F-1 uses I-539 for status change
-                logger.info(f"✅ Detected I-539 (F-1 Status Change)")
-            
-            # H-1B Work Visa
-            if 'H-1B' in status_solicitado or 'H1B' in status_solicitado:
-                detected_visa = 'I-539'  # H-1B also uses I-539 for extension
-                logger.info(f"✅ Detected I-539 (H-1B Extension)")
-            
-            # O-1 Extraordinary Ability
-            if 'O-1' in status_solicitado or 'O1' in status_solicitado:
-                detected_visa = 'O-1'
-                logger.info(f"✅ Detected O-1")
-            
-            # EB-1A Extraordinary Ability (Immigrant)
-            if 'EB-1A' in status_solicitado or 'EB1A' in status_solicitado:
-                detected_visa = 'I-140'
-                logger.info(f"✅ Detected I-140 (EB-1A)")
-            
-            # I-589 Asylum
-            if 'ASYLUM' in status_solicitado or 'ASILO' in status_solicitado or 'I-589' in status_solicitado:
-                detected_visa = 'I-589'
-                logger.info(f"✅ Detected I-589 (Asylum)")
-            
-            if detected_visa:
-                # Update case with detected visa type
-                result = await db.auto_cases.update_one(
-                    {"case_id": case_id},
-                    {"$set": {"form_code": detected_visa, "updated_at": datetime.utcnow()}}
-                )
-                visa_type = detected_visa
-                logger.info(f"✅ BUG P1 FIX: Auto-detected and saved form_code: {detected_visa} for case {case_id} (matched: {result.matched_count}, modified: {result.modified_count})")
-            else:
-                logger.warning(f"⚠️ Could not auto-detect form_code for case {case_id}")
-        
-        # If still not detected, use I-539 as default (most common)
-        if not visa_type or visa_type == 'N/A':
-            visa_type = 'I-539'
-            logger.info(f"ℹ️ Using default form_code: I-539 for case {case_id}")
-        
-        # STEP 1: Apply Legal Rules Validation (CRITICAL - From Immigration Attorney)
-        legal_validation_issues = []
-        legal_rules_passed = True
-        
-        if LEGAL_RULES_AVAILABLE:
-            logger.info(f"Applying legal rules validation for visa type: {visa_type}")
-            try:
-                legal_rules_passed, legal_messages = apply_legal_rules(friendly_form_data, visa_type)
-                if not legal_rules_passed or legal_messages:
-                    for message in legal_messages:
-                        # Categorize messages by type
-                        if message.startswith("❌"):
-                            legal_validation_issues.append({
-                                "field": "legal_requirement",
-                                "issue": message,
-                                "severity": "critical",
-                                "type": "legal_rule"
-                            })
-                        elif message.startswith("⚠️") or message.startswith("🚨"):
-                            legal_validation_issues.append({
-                                "field": "legal_warning",
-                                "issue": message,
-                                "severity": "warning",
-                                "type": "legal_rule"
-                            })
-                        else:
-                            legal_validation_issues.append({
-                                "field": "legal_info",
-                                "issue": message,
-                                "severity": "info",
-                                "type": "legal_rule"
-                            })
-                    logger.info(f"Legal validation found {len(legal_validation_issues)} issues/warnings")
-            except Exception as e:
-                logger.error(f"Error applying legal rules: {e}")
-                legal_validation_issues.append({
-                    "field": "legal_validation",
-                    "issue": f"⚠️ Erro ao aplicar regras jurídicas: {str(e)}",
-                    "severity": "warning",
-                    "type": "system_error"
-                })
-        
-        # STEP 2: AI Validation - Check completeness and coherence
-        logger.info(f"Starting AI validation for case {case_id}, visa type: {visa_type}")
-        
-        validation_result = await validate_friendly_form_ai(
-            case=case,
-            friendly_form_data=friendly_form_data,
-            basic_data=basic_data,
-            visa_type=visa_type
-        )
-        
-        # STEP 3: Merge legal validation with AI validation
-        validation_status = validation_result.get("overall_status", "needs_review")
-        validation_issues = legal_validation_issues + validation_result.get("validation_issues", [])
-        
-        # If legal rules failed, override status to needs_review
-        if not legal_rules_passed:
-            validation_status = "needs_review"
-            logger.warning(f"Legal rules validation failed for case {case_id}")
-        
-        completion_percentage = validation_result.get("completion_percentage", 0)
-        
-        # STEP 3: Save data to database (even if validation found issues)
-        # Merge basic_data safely
-        existing_basic_data = case.get("basic_data")
-        if existing_basic_data is None or not isinstance(existing_basic_data, dict):
-            existing_basic_data = {}
-        merged_basic_data = {**existing_basic_data, **basic_data}
-        
-        update_data = {
-            "simplified_form_responses": friendly_form_data,
-            "basic_data": merged_basic_data,
-            "friendly_form_validation": {
-                "status": validation_status,
-                "completion_percentage": completion_percentage,
-                "validation_date": datetime.utcnow(),
-                "issues": validation_issues,
-                "legal_rules_applied": LEGAL_RULES_AVAILABLE,
-                "legal_rules_passed": legal_rules_passed,
-                "total_legal_issues": len(legal_validation_issues)
-            },
-            "updated_at": datetime.utcnow()
-        }
-        
-        # 🆕 P1-5: Update progress status
-        if completion_percentage >= 100:
-            await update_case_status_and_progress(case_id, "friendly-form-complete", "auto_cases")
-        elif completion_percentage >= 50:
-            await update_case_status_and_progress(case_id, "friendly_form_partial", "auto_cases")
-        
-        # Update progress based on completion
-        if completion_percentage >= 90:
-            update_data["progress_percentage"] = 50
-            update_data["current_step"] = "friendly-form-complete"
-        elif completion_percentage >= 50:
-            update_data["progress_percentage"] = 45
-            update_data["current_step"] = "friendly-form-partial"
-        
-        # 🆕 BUG FIX DEBUG: Log what we're saving
-        logger.info(f"🔍 About to save simplified_form_responses with {len(friendly_form_data)} fields")
-        logger.info(f"🔍 Sample data: {dict(list(friendly_form_data.items())[:3])}")
-        
-        result = await db.auto_cases.update_one(
-            {"case_id": case_id},
-            {"$set": update_data}
-        )
-        
-        logger.info(f"✅ Friendly form data saved for case {case_id} (matched: {result.matched_count}, modified: {result.modified_count})")
-        
-        # 🆕 BUG FIX DEBUG: Verify data was saved
-        saved_case = await db.auto_cases.find_one({"case_id": case_id})
-        saved_simplified = saved_case.get("simplified_form_responses", {})
-        logger.info(f"🔍 Verification: simplified_form_responses has {len(saved_simplified)} fields after save")
-        if len(saved_simplified) == 0 and len(friendly_form_data) > 0:
-            logger.error(f"⚠️ DATA LOSS DETECTED! Sent {len(friendly_form_data)} fields but saved 0!")
-        
-        # STEP 4: Return validation result to user
-        response = {
-            "success": True,
-            "case_id": case_id,
-            "validation_status": validation_status,
-            "completion_percentage": completion_percentage,
-            "message": get_validation_message_pt(validation_status, completion_percentage),
-            "validation_issues": validation_issues,
-            "next_steps": get_next_steps_pt(validation_status, completion_percentage)
-        }
-        
-        return response
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error in friendly form submission: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error processing friendly form: {str(e)}")
-
-
-async def validate_friendly_form_ai(case: dict, friendly_form_data: dict, basic_data: dict, visa_type: str):
-    """
-    Enhanced AI-powered validation of friendly form data.
-    
-    TWO-STAGE VALIDATION:
-    1. Programmatic validation (fast, rule-based)
-    2. AI validation (slow, intelligent analysis)
-    
-    Checks for:
-    - Completeness (all required fields filled)
-    - Coherence (data makes sense and is consistent)
-    - Format correctness (dates, emails, phone numbers)
-    - Visa-specific requirements
-    """
-    try:
-        # STAGE 1: Programmatic Validation (Fast & Reliable)
-        logger.info(f"🔍 Stage 1: Programmatic validation for {visa_type}")
-        
-        programmatic_result = validate_fields_programmatically(
-            friendly_form_data=friendly_form_data,
-            basic_data=basic_data,
-            visa_type=visa_type
-        )
-        
-        validation_issues = programmatic_result["validation_issues"]
-        completion_percentage = programmatic_result["completion_percentage"]
-        missing_fields = programmatic_result["missing_fields"]
-        
-        logger.info(f"📊 Programmatic validation: {completion_percentage}% complete, {len(validation_issues)} issues found")
-        
-        # If completion is very low, skip AI validation (no point)
-        if completion_percentage < 30:
-            logger.info(f"⚠️ Completion too low ({completion_percentage}%), skipping AI validation")
-            return {
-                "validation_issues": validation_issues,
-                "overall_status": "rejected",
-                "completion_percentage": completion_percentage,
-                "missing_fields": missing_fields,
-                "message_to_user": f"Formulário muito incompleto. Preencha pelo menos os campos básicos obrigatórios."
-            }
-        
-        # STAGE 2: AI Validation (Intelligent Analysis)
-        logger.info(f"🤖 Stage 2: AI validation for enhanced analysis")
-        
-        # Use Emergent LLM key
-        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
-        if not emergent_key:
-            logger.warning("EMERGENT_LLM_KEY not found, using programmatic validation only")
-            overall_status = determine_overall_status(completion_percentage, validation_issues)
-            return {
-                "validation_issues": validation_issues,
-                "overall_status": overall_status,
-                "completion_percentage": completion_percentage,
-                "missing_fields": missing_fields,
-                "message_to_user": f"Validação programática concluída. {len(missing_fields)} campos obrigatórios faltando."
-            }
-        
-        try:
-            from emergentintegrations import EmergentLLM
-            llm = EmergentLLM(api_key=emergent_key)
-        except ImportError:
-            logger.error("EmergentLLM import failed, using programmatic validation only")
-            overall_status = determine_overall_status(completion_percentage, validation_issues)
-            return {
-                "validation_issues": validation_issues,
-                "overall_status": overall_status,
-                "completion_percentage": completion_percentage,
-                "missing_fields": missing_fields,
-                "message_to_user": f"Validação programática concluída. {len(missing_fields)} campos obrigatórios faltando."
-            }
-        
-        # Get visa-specific requirements
-        try:
-            from visa_specifications import get_visa_specifications
-            visa_specs = get_visa_specifications(visa_type) if visa_type else {}
-            if visa_specs is None:
-                visa_specs = {}
-        except Exception as spec_error:
-            logger.warning(f"Could not get visa specifications: {spec_error}")
-            visa_specs = {}
-        
-        # Prepare enhanced validation prompt with programmatic results
-        validation_prompt = f"""
-Você é um especialista em imigração dos EUA. Uma validação programática inicial já foi feita.
-
-**CONTEXTO**:
-- Tipo de Visto: {visa_type}
-- Validação Programática: {completion_percentage}% completo
-- Problemas Detectados: {len(validation_issues)} problemas
-- Campos Faltando: {len(missing_fields)} campos
-
-**DADOS DO USUÁRIO**:
-Dados Básicos: {json.dumps(basic_data, indent=2, ensure_ascii=False)}
-Formulário Amigável: {json.dumps(friendly_form_data, indent=2, ensure_ascii=False)}
-
-**PROBLEMAS JÁ IDENTIFICADOS**:
-{json.dumps(validation_issues[:5], indent=2, ensure_ascii=False) if validation_issues else "Nenhum problema detectado na validação inicial"}
-
-**SUA TAREFA ADICIONAL** (além dos problemas já detectados):
-1. Verificar COERÊNCIA dos dados (datas cronológicas, informações consistentes)
-2. Identificar CONTRADIÇÕES ou INCONSISTÊNCIAS que a validação programática não detectou
-3. Avaliar se as EXPLICAÇÕES/TEXTOS são suficientemente detalhados
-4. Verificar LÓGICA do pedido (ex: motivo da mudança de status faz sentido?)
-5. Sugerir MELHORIAS nos textos e respostas
-
-**IMPORTANTE**: 
-- NÃO repita os problemas já listados acima
-- Foque em análise semântica e coerência
-- Se não encontrar problemas adicionais, retorne array vazio em "additional_issues"
-- Mantenha o completion_percentage próximo ao detectado ({completion_percentage}%)
-
-**RESPONDA EM JSON** (APENAS JSON, SEM TEXTO ADICIONAL):
-{{
-    "additional_issues": [
-        {{
-            "field": "nome_do_campo",
-            "issue": "problema de coerência ou lógica",
-            "severity": "warning|info",
-            "suggestion": "como melhorar"
-        }}
-    ],
-    "coherence_score": 85,
-    "recommendations": [
-        "Recomendação específica para melhorar a aplicação"
-    ],
-    "overall_assessment": "Breve avaliação geral em português"
-}}
-"""
-        
-        # Call AI for enhanced validation
-        try:
-            response_text = llm.chat([{"role": "user", "content": validation_prompt}])
-            
-            # Check if response is valid
-            if not response_text or response_text is None:
-                logger.warning("AI returned empty response, using programmatic validation only")
-                overall_status = "approved" if completion_percentage >= 90 else "needs_review" if completion_percentage >= 70 else "rejected"
-                return {
-                    "validation_issues": validation_issues,
-                    "overall_status": overall_status,
-                    "completion_percentage": completion_percentage,
-                    "missing_fields": missing_fields,
-                    "message_to_user": f"Validação concluída. {len(missing_fields)} campos obrigatórios faltando."
-                }
-            
-            # Parse JSON response from AI
-            try:
-                # Try to extract JSON from response
-                json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
-                if json_match:
-                    ai_response = json.loads(json_match.group())
-                else:
-                    ai_response = json.loads(response_text.strip())
-                
-                # Combine programmatic issues with AI additional issues
-                additional_issues = ai_response.get("additional_issues", [])
-                all_issues = validation_issues + additional_issues
-                
-                # Adjust completion percentage with AI coherence score
-                coherence_score = ai_response.get("coherence_score", 100)
-                adjusted_completion = int((completion_percentage * 0.7) + (coherence_score * 0.3))
-                
-                # Determine overall status
-                if adjusted_completion >= 90 and len([i for i in all_issues if i.get("severity") == "error"]) == 0:
-                    overall_status = "approved"
-                elif adjusted_completion >= 70:
-                    overall_status = "needs_review"
-                else:
-                    overall_status = "rejected"
-                
-                logger.info(f"✅ AI validation complete: {adjusted_completion}% completion, {len(additional_issues)} additional issues")
-                
-                return {
-                    "validation_issues": all_issues,
-                    "overall_status": overall_status,
-                    "completion_percentage": adjusted_completion,
-                    "missing_fields": missing_fields,
-                    "message_to_user": ai_response.get("overall_assessment", f"Formulário {adjusted_completion}% completo"),
-                    "ai_recommendations": ai_response.get("recommendations", [])
-                }
-                
-            except json.JSONDecodeError:
-                logger.error(f"Failed to parse AI response as JSON: {response_text[:200]}")
-                # Use programmatic validation as fallback
-                overall_status = "approved" if completion_percentage >= 90 else "needs_review" if completion_percentage >= 70 else "rejected"
-                return {
-                    "validation_issues": validation_issues,
-                    "overall_status": overall_status,
-                    "completion_percentage": completion_percentage,
-                    "missing_fields": missing_fields,
-                    "message_to_user": f"Validação programática concluída. {len(missing_fields)} campos faltando."
-                }
-            
-        except Exception as llm_error:
-            logger.error(f"Error calling LLM: {str(llm_error)}")
-            # Use programmatic validation as fallback
-            overall_status = "approved" if completion_percentage >= 90 else "needs_review" if completion_percentage >= 70 else "rejected"
-            return {
-                "validation_issues": validation_issues,
-                "overall_status": overall_status,
-                "completion_percentage": completion_percentage,
-                "missing_fields": missing_fields,
-                "message_to_user": f"Validação concluída. {len(missing_fields)} campos obrigatórios faltando."
-            }
-        
-    except Exception as e:
-        logger.error(f"Error in AI validation: {str(e)}")
-        # Return basic validation on error
-        return {
-            "validation_issues": [],
-            "overall_status": "needs_review",
-            "completion_percentage": 60,
-            "message_to_user": "Validação básica concluída. Revise seus dados."
-        }
-
-
-def get_required_fields_by_visa_type(visa_type: str) -> dict:
-    """
-    Define required fields for each visa type based on official USCIS forms
-    Returns dict with field name, Portuguese label, and validation rules
-    
-    This function now uses the official form structures to ensure ALL required fields
-    from the official USCIS forms are included.
-    """
-    try:
-        from friendly_form_structures import get_friendly_form_structure
-        
-        structure = get_friendly_form_structure(visa_type)
-        required_fields = {}
-        
-        # Extract all required fields from the structure
-        for section in structure.get("sections", []):
-            for field in section.get("fields", []):
-                if field.get("required", False):
-                    # Check if field has conditional requirement
-                    conditional = field.get("conditional")
-                    if not conditional:  # Only include unconditionally required fields
-                        required_fields[field["id"]] = {
-                            "label": field["label"],
-                            "validation": field.get("validation", "required"),
-                            "example": field.get("placeholder", ""),
-                            "official_mapping": field.get("official_mapping", "")
-                        }
-        
-        return required_fields
-        
-    except Exception as e:
-        logger.warning(f"Could not load official structure for {visa_type}, using fallback: {e}")
-        # Fallback to old structure
-        return get_required_fields_by_visa_type_old(visa_type)
-
-
-def get_required_fields_by_visa_type_old(visa_type: str) -> dict:
-    """
-    OLD VERSION - Fallback function
-    Define required fields for each visa type
-    Returns dict with field name, Portuguese label, and validation rules
-    """
-    
-    # Common fields for all visa types
-    common_fields = {
-        "nome_completo": {
-            "label": "Nome Completo",
-            "validation": "required|min:3",
-            "example": "Maria Santos Silva"
-        },
-        "data_nascimento": {
-            "label": "Data de Nascimento",
-            "validation": "required|date",
-            "example": "1990-05-15"
-        },
-        "email": {
-            "label": "Email",
-            "validation": "required|email",
-            "example": "maria@example.com"
-        },
-        "numero_passaporte": {
-            "label": "Número do Passaporte",
-            "validation": "required|min:5",
-            "example": "BR123456789"
-        },
-        "pais_nascimento": {
-            "label": "País de Nascimento",
-            "validation": "required",
-            "example": "Brazil"
-        }
-    }
-    
-    # Visa-specific fields
-    if visa_type == "I-539":
-        return {
-            **common_fields,
-            "endereco": {
-                "label": "Endereço nos EUA",
-                "validation": "required|min:5",
-                "example": "123 Main Street, Apt 4B"
-            },
-            "cidade": {
-                "label": "Cidade",
-                "validation": "required",
-                "example": "New York"
-            },
-            "estado": {
-                "label": "Estado",
-                "validation": "required|length:2",
-                "example": "NY"
-            },
-            "cep": {
-                "label": "CEP/ZIP Code",
-                "validation": "required",
-                "example": "10001"
-            },
-            "telefone": {
-                "label": "Telefone",
-                "validation": "required",
-                "example": "+1 555-1234"
-            },
-            "status_atual": {
-                "label": "Status de Visto Atual",
-                "validation": "required",
-                "example": "F-1"
-            },
-            "status_solicitado": {
-                "label": "Status de Visto Solicitado",
-                "validation": "required",
-                "example": "H-1B"
-            },
-            "data_entrada_eua": {
-                "label": "Data de Entrada nos EUA",
-                "validation": "required|date",
-                "example": "2020-08-15"
-            },
-            "numero_i94": {
-                "label": "Número I-94",
-                "validation": "required|numeric",
-                "example": "1234567890"
-            }
-        }
-    
-    elif visa_type == "I-589":
-        return {
-            **common_fields,
-            "data_chegada_eua": {
-                "label": "Data de Chegada nos EUA",
-                "validation": "required|date",
-                "example": "2023-01-15"
-            },
-            "numero_i94": {
-                "label": "Número I-94",
-                "validation": "required|numeric",
-                "example": "1234567890"
-            },
-            "nacionalidade": {
-                "label": "Nacionalidade",
-                "validation": "required",
-                "example": "Brazilian"
-            },
-            "motivo_asilo": {
-                "label": "Motivo do Pedido de Asilo",
-                "validation": "required|min:50",
-                "example": "Perseguição política no país de origem..."
-            },
-            "endereco": {
-                "label": "Endereço Atual nos EUA",
-                "validation": "required|min:5",
-                "example": "123 Main Street"
-            },
-            "telefone": {
-                "label": "Telefone",
-                "validation": "required",
-                "example": "+1 555-1234"
-            }
-        }
-    
-    elif visa_type in ["EB-1A", "EB1A", "I-140"]:
-        return {
-            **common_fields,
-            "area_expertise": {
-                "label": "Área de Expertise",
-                "validation": "required|min:3",
-                "example": "Tecnologia da Informação"
-            },
-            "realizacoes": {
-                "label": "Realizações Extraordinárias",
-                "validation": "required|min:100",
-                "example": "Publicações, prêmios, patentes..."
-            },
-            "publicacoes": {
-                "label": "Publicações",
-                "validation": "optional",
-                "example": "Lista de publicações acadêmicas"
-            },
-            "premios": {
-                "label": "Prêmios e Reconhecimentos",
-                "validation": "optional",
-                "example": "Prêmios nacionais ou internacionais"
-            }
-        }
-    
-    # Default: return common fields only
-    return common_fields
-
-
-def validate_fields_programmatically(friendly_form_data: dict, basic_data: dict, visa_type: str) -> dict:
-    """
-    Perform programmatic validation before AI validation
-    This is faster and more reliable for basic checks
-    
-    Returns: dict with validation_issues, completion_percentage, missing_fields
-    """
-    
-    required_fields = get_required_fields_by_visa_type(visa_type)
-    validation_issues = []
-    missing_fields = []
-    filled_count = 0
-    total_required = len(required_fields)
-    
-    # Merge both data sources for validation
-    all_data = {**basic_data, **friendly_form_data}
-    
-    for field_name, field_config in required_fields.items():
-        field_value = all_data.get(field_name, "")
-        field_label = field_config["label"]
-        validation_rules = field_config["validation"]
-        
-        # Check if field is empty
-        if not field_value or (isinstance(field_value, str) and field_value.strip() == ""):
-            if "required" in validation_rules:
-                missing_fields.append(field_name)
-                validation_issues.append({
-                    "field": field_name,
-                    "field_label": field_label,
-                    "issue": f"Campo obrigatório não preenchido",
-                    "severity": "error",
-                    "suggestion": f"Por favor, preencha o campo '{field_label}'. Exemplo: {field_config.get('example', 'N/A')}"
-                })
-        else:
-            filled_count += 1
-            
-            # Additional validation rules
-            if "email" in validation_rules:
-                if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', str(field_value)):
-                    validation_issues.append({
-                        "field": field_name,
-                        "field_label": field_label,
-                        "issue": "Formato de email inválido",
-                        "severity": "error",
-                        "suggestion": f"Use um email válido, como: {field_config.get('example', 'usuario@example.com')}"
-                    })
-            
-            if "date" in validation_rules:
-                # Check if date is in valid format
-                if not re.match(r'^\d{4}-\d{2}-\d{2}$', str(field_value)):
-                    validation_issues.append({
-                        "field": field_name,
-                        "field_label": field_label,
-                        "issue": "Formato de data inválido",
-                        "severity": "error",
-                        "suggestion": f"Use o formato YYYY-MM-DD, como: {field_config.get('example', '1990-01-15')}"
-                    })
-            
-            if "numeric" in validation_rules:
-                if not str(field_value).replace("-", "").isdigit():
-                    validation_issues.append({
-                        "field": field_name,
-                        "field_label": field_label,
-                        "issue": "Deve conter apenas números",
-                        "severity": "warning",
-                        "suggestion": f"Use apenas números, como: {field_config.get('example', '123456')}"
-                    })
-            
-            if "min:" in validation_rules:
-                min_length = int(validation_rules.split("min:")[1].split("|")[0])
-                if len(str(field_value)) < min_length:
-                    validation_issues.append({
-                        "field": field_name,
-                        "field_label": field_label,
-                        "issue": f"Muito curto (mínimo {min_length} caracteres)",
-                        "severity": "warning",
-                        "suggestion": f"Forneça mais detalhes. Exemplo: {field_config.get('example', 'N/A')}"
-                    })
-    
-    # Calculate completion percentage with penalty for format errors
-    base_completion = int((filled_count / total_required) * 100) if total_required > 0 else 0
-    
-    # Penalize for FORMAT errors only (not missing fields, those already reduce filled_count)
-    # Only count format/validation errors that occur on filled fields
-    format_errors = [i for i in validation_issues if i.get("severity") == "error" and i.get("issue") != "Campo obrigatório não preenchido"]
-    format_warnings = [i for i in validation_issues if i.get("severity") == "warning"]
-    
-    # Each format error reduces by 5%, each warning by 2%
-    penalty = (len(format_errors) * 5) + (len(format_warnings) * 2)
-    completion_percentage = max(0, base_completion - penalty)
-    
-    return {
-        "validation_issues": validation_issues,
-        "missing_fields": missing_fields,
-        "completion_percentage": completion_percentage,
-        "total_required": total_required,
-        "filled_count": filled_count
-    }
-
-
-def determine_overall_status(completion_percentage: int, validation_issues: list) -> str:
-    """
-    Determine overall validation status based on completion and issues
-    """
-    error_count = len([i for i in validation_issues if i.get("severity") == "error"])
-    
-    # If there are critical errors, cannot be approved
-    if error_count > 0:
-        if completion_percentage < 70:
-            return "rejected"
-        else:
-            return "needs_review"
-    
-    # No errors, check completion only
-    if completion_percentage >= 90:
-        return "approved"
-    elif completion_percentage >= 70:
-        return "needs_review"
-    else:
-        return "rejected"
-
-
-def get_validation_message_pt(status: str, completion: int) -> str:
-    """Get user-friendly message in Portuguese based on validation status"""
-    if status == "approved" and completion >= 90:
-        return "✅ Excelente! Seu formulário está completo e coerente. Você pode prosseguir para a próxima etapa."
-    elif status == "needs_review":
-        return f"⚠️ Seu formulário está {completion}% completo. Por favor, revise as informações destacadas abaixo."
-    else:
-        return f"❌ Seu formulário precisa de mais informações ({completion}% completo). Por favor, preencha os campos faltantes."
-
-
-def get_next_steps_pt(status: str, completion: int) -> list:
-    """Get next steps recommendations in Portuguese"""
-    if status == "approved" and completion >= 90:
-        return [
-            "Revisar seus dados uma última vez",
-            "Clicar em 'Continuar' para gerar os formulários oficiais",
-            "Upload de documentos de suporte (se necessário)"
-        ]
-    elif status == "needs_review":
-        return [
-            "Revisar e corrigir as informações destacadas",
-            "Preencher campos faltantes",
-            "Verificar datas e formatos de dados"
-        ]
-    else:
-        return [
-            "Preencher todos os campos obrigatórios",
-            "Revisar informações básicas",
-            "Garantir que todos os dados estão corretos"
-        ]
-
-
-@api_router.get("/friendly-form/available-visas")
-async def get_available_visa_types():
-    """
-    Retorna lista de todos os tipos de visto com estruturas de formulário disponíveis
-    
-    Returns:
-        Lista de vistos disponíveis com informações básicas
-    """
-    try:
-        visa_types = [
-            {
-                "code": "I-539",
-                "name": "Extensão/Mudança de Status Geral",
-                "category": "Não-Imigrante",
-                "description": "Para extensão ou mudança de qualquer status não-imigrante",
-                "estimated_time": "20-30 minutos"
-            },
-            {
-                "code": "F-1",
-                "name": "Visto de Estudante",
-                "category": "Estudante",
-                "description": "Para estudantes em programas acadêmicos",
-                "estimated_time": "25-35 minutos"
-            },
-            {
-                "code": "H-1B",
-                "name": "Visto de Trabalho Especializado",
-                "category": "Trabalho",
-                "description": "Para profissionais em ocupações especializadas",
-                "estimated_time": "30-40 minutos"
-            },
-            {
-                "code": "B-2",
-                "name": "Visto de Turista",
-                "category": "Turismo",
-                "description": "Extensão de visto de turista/visitante",
-                "estimated_time": "15-20 minutos"
-            },
-            {
-                "code": "L-1",
-                "name": "Transferência Intra-Empresa",
-                "category": "Trabalho",
-                "description": "Para executivos e gerentes transferidos",
-                "estimated_time": "30-40 minutos"
-            },
-            {
-                "code": "O-1",
-                "name": "Habilidade Extraordinária (O-1)",
-                "category": "Habilidade Especial",
-                "description": "Para indivíduos com habilidade extraordinária",
-                "estimated_time": "35-45 minutos"
-            },
-            {
-                "code": "I-589",
-                "name": "Pedido de Asilo",
-                "category": "Asilo/Proteção",
-                "description": "Para solicitantes de asilo político",
-                "estimated_time": "45-60 minutos"
-            },
-            {
-                "code": "EB-1A",
-                "name": "Imigrante - Habilidade Extraordinária",
-                "category": "Imigrante",
-                "description": "Green Card baseado em habilidade extraordinária",
-                "estimated_time": "60-90 minutos"
-            }
-        ]
-        
-        return {
-            "success": True,
-            "visa_types": visa_types,
-            "total": len(visa_types)
-        }
-        
-    except Exception as e:
-        logger.error(f"Error getting available visa types: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error getting visa types: {str(e)}")
-
-
-@api_router.get("/friendly-form/structure/{visa_type}")
-async def get_friendly_form_structure_endpoint(visa_type: str):
-    """
-    Retorna a estrutura completa do formulário amigável para o tipo de visto
-    
-    Este endpoint fornece ao frontend a estrutura exata do formulário que deve ser apresentado
-    ao usuário, garantindo que TODOS os campos obrigatórios do formulário oficial USCIS sejam coletados.
-    
-    Args:
-        visa_type: Código do visto (I-539, I-589, EB-1A, F-1, H-1B, B-2, L-1, O-1, etc.)
-        
-    Returns:
-        Estrutura completa do formulário com seções, campos, validações e mapeamento para formulário oficial
-    """
-    try:
-        from friendly_form_structures import get_friendly_form_structure
-        
-        structure = get_friendly_form_structure(visa_type)
-        
-        return {
-            "success": True,
-            "visa_type": visa_type,
-            "structure": structure,
-            "message": f"Estrutura do formulário para {visa_type} obtida com sucesso"
-        }
-        
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        logger.error(f"Error getting friendly form structure: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error getting form structure: {str(e)}")
-
-
-@api_router.post("/auto-application/extract-facts")
-async def extract_facts_from_story(request: dict):
-    """Extract structured facts from user's story using sistema"""
-    try:
-        case_id = request.get("case_id")
-        story_text = request.get("story_text", "")
-        form_code = request.get("form_code")
-        
-        if not story_text.strip():
-            raise HTTPException(status_code=400, detail="Story text is required")
-        
-        # Get visa specifications for context
-        visa_specs = get_visa_specifications(form_code) if form_code else {}
-        
-        # Create sistema prompt for fact extraction
-        extraction_prompt = f"""
-Você é um assistente especializado em extrair informações estruturadas de narrativas para aplicações de imigração dos EUA.
-
-FORMULÁRIO: {form_code or 'Não especificado'}
-CATEGORIA: {visa_specs.get('category', 'Não especificada')}
-
-HISTÓRIA DO USUÁRIO:
-{story_text}
-
-Extraia e organize as seguintes informações da história, criando um JSON estruturado:
-
-1. PERSONAL_INFO (informações pessoais):
-   - full_name, date_of_birth, place_of_birth, nationality, current_address, phone, email
-
-2. IMMIGRATION_HISTORY (histórico de imigração):
-   - current_status, previous_entries, visa_history, overstays, deportations
-
-3. FAMILY_DETAILS (detalhes familiares):
-   - marital_status, spouse_info, children, parents, siblings
-
-4. EMPLOYMENT_INFO (informações de trabalho):
-   - current_job, previous_jobs, employer_details, salary, job_duties
-
-5. EDUCATION (educação):
-   - degrees, schools, graduation_dates, certifications
-
-6. TRAVEL_HISTORY (histórico de viagens):
-   - trips_outside_usa, duration, purposes, countries_visited
-
-7. FINANCIAL_INFO (informações financeiras):
-   - income, bank_accounts, assets, debts, tax_filings
-
-8. SPECIAL_CIRCUMSTANCES (circunstâncias especiais):
-   - medical_conditions, criminal_history, military_service, religious_persecution
-
-INSTRUÇÕES:
-- Extraia apenas informações explicitamente mencionadas na história
-- Use "Não mencionado" para informações ausentes
-- Mantenha datas no formato ISO quando possível
-- Seja preciso e não invente informações
-- Organize por categorias mesmo que algumas estejam vazias
-
-Responda apenas com o JSON estruturado, sem explicações adicionais.
-"""
-
-        # Call LLM via emergentintegrations for fact extraction
-        chat = LlmChat(
-            api_key=os.environ.get('EMERGENT_LLM_KEY'),
-            session_id=f"fact_extraction_{uuid.uuid4().hex[:8]}",
-            system_message="Você é um especialista em extrair informações estruturadas de narrativas para aplicações de imigração. Responda sempre em português e com informações precisas."
-        ).with_model("openai", "gpt-4o")
-        
-        user_message = UserMessage(text=extraction_prompt)
-        ai_response = await chat.send_message(user_message)
-        
-        # Try to extract JSON from the response
-        try:
-            # Remove any markdown formatting
-            if "```json" in ai_response:
-                ai_response = ai_response.split("```json")[1].split("```")[0].strip()
-            elif "```" in ai_response:
-                ai_response = ai_response.split("```")[1].split("```")[0].strip()
-            
-            extracted_facts = json.loads(ai_response)
-        except json.JSONDecodeError:
-            # Fallback: create structured response based on keywords
-            extracted_facts = {
-                "personal_info": {"extracted_from": "sistema analysis of user story"},
-                "immigration_history": {"status": "Extracted from narrative"},
-                "family_details": {"mentioned_in_story": True},
-                "employment_info": {"details": "See user narrative"},
-                "education": {"background": "Mentioned in story"},
-                "travel_history": {"trips": "Referenced in narrative"}
-            }
-        
-        # Update case with extracted facts if case_id provided
-        if case_id:
-            await db.auto_cases.update_one(
-                {"case_id": case_id},
-                {
-                    "$set": {
-                        "ai_extracted_facts": extracted_facts,
-                        "updated_at": datetime.utcnow()
-                    }
-                }
-            )
-        
-        return {
-            "message": "Facts extracted successfully",
-            "extracted_facts": extracted_facts,
-            "categories_found": len(extracted_facts.keys())
-        }
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error extracting facts: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error extracting facts: {str(e)}")
-
-@api_router.post("/auto-application/generate-forms")
-async def generate_official_forms(request: dict):
-    """Generate official USCIS forms from simplified responses using sistema"""
-    try:
-        case_id = request.get("case_id")
-        form_responses = request.get("form_responses", {})
-        form_code = request.get("form_code")
-        
-        if not case_id or not form_responses:
-            raise HTTPException(status_code=400, detail="Case ID and form responses are required")
-        
-        # Get visa specifications for context
-        visa_specs = get_visa_specifications(form_code) if form_code else {}
-        
-        # Create sistema prompt for form conversion
-        conversion_prompt = f"""
-Você é um especialista em formulários do USCIS. Converta as respostas simplificadas em português para o formato oficial do formulário {form_code}.
-
-FORMULÁRIO: {form_code}
-CATEGORIA: {visa_specs.get('category', 'Não especificada')}
-TÍTULO: {visa_specs.get('title', 'Não especificado')}
-
-RESPOSTAS DO USUÁRIO (em português):
-{json.dumps(form_responses, indent=2, ensure_ascii=False)}
-
-INSTRUÇÕES:
-1. Converta todas as respostas para inglês profissional
-2. Formate conforme os padrões do USCIS para {form_code}
-3. Complete campos obrigatórios baseados nas informações fornecidas
-4. Mantenha consistência de datas (MM/DD/YYYY)
-5. Use formatação oficial de nomes e endereços
-6. Adicione códigos de país padrão (BR para Brasil, US para EUA)
-7. Converta valores monetários para USD se necessário
-
-FORMATO DE SAÍDA:
-Retorne um JSON estruturado com os campos do formulário oficial {form_code}, usando os nomes de campos exatos do USCIS.
-
-Para campos não preenchidos pelo usuário, use:
-- "N/A" para não aplicável
-- "None" para informações não fornecidas
-- Mantenha campos obrigatórios em branco se não houver informação
-
-Responda apenas com o JSON estruturado, sem explicações adicionais.
-"""
-
-        # Call OpenAI for form conversion
-        response = openai.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {
-                    "role": "system", 
-                    "content": "Você é um especialista em formulários do USCIS. Converta respostas em português para formato oficial em inglês com precisão total."
-                },
-                {"role": "user", "content": conversion_prompt}
-            ],
-            temperature=0.1,
-            max_tokens=3000
-        )
-        
-        # Parse sistema response
-        ai_response = response.choices[0].message.content.strip()
-        
-        # Try to extract JSON from the response
-        try:
-            # Remove any markdown formatting
-            if "```json" in ai_response:
-                ai_response = ai_response.split("```json")[1].split("```")[0].strip()
-            elif "```" in ai_response:
-                ai_response = ai_response.split("```")[1].split("```")[0].strip()
-            
-            official_form_data = json.loads(ai_response)
-        except json.JSONDecodeError:
-            # Fallback: create basic structure
-            official_form_data = {
-                "form_number": form_code,
-                "generated_date": datetime.utcnow().isoformat(),
-                "user_responses": form_responses,
-                "conversion_status": "partial",
-                "notes": "Manual review recommended"
-            }
-        
-        # Update case with official form data
-        if case_id:
-            await db.auto_cases.update_one(
-                {"case_id": case_id},
-                {
-                    "$set": {
-                        "official_form_data": official_form_data,
-                        "status": "form_filled",
-                        "updated_at": datetime.utcnow()
-                    }
-                }
-            )
-        
-        return {
-            "message": "Official forms generated successfully",
-            "form_code": form_code,
-            "official_form_data": official_form_data,
-            "fields_converted": len(official_form_data.keys())
-        }
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error generating forms: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error generating forms: {str(e)}")
-
-@api_router.post("/auto-application/validate-forms")
-async def validate_forms(request: dict):
-    """Validate official forms for consistency and completeness"""
-    try:
-        case_id = request.get("case_id")
-        form_code = request.get("form_code")
-        
-        if not case_id:
-            raise HTTPException(status_code=400, detail="Case ID is required")
-        
-        # Get case data
-        case = await db.auto_cases.find_one({"case_id": case_id})
-        if not case:
-            raise HTTPException(status_code=404, detail="Case not found")
-        
-        # Simulate validation process
-        validation_issues = []
-        
-        # Check for required fields
-        official_form = case.get("official_form_data", {})
-        simplified_responses = case.get("simplified_form_responses", {})
-        
-        # Validate personal information
-        if not official_form.get("full_name") and not official_form.get("applicant_name"):
-            validation_issues.append({
-                "section": "Informações Pessoais",
-                "field": "Nome Completo",
-                "issue": "Nome completo não foi preenchido no formulário oficial",
-                "severity": "high"
-            })
-        
-        if not official_form.get("date_of_birth") and not official_form.get("birth_date"):
-            validation_issues.append({
-                "section": "Informações Pessoais", 
-                "field": "Data de Nascimento",
-                "issue": "Data de nascimento não foi preenchida",
-                "severity": "high"
-            })
-        
-        # Check for address information
-        if not official_form.get("current_address") and not official_form.get("mailing_address"):
-            validation_issues.append({
-                "section": "Informações de Endereço",
-                "field": "Endereço Atual", 
-                "issue": "Endereço atual não foi preenchido",
-                "severity": "high"
-            })
-        
-        # Form-specific validation
-        if form_code == "H-1B":
-            if not official_form.get("employer_name") and not official_form.get("company_name"):
-                validation_issues.append({
-                    "section": "Informações de Trabalho",
-                    "field": "Nome do Empregador",
-                    "issue": "Nome do empregador é obrigatório para H-1B",
-                    "severity": "high"
-                })
-        
-        elif form_code == "I-130":
-            if not official_form.get("spouse_name") and not official_form.get("beneficiary_name"):
-                validation_issues.append({
-                    "section": "Informações Familiares",
-                    "field": "Nome do Beneficiário",
-                    "issue": "Nome do beneficiário é obrigatório para I-130",
-                    "severity": "high"
-                })
-        
-        # Date format validation
-        date_fields = ["date_of_birth", "birth_date", "marriage_date"]
-        for field in date_fields:
-            if official_form.get(field):
-                date_value = official_form[field]
-                # Check if date is in MM/DD/YYYY format
-                if not re.match(r'^\d{2}/\d{2}/\d{4}$', str(date_value)):
-                    validation_issues.append({
-                        "section": "Validação de Formato",
-                        "field": field,
-                        "issue": "Data deve estar no formato MM/DD/YYYY",
-                        "severity": "medium"
-                    })
-        
-        return {
-            "message": "Form validation completed",
-            "validation_issues": validation_issues,
-            "total_issues": len(validation_issues),
-            "blocking_issues": len([i for i in validation_issues if i["severity"] == "high"])
-        }
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error validating forms: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error validating forms: {str(e)}")
-
-# NEW ENDPOINTS FOR COMPLETE APPLICATION FLOW
-
-@api_router.post("/auto-application/case/{case_id}/ai-processing")
-async def run_ai_processing_step(case_id: str, request: dict):
-    """Run AI processing step (validation, consistency, translation, form_generation, final_review)"""
-    try:
-        step = request.get("step")
-        if not step:
-            raise HTTPException(status_code=400, detail="Processing step is required")
-        
-        # Get case
-        case = await db.auto_cases.find_one({"case_id": case_id})
-        if not case:
-            raise HTTPException(status_code=404, detail="Case not found")
-        
-        # Define progress increments for each step
-        progress_map = {
-            "validation": 65,
-            "consistency": 69,
-            "translation": 73,
-            "form_generation": 77,
-            "final_review": 81
-        }
-        
-        # Update case progress
-        new_progress = progress_map.get(step, case.get("progress_percentage", 60))
-        
-        # Initialize ai_processing if it's null
-        if case.get("ai_processing") is None:
-            await db.auto_cases.update_one(
-                {"case_id": case_id},
-                {"$set": {"ai_processing": {}}}
-            )
-        
-        await db.auto_cases.update_one(
-            {"case_id": case_id},
-            {
-                "$set": {
-                    "progress_percentage": new_progress,
-                    f"ai_processing.{step}": "completed",
-                    "updated_at": datetime.utcnow()
-                }
-            }
-        )
-        
-        return {
-            "success": True,
-            "step": step,
-            "step_id": step,
-            "progress": new_progress,
-            "message": f"Step {step} completed successfully"
-        }
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error in AI processing step: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.post("/auto-application/case/{case_id}/professional-qa-review")
-async def run_professional_qa_review(case_id: str):
-    """
-    Executar revisão profissional de qualidade usando agente treinado com requisitos USCIS
-    Este endpoint garante que nenhum processo incompleto seja liberado
-    """
-    try:
-        # Buscar caso completo
-        case = await db.auto_cases.find_one({"case_id": case_id})
-        if not case:
-            raise HTTPException(status_code=404, detail="Case not found")
-        
-        # Obter agente de QA
-        qa_agent = get_qa_agent()
-        
-        # Executar revisão profissional completa
-        logger.info(f"🔍 Iniciando revisão profissional QA para case {case_id}")
-        qa_report = qa_agent.comprehensive_review(case)
-        
-        # Salvar relatório no banco
-        await db.auto_cases.update_one(
-            {"case_id": case_id},
-            {
-                "$set": {
-                    "qa_review": qa_report,
-                    "qa_approved": qa_report['approval']['approved'],
-                    "qa_score": qa_report['overall_score'],
-                    "qa_review_date": datetime.utcnow(),
-                    "updated_at": datetime.utcnow()
-                }
-            }
-        )
-        
-        # Se aprovado, atualizar status
-        if qa_report['approval']['approved']:
-            await db.auto_cases.update_one(
-                {"case_id": case_id},
-                {
-                    "$set": {
-                        "status": "qa_approved",
-                        "progress_percentage": 95,
-                        "ai_processing_status": "approved"
-                    }
-                }
-            )
-            logger.info(f"✅ Case {case_id} APROVADO na revisão QA (score: {qa_report['overall_score']:.1%})")
-        else:
-            logger.warning(f"❌ Case {case_id} REJEITADO na revisão QA: {qa_report['approval']['reason']}")
-        
-        return {
-            "success": True,
-            "qa_report": qa_report,
-            "approved": qa_report['approval']['approved'],
-            "score": qa_report['overall_score'],
-            "message": qa_report['approval']['reason']
-        }
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"❌ Erro na revisão QA: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error in QA review: {str(e)}")
 
 @api_router.post("/case/{case_id}/ai-review")
 @api_router.get("/case/{case_id}/ai-review")
 async def comprehensive_ai_review(case_id: str):
     """
     🤖 REVISÃO COMPLETA DA IA - Endpoint Unificado
-    
+
     Executa revisão completa do caso usando todos os agentes especializados:
     - Validação de documentos (Dr. Miguel)
     - Validação de formulários (Dra. Ana)
     - Verificação de compliance USCIS
     - Avaliação de cartas (Dr. Paula)
     - Análise de elegibilidade
-    
+
     Retorna relatório consolidado com:
     - Status de aprovação (APROVADO/REJEITADO/PENDENTE)
     - Score geral (0-100%)
@@ -4142,112 +342,164 @@ async def comprehensive_ai_review(case_id: str):
         if not case:
             # Tentar na coleção auto_cases
             case = await db.auto_cases.find_one({"case_id": case_id})
-        
+
         if not case:
             raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
-        
+
         logger.info(f"🔍 Iniciando revisão completa da IA para case {case_id}")
-        
+
         # Estrutura para armazenar resultados
         review_results = {
             "case_id": case_id,
             "visa_type": case.get("visa_type") or case.get("form_code") or "unknown",
-            "timestamp": datetime.utcnow().isoformat(),
-            "checks": {}
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "checks": {},
         }
-        
+
         # 1. VERIFICAÇÃO DE DADOS BÁSICOS
         basic_data = case.get("basic_data", {})
-        required_fields = ["applicant_name", "date_of_birth", "passport_number", 
-                          "current_address", "city", "zip_code"]
-        
+        required_fields = [
+            "applicant_name",
+            "date_of_birth",
+            "passport_number",
+            "current_address",
+            "city",
+            "zip_code",
+        ]
+
         missing_fields = [f for f in required_fields if not basic_data.get(f)]
-        
+
         review_results["checks"]["basic_data"] = {
             "status": "COMPLETE" if not missing_fields else "INCOMPLETE",
             "score": (len(required_fields) - len(missing_fields)) / len(required_fields),
             "missing_fields": missing_fields,
-            "message": "Dados básicos completos" if not missing_fields else f"Faltam {len(missing_fields)} campos obrigatórios"
+            "message": (
+                "Dados básicos completos"
+                if not missing_fields
+                else f"Faltam {len(missing_fields)} campos obrigatórios"
+            ),
         }
-        
+
         # 2. VERIFICAÇÃO DE DOCUMENTOS
         documents = case.get("documents", [])
         visa_type = case.get("visa_type") or case.get("form_code") or ""
         if visa_type:
             visa_type = visa_type.upper()
-        
+
         # Requisitos por tipo de visto
         required_docs = {
             "I-539": ["passport", "i94", "current_visa", "i20_or_ds2019", "financial_evidence"],
-            "I-589": ["passport", "i94", "evidence_persecution", "medical_records", "witness_statements", "country_conditions"],
-            "EB-1A": ["passport", "awards", "publications", "memberships", "expert_letters", "high_salary", "press_coverage", "judging_work"],
+            "I-589": [
+                "passport",
+                "i94",
+                "evidence_persecution",
+                "medical_records",
+                "witness_statements",
+                "country_conditions",
+            ],
+            "EB-1A": [
+                "passport",
+                "awards",
+                "publications",
+                "memberships",
+                "expert_letters",
+                "high_salary",
+                "press_coverage",
+                "judging_work",
+            ],
             "F-1": ["passport", "i20", "school_acceptance", "financial_evidence"],
-            "H-1B": ["passport", "lca", "diploma", "resume", "support_letter"]
+            "H-1B": ["passport", "lca", "diploma", "resume", "support_letter"],
         }
-        
+
         required_for_visa = required_docs.get(visa_type, ["passport"])
         uploaded_doc_types = [doc.get("document_type") for doc in documents]
         missing_docs = [doc for doc in required_for_visa if doc not in uploaded_doc_types]
-        
+
         review_results["checks"]["documents"] = {
             "status": "COMPLETE" if not missing_docs else "INCOMPLETE",
-            "score": (len(required_for_visa) - len(missing_docs)) / len(required_for_visa) if required_for_visa else 1.0,
+            "score": (
+                (len(required_for_visa) - len(missing_docs)) / len(required_for_visa)
+                if required_for_visa
+                else 1.0
+            ),
             "uploaded": len(documents),
             "required": len(required_for_visa),
             "missing_documents": missing_docs,
-            "message": f"{len(documents)} documentos enviados" if documents else "Nenhum documento enviado"
+            "message": (
+                f"{len(documents)} documentos enviados" if documents else "Nenhum documento enviado"
+            ),
         }
-        
+
         # 3. VERIFICAÇÃO DE FORMULÁRIOS
         forms = case.get("forms", {})
-        
+
         review_results["checks"]["forms"] = {
             "status": "COMPLETE" if forms else "NOT_STARTED",
             "score": 1.0 if forms else 0.0,
-            "message": "Formulários preenchidos" if forms else "Formulários não iniciados"
+            "message": "Formulários preenchidos" if forms else "Formulários não iniciados",
         }
-        
+
         # 4. VERIFICAÇÃO DE CARTAS
         letters = case.get("letters", {})
         cover_letter = letters.get("cover_letter", "")
-        
+
         # Para I-589, personal statement é OBRIGATÓRIO e mais crítico
         if visa_type == "I-589":
-            letter_score = 0.85 if cover_letter and len(cover_letter) > 200 else (0.5 if cover_letter else 0.0)
-            letter_message = "Personal statement presente e detalhado" if cover_letter and len(cover_letter) > 200 else \
-                            ("Personal statement muito curto - precisa mais detalhes" if cover_letter else \
-                             "Personal statement OBRIGATÓRIO para asilo - FALTANDO")
+            letter_score = (
+                0.85 if cover_letter and len(cover_letter) > 200 else (0.5 if cover_letter else 0.0)
+            )
+            letter_message = (
+                "Personal statement presente e detalhado"
+                if cover_letter and len(cover_letter) > 200
+                else (
+                    "Personal statement muito curto - precisa mais detalhes"
+                    if cover_letter
+                    else "Personal statement OBRIGATÓRIO para asilo - FALTANDO"
+                )
+            )
         elif visa_type == "EB-1A":
             # Para EB-1A, petition letter deve demonstrar extraordinary ability com evidências
-            letter_score = 0.90 if cover_letter and len(cover_letter) > 500 else (0.7 if cover_letter else 0.0)
-            letter_message = "Strong petition letter demonstrating extraordinary ability with evidence" if cover_letter and len(cover_letter) > 500 else \
-                            ("Petition letter present but should include more evidence of achievements" if cover_letter else \
-                             "EB-1A petition letter required - must demonstrate sustained acclaim")
+            letter_score = (
+                0.90 if cover_letter and len(cover_letter) > 500 else (0.7 if cover_letter else 0.0)
+            )
+            letter_message = (
+                "Strong petition letter demonstrating extraordinary ability with evidence"
+                if cover_letter and len(cover_letter) > 500
+                else (
+                    "Petition letter present but should include more evidence of achievements"
+                    if cover_letter
+                    else "EB-1A petition letter required - must demonstrate sustained acclaim"
+                )
+            )
         else:
             letter_score = 0.75 if cover_letter else 0.0
-            letter_message = "Carta de apresentação presente" if cover_letter else "Carta de apresentação faltando"
-        
+            letter_message = (
+                "Carta de apresentação presente"
+                if cover_letter
+                else "Carta de apresentação faltando"
+            )
+
         review_results["checks"]["letters"] = {
             "status": "COMPLETE" if cover_letter else "INCOMPLETE",
             "score": letter_score,
             "has_cover_letter": bool(cover_letter),
             "letter_length": len(cover_letter) if cover_letter else 0,
-            "message": letter_message
+            "message": letter_message,
         }
-        
+
         # 5. VERIFICAÇÃO DE PAYMENT
         payment_status = case.get("payment_status") or "pending"
-        
+
         review_results["checks"]["payment"] = {
             "status": payment_status.upper() if payment_status else "PENDING",
             "score": 1.0 if payment_status in ["completed", "test_mode"] else 0.0,
-            "message": f"Pagamento: {payment_status}"
+            "message": f"Pagamento: {payment_status}",
         }
-        
+
         # CÁLCULO DO SCORE GERAL
         scores = [check["score"] for check in review_results["checks"].values()]
         overall_score = sum(scores) / len(scores) if scores else 0.0
-        
+
         # DETERMINAÇÃO DO STATUS GERAL
         if overall_score >= 0.9:
             overall_status = "APPROVED"
@@ -4273,7 +525,7 @@ async def comprehensive_ai_review(case_id: str):
                 approval_message = "❌ EB-1A petition INCOMPLETE. Must demonstrate extraordinary ability through evidence of sustained national/international acclaim. Minimum 3 of 10 USCIS criteria required."
             else:
                 approval_message = "❌ Caso rejeitado. Muitos itens faltando."
-        
+
         # MONTAR RESULTADO FINAL
         final_result = {
             "success": True,
@@ -4283,32 +535,34 @@ async def comprehensive_ai_review(case_id: str):
             "approval_message": approval_message,
             "detailed_checks": review_results["checks"],
             "summary": {
-                "basic_data_complete": review_results["checks"]["basic_data"]["status"] == "COMPLETE",
+                "basic_data_complete": review_results["checks"]["basic_data"]["status"]
+                == "COMPLETE",
                 "documents_complete": review_results["checks"]["documents"]["status"] == "COMPLETE",
                 "forms_complete": review_results["checks"]["forms"]["status"] == "COMPLETE",
                 "letters_complete": review_results["checks"]["letters"]["status"] == "COMPLETE",
-                "payment_complete": review_results["checks"]["payment"]["status"] in ["COMPLETED", "TEST_MODE"]
+                "payment_complete": review_results["checks"]["payment"]["status"]
+                in ["COMPLETED", "TEST_MODE"],
             },
             "missing_items": {
                 "fields": review_results["checks"]["basic_data"].get("missing_fields", []),
-                "documents": review_results["checks"]["documents"].get("missing_documents", [])
+                "documents": review_results["checks"]["documents"].get("missing_documents", []),
             },
-            "timestamp": review_results["timestamp"]
+            "timestamp": review_results["timestamp"],
         }
-        
+
         # Salvar resultado da revisão no banco (try both collections)
         result = await db.application_cases.update_one(
             {"case_id": case_id},
             {
                 "$set": {
                     "ai_review": final_result,
-                    "ai_review_date": datetime.utcnow(),
+                    "ai_review_date": datetime.now(timezone.utc),
                     "ai_review_score": overall_score,
-                    "updated_at": datetime.utcnow()
+                    "updated_at": datetime.now(timezone.utc),
                 }
-            }
+            },
         )
-        
+
         # If not found in application_cases, try auto_cases
         if result.matched_count == 0:
             await db.auto_cases.update_one(
@@ -4316,32 +570,35 @@ async def comprehensive_ai_review(case_id: str):
                 {
                     "$set": {
                         "ai_review": final_result,
-                        "ai_review_date": datetime.utcnow(),
+                        "ai_review_date": datetime.now(timezone.utc),
                         "ai_review_score": overall_score,
-                        "updated_at": datetime.utcnow()
+                        "updated_at": datetime.now(timezone.utc),
                     }
-                }
+                },
             )
-        
-        logger.info(f"✅ Revisão IA completa para {case_id}: {overall_status} ({overall_score*100:.1f}%)")
-        
+
+        logger.info(
+            f"✅ Revisão IA completa para {case_id}: {overall_status} ({overall_score*100:.1f}%)"
+        )
+
         return final_result
-    
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"❌ Erro na revisão IA: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error in AI review: {str(e)}")
 
+
 @api_router.get("/qa-system/learning-statistics")
 async def get_qa_learning_statistics(agent_name: Optional[str] = None, days: int = 30):
     """
     📊 Obtém estatísticas do sistema de aprendizado dos agentes
-    
+
     Query Parameters:
     - agent_name (opcional): Nome do agente específico
     - days (padrão: 30): Período em dias
-    
+
     Retorna estatísticas sobre:
     - Total de lições aprendidas
     - Taxa de sucesso
@@ -4349,143 +606,17 @@ async def get_qa_learning_statistics(agent_name: Optional[str] = None, days: int
     - Performance por agente
     """
     try:
-        from agent_learning_system import get_learning_system
-        
+        from backend.learning.agent_learning import get_learning_system
+
         learning_system = await get_learning_system(db)
-        stats = await learning_system.get_learning_statistics(
-            agent_name=agent_name,
-            days=days
-        )
-        
-        return {
-            "success": True,
-            "statistics": stats
-        }
-    
+        stats = await learning_system.get_learning_statistics(agent_name=agent_name, days=days)
+
+        return {"success": True, "statistics": stats}
+
     except Exception as e:
         logger.error(f"❌ Erro ao obter estatísticas: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.post("/auto-application/case/{case_id}/qa-cycle-with-feedback")
-async def run_qa_cycle_with_feedback(case_id: str, request: dict = None):
-    """
-    🔄 CICLO COMPLETO DE QA COM FEEDBACK LOOP AUTOMÁTICO
-    
-    Executa ciclo iterativo de revisão → correção → revisão até aprovação
-    ou até atingir máximo de iterações.
-    
-    O QA Agent identifica problemas e encaminha automaticamente para os
-    agentes construtores apropriados (Document Analyzer, Form Filler, 
-    Translation Agent, Specialized Agents) que fazem as correções necessárias.
-    
-    Parâmetros opcionais:
-    - max_iterations: Número máximo de iterações (padrão: 5)
-    - auto_fix: Se True, tenta correções automáticas (padrão: True)
-    """
-    try:
-        # Buscar caso completo
-        case = await db.auto_cases.find_one({"case_id": case_id})
-        if not case:
-            raise HTTPException(status_code=404, detail="Case not found")
-        
-        # Remover _id do MongoDB
-        if '_id' in case:
-            case['_id'] = str(case['_id'])
-        
-        # Obter configurações
-        request_data = request or {}
-        max_iterations = request_data.get('max_iterations', 5)
-        auto_fix = request_data.get('auto_fix', True)
-        
-        logger.info(f"🔄 Iniciando ciclo de QA com feedback loop para case {case_id}")
-        logger.info(f"   Max iterações: {max_iterations}, Auto-fix: {auto_fix}")
-        
-        # Obter agente de QA e orquestrador com sistema de aprendizado
-        qa_agent = get_qa_agent()
-        orchestrator = get_qa_orchestrator(db)
-        
-        # Executar ciclo completo
-        result = await orchestrator.orchestrate_qa_cycle(
-            case_data=case,
-            qa_agent=qa_agent,
-            db=db,
-            max_iterations=max_iterations
-        )
-        
-        # Se aprovado, atualizar status final
-        if result['status'] == 'approved':
-            await db.auto_cases.update_one(
-                {"case_id": case_id},
-                {
-                    "$set": {
-                        "status": "qa_approved",
-                        "progress_percentage": 95,
-                        "ai_processing_status": "approved",
-                        "updated_at": datetime.utcnow()
-                    }
-                }
-            )
-            logger.info(f"✅ Case {case_id} APROVADO após {result['iterations']} iteração(ões)")
-        else:
-            logger.warning(
-                f"⚠️  Case {case_id} não foi aprovado: {result['status']} "
-                f"(Score final: {result['final_score']:.1%})"
-            )
-        
-        return {
-            "success": result['success'],
-            "case_id": case_id,
-            "status": result['status'],
-            "iterations": result['iterations'],
-            "final_score": result['final_score'],
-            "approved": result['status'] == 'approved',
-            "qa_report": result.get('qa_report'),
-            "iteration_history": result.get('iteration_history', []),
-            "message": result['message']
-        }
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"❌ Erro no ciclo de QA com feedback: {str(e)}")
-        import traceback
-        logger.error(traceback.format_exc())
-        raise HTTPException(status_code=500, detail=f"Error in QA cycle: {str(e)}")
-
-@api_router.post("/auto-application/case/{case_id}/generate-form")
-async def generate_uscis_form_for_case(case_id: str):
-    """Generate USCIS form for a specific case"""
-    try:
-        # Get case
-        case = await db.auto_cases.find_one({"case_id": case_id})
-        if not case:
-            raise HTTPException(status_code=404, detail="Case not found")
-        
-        # Mark form as generated
-        await db.auto_cases.update_one(
-            {"case_id": case_id},
-            {
-                "$set": {
-                    "uscis_form_generated": True,
-                    "progress_percentage": 90,
-                    "status": "form_generated",
-                    "updated_at": datetime.utcnow()
-                }
-            }
-        )
-        
-        return {
-            "success": True,
-            "message": "USCIS form generated successfully",
-            "form_code": case.get("form_code", ""),
-            "progress": 90
-        }
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error generating USCIS form: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/auto-application/case/{case_id}/complete")
 async def complete_application(case_id: str):
@@ -4495,7 +626,7 @@ async def complete_application(case_id: str):
         case = await db.auto_cases.find_one({"case_id": case_id})
         if not case:
             raise HTTPException(status_code=404, detail="Case not found")
-        
+
         # Mark as completed
         await db.auto_cases.update_one(
             {"case_id": case_id},
@@ -4503,210 +634,26 @@ async def complete_application(case_id: str):
                 "$set": {
                     "status": "completed",
                     "progress_percentage": 100,
-                    "completed_at": datetime.utcnow(),
-                    "updated_at": datetime.utcnow()
+                    "completed_at": datetime.now(timezone.utc),
+                    "updated_at": datetime.now(timezone.utc),
                 }
-            }
+            },
         )
-        
+
         return {
             "success": True,
             "message": "Application completed successfully",
             "case_id": case_id,
             "status": "completed",
-            "progress": 100
+            "progress": 100,
         }
-    
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error completing application: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.post("/auto-application/process-payment")
-async def process_payment(request: dict):
-    """Process payment for auto-application package"""
-    try:
-        case_id = request.get("case_id")
-        package_id = request.get("package_id")
-        payment_method = request.get("payment_method")
-        amount = request.get("amount")
-        
-        if not all([case_id, package_id, payment_method, amount]):
-            raise HTTPException(status_code=400, detail="Missing required payment information")
-        
-        # Get case
-        case = await db.auto_cases.find_one({"case_id": case_id})
-        if not case:
-            raise HTTPException(status_code=404, detail="Case not found")
-        
-        # Generate payment ID
-        payment_id = f"PAY-{str(uuid.uuid4())[:8].upper()}"
-        
-        # Simulate payment processing
-        # In real implementation, integrate with Stripe/PagSeguro/etc.
-        payment_data = {
-            "payment_id": payment_id,
-            "case_id": case_id,
-            "package_id": package_id,
-            "payment_method": payment_method,
-            "amount": amount,
-            "currency": "USD",
-            "status": "completed",
-            "processed_at": datetime.utcnow(),
-            "transaction_fee": amount * 0.029 if payment_method == "credit_card" else 0
-        }
-        
-        # Update case with payment information
-        await db.auto_cases.update_one(
-            {"case_id": case_id},
-            {
-                "$set": {
-                    "payment_status": "completed",
-                    "payment_id": payment_id,
-                    "package_selected": package_id,
-                    "payment_data": payment_data,
-                    "updated_at": datetime.utcnow()
-                }
-            }
-        )
-        
-        # Store payment record
-        await db.payments.insert_one(payment_data)
-        
-        return {
-            "message": "Payment processed successfully",
-            "payment_id": payment_id,
-            "status": "completed",
-            "amount_charged": amount
-        }
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error processing payment: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error processing payment: {str(e)}")
-
-@api_router.post("/auto-application/generate-package")
-async def generate_final_package(request: dict):
-    """Generate final document package for download"""
-    try:
-        case_id = request.get("case_id")
-        package_type = request.get("package_type", "complete")
-        
-        if not case_id:
-            raise HTTPException(status_code=400, detail="Case ID is required")
-        
-        # Get case data
-        case = await db.auto_cases.find_one({"case_id": case_id})
-        if not case:
-            raise HTTPException(status_code=404, detail="Case not found")
-        
-        # 🆕 BUG P2 FIX: Verify payment status (with test mode bypass)
-        skip_payment = os.getenv("SKIP_PAYMENT_FOR_TESTING", "FALSE").upper() == "TRUE"
-        
-        if not skip_payment and case.get("payment_status") != "completed":
-            raise HTTPException(status_code=400, detail="Payment required before package generation")
-        elif skip_payment:
-            logger.info(f"⚠️ BUG P2 FIX: Skipping payment check for case {case_id} (TEST MODE)")
-        
-        # Get form specifications
-        form_code = case.get("form_code")
-        visa_specs = get_visa_specifications(form_code) if form_code else {}
-        
-        # Generate package contents based on type
-        package_contents = {
-            "case_id": case_id,
-            "form_code": form_code,
-            "generated_at": datetime.utcnow().isoformat(),
-            "package_type": package_type,
-            "files": []
-        }
-        
-        # Official forms
-        if case.get("official_form_data"):
-            package_contents["files"].append({
-                "name": f"{form_code}_Official_Form.pdf",
-                "type": "official_form",
-                "description": f"Formulário oficial {form_code} preenchido em inglês"
-            })
-        
-        # Document checklist
-        package_contents["files"].append({
-            "name": "Document_Checklist.pdf",
-            "type": "checklist",
-            "description": "Lista completa de documentos necessários"
-        })
-        
-        # Submission instructions
-        package_contents["files"].append({
-            "name": "Submission_Instructions.pdf", 
-            "type": "instructions",
-            "description": "Instruções passo-a-passo para submissão"
-        })
-        
-        # User story and extracted facts
-        if case.get("user_story_text"):
-            package_contents["files"].append({
-                "name": "User_Story_Summary.pdf",
-                "type": "summary",
-                "description": "Resumo da sua história e fatos extraídos"
-            })
-        
-        # Support documents (for complete/premium packages)
-        if package_type in ["complete", "premium"]:
-            package_contents["files"].extend([
-                {
-                    "name": "Cover_Letter_Template.docx",
-                    "type": "template",
-                    "description": "Modelo de carta de apresentação"
-                },
-                {
-                    "name": "RFE_Response_Guide.pdf",
-                    "type": "guide",
-                    "description": "Guia para responder Request for Evidence"
-                },
-                {
-                    "name": "Interview_Preparation.pdf",
-                    "type": "guide", 
-                    "description": "Guia de preparação para entrevista"
-                }
-            ])
-        
-        # Generate download URL (in real implementation, create actual ZIP file)
-        download_url = f"/downloads/packages/OSPREY-{form_code}-{case_id}-{package_type}.zip"
-        
-        # 🆕 BUG P2 FIX: Update case with package information and set final status
-        await db.auto_cases.update_one(
-            {"case_id": case_id},
-            {
-                "$set": {
-                    "final_package_generated": True,
-                    "final_package_url": download_url,
-                    "package_contents": package_contents,
-                    "status": "completed",
-                    "current_step": "finalized",
-                    "progress_percentage": 100,
-                    "completed_at": datetime.utcnow(),
-                    "updated_at": datetime.utcnow()
-                }
-            }
-        )
-        
-        logger.info(f"✅ BUG P2 FIX: Case {case_id} finalized with status='completed', progress=100%")
-        
-        return {
-            "message": "Package generated successfully",
-            "download_url": download_url,
-            "package_contents": package_contents,
-            "total_files": len(package_contents["files"])
-        }
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error generating package: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error generating package: {str(e)}")
 
 @api_router.get("/auto-application/visa-specs/{form_code}")
 async def get_visa_specs(form_code: str, subcategory: Optional[str] = None):
@@ -4715,126 +662,26 @@ async def get_visa_specs(form_code: str, subcategory: Optional[str] = None):
         specs = get_visa_specifications(form_code)
         if not specs:
             raise HTTPException(status_code=404, detail="Form specifications not found")
-        
+
         # Get additional details
         required_documents = get_required_documents(form_code, subcategory)
         key_questions = get_key_questions(form_code)
         common_issues = get_common_issues(form_code)
-        
+
         return {
             "form_code": form_code,
             "specifications": specs,
             "required_documents": required_documents,
             "key_questions": key_questions,
-            "common_issues": common_issues
+            "common_issues": common_issues,
         }
-    
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error getting visa specifications: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error getting visa specifications: {str(e)}")
 
-# Voice Agent WebSocket and REST endpoints
-from voice_websocket import voice_manager
-from validate_endpoint import form_validator
-
-@app.websocket("/ws/voice/{session_id}")
-async def voice_websocket_endpoint(websocket: WebSocket, session_id: str):
-    """WebSocket endpoint for voice agent interactions"""
-    await voice_manager.connect(websocket, session_id)
-    
-    try:
-        while True:
-            # Receive message from client
-            data = await websocket.receive_text()
-            message = json.loads(data)
-            
-            # Process message through voice agent
-            response = await voice_manager.handle_message(session_id, message)
-            
-            # Send response back to client
-            await voice_manager.send_personal_message(session_id, response)
-            
-    except WebSocketDisconnect:
-        voice_manager.disconnect(session_id)
-    except Exception as e:
-        logger.error(f"Voice WebSocket error for {session_id}: {e}")
-        voice_manager.disconnect(session_id)
-
-@api_router.post("/validate")
-async def validate_form_step(request: dict):
-    """Validate form data for a specific step (Osprey Owl Tutor)"""
-    try:
-        step_id = request.get("stepId", "")
-        form_data = request.get("formData", {})
-        
-        if not step_id:
-            raise HTTPException(status_code=400, detail="stepId is required")
-        
-        # Import form validator
-        from validate_endpoint import form_validator
-        
-        # Validate using form validator
-        result = form_validator.validate_step(step_id, form_data)
-        
-        return result.to_dict()
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error validating form step: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error validating form step: {str(e)}")
-
-@api_router.post("/analyze")
-async def analyze_with_llm(request: dict):
-    """Analyze form state using LLM with guardrails"""
-    try:
-        from voice_agent import voice_agent
-        
-        # Create a mock snapshot from request
-        snapshot = {
-            "sections": request.get("sections", []),
-            "fields": request.get("fields", []),
-            "stepId": request.get("stepId", ""),
-            "formId": request.get("formId", ""),
-            "userId": "temp_user",
-            "url": request.get("url", ""),
-            "timestamp": datetime.utcnow().isoformat(),
-            "siteVersionHash": "v1.0.0"
-        }
-        
-        # Analyze using voice agent
-        advice = await voice_agent._analyze_current_state(snapshot)
-        
-        return {
-            "advice": advice.__dict__,
-            "analysis_timestamp": datetime.utcnow().isoformat()
-        }
-        
-    except Exception as e:
-        logger.error(f"Error in LLM analysis: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error in LLM analysis: {str(e)}")
-
-@api_router.get("/voice/status")
-async def voice_agent_status():
-    """Get voice agent status and metrics"""
-    try:
-        return {
-            "status": "active",
-            "active_sessions": voice_manager.get_session_count(),
-            "capabilities": [
-                "voice_guidance",
-                "form_validation", 
-                "step_assistance",
-                "intent_recognition"
-            ],
-            "supported_languages": ["pt-BR", "en-US"],
-            "version": "1.0.0"
-        }
-    except Exception as e:
-        logger.error(f"Error getting voice status: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error getting voice status: {str(e)}")
 
 # Immigration Expert endpoints
 @api_router.post("/immigration-expert/validate")
@@ -4844,22 +691,18 @@ async def immigration_expert_validate(request: dict):
         # Initialize expert with custom configuration
         expert = create_immigration_expert(
             provider="openai",  # You can change this
-            model="gpt-4o",     # You can change this
-            custom_prompt=None  # You can add your custom prompt here
+            model="gpt-4o",  # You can change this
+            custom_prompt=None,  # You can add your custom prompt here
         )
-        
+
         form_data = request.get("formData", {})
         visa_type = request.get("visaType", "H-1B")
         step_id = request.get("stepId", "personal")
-        
+
         result = await expert.validate_form_data(form_data, visa_type, step_id)
-        
-        return {
-            "success": True,
-            "expert_analysis": result,
-            "timestamp": datetime.now().isoformat()
-        }
-        
+
+        return {"success": True, "expert_analysis": result, "timestamp": datetime.now().isoformat()}
+
     except Exception as e:
         logger.error(f"Immigration expert validation error: {e}")
         return {
@@ -4868,274 +711,59 @@ async def immigration_expert_validate(request: dict):
             "expert_analysis": {
                 "status": "error",
                 "issues": [],
-                "recommendations": ["Erro ao processar análise especializada"]
-            }
+                "recommendations": ["Erro ao processar análise especializada"],
+            },
         }
 
-@api_router.post("/immigration-expert/analyze-document") 
+
+@api_router.post("/immigration-expert/analyze-document")
 async def immigration_expert_analyze_document(request: dict):
     """Use specialized immigration expert for document analysis"""
     try:
         expert = create_immigration_expert()
-        
+
         document_type = request.get("documentType", "passport")
         document_content = request.get("documentContent", "")
         visa_type = request.get("visaType", "H-1B")
         user_data = request.get("userData", {})  # Dados do usuário para validação
-        
-        result = await expert.analyze_document(document_type, document_content, visa_type, user_data)
-        
-        return {
-            "success": True,
-            "expert_analysis": result,
-            "timestamp": datetime.now().isoformat()
-        }
-        
+
+        result = await expert.analyze_document(
+            document_type, document_content, visa_type, user_data
+        )
+
+        return {"success": True, "expert_analysis": result, "timestamp": datetime.now().isoformat()}
+
     except Exception as e:
         logger.error(f"Immigration expert document analysis error: {e}")
-        return {
-            "success": False,
-            "error": str(e)
-        }
+        return {"success": False, "error": str(e)}
+
 
 @api_router.post("/immigration-expert/advice")
 async def immigration_expert_advice(request: dict):
     """Get specialized immigration advice"""
     try:
         expert = create_immigration_expert()
-        
+
         question = request.get("question", "")
         context = request.get("context", {})
-        
+
         advice = await expert.generate_advice(question, context)
-        
-        return {
-            "success": True,
-            "advice": advice,
-            "timestamp": datetime.now().isoformat()
-        }
-        
+
+        return {"success": True, "advice": advice, "timestamp": datetime.now().isoformat()}
+
     except Exception as e:
         logger.error(f"Immigration expert advice error: {e}")
         return {
             "success": False,
             "error": str(e),
-            "advice": "Desculpe, não foi possível processar sua pergunta no momento."
+            "advice": "Desculpe, não foi possível processar sua pergunta no momento.",
         }
 
-# Specialized Agents Endpoints
-@api_router.post("/specialized-agents/document-validation")
-async def specialized_document_validation(request: dict):
-    """Ultra-specialized document validation using Dr. Miguel"""
-    try:
-        validator = create_document_validator()
-        
-        document_type = request.get("documentType", "passport")
-        document_content = request.get("documentContent", "")
-        user_data = request.get("userData", {})
-        
-        # Extract user's name for comparison
-        user_name = user_data.get("name", user_data.get("full_name", user_data.get("firstName", "") + " " + user_data.get("lastName", "")))
-        
-        # Use the enhanced validation method with database
-        analysis = await validator.validate_document_with_database(
-            document_type=document_type,
-            document_content=document_content,
-            applicant_name=user_name,
-            visa_type=user_data.get("visa_type", "unknown")
-        )
-        
-        return {
-            "success": True,
-            "agent": "Dr. Miguel - Validador de Documentos",
-            "specialization": "Document Validation & Authenticity",
-            "analysis": analysis,
-            "timestamp": datetime.now().isoformat()
-        }
-        
-    except Exception as e:
-        logger.error(f"Dr. Miguel document validation error: {e}")
-        return {
-            "success": False,
-            "agent": "Dr. Miguel - Validador de Documentos", 
-            "error": str(e)
-        }
-
-@api_router.post("/specialized-agents/form-validation")
-async def specialized_form_validation(request: dict):
-    """Ultra-specialized form validation using Dra. Ana"""
-    try:
-        validator = create_form_validator()
-        
-        form_data = request.get("formData", {})
-        visa_type = request.get("visaType", "H-1B")
-        step_id = request.get("stepId", "personal")
-        
-        prompt = f"""
-        VALIDAÇÃO COMPLETA DE FORMULÁRIO
-        
-        Dados do Formulário: {form_data}
-        Tipo de Visto: {visa_type}
-        Etapa Atual: {step_id}
-        
-        Execute validação sistemática conforme seu protocolo especializado.
-        """
-        
-        session_id = f"form_validation_{visa_type}_{step_id}_{hash(str(form_data)) % 10000}"
-        analysis = await validator._call_agent(prompt, session_id)
-        
-        return {
-            "success": True,
-            "agent": "Dra. Ana - Validadora de Formulários",
-            "specialization": "Form Validation & Data Consistency", 
-            "analysis": analysis,
-            "timestamp": datetime.now().isoformat()
-        }
-        
-    except Exception as e:
-        logger.error(f"Dra. Ana form validation error: {e}")
-        return {
-            "success": False,
-            "agent": "Dra. Ana - Validadora de Formulários",
-            "error": str(e)
-        }
-
-@api_router.post("/specialized-agents/eligibility-analysis")
-async def specialized_eligibility_analysis(request: dict):
-    """Ultra-specialized eligibility analysis using Dr. Carlos"""
-    try:
-        analyst = create_eligibility_analyst()
-        
-        applicant_profile = request.get("applicantProfile", {})
-        visa_type = request.get("visaType", "H-1B")
-        qualifications = request.get("qualifications", {})
-        
-        prompt = f"""
-        ANÁLISE COMPLETA DE ELEGIBILIDADE
-        
-        Perfil do Candidato: {applicant_profile}
-        Visto Solicitado: {visa_type}
-        Qualificações: {qualifications}
-        
-        Execute análise sistemática conforme seu protocolo especializado.
-        """
-        
-        session_id = f"eligibility_{visa_type}_{hash(str(applicant_profile)) % 10000}"
-        analysis = await analyst._call_agent(prompt, session_id)
-        
-        return {
-            "success": True,
-            "agent": "Dr. Carlos - Analista de Elegibilidade",
-            "specialization": "Visa Eligibility Analysis",
-            "analysis": analysis,
-            "timestamp": datetime.now().isoformat()
-        }
-        
-    except Exception as e:
-        logger.error(f"Dr. Carlos eligibility analysis error: {e}")
-        return {
-            "success": False,
-            "agent": "Dr. Carlos - Analista de Elegibilidade",
-            "error": str(e)
-        }
-
-@api_router.post("/specialized-agents/compliance-check")
-async def specialized_compliance_check(request: dict):
-    """Ultra-specialized USCIS compliance check using Dra. Patricia"""
-    try:
-        checker = create_compliance_checker()
-        
-        complete_application = request.get("completeApplication", {})
-        documents = request.get("documents", [])
-        forms = request.get("forms", {})
-        
-        prompt = f"""
-        REVISÃO FINAL DE COMPLIANCE USCIS
-        
-        Aplicação Completa: {complete_application}
-        Documentos Submetidos: {documents}
-        Formulários: {forms}
-        
-        Execute revisão final conforme seu protocolo especializado.
-        """
-        
-        session_id = f"compliance_{hash(str(complete_application)) % 10000}"
-        analysis = await checker._call_agent(prompt, session_id)
-        
-        return {
-            "success": True,
-            "agent": "Dra. Patricia - Compliance USCIS",
-            "specialization": "USCIS Compliance & Final Review",
-            "analysis": analysis,
-            "timestamp": datetime.now().isoformat()
-        }
-        
-    except Exception as e:
-        logger.error(f"Dra. Patricia compliance check error: {e}")
-        return {
-            "success": False,
-            "agent": "Dra. Patricia - Compliance USCIS", 
-            "error": str(e)
-        }
-
-@api_router.post("/specialized-agents/immigration-letter")
-async def specialized_immigration_letter_writing(request: dict):
-    """Ultra-specialized immigration letter writing using Dr. Ricardo - NEVER invents facts"""
-    try:
-        letter_writer = create_immigration_letter_writer()
-        
-        client_story = request.get("clientStory", "")
-        client_data = request.get("clientData", {})
-        visa_type = request.get("visaType", "H-1B")
-        letter_type = request.get("letterType", "cover_letter")  # cover_letter, personal_statement, support_letter
-        
-        prompt = f"""
-        REDAÇÃO DE CARTA DE IMIGRAÇÃO - BASEADA APENAS EM FATOS DO CLIENTE
-        
-        TIPO DE VISTO: {visa_type}
-        TIPO DE CARTA: {letter_type}
-        
-        DADOS DO CLIENTE (USE APENAS ESTES FATOS):
-        {client_data}
-        
-        HISTÓRIA/CONTEXTO FORNECIDO PELO CLIENTE:
-        {client_story}
-        
-        INSTRUÇÕES CRÍTICAS:
-        - Use APENAS as informações fornecidas acima
-        - Se informação crítica estiver faltando, indique [INFORMAÇÃO NECESSÁRIA: descrição]
-        - NÃO invente datas, nomes, empresas, qualificações ou eventos
-        - Mantenha tom profissional e formal apropriado para USCIS
-        - Estruture conforme padrões de cartas de imigração
-        
-        Execute conforme seu protocolo especializado de redação.
-        """
-        
-        session_id = f"letter_{visa_type}_{letter_type}_{hash(client_story) % 10000}"
-        analysis = await letter_writer._call_agent(prompt, session_id)
-        
-        return {
-            "success": True,
-            "agent": "Dr. Ricardo - Redator de Cartas",
-            "specialization": "Immigration Letter Writing",
-            "visa_type": visa_type,
-            "letter_type": letter_type,
-            "analysis": analysis,
-            "timestamp": datetime.now().isoformat(),
-            "fact_check": "Only client-provided facts used - no invention"
-        }
-        
-    except Exception as e:
-        logger.error(f"Dr. Ricardo letter writing error: {e}")
-        return {
-            "success": False,
-            "agent": "Dr. Ricardo - Redator de Cartas",
-            "error": str(e)
-        }
 
 # =====================================
 # CASE FINALIZER MVP - SISTEMA DE FINALIZAÇÃO
 # =====================================
+
 
 @api_router.post("/cases/{case_id}/finalize/start")
 async def start_case_finalization(case_id: str, request: dict):
@@ -5144,7 +772,7 @@ async def start_case_finalization(case_id: str, request: dict):
         scenario_key = request.get("scenario_key", "H-1B_basic")
         postage = request.get("postage", "USPS")
         language = request.get("language", "pt")
-        
+
         # 🆕 Buscar dados completos do caso do MongoDB
         case_data = None
         try:
@@ -5152,96 +780,100 @@ async def start_case_finalization(case_id: str, request: dict):
             if case:
                 # Serializar para remover ObjectId e tornar JSON-safe
                 case_data = serialize_doc(case)
-                logger.info(f"📦 Dados do caso {case_id} carregados: form_code={case_data.get('form_code')}")
-                
+                logger.info(
+                    f"📦 Dados do caso {case_id} carregados: form_code={case_data.get('form_code')}"
+                )
+
                 # 🔍 REVISÃO QA OBRIGATÓRIA ANTES DE FINALIZAR
-                qa_approved = case_data.get('qa_approved', False)
-                
+                qa_approved = case_data.get("qa_approved", False)
+
                 if not qa_approved:
                     logger.warning(f"⚠️ Case {case_id} não passou pela revisão QA ou foi reprovado")
-                    
+
                     # Executar revisão QA automaticamente
                     qa_agent = get_qa_agent()
                     qa_report = qa_agent.comprehensive_review(case_data)
-                    
+
                     # Salvar resultado da revisão
                     await db.auto_cases.update_one(
                         {"case_id": case_id},
                         {
                             "$set": {
                                 "qa_review": qa_report,
-                                "qa_approved": qa_report['approval']['approved'],
-                                "qa_score": qa_report['overall_score'],
-                                "qa_review_date": datetime.utcnow()
+                                "qa_approved": qa_report["approval"]["approved"],
+                                "qa_score": qa_report["overall_score"],
+                                "qa_review_date": datetime.now(timezone.utc),
                             }
-                        }
+                        },
                     )
-                    
+
                     # Se não foi aprovado, bloquear finalização
-                    if not qa_report['approval']['approved']:
+                    if not qa_report["approval"]["approved"]:
                         return {
                             "success": False,
                             "error": "quality_check_failed",
                             "message": "❌ Aplicação não passou na revisão de qualidade",
                             "qa_report": {
                                 "approved": False,
-                                "score": qa_report['overall_score'],
-                                "reason": qa_report['approval']['reason'],
-                                "missing_items": qa_report.get('missing_items', []),
-                                "required_actions": qa_report['approval']['required_actions'],
-                                "recommendations": qa_report.get('recommendations', [])
-                            }
+                                "score": qa_report["overall_score"],
+                                "reason": qa_report["approval"]["reason"],
+                                "missing_items": qa_report.get("missing_items", []),
+                                "required_actions": qa_report["approval"]["required_actions"],
+                                "recommendations": qa_report.get("recommendations", []),
+                            },
                         }
                     else:
                         logger.info(f"✅ Case {case_id} aprovado na revisão QA automática")
                 else:
                     logger.info(f"✅ Case {case_id} já aprovado em revisão QA anterior")
-                
+
             else:
                 logger.warning(f"⚠️ Caso {case_id} não encontrado no MongoDB")
         except Exception as db_error:
             logger.error(f"❌ Erro ao buscar caso do MongoDB: {db_error}")
-        
+
         # Chamar finalizer com ou sem dados do caso
         result = case_finalizer_complete.start_finalization(
             case_id=case_id,
             scenario_key=scenario_key,
             postage=postage,
             language=language,
-            case_data=case_data  # 🆕 Passar dados do caso
+            case_data=case_data,  # 🆕 Passar dados do caso
         )
-        
+
         if result["success"]:
             return {
                 "job_id": result["job_id"],
                 "status": result["status"],
                 "message": "Finalização iniciada com sucesso",
                 "used_agent": result.get("used_agent", False),  # 🆕 Indicar se usou agente
-                "agent_available": case_data is not None
+                "agent_available": case_data is not None,
             }
         else:
             return {
                 "error": result["error"],
-                "supported_scenarios": result.get("supported_scenarios", [])
+                "supported_scenarios": result.get("supported_scenarios", []),
             }
-            
+
     except Exception as e:
         logger.error(f"Error starting finalization: {e}")
         import traceback
+
         logger.error(traceback.format_exc())
         return {
             "error": "Erro interno do servidor",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
+
 
 @api_router.get("/cases/finalize/{job_id}/status")
 async def get_finalization_status(job_id: str):
     """Obtém status da finalização"""
     try:
         # Importação movida para o topo
-        
+
         result = case_finalizer_complete.get_job_status(job_id)
-        
+
         if result["success"]:
             job = result["job"]
             return {
@@ -5249,45 +881,47 @@ async def get_finalization_status(job_id: str):
                 "issues": job.get("issues", []),
                 "links": job.get("links", {}),
                 "created_at": job.get("created_at"),
-                "completed_at": job.get("completed_at")
+                "completed_at": job.get("completed_at"),
             }
         else:
             return {"error": result["error"]}
-            
+
     except Exception as e:
         logger.error(f"Error getting finalization status: {e}")
         return {"error": "Erro interno do servidor"}
+
 
 @api_router.post("/cases/{case_id}/finalize/accept")
 async def accept_finalization_consent(case_id: str, request: dict):
     """Aceita consentimento para liberação dos downloads"""
     try:
         # Importação movida para o topo
-        
-        consent_hash = request.get("consent_hash", "")
-        
+
+        request.get("consent_hash", "")
+
         # Aceitar consentimento (implementação simplificada para demonstração)
         result = {
             "success": True,
             "downloads": {
                 "instructions": f"/download/instructions/{case_id}",
                 "checklist": f"/download/checklist/{case_id}",
-                "master_packet": f"/download/master-packet/{case_id}"
+                "master_packet": f"/download/master-packet/{case_id}",
             },
-            "message": "Consentimento aceito. Downloads liberados."
+            "message": "Consentimento aceito. Downloads liberados.",
         }
-        
+
         if result["success"]:
             return {
                 "accepted": result["accepted"],
-                "message": result.get("message", "Consentimento registrado")
+                "message": result.get("message", "Consentimento registrado"),
             }
         else:
             return {"error": result["error"]}
-            
+
     except Exception as e:
         logger.error(f"Error accepting consent: {e}")
         return {"error": "Erro interno do servidor"}
+
 
 @api_router.get("/instructions/{instruction_id}")
 async def get_instructions(instruction_id: str):
@@ -5296,8 +930,9 @@ async def get_instructions(instruction_id: str):
         "instruction_id": instruction_id,
         "content": "# Instruções de envio\nPlaceholder para instruções detalhadas...",
         "language": "pt",
-        "note": "MVP - Em produção retornaria conteúdo real do storage"
+        "note": "MVP - Em produção retornaria conteúdo real do storage",
     }
+
 
 @api_router.get("/checklists/{checklist_id}")
 async def get_checklist(checklist_id: str):
@@ -5306,8 +941,9 @@ async def get_checklist(checklist_id: str):
         "checklist_id": checklist_id,
         "content": "# Checklist Final\nPlaceholder para checklist...",
         "language": "pt",
-        "note": "MVP - Em produção retornaria conteúdo real do storage"
+        "note": "MVP - Em produção retornaria conteúdo real do storage",
     }
+
 
 @api_router.get("/master-packets/{packet_id}")
 async def get_master_packet(packet_id: str):
@@ -5315,12 +951,14 @@ async def get_master_packet(packet_id: str):
     return {
         "packet_id": packet_id,
         "note": "MVP - Em produção retornaria PDF merged real",
-        "download_url": f"/download/master-packet/{packet_id}"
+        "download_url": f"/download/master-packet/{packet_id}",
     }
+
 
 # =====================================
 # MÓDULO DE CARTAS DE CAPA - DR. PAULA
 # =====================================
+
 
 @api_router.post("/llm/dr-paula/generate-directives")
 async def generate_visa_directives(request: dict):
@@ -5329,46 +967,61 @@ async def generate_visa_directives(request: dict):
         visa_type = request.get("visa_type", "H1B")
         language = request.get("language", "pt")
         context = request.get("context", "")
+
+        # Normalize visa type (remove hyphens for YAML lookup)
+        normalized_visa_type = visa_type.replace("-", "").replace("_", "")
         
+        logger.info(f"Looking for visa type: {visa_type}, normalized: {normalized_visa_type}")
+
         # Load directives from YAML file
-        yaml_path = ROOT_DIR / "visa_directive_guides_informative.yaml"
-        
-        with open(yaml_path, 'r', encoding='utf-8') as f:
+        yaml_path = ROOT_DIR / "visa" / "directives.yaml"
+
+        with open(yaml_path, "r", encoding="utf-8") as f:
             directives_data = yaml.safe_load(f)
-        
-        visa_directives = directives_data.get(visa_type, {})
-        
+
+        logger.info(f"Available visa types in YAML: {list(directives_data.keys())}")
+
+        # Try to find directives with normalized key
+        visa_directives = None
+        for key in directives_data.keys():
+            normalized_key = key.replace("-", "").replace("_", "")
+            logger.info(f"Comparing {normalized_key.upper()} with {normalized_visa_type.upper()}")
+            if normalized_key.upper() == normalized_visa_type.upper():
+                visa_directives = directives_data[key]
+                logger.info(f"Found match with key: {key}")
+                break
+
         if not visa_directives:
+            logger.error(f"Visa type {visa_type} (normalized: {normalized_visa_type}) not found in directives")
             return {
                 "success": False,
-                "error": f"Tipo de visto {visa_type} não encontrado nas diretivas"
+                "error": f"Tipo de visto {visa_type} não encontrado nas diretivas. Tipos disponíveis: {', '.join(directives_data.keys())}",
             }
-        
+
         # Create Dra. Paula expert
         expert = create_immigration_expert()
-        
+
         system_prompt = f"""
         Você é a Dra. Paula, especialista em imigração. Produza um ROTEIRO INFORMATIVO com base nas exigências publicadas pelo USCIS para o visto {visa_type}.
-        
+
         DIRETRIZES:
         - Use linguagem impessoal: "o candidato deve demonstrar..."
         - Base-se nas informações públicas do USCIS
         - Finalize com o disclaimer padrão
         - Idioma: {language}
         - Use as diretivas fornecidas como base
-        
+
         DIRETIVAS PARA {visa_type}:
         {yaml.dump(visa_directives, default_flow_style=False, allow_unicode=True)}
-        
+
         CONTEXTO ADICIONAL: {context}
-        
+
         Formate como um roteiro informativo claro e objetivo.
         """
-        
+
         # Generate directives using Dra. Paula
-        session_id = f"directives_{visa_type}_{language}_{hash(context) % 10000}"
-        response = await expert._call_dra_paula(system_prompt, session_id)
-        
+        response = await expert._call_dra_paula(system_prompt)
+
         return {
             "success": True,
             "agent": "Dra. Paula B2C",
@@ -5376,16 +1029,17 @@ async def generate_visa_directives(request: dict):
             "language": language,
             "directives_text": response,
             "directives_data": visa_directives,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
-        
+
     except Exception as e:
         logger.error(f"Dra. Paula generate directives error: {e}")
         return {
             "success": False,
             "error": "Erro ao gerar roteiro informativo. Tente novamente.",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
+
 
 @api_router.post("/llm/dr-paula/review-letter")
 async def review_applicant_letter(request: dict):
@@ -5394,37 +1048,34 @@ async def review_applicant_letter(request: dict):
         visa_type = request.get("visa_type", "H1B")
         applicant_letter = request.get("applicant_letter", "")
         visa_profile = request.get("visa_profile", {})
-        
+
         if not applicant_letter:
-            return {
-                "success": False,
-                "error": "Carta do aplicante não fornecida"
-            }
-        
+            return {"success": False, "error": "Carta do aplicante não fornecida"}
+
         # Create Dra. Paula expert
         expert = create_immigration_expert()
-        
+
         system_prompt = f"""
         Você é a Dra. Paula, especialista em processos imigratórios.
         Analise a carta escrita pelo aplicante para o visto {visa_type}.
-        
+
         FLUXO INTELIGENTE:
         1. Primeiro, avalie se a carta já atende TODOS os critérios essenciais do visto {visa_type}
         2. Se a carta ESTIVER SATISFATÓRIA (≥85% dos pontos cobertos):
-           - Retorne status "ready_for_formatting" 
+           - Retorne status "ready_for_formatting"
            - A carta será formatada diretamente no padrão oficial
         3. Se a carta ESTIVER INCOMPLETA (<85% dos pontos):
            - Retorne status "needs_questions"
            - Gere 3-5 perguntas específicas e objetivas para completar
-        
+
         CRITÉRIOS ESSENCIAIS PARA {visa_type}:
         {yaml.dump(visa_profile, default_flow_style=False, allow_unicode=True)}
-        
+
         CARTA DO APLICANTE:
         {applicant_letter}
-        
+
         AVALIE E RESPONDA EM JSON:
-        
+
         SE SATISFATÓRIA (≥85%):
         {{
             "review": {{
@@ -5435,7 +1086,7 @@ async def review_applicant_letter(request: dict):
                 "next_action": "format_official_letter"
             }}
         }}
-        
+
         SE INCOMPLETA (<85%):
         {{
             "review": {{
@@ -5455,23 +1106,22 @@ async def review_applicant_letter(request: dict):
             }}
         }}
         """
-        
-        session_id = f"review_{visa_type}_{hash(applicant_letter) % 10000}"
-        response = await expert._call_dra_paula(system_prompt, session_id)
-        
+
+        response = await expert._call_dra_paula(system_prompt)
+
         # Try to parse JSON response with improved error handling
         try:
             import json
             import re
-            
+
             logger.info(f"Dr. Paula raw response (first 500 chars): {response[:500]}")
-            
+
             # Try multiple JSON extraction methods
             json_str = None
-            
+
             # Method 1: Look for complete JSON object
-            start_idx = response.find('{')
-            end_idx = response.rfind('}') + 1
+            start_idx = response.find("{")
+            end_idx = response.rfind("}") + 1
             if start_idx != -1 and end_idx > start_idx:
                 json_str = response[start_idx:end_idx]
                 try:
@@ -5479,7 +1129,7 @@ async def review_applicant_letter(request: dict):
                     logger.info("Successfully parsed JSON using method 1")
                 except:
                     # Method 2: Try to find JSON within code blocks
-                    json_matches = re.findall(r'```json\s*(.*?)\s*```', response, re.DOTALL)
+                    json_matches = re.findall(r"```json\s*(.*?)\s*```", response, re.DOTALL)
                     if json_matches:
                         try:
                             review_data = json.loads(json_matches[0])
@@ -5488,26 +1138,29 @@ async def review_applicant_letter(request: dict):
                             json_str = None
                     else:
                         json_str = None
-            
-            if json_str is None or 'review_data' not in locals():
+
+            if json_str is None or "review_data" not in locals():
                 # Smart fallback: analyze the text response to create structured data
                 logger.warning("Failed to parse JSON, creating intelligent fallback")
-                
+
                 # Try to extract key information from text response
                 coverage_score = 0.6  # Default
                 status = "needs_questions"
                 questions = []
-                
+
                 # Look for percentage or score indicators
-                score_match = re.search(r'(\d+)%', response)
+                score_match = re.search(r"(\d+)%", response)
                 if score_match:
                     coverage_score = int(score_match.group(1)) / 100
-                
+
                 # Check if response suggests completion
-                if any(word in response.lower() for word in ['completa', 'satisfatória', 'adequada', 'pronta']):
+                if any(
+                    word in response.lower()
+                    for word in ["completa", "satisfatória", "adequada", "pronta"]
+                ):
                     status = "complete"
                     coverage_score = max(coverage_score, 0.85)
-                
+
                 # Generate helpful questions if incomplete
                 if status == "needs_questions":
                     questions = [
@@ -5515,28 +1168,30 @@ async def review_applicant_letter(request: dict):
                             "id": 1,
                             "question": f"Poderia fornecer mais detalhes sobre sua experiência relevante para o visto {visa_type}?",
                             "why_needed": f"Para fortalecer sua aplicação de {visa_type}, precisamos de informações mais específicas.",
-                            "category": "experience"
+                            "category": "experience",
                         },
                         {
                             "id": 2,
                             "question": f"Há alguma informação adicional sobre sua qualificação que deveria ser incluída?",
                             "why_needed": "Detalhes adicionais podem tornar sua carta mais convincente.",
-                            "category": "qualifications"
-                        }
+                            "category": "qualifications",
+                        },
                     ]
-                
+
                 review_data = {
                     "review": {
                         "visa_type": visa_type,
                         "coverage_score": coverage_score,
                         "status": status,
                         "questions": questions,
-                        "next_action": "collect_answers" if status == "needs_questions" else "format_letter",
+                        "next_action": (
+                            "collect_answers" if status == "needs_questions" else "format_letter"
+                        ),
                         "ai_note": "Resposta processada com análise inteligente - funcionalidade mantida",
-                        "raw_response": response[:200] + "..." if len(response) > 200 else response
+                        "raw_response": response[:200] + "..." if len(response) > 200 else response,
                     }
                 }
-                
+
         except Exception as json_e:
             logger.error(f"Complete failure in JSON parsing from Dra. Paula: {json_e}")
             # Ultimate fallback with helpful guidance
@@ -5550,28 +1205,29 @@ async def review_applicant_letter(request: dict):
                             "id": 1,
                             "question": f"Poderia reescrever sua carta incluindo mais detalhes sobre sua experiência específica para o visto {visa_type}?",
                             "why_needed": "Uma carta mais detalhada ajudará no processo de análise.",
-                            "category": "rewrite"
+                            "category": "rewrite",
                         }
                     ],
                     "next_action": "collect_answers",
-                    "error_note": "Sistema em modo de recuperação - funcionalidade preservada"
+                    "error_note": "Sistema em modo de recuperação - funcionalidade preservada",
                 }
             }
-        
+
         return {
             "success": True,
             "agent": "Dra. Paula B2C",
-            "timestamp": datetime.utcnow().isoformat(),
-            **review_data
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            **review_data,
         }
-        
+
     except Exception as e:
         logger.error(f"Dra. Paula review letter error: {e}")
         return {
             "success": False,
             "error": "Erro ao revisar carta. Tente novamente.",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
+
 
 @api_router.post("/llm/dr-paula/format-official-letter")
 async def format_official_letter(request: dict):
@@ -5580,21 +1236,18 @@ async def format_official_letter(request: dict):
         visa_type = request.get("visa_type", "H1B")
         applicant_letter = request.get("applicant_letter", "")
         visa_profile = request.get("visa_profile", {})
-        
+
         if not applicant_letter:
-            return {
-                "success": False,
-                "error": "Carta do aplicante não fornecida"
-            }
-        
+            return {"success": False, "error": "Carta do aplicante não fornecida"}
+
         # Create Dra. Paula expert
         expert = create_immigration_expert()
-        
+
         system_prompt = f"""
         Você é a Dra. Paula, especialista em processos imigratórios.
         A carta do aplicante JÁ ATENDE todos os critérios do visto {visa_type}.
         Sua tarefa é APENAS FORMATAR no padrão oficial de imigração americana.
-        
+
         INSTRUÇÕES PARA FORMATAÇÃO:
         1. Mantenha TODOS os fatos e informações do aplicante
         2. Reorganize em estrutura PROFISSIONAL padrão de imigração
@@ -5603,7 +1256,7 @@ async def format_official_letter(request: dict):
         5. Finalize com disclaimer profissional
         6. NÃO adicione informações não mencionadas pelo aplicante
         7. NÃO altere dados factuais (datas, nomes, empresas, etc.)
-        
+
         ESTRUTURA PADRÃO PARA {visa_type}:
         - Cabeçalho com propósito da carta
         - Apresentação pessoal e profissional
@@ -5612,13 +1265,13 @@ async def format_official_letter(request: dict):
         - Argumentos de conformidade com requisitos
         - Conclusão e agradecimentos
         - Disclaimer profissional
-        
+
         CARTA ORIGINAL DO APLICANTE:
         {applicant_letter}
-        
+
         DIRETIVAS PARA {visa_type}:
         {yaml.dump(visa_profile, default_flow_style=False, allow_unicode=True)}
-        
+
         Responda em JSON:
         {{
             "formatted_letter": {{
@@ -5630,15 +1283,15 @@ async def format_official_letter(request: dict):
             }}
         }}
         """
-        
-        session_id = f"format_{visa_type}_{hash(applicant_letter) % 10000}"
-        response = await expert._call_dra_paula(system_prompt, session_id)
-        
+
+        response = await expert._call_dra_paula(system_prompt)
+
         # Try to parse JSON response
         try:
             import json
-            start_idx = response.find('{')
-            end_idx = response.rfind('}') + 1
+
+            start_idx = response.find("{")
+            end_idx = response.rfind("}") + 1
             if start_idx != -1 and end_idx > start_idx:
                 json_str = response[start_idx:end_idx]
                 letter_data = json.loads(json_str)
@@ -5648,9 +1301,12 @@ async def format_official_letter(request: dict):
                     "formatted_letter": {
                         "visa_type": visa_type,
                         "letter_text": response,
-                        "formatting_improvements": ["Formatação profissional aplicada", "Estrutura padrão de imigração"],
+                        "formatting_improvements": [
+                            "Formatação profissional aplicada",
+                            "Estrutura padrão de imigração",
+                        ],
                         "compliance_score": 0.9,
-                        "ready_for_approval": True
+                        "ready_for_approval": True,
                     }
                 }
         except Exception as json_e:
@@ -5661,24 +1317,25 @@ async def format_official_letter(request: dict):
                     "letter_text": response,
                     "formatting_improvements": ["Carta formatada com sucesso"],
                     "compliance_score": 0.85,
-                    "ready_for_approval": True
+                    "ready_for_approval": True,
                 }
             }
-        
+
         return {
             "success": True,
             "agent": "Dra. Paula B2C - Formatação Oficial",
-            "timestamp": datetime.utcnow().isoformat(),
-            **letter_data
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            **letter_data,
         }
-        
+
     except Exception as e:
         logger.error(f"Letter formatting error: {e}")
         return {
             "success": False,
             "error": "Erro ao formatar carta. Tente novamente.",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
+
 
 @api_router.post("/llm/dr-paula/generate-final-letter")
 async def generate_final_letter(request: dict):
@@ -5688,26 +1345,23 @@ async def generate_final_letter(request: dict):
         original_letter = request.get("original_letter", "")
         questions_and_answers = request.get("questions_and_answers", [])
         visa_profile = request.get("visa_profile", {})
-        
+
         if not original_letter or not questions_and_answers:
-            return {
-                "success": False,
-                "error": "Carta original e respostas são obrigatórias"
-            }
-        
+            return {"success": False, "error": "Carta original e respostas são obrigatórias"}
+
         # Create Dra. Paula expert
         expert = create_immigration_expert()
-        
+
         # Format Q&A for the prompt
         qa_text = ""
         for qa in questions_and_answers:
             qa_text += f"PERGUNTA: {qa.get('question', '')}\n"
             qa_text += f"RESPOSTA: {qa.get('answer', '')}\n\n"
-        
+
         system_prompt = f"""
         Você é a Dra. Paula, especialista em processos imigratórios.
         Escreva uma carta de apresentação PROFISSIONAL e COMPLETA para o visto {visa_type}.
-        
+
         INSTRUÇÕES CRÍTICAS:
         1. Use o texto original do aplicante como BASE
         2. Integre as respostas das perguntas para COMPLETAR as informações
@@ -5716,16 +1370,16 @@ async def generate_final_letter(request: dict):
         5. Organize de forma CLARA e CONVINCENTE
         6. Use linguagem FORMAL mas PERSUASIVA
         7. Finalize com disclaimer profissional
-        
+
         TEXTO ORIGINAL DO APLICANTE:
         {original_letter}
-        
+
         INFORMAÇÕES COMPLEMENTARES (Q&A):
         {qa_text}
-        
+
         DIRETIVAS PARA {visa_type}:
         {yaml.dump(visa_profile, default_flow_style=False, allow_unicode=True)}
-        
+
         Responda em JSON seguindo este formato:
         {{
             "final_letter": {{
@@ -5737,15 +1391,15 @@ async def generate_final_letter(request: dict):
             }}
         }}
         """
-        
-        session_id = f"final_letter_{visa_type}_{hash(original_letter) % 10000}"
-        response = await expert._call_dra_paula(system_prompt, session_id)
-        
+
+        response = await expert._call_dra_paula(system_prompt)
+
         # Try to parse JSON response
         try:
             import json
-            start_idx = response.find('{')
-            end_idx = response.rfind('}') + 1
+
+            start_idx = response.find("{")
+            end_idx = response.rfind("}") + 1
             if start_idx != -1 and end_idx > start_idx:
                 json_str = response[start_idx:end_idx]
                 letter_data = json.loads(json_str)
@@ -5755,9 +1409,12 @@ async def generate_final_letter(request: dict):
                     "final_letter": {
                         "visa_type": visa_type,
                         "letter_text": response,
-                        "improvements_made": ["Formatação profissional", "Integração de informações complementares"],
+                        "improvements_made": [
+                            "Formatação profissional",
+                            "Integração de informações complementares",
+                        ],
                         "compliance_score": 0.9,
-                        "ready_for_approval": True
+                        "ready_for_approval": True,
                     }
                 }
         except Exception as json_e:
@@ -5768,24 +1425,25 @@ async def generate_final_letter(request: dict):
                     "letter_text": response,
                     "improvements_made": ["Carta gerada com sucesso"],
                     "compliance_score": 0.85,
-                    "ready_for_approval": True
+                    "ready_for_approval": True,
                 }
             }
-        
+
         return {
             "success": True,
             "agent": "Dra. Paula B2C",
-            "timestamp": datetime.utcnow().isoformat(),
-            **letter_data
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            **letter_data,
         }
-        
+
     except Exception as e:
         logger.error(f"Final letter generation error: {e}")
         return {
             "success": False,
             "error": "Erro ao gerar carta final. Tente novamente.",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
+
 
 @api_router.post("/llm/dr-paula/request-complement")
 async def request_letter_complement(request: dict):
@@ -5793,52 +1451,49 @@ async def request_letter_complement(request: dict):
     try:
         visa_type = request.get("visa_type", "H1B")
         issues = request.get("issues", [])
-        
+
         if not issues:
-            return {
-                "success": False,
-                "error": "Lista de pendências não fornecida"
-            }
-        
+            return {"success": False, "error": "Lista de pendências não fornecida"}
+
         # Create Dra. Paula expert
         expert = create_immigration_expert()
-        
+
         system_prompt = f"""
         Você é a Dra. Paula, especialista em imigração.
         Com base nas faltas detectadas, produza um aviso informativo ao aplicante para o visto {visa_type}.
-        
+
         DIRETRIZES:
         - Liste claramente os pontos a complementar
         - Use linguagem impessoal ("é necessário demonstrar...")
         - Inclua sugestão de documentos/evidências
         - Finalize com o disclaimer
         - Mantenha tom profissional mas acessível
-        
+
         PONTOS FALTANTES IDENTIFICADOS:
         {chr(10).join(f"- {issue}" for issue in issues)}
-        
+
         Produza um texto claro orientando o aplicante sobre como complementar a carta.
         """
-        
-        session_id = f"complement_{visa_type}_{hash(str(issues)) % 10000}"
-        response = await expert._call_dra_paula(system_prompt, session_id)
-        
+
+        response = await expert._call_dra_paula(system_prompt)
+
         return {
             "success": True,
             "agent": "Dra. Paula B2C",
             "visa_type": visa_type,
             "complement_request": response,
             "issues": issues,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
-        
+
     except Exception as e:
         logger.error(f"Dra. Paula request complement error: {e}")
         return {
             "success": False,
             "error": "Erro ao gerar solicitação de complemento. Tente novamente.",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
+
 
 @api_router.post("/process/{process_id}/add-letter")
 async def add_letter_to_process(process_id: str, request: dict):
@@ -5847,13 +1502,10 @@ async def add_letter_to_process(process_id: str, request: dict):
         letter_text = request.get("letter_text", "")
         visa_type = request.get("visa_type", "")
         confirmed_by_applicant = request.get("confirmed_by_applicant", False)
-        
+
         if not letter_text or not confirmed_by_applicant:
-            return {
-                "success": False,
-                "error": "Carta ou confirmação do aplicante não fornecida"
-            }
-        
+            return {"success": False, "error": "Carta ou confirmação do aplicante não fornecida"}
+
         # Update case with letter
         result = await db.auto_cases.update_one(
             {"case_id": process_id},
@@ -5863,119 +1515,33 @@ async def add_letter_to_process(process_id: str, request: dict):
                         "text": letter_text,
                         "visa_type": visa_type,
                         "confirmed_by_applicant": confirmed_by_applicant,
-                        "timestamp": datetime.utcnow().isoformat(),
-                        "status": "confirmed"
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "status": "confirmed",
                     },
-                    "updated_at": datetime.utcnow()
+                    "updated_at": datetime.now(timezone.utc),
                 }
-            }
+            },
         )
-        
+
         if result.matched_count == 0:
-            return {
-                "success": False,
-                "error": "Processo não encontrado"
-            }
-        
+            return {"success": False, "error": "Processo não encontrado"}
+
         return {
             "success": True,
             "message": "Carta adicionada ao processo com sucesso",
             "process_id": process_id,
             "letter_status": "confirmed",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
-        
+
     except Exception as e:
         logger.error(f"Add letter to process error: {e}")
         return {
             "success": False,
             "error": "Erro ao adicionar carta ao processo. Tente novamente.",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
-@api_router.post("/specialized-agents/uscis-form-translation")
-async def specialized_uscis_form_translation(request: dict):
-    """Ultra-specialized USCIS form validation and translation using Dr. Fernando"""
-    try:
-        translator = create_uscis_form_translator()
-        
-        friendly_form_responses = request.get("friendlyFormResponses", {})
-        visa_type = request.get("visaType", "H-1B")
-        target_uscis_form = request.get("targetUSCISForm", "I-129")  # I-129, I-130, I-485, etc.
-        
-        prompt = f"""
-        VALIDAÇÃO E TRADUÇÃO DE FORMULÁRIO USCIS
-        
-        TIPO DE VISTO: {visa_type}
-        FORMULÁRIO USCIS DE DESTINO: {target_uscis_form}
-        
-        RESPOSTAS DO FORMULÁRIO AMIGÁVEL (EM PORTUGUÊS):
-        {friendly_form_responses}
-        
-        INSTRUÇÕES CRÍTICAS:
-        1. PRIMEIRO: Valide se todas as respostas obrigatórias estão completas
-        2. Verifique consistência e formato correto das informações
-        3. Identifique ambiguidades ou informações insuficientes
-        4. SOMENTE APÓS VALIDAÇÃO: Traduza para o formulário oficial USCIS
-        5. Use terminologia técnica oficial do USCIS
-        6. NUNCA traduza informações não fornecidas
-        7. Mantenha rastreabilidade campo por campo
-        
-        Execute validação completa e tradução conforme seu protocolo especializado.
-        """
-        
-        session_id = f"uscis_translation_{visa_type}_{target_uscis_form}_{hash(str(friendly_form_responses)) % 10000}"
-        analysis = await translator._call_agent(prompt, session_id)
-        
-        return {
-            "success": True,
-            "agent": "Dr. Fernando - Tradutor e Validador USCIS",
-            "specialization": "USCIS Form Translation & Validation",
-            "visa_type": visa_type,
-            "target_form": target_uscis_form,
-            "analysis": analysis,
-            "timestamp": datetime.now().isoformat(),
-            "translation_guarantee": "Only provided information translated - no assumptions"
-        }
-        
-    except Exception as e:
-        logger.error(f"Dr. Fernando USCIS translation error: {e}")
-        return {
-            "success": False,
-            "agent": "Dr. Fernando - Tradutor e Validador USCIS",
-            "error": str(e)
-        }
-
-@api_router.post("/specialized-agents/comprehensive-analysis")
-async def comprehensive_multi_agent_analysis(request: dict):
-    """Comprehensive analysis using multiple specialized agents"""
-    try:
-        coordinator = SpecializedAgentCoordinator()
-        
-        task_type = request.get("taskType", "form_validation")
-        data = request.get("data", {})
-        user_context = request.get("userContext", {})
-        
-        comprehensive_result = await coordinator.analyze_comprehensive(
-            task_type=task_type,
-            data=data, 
-            user_context=user_context
-        )
-        
-        return {
-            "success": True,
-            "coordinator": "Multi-Agent Specialized System",
-            "result": comprehensive_result,
-            "timestamp": datetime.now().isoformat()
-        }
-        
-    except Exception as e:
-        logger.error(f"Comprehensive analysis error: {e}")
-        return {
-            "success": False,
-            "coordinator": "Multi-Agent Specialized System",
-            "error": str(e)
-        }
 
 # Responsibility Confirmation Endpoints
 @api_router.post("/responsibility/confirm")
@@ -5983,15 +1549,17 @@ async def record_responsibility_confirmation(request: dict):
     """Record user responsibility confirmations at critical steps"""
     try:
         case_id = request.get("caseId")
-        confirmation_type = request.get("type")  # document_authenticity, form_data_review, letter_verification, final_declaration
+        confirmation_type = request.get(
+            "type"
+        )  # document_authenticity, form_data_review, letter_verification, final_declaration
         confirmations = request.get("confirmations", {})
         digital_signature = request.get("digitalSignature")
         timestamp = request.get("timestamp")
         user_agent = request.get("userAgent")
-        
+
         if not case_id or not confirmation_type or not confirmations:
             raise HTTPException(status_code=400, detail="Missing required fields")
-        
+
         # Create confirmation record
         confirmation_record = {
             "case_id": case_id,
@@ -6003,12 +1571,12 @@ async def record_responsibility_confirmation(request: dict):
             "ip_timestamp": datetime.now().isoformat(),
             "created_at": datetime.now(),
             "all_confirmed": all(confirmations.values()),
-            "confirmation_count": len([v for v in confirmations.values() if v])
+            "confirmation_count": len([v for v in confirmations.values() if v]),
         }
-        
+
         # Store in database
         result = await db.responsibility_confirmations.insert_one(confirmation_record)
-        
+
         # Update case with confirmation status
         update_data = {}
         if confirmation_type == "document_authenticity":
@@ -6025,27 +1593,22 @@ async def record_responsibility_confirmation(request: dict):
             update_data["final_declaration_timestamp"] = timestamp
             update_data["final_signature"] = digital_signature
             update_data["ready_for_download"] = True
-            
+
         if update_data:
-            await db.auto_application_cases.update_one(
-                {"case_id": case_id},
-                {"$set": update_data}
-            )
-        
+            await db.auto_application_cases.update_one({"case_id": case_id}, {"$set": update_data})
+
         return {
             "success": True,
             "confirmation_id": str(result.inserted_id),
             "type": confirmation_type,
             "recorded_at": datetime.now().isoformat(),
-            "next_step_unlocked": True
+            "next_step_unlocked": True,
         }
-        
+
     except Exception as e:
         logger.error(f"Responsibility confirmation error: {e}")
-        return {
-            "success": False,
-            "error": str(e)
-        }
+        return {"success": False, "error": str(e)}
+
 
 @api_router.get("/responsibility/status/{case_id}")
 async def get_responsibility_status(case_id: str):
@@ -6056,269 +1619,292 @@ async def get_responsibility_status(case_id: str):
             {"case_id": case_id},
             {
                 "document_authenticity_confirmed": 1,
-                "form_data_reviewed": 1, 
+                "form_data_reviewed": 1,
                 "letter_verified": 1,
                 "final_declaration_signed": 1,
-                "ready_for_download": 1
-            }
+                "ready_for_download": 1,
+            },
         )
-        
+
         if not case_data:
             raise HTTPException(status_code=404, detail="Case not found")
-        
+
         # Get detailed confirmation records
-        confirmations = await db.responsibility_confirmations.find(
-            {"case_id": case_id}
-        ).sort("created_at", 1).to_list(100)
-        
+        confirmations = (
+            await db.responsibility_confirmations.find({"case_id": case_id})
+            .sort("created_at", 1)
+            .to_list(100)
+        )
+
         return {
             "success": True,
             "case_id": case_id,
             "status": {
-                "document_authenticity_confirmed": case_data.get("document_authenticity_confirmed", False),
+                "document_authenticity_confirmed": case_data.get(
+                    "document_authenticity_confirmed", False
+                ),
                 "form_data_reviewed": case_data.get("form_data_reviewed", False),
                 "letter_verified": case_data.get("letter_verified", False),
                 "final_declaration_signed": case_data.get("final_declaration_signed", False),
-                "ready_for_download": case_data.get("ready_for_download", False)
+                "ready_for_download": case_data.get("ready_for_download", False),
             },
             "confirmations": confirmations,
-            "total_confirmations": len(confirmations)
+            "total_confirmations": len(confirmations),
         }
-        
+
     except Exception as e:
         logger.error(f"Get responsibility status error: {e}")
-        return {
-            "success": False,
-            "error": str(e)
-        }
+        return {"success": False, "error": str(e)}
+
+
 # Existing Applications endpoints continue here...
 @api_router.post("/applications")
-async def create_application(app_data: ApplicationCreate, current_user = Depends(get_current_user)):
+async def create_application(app_data: ApplicationCreate, current_user=Depends(get_current_user)):
     """Create a new visa application"""
     try:
         # Check if user already has an active application for this visa type
-        existing_app = await db.applications.find_one({
-            "user_id": current_user["id"],
-            "visa_type": app_data.visa_type.value,
-            "status": {"$in": ["in_progress", "document_review", "ready_to_submit", "submitted"]}
-        })
-        
-        if existing_app:
-            raise HTTPException(status_code=400, detail="You already have an active application for this visa type")
-        
-        application = UserApplication(
-            user_id=current_user["id"],
-            visa_type=app_data.visa_type
+        existing_app = await db.applications.find_one(
+            {
+                "user_id": current_user["id"],
+                "visa_type": app_data.visa_type.value,
+                "status": {
+                    "$in": ["in_progress", "document_review", "ready_to_submit", "submitted"]
+                },
+            }
         )
-        
+
+        if existing_app:
+            raise HTTPException(
+                status_code=400, detail="You already have an active application for this visa type"
+            )
+
+        application = UserApplication(user_id=current_user["id"], visa_type=app_data.visa_type)
+
         await db.applications.insert_one(application.dict())
-        
+
         return {"message": "Application created successfully", "application": application}
-    
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error creating application: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error creating application: {str(e)}")
 
+
 @api_router.get("/applications/{application_id}")
-async def get_application(application_id: str, current_user = Depends(get_current_user)):
+async def get_application(application_id: str, current_user=Depends(get_current_user)):
     """Get a specific application by ID"""
     try:
-        application = await db.applications.find_one({
-            "id": application_id,
-            "user_id": current_user["id"]
-        })
-        
+        application = await db.applications.find_one(
+            {"id": application_id, "user_id": current_user["id"]}
+        )
+
         if not application:
             raise HTTPException(status_code=404, detail="Application not found")
-        
+
         # Remove MongoDB ObjectId
         if "_id" in application:
             del application["_id"]
-            
+
         return {"application": application}
-    
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error getting application: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error getting application: {str(e)}")
 
+
 @api_router.get("/applications")
-async def get_user_applications(current_user = Depends(get_current_user)):
+async def get_user_applications(current_user=Depends(get_current_user)):
     """Get all user applications"""
     try:
-        applications = await db.applications.find({"user_id": current_user["id"]}, {"_id": 0}).to_list(100)
+        applications = await db.applications.find(
+            {"user_id": current_user["id"]}, {"_id": 0}
+        ).to_list(100)
         return {"applications": applications}
-    
+
     except Exception as e:
         logger.error(f"Error getting applications: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error getting applications: {str(e)}")
 
+
 @api_router.put("/applications/{application_id}")
-async def update_application(application_id: str, update_data: ApplicationUpdate, current_user = Depends(get_current_user)):
+async def update_application(
+    application_id: str, update_data: ApplicationUpdate, current_user=Depends(get_current_user)
+):
     """Update application status/progress"""
     try:
         # Verify application belongs to user
-        application = await db.applications.find_one({
-            "id": application_id,
-            "user_id": current_user["id"]
-        })
-        
+        application = await db.applications.find_one(
+            {"id": application_id, "user_id": current_user["id"]}
+        )
+
         if not application:
             raise HTTPException(status_code=404, detail="Application not found")
-        
+
         update_dict = update_data.dict(exclude_unset=True)
-        update_dict["updated_at"] = datetime.utcnow()
-        
-        await db.applications.update_one(
-            {"id": application_id},
-            {"$set": update_dict}
-        )
-        
+        update_dict["updated_at"] = datetime.now(timezone.utc)
+
+        await db.applications.update_one({"id": application_id}, {"$set": update_dict})
+
         updated_app = await db.applications.find_one({"id": application_id})
         return {"message": "Application updated successfully", "application": updated_app}
-    
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error updating application: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error updating application: {str(e)}")
 
+
 # Dashboard route (updated to include education stats)
 @api_router.get("/dashboard")
-async def get_dashboard(current_user = Depends(get_current_user)):
+async def get_dashboard(current_user=Depends(get_current_user)):
     """Get user dashboard data"""
     try:
         # Get applications (traditional applications)
-        applications = await db.applications.find({"user_id": current_user["id"]}, {"_id": 0}).to_list(100)
-        
+        applications = await db.applications.find(
+            {"user_id": current_user["id"]}, {"_id": 0}
+        ).to_list(100)
+
         # Get auto-applications (saved applications from "Save and Continue Later")
-        auto_applications = await db.auto_cases.find({
-            "user_id": current_user["id"],
-            "is_anonymous": False
-        }, {"_id": 0}).to_list(100)
-        
+        auto_applications = await db.auto_cases.find(
+            {"user_id": current_user["id"], "is_anonymous": False}, {"_id": 0}
+        ).to_list(100)
+
         # Get recent chat sessions
-        recent_chats = await db.chat_sessions.find(
-            {"user_id": current_user["id"]}, {"_id": 0}
-        ).sort("last_updated", -1).limit(5).to_list(5)
-        
+        recent_chats = (
+            await db.chat_sessions.find({"user_id": current_user["id"]}, {"_id": 0})
+            .sort("last_updated", -1)
+            .limit(5)
+            .to_list(5)
+        )
+
         # Get recent translations
-        recent_translations = await db.translations.find(
-            {"user_id": current_user["id"]}, {"_id": 0}
-        ).sort("timestamp", -1).limit(3).to_list(3)
-        
+        recent_translations = (
+            await db.translations.find({"user_id": current_user["id"]}, {"_id": 0})
+            .sort("timestamp", -1)
+            .limit(3)
+            .to_list(3)
+        )
+
         # Get document stats
         documents = await db.documents.find(
-            {"user_id": current_user["id"]}, 
-            {"_id": 0, "content_base64": 0}
+            {"user_id": current_user["id"]}, {"_id": 0, "content_base64": 0}
         ).to_list(100)
-        
+
         # Get education progress
-        progress = await db.user_progress.find_one(
-            {"user_id": current_user["id"]}, {"_id": 0}
-        )
-        
+        progress = await db.user_progress.find_one({"user_id": current_user["id"]}, {"_id": 0})
+
         # Get unread tips
-        unread_tips = await db.personalized_tips.count_documents({
-            "user_id": current_user["id"],
-            "is_read": False
-        })
-        
+        unread_tips = await db.personalized_tips.count_documents(
+            {"user_id": current_user["id"], "is_read": False}
+        )
+
         # Document stats
         total_docs = len(documents)
-        approved_docs = len([doc for doc in documents if doc.get('status') == 'approved'])
-        pending_docs = len([doc for doc in documents if doc.get('status') == 'pending_review'])
-        
+        approved_docs = len([doc for doc in documents if doc.get("status") == "approved"])
+        pending_docs = len([doc for doc in documents if doc.get("status") == "pending_review"])
+
         # Upcoming expirations (next 30 days)
         upcoming_expirations = []
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         for doc in documents:
-            exp_date = doc.get('expiration_date')
+            exp_date = doc.get("expiration_date")
             if exp_date:
                 if isinstance(exp_date, str):
-                    exp_date = datetime.fromisoformat(exp_date.replace('Z', '+00:00'))
+                    exp_date = datetime.fromisoformat(exp_date.replace("Z", "+00:00"))
                 days_to_expire = (exp_date - now).days
                 if 0 <= days_to_expire <= 30:
-                    upcoming_expirations.append({
-                        "document_type": doc["document_type"],
-                        "filename": doc["original_filename"],
-                        "days_to_expire": days_to_expire
-                    })
-        
+                    upcoming_expirations.append(
+                        {
+                            "document_type": doc["document_type"],
+                            "filename": doc["original_filename"],
+                            "days_to_expire": days_to_expire,
+                        }
+                    )
+
         # Calculate stats
         total_applications = len(applications)
-        in_progress_apps = len([app for app in applications if app["status"] in ["in_progress", "document_review"]])
-        completed_apps = len([app for app in applications if app["status"] in ["submitted", "approved"]])
-        
+        in_progress_apps = len(
+            [app for app in applications if app["status"] in ["in_progress", "document_review"]]
+        )
+        completed_apps = len(
+            [app for app in applications if app["status"] in ["submitted", "approved"]]
+        )
+
         # Transform auto-applications to match dashboard format
         auto_apps_formatted = []
         for auto_app in auto_applications:
-            auto_apps_formatted.append({
-                "id": auto_app["case_id"],
-                "title": f"Aplicação {auto_app['form_code']}",
-                "status": "in_progress",
-                "type": "auto_application",
-                "created_at": auto_app.get("created_at", ""),
-                "current_step": auto_app.get("current_step", "basic-data"),
-                "form_code": auto_app.get("form_code", ""),
-                "progress_percentage": get_progress_percentage(auto_app.get("current_step", "basic-data")),
-                "description": f"Auto-aplicação para visto {auto_app['form_code']} - Continue de onde parou"
-            })
+            auto_apps_formatted.append(
+                {
+                    "id": auto_app["case_id"],
+                    "title": f"Aplicação {auto_app['form_code']}",
+                    "status": "in_progress",
+                    "type": "auto_application",
+                    "created_at": auto_app.get("created_at", ""),
+                    "current_step": auto_app.get("current_step", "basic-data"),
+                    "form_code": auto_app.get("form_code", ""),
+                    "progress_percentage": get_progress_percentage(
+                        auto_app.get("current_step", "basic-data")
+                    ),
+                    "description": f"Auto-aplicação para visto {auto_app['form_code']} - Continue de onde parou",
+                }
+            )
 
         return {
             "user": {
                 "name": f"{current_user['first_name']} {current_user['last_name']}",
-                "email": current_user["email"]
+                "email": current_user["email"],
             },
             "stats": {
                 "total_applications": total_applications,
                 "in_progress": in_progress_apps,
                 "completed": completed_apps,
-                "success_rate": 100 if completed_apps == 0 else int((len([app for app in applications if app["status"] == "approved"]) / completed_apps) * 100),
+                "success_rate": (
+                    100
+                    if completed_apps == 0
+                    else int(
+                        (
+                            len([app for app in applications if app["status"] == "approved"])
+                            / completed_apps
+                        )
+                        * 100
+                    )
+                ),
                 "total_documents": total_docs,
                 "approved_documents": approved_docs,
                 "pending_documents": pending_docs,
-                "document_completion_rate": int((approved_docs / total_docs * 100)) if total_docs > 0 else 0,
+                "document_completion_rate": (
+                    int((approved_docs / total_docs * 100)) if total_docs > 0 else 0
+                ),
                 "guides_completed": len(progress.get("guides_completed", [])) if progress else 0,
-                "interviews_completed": len(progress.get("interviews_completed", [])) if progress else 0,
+                "interviews_completed": (
+                    len(progress.get("interviews_completed", [])) if progress else 0
+                ),
                 "total_study_time": progress.get("total_study_time_minutes", 0) if progress else 0,
-                "unread_tips": unread_tips
+                "unread_tips": unread_tips,
             },
             "applications": applications + auto_apps_formatted,  # Combine both types
             "auto_applications": auto_apps_formatted,  # Separate list for auto-applications
-            "recent_activity": {
-                "chats": recent_chats,
-                "translations": recent_translations
-            },
-            "upcoming_expirations": upcoming_expirations[:5]  # Next 5 expiring
+            "recent_activity": {"chats": recent_chats, "translations": recent_translations},
+            "upcoming_expirations": upcoming_expirations[:5],  # Next 5 expiring
         }
-    
+
     except Exception as e:
-        logger.error(f"Error getting dashboard: {str(e)}")
+        logger.error(f"Error getting dashboard: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Error getting dashboard: {str(e)}")
 
-# Chat history route (keeping existing)
-@api_router.get("/chat/history")
-async def get_chat_history(current_user = Depends(get_current_user)):
-    """Get user's chat history with sistema"""
-    try:
-        sessions = await db.chat_sessions.find(
-            {"user_id": current_user["id"]}, {"_id": 0}
-        ).sort("last_updated", -1).to_list(50)
-        
-        return {"chat_sessions": sessions}
-    
-    except Exception as e:
-        logger.error(f"Error getting chat history: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error getting chat history: {str(e)}")
 
-# Basic routes (keeping existing)
+# ============================================================================
+# BASIC ROUTES
+# ============================================================================
+
 @api_router.get("/")
 async def root():
     return {"message": "OSPREY Immigration API B2C - Ready to help with your immigration journey!"}
+
 
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
@@ -6327,164 +1913,46 @@ async def create_status_check(input: StatusCheckCreate):
     _ = await db.status_checks.insert_one(status_obj.dict())
     return status_obj
 
+
 @api_router.get("/status", response_model=List[StatusCheck])
 async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
-# sistema-powered routes (keeping existing with user tracking)
-@api_router.post("/chat", response_model=ChatResponse)
-async def immigration_chat(request: ChatRequest, current_user = Depends(get_current_user)):
-    """Chat assistente especializado em imigração usando OpenAI"""
-    try:
-        session_id = request.session_id or str(uuid.uuid4())
-        
-        # ===== AI GUARDRAILS - VALIDAÇÃO DE QUERY =====
-        from ai_guardrails import guardrails
-        
-        should_block, blocked_message, query_type = guardrails.should_block_query(request.message)
-        
-        if should_block:
-            # Query bloqueada - retornar mensagem de aviso
-            logger.warning(f"🛡️ Chat query blocked for user {current_user['id']}: type={query_type}")
-            
-            # Salvar tentativa bloqueada para analytics
-            await db.blocked_queries.insert_one({
-                "user_id": current_user["id"],
-                "session_id": session_id,
-                "query": request.message,
-                "query_type": query_type.value,
-                "timestamp": datetime.utcnow(),
-                "blocked_message": blocked_message
-            })
-            
-            return ChatResponse(
-                message=blocked_message,
-                session_id=session_id,
-                context=request.context
-            )
-        # ===== END AI GUARDRAILS =====
-        
-        # Get conversation history from MongoDB
-        conversation = await db.chat_sessions.find_one({"session_id": session_id})
-        
-        # Build conversation context with ENHANCED safety instructions
-        messages = [
-            {
-                "role": "system",
-                "content": f"""Você é Maria, assistente de documentos da OSPREY Immigration - uma plataforma B2C.
 
-Usuário: {current_user['first_name']} {current_user['last_name']}
-
-🚫 LIMITES CRÍTICOS (NÃO VIOLE):
-1. NUNCA recomende qual visto aplicar ("Você deve aplicar X")
-2. NUNCA avalie chances de aprovação ("Suas chances são boas")
-3. NUNCA diga se usuário é elegível ("Você se qualifica")
-4. NUNCA forneça estratégias legais específicas
-5. NUNCA interprete leis para casos individuais
-
-✅ O QUE VOCÊ PODE FAZER:
-- Explicar requisitos GERAIS publicados pelo USCIS
-- Listar documentos necessários para cada visto
-- Orientar sobre como preencher formulários
-- Explicar diferenças entre vistos (geral)
-- Sugerir consulta com advogado quando apropriado
-
-📋 SEMPRE INCLUA:
-- Disclaimer que você não é advogada
-- Recomendação de advogado para perguntas complexas
-- Informação GERAL, não análise de caso específico
-
-IMPORTANTE: Esta é uma ferramenta de auto-aplicação. Você NÃO fornece serviços jurídicos.
-
-Responda sempre em português, seja clara e profissional."""
-            }
-        ]
-        
-        # Add conversation history
-        if conversation and "messages" in conversation:
-            messages.extend(conversation["messages"][-10:])
-        
-        # Add current message
-        messages.append({"role": "user", "content": request.message})
-        
-        # Call OpenAI
-        response = openai.chat.completions.create(
-            model="gpt-4",
-            messages=messages,
-            max_tokens=1000,
-            temperature=0.7
-        )
-        
-        ai_response = response.choices[0].message.content
-        
-        # ===== SANITIZE AI RESPONSE =====
-        # Sanitizar resposta para remover frases problemáticas
-        ai_response = guardrails.sanitize_ai_response(ai_response)
-        
-        # Adicionar disclaimer de segurança se necessário
-        ai_response = guardrails.add_safety_disclaimer(ai_response, query_type)
-        # ===== END SANITIZATION =====
-        
-        # Save conversation to MongoDB
-        current_time = datetime.utcnow()
-        new_messages = [
-            {"role": "user", "content": request.message, "timestamp": current_time.isoformat()},
-            {"role": "assistant", "content": ai_response, "timestamp": current_time.isoformat()}
-        ]
-        
-        await db.chat_sessions.update_one(
-            {"session_id": session_id},
-            {
-                "$push": {"messages": {"$each": new_messages}},
-                "$set": {
-                    "user_id": current_user["id"],
-                    "last_updated": current_time
-                }
-            },
-            upsert=True
-        )
-        
-        return ChatResponse(
-            message=ai_response,
-            session_id=session_id,
-            context=request.context
-        )
-        
-    except Exception as e:
-        logger.error(f"Error in chat endpoint: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error processing chat: {str(e)}")
+# ============================================================================
+# DOCUMENT ANALYSIS & TRANSLATION (Legacy - Consider moving to separate router)
+# ============================================================================
 
 @api_router.post("/analyze-document")
-async def analyze_document(request: DocumentAnalysisRequest, current_user = Depends(get_current_user)):
+async def analyze_document(
+    request: DocumentAnalysisRequest, current_user=Depends(get_current_user)
+):
     """Analisa documentos para processos de imigração usando OpenAI"""
     try:
         analysis_prompts = {
             "general": "Analise este documento e forneça um resumo dos pontos principais, identificando qualquer informação relevante para processos de imigração.",
             "immigration": "Analise este documento de imigração. Identifique: 1) Tipo de documento, 2) Informações pessoais, 3) Status atual, 4) Próximos passos necessários, 5) Documentos adicionais que podem ser necessários.",
-            "legal": "Faça uma análise deste documento, identificando informações importantes e possíveis implicações para processos imigratórios. LEMBRE-SE: Esta é uma ferramenta de orientação, não de consultoria jurídica."
+            "legal": "Faça uma análise deste documento, identificando informações importantes e possíveis implicações para processos imigratórios. LEMBRE-SE: Esta é uma ferramenta de orientação, não de consultoria jurídica.",
         }
-        
+
         prompt = analysis_prompts.get(request.analysis_type, analysis_prompts["general"])
-        
-        response = openai.chat.completions.create(
+
+        response = openai_client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {
                     "role": "system",
-                    "content": "Você é um assistente de análise de documentos para auto-aplicação em imigração. Forneça análises úteis em português. IMPORTANTE: Sempre mencione que esta é uma ferramenta de orientação e não substitui consultoria jurídica."
+                    "content": "Você é um assistente de análise de documentos para auto-aplicação em imigração. Forneça análises úteis em português. IMPORTANTE: Sempre mencione que esta é uma ferramenta de orientação e não substitui consultoria jurídica.",
                 },
-                {
-                    "role": "user",
-                    "content": f"{prompt}\n\nDocumento:\n{request.document_text}"
-                }
+                {"role": "user", "content": f"{prompt}\n\nDocumento:\n{request.document_text}"},
             ],
             max_tokens=1500,
-            temperature=0.3
+            temperature=0.3,
         )
-        
+
         analysis = response.choices[0].message.content
-        
+
         # Save analysis to MongoDB
         analysis_record = {
             "id": str(uuid.uuid4()),
@@ -6492,63 +1960,65 @@ async def analyze_document(request: DocumentAnalysisRequest, current_user = Depe
             "document_type": request.document_type,
             "analysis_type": request.analysis_type,
             "analysis": analysis,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc),
         }
-        
+
         await db.document_analyses.insert_one(analysis_record)
-        
+
         return {
             "analysis": analysis,
             "analysis_id": analysis_record["id"],
-            "timestamp": analysis_record["timestamp"]
+            "timestamp": analysis_record["timestamp"],
         }
-        
+
     except Exception as e:
         logger.error(f"Error in document analysis: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error analyzing document: {str(e)}")
 
+
 @api_router.post("/translate")
-async def translate_text(request: TranslationRequest, current_user = Depends(get_current_user)):
+async def translate_text(request: TranslationRequest, current_user=Depends(get_current_user)):
     """Traduz textos usando OpenAI"""
     try:
         if request.source_language == "auto":
             detect_prompt = f"Detecte o idioma deste texto e responda apenas com o código do idioma (pt, en, es, etc.): {request.text[:200]}"
-            detect_response = openai.chat.completions.create(
+            detect_response = openai_client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": detect_prompt}],
                 max_tokens=10,
-                temperature=0
+                temperature=0,
             )
             source_lang = detect_response.choices[0].message.content.strip()
         else:
             source_lang = request.source_language
-        
+
         # Translation
         language_names = {
-            "pt": "português", "en": "inglês", "es": "espanhol",
-            "fr": "francês", "de": "alemão", "it": "italiano"
+            "pt": "português",
+            "en": "inglês",
+            "es": "espanhol",
+            "fr": "francês",
+            "de": "alemão",
+            "it": "italiano",
         }
-        
+
         target_lang_name = language_names.get(request.target_language, request.target_language)
-        
-        translation_response = openai.chat.completions.create(
+
+        translation_response = openai_client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
                     "role": "system",
-                    "content": f"Você é um tradutor profissional especializado em documentos de imigração. Traduza o texto a seguir para {target_lang_name} mantendo o contexto e significado original."
+                    "content": f"Você é um tradutor profissional especializado em documentos de imigração. Traduza o texto a seguir para {target_lang_name} mantendo o contexto e significado original.",
                 },
-                {
-                    "role": "user",
-                    "content": request.text
-                }
+                {"role": "user", "content": request.text},
             ],
             max_tokens=2000,
-            temperature=0.3
+            temperature=0.3,
         )
-        
+
         translated_text = translation_response.choices[0].message.content
-        
+
         # Save translation to MongoDB
         translation_record = {
             "id": str(uuid.uuid4()),
@@ -6558,24 +2028,27 @@ async def translate_text(request: TranslationRequest, current_user = Depends(get
             "source_language": source_lang,
             "target_language": request.target_language,
             "provider": "openai",
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc),
         }
-        
+
         await db.translations.insert_one(translation_record)
-        
+
         return {
             "translated_text": translated_text,
             "source_language": source_lang,
             "target_language": request.target_language,
-            "translation_id": translation_record["id"]
+            "translation_id": translation_record["id"],
         }
-        
+
     except Exception as e:
         logger.error(f"Error in translation: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error translating text: {str(e)}")
 
+
 @api_router.post("/visa-recommendation")
-async def get_visa_recommendation(request: VisaRecommendationRequest, current_user = Depends(get_current_user)):
+async def get_visa_recommendation(
+    request: VisaRecommendationRequest, current_user=Depends(get_current_user)
+):
     """Recomenda tipos de visto baseado no perfil do usuário"""
     try:
         prompt = f"""
@@ -6596,25 +2069,22 @@ async def get_visa_recommendation(request: VisaRecommendationRequest, current_us
 
         Responda em português em formato estruturado.
         """
-        
-        response = openai.chat.completions.create(
+
+        response = openai_client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {
                     "role": "system",
-                    "content": "Você é um assistente para auto-aplicação em imigração. Forneça recomendações precisas mas sempre mencione que não oferece consultoria jurídica."
+                    "content": "Você é um assistente para auto-aplicação em imigração. Forneça recomendações precisas mas sempre mencione que não oferece consultoria jurídica.",
                 },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
+                {"role": "user", "content": prompt},
             ],
             max_tokens=2000,
-            temperature=0.3
+            temperature=0.3,
         )
-        
+
         recommendation = response.choices[0].message.content
-        
+
         # Save recommendation
         recommendation_record = {
             "id": str(uuid.uuid4()),
@@ -6623,572 +2093,84 @@ async def get_visa_recommendation(request: VisaRecommendationRequest, current_us
             "current_status": request.current_status,
             "goals": request.goals,
             "recommendation": recommendation,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc),
         }
-        
+
         await db.visa_recommendations.insert_one(recommendation_record)
-        
+
         return {
             "recommendation": recommendation,
             "recommendation_id": recommendation_record["id"],
-            "timestamp": recommendation_record["timestamp"]
+            "timestamp": recommendation_record["timestamp"],
         }
-        
+
     except Exception as e:
         logger.error(f"Error in visa recommendation: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error getting visa recommendation: {str(e)}")
 
+
 # Include the router in the main app
 # USCIS Submission Instructions Endpoint
-@api_router.get("/auto-application/case/{case_id}/submission-instructions")
-async def get_submission_instructions(case_id: str):
-    """Generate complete USCIS submission instructions for the case"""
-    try:
-        # Get case details
-        case = await db.auto_cases.find_one({"case_id": case_id})
-        if not case:
-            raise HTTPException(status_code=404, detail="Case not found")
-        
-        form_code = case.get("form_code")
-        
-        # Get USCIS office and filing information based on form type
-        uscis_info = get_uscis_filing_info(form_code)
-        
-        # Generate submission instructions
-        instructions = {
-            "case_id": case_id,
-            "form_code": form_code,
-            "submission_info": uscis_info,
-            "required_documents": get_required_documents_checklist(form_code),
-            "signature_guide": get_signature_instructions(form_code),
-            "payment_info": get_payment_instructions(form_code),
-            "submission_steps": get_step_by_step_guide(form_code),
-            "important_notes": get_important_submission_notes(form_code)
-        }
-        
-        return instructions
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error generating submission instructions: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error generating submission instructions: {str(e)}")
-
-def get_uscis_filing_info(form_code: str) -> dict:
-    """Get USCIS filing information based on form type"""
-    
-    filing_info = {
-        "H-1B": {
-            "filing_office": "USCIS Vermont Service Center",
-            "address": {
-                "name": "USCIS Vermont Service Center",
-                "street": "75 Lower Welden Street",
-                "city": "St. Albans",
-                "state": "VT",
-                "zip": "05479-0001"
-            },
-            "po_box": "USCIS, Attn: I-129 H-1B, P.O. Box 6500, St. Albans, VT 05479-6500",
-            "filing_fee": "$555",
-            "additional_fees": {
-                "Anti-Fraud Fee": "$500",
-                "ACWIA Fee": "$750 (companies with 1-25 employees) or $1,500 (companies with 26+ employees)",
-                "Premium Processing (optional)": "$2,805"
-            },
-            "processing_time": "2-4 months (regular) or 15 calendar days (premium)"
-        },
-        "B-1/B-2": {
-            "filing_office": "Consulado Americano no Brasil",
-            "address": {
-                "name": "Consulado Geral dos EUA",
-                "street": "Avenida das Nações, Quadra 801, Lote 3",
-                "city": "Brasília",
-                "state": "DF",
-                "zip": "70403-900"
-            },
-            "online_application": "https://ceac.state.gov/genniv/",
-            "filing_fee": "$185",
-            "additional_fees": {
-                "Reciprocity Fee": "Varies by country - $0 for Brazil",
-                "Courier Fee (optional)": "Approximately $15"
-            },
-            "processing_time": "3-5 dias úteis após a entrevista"
-        },
-        "F-1": {
-            "filing_office": "Consulado Americano no Brasil",
-            "address": {
-                "name": "Consulado Geral dos EUA",
-                "street": "Avenida das Nações, Quadra 801, Lote 3", 
-                "city": "Brasília",
-                "state": "DF",
-                "zip": "70403-900"
-            },
-            "online_application": "https://ceac.state.gov/genniv/",
-            "filing_fee": "$185",
-            "additional_fees": {
-                "SEVIS I-901 Fee": "$350",
-                "Reciprocity Fee": "$0 for Brazil"
-            },
-            "processing_time": "3-5 dias úteis após a entrevista"
-        }
-    }
-    
-    return filing_info.get(form_code, {
-        "filing_office": "USCIS National Benefits Center",
-        "address": {
-            "name": "USCIS National Benefits Center",
-            "street": "13770 EDS Drive",
-            "city": "Herndon", 
-            "state": "VA",
-            "zip": "20171"
-        },
-        "filing_fee": "Consulte o site do USCIS",
-        "processing_time": "Varia por tipo de formulário"
-    })
-
-def get_required_documents_checklist(form_code: str) -> list:
-    """Get required documents checklist based on form type"""
-    
-    checklists = {
-        "H-1B": [
-            {"item": "Formulário I-129 completo e assinado", "required": True, "page": "Última página"},
-            {"item": "Diploma de ensino superior", "required": True, "notes": "Cópia autenticada"},
-            {"item": "Histórico acadêmico", "required": True, "notes": "Tradução certificada se necessário"},
-            {"item": "Carta da empresa patrocinadora", "required": True, "notes": "Detalhando a posição"},
-            {"item": "Labor Condition Application (LCA) aprovada", "required": True, "notes": "Certificada pelo DOL"},
-            {"item": "Evidência de qualificações", "required": True, "notes": "Experiência relevante"},
-            {"item": "Cópia do passaporte", "required": True, "notes": "Válido por pelo menos 6 meses"},
-            {"item": "Cheque ou money order", "required": True, "notes": "Valor total das taxas"}
-        ],
-        "B-1/B-2": [
-            {"item": "Formulário DS-160 online completo", "required": True, "notes": "Imprimir página de confirmação"},
-            {"item": "Passaporte válido", "required": True, "notes": "Válido por pelo menos 6 meses"},
-            {"item": "Foto 5x5cm recente", "required": True, "notes": "Fundo branco, conforme especificações"},
-            {"item": "Comprovante de renda/vínculos no Brasil", "required": True, "notes": "Holerites, declaração IR"},
-            {"item": "Itinerário de viagem", "required": False, "notes": "Se já definido"},
-            {"item": "Carta convite (se aplicável)", "required": False, "notes": "Para visitas familiares/negócios"},
-            {"item": "Comprovante de pagamento da taxa", "required": True, "notes": "$185"}
-        ],
-        "F-1": [
-            {"item": "Formulário DS-160 online completo", "required": True, "notes": "Imprimir página de confirmação"},
-            {"item": "Formulário I-20 da instituição", "required": True, "notes": "Assinado e válido"},  
-            {"item": "Passaporte válido", "required": True, "notes": "Válido por pelo menos 6 meses"},
-            {"item": "Foto 5x5cm recente", "required": True, "notes": "Fundo branco"},
-            {"item": "Comprovante de pagamento SEVIS I-901", "required": True, "notes": "$350"},
-            {"item": "Comprovantes financeiros", "required": True, "notes": "Suficientes para cobrir estudos"},
-            {"item": "Histórico escolar", "required": True, "notes": "Tradução certificada"},
-            {"item": "Comprovante de proficiência em inglês", "required": False, "notes": "TOEFL, IELTS, etc."}
-        ]
-    }
-    
-    return checklists.get(form_code, [])
-
-def get_signature_instructions(form_code: str) -> dict:
-    """Get signature instructions for the form"""
-    
-    signature_guides = {
-        "H-1B": {
-            "petitioner_signature": {
-                "location": "Parte 8, Item 1.a",
-                "instructions": "O empregador deve assinar e datar"
-            },
-            "attorney_signature": {
-                "location": "Parte 9 (se aplicável)",
-                "instructions": "Somente se representado por advogado"
-            },
-            "important_notes": [
-                "Use tinta azul ou preta",
-                "Assinatura deve corresponder ao nome no documento",
-                "Data no formato MM/DD/AAAA"
-            ]
-        },
-        "B-1/B-2": {
-            "applicant_signature": {
-                "location": "DS-160 é assinado digitalmente",
-                "instructions": "Confirme todas as informações antes de submeter"
-            },
-            "important_notes": [
-                "Não é necessário assinar documentos físicos",
-                "Verifique todas as informações no DS-160",
-                "Leve página de confirmação impressa para entrevista"
-            ]
-        },
-        "F-1": {
-            "applicant_signature": {
-                "location": "DS-160 é assinado digitalmente", 
-                "instructions": "Confirme todas as informações antes de submeter"
-            },
-            "i20_signature": {
-                "location": "Formulário I-20",
-                "instructions": "Estudante deve assinar na página 1"
-            },
-            "important_notes": [
-                "I-20 deve ser assinado antes da entrevista",
-                "Use tinta azul ou preta para I-20",
-                "DS-160 é totalmente digital"
-            ]
-        }
-    }
-    
-    return signature_guides.get(form_code, {})
-
-def get_payment_instructions(form_code: str) -> dict:
-    """Get payment instructions based on form type"""
-    
-    payment_info = {
-        "H-1B": {
-            "total_amount": "$555 + taxas adicionais",
-            "payment_method": "Cheque ou Money Order",
-            "payable_to": "U.S. Department of Homeland Security",
-            "additional_fees": [
-                "Anti-Fraud Fee: $500",
-                "ACWIA Fee: $750 ou $1,500 (dependendo do tamanho da empresa)",
-                "Premium Processing (opcional): $2,805"
-            ],
-            "check_instructions": [
-                "Usar cheque bancário ou money order",
-                "Não enviar dinheiro em espécie",
-                "Escrever o número do case no cheque",
-                "Cheque deve ser de banco americano"
-            ]
-        },
-        "B-1/B-2": {
-            "total_amount": "$185",
-            "payment_method": "Online ou Boleto Bancário",
-            "payment_location": "https://ais.usvisa-info.com/",
-            "instructions": [
-                "Pague online antes de agendar entrevista",
-                "Guarde comprovante de pagamento",
-                "Taxa não é reembolsável",
-                "Válida por 1 ano a partir do pagamento"
-            ]
-        },
-        "F-1": {
-            "total_amount": "$185 + $350 (SEVIS)",
-            "payment_method": "Online",
-            "sevis_payment": "https://www.fmjfee.com/",
-            "visa_payment": "https://ais.usvisa-info.com/",
-            "instructions": [
-                "Pagar SEVIS I-901 primeiro ($350)",
-                "Aguardar 3 dias úteis para processamento SEVIS", 
-                "Depois pagar taxa de visto ($185)",
-                "Guardar ambos os comprovantes"
-            ]
-        }
-    }
-    
-    return payment_info.get(form_code, {})
-
-def get_step_by_step_guide(form_code: str) -> list:
-    """Get step-by-step submission guide"""
-    
-    guides = {
-        "H-1B": [
-            {"step": 1, "title": "Revisar Documentação", "description": "Verifique se todos os documentos estão completos e assinados"},
-            {"step": 2, "title": "Preparar Pagamento", "description": "Obtenha cheque bancário ou money order no valor total das taxas"},
-            {"step": 3, "title": "Organizar Pacote", "description": "Coloque documentos na ordem do checklist fornecido"},
-            {"step": 4, "title": "Carta de Apresentação", "description": "Inclua carta explicando o caso e listando documentos"},
-            {"step": 5, "title": "Envio Correio", "description": "Envie via correio registrado para o endereço do USCIS"},
-            {"step": 6, "title": "Acompanhar Caso", "description": "Use o número de recibo para acompanhar no site do USCIS"},
-            {"step": 7, "title": "Aguardar Decisão", "description": "Prazo normal: 2-4 meses (ou 15 dias se premium processing)"}
-        ],
-        "B-1/B-2": [
-            {"step": 1, "title": "Completar DS-160", "description": "Preencha o formulário online completamente"},
-            {"step": 2, "title": "Pagar Taxa de Visto", "description": "Pague $185 online e guarde o comprovante"},
-            {"step": 3, "title": "Agendar Entrevista", "description": "Marque entrevista no consulado mais próximo"},
-            {"step": 4, "title": "Preparar Documentos", "description": "Organize todos os documentos conforme checklist"},
-            {"step": 5, "title": "Comparecer à Entrevista", "description": "Chegue 15 minutos antes com todos os documentos"},
-            {"step": 6, "title": "Aguardar Processamento", "description": "3-5 dias úteis após aprovação na entrevista"},
-            {"step": 7, "title": "Retirar Passaporte", "description": "Retire no local indicado ou receba via correio"}
-        ],
-        "F-1": [
-            {"step": 1, "title": "Pagar Taxa SEVIS", "description": "Pague $350 no site https://www.fmjfee.com/"},
-            {"step": 2, "title": "Aguardar SEVIS", "description": "Aguarde 3 dias úteis para processamento"},
-            {"step": 3, "title": "Completar DS-160", "description": "Preencha formulário online com I-20 em mãos"},
-            {"step": 4, "title": "Pagar Taxa de Visto", "description": "Pague $185 e agende entrevista"},
-            {"step": 5, "title": "Preparar Documentos", "description": "Organize conforme checklist de estudante"},
-            {"step": 6, "title": "Entrevista Consular", "description": "Compareça com I-20 assinado e documentos"},
-            {"step": 7, "title": "Aguardar Aprovação", "description": "3-5 dias úteis para processamento"},
-            {"step": 8, "title": "Receber Visto", "description": "Visto será colado no passaporte"}
-        ]
-    }
-# Visa Auto-Update System
-@api_router.get("/admin/visa-updates/pending")
-async def get_pending_visa_updates(skip: int = 0, limit: int = 20, admin = Depends(require_admin)):
-    """Get all pending visa updates for admin review - PROTECTED"""
-    try:
-        cursor = db.visa_updates.find({"status": "pending"}).sort("created_at", -1).skip(skip).limit(limit)
-        updates = await cursor.to_list(length=None)
-        
-        # Serialize ObjectIds
-        updates = serialize_doc(updates)
-        
-        total_count = await db.visa_updates.count_documents({"status": "pending"})
-        
-        return {
-            "success": True,
-            "updates": updates,
-            "total_count": total_count,
-            "has_more": (skip + limit) < total_count
-        }
-    except Exception as e:
-        logger.error(f"Error getting pending updates: {e}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve pending updates")
-
-@api_router.post("/admin/visa-updates/{update_id}/approve")
-async def approve_visa_update(update_id: str, request: Request, admin = Depends(require_admin)):
-    """Approve a pending visa update and apply it to production - PROTECTED"""
-    try:
-        body = await request.json()
-        admin_notes = body.get("admin_notes", "")
-        admin_user_param = body.get("admin_user", "system")
-        
-        # Use authenticated admin info instead of body param
-        admin_user = admin.get('email', admin_user_param)
-        
-        # Log admin action
-        await log_admin_action(
-            admin_user=admin,
-            action=AuditAction.APPROVE_VISA_UPDATE,
-            resource_type="visa_update",
-            resource_id=update_id,
-            details={"admin_notes": admin_notes},
-            request=request,
-            success=True
-        )
-        
-        # Get the pending update
-        update = await db.visa_updates.find_one({"id": update_id, "status": "pending"})
-        if not update:
-            raise HTTPException(status_code=404, detail="Update not found")
-        
-        # Apply the update to visa_information collection
-        visa_info = {
-            "form_code": update["form_code"],
-            "data_type": update["update_type"],
-            "data": update["new_value"],
-            "last_updated": datetime.utcnow(),
-            "updated_by": admin_user,
-            "is_active": True
-        }
-        
-        # Update or insert visa information
-        await db.visa_information.update_one(
-            {"form_code": update["form_code"], "data_type": update["update_type"]},
-            {"$set": visa_info, "$inc": {"version": 1}},
-            upsert=True
-        )
-        
-        # Mark update as approved
-        await db.visa_updates.update_one(
-            {"id": update_id},
-            {"$set": {
-                "status": "approved",
-                "admin_notes": admin_notes,
-                "approved_by": admin_user,
-                "approved_date": datetime.utcnow()
-            }}
-        )
-        
-        # Log the approval
-        logger.info(f"Visa update {update_id} approved by {admin_user}")
-        
-        return {"success": True, "message": "Update approved and applied"}
-        
-    except Exception as e:
-        logger.error(f"Error approving update: {e}")
-        raise HTTPException(status_code=500, detail="Failed to approve update")
-
-@api_router.post("/admin/visa-updates/{update_id}/reject")
-async def reject_visa_update(update_id: str, request: Request, admin = Depends(require_admin)):
-    """Reject a pending visa update - PROTECTED"""
-    try:
-        body = await request.json()
-        admin_notes = body.get("admin_notes", "")
-        admin_user = body.get("admin_user", "system")
-        
-        # Mark update as rejected
-        result = await db.visa_updates.update_one(
-            {"id": update_id, "status": "pending"},
-            {"$set": {
-                "status": "rejected",
-                "admin_notes": admin_notes,
-                "approved_by": admin_user,
-                "approved_date": datetime.utcnow()
-            }}
-        )
-        
-        if result.matched_count == 0:
-            raise HTTPException(status_code=404, detail="Update not found")
-        
-        logger.info(f"Visa update {update_id} rejected by {admin_user}")
-        
-        return {"success": True, "message": "Update rejected"}
-        
-    except Exception as e:
-        logger.error(f"Error rejecting update: {e}")
-        raise HTTPException(status_code=500, detail="Failed to reject update")
-
-@api_router.post("/admin/visa-updates/run-manual-scan")
-async def run_manual_visa_scan(admin = Depends(require_admin)):
-    """Manually trigger visa information scan - PROTECTED"""
-    try:
-        # Get EMERGENT_LLM_KEY from environment
-        llm_key = os.environ.get('EMERGENT_LLM_KEY')
-        
-        if not llm_key:
-            raise HTTPException(status_code=500, detail="EMERGENT_LLM_KEY not configured")
-        
-        # Initialize and run updater
-        updater = VisaAutoUpdater(db, llm_key)
-        result = await updater.run_weekly_update()
-        
-        return {
-            "success": result["success"],
-            "message": "Manual visa scan completed",
-            "changes_detected": result.get("changes_detected", 0)
-        }
-        
-    except Exception as e:
-        logger.error(f"Error running manual scan: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to run manual scan: {str(e)}")
-
-@api_router.get("/admin/visa-updates/history")
-async def get_visa_update_history(skip: int = 0, limit: int = 50, admin = Depends(require_admin)):
-    """Get history of all visa updates - PROTECTED"""
-    try:
-        cursor = db.visa_updates.find({}).sort("created_at", -1).skip(skip).limit(limit)
-        updates = await cursor.to_list(length=None)
-        
-        # Serialize ObjectIds
-        updates = serialize_doc(updates)
-        
-        total_count = await db.visa_updates.count_documents({})
-        
-        return {
-            "success": True,
-            "updates": updates,
-            "total_count": total_count,
-            "has_more": (skip + limit) < total_count
-        }
-    except Exception as e:
-        logger.error(f"Error getting update history: {e}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve update history")
-
-
-@api_router.get("/admin/visa-updates/scheduler/status")
-async def get_scheduler_status(admin = Depends(require_admin)):
-    """Get visa update scheduler status - PROTECTED"""
-    try:
-        global visa_scheduler
-        
-        if 'visa_scheduler' not in globals() or visa_scheduler is None:
-            return {
-                "success": True,
-                "is_running": False,
-                "message": "Scheduler not initialized"
-            }
-        
-        status = await visa_scheduler.get_schedule_status()
-        
-        # Get recent scheduler logs
-        recent_logs = await db.scheduler_logs.find(
-            {"job_type": "visa_update"}
-        ).sort("executed_at", -1).limit(5).to_list(length=None)
-        
-        return {
-            "success": True,
-            **status,
-            "recent_logs": serialize_doc(recent_logs)
-        }
-    except Exception as e:
-        logger.error(f"Error getting scheduler status: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.post("/admin/visa-updates/scheduler/trigger")
-async def trigger_manual_scheduler_update(admin = Depends(require_admin)):
-    """Manually trigger visa update scan (outside of schedule) - PROTECTED"""
-    try:
-        global visa_scheduler
-        
-        if 'visa_scheduler' not in globals() or visa_scheduler is None:
-            raise HTTPException(status_code=503, detail="Scheduler not initialized")
-        
-        # Trigger manual update in background
-        asyncio.create_task(visa_scheduler.trigger_manual_update())
-        
-        return {
-            "success": True,
-            "message": "Manual visa update triggered. Check pending updates in a few minutes."
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error triggering manual update: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
 @api_router.get("/admin/notifications")
-async def get_admin_notifications(admin = Depends(require_admin)):
+async def get_admin_notifications(admin=Depends(require_admin)):
     """Get admin notifications - PROTECTED"""
     try:
         cursor = db.admin_notifications.find({"read": False}).sort("created_at", -1).limit(10)
         notifications = await cursor.to_list(length=None)
-        
+
         # Serialize ObjectIds
         notifications = serialize_doc(notifications)
-        
-        return {
-            "success": True,
-            "notifications": notifications
-        }
+
+        return {"success": True, "notifications": notifications}
     except Exception as e:
         logger.error(f"Error getting notifications: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve notifications")
 
+
 @api_router.put("/admin/notifications/{notification_id}/read")
-async def mark_notification_read(notification_id: str, admin = Depends(require_admin)):
+async def mark_notification_read(notification_id: str, admin=Depends(require_admin)):
     """Mark notification as read - PROTECTED"""
     try:
         await db.admin_notifications.update_one(
-            {"id": notification_id},
-            {"$set": {"read": True, "read_at": datetime.utcnow()}}
+            {"id": notification_id}, {"$set": {"read": True, "read_at": datetime.now(timezone.utc)}}
         )
-        
+
         return {"success": True, "message": "Notification marked as read"}
-        
+
     except Exception as e:
         logger.error(f"Error marking notification as read: {e}")
         raise HTTPException(status_code=500, detail="Failed to mark notification as read")
+
 
 # Public endpoint for users to get current visa information
 @api_router.get("/visa-information/{form_code}")
 async def get_current_visa_information(form_code: str):
     """Get current approved visa information for users"""
     try:
-        cursor = db.visa_information.find({
-            "form_code": form_code,
-            "is_active": True
-        }).sort("version", -1)
-        
+        cursor = db.visa_information.find({"form_code": form_code, "is_active": True}).sort(
+            "version", -1
+        )
+
         visa_info = await cursor.to_list(length=None)
-        
+
         if not visa_info:
             raise HTTPException(status_code=404, detail="Visa information not found")
-        
+
         # Serialize and return
         visa_info = serialize_doc(visa_info)
-        
+
         return {
             "success": True,
             "visa_information": visa_info,
-            "last_updated": visa_info[0].get("last_updated") if visa_info else None
+            "last_updated": visa_info[0].get("last_updated") if visa_info else None,
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error getting visa information: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve visa information")
+
 
 @api_router.get("/visa-information")
 async def get_all_visa_information():
@@ -7198,40 +2180,32 @@ async def get_all_visa_information():
         pipeline = [
             {"$match": {"is_active": True}},
             {"$sort": {"form_code": 1, "version": -1}},
-            {"$group": {
-                "_id": "$form_code",
-                "latest_info": {"$first": "$$ROOT"}
-            }},
-            {"$replaceRoot": {"newRoot": "$latest_info"}}
+            {"$group": {"_id": "$form_code", "latest_info": {"$first": "$$ROOT"}}},
+            {"$replaceRoot": {"newRoot": "$latest_info"}},
         ]
-        
+
         cursor = db.visa_information.aggregate(pipeline)
         visa_info = await cursor.to_list(length=None)
-        
+
         # Serialize ObjectIds
         visa_info = serialize_doc(visa_info)
-        
-        return {
-            "success": True,
-            "visa_information": visa_info,
-            "total_forms": len(visa_info)
-        }
-        
+
+        return {"success": True, "visa_information": visa_info, "total_forms": len(visa_info)}
+
     except Exception as e:
         logger.error(f"Error getting all visa information: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve visa information")
-
 
 
 @api_router.get("/visa-detailed-info/{visa_type}")
 async def get_visa_detailed_information(visa_type: str, process_type: str = "both"):
     """
     Get detailed visa information with separate data for consular processing and change of status
-    
+
     Args:
         visa_type: F-1, H-1B, I-130, I-539
         process_type: "consular", "change_of_status", or "both"  (default: "both")
-    
+
     Returns comprehensive information including:
     - Processing times (separated by consular vs change of status)
     - Fees (separated by consular vs change of status)
@@ -7239,35 +2213,36 @@ async def get_visa_detailed_information(visa_type: str, process_type: str = "bot
     - Eligibility criteria
     """
     try:
-        from visa_information_detailed import get_visa_processing_info
-        
+        from backend.visa.information import get_visa_processing_info
+
         # Normalize visa type (handle variations)
         visa_type_normalized = visa_type.upper().replace("_", "-")
-        
+
         # Get detailed information
         info = get_visa_processing_info(visa_type_normalized, process_type)
-        
+
         if "error" in info:
             raise HTTPException(status_code=404, detail=info["error"])
-        
+
         return {
             "success": True,
             "visa_type": visa_type_normalized,
             "process_type": process_type,
             "information": info,
             "source": "USCIS public information - Educational purposes only",
-            "disclaimer": "⚖️ Esta informação é educativa. Consulte advogado de imigração licenciado para decisões legais específicas."
+            "disclaimer": "⚖️ Esta informação é educativa. Consulte advogado de imigração licenciado para decisões legais específicas.",
         }
-    
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error getting detailed visa information: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 def get_important_submission_notes(form_code: str) -> list:
     """Get important notes for submission"""
-    
+
     notes = {
         "H-1B": [
             "⚠️ PRAZO: Petições H-1B regulares só podem ser submetidas a partir de 1º de abril",
@@ -7275,7 +2250,7 @@ def get_important_submission_notes(form_code: str) -> list:
             "⚠️ LOTERIA: Se houver mais pedidos que o limite, será realizada loteria",
             "📋 PREMIUM: Considere Premium Processing ($2,805) para decisão em 15 dias",
             "📞 SUPORTE: Em caso de RFE (Request for Evidence), responda dentro do prazo",
-            "🔄 STATUS: Acompanhe o caso em uscis.gov com o número de recibo"
+            "🔄 STATUS: Acompanhe o caso em uscis.gov com o número de recibo",
         ],
         "B-1/B-2": [
             "⚠️ VALIDADE: Visto B-1/B-2 normalmente tem validade de 10 anos para brasileiros",
@@ -7283,19 +2258,20 @@ def get_important_submission_notes(form_code: str) -> list:
             "📋 ENTREVISTA: Seja honesto e direto nas respostas durante a entrevista",
             "💰 VÍNCULOS: Demonstre vínculos fortes com o Brasil (emprego, família, propriedades)",
             "🎯 PROPÓSITO: Seja claro sobre o propósito da viagem e data de retorno",
-            "📱 AGENDAMENTO: Agende com antecedência - consulados têm alta demanda"
+            "📱 AGENDAMENTO: Agende com antecedência - consulados têm alta demanda",
         ],
         "F-1": [
             "⚠️ I-20: Visto só pode ser solicitado com I-20 válido da instituição",
             "⚠️ SEVIS: Taxa SEVIS deve ser paga antes da entrevista (aguarde 3 dias)",
             "📋 FINANCEIRO: Demonstre capacidade financeira para cobrir estudos e vida",
-            "🎓 INTENÇÃO: Demonstre intenção de retornar ao Brasil após os estudos", 
+            "🎓 INTENÇÃO: Demonstre intenção de retornar ao Brasil após os estudos",
             "📅 TIMING: Visto F-1 pode ser solicitado até 120 dias antes do início do curso",
-            "🇺🇸 ENTRADA: Pode entrar nos EUA até 30 dias antes do início das aulas"
-        ]
+            "🇺🇸 ENTRADA: Pode entrar nos EUA até 30 dias antes do início das aulas",
+        ],
     }
-    
+
     return notes.get(form_code, [])
+
 
 # User Association Endpoints
 @api_router.post("/auto-application/case/{case_id}/associate-user")
@@ -7306,57 +2282,57 @@ async def associate_case_with_user(case_id: str, request: Request):
         auth_header = request.headers.get("Authorization")
         if not auth_header or not auth_header.startswith("Bearer "):
             raise HTTPException(status_code=401, detail="Authentication required")
-        
+
         token = auth_header.split(" ")[1]
         user_data = verify_jwt_token(token)  # You'll need to implement this
-        
+
         if not user_data:
             raise HTTPException(status_code=401, detail="Invalid token")
-        
+
         # Get case details
         case = await db.auto_cases.find_one({"case_id": case_id})
         if not case:
             raise HTTPException(status_code=404, detail="Case not found")
-        
+
         # Get request body for additional info
         body = await request.json()
-        
+
         # Update case with user information
         update_data = {
             "user_id": user_data["user_id"],
             "user_email": user_data["email"],
-            "associated_at": datetime.utcnow(),
-            "is_anonymous": False
+            "associated_at": datetime.now(timezone.utc),
+            "is_anonymous": False,
         }
-        
+
         # Add purchase information if provided
         if body.get("purchase_completed"):
-            update_data.update({
-                "purchase_completed": True,
-                "package_type": body.get("package_type"),
-                "amount_paid": body.get("amount_paid"),
-                "purchase_date": datetime.utcnow()
-            })
-        
-        result = await db.auto_cases.update_one(
-            {"case_id": case_id},
-            {"$set": update_data}
-        )
-        
+            update_data.update(
+                {
+                    "purchase_completed": True,
+                    "package_type": body.get("package_type"),
+                    "amount_paid": body.get("amount_paid"),
+                    "purchase_date": datetime.now(timezone.utc),
+                }
+            )
+
+        result = await db.auto_cases.update_one({"case_id": case_id}, {"$set": update_data})
+
         if result.modified_count == 0:
             raise HTTPException(status_code=500, detail="Failed to associate case with user")
-        
+
         return {
             "message": "Case successfully associated with user",
             "case_id": case_id,
-            "user_id": user_data["user_id"]
+            "user_id": user_data["user_id"],
         }
-    
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error associating case with user: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error associating case: {str(e)}")
+
 
 @api_router.get("/user/cases")
 async def get_user_cases(request: Request):
@@ -7366,50 +2342,30 @@ async def get_user_cases(request: Request):
         auth_header = request.headers.get("Authorization")
         if not auth_header or not auth_header.startswith("Bearer "):
             raise HTTPException(status_code=401, detail="Authentication required")
-        
+
         token = auth_header.split(" ")[1]
         user_data = verify_jwt_token(token)
-        
+
         if not user_data:
             raise HTTPException(status_code=401, detail="Invalid token")
-        
+
         # Find all cases for this user
         cursor = db.auto_cases.find(
-            {"user_id": user_data["user_id"]},
-            {"_id": 0}  # Exclude MongoDB _id field
-        ).sort("created_at", -1)  # Most recent first
-        
+            {"user_id": user_data["user_id"]}, {"_id": 0}  # Exclude MongoDB _id field
+        ).sort(
+            "created_at", -1
+        )  # Most recent first
+
         cases = await cursor.to_list(length=100)  # Limit to 100 cases
-        
-        return {
-            "cases": cases,
-            "total": len(cases)
-        }
-    
+
+        return {"cases": cases, "total": len(cases)}
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error getting user cases: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error retrieving cases: {str(e)}")
 
-def verify_jwt_token(token: str):
-    """Verify JWT token and return user data - implement based on your JWT setup"""
-    try:
-        # This is a simplified version - implement proper JWT verification
-        # You might want to use libraries like python-jose or PyJWT
-        import jwt
-        
-        # Use the same JWT secret as the main authentication
-        SECRET_KEY = os.environ.get('JWT_SECRET', 'osprey-secret-key-change-in-production')
-        
-        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-        return payload
-    except jwt.ExpiredSignatureError:
-        return None
-    except jwt.InvalidTokenError:
-        return None
-    except Exception:
-        return None
 
 # Test Document Validation with Image Analysis
 @api_router.post("/test-document-validation")
@@ -7417,11 +2373,11 @@ async def test_document_validation_with_image(request: dict):
     """Test the improved document validation with image analysis"""
     try:
         validator = create_document_validator()
-        
+
         image_url = request.get("image_url", "")
         expected_document_type = request.get("expected_type", "passport")
         applicant_name = request.get("applicant_name", "")
-        
+
         # First, analyze the image to extract information
         vision_prompt = f"""
         Analyze this document image and extract:
@@ -7431,60 +2387,57 @@ async def test_document_validation_with_image(request: dict):
         4. Document number
         5. Expiration date
         6. Any other identifying information
-        
+
         Be very specific about the document type. A Brazilian RG/Identidade Nacional is NOT a passport.
         """
-        
+
         # For now, we'll simulate this - in production you'd use vision API
         # This is where you'd integrate with OpenAI Vision or similar
-        
+
         # Use the improved validation prompt
         validation_prompt = f"""
         VALIDAÇÃO RIGOROSA DE DOCUMENTO - PROTOCOLO DE SEGURANÇA MÁXIMA
-        
+
         DADOS CRÍTICOS PARA VALIDAÇÃO:
         - Tipo de Documento Esperado: {expected_document_type}
         - Nome do Aplicante: {applicant_name}
         - URL da Imagem: {image_url}
-        
+
         CENÁRIO DE TESTE:
         Usuário "{applicant_name}" deveria enviar {expected_document_type} mas pode ter enviado documento errado ou de outra pessoa.
-        
+
         VALIDAÇÕES OBRIGATÓRIAS (TODAS DEVEM PASSAR):
         1. TIPO CORRETO: Verificar se é exatamente "{expected_document_type}"
         2. NOME CORRETO: Nome no documento DEVE ser "{applicant_name}"
         3. PROPRIEDADE: Documento deve pertencer ao aplicante
-        
+
         INSTRUÇÕES ESPECÍFICAS:
         - Se for solicitado "passport" mas for RG/CNH/Identidade → REJEITAR com explicação clara
         - Se nome no documento for diferente de "{applicant_name}" → REJEITAR com explicação clara
         - Explicar detalhadamente cada problema encontrado
-        
+
         Analise a imagem e faça validação técnica rigorosa.
         """
-        
+
         session_id = f"test_validation_{hash(image_url) % 10000}"
         analysis = await validator._call_agent(validation_prompt, session_id)
-        
+
         return {
             "success": True,
             "agent": "Dr. Miguel - Validador de Documentos (MELHORADO)",
             "test_scenario": {
                 "expected_type": expected_document_type,
                 "applicant_name": applicant_name,
-                "image_url": image_url
+                "image_url": image_url,
             },
             "analysis": analysis,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
-    
+
     except Exception as e:
         logger.error(f"Error in test document validation: {str(e)}")
-        return {
-            "success": False,
-            "error": str(e),
-            "timestamp": datetime.now().isoformat()
-        }
+        return {"success": False, "error": str(e), "timestamp": datetime.now().isoformat()}
+
 
 # Comprehensive Document Validation Test Endpoint
 @api_router.post("/test-comprehensive-document-validation")
@@ -7492,233 +2445,104 @@ async def test_comprehensive_document_validation(request: dict):
     """Test the enhanced Dr. Miguel with comprehensive document database"""
     try:
         validator = create_document_validator()
-        
+
         document_type = request.get("document_type", "passport")
         document_content = request.get("document_content", "")
         applicant_name = request.get("applicant_name", "")
         visa_type = request.get("visa_type", "")
-        
+
         # Use the enhanced validation method
         analysis = await validator.validate_document_with_database(
             document_type=document_type,
             document_content=document_content,
             applicant_name=applicant_name,
-            visa_type=visa_type
+            visa_type=visa_type,
         )
-        
+
         return {
             "success": True,
             "agent": "Dr. Miguel - Validador Avançado com Base de Dados",
             "test_scenario": {
                 "document_type": document_type,
                 "applicant_name": applicant_name,
-                "visa_type": visa_type
+                "visa_type": visa_type,
             },
             "validation_database_used": True,
             "analysis": analysis,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
-    
+
     except Exception as e:
         logger.error(f"Error in comprehensive document validation: {str(e)}")
-        return {
-            "success": False,
-            "error": str(e),
-            "timestamp": datetime.now().isoformat()
-        }
+        return {"success": False, "error": str(e), "timestamp": datetime.now().isoformat()}
+
 
 # Document Database Info Endpoint
 @api_router.get("/document-validation-database/{document_type}")
 async def get_document_validation_info_endpoint(document_type: str):
     """Get validation information for a specific document type"""
     try:
-        from document_validation_database import get_document_validation_info
-        
+        from backend.documents.validation_database import get_document_validation_info
+
         validation_info = get_document_validation_info(document_type)
-        
+
         if not validation_info:
-            raise HTTPException(status_code=404, detail=f"Document type '{document_type}' not found in database")
-        
+            raise HTTPException(
+                status_code=404, detail=f"Document type '{document_type}' not found in database"
+            )
+
         return {
             "success": True,
             "document_type": document_type,
             "validation_info": validation_info,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
-    
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error getting document validation info: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 # Visa Requirements Endpoint
 @api_router.get("/visa-document-requirements/{visa_type}")
 async def get_visa_document_requirements_endpoint(visa_type: str):
     """Get required documents for a specific visa type"""
     try:
-        from document_validation_database import get_required_documents_for_visa, get_document_validation_info
-        
+        from backend.documents.validation_database import (
+            get_document_validation_info,
+            get_required_documents_for_visa,
+        )
+
         required_docs = get_required_documents_for_visa(visa_type)
-        
+
         if not required_docs:
-            raise HTTPException(status_code=404, detail=f"Visa type '{visa_type}' not found in database")
-        
+            raise HTTPException(
+                status_code=404, detail=f"Visa type '{visa_type}' not found in database"
+            )
+
         # Get detailed info for each required document
         detailed_requirements = {}
         for doc_type in required_docs:
             detailed_requirements[doc_type] = get_document_validation_info(doc_type)
-        
+
         return {
             "success": True,
             "visa_type": visa_type,
             "required_documents": required_docs,
             "detailed_requirements": detailed_requirements,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
-    
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error getting visa requirements: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 # USCIS Form Data Endpoint
-@api_router.post("/auto-application/case/{case_id}/uscis-form")
-async def save_uscis_form_data(case_id: str, request: dict):
-    """Save USCIS form data for a case"""
-    try:
-        # Get case details
-        case = await db.auto_cases.find_one({"case_id": case_id})
-        if not case:
-            raise HTTPException(status_code=404, detail="Case not found")
-        
-        uscis_form_data = request.get("uscis_form_data", {})
-        completed_sections = request.get("completed_sections", [])
-        
-        # Update case with USCIS form data
-        update_data = {
-            "uscis_form_data": uscis_form_data,
-            "uscis_form_completed_sections": completed_sections,
-            "uscis_form_updated_at": datetime.utcnow(),
-            "current_step": "uscis-form"
-        }
-        
-        result = await db.auto_cases.update_one(
-            {"case_id": case_id},
-            {"$set": update_data}
-        )
-        
-        if result.modified_count == 0:
-            raise HTTPException(status_code=500, detail="Failed to save USCIS form data")
-        
-        return {
-            "success": True,
-            "message": "USCIS form data saved successfully",
-            "case_id": case_id,
-            "completed_sections": completed_sections
-        }
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error saving USCIS form data: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error saving USCIS form data: {str(e)}")
-
-@api_router.get("/auto-application/case/{case_id}/uscis-form")
-async def get_uscis_form_data(case_id: str):
-    """Get USCIS form data for a case"""
-    try:
-        # Get case details
-        case = await db.auto_cases.find_one({"case_id": case_id})
-        if not case:
-            raise HTTPException(status_code=404, detail="Case not found")
-        
-        return {
-            "success": True,
-            "case_id": case_id,
-            "form_code": case.get("form_code"),
-            "uscis_form_data": case.get("uscis_form_data", {}),
-            "completed_sections": case.get("uscis_form_completed_sections", []),
-            "basic_data": case.get("basic_data", {})  # Include basic data for pre-filling
-        }
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error getting USCIS form data: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error getting USCIS form data: {str(e)}")
-
-# Authorize USCIS Form Endpoint
-@api_router.post("/auto-application/case/{case_id}/authorize-uscis-form")
-async def authorize_uscis_form(case_id: str, request: dict):
-    """Authorize and save USCIS form automatically to user's document folder"""
-    try:
-        form_reviewed = request.get("form_reviewed", False)
-        form_authorized = request.get("form_authorized", False)
-        generated_form_data = request.get("generated_form_data", {})
-        authorization_timestamp = request.get("authorization_timestamp")
-        
-        if not (form_reviewed and form_authorized):
-            raise HTTPException(status_code=400, detail="Form must be reviewed and authorized")
-        
-        # Get case details
-        case = await db.auto_cases.find_one({"case_id": case_id})
-        if not case:
-            raise HTTPException(status_code=404, detail="Case not found")
-        
-        # Create the USCIS form document entry
-        uscis_document = {
-            "id": f"uscis_form_{case_id}",
-            "document_type": "uscis_form",
-            "name": f"Formulário USCIS {case.get('form_code', '')}",
-            "description": "Formulário oficial gerado automaticamente pela sistema e autorizado pelo aplicante",
-            "content_type": "application/pdf",
-            "generated_by_ai": True,
-            "authorized_by_user": True,
-            "authorization_timestamp": authorization_timestamp,
-            "form_data": generated_form_data,
-            "case_id": case_id,
-            "created_at": datetime.utcnow(),
-            "status": "ready_for_submission"
-        }
-        
-        # Update case with authorized form and add to documents
-        update_data = {
-            "uscis_form_authorized": True,
-            "uscis_form_authorized_at": datetime.utcnow(),
-            "uscis_form_document": uscis_document,
-            "current_step": "uscis-form-authorized"
-        }
-        
-        # Add to documents array if it exists, otherwise create it
-        existing_documents = case.get("documents", [])
-        existing_documents.append(uscis_document)
-        update_data["documents"] = existing_documents
-        
-        result = await db.auto_cases.update_one(
-            {"case_id": case_id},
-            {"$set": update_data}
-        )
-        
-        if result.modified_count == 0:
-            raise HTTPException(status_code=500, detail="Failed to authorize and save form")
-        
-        return {
-            "success": True,
-            "message": "Formulário USCIS autorizado e salvo automaticamente",
-            "case_id": case_id,
-            "document_saved": True,
-            "document_id": uscis_document["id"]
-        }
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error authorizing USCIS form: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error authorizing form: {str(e)}")
-
-# sistema Processing Endpoint
 @api_router.post("/ai-processing/step")
 async def process_ai_step(request: dict):
     """Process a single sistema step for auto-application form generation with flexible parameters"""
@@ -7726,12 +2550,12 @@ async def process_ai_step(request: dict):
         # Extract parameters with flexible structure support
         case_id = request.get("case_id")
         step_id = request.get("step_id")
-        
+
         # Support multiple parameter structures for backward compatibility
         friendly_form_data = request.get("friendly_form_data", {})
         basic_data = request.get("basic_data", {})
         case_data = request.get("case_data", {})
-        
+
         # If case_data is provided, extract nested data
         if case_data:
             if "simplified_form_responses" in case_data:
@@ -7740,10 +2564,10 @@ async def process_ai_step(request: dict):
                 basic_data.update(case_data["basic_data"])
             if "personal_information" in case_data:
                 basic_data.update(case_data["personal_information"])
-        
+
         if not case_id or not step_id:
             raise HTTPException(status_code=400, detail="case_id and step_id are required")
-        
+
         # Get case details or create from provided data
         case = await db.auto_cases.find_one({"case_id": case_id})
         if not case:
@@ -7754,13 +2578,13 @@ async def process_ai_step(request: dict):
                     "simplified_form_responses": case_data.get("simplified_form_responses", {}),
                     "basic_data": case_data.get("basic_data", {}),
                     "status": "ai_processing",
-                    "created_at": datetime.utcnow()
+                    "created_at": datetime.now(timezone.utc),
                 }
             else:
                 raise HTTPException(status_code=404, detail="Case not found")
-        
-        start_time = datetime.utcnow()
-        
+
+        start_time = datetime.now(timezone.utc)
+
         # Process different sistema steps with enhanced error handling
         try:
             if step_id == "validation":
@@ -7783,416 +2607,26 @@ async def process_ai_step(request: dict):
                 "details": f"Processamento {step_id} concluído com observações",
                 "issues": [],
                 "ai_fallback": True,
-                "error_handled": str(ai_error)
+                "error_handled": str(ai_error),
             }
-        
-        end_time = datetime.utcnow()
+
+        end_time = datetime.now(timezone.utc)
         duration = int((end_time - start_time).total_seconds())
-        
+
         return {
             "success": True,
             "step_id": step_id,
             "details": result.get("details", "Processamento concluído"),
             "duration": duration,
-            "validation_issues": result.get("validation_issues", [])
+            "validation_issues": result.get("validation_issues", []),
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error in sistema processing step {step_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error processing sistema step: {str(e)}")
 
-async def validate_form_data_ai(case, friendly_form_data, basic_data):
-    """sistema validation of form data completeness and accuracy"""
-    try:
-        from emergentintegrations import EmergentLLM
-        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
-        from oracle_consultant import consult_oracle, oracle
-        
-        # Use OpenAI directly or fallback to EmergentLLM
-        openai_key = os.environ.get('OPENAI_API_KEY')
-        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
-        
-        if openai_key:
-            use_openai = True
-        else:
-            llm = EmergentLLM(api_key=emergent_key)
-            use_openai = False
-        
-        # Get Dra. Paula's enhanced knowledge for validation
-        visa_type = case.get('form_code', 'N/A')
-        enhanced_prompt = get_dra_paula_enhanced_prompt("document_validation", f"Tipo de Visto: {visa_type}")
-        visa_knowledge = get_visa_knowledge(visa_type)
-        
-        # Prepare data for validation with Dra. Paula's expertise
-        validation_prompt = f"""
-        {enhanced_prompt}
-        
-        [ANÁLISE DE FORMULÁRIO COM EXPERTISE DRA. PAULA B2C]
-        
-        Analise os dados do formulário de imigração americana usando seu conhecimento especializado:
-        
-        Dados Básicos: {json.dumps(basic_data, indent=2)}
-        Respostas do Formulário: {json.dumps(friendly_form_data, indent=2)}
-        Tipo de Visto: {visa_type}
-        
-        CONHECIMENTO ESPECÍFICO DO VISTO:
-        {json.dumps(visa_knowledge, indent=2) if visa_knowledge else "Consulte conhecimento geral de imigração"}
-        
-        ANÁLISE REQUIRED (usando expertise Dra. Paula):
-        1. Campos obrigatórios em falta ESPECÍFICOS para {visa_type}
-        2. Formatos incorretos (datas MM/DD/YYYY, telefones, emails)
-        3. Inconsistências nos dados baseado em requisitos USCIS
-        4. Sugestões práticas da Dra. Paula para melhoria
-        5. Problemas potenciais de inadmissibilidade
-        6. Documentos adicionais que podem ser necessários
-        
-        Responda em formato JSON seguindo expertise da Dra. Paula:
-        {{
-            "validation_issues": [
-                {{
-                    "field": "nome_do_campo",
-                    "issue": "descrição do problema (com conhecimento Dra. Paula)",
-                    "severity": "error|warning|info",
-                    "suggestion": "sugestão específica da Dra. Paula para correção"
-                }}
-            ],
-            "overall_status": "approved|needs_review|rejected",
-            "completion_percentage": 85,
-            "dra_paula_insights": "Análise especializada e tips específicos",
-            "visa_specific_tips": "Dicas específicas para este tipo de visto"
-        }}
-        """
-        
-        if use_openai:
-            from openai import AsyncOpenAI
-            client = AsyncOpenAI(api_key=openai_key)
-            
-            response = await client.chat.completions.create(
-                model="gpt-4",
-                messages=[{"role": "user", "content": validation_prompt}],
-                max_tokens=2000,
-                temperature=0.3
-            )
-            response_text = response.choices[0].message.content
-        else:
-            response_text = llm.chat([{"role": "user", "content": validation_prompt}])
-        
-        try:
-            ai_response = json.loads(response_text.strip())
-        except:
-            ai_response = {"validation_issues": [], "overall_status": "approved", "completion_percentage": 100}
-        
-        return {
-            "details": f"Validação concluída - {ai_response.get('completion_percentage', 100)}% completo",
-            "validation_issues": ai_response.get("validation_issues", [])
-        }
-        
-    except Exception as e:
-        logger.error(f"Error in sistema validation: {str(e)}")
-        return {"details": "Validação concluída", "validation_issues": []}
-
-async def check_data_consistency_ai(case, friendly_form_data, basic_data):
-    """sistema check for data consistency across different form sections"""
-    try:
-        from emergentintegrations import EmergentLLM
-        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt
-        from oracle_consultant import consult_oracle, oracle
-        
-        # Use OpenAI directly or fallback to EmergentLLM
-        openai_key = os.environ.get('OPENAI_API_KEY')
-        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
-        
-        if openai_key:
-            use_openai = True
-        else:
-            llm = EmergentLLM(api_key=emergent_key)
-            use_openai = False
-        
-        # Get Dra. Paula's enhanced knowledge for consistency checking
-        visa_type = case.get('form_code', 'N/A')
-        enhanced_prompt = get_dra_paula_enhanced_prompt("consistency_check", f"Tipo de Visto: {visa_type}")
-        
-        consistency_prompt = f"""
-        {enhanced_prompt}
-        
-        [VERIFICAÇÃO DE CONSISTÊNCIA COM EXPERTISE DRA. PAULA B2C]
-        
-        Verifique a consistência dos dados usando conhecimento especializado da Dra. Paula:
-        
-        Dados Básicos: {json.dumps(basic_data, indent=2)}
-        Formulário: {json.dumps(friendly_form_data, indent=2)}
-        Tipo de Visto: {visa_type}
-        
-        VERIFICAÇÕES ESPECIALIZADAS (Dra. Paula):
-        1. Nomes consistentes em todas as seções (exatamente como no passaporte)
-        2. Datas cronologicamente corretas e no formato americano
-        3. Endereços e informações de contato atuais e consistentes
-        4. Histórico de trabalho/educação coerente e sem gaps problemáticos
-        5. Informações familiares consistentes entre seções
-        6. Dados financeiros realistas e compatíveis
-        7. Consistência específica para requisitos do visto {visa_type}
-        
-        Responda "DADOS_CONSISTENTES_DRA_PAULA" se tudo estiver correto, ou liste inconsistências encontradas com orientações específicas da Dra. Paula para correção.
-        """
-        
-        if use_openai:
-            from openai import AsyncOpenAI
-            client = AsyncOpenAI(api_key=openai_key)
-            
-            response = await client.chat.completions.create(
-                model="gpt-4",
-                messages=[{"role": "user", "content": consistency_prompt}],
-                max_tokens=2000,
-                temperature=0.3
-            )
-            response_text = response.choices[0].message.content
-        else:
-            response_text = llm.chat([{"role": "user", "content": consistency_prompt}])
-        
-        if "DADOS_CONSISTENTES" in response_text:
-            return {"details": "Dados verificados - Totalmente consistentes"}
-        else:
-            return {"details": "Dados verificados - Pequenas inconsistências identificadas e corrigidas"}
-        
-    except Exception as e:
-        logger.error(f"Error in consistency check: {str(e)}")
-        return {"details": "Verificação de consistência concluída"}
-
-async def translate_data_ai(case, friendly_form_data):
-    """sistema translation from Portuguese to English for USCIS forms"""
-    try:
-        from emergentintegrations import EmergentLLM
-        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt
-        from oracle_consultant import consult_oracle, oracle
-        
-        # Use OpenAI directly or fallback to EmergentLLM
-        openai_key = os.environ.get('OPENAI_API_KEY')
-        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
-        
-        if openai_key:
-            use_openai = True
-        else:
-            llm = EmergentLLM(api_key=emergent_key)
-            use_openai = False
-        
-        # Get Dra. Paula's enhanced knowledge for translation
-        visa_type = case.get('form_code', 'N/A')
-        enhanced_prompt = get_dra_paula_enhanced_prompt("form_generation", f"Tipo de Visto: {visa_type}")
-        
-        translation_prompt = f"""
-        {enhanced_prompt}
-        
-        [TRADUÇÃO ESPECIALIZADA COM EXPERTISE DRA. PAULA B2C]
-        
-        Traduza as respostas usando conhecimento especializado da Dra. Paula sobre formulários USCIS:
-        
-        Dados em Português: {json.dumps(friendly_form_data, indent=2)}
-        Tipo de Visto: {visa_type}
-        
-        REGRAS DE TRADUÇÃO ESPECIALIZADAS (Dra. Paula):
-        1. Use terminologia jurídica oficial específica do USCIS
-        2. Mantenha nomes próprios EXATAMENTE como no passaporte
-        3. Traduza profissões usando códigos SOC quando aplicável
-        4. Converta datas para formato MM/DD/YYYY (obrigatório USCIS)
-        5. Use inglês formal e preciso para contexto jurídico
-        6. Endereços americanos: Street, City, State, ZIP Code
-        7. Traduza títulos acadêmicos para equivalentes americanos
-        8. Mantenha consistência com terminologia USCIS oficial
-        
-        CONHECIMENTO ESPECÍFICO DO VISTO {visa_type}:
-        - Aplique requisitos específicos de tradução para este tipo de visto
-        - Use terminologia apropriada para o contexto (trabalho, família, temporário)
-        - Considere nuances importantes para aprovação do visto
-        
-        Responda apenas "TRADUÇÃO_COMPLETA_DRA_PAULA" quando terminar a tradução com expertise especializada.
-        """
-        
-        if use_openai:
-            from openai import AsyncOpenAI
-            client = AsyncOpenAI(api_key=openai_key)
-            
-            response = await client.chat.completions.create(
-                model="gpt-4",
-                messages=[{"role": "user", "content": translation_prompt}],
-                max_tokens=2000,
-                temperature=0.3
-            )
-            response_text = response.choices[0].message.content
-        else:
-            response_text = llm.chat([{"role": "user", "content": translation_prompt}])
-        
-        return {"details": "Tradução para inglês jurídico concluída com sucesso"}
-        
-    except Exception as e:
-        logger.error(f"Error in translation: {str(e)}")
-        return {"details": "Tradução concluída"}
-
-async def generate_uscis_form_ai(case, friendly_form_data, basic_data):
-    """sistema generation of official USCIS form from friendly data"""
-    try:
-        from emergentintegrations import EmergentLLM
-        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
-        from oracle_consultant import consult_oracle, oracle
-        
-        # Use OpenAI directly or fallback to EmergentLLM
-        openai_key = os.environ.get('OPENAI_API_KEY')
-        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
-        
-        if openai_key:
-            use_openai = True
-        else:
-            llm = EmergentLLM(api_key=emergent_key)
-            use_openai = False
-        
-        form_code = case.get("form_code", "")
-        
-        # Get Dra. Paula's enhanced knowledge for form generation
-        enhanced_prompt = get_dra_paula_enhanced_prompt("form_generation", f"Formulário: {form_code}")
-        visa_knowledge = get_visa_knowledge(form_code)
-        
-        generation_prompt = f"""
-        {enhanced_prompt}
-        
-        [GERAÇÃO DE FORMULÁRIO USCIS COM EXPERTISE DRA. PAULA B2C]
-        
-        Gere o formulário oficial USCIS {form_code} usando conhecimento especializado da Dra. Paula:
-        
-        Dados Básicos: {json.dumps(basic_data, indent=2)}
-        Respostas do Formulário: {json.dumps(friendly_form_data, indent=2)}
-        Tipo de Visto: {form_code}
-        
-        CONHECIMENTO ESPECÍFICO DO VISTO (Dra. Paula):
-        {json.dumps(visa_knowledge, indent=2) if visa_knowledge else "Aplicar conhecimento geral USCIS"}
-        
-        MAPEAMENTO ESPECIALIZADO DOS CAMPOS:
-        1. Informações pessoais (nome EXATO do passaporte, data MM/DD/YYYY, nacionalidade)
-        2. Informações de contato (endereço formato americano, telefone internacional)
-        3. Informações específicas do visto {form_code} (baseado em requisitos Dra. Paula)
-        4. Histórico (educação com equivalências americanas, trabalho cronológico)
-        5. Seções específicas do formulário {form_code}
-        6. Campos obrigatórios vs opcionais (conhecimento USCIS)
-        7. Validações de consistência interna do formulário
-        
-        DIRETRIZES DRA. PAULA PARA {form_code}:
-        - Aplique requisitos específicos para este tipo de visto
-        - Use formatação USCIS oficial
-        - Inclua todos os campos obrigatórios
-        - Mantenha consistência com documentação de apoio
-        - Prepare dados para revisão final
-        
-        Gere JSON completo com estrutura oficial do formulário.
-        Responda apenas "FORMULÁRIO_GERADO_DRA_PAULA" quando concluir.
-        """
-        
-        if use_openai:
-            from openai import AsyncOpenAI
-            client = AsyncOpenAI(api_key=openai_key)
-            
-            response = await client.chat.completions.create(
-                model="gpt-4",
-                messages=[{"role": "user", "content": generation_prompt}],
-                max_tokens=2000,
-                temperature=0.3
-            )
-            response_text = response.choices[0].message.content
-        else:
-            response_text = llm.chat([{"role": "user", "content": generation_prompt}])
-        
-        # Update case with generated USCIS form flag
-        await db.auto_cases.update_one(
-            {"case_id": case.get("case_id")},
-            {"$set": {
-                "uscis_form_generated": True,
-                "uscis_form_generated_at": datetime.utcnow()
-            }}
-        )
-        
-        return {"details": f"Formulário USCIS {form_code} gerado com sucesso"}
-        
-    except Exception as e:
-        logger.error(f"Error in form generation: {str(e)}")
-        return {"details": "Formulário oficial gerado"}
-
-async def final_review_ai(case):
-    """Final sistema review of the complete USCIS form"""
-    try:
-        from emergentintegrations import EmergentLLM
-        from dra_paula_knowledge_base import get_dra_paula_enhanced_prompt, get_visa_knowledge
-        from oracle_consultant import consult_oracle, oracle
-        
-        # Use OpenAI directly or fallback to EmergentLLM
-        openai_key = os.environ.get('OPENAI_API_KEY')
-        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
-        
-        if openai_key:
-            use_openai = True
-        else:
-            llm = EmergentLLM(api_key=emergent_key)
-            use_openai = False
-        
-        # Get Dra. Paula's enhanced knowledge for final review
-        form_code = case.get('form_code', '')
-        enhanced_prompt = get_dra_paula_enhanced_prompt("final_review", f"Revisão Final: {form_code}")
-        visa_knowledge = get_visa_knowledge(form_code)
-        
-        review_prompt = f"""
-        {enhanced_prompt}
-        
-        [REVISÃO FINAL COM EXPERTISE DRA. PAULA B2C]
-        
-        Faça uma revisão especializada final usando conhecimento da Dra. Paula:
-        
-        Caso: {case.get('case_id')}
-        Tipo de Visto: {form_code}
-        Status: {case.get('status', 'N/A')}
-        
-        CONHECIMENTO ESPECÍFICO DO VISTO (Dra. Paula):
-        {json.dumps(visa_knowledge, indent=2) if visa_knowledge else "Aplicar conhecimento geral USCIS"}
-        
-        CHECKLIST DE REVISÃO ESPECIALIZADA:
-        1. ✓ Todos os campos obrigatórios preenchidos (específicos para {form_code})
-        2. ✓ Formatação correta: datas MM/DD/YYYY, números, telefones internacionais
-        3. ✓ Consistência de informações entre seções
-        4. ✓ Requisitos específicos do visto {form_code} atendidos
-        5. ✓ Adequação aos padrões USCIS oficiais
-        6. ✓ Documentos de apoio necessários identificados
-        7. ✓ Problemas potenciais de inadmissibilidade verificados
-        8. ✓ Tips da Dra. Paula para sucesso da aplicação
-        
-        ANÁLISE DE RISCOS (Dra. Paula):
-        - Identifique possíveis red flags para o tipo de visto
-        - Verifique se há gaps ou inconsistências problemáticas
-        - Confirme adequação aos critérios específicos do {form_code}
-        - Avalie probabilidade de aprovação baseada na experiência
-        
-        RESULTADO DA REVISÃO:
-        Se tudo estiver correto segundo expertise da Dra. Paula, responda:
-        "REVISÃO_APROVADA_DRA_PAULA - Formulário pronto para submissão oficial com alta probabilidade de sucesso"
-        
-        Se houver problemas, liste-os com orientações específicas para correção.
-        """
-        
-        if use_openai:
-            from openai import AsyncOpenAI
-            client = AsyncOpenAI(api_key=openai_key)
-            
-            response = await client.chat.completions.create(
-                model="gpt-4",
-                messages=[{"role": "user", "content": review_prompt}],
-                max_tokens=2000,
-                temperature=0.3
-            )
-            response_text = response.choices[0].message.content
-        else:
-            response_text = llm.chat([{"role": "user", "content": review_prompt}])
-        
-        return {"details": "Revisão final concluída - Formulário aprovado para submissão"}
-        
-    except Exception as e:
-        logger.error(f"Error in final review: {str(e)}")
-        return {"details": "Revisão final concluída"}
 
 # Responsibility Confirmation Endpoint
 @api_router.post("/responsibility/confirm")
@@ -8203,15 +2637,15 @@ async def record_responsibility_confirmation(request: dict):
         confirmation_type = request.get("type")
         confirmations = request.get("confirmations", {})
         digital_signature = request.get("digitalSignature", "")
-        timestamp = request.get("timestamp", datetime.utcnow().isoformat())
+        timestamp = request.get("timestamp", datetime.now(timezone.utc).isoformat())
         user_agent = request.get("userAgent", "")
-        
+
         if not case_id or not confirmation_type:
             raise HTTPException(status_code=400, detail="caseId and type are required")
-        
+
         # Create confirmation record
         confirmation_record = {
-            "id": f"conf_{case_id}_{confirmation_type}_{int(datetime.utcnow().timestamp())}",
+            "id": f"conf_{case_id}_{confirmation_type}_{int(datetime.now(timezone.utc).timestamp())}",
             "case_id": case_id,
             "type": confirmation_type,
             "confirmations": confirmations,
@@ -8219,39 +2653,37 @@ async def record_responsibility_confirmation(request: dict):
             "timestamp": timestamp,
             "user_agent": user_agent,
             "ip_address": "system_recorded",  # In production, get from request
-            "created_at": datetime.utcnow()
+            "created_at": datetime.now(timezone.utc),
         }
-        
+
         # Store in database
         await db.responsibility_confirmations.insert_one(confirmation_record)
-        
+
         # Update case with confirmation status
         case_update = {
             f"responsibility_confirmations.{confirmation_type}": {
                 "confirmed": True,
                 "timestamp": timestamp,
-                "signature": digital_signature
+                "signature": digital_signature,
             },
-            "updated_at": datetime.utcnow()
+            "updated_at": datetime.now(timezone.utc),
         }
-        
-        await db.auto_cases.update_one(
-            {"case_id": case_id},
-            {"$set": case_update}
-        )
-        
+
+        await db.auto_cases.update_one({"case_id": case_id}, {"$set": case_update})
+
         return {
             "success": True,
             "confirmation_id": confirmation_record["id"],
             "type": confirmation_type,
-            "recorded_at": confirmation_record["created_at"].isoformat()
+            "recorded_at": confirmation_record["created_at"].isoformat(),
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error recording responsibility confirmation: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error recording confirmation: {str(e)}")
+
 
 # Document Analysis KPIs and Metrics Endpoints
 @api_router.get("/documents/analysis/kpis")
@@ -8260,20 +2692,21 @@ async def get_document_analysis_kpis(timeframe_days: int = 30):
     Obtém KPIs de análise de documentos para o período especificado
     """
     try:
-        from document_analysis_metrics import DocumentAnalysisKPIs
-        
+        from backend.documents.metrics import DocumentAnalysisKPIs
+
         kpi_system = DocumentAnalysisKPIs()
         report = kpi_system.generate_kpi_report(timeframe_days)
-        
+
         return {
             "success": True,
             "kpi_report": report,
-            "message": f"KPI report generated for last {timeframe_days} days"
+            "message": f"KPI report generated for last {timeframe_days} days",
         }
-        
+
     except Exception as e:
         logger.error(f"Error generating KPI report: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error generating KPI report: {str(e)}")
+
 
 @api_router.get("/documents/analysis/performance")
 async def get_document_analysis_performance():
@@ -8281,21 +2714,24 @@ async def get_document_analysis_performance():
     Obtém métricas de performance do sistema de análise
     """
     try:
-        from document_analysis_metrics import DocumentAnalysisKPIs
-        
+        from backend.documents.metrics import DocumentAnalysisKPIs
+
         kpi_system = DocumentAnalysisKPIs()
         performance = kpi_system.calculate_processing_performance()
-        
+
         return {
             "success": True,
             "performance_metrics": performance,
             "targets": kpi_system.targets,
-            "message": "Performance metrics retrieved successfully"
+            "message": "Performance metrics retrieved successfully",
         }
-        
+
     except Exception as e:
         logger.error(f"Error retrieving performance metrics: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error retrieving performance metrics: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error retrieving performance metrics: {str(e)}"
+        )
+
 
 # CRITICAL: Real Document Analysis Endpoint
 @api_router.post("/documents/analyze-with-ai")
@@ -8304,7 +2740,7 @@ async def analyze_document_with_professional_api(
     document_type: str = Form(...),
     visa_type: str = Form(...),
     case_id: str = Form(...),
-    applicant_name: str = Form(default="Unknown User")
+    applicant_name: str = Form(default="Unknown User"),
 ):
     """
     HYBRID PROFESSIONAL document analysis using Google Document sistema + Dr. Miguel
@@ -8312,11 +2748,13 @@ async def analyze_document_with_professional_api(
     Combines Google's specialized Document sistema with Dr. Miguel's fraud detection
     """
     try:
-        # Hybrid professional validation with Google Document sistema + Dr. Miguel  
-        logger.info(f"🔬 Starting HYBRID document analysis (Google Document sistema + Dr. Miguel) - File: {file.filename}, Type: {document_type}")
-        
+        # Hybrid professional validation with Google Document sistema + Dr. Miguel
+        logger.info(
+            f"🔬 Starting HYBRID document analysis (Google Document sistema + Dr. Miguel) - File: {file.filename}, Type: {document_type}"
+        )
+
         # Basic file validation
-        allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf']
+        allowed_types = ["image/jpeg", "image/jpg", "image/png", "image/webp", "application/pdf"]
         if file.content_type not in allowed_types:
             return {
                 "valid": False,
@@ -8324,13 +2762,13 @@ async def analyze_document_with_professional_api(
                 "completeness": 0,
                 "issues": [f"❌ Tipo de arquivo não suportado: {file.content_type}"],
                 "extracted_data": {"validation_status": "REJECTED", "reason": "Invalid file type"},
-                "dra_paula_assessment": "❌ Híbrido: Tipo de arquivo não aceito pelo sistema (Google Document sistema + Dr. Miguel)"
+                "dra_paula_assessment": "❌ Híbrido: Tipo de arquivo não aceito pelo sistema (Google Document sistema + Dr. Miguel)",
             }
-        
+
         # Read file content
         file_content = await file.read()
         file_size = len(file_content)
-        
+
         # File size validation
         if file_size > 10 * 1024 * 1024:  # 10MB
             return {
@@ -8339,9 +2777,9 @@ async def analyze_document_with_professional_api(
                 "completeness": 0,
                 "issues": ["❌ Arquivo muito grande (máximo: 10MB)"],
                 "extracted_data": {"validation_status": "REJECTED", "reason": "File too large"},
-                "dra_paula_assessment": "❌ Híbrido: Arquivo excede limite permitido"
+                "dra_paula_assessment": "❌ Híbrido: Arquivo excede limite permitido",
             }
-        
+
         if file_size < 10000:  # 10KB minimum for quality
             return {
                 "valid": False,
@@ -8349,39 +2787,48 @@ async def analyze_document_with_professional_api(
                 "completeness": 0,
                 "issues": ["❌ Arquivo muito pequeno ou corrompido"],
                 "extracted_data": {"validation_status": "REJECTED", "reason": "File too small"},
-                "dra_paula_assessment": "❌ Híbrido: Qualidade de arquivo inadequada"
+                "dra_paula_assessment": "❌ Híbrido: Qualidade de arquivo inadequada",
             }
-        
+
         # HYBRID PROFESSIONAL ANALYSIS - Google Document sistema + Dr. Miguel
-        logger.info(f"🔬 Analyzing document with HYBRID system (Google Document sistema + Dr. Miguel)")
-        
+        logger.info(
+            f"🔬 Analyzing document with HYBRID system (Google Document sistema + Dr. Miguel)"
+        )
+
         analysis_result = await hybrid_validator.analyze_document(
             file_content=file_content,
             filename=file.filename,
             document_type=document_type,
             applicant_name=applicant_name,
             visa_type=visa_type,
-            case_id=case_id
+            case_id=case_id,
         )
-        
+
         # Add additional context for immigration processing
-        analysis_result.update({
-            "processed_by": "Google Document sistema + Dr. Miguel Hybrid System",
-            "processing_date": datetime.now().isoformat(),
-            "file_size_mb": round(file_size / (1024 * 1024), 2),
-            "immigration_compliant": analysis_result.get("completeness", 0) >= 75,
-            "cost_effective": True,  # Much cheaper than Onfido
-            "ai_powered": True
-        })
-        
-        logger.info(f"✅ Hybrid analysis completed - Valid: {analysis_result.get('valid')}, Score: {analysis_result.get('completeness')}%")
-        
+        analysis_result.update(
+            {
+                "processed_by": "Google Document sistema + Dr. Miguel Hybrid System",
+                "processing_date": datetime.now().isoformat(),
+                "file_size_mb": round(file_size / (1024 * 1024), 2),
+                "immigration_compliant": analysis_result.get("completeness", 0) >= 75,
+                "cost_effective": True,  # Much cheaper than Onfido
+                "ai_powered": True,
+            }
+        )
+
+        logger.info(
+            f"✅ Hybrid analysis completed - Valid: {analysis_result.get('valid')}, Score: {analysis_result.get('completeness')}%"
+        )
+
         return analysis_result
-        
+
         # Validate document type against visa requirements (CORRECTED)
-        from document_validation_database import get_required_documents_for_visa
+        from backend.documents.validation_database import (
+            get_required_documents_for_visa,
+        )
+
         required_docs = get_required_documents_for_visa(visa_type)
-        
+
         # Log para debug detalhado
         logger.info(f"🔍 ANÁLISE DEBUG - Parâmetros recebidos:")
         logger.info(f"  📄 document_type: '{document_type}'")
@@ -8389,70 +2836,96 @@ async def analyze_document_with_professional_api(
         logger.info(f"  📋 case_id: '{case_id}'")
         logger.info(f"  📎 filename: '{file.filename}'")
         logger.info(f"📋 Documentos obrigatórios para {visa_type}: {required_docs}")
-        
+
         # Se não encontrou documentos, pode estar usando visa_type incorreto
         if not required_docs:
-            logger.warning(f"⚠️ ATENÇÃO: Nenhum documento obrigatório encontrado para visa_type '{visa_type}'. Verificar mapeamento!")
+            logger.warning(
+                f"⚠️ ATENÇÃO: Nenhum documento obrigatório encontrado para visa_type '{visa_type}'. Verificar mapeamento!"
+            )
             # Verificar se caso existe e tem form_code diferente
             try:
                 case_doc = await db.auto_cases.find_one({"case_id": case_id})
-                if case_doc and case_doc.get('form_code'):
-                    actual_form_code = case_doc['form_code']
-                    logger.warning(f"⚠️ Case {case_id} tem form_code '{actual_form_code}' mas visa_type recebido foi '{visa_type}'")
+                if case_doc and case_doc.get("form_code"):
+                    actual_form_code = case_doc["form_code"]
+                    logger.warning(
+                        f"⚠️ Case {case_id} tem form_code '{actual_form_code}' mas visa_type recebido foi '{visa_type}'"
+                    )
                     if actual_form_code != visa_type:
-                        logger.error(f"❌ INCONSISTÊNCIA: visa_type '{visa_type}' ≠ case.form_code '{actual_form_code}'")
+                        logger.error(
+                            f"❌ INCONSISTÊNCIA: visa_type '{visa_type}' ≠ case.form_code '{actual_form_code}'"
+                        )
                         # Usar o form_code correto do caso
                         visa_type = actual_form_code
                         required_docs = get_required_documents_for_visa(visa_type)
-                        logger.info(f"🔄 Corrigido para usar form_code '{visa_type}'. Novos documentos obrigatórios: {required_docs}")
+                        logger.info(
+                            f"🔄 Corrigido para usar form_code '{visa_type}'. Novos documentos obrigatórios: {required_docs}"
+                        )
             except Exception as e:
                 logger.error(f"❌ Erro ao verificar caso {case_id}: {e}")
-        
+
         if document_type not in required_docs:
-            logger.warning(f"⚠️ Documento '{document_type}' NÃO está na lista obrigatória para {visa_type}")
+            logger.warning(
+                f"⚠️ Documento '{document_type}' NÃO está na lista obrigatória para {visa_type}"
+            )
             return {
                 "valid": False,
                 "legible": True,
                 "completeness": 0,
-                "issues": [f"❌ ERRO CRÍTICO: Documento '{document_type}' não é necessário para {visa_type}. Documentos obrigatórios: {', '.join(required_docs)}"],
-                "extracted_data": {"validation_status": "REJECTED", "reason": "Document not required for visa"},
-                "dra_paula_assessment": f"❌ DOCUMENTO REJEITADO: {document_type} não é requisito para {visa_type}. Documentos necessários: {', '.join(required_docs)}"
+                "issues": [
+                    f"❌ ERRO CRÍTICO: Documento '{document_type}' não é necessário para {visa_type}. Documentos obrigatórios: {', '.join(required_docs)}"
+                ],
+                "extracted_data": {
+                    "validation_status": "REJECTED",
+                    "reason": "Document not required for visa",
+                },
+                "dra_paula_assessment": f"❌ DOCUMENTO REJEITADO: {document_type} não é requisito para {visa_type}. Documentos necessários: {', '.join(required_docs)}",
             }
         else:
-            logger.info(f"✅ Documento '{document_type}' é obrigatório para {visa_type} - prosseguindo com validação")
-        
+            logger.info(
+                f"✅ Documento '{document_type}' é obrigatório para {visa_type} - prosseguindo com validação"
+            )
+
         # File name analysis for obvious mismatches
         file_name = file.filename.lower() if file.filename else ""
         mismatch_detected = False
         mismatch_reason = ""
-        
-        if document_type == 'passport':
-            if any(word in file_name for word in ['diploma', 'certificate', 'birth', 'certidao']):
+
+        if document_type == "passport":
+            if any(word in file_name for word in ["diploma", "certificate", "birth", "certidao"]):
                 mismatch_detected = True
-                mismatch_reason = f"Arquivo '{file.filename}' parece ser outro documento, não passaporte"
-        elif document_type == 'diploma':
-            if any(word in file_name for word in ['passport', 'birth', 'id', 'certidao', 'passaporte']):
+                mismatch_reason = (
+                    f"Arquivo '{file.filename}' parece ser outro documento, não passaporte"
+                )
+        elif document_type == "diploma":
+            if any(
+                word in file_name for word in ["passport", "birth", "id", "certidao", "passaporte"]
+            ):
                 mismatch_detected = True
-                mismatch_reason = f"Arquivo '{file.filename}' parece ser outro documento, não diploma"
-        elif document_type == 'birth_certificate':
-            if any(word in file_name for word in ['passport', 'diploma', 'id', 'passaporte']):
+                mismatch_reason = (
+                    f"Arquivo '{file.filename}' parece ser outro documento, não diploma"
+                )
+        elif document_type == "birth_certificate":
+            if any(word in file_name for word in ["passport", "diploma", "id", "passaporte"]):
                 mismatch_detected = True
                 mismatch_reason = f"Arquivo '{file.filename}' parece ser outro documento, não certidão de nascimento"
-        
+
         if mismatch_detected:
             return {
                 "valid": False,
                 "legible": True,
                 "completeness": 0,
                 "issues": [f"❌ ERRO CRÍTICO: {mismatch_reason}"],
-                "extracted_data": {"validation_status": "REJECTED", "reason": "Document type mismatch"},
-                "dra_paula_assessment": f"❌ DOCUMENTO REJEITADO: {mismatch_reason}. Verifique se enviou o documento correto!"
+                "extracted_data": {
+                    "validation_status": "REJECTED",
+                    "reason": "Document type mismatch",
+                },
+                "dra_paula_assessment": f"❌ DOCUMENTO REJEITADO: {mismatch_reason}. Verifique se enviou o documento correto!",
             }
-        
+
         # FASE 1: Policy Engine Integration (ALWAYS RUNS)
-        from policy_engine import policy_engine
-        from document_catalog import document_catalog
-        
+        from backend.compliance.policy_engine import policy_engine
+        from backend.documents.catalog import document_catalog
+
         # Initialize base analysis result - SECURE DEFAULT (reject until proven valid)
         analysis_result = {
             "valid": False,
@@ -8463,20 +2936,20 @@ async def analyze_document_with_professional_api(
                 "document_type": document_type,
                 "file_name": file.filename,
                 "validation_status": "PENDING_VALIDATION",
-                "visa_context": visa_type
+                "visa_context": visa_type,
             },
-            "dra_paula_assessment": f"Documento {document_type} em análise para {visa_type}"
+            "dra_paula_assessment": f"Documento {document_type} em análise para {visa_type}",
         }
-        
+
         # FASE 1: Policy Engine Analysis (Quality + Policies + Catalog)
         try:
             logger.info(f"🏛️ Iniciando análise Policy Engine FASE 1 para {document_type}")
-            
+
             # Mapear para catálogo padronizado
             suggestions = document_catalog.suggest_document_type(file.filename)
             type_mapping = {
                 "passport": "PASSPORT_ID_PAGE",
-                "birth_certificate": "BIRTH_CERTIFICATE", 
+                "birth_certificate": "BIRTH_CERTIFICATE",
                 "marriage_certificate": "MARRIAGE_CERT",
                 "diploma": "DEGREE_CERTIFICATE",
                 "transcript": "TRANSCRIPT",
@@ -8485,71 +2958,86 @@ async def analyze_document_with_professional_api(
                 "tax_return": "TAX_RETURN_1040",
                 "i94": "I94_RECORD",
                 "i797": "I797_NOTICE",
-                "medical": "I693_MEDICAL"
+                "medical": "I693_MEDICAL",
             }
-            standardized_doc_type = type_mapping.get(document_type, suggestions[0] if suggestions else "PASSPORT_ID_PAGE")
-            
+            standardized_doc_type = type_mapping.get(
+                document_type, suggestions[0] if suggestions else "PASSPORT_ID_PAGE"
+            )
+
             # Executar Policy Engine
-            extracted_text = f"Document type: {document_type}, Filename: {file.filename}"  # Basic text for now
+            extracted_text = (
+                f"Document type: {document_type}, Filename: {file.filename}"  # Basic text for now
+            )
             policy_validation = policy_engine.validate_document(
                 file_content=file_content,
                 filename=file.filename,
                 doc_type=standardized_doc_type,
                 extracted_text=extracted_text,
-                case_context={"case_id": case_id, "visa_type": visa_type}
+                case_context={"case_id": case_id, "visa_type": visa_type},
             )
-            
+
             # Enriquecer resultado com análise de políticas
-            analysis_result.update({
-                "policy_engine": policy_validation,
-                "standardized_doc_type": standardized_doc_type,
-                "quality_analysis": policy_validation.get("quality", {}),
-                "policy_score": policy_validation.get("overall_score", 0.0),
-                "policy_decision": policy_validation.get("decision", "UNKNOWN")
-            })
-            
+            analysis_result.update(
+                {
+                    "policy_engine": policy_validation,
+                    "standardized_doc_type": standardized_doc_type,
+                    "quality_analysis": policy_validation.get("quality", {}),
+                    "policy_score": policy_validation.get("overall_score", 0.0),
+                    "policy_decision": policy_validation.get("decision", "UNKNOWN"),
+                }
+            )
+
             # Atualizar assessment com insights combinados
             policy_decision = policy_validation.get("decision", "UNKNOWN")
             if policy_decision == "FAIL":
-                analysis_result["dra_paula_assessment"] = f"❌ REJEITADO (Policy Engine): {'; '.join(policy_validation.get('messages', []))}"
+                analysis_result["dra_paula_assessment"] = (
+                    f"❌ REJEITADO (Policy Engine): {'; '.join(policy_validation.get('messages', []))}"
+                )
                 analysis_result["valid"] = False
             elif policy_decision == "ALERT":
-                analysis_result["dra_paula_assessment"] = f"⚠️ COM RESSALVAS (Score: {policy_validation.get('overall_score', 0.0):.2f}): {'; '.join(policy_validation.get('messages', []))}"
+                analysis_result["dra_paula_assessment"] = (
+                    f"⚠️ COM RESSALVAS (Score: {policy_validation.get('overall_score', 0.0):.2f}): {'; '.join(policy_validation.get('messages', []))}"
+                )
             elif policy_decision == "PASS":
-                analysis_result["dra_paula_assessment"] = f"✅ APROVADO (Score: {policy_validation.get('overall_score', 0.0):.2f}) - Análise Policy Engine FASE 1"
-            
+                analysis_result["dra_paula_assessment"] = (
+                    f"✅ APROVADO (Score: {policy_validation.get('overall_score', 0.0):.2f}) - Análise Policy Engine FASE 1"
+                )
+
             logger.info(f"✅ Policy Engine FASE 1 concluído: {policy_decision}")
-                
+
         except Exception as e:
             logger.error(f"❌ Policy Engine FASE 1 error: {e}")
             analysis_result["policy_engine_error"] = str(e)
-        
+
         # Use Dr. Miguel ENHANCED SYSTEM for additional analysis (optional)
         dr_miguel = DocumentValidationAgent()
-        
+
         try:
             logger.info(f"🔬 Iniciando análise aprimorada Dr. Miguel para {document_type}")
-            
+
             # Try the new enhanced validation system
             enhanced_result = await dr_miguel.validate_document_enhanced(
                 file_content=file_content,
-                file_name=file.filename or f"document_{document_type}.{file.content_type.split('/')[-1]}",
+                file_name=file.filename
+                or f"document_{document_type}.{file.content_type.split('/')[-1]}",
                 expected_document_type=document_type,
                 visa_type=visa_type,
-                applicant_name='Usuário'  # Will be replaced with actual name when available
+                applicant_name="Usuário",  # Will be replaced with actual name when available
             )
-            
-            logger.info(f"✅ Análise aprimorada Dr. Miguel concluída: {enhanced_result.get('verdict', 'PROCESSADO')}")
-            
+
+            logger.info(
+                f"✅ Análise aprimorada Dr. Miguel concluída: {enhanced_result.get('verdict', 'PROCESSADO')}"
+            )
+
             # Merge enhanced results with Policy Engine results - SECURE VALIDATION
             if enhanced_result and isinstance(enhanced_result, dict):
                 # Update analysis result with enhanced data while preserving Policy Engine data
                 analysis_result["enhanced_analysis"] = enhanced_result
-                
+
                 # SECURITY FIX: Only update completeness if document is actually valid
                 dr_miguel_verdict = enhanced_result.get("verdict", "REJEITADO")
                 dr_miguel_confidence = enhanced_result.get("confidence_score", 0)
-                
+
                 # Only approve if both Dr. Miguel and Policy Engine approve
                 policy_decision = analysis_result.get("policy_decision", "FAIL")
                 if dr_miguel_verdict == "APROVADO" and policy_decision == "PASS":
@@ -8565,41 +3053,55 @@ async def analyze_document_with_professional_api(
                 elif dr_miguel_verdict == "APROVADO" and policy_decision in ["ALERT", "PASS"]:
                     analysis_result["valid"] = False  # Require both systems to pass
                     analysis_result["legible"] = True
-                    analysis_result["completeness"] = min(dr_miguel_confidence, 70)  # Reduced for partial approval
+                    analysis_result["completeness"] = min(
+                        dr_miguel_confidence, 70
+                    )  # Reduced for partial approval
                     issues_from_miguel = enhanced_result.get("issues", [])
                     if isinstance(issues_from_miguel, str):
                         issues_from_miguel = [issues_from_miguel]
                     elif not isinstance(issues_from_miguel, list):
                         issues_from_miguel = []
-                    analysis_result["issues"] = ["Documento requer revisão adicional"] + issues_from_miguel
+                    analysis_result["issues"] = [
+                        "Documento requer revisão adicional"
+                    ] + issues_from_miguel
                 else:
                     # Reject if either system fails
                     analysis_result["valid"] = False
                     analysis_result["legible"] = enhanced_result.get("legible", False)
-                    analysis_result["completeness"] = min(dr_miguel_confidence, 30)  # Low score for rejected docs
+                    analysis_result["completeness"] = min(
+                        dr_miguel_confidence, 30
+                    )  # Low score for rejected docs
                     issues_from_miguel = enhanced_result.get("issues", [])
                     if isinstance(issues_from_miguel, str):
                         issues_from_miguel = [issues_from_miguel]
                     elif not isinstance(issues_from_miguel, list):
                         issues_from_miguel = ["Documento rejeitado pela validação"]
-                    analysis_result["issues"] = issues_from_miguel if issues_from_miguel else ["Documento rejeitado pela validação"]
-                
+                    analysis_result["issues"] = (
+                        issues_from_miguel
+                        if issues_from_miguel
+                        else ["Documento rejeitado pela validação"]
+                    )
+
                 # Combine assessments
                 dr_miguel_assessment = enhanced_result.get("verdict", "")
-                if dr_miguel_assessment and "Policy Engine" not in analysis_result["dra_paula_assessment"]:
-                    analysis_result["dra_paula_assessment"] += f" | Dr. Miguel: {dr_miguel_assessment}"
-            
+                if (
+                    dr_miguel_assessment
+                    and "Policy Engine" not in analysis_result["dra_paula_assessment"]
+                ):
+                    analysis_result[
+                        "dra_paula_assessment"
+                    ] += f" | Dr. Miguel: {dr_miguel_assessment}"
+
             # Return combined analysis result (Policy Engine + Dr. Miguel)
             return analysis_result
-            
+
         except Exception as enhanced_error:
             logger.error(f"❌ Erro no sistema aprimorado Dr. Miguel: {str(enhanced_error)}")
-            
+
             # Even if Dr. Miguel fails, return Policy Engine results
             analysis_result["dr_miguel_error"] = str(enhanced_error)
             analysis_result["dra_paula_assessment"] += " | Dr. Miguel: Erro na análise avançada"
-            
-            
+
     except HTTPException:
         raise
     except Exception as e:
@@ -8610,25 +3112,29 @@ async def analyze_document_with_professional_api(
             "completeness": 0,
             "issues": [f"❌ Erro no sistema de validação profissional: {str(e)}"],
             "extracted_data": {
-                "validation_status": "ERROR", 
+                "validation_status": "ERROR",
                 "reason": str(e),
-                "provider": "Onfido"
+                "provider": "Onfido",
             },
             "dra_paula_assessment": f"❌ Híbrido: Erro na análise (Google Document sistema + Dr. Miguel) - {str(e)}",
-            "hybrid_powered": True
+            "hybrid_powered": True,
         }
 
+
 # Phase 2 & 3: Enhanced Document Validation Endpoints
-from policy_engine import policy_engine
+from backend.compliance.policy_engine import policy_engine
+
 
 class DocumentClassificationRequest(BaseModel):
     filename: str
     extracted_text: str
     file_size: Optional[int] = 0
 
+
 class MultiDocumentValidationRequest(BaseModel):
     documents: List[Dict[str, Any]]
     case_context: Optional[Dict[str, Any]] = None
+
 
 class FieldExtractionRequest(BaseModel):
     text_content: str
@@ -8636,17 +3142,22 @@ class FieldExtractionRequest(BaseModel):
     policy_fields: Optional[List[Dict[str, Any]]] = None
     context: Optional[Dict[str, Any]] = None
 
+
 class LanguageAnalysisRequest(BaseModel):
     text_content: str
     document_type: str
     filename: Optional[str] = ""
 
+
 class ConsistencyCheckRequest(BaseModel):
     documents_data: List[Dict[str, Any]]
     case_context: Optional[Dict[str, Any]] = None
 
+
 @api_router.post("/documents/classify")
-async def auto_classify_document(request: DocumentClassificationRequest, current_user = Depends(get_current_user)):
+async def auto_classify_document(
+    request: DocumentClassificationRequest, current_user=Depends(get_current_user)
+):
     """
     Phase 3: Automatically classify document type based on content
     """
@@ -8654,117 +3165,125 @@ async def auto_classify_document(request: DocumentClassificationRequest, current
         classification_result = policy_engine.auto_classify_document(
             b"",  # Empty bytes for file content (we have extracted text)
             request.filename,
-            request.extracted_text
+            request.extracted_text,
         )
-        
+
         return {
             "status": "success",
             "classification": classification_result,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
-        
+
     except Exception as e:
         logger.error(f"Error in document classification: {e}")
         raise HTTPException(status_code=500, detail=f"Classification failed: {str(e)}")
 
+
 @api_router.post("/documents/extract-fields")
-async def extract_document_fields(request: FieldExtractionRequest, current_user = Depends(get_current_user)):
+async def extract_document_fields(
+    request: FieldExtractionRequest, current_user=Depends(get_current_user)
+):
     """
     Phase 2: Enhanced field extraction using advanced patterns and validators
     """
     try:
-        from field_extraction_engine import field_extraction_engine
-        
+        from backend.forms.field_extraction import field_extraction_engine
+
         # Extract fields using the advanced engine
         extraction_result = field_extraction_engine.extract_all_fields(
-            request.text_content,
-            request.policy_fields,
-            request.context or {}
+            request.text_content, request.policy_fields, request.context or {}
         )
-        
+
         return {
             "status": "success",
             "extracted_fields": extraction_result,
             "field_count": len(extraction_result),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
-        
+
     except Exception as e:
         logger.error(f"Error in field extraction: {e}")
         raise HTTPException(status_code=500, detail=f"Field extraction failed: {str(e)}")
 
+
 @api_router.post("/documents/analyze-language")
-async def analyze_document_language(request: LanguageAnalysisRequest, current_user = Depends(get_current_user)):
+async def analyze_document_language(
+    request: LanguageAnalysisRequest, current_user=Depends(get_current_user)
+):
     """
     Phase 2: Analyze document language and translation requirements
     """
     try:
-        from translation_gate import translation_gate
-        
+        from backend.utils.translation.gate import translation_gate
+
         # Analyze language and translation requirements
         language_result = translation_gate.analyze_document_language(
-            request.text_content,
-            request.document_type,
-            request.filename or ""
+            request.text_content, request.document_type, request.filename or ""
         )
-        
+
         return {
             "status": "success",
             "language_analysis": language_result,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
-        
+
     except Exception as e:
         logger.error(f"Error in language analysis: {e}")
         raise HTTPException(status_code=500, detail=f"Language analysis failed: {str(e)}")
 
+
 @api_router.post("/documents/check-consistency")
-async def check_document_consistency(request: ConsistencyCheckRequest, current_user = Depends(get_current_user)):
+async def check_document_consistency(
+    request: ConsistencyCheckRequest, current_user=Depends(get_current_user)
+):
     """
     Phase 3: Check consistency across multiple documents
     """
     try:
-        from cross_document_consistency import cross_document_consistency
-        
+        from backend.documents.consistency import cross_document_consistency
+
         # Analyze consistency across documents
         consistency_result = cross_document_consistency.analyze_document_consistency(
-            request.documents_data,
-            request.case_context or {}
+            request.documents_data, request.case_context or {}
         )
-        
+
         return {
             "status": "success",
             "consistency_analysis": consistency_result,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
-        
+
     except Exception as e:
         logger.error(f"Error in consistency check: {e}")
         raise HTTPException(status_code=500, detail=f"Consistency check failed: {str(e)}")
 
+
 @api_router.post("/documents/validate-multiple")
-async def validate_multiple_documents(request: MultiDocumentValidationRequest, current_user = Depends(get_current_user)):
+async def validate_multiple_documents(
+    request: MultiDocumentValidationRequest, current_user=Depends(get_current_user)
+):
     """
     Phase 3: Comprehensive validation of multiple documents with consistency checking
     """
     try:
         # Validate multiple documents using the enhanced policy engine
         validation_result = policy_engine.validate_multiple_documents(
-            request.documents,
-            request.case_context or {}
+            request.documents, request.case_context or {}
         )
-        
+
         return {
             "status": "success",
             "validation_result": validation_result,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
-        
+
     except Exception as e:
         logger.error(f"Error in multi-document validation: {e}")
         raise HTTPException(status_code=500, detail=f"Multi-document validation failed: {str(e)}")
 
+
 # Moved validation-capabilities endpoint to avoid route conflict
+
 
 # Enhanced analyze-with-ai endpoint to use Phase 2 & 3 features
 @api_router.post("/documents/analyze-with-ai-enhanced")
@@ -8772,7 +3291,7 @@ async def analyze_with_ai_enhanced(
     file: UploadFile = File(...),
     document_type: str = Form(...),
     case_id: Optional[str] = Form(None),
-    current_user = Depends(get_current_user)
+    current_user=Depends(get_current_user),
 ):
     """
     Enhanced sistema document analysis using Phase 2 & 3 capabilities
@@ -8781,33 +3300,37 @@ async def analyze_with_ai_enhanced(
         # Basic file validation
         if not file:
             raise HTTPException(status_code=400, detail="No file provided")
-        
+
         content = await file.read()
         if len(content) < 1000:  # Minimum size check
             raise HTTPException(status_code=400, detail="File too small or corrupted")
-        
+
         # Extract text (placeholder for OCR)
         extracted_text = "Sample extracted text from document"  # Replace with actual OCR
-        
+
         # Phase 3: Auto-classify if document type is unknown
         if document_type == "UNKNOWN":
             classification_result = policy_engine.auto_classify_document(
                 content, file.filename, extracted_text
             )
-            document_type = classification_result.get('suggested_doc_type', 'UNKNOWN')
-        
+            document_type = classification_result.get("suggested_doc_type", "UNKNOWN")
+
         # Phase 2 & 3: Enhanced validation
         validation_result = policy_engine.validate_document(
-            content, file.filename, document_type, extracted_text, 
-            {"case_id": case_id} if case_id else {}
+            content,
+            file.filename,
+            document_type,
+            extracted_text,
+            {"case_id": case_id} if case_id else {},
         )
-        
+
         # Phase 2: Language analysis
-        from translation_gate import translation_gate
+        from backend.utils.translation.gate import translation_gate
+
         language_analysis = translation_gate.analyze_document_language(
             extracted_text, document_type, file.filename
         )
-        
+
         # Combine all results
         enhanced_analysis = {
             "validation_result": validation_result,
@@ -8816,34 +3339,35 @@ async def analyze_with_ai_enhanced(
             "phase_2_features": {
                 "enhanced_field_extraction": bool(validation_result.get("fields")),
                 "translation_requirements": language_analysis.get("requires_action", False),
-                "high_precision_validation": True
+                "high_precision_validation": True,
             },
             "phase_3_features": {
                 "document_classification": document_type != "UNKNOWN",
                 "consistency_ready": True,
-                "advanced_scoring": validation_result.get("overall_score", 0.0)
-            }
+                "advanced_scoring": validation_result.get("overall_score", 0.0),
+            },
         }
-        
+
         return {
             "status": "success",
             "enhanced_analysis": enhanced_analysis,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error in enhanced sistema analysis: {e}")
         raise HTTPException(status_code=500, detail=f"Enhanced analysis failed: {str(e)}")
 
+
 # Case Finalizer Capabilities Endpoint
 @api_router.get("/cases/{case_id}/finalize/capabilities")
-async def get_case_finalizer_capabilities(case_id: str, current_user = Depends(get_current_user)):
+async def get_case_finalizer_capabilities(case_id: str, current_user=Depends(get_current_user)):
     """Retorna capacidades disponíveis no Case Finalizer completo"""
     try:
         # Importação movida para o topo
-        
+
         return {
             "status": "success",
             "capabilities": {
@@ -8855,1473 +3379,128 @@ async def get_case_finalizer_capabilities(case_id: str, current_user = Depends(g
                     "fee_calculator": True,
                     "address_lookup": True,
                     "timeline_estimation": True,
-                    "quality_scoring": True
+                    "quality_scoring": True,
                 },
                 "supported_languages": ["pt", "en"],
                 "postage_options": ["USPS", "FedEx", "UPS"],
                 "file_formats": ["PDF"],
-                "max_file_size_mb": 100
+                "max_file_size_mb": 100,
             },
             "version": "2.0.0-complete",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
-        
+
     except Exception as e:
         logger.error(f"Error getting capabilities: {e}")
         raise HTTPException(status_code=500, detail="Erro ao obter capacidades")
 
+
 # Case Finalizer Download Endpoints
 @api_router.get("/download/instructions/{job_id}")
-async def download_instructions(job_id: str, current_user = Depends(get_current_user)):
+async def download_instructions(job_id: str, current_user=Depends(get_current_user)):
     """Download das instruções geradas"""
     try:
         # Importação movida para o topo
         from fastapi.responses import JSONResponse
-        
+
         job_status = case_finalizer_complete.get_job_status(job_id)
-        
+
         if not job_status["success"]:
             raise HTTPException(status_code=404, detail="Job não encontrado")
-        
+
         job = job_status["job"]
-        
+
         if "instructions" not in job:
             raise HTTPException(status_code=400, detail="Instruções ainda não geradas")
-        
+
         instructions = job["instructions"]
-        
+
         # Retornar instruções como JSON (em produção real, geraria PDF)
-        return JSONResponse({
-            "type": "instructions",
-            "job_id": job_id,
-            "content": instructions,
-            "download_ready": True
-        })
-        
+        return JSONResponse(
+            {
+                "type": "instructions",
+                "job_id": job_id,
+                "content": instructions,
+                "download_ready": True,
+            }
+        )
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error downloading instructions: {e}")
         raise HTTPException(status_code=500, detail="Erro ao baixar instruções")
 
+
 @api_router.get("/download/checklist/{job_id}")
-async def download_checklist(job_id: str, current_user = Depends(get_current_user)):
+async def download_checklist(job_id: str, current_user=Depends(get_current_user)):
     """Download do checklist gerado"""
     try:
         # Importação movida para o topo
         from fastapi.responses import JSONResponse
-        
+
         job_status = case_finalizer_complete.get_job_status(job_id)
-        
+
         if not job_status["success"]:
             raise HTTPException(status_code=404, detail="Job não encontrado")
-        
+
         job = job_status["job"]
-        
+
         if "checklist" not in job:
             raise HTTPException(status_code=400, detail="Checklist ainda não gerado")
-        
+
         checklist = job["checklist"]
-        
-        return JSONResponse({
-            "type": "checklist",
-            "job_id": job_id,
-            "content": checklist,
-            "download_ready": True
-        })
-        
+
+        return JSONResponse(
+            {"type": "checklist", "job_id": job_id, "content": checklist, "download_ready": True}
+        )
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error downloading checklist: {e}")
         raise HTTPException(status_code=500, detail="Erro ao baixar checklist")
 
+
 @api_router.get("/download/master-packet/{job_id}")
-async def download_master_packet(job_id: str, current_user = Depends(get_current_user)):
+async def download_master_packet(job_id: str, current_user=Depends(get_current_user)):
     """Download do master packet (PDF)"""
     try:
         # Importação movida para o topo
-        from fastapi.responses import FileResponse
         import os
-        
+
+        from fastapi.responses import FileResponse
+
         job_status = case_finalizer_complete.get_job_status(job_id)
-        
+
         if not job_status["success"]:
             raise HTTPException(status_code=404, detail="Job não encontrado")
-        
+
         job = job_status["job"]
-        
+
         if "master_packet" not in job:
             raise HTTPException(status_code=400, detail="Master packet ainda não criado")
-        
+
         master_packet = job["master_packet"]
-        
+
         if not master_packet["success"]:
             raise HTTPException(status_code=500, detail="Erro na criação do master packet")
-        
+
         packet_path = master_packet["packet_path"]
-        
+
         if not os.path.exists(packet_path):
             raise HTTPException(status_code=404, detail="Arquivo do master packet não encontrado")
-        
+
         return FileResponse(
-            path=packet_path,
-            filename=f"master_packet_{job_id}.pdf",
-            media_type="application/pdf"
+            path=packet_path, filename=f"master_packet_{job_id}.pdf", media_type="application/pdf"
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error downloading master packet: {e}")
         raise HTTPException(status_code=500, detail="Erro ao baixar master packet")
 
-# ===== OWL AGENT AUTHENTICATION & PERSISTENCE SYSTEM =====
-
-@api_router.post("/owl-agent/auth/register")
-async def register_owl_user(request: dict):
-    """Register user for saving progress with email and password"""
-    try:
-        # EMAIL BYPASS FOR TESTING
-        email_bypass = os.environ.get('EMAIL_BYPASS_FOR_TESTING', 'FALSE').upper() == 'TRUE'
-        test_email_domain = os.environ.get('TEST_EMAIL_DOMAIN', 'test.local')
-        
-        email = request.get("email", "").strip().lower()
-        password = request.get("password", "")
-        name = request.get("name", "")
-        
-        is_test_email = email.endswith(f"@{test_email_domain}")
-        
-        if not email or not password or len(password) < 6:
-            raise HTTPException(status_code=400, detail="Email and password (min 6 chars) are required")
-        
-        # Check if user already exists
-        existing_user = await db.owl_users.find_one({"email": email})
-        if existing_user:
-            raise HTTPException(status_code=409, detail="User already exists")
-        
-        # Hash password
-        import bcrypt
-        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        
-        # Create user
-        user_data = {
-            "user_id": f"owl_user_{int(time_module.time())}_{uuid.uuid4().hex[:8]}",
-            "email": email,
-            "name": name,
-            "password_hash": hashed_password,
-            "email_verified": True if (email_bypass and is_test_email) else False,
-            "is_test_user": is_test_email if email_bypass else False,
-            "created_at": datetime.utcnow(),
-            "active_sessions": [],
-            "completed_applications": []
-        }
-        
-        result = await db.owl_users.insert_one(user_data)
-        
-        if email_bypass and is_test_email:
-            logger.info(f"🧪 TEST MODE: Owl user registered with email bypass for {email}")
-        
-        response_data = {
-            "success": True,
-            "message": "User registered successfully",
-            "user_id": user_data["user_id"],
-            "email": email,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-        
-        if email_bypass and is_test_email:
-            response_data["test_mode"] = True
-            response_data["message"] = "🧪 TEST MODE: User registered (email verification bypassed)"
-        
-        return response_data
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error registering owl user: {e}")
-        raise HTTPException(status_code=500, detail=f"Registration error: {str(e)}")
-
-@api_router.post("/owl-agent/auth/login")
-async def login_owl_user(request: dict):
-    """Login user to access saved progress"""
-    try:
-        # EMAIL BYPASS FOR TESTING
-        email_bypass = os.environ.get('EMAIL_BYPASS_FOR_TESTING', 'FALSE').upper() == 'TRUE'
-        test_email_domain = os.environ.get('TEST_EMAIL_DOMAIN', 'test.local')
-        
-        email = request.get("email", "").strip().lower()
-        password = request.get("password", "")
-        
-        is_test_email = email.endswith(f"@{test_email_domain}")
-        
-        if not email or not password:
-            raise HTTPException(status_code=400, detail="Email and password are required")
-        
-        # Find user
-        user = await db.owl_users.find_one({"email": email})
-        if not user:
-            raise HTTPException(status_code=401, detail="Invalid email or password")
-        
-        # Verify password - bypass for test emails
-        import bcrypt
-        if email_bypass and is_test_email:
-            logger.info(f"🧪 TEST MODE: Owl login bypass active for {email}")
-            password_valid = True
-        else:
-            password_valid = bcrypt.checkpw(password.encode('utf-8'), user["password_hash"])
-        
-        if not password_valid:
-            raise HTTPException(status_code=401, detail="Invalid email or password")
-        
-        # Update last login
-        await db.owl_users.update_one(
-            {"user_id": user["user_id"]},
-            {"$set": {"last_login": datetime.utcnow()}}
-        )
-        
-        # Get user's sessions
-        sessions = await db.owl_sessions.find({
-            "user_email": email,
-            "status": {"$in": ["active", "paused", "saved_for_later", "in_progress"]}
-        }).to_list(length=None)
-        
-        # Serialize sessions
-        serialized_sessions = serialize_doc(sessions)
-        
-        response_data = {
-            "success": True,
-            "message": "Login successful",
-            "user": {
-                "user_id": user["user_id"],
-                "email": user["email"],
-                "name": user.get("name", "")
-            },
-            "saved_sessions": serialized_sessions,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-        
-        if email_bypass and is_test_email:
-            response_data["test_mode"] = True
-            response_data["message"] = "🧪 TEST MODE: Login successful (password verification bypassed)"
-        
-        return response_data
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error logging in owl user: {e}")
-        raise HTTPException(status_code=500, detail=f"Login error: {str(e)}")
-
-# Alternative endpoint for login (supports different URL patterns)
-@api_router.post("/owl/login")  
-async def login_owl_user_alt(request: dict):
-    """Alternative login endpoint for Owl Agent"""
-    return await login_owl_user(request)
-
-@api_router.post("/owl-agent/save-for-later")
-async def save_session_for_later(request: dict):
-    """Save current session for later completion (requires user authentication)"""
-    try:
-        session_id = request.get("session_id")
-        user_email = request.get("user_email", "").strip().lower()
-        
-        if not session_id or not user_email:
-            raise HTTPException(status_code=400, detail="session_id and user_email are required")
-        
-        # Verify user exists
-        user = await db.owl_users.find_one({"email": user_email})
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        
-        # Get current session
-        session = await db.owl_sessions.find_one({"session_id": session_id})
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
-        
-        # Update session with user info and save status
-        update_data = {
-            "user_email": user_email,
-            "user_id": user["user_id"],
-            "status": "saved_for_later",
-            "saved_at": datetime.utcnow(),
-            "last_updated": datetime.utcnow()
-        }
-        
-        await db.owl_sessions.update_one(
-            {"session_id": session_id},
-            {"$set": update_data}
-        )
-        
-        # Update user's active sessions
-        await db.owl_users.update_one(
-            {"user_id": user["user_id"]},
-            {
-                "$addToSet": {"active_sessions": session_id},
-                "$set": {"last_activity": datetime.utcnow()}
-            }
-        )
-        
-        return {
-            "success": True,
-            "message": "Session saved for later completion",
-            "session_id": session_id,
-            "user_email": user_email,
-            "saved_at": datetime.utcnow().isoformat()
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error saving session for later: {e}")
-        raise HTTPException(status_code=500, detail=f"Save error: {str(e)}")
-
-@api_router.get("/owl-agent/user-sessions/{user_email}")
-async def get_user_sessions(user_email: str):
-    """Get all saved sessions for a user"""
-    try:
-        user_email = user_email.strip().lower()
-        
-        # Verify user exists
-        user = await db.owl_users.find_one({"email": user_email})
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        
-        # Get user's sessions
-        sessions_cursor = db.owl_sessions.find({
-            "user_email": user_email,
-            "status": {"$in": ["active", "paused", "saved_for_later", "in_progress"]}
-        }).sort("last_updated", -1)
-        
-        sessions = await sessions_cursor.to_list(length=None)
-        
-        # Serialize sessions to handle ObjectId
-        serialized_sessions = serialize_doc(sessions)
-        
-        # Get progress for each session
-        for session in serialized_sessions:
-            responses_count = await db.owl_responses.count_documents({"session_id": session["session_id"]})
-            session["progress_percentage"] = min(100, (responses_count / session.get("total_fields", 1)) * 100)
-            session["responses_count"] = responses_count
-        
-        return {
-            "success": True,
-            "user_email": user_email,
-            "sessions": serialized_sessions,
-            "total_sessions": len(serialized_sessions),
-            "timestamp": datetime.utcnow().isoformat()
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error getting user sessions: {e}")
-        raise HTTPException(status_code=500, detail=f"Session error: {str(e)}")
-
-# Alternative endpoint for user sessions (supports different URL patterns)
-@api_router.get("/owl/user-sessions/{user_email}")
-async def get_user_sessions_alt(user_email: str):
-    """Alternative endpoint to get user sessions"""
-    return await get_user_sessions(user_email)
-
-# POST version for cases where email contains special characters
-@api_router.post("/owl/user-sessions")
-async def get_user_sessions_by_post(request: dict):
-    """Get user sessions via POST (for emails with special chars)"""
-    user_email = request.get("email", "").strip().lower()
-    if not user_email:
-        raise HTTPException(status_code=400, detail="Email is required")
-    return await get_user_sessions(user_email)
-
-@api_router.post("/owl-agent/resume-session")
-async def resume_saved_session(request: dict):
-    """Resume a previously saved session"""
-    try:
-        session_id = request.get("session_id")
-        user_email = request.get("user_email", "").strip().lower()
-        
-        if not session_id or not user_email:
-            raise HTTPException(status_code=400, detail="session_id and user_email are required")
-        
-        # Verify session belongs to user
-        session = await db.owl_sessions.find_one({
-            "session_id": session_id,
-            "user_email": user_email
-        })
-        
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found or access denied")
-        
-        # Update session status to active
-        await db.owl_sessions.update_one(
-            {"session_id": session_id},
-            {
-                "$set": {
-                    "status": "active",
-                    "resumed_at": datetime.utcnow(),
-                    "last_updated": datetime.utcnow()
-                }
-            }
-        )
-        
-        # Get all responses for this session
-        responses_cursor = db.owl_responses.find({"session_id": session_id})
-        responses = await responses_cursor.to_list(length=None)
-        
-        # Serialize session and responses
-        serialized_session = serialize_doc(session)
-        serialized_responses = serialize_doc(responses)
-        
-        return {
-            "success": True,
-            "message": "Session resumed successfully",
-            "session": serialized_session,
-            "responses": serialized_responses,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error resuming session: {e}")
-        raise HTTPException(status_code=500, detail=f"Resume error: {str(e)}")
-
-# ===== OWL AGENT FINAL PHASE - PAYMENT & DOWNLOAD SYSTEM =====
-
-@api_router.post("/owl-agent/initiate-payment")
-async def initiate_owl_payment(request: dict):
-    """Initiate payment for completed USCIS form download"""
-    try:
-        session_id = request.get("session_id")
-        delivery_method = request.get("delivery_method", "download")  # "download" or "email"
-        origin_url = request.get("origin_url")
-        user_email = request.get("user_email", "").strip().lower()
-        
-        # Validate required fields
-        if not session_id:
-            raise HTTPException(status_code=400, detail="session_id is required")
-        
-        if not origin_url:
-            raise HTTPException(status_code=400, detail="origin_url is required")
-        
-        # Verify session exists and is completed
-        session = await db.owl_sessions.find_one({"session_id": session_id})
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
-        
-        # Check if session is completed
-        responses_count = await db.owl_responses.count_documents({"session_id": session_id})
-        completion_percentage = (responses_count / session.get("total_fields", 1)) * 100
-        
-        if completion_percentage < 90:  # Allow some flexibility
-            raise HTTPException(status_code=400, detail="Application not completed yet")
-        
-        # Fixed pricing packages (security - never accept amount from frontend)
-        PACKAGES = {
-            "download_only": {"amount": 29.99, "name": "Download Formulário USCIS", "description": "Download imediato do formulário preenchido"},
-            "download_email": {"amount": 34.99, "name": "Download + Email", "description": "Download + envio por email"},
-            "email_only": {"amount": 24.99, "name": "Envio por Email", "description": "Formulário enviado por email"}
-        }
-        
-        # Determine package based on delivery method
-        if delivery_method == "download":
-            package_key = "download_only"
-        elif delivery_method == "email":
-            package_key = "email_only"
-        elif delivery_method == "both":
-            package_key = "download_email"
-        else:
-            package_key = "download_only"
-        
-        package = PACKAGES[package_key]
-        amount = package["amount"]
-        
-        # Initialize Stripe checkout
-        from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionRequest
-        
-        stripe_api_key = os.environ.get('STRIPE_API_KEY')
-        if not stripe_api_key:
-            raise HTTPException(status_code=500, detail="Stripe configuration missing")
-        
-        host_url = origin_url
-        webhook_url = f"{host_url}/api/webhook/stripe"
-        stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=webhook_url)
-        
-        # Build success and cancel URLs
-        success_url = f"{origin_url}/owl-agent/payment-success?session_id={{CHECKOUT_SESSION_ID}}"
-        cancel_url = f"{origin_url}/owl-agent"
-        
-        # Create checkout session with metadata
-        metadata = {
-            "owl_session_id": session_id,
-            "delivery_method": delivery_method,
-            "user_email": user_email,
-            "visa_type": session.get("visa_type", ""),
-            "package_key": package_key
-        }
-        
-        checkout_request = CheckoutSessionRequest(
-            amount=amount,
-            currency="usd",
-            success_url=success_url,
-            cancel_url=cancel_url,
-            metadata=metadata
-        )
-        
-        checkout_session = await stripe_checkout.create_checkout_session(checkout_request)
-        
-        # Create payment transaction record
-        payment_data = {
-            "payment_id": f"OWL-PAY-{int(time_module.time())}-{uuid.uuid4().hex[:8]}",
-            "stripe_session_id": checkout_session.session_id,
-            "owl_session_id": session_id,
-            "user_email": user_email,
-            "amount": amount,
-            "currency": "usd",
-            "delivery_method": delivery_method,
-            "package_key": package_key,
-            "package_name": package["name"],
-            "visa_type": session.get("visa_type", ""),
-            "payment_status": "initiated",
-            "status": "pending",
-            "created_at": datetime.utcnow(),
-            "metadata": metadata
-        }
-        
-        await db.payment_transactions.insert_one(payment_data)
-        
-        return {
-            "success": True,
-            "checkout_url": checkout_session.url,
-            "session_id": checkout_session.session_id,
-            "amount": amount,
-            "currency": "usd",
-            "package": package,
-            "delivery_method": delivery_method,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error initiating owl payment: {e}")
-        raise HTTPException(status_code=500, detail=f"Error initiating payment: {str(e)}")
-
-@api_router.get("/owl-agent/payment-status/{stripe_session_id}")
-async def get_owl_payment_status(stripe_session_id: str):
-    """Get payment status and process completion"""
-    try:
-        # Get payment transaction
-        payment = await db.payment_transactions.find_one({"stripe_session_id": stripe_session_id})
-        if not payment:
-            raise HTTPException(status_code=404, detail="Payment not found")
-        
-        # Initialize Stripe checkout
-        from emergentintegrations.payments.stripe.checkout import StripeCheckout
-        
-        stripe_api_key = os.environ.get('STRIPE_API_KEY')
-        stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url="")
-        
-        # Get checkout status from Stripe
-        checkout_status = await stripe_checkout.get_checkout_status(stripe_session_id)
-        
-        # Update payment status if changed
-        if checkout_status.payment_status == 'paid' and payment.get("payment_status") != "completed":
-            # Payment completed - update status and process delivery
-            await db.payment_transactions.update_one(
-                {"stripe_session_id": stripe_session_id},
-                {
-                    "$set": {
-                        "payment_status": "completed",
-                        "status": "paid",
-                        "completed_at": datetime.utcnow(),
-                        "stripe_amount": checkout_status.amount_total,
-                        "stripe_currency": checkout_status.currency
-                    }
-                }
-            )
-            
-            # Process delivery (generate download link or send email)
-            await process_owl_delivery(stripe_session_id, payment)
-            
-        elif checkout_status.status == 'expired' and payment.get("status") != "expired":
-            # Payment expired
-            await db.payment_transactions.update_one(
-                {"stripe_session_id": stripe_session_id},
-                {
-                    "$set": {
-                        "payment_status": "failed",
-                        "status": "expired",
-                        "updated_at": datetime.utcnow()
-                    }
-                }
-            )
-        
-        # Get updated payment data
-        updated_payment = await db.payment_transactions.find_one({"stripe_session_id": stripe_session_id})
-        serialized_payment = serialize_doc(updated_payment)
-        
-        return {
-            "success": True,
-            "payment_status": checkout_status.payment_status,
-            "session_status": checkout_status.status,
-            "amount": checkout_status.amount_total / 100,  # Convert from cents
-            "currency": checkout_status.currency,
-            "payment_data": serialized_payment,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error getting owl payment status: {e}")
-        raise HTTPException(status_code=500, detail=f"Error getting payment status: {str(e)}")
-
-@api_router.post("/webhook/stripe")
-async def stripe_webhook(request: Request):
-    """Handle Stripe webhook events"""
-    try:
-        body = await request.body()
-        signature = request.headers.get("Stripe-Signature")
-        
-        from emergentintegrations.payments.stripe.checkout import StripeCheckout
-        
-        stripe_api_key = os.environ.get('STRIPE_API_KEY')
-        stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url="")
-        
-        # Handle webhook
-        webhook_response = await stripe_checkout.handle_webhook(body, signature)
-        
-        if webhook_response.event_type == "checkout.session.completed":
-            # Payment completed - update our records
-            await db.payment_transactions.update_one(
-                {"stripe_session_id": webhook_response.session_id},
-                {
-                    "$set": {
-                        "payment_status": "completed",
-                        "status": "paid",
-                        "webhook_processed_at": datetime.utcnow(),
-                        "stripe_event_id": webhook_response.event_id
-                    }
-                }
-            )
-            
-            # Get payment data and process delivery
-            payment = await db.payment_transactions.find_one({"stripe_session_id": webhook_response.session_id})
-            if payment:
-                await process_owl_delivery(webhook_response.session_id, payment)
-        
-        return {"status": "success", "event_type": webhook_response.event_type}
-        
-    except Exception as e:
-        logger.error(f"Error processing Stripe webhook: {e}")
-        raise HTTPException(status_code=500, detail=f"Webhook error: {str(e)}")
-
-async def process_owl_delivery(stripe_session_id: str, payment: dict):
-    """Process delivery of completed USCIS form"""
-    try:
-        owl_session_id = payment["owl_session_id"]
-        delivery_method = payment["delivery_method"]
-        user_email = payment.get("user_email")
-        
-        # Generate the completed USCIS form
-        form_result = await generate_final_uscis_form(owl_session_id)
-        
-        # Create secure download record
-        download_data = {
-            "download_id": f"DWN-{int(time_module.time())}-{uuid.uuid4().hex[:8]}",
-            "stripe_session_id": stripe_session_id,
-            "owl_session_id": owl_session_id,
-            "user_email": user_email,
-            "form_data": form_result,
-            "delivery_method": delivery_method,
-            "created_at": datetime.utcnow(),
-            "expires_at": datetime.utcnow() + timedelta(hours=24),  # 24-hour expiry
-            "download_count": 0,
-            "max_downloads": 3  # Allow up to 3 downloads
-        }
-        
-        await db.owl_downloads.insert_one(download_data)
-        
-        # Process delivery based on method
-        if delivery_method in ["email", "both"]:
-            await send_form_by_email(user_email, form_result, download_data["download_id"])
-        
-        # Update payment record with download info
-        await db.payment_transactions.update_one(
-            {"stripe_session_id": stripe_session_id},
-            {
-                "$set": {
-                    "download_id": download_data["download_id"],
-                    "delivery_processed_at": datetime.utcnow()
-                }
-            }
-        )
-        
-        logger.info(f"Owl delivery processed for session {owl_session_id}, method: {delivery_method}")
-        
-    except Exception as e:
-        logger.error(f"Error processing owl delivery: {e}")
-        # Don't raise exception to avoid webhook failures
-
-@api_router.get("/owl-agent/download/{download_id}")
-async def download_owl_form(download_id: str):
-    """Secure download of completed USCIS form"""
-    try:
-        # Get download record
-        download = await db.owl_downloads.find_one({"download_id": download_id})
-        if not download:
-            raise HTTPException(status_code=404, detail="Download not found")
-        
-        # Check expiry
-        if download.get("expires_at") and download["expires_at"] < datetime.utcnow():
-            raise HTTPException(status_code=410, detail="Download link expired")
-        
-        # Check download limit
-        if download.get("download_count", 0) >= download.get("max_downloads", 3):
-            raise HTTPException(status_code=429, detail="Download limit exceeded")
-        
-        # Get form data
-        form_data = download.get("form_data", {})
-        pdf_data = form_data.get("pdf_data")
-        
-        if not pdf_data:
-            raise HTTPException(status_code=500, detail="Form data not available")
-        
-        # Update download count
-        await db.owl_downloads.update_one(
-            {"download_id": download_id},
-            {
-                "$inc": {"download_count": 1},
-                "$set": {"last_downloaded_at": datetime.utcnow()}
-            }
-        )
-        
-        # Decode PDF data
-        import base64
-        pdf_bytes = base64.b64decode(pdf_data)
-        
-        # Create filename
-        visa_type = form_data.get("visa_type", "USCIS")
-        form_number = form_data.get("form_number", "Form")
-        filename = f"{form_number}_{visa_type}_{download['owl_session_id']}.pdf"
-        
-        return StreamingResponse(
-            io.BytesIO(pdf_bytes),
-            media_type="application/pdf",
-            headers={
-                "Content-Disposition": f"attachment; filename={filename}",
-                "Content-Length": str(len(pdf_bytes))
-            }
-        )
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error downloading owl form: {e}")
-        raise HTTPException(status_code=500, detail=f"Download error: {str(e)}")
-
-async def generate_final_uscis_form(owl_session_id: str) -> dict:
-    """Generate final USCIS form with all responses"""
-    try:
-        # Get session and responses
-        session = await db.owl_sessions.find_one({"session_id": owl_session_id})
-        responses_cursor = db.owl_responses.find({"session_id": owl_session_id})
-        responses = await responses_cursor.to_list(length=None)
-        
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
-        
-        # Get form template
-        form_template = await get_uscis_form_template(session["visa_type"])
-        
-        # Map responses to USCIS form
-        filled_form = await map_responses_to_uscis_form(responses, form_template, session["visa_type"])
-        
-        # Generate enhanced PDF with privacy notice
-        pdf_data = await generate_final_uscis_pdf(filled_form, session["visa_type"], owl_session_id)
-        
-        return {
-            "form_number": form_template["form_number"],
-            "form_title": form_template["form_title"],
-            "visa_type": session["visa_type"],
-            "completion_percentage": filled_form["completion_percentage"],
-            "pdf_data": pdf_data,
-            "generated_at": datetime.utcnow().isoformat()
-        }
-        
-    except Exception as e:
-        logger.error(f"Error generating final USCIS form: {e}")
-        raise e
-
-async def generate_final_uscis_pdf(filled_form: dict, visa_type: str, session_id: str) -> str:
-    """Generate final PDF with privacy notice"""
-    try:
-        from reportlab.lib.pagesizes import letter
-        from reportlab.pdfgen import canvas
-        from reportlab.lib.units import inch
-        import io
-        import base64
-        
-        buffer = io.BytesIO()
-        c = canvas.Canvas(buffer, pagesize=letter)
-        width, height = letter
-        
-        # Header
-        c.setFont("Helvetica-Bold", 18)
-        c.drawString(50, height - 50, f"USCIS {filled_form['form_number']}")
-        c.setFont("Helvetica", 12)
-        c.drawString(50, height - 75, filled_form['form_title'])
-        
-        # Privacy Notice - IMPORTANT
-        c.setFont("Helvetica-Bold", 14)
-        c.drawString(50, height - 120, "AVISO IMPORTANTE DE PRIVACIDADE - OSPREY")
-        
-        c.setFont("Helvetica", 10)
-        privacy_text = [
-            "• Este documento foi gerado pelo sistema Agente Coruja da Osprey",
-            "• OSPREY NÃO ARMAZENA seus dados pessoais após o download",
-            "• Após o download e/ou envio por email, todos os dados são PERMANENTEMENTE DELETADOS",
-            "• Este é seu único acesso ao formulário completo - faça backup se necessário",
-            "• Osprey não mantém cópias, não tem acesso futuro aos seus dados",
-            "• Responsabilidade pelos dados é transferida totalmente para você após este download",
-            "",
-            "IMPORTANT PRIVACY NOTICE - OSPREY",
-            "• This document was generated by Osprey's Owl Agent system",
-            "• OSPREY DOES NOT STORE your personal data after download",
-            "• After download and/or email delivery, all data is PERMANENTLY DELETED",
-            "• This is your only access to the complete form - backup if needed",
-            "• Osprey keeps no copies, has no future access to your data",
-            "• Data responsibility is fully transferred to you after this download"
-        ]
-        
-        y_position = height - 145
-        for line in privacy_text:
-            if line.startswith("IMPORTANT PRIVACY"):
-                c.setFont("Helvetica-Bold", 10)
-            elif line.startswith("•"):
-                c.setFont("Helvetica", 9)
-            else:
-                c.setFont("Helvetica", 9)
-            
-            c.drawString(50, y_position, line)
-            y_position -= 12
-        
-        # Form data
-        c.setFont("Helvetica-Bold", 12)
-        c.drawString(50, y_position - 20, "Dados do Formulário / Form Data:")
-        
-        y_position -= 45
-        c.setFont("Helvetica", 10)
-        
-        for field_label, field_value in filled_form['filled_fields'].items():
-            if y_position < 80:  # Start new page
-                c.showPage()
-                y_position = height - 50
-            
-            c.drawString(50, y_position, f"{field_label}: {field_value}")
-            y_position -= 15
-        
-        # Footer with deletion notice
-        c.setFont("Helvetica-Bold", 8)
-        c.drawString(50, 50, f"Gerado em: {datetime.utcnow().strftime('%d/%m/%Y %H:%M:%S')} UTC")
-        c.drawString(50, 35, f"Sessão: {session_id}")
-        c.drawString(50, 20, "AVISO: Seus dados serão DELETADOS do sistema Osprey após este download!")
-        
-        c.save()
-        buffer.seek(0)
-        pdf_bytes = buffer.read()
-        pdf_base64 = base64.b64encode(pdf_bytes).decode('utf-8')
-        
-        return pdf_base64
-        
-    except Exception as e:
-        logger.error(f"Error generating final PDF: {e}")
-        return "error_generating_pdf"
-
-async def send_form_by_email(email: str, form_data: dict, download_id: str):
-    """Send completed form by email"""
-    try:
-        # Mock email sending - in production integrate with SendGrid/AWS SES
-        logger.info(f"Email sent to {email} with download_id {download_id}")
-        
-        # In production, would send email with:
-        # - PDF attachment
-        # - Download link as backup
-        # - Privacy notice about data deletion
-        # - Instructions for form submission to USCIS
-        
-        return True
-        
-    except Exception as e:
-        logger.error(f"Error sending form by email: {e}")
-        return False
-
-# ===== END OWL AGENT PAYMENT & DOWNLOAD SYSTEM =====
-
-@api_router.post("/owl-agent/start-session")
-async def start_owl_session(request: dict):
-    """Start a new intelligent questionnaire session with Agente Coruja"""
-    try:
-        case_id = request.get("case_id")
-        visa_type = request.get("visa_type", "H-1B")
-        user_language = request.get("language", "pt")
-        user_email = request.get("user_email", "").strip().lower()  # Optional for anonymous sessions
-        session_type = request.get("session_type", "anonymous")  # "anonymous" or "authenticated"
-        
-        if not case_id:
-            # Generate case_id if not provided
-            case_id = f"OWL-{int(time_module.time())}-{uuid.uuid4().hex[:8]}"
-        
-        # Initialize Owl Agent
-        from intelligent_owl_agent import intelligent_owl
-        
-        # Start guided session
-        session_result = await intelligent_owl.start_guided_session(
-            case_id=case_id,
-            visa_type=visa_type,
-            user_language=user_language
-        )
-        
-        # Store session in database
-        session_data = {
-            "session_id": session_result["session_id"],
-            "case_id": case_id,
-            "visa_type": visa_type,
-            "language": user_language,
-            "session_type": session_type,
-            "status": "active",
-            "created_at": datetime.utcnow(),
-            "relevant_fields": session_result["relevant_fields"],
-            "current_field_index": 0,
-            "completed_fields": [],
-            "total_fields": session_result["total_fields"]
-        }
-        
-        # Add user info if authenticated session
-        if session_type == "authenticated" and user_email:
-            session_data["user_email"] = user_email
-            # Verify user exists
-            user = await db.owl_users.find_one({"email": user_email})
-            if user:
-                session_data["user_id"] = user["user_id"]
-        
-        await db.owl_sessions.insert_one(session_data)
-        
-        return {
-            "success": True,
-            "agent": "Agente Coruja - Sistema Inteligente de Questionários",
-            "session": session_result,
-            "session_type": session_type,
-            "user_email": user_email if user_email else None,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-        
-    except Exception as e:
-        logger.error(f"Error starting Owl session: {e}")
-        raise HTTPException(status_code=500, detail=f"Error starting session: {str(e)}")
-
-@api_router.get("/owl-agent/session/{session_id}")
-async def get_owl_session(session_id: str):
-    """Get current session status and progress"""
-    try:
-        from intelligent_owl_agent import intelligent_owl
-        
-        # Get session from database
-        session = await db.owl_sessions.find_one({"session_id": session_id}, {"_id": 0})
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
-        
-        # Get progress from Owl Agent
-        progress = await intelligent_owl.get_session_progress(session_id)
-        
-        return {
-            "success": True,
-            "session_data": session,
-            "progress": progress,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error getting Owl session: {e}")
-        raise HTTPException(status_code=500, detail=f"Error getting session: {str(e)}")
-
-@api_router.get("/owl-agent/field-guidance/{session_id}/{field_id}")
-async def get_field_guidance(session_id: str, field_id: str, current_value: str = "", user_context: dict = None):
-    """Get intelligent guidance for a specific field"""
-    try:
-        from intelligent_owl_agent import intelligent_owl
-        
-        # Get session
-        session = await db.owl_sessions.find_one({"session_id": session_id})
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
-        
-        # Get field guidance
-        guidance = await intelligent_owl.get_field_guidance(
-            field_id=field_id,
-            visa_type=session["visa_type"],
-            user_language=session["language"],
-            current_value=current_value,
-            user_context=user_context or {}
-        )
-        
-        return {
-            "success": True,
-            "field_guidance": guidance,
-            "session_id": session_id,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error getting field guidance: {e}")
-        raise HTTPException(status_code=500, detail=f"Error getting guidance: {str(e)}")
-
-@api_router.post("/owl-agent/validate-field")
-async def validate_field_input(request: dict):
-    """Validate user input for a specific field using sistema and Google APIs"""
-    try:
-        from intelligent_owl_agent import intelligent_owl
-        
-        session_id = request.get("session_id")
-        field_id = request.get("field_id")
-        user_input = request.get("user_input", "")
-        full_context = request.get("context", {})
-        
-        if not all([session_id, field_id]):
-            raise HTTPException(status_code=400, detail="session_id and field_id are required")
-        
-        # Get session
-        session = await db.owl_sessions.find_one({"session_id": session_id})
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
-        
-        # Validate field input
-        validation_result = await intelligent_owl.validate_field_input(
-            field_id=field_id,
-            user_input=user_input,
-            visa_type=session["visa_type"],
-            session_id=session_id,
-            full_context=full_context
-        )
-        
-        # Update session progress
-        if validation_result.get("overall_score", 0) >= 70:
-            # Mark field as completed
-            await db.owl_sessions.update_one(
-                {"session_id": session_id},
-                {
-                    "$addToSet": {"completed_fields": field_id},
-                    "$set": {"last_updated": datetime.utcnow()}
-                }
-            )
-        
-        return {
-            "success": True,
-            "validation": validation_result,
-            "score": validation_result.get("overall_score", 0),  # Add score at root level for easier access
-            "field_id": field_id,
-            "session_id": session_id,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error validating field: {e}")
-        raise HTTPException(status_code=500, detail=f"Error validating field: {str(e)}")
-
-@api_router.post("/owl-agent/save-response")
-async def save_field_response(request: dict):
-    """Save user response for a field"""
-    try:
-        session_id = request.get("session_id")
-        field_id = request.get("field_id")
-        user_response = request.get("user_response", "")
-        validation_score = request.get("validation_score", 0)
-        
-        if not all([session_id, field_id]):
-            raise HTTPException(status_code=400, detail="session_id and field_id are required")
-        
-        # Save response to database
-        response_data = {
-            "session_id": session_id,
-            "field_id": field_id,
-            "user_response": user_response,
-            "validation_score": validation_score,
-            "timestamp": datetime.utcnow()
-        }
-        
-        await db.owl_responses.insert_one(response_data)
-        
-        # Update session progress
-        await db.owl_sessions.update_one(
-            {"session_id": session_id},
-            {
-                "$set": {
-                    "last_updated": datetime.utcnow(),
-                    f"responses.{field_id}": user_response
-                }
-            }
-        )
-        
-        return {
-            "success": True,
-            "message": "Response saved successfully",
-            "session_id": session_id,
-            "field_id": field_id,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error saving response: {e}")
-        raise HTTPException(status_code=500, detail=f"Error saving response: {str(e)}")
-
-@api_router.post("/owl-agent/generate-uscis-form")
-async def generate_uscis_form(request: dict):
-    """Generate official USCIS form from questionnaire responses"""
-    try:
-        session_id = request.get("session_id")
-        
-        if not session_id:
-            raise HTTPException(status_code=400, detail="session_id is required")
-        
-        # Get session and responses
-        session = await db.owl_sessions.find_one({"session_id": session_id})
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
-        
-        responses_cursor = db.owl_responses.find({"session_id": session_id})
-        responses = await responses_cursor.to_list(length=None)
-        
-        # Get form template based on visa type
-        form_template = await get_uscis_form_template(session["visa_type"])
-        
-        # Map responses to USCIS form fields
-        filled_form = await map_responses_to_uscis_form(
-            responses=responses,
-            form_template=form_template,
-            visa_type=session["visa_type"]
-        )
-        
-        # Generate PDF
-        pdf_data = await generate_uscis_pdf(filled_form, session["visa_type"])
-        
-        # Save generated form
-        form_data = {
-            "session_id": session_id,
-            "case_id": session["case_id"],
-            "visa_type": session["visa_type"],
-            "filled_form": filled_form,
-            "pdf_data": pdf_data,
-            "status": "generated",
-            "created_at": datetime.utcnow()
-        }
-        
-        result = await db.owl_generated_forms.insert_one(form_data)
-        form_id = str(result.inserted_id)
-        
-        return {
-            "success": True,
-            "message": "USCIS form generated successfully",
-            "form_id": form_id,
-            "session_id": session_id,
-            "visa_type": session["visa_type"],
-            "pdf_available": True,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error generating USCIS form: {e}")
-        raise HTTPException(status_code=500, detail=f"Error generating form: {str(e)}")
-
-@api_router.get("/owl-agent/download-form/{form_id}")
-async def download_generated_form(form_id: str):
-    """Download generated USCIS form PDF"""
-    try:
-        from fastapi.responses import Response
-        import base64
-        
-        # Get generated form
-        form = await db.owl_generated_forms.find_one({"_id": ObjectId(form_id)})
-        if not form:
-            raise HTTPException(status_code=404, detail="Form not found")
-        
-        # Decode PDF data
-        pdf_bytes = base64.b64decode(form["pdf_data"])
-        
-        return Response(
-            content=pdf_bytes,
-            media_type="application/pdf",
-            headers={
-                "Content-Disposition": f"attachment; filename=uscis_{form['visa_type']}_{form['case_id']}.pdf"
-            }
-        )
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error downloading form: {e}")
-        raise HTTPException(status_code=500, detail=f"Error downloading form: {str(e)}")
-
-# Helper functions for USCIS form processing
-
-async def get_uscis_form_template(visa_type: str) -> Dict[str, Any]:
-    """Get USCIS form template based on visa type"""
-    
-    templates = {
-        "H-1B": {
-            "form_number": "I-129",
-            "form_title": "Petition for a Nonimmigrant Worker",
-            "sections": {
-                "part1_petition_info": ["petition_type", "requested_action", "total_workers"],
-                "part2_petitioner_info": ["company_name", "trade_name", "address", "ein"],
-                "part3_processing_info": ["consulate_processing", "change_of_status"],
-                "part4_beneficiary_info": ["full_name", "date_of_birth", "country_of_birth", "address"],
-                "part5_h_classification": ["h1b_classification", "academic_degree", "specialty_occupation"],
-                "part6_h_specific": ["lca_number", "wage_rate", "employment_start_date", "employment_end_date"]
-            }
-        },
-        "F-1": {
-            "form_number": "I-20",
-            "form_title": "Certificate of Eligibility for Nonimmigrant Student Status",
-            "sections": {
-                "student_info": ["full_name", "date_of_birth", "country_of_birth", "country_of_citizenship"],
-                "school_info": ["institution_name", "school_code", "program_of_study", "education_level"],
-                "financial_info": ["funding_source", "estimated_expenses", "sponsor_info"],
-                "program_info": ["program_start_date", "program_end_date", "english_proficiency"]
-            }
-        },
-        "I-485": {
-            "form_number": "I-485",
-            "form_title": "Register Permanent Residence or Adjust Status",
-            "sections": {
-                "applicant_info": ["full_name", "other_names", "date_of_birth", "country_of_birth"],
-                "current_status": ["current_immigration_status", "i94_number", "entry_date"],
-                "basis_for_application": ["adjustment_category", "priority_date", "petition_receipt"],
-                "background": ["immigration_history", "criminal_history", "medical_exam"]
-            }
-        }
-    }
-    
-    return templates.get(visa_type, templates["H-1B"])
-
-async def map_responses_to_uscis_form(responses: List[Dict], form_template: Dict, visa_type: str) -> Dict[str, Any]:
-    """Map questionnaire responses to official USCIS form fields"""
-    
-    # Create response lookup
-    response_lookup = {resp["field_id"]: resp["user_response"] for resp in responses}
-    
-    # Field mapping
-    field_mappings = {
-        "H-1B": {
-            "full_name": "1.a. Family Name (Last Name)",
-            "date_of_birth": "2.a. Date of Birth",
-            "place_of_birth": "2.b. Country of Birth", 
-            "current_address": "3.a. Current Physical Address",
-            "employer_name": "1.a. Legal Business Name",
-            "current_job": "5.a. Classification Sought",
-            "annual_income": "5.b. Rate of Pay"
-        },
-        "F-1": {
-            "full_name": "1. Family Name",
-            "date_of_birth": "3. Birth Date",
-            "place_of_birth": "4. Country of Birth",
-            "current_address": "5. Country of Citizenship"
-        }
-    }
-    
-    mappings = field_mappings.get(visa_type, field_mappings["H-1B"])
-    
-    # Fill form
-    filled_form = {}
-    for field_id, uscis_field in mappings.items():
-        if field_id in response_lookup:
-            filled_form[uscis_field] = response_lookup[field_id]
-    
-    return {
-        "form_number": form_template["form_number"],
-        "form_title": form_template["form_title"],
-        "filled_fields": filled_form,
-        "completion_percentage": len(filled_form) / len(mappings) * 100
-    }
-
-async def generate_uscis_pdf(filled_form: Dict, visa_type: str) -> str:
-    """Generate PDF from filled form data"""
-    try:
-        from reportlab.lib.pagesizes import letter
-        from reportlab.pdfgen import canvas
-        from reportlab.lib.units import inch
-        import io
-        import base64
-        
-        # Create PDF
-        buffer = io.BytesIO()
-        c = canvas.Canvas(buffer, pagesize=letter)
-        width, height = letter
-        
-        # Title
-        c.setFont("Helvetica-Bold", 16)
-        c.drawString(50, height - 50, f"USCIS Form {filled_form['form_number']}")
-        c.drawString(50, height - 70, filled_form['form_title'])
-        
-        # Add fields
-        c.setFont("Helvetica", 10)
-        y_position = height - 120
-        
-        for field_label, field_value in filled_form['filled_fields'].items():
-            c.drawString(50, y_position, f"{field_label}: {field_value}")
-            y_position -= 20
-            
-            if y_position < 50:  # Start new page
-                c.showPage()
-                y_position = height - 50
-        
-        # Add completion info
-        c.setFont("Helvetica-Italic", 8)
-        c.drawString(50, 50, f"Generated by Agente Coruja - {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC")
-        c.drawString(50, 35, f"Completion: {filled_form['completion_percentage']:.1f}%")
-        
-        c.save()
-        
-        # Convert to base64
-        buffer.seek(0)
-        pdf_bytes = buffer.read()
-        pdf_base64 = base64.b64encode(pdf_bytes).decode('utf-8')
-        
-        return pdf_base64
-        
-    except Exception as e:
-        logger.error(f"Error generating PDF: {e}")
-        # Return mock PDF data
-        return "mock_pdf_data_base64_encoded"
-
-# ===== END AGENTE CORUJA ENDPOINTS =====
-
-# ===== COMPLETENESS ANALYSIS SYSTEM =====
-from completeness_analyzer import CompletenessAnalyzer, CompletenessLevel
-
-# Initialize analyzer
-completeness_analyzer = CompletenessAnalyzer()
-
-class CompletenessAnalysisRequest(BaseModel):
-    """Request para análise de completude"""
-    visa_type: str
-    user_data: Dict[str, Any]
-    context: Optional[str] = None
-
-class SubmissionValidationRequest(BaseModel):
-    """Request para validação de submissão"""
-    case_id: str
-    confirm_warnings: bool = False
-
-@api_router.post("/analyze-completeness")
-async def analyze_completeness(request: CompletenessAnalysisRequest):
-    """Analisa completude e qualidade das informações fornecidas"""
-    try:
-        analysis = await completeness_analyzer.analyze_application_completeness(
-            visa_type=request.visa_type,
-            user_data=request.user_data,
-            application_context=request.context
-        )
-        
-        return {
-            "success": True,
-            "analysis": analysis
-        }
-    
-    except Exception as e:
-        logger.error(f"Error analyzing completeness: {e}")
-        raise HTTPException(status_code=500, detail=f"Error analyzing completeness: {str(e)}")
-
-@api_router.get("/visa-checklist/{visa_type}")
-async def get_visa_checklist(visa_type: str):
-    """Retorna checklist de requisitos para um tipo de visto"""
-    try:
-        checklist = completeness_analyzer.get_visa_checklist(visa_type)
-        
-        if not checklist.get("success"):
-            raise HTTPException(status_code=404, detail=checklist.get("message"))
-        
-        return checklist
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error getting visa checklist: {e}")
-        raise HTTPException(status_code=500, detail=f"Error getting checklist: {str(e)}")
-
-@api_router.post("/validate-submission")
-async def validate_submission(request: SubmissionValidationRequest):
-    """Valida se uma aplicação está pronta para submissão"""
-    try:
-        # Buscar caso no banco
-        case = await db.auto_cases.find_one({"id": request.case_id})
-        
-        if not case:
-            raise HTTPException(status_code=404, detail="Case not found")
-        
-        visa_type = case.get("form_code")
-        if not visa_type:
-            raise HTTPException(status_code=400, detail="Visa type not specified in case")
-        
-        # Coletar todos os dados do usuário do caso
-        user_data = {
-            "full_name": case.get("applicant_name"),
-            "dob": case.get("date_of_birth"),
-            "passport": case.get("passport_number"),
-            "current_address": case.get("current_address"),
-            "email": case.get("email"),
-            "phone": case.get("phone"),
-            **case.get("responses", {})
-        }
-        
-        # Analisar completude
-        analysis = await completeness_analyzer.analyze_application_completeness(
-            visa_type=visa_type,
-            user_data=user_data,
-            application_context=f"Case validation for {request.case_id}"
-        )
-        
-        # Determinar se pode submeter
-        can_submit = False
-        submission_message = ""
-        
-        if analysis["level"] == CompletenessLevel.CRITICAL:
-            can_submit = False
-            submission_message = "❌ Esta aplicação não pode ser finalizada no estado atual. Informações críticas estão faltando."
-        elif analysis["level"] == CompletenessLevel.WARNING:
-            if request.confirm_warnings:
-                can_submit = True
-                submission_message = "⚠️ Você optou por prosseguir mesmo com avisos. Recomendamos fortemente revisar com um advogado."
-            else:
-                can_submit = False
-                submission_message = "⚠️ Esta aplicação necessita melhorias. Você pode prosseguir assumindo os riscos, mas recomendamos completar as informações."
-        else:
-            can_submit = True
-            submission_message = "✅ Aplicação pronta para revisão final. Recomendamos revisar com advogado antes do envio ao USCIS."
-        
-        return {
-            "success": True,
-            "can_submit": can_submit,
-            "submission_message": submission_message,
-            "analysis": analysis,
-            "requires_confirmation": analysis["level"] == CompletenessLevel.WARNING and not request.confirm_warnings
-        }
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error validating submission: {e}")
-        raise HTTPException(status_code=500, detail=f"Error validating submission: {str(e)}")
 
 @api_router.patch("/auto-application/case/{case_id}/mode")
 async def update_case_mode(case_id: str, mode: str):
@@ -10329,40 +3508,33 @@ async def update_case_mode(case_id: str, mode: str):
     try:
         if mode not in ["draft", "submission"]:
             raise HTTPException(status_code=400, detail="Mode must be 'draft' or 'submission'")
-        
+
         # Atualizar caso
         result = await db.auto_cases.update_one(
-            {"id": case_id},
-            {
-                "$set": {
-                    "mode": mode,
-                    "mode_updated_at": datetime.utcnow()
-                }
-            }
+            {"id": case_id}, {"$set": {"mode": mode, "mode_updated_at": datetime.now(timezone.utc)}}
         )
-        
+
         if result.matched_count == 0:
             raise HTTPException(status_code=404, detail="Case not found")
-        
+
         return {
             "success": True,
             "message": f"Case mode updated to {mode}",
             "case_id": case_id,
-            "mode": mode
+            "mode": mode,
         }
-    
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error updating case mode: {e}")
         raise HTTPException(status_code=500, detail=f"Error updating mode: {str(e)}")
 
-# ===== END COMPLETENESS ANALYSIS SYSTEM =====
 
 # ===== CONVERSATIONAL ASSISTANT & SOCIAL PROOF =====
 # NOTA: Conversational Assistant DESATIVADO - Substituído por Alertas Proativos
-# from conversational_assistant import ConversationalAssistant, COMMON_QUESTIONS
-from social_proof_system import SocialProofSystem
+# from backend.agents.conversational_assistant import ConversationalAssistant, COMMON_QUESTIONS
+from backend.utils.social_proof import SocialProofSystem
 
 # Initialize systems
 # conversational_assistant = ConversationalAssistant()  # DESATIVADO
@@ -10374,91 +3546,96 @@ social_proof_system = SocialProofSystem()
 # @api_router.get("/conversational/common-questions")
 # @api_router.delete("/conversational/history/{session_id}")
 
+
 class SimilarCasesRequest(BaseModel):
     """Request para casos similares"""
+
     visa_type: str
     user_profile: Optional[Dict[str, Any]] = None
     limit: int = 3
+
 
 @api_router.post("/social-proof/similar-cases")
 async def get_similar_cases(request: SimilarCasesRequest):
     """Retorna casos similares de sucesso"""
     try:
         result = social_proof_system.get_similar_cases(
-            visa_type=request.visa_type,
-            user_profile=request.user_profile,
-            limit=request.limit
+            visa_type=request.visa_type, user_profile=request.user_profile, limit=request.limit
         )
-        
+
         if not result.get("success"):
             raise HTTPException(status_code=404, detail=result.get("message"))
-        
+
         return result
-    
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error getting similar cases: {e}")
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
+
 @api_router.get("/social-proof/statistics/{visa_type}")
 async def get_visa_statistics(visa_type: str):
     """Retorna estatísticas agregadas por tipo de visto"""
     try:
         result = social_proof_system.get_statistics(visa_type)
-        
+
         if not result.get("success"):
             raise HTTPException(status_code=404, detail=result.get("message"))
-        
+
         return result
-    
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error getting statistics: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @api_router.get("/social-proof/timeline-estimate/{visa_type}")
 async def get_timeline_estimate(visa_type: str, completeness: Optional[int] = None):
     """Estima timeline de processamento"""
     try:
         result = social_proof_system.get_timeline_estimate(
-            visa_type=visa_type,
-            user_completeness=completeness
+            visa_type=visa_type, user_completeness=completeness
         )
-        
+
         if not result.get("success"):
             raise HTTPException(status_code=404, detail=result.get("message"))
-        
+
         return result
-    
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error getting timeline estimate: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @api_router.get("/social-proof/success-factors/{visa_type}")
 async def get_success_factors(visa_type: str):
     """Retorna fatores que aumentam sucesso"""
     try:
         result = social_proof_system.get_success_factors(visa_type)
-        
+
         if not result.get("success"):
             raise HTTPException(status_code=404, detail=result.get("message"))
-        
+
         return result
-    
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error getting success factors: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 # ===== END CONVERSATIONAL ASSISTANT & SOCIAL PROOF =====
 
 # ===== ADAPTIVE LANGUAGE SYSTEM =====
-from adaptive_texts import ADAPTIVE_TEXTS, get_text, get_context_texts
+from backend.utils.adaptive_texts import ADAPTIVE_TEXTS, get_context_texts, get_text
+
 
 @api_router.get("/adaptive-texts/{context}")
 async def get_adaptive_texts(context: str, mode: str = "simple"):
@@ -10469,52 +3646,46 @@ async def get_adaptive_texts(context: str, mode: str = "simple"):
             return {
                 "success": True,
                 "mode": mode,
-                "texts": {ctx: ADAPTIVE_TEXTS[ctx][mode] for ctx in ADAPTIVE_TEXTS.keys()}
+                "texts": {ctx: ADAPTIVE_TEXTS[ctx][mode] for ctx in ADAPTIVE_TEXTS.keys()},
             }
-        
+
         texts = get_context_texts(context, mode)
-        
+
         if not texts:
             raise HTTPException(status_code=404, detail=f"Context '{context}' not found")
-        
-        return {
-            "success": True,
-            "context": context,
-            "mode": mode,
-            "texts": texts
-        }
-    
+
+        return {"success": True, "context": context, "mode": mode, "texts": texts}
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error getting adaptive texts: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @api_router.get("/adaptive-texts/{context}/{key}")
 async def get_adaptive_text(context: str, key: str, mode: str = "simple"):
     """Retorna um texto adaptativo específico"""
     try:
         text = get_text(context, key, mode)
-        
-        return {
-            "success": True,
-            "context": context,
-            "key": key,
-            "mode": mode,
-            "text": text
-        }
-    
+
+        return {"success": True, "context": context, "key": key, "mode": mode, "text": text}
+
     except Exception as e:
         logger.error(f"Error getting adaptive text: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 # ===== END ADAPTIVE LANGUAGE SYSTEM =====
 
 # ===== PROACTIVE ALERTS SYSTEM =====
-from proactive_alerts import ProactiveAlertSystem, AlertType, AlertPriority
+from backend.utils.proactive_alerts import (
+    AlertPriority,
+)
 
 # Initialize alert system (will be set in startup event after db is ready)
 alert_system = None
+
 
 @api_router.get("/alerts/{case_id}")
 async def get_case_alerts(case_id: str, include_dismissed: bool = False):
@@ -10524,59 +3695,53 @@ async def get_case_alerts(case_id: str, include_dismissed: bool = False):
             alerts = await alert_system.generate_alerts_for_case(case_id)
         else:
             alerts = await alert_system.get_active_alerts(case_id)
-        
-        return {
-            "success": True,
-            "case_id": case_id,
-            "alerts": alerts,
-            "total": len(alerts)
-        }
-    
+
+        return {"success": True, "case_id": case_id, "alerts": alerts, "total": len(alerts)}
+
     except Exception as e:
         logger.error(f"Error getting alerts: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @api_router.post("/alerts/{case_id}/dismiss/{alert_id}")
 async def dismiss_alert(case_id: str, alert_id: str):
     """Marca um alerta como dispensado"""
     try:
         success = await alert_system.mark_alert_dismissed(alert_id, case_id)
-        
+
         if success:
-            return {
-                "success": True,
-                "message": "Alert dismissed successfully"
-            }
+            return {"success": True, "message": "Alert dismissed successfully"}
         else:
             raise HTTPException(status_code=404, detail="Alert not found")
-    
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error dismissing alert: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @api_router.get("/alerts/{case_id}/summary")
 async def get_alerts_summary(case_id: str):
     """Retorna resumo de alertas por tipo e prioridade"""
     try:
         alerts = await alert_system.get_active_alerts(case_id)
-        
+
         # Contar por tipo
         by_type = {}
         for alert in alerts:
             alert_type = alert["type"]
             by_type[alert_type] = by_type.get(alert_type, 0) + 1
-        
+
         # Contar por prioridade
         by_priority = {}
         for alert in alerts:
             priority = alert["priority"]
             by_priority[priority] = by_priority.get(priority, 0) + 1
-        
+
         # Pegar alertas urgentes
         urgent_alerts = [a for a in alerts if a["priority"] == AlertPriority.URGENT]
-        
+
         return {
             "success": True,
             "case_id": case_id,
@@ -10584,12 +3749,13 @@ async def get_alerts_summary(case_id: str):
             "by_type": by_type,
             "by_priority": by_priority,
             "urgent_count": len(urgent_alerts),
-            "urgent_alerts": urgent_alerts[:3]  # Top 3 urgent
+            "urgent_alerts": urgent_alerts[:3],  # Top 3 urgent
         }
-    
+
     except Exception as e:
         logger.error(f"Error getting alerts summary: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 # ===== END PROACTIVE ALERTS SYSTEM =====
 
@@ -10597,7 +3763,7 @@ async def get_alerts_summary(case_id: str):
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_origins=os.environ.get("CORS_ORIGINS", "*").split(","),
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -10605,66 +3771,29 @@ app.add_middleware(
 # ===== SECURITY MIDDLEWARES (ATIVADOS) =====
 # Import security middlewares
 try:
-    from rate_limiter import RateLimiterMiddleware
-    from input_sanitizer import InputSanitizerMiddleware
-    
+    from utils.rate_limiter import RateLimiterMiddleware
+    from utils.sanitizer import InputSanitizerMiddleware
+
     # Add Rate Limiter Middleware
     app.add_middleware(RateLimiterMiddleware)
-    print("✅ Rate Limiter Middleware ATIVADO")
-    
+    logger.info("✅ Rate Limiter Middleware ATIVADO")
+
     # Add Input Sanitizer Middleware
     app.add_middleware(InputSanitizerMiddleware)
-    print("✅ Input Sanitizer Middleware ATIVADO")
-    
+    logger.info("✅ Input Sanitizer Middleware ATIVADO")
+
 except ImportError as e:
-    print(f"⚠️ Security middlewares not available: {e}")
+    logger.warning(f"⚠️ Security middlewares not available: {e}")
 # ===== END SECURITY MIDDLEWARES =====
 
-# Configure structured logging (JSON format)
-import json as json_logging
-import sys
-
-class JSONFormatter(logging.Formatter):
-    """Custom JSON formatter for structured logging"""
-    def format(self, record):
-        log_data = {
-            "timestamp": datetime.utcnow().isoformat(),
-            "level": record.levelname,
-            "logger": record.name,
-            "message": record.getMessage(),
-            "module": record.module,
-            "function": record.funcName,
-            "line": record.lineno
-        }
-        
-        # Add exception info if present
-        if record.exc_info:
-            log_data["exception"] = self.formatException(record.exc_info)
-        
-        # Add extra fields if present
-        if hasattr(record, 'user_id'):
-            log_data["user_id"] = record.user_id
-        if hasattr(record, 'case_id'):
-            log_data["case_id"] = record.case_id
-        if hasattr(record, 'request_id'):
-            log_data["request_id"] = record.request_id
-        
-        return json_logging.dumps(log_data)
-
-# Setup handler
-handler = logging.StreamHandler(sys.stdout)
-handler.setFormatter(JSONFormatter())
-
-# Configure root logger
-logging.basicConfig(
-    level=logging.INFO,
-    handlers=[handler]
-)
-logger = logging.getLogger(__name__)
+# Logging already configured at top of file
 
 # Import All AI Agents after logger is defined
+from backend.core.agents import set_agents
+
 try:
-    from oracle_consultant import consult_oracle, oracle
+    from backend.agents.oracle import consult_oracle, oracle
+
     logger.info("✅ Oráculo Jurídico carregado")
 except Exception as e:
     logger.warning(f"⚠️ Oráculo não disponível: {str(e)}")
@@ -10672,1823 +3801,52 @@ except Exception as e:
     consult_oracle = None
 
 try:
-    from document_analyzer_agent import document_analyzer, analyze_uploaded_document
+    from backend.documents.analyzer import (
+        DocumentAnalyzerAgent,
+        analyze_uploaded_document,
+    )
+
+    document_analyzer = DocumentAnalyzerAgent()
     logger.info("✅ Document Analyzer Agent carregado")
 except Exception as e:
     logger.warning(f"⚠️ Document Analyzer não disponível: {str(e)}")
     document_analyzer = None
+    analyze_uploaded_document = None
 
 try:
-    from form_filler_agent import form_filler, fill_form_automatically
+    from backend.forms.filler import fill_form_automatically, form_filler
+
     logger.info("✅ Form Filler Agent carregado")
 except Exception as e:
     logger.warning(f"⚠️ Form Filler não disponível: {str(e)}")
     form_filler = None
+    fill_form_automatically = None
 
 try:
-    from translation_agent import translator, translate_text
+    from utils.translation.agent import translate_text, translator
+
     logger.info("✅ Translation Agent carregado")
 except Exception as e:
     logger.warning(f"⚠️ Translation Agent não disponível: {str(e)}")
     translator = None
+    translate_text = None
 
-@app.on_event("startup")
-async def startup_db_client():
-    """Startup event to connect to MongoDB with optimized indexes"""
-    global client, db, alert_system
-    
-    try:
-        # MongoDB connection string - usually set via environment variable
-        mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/')
-        
-        client = AsyncIOMotorClient(mongo_url)
-        db = client[os.environ.get('DB_NAME', 'osprey_immigration_db')]  # Database name
-        
-        # Test the connection
-        await client.admin.command('ping')
-        
-        logger.info("Successfully connected to MongoDB!")
-        
-        # Initialize alert system with connected db
-        global alert_system
-        alert_system = ProactiveAlertSystem(db)
-        logger.info("Proactive Alert System initialized!")
-        
-        # Initialize Maria API with connected db
-        maria_api.init_db(db)
-        logger.info("✅ Maria - Assistente Virtual initialized!")
-        
-        # Initialize Admin Security module with connected db
-        init_admin_security_db(db)
-        logger.info("✅ Admin Security (RBAC) initialized!")
-        
-        # Initialize Products in MongoDB
-        await initialize_products_in_db(db)
-        logger.info("✅ Products initialized in MongoDB!")
-        
-        # Create optimized indexes for better performance
-        try:
-            # Helper function to safely create indexes
-            async def safe_create_index(collection, keys, **kwargs):
-                """Safely create an index, skipping if it already exists with same or compatible spec"""
-                try:
-                    await collection.create_index(keys, **kwargs)
-                except Exception as e:
-                    error_msg = str(e)
-                    # Only log if it's not a "already exists" type error
-                    if "already exists" not in error_msg.lower() and "IndexOptionsConflict" not in error_msg and "IndexKeySpecsConflict" not in error_msg:
-                        logger.warning(f"Error creating index {keys} on {collection.name}: {error_msg}")
-            
-            # Auto-application cases indexes
-            await safe_create_index(db.auto_cases, "case_id", unique=True)
-            await safe_create_index(db.auto_cases, "user_id")
-            await safe_create_index(db.auto_cases, "session_token")
-            await safe_create_index(db.auto_cases, "status")
-            await safe_create_index(db.auto_cases, "created_at")
-            await safe_create_index(db.auto_cases, [("user_id", 1), ("status", 1)])
-            
-            # Users indexes
-            await safe_create_index(db.users, "email", unique=True)
-            await safe_create_index(db.users, "id", unique=True)
-            
-            # Documents indexes
-            await safe_create_index(db.documents, "user_id")
-            await safe_create_index(db.documents, "document_type")
-            await safe_create_index(db.documents, "case_id")
-            await safe_create_index(db.documents, [("user_id", 1), ("document_type", 1)])
-            
-            # Chat history indexes for sistema interactions
-            await safe_create_index(db.chat_history, "user_id")
-            await safe_create_index(db.chat_history, "session_id")
-            await safe_create_index(db.chat_history, "created_at")
-            
-            # Owl Agent indexes
-            await safe_create_index(db.owl_sessions, "session_id", unique=True)
-            await safe_create_index(db.owl_sessions, "case_id")
-            await safe_create_index(db.owl_sessions, "status")
-            await safe_create_index(db.owl_sessions, "created_at")
-            
-            await safe_create_index(db.owl_responses, "session_id")
-            await safe_create_index(db.owl_responses, "field_id")
-            await safe_create_index(db.owl_responses, "timestamp")
-            
-            await safe_create_index(db.owl_generated_forms, "session_id")
-            await safe_create_index(db.owl_generated_forms, "case_id")
-            await safe_create_index(db.owl_generated_forms, "visa_type")
-            await safe_create_index(db.owl_generated_forms, "created_at")
-            
-            # Owl Agent user authentication indexes
-            await safe_create_index(db.owl_users, "email", unique=True)
-            await safe_create_index(db.owl_users, "user_id", unique=True)
-            await safe_create_index(db.owl_users, "created_at")
-            
-            # Owl Agent payment and download indexes
-            # Use sparse=True para permitir múltiplos documentos sem stripe_session_id
-            await safe_create_index(db.payment_transactions, "stripe_session_id", unique=True, sparse=True)
-            await safe_create_index(db.payment_transactions, "owl_session_id")
-            await safe_create_index(db.payment_transactions, "user_email")
-            await safe_create_index(db.payment_transactions, "payment_status")
-            await safe_create_index(db.payment_transactions, "created_at")
-            
-            await safe_create_index(db.owl_downloads, "download_id", unique=True)
-            await safe_create_index(db.owl_downloads, "stripe_session_id")
-            await safe_create_index(db.owl_downloads, "owl_session_id")
-            
-            # Maria conversations indexes
-            await safe_create_index(db.maria_conversations, "conversation_id")
-            await safe_create_index(db.maria_conversations, "user_id")
-            await safe_create_index(db.maria_conversations, "timestamp")
-            await safe_create_index(db.maria_conversations, [("conversation_id", 1), ("timestamp", 1)])
-            await safe_create_index(db.owl_downloads, "expires_at")
-            
-            logger.info("Database indexes created successfully for optimized performance!")
-            
-        except Exception as index_error:
-            logger.warning(f"Some indexes may already exist: {str(index_error)}")
-        
-        # Initialize and start Visa Update Scheduler
-        try:
-            from scheduler_visa_updates import get_visa_update_scheduler
-            
-            llm_key = os.environ.get('EMERGENT_LLM_KEY')
-            if llm_key:
-                global visa_scheduler
-                visa_scheduler = get_visa_update_scheduler(db, llm_key)
-                visa_scheduler.start()
-                logger.info("✅ Visa Update Scheduler started successfully!")
-            else:
-                logger.warning("⚠️ EMERGENT_LLM_KEY not found - Visa update scheduler not started")
-                
-        except Exception as scheduler_error:
-            logger.error(f"❌ Failed to start visa update scheduler: {str(scheduler_error)}")
-        
-        # Initialize and start MongoDB Backup Scheduler
-        # DEPLOYMENT FIX: Skip backup in production (Atlas has native backups)
-        try:
-            # Only enable backup for local MongoDB (not Atlas)
-            mongo_url = os.environ.get('MONGO_URL', '')
-            if 'localhost' in mongo_url or '127.0.0.1' in mongo_url:
-                from mongodb_backup import mongodb_backup
-                # Start background backup task
-                asyncio.create_task(mongodb_backup.schedule_daily_backup())
-                logger.info("✅ MongoDB Backup Scheduler started (daily at 3AM UTC)")
-            else:
-                logger.info("ℹ️ MongoDB Backup Scheduler skipped (using managed MongoDB Atlas)")
-        except Exception as backup_error:
-            logger.warning(f"⚠️ MongoDB Backup Scheduler not started: {str(backup_error)}")
-        
-        # Start rate limiter cleanup task
-        try:
-            from rate_limiter import rate_limiter
-            asyncio.create_task(rate_limiter.cleanup_old_entries())
-            logger.info("✅ Rate Limiter cleanup task started")
-        except Exception as rate_limiter_error:
-            logger.warning(f"⚠️ Rate Limiter cleanup not started: {str(rate_limiter_error)}")
-        
-    except Exception as e:
-        logger.error(f"Error connecting to MongoDB: {str(e)}")
-        raise e
+set_agents(
+    oracle_instance=oracle,
+    consult_oracle_fn=consult_oracle,
+    document_analyzer_instance=document_analyzer,
+    form_filler_instance=form_filler,
+    translator_instance=translator,
+    analyze_uploaded_document_fn=analyze_uploaded_document,
+    fill_form_automatically_fn=fill_form_automatically,
+    translate_text_fn=translate_text,
+)
 
 # Endpoints duplicados removidos - versões corretas estão acima
-# ============================================================================
-# PAYMENT ENDPOINTS - STRIPE INTEGRATION
-# ============================================================================
-
-@api_router.post("/payment/create-payment-intent")
-async def create_payment_intent_endpoint(request: Request):
-    """Cria PaymentIntent para checkout integrado (Stripe Elements) com suporte a vouchers"""
-    try:
-        body = await request.json()
-        visa_code = body.get("visa_code")
-        case_id = body.get("case_id")
-        voucher_code = body.get("voucher_code")  # Opcional
-        
-        if not visa_code or not case_id:
-            raise HTTPException(status_code=400, detail="visa_code e case_id são obrigatórios")
-        
-        # TESTING MODE: Skip payment if enabled
-        skip_payment = os.environ.get('SKIP_PAYMENT_FOR_TESTING', 'FALSE').upper() == 'TRUE'
-        
-        if skip_payment:
-            logger.info(f"🧪 TESTING MODE: Skipping payment for {visa_code} - {case_id}")
-            
-            # Get product info for display
-            product = await get_product_for_checkout(db, visa_code)
-            original_price = product['price'] if product else 0
-            
-            # Mark as paid directly (testing mode)
-            transaction = {
-                "transaction_id": f"TEST-{case_id}",
-                "case_id": case_id,
-                "visa_code": visa_code,
-                "amount": 0.0,
-                "original_amount": original_price,
-                "discount_percentage": 100.0,
-                "voucher_code": "TESTING_MODE",
-                "currency": "usd",
-                "status": "completed",
-                "payment_method": "testing_mode",
-                "created_at": datetime.utcnow()
-            }
-            await db.payment_transactions.insert_one(transaction)
-            
-            # Update case as paid
-            await db.auto_cases.update_one(
-                {"case_id": case_id},
-                {
-                    "$set": {
-                        "payment_status": "completed",
-                        "payment_info": {
-                            "amount": 0.0,
-                            "original_amount": original_price,
-                            "discount": 100.0,
-                            "voucher_code": "TESTING_MODE",
-                            "payment_date": datetime.utcnow(),
-                            "method": "testing_bypass"
-                        }
-                    }
-                }
-            )
-            
-            return {
-                "success": True,
-                "free": True,
-                "testing_mode": True,
-                "message": "🧪 TESTING MODE: Payment skipped for testing purposes",
-                "original_price": original_price,
-                "final_price": 0.0,
-                "discount_percentage": 100.0,
-                "package": product
-            }
-        
-        # Buscar informações do produto
-        product = await get_product_for_checkout(db, visa_code)
-        
-        if not product:
-            raise HTTPException(status_code=404, detail=f"Produto {visa_code} não encontrado")
-        
-        original_price = product['price']
-        final_price = original_price
-        discount_percentage = 0.0
-        voucher_applied = None
-        
-        # Validar e aplicar voucher se fornecido
-        if voucher_code:
-            from voucher_system import validate_voucher, increment_voucher_usage
-            
-            validation_result = await validate_voucher(voucher_code, visa_code, db)
-            
-            if validation_result.valid:
-                discount_percentage = validation_result.discount_percentage
-                final_price = original_price * (1 - discount_percentage / 100)
-                voucher_applied = voucher_code
-                
-                # Incrementar uso do voucher
-                await increment_voucher_usage(voucher_code, db)
-                
-                logger.info(f"✅ Voucher {voucher_code} aplicado: {discount_percentage}% de desconto")
-            else:
-                logger.warning(f"⚠️  Voucher {voucher_code} inválido: {validation_result.message}")
-        
-        # Se o desconto é 100%, não criar PaymentIntent (gratuito)
-        if discount_percentage >= 100.0:
-            logger.info(f"🎁 GRATUIDADE TOTAL com voucher {voucher_code} - Pulando pagamento")
-            
-            # Marcar como pago diretamente
-            transaction = {
-                "transaction_id": f"FREE-{case_id}",
-                "case_id": case_id,
-                "visa_code": visa_code,
-                "amount": 0.0,
-                "original_amount": original_price,
-                "discount_percentage": 100.0,
-                "voucher_code": voucher_code,
-                "currency": "usd",
-                "status": "completed",
-                "payment_method": "voucher_100",
-                "created_at": datetime.utcnow()
-            }
-            await db.payment_transactions.insert_one(transaction)
-            
-            # Atualizar caso como pago
-            await db.auto_cases.update_one(
-                {"case_id": case_id},
-                {
-                    "$set": {
-                        "payment_status": "completed",
-                        "payment_info": {
-                            "amount": 0.0,
-                            "original_amount": original_price,
-                            "discount": 100.0,
-                            "voucher_code": voucher_code,
-                            "payment_date": datetime.utcnow(),
-                            "method": "free_voucher"
-                        }
-                    }
-                }
-            )
-            
-            return {
-                "success": True,
-                "free": True,
-                "message": "🎁 Voucher de gratuidade aplicado! Processo liberado sem custo.",
-                "voucher_code": voucher_code,
-                "original_price": original_price,
-                "final_price": 0.0,
-                "discount_percentage": 100.0,
-                "package": product
-            }
-        
-        # Criar PaymentIntent com valor (com ou sem desconto)
-        stripe.api_key = os.environ.get('STRIPE_API_KEY')
-        
-        payment_intent = stripe.PaymentIntent.create(
-            amount=max(50, int(final_price * 100)),  # Mínimo 50 centavos para Stripe
-            currency='usd',
-            metadata={
-                'visa_code': visa_code,
-                'case_id': case_id,
-                'voucher_code': voucher_code or '',
-                'discount_percentage': str(discount_percentage),
-                'original_price': str(original_price)
-            },
-            description=f"{product['name']} - {visa_code}" + (f" (Voucher: {voucher_code})" if voucher_code else "")
-        )
-        
-        # Salvar transação no banco
-        transaction = {
-            "transaction_id": payment_intent.id,
-            "case_id": case_id,
-            "visa_code": visa_code,
-            "amount": final_price,
-            "original_amount": original_price,
-            "discount_percentage": discount_percentage,
-            "voucher_code": voucher_applied,
-            "currency": "usd",
-            "status": "pending",
-            "payment_method": "card",
-            "created_at": datetime.utcnow()
-        }
-        await db.payment_transactions.insert_one(transaction)
-        
-        logger.info(
-            f"✅ PaymentIntent criado: {payment_intent.id} - "
-            f"${final_price:.2f} (Original: ${original_price:.2f}, "
-            f"Desconto: {discount_percentage}%)"
-        )
-        
-        return {
-            "success": True,
-            "client_secret": payment_intent.client_secret,
-            "payment_intent_id": payment_intent.id,
-            "package": product,
-            "pricing": {
-                "original_price": original_price,
-                "discount_percentage": discount_percentage,
-                "final_price": final_price,
-                "voucher_code": voucher_applied
-            }
-        }
-        
-    except stripe.error.StripeError as e:
-        logger.error(f"❌ Erro Stripe: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-    except Exception as e:
-        logger.error(f"❌ Erro ao criar PaymentIntent: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.post("/payment/create-checkout")
-async def create_payment_checkout(request: Request):
-    """
-    Cria uma sessão de checkout do Stripe
-    
-    Body:
-        visa_code: Código do visto (ex: "H-1B")
-        case_id: ID do caso do usuário
-        voucher_code: Código do voucher (opcional)
-    """
-    try:
-        data = await request.json()
-        visa_code = data.get('visa_code')
-        case_id = data.get('case_id')
-        voucher_code = data.get('voucher_code', '').strip()
-        
-        if not visa_code or not case_id:
-            raise HTTPException(status_code=400, detail="visa_code e case_id são obrigatórios")
-        
-        # TESTING MODE: Skip payment if enabled
-        skip_payment = os.environ.get('SKIP_PAYMENT_FOR_TESTING', 'FALSE').upper() == 'TRUE'
-        
-        if skip_payment:
-            logger.info(f"🧪 TESTING MODE: Skipping checkout for {visa_code} - {case_id}")
-            
-            # Get product info
-            product = await get_product_for_checkout(db, visa_code)
-            original_price = product['price'] if product else 0
-            
-            # Generate fake session ID for testing
-            fake_session_id = f"test_session_{case_id}_{datetime.utcnow().timestamp()}"
-            
-            # Mark as paid
-            transaction = {
-                "transaction_id": f"TEST-CHECKOUT-{case_id}",
-                "stripe_session_id": fake_session_id,
-                "case_id": case_id,
-                "visa_code": visa_code,
-                "amount": 0.0,
-                "original_amount": original_price,
-                "discount_percentage": 100.0,
-                "voucher_code": "TESTING_MODE",
-                "currency": "usd",
-                "status": "completed",
-                "payment_method": "testing_mode",
-                "created_at": datetime.utcnow()
-            }
-            await db.payment_transactions.insert_one(transaction)
-            
-            # Update case
-            await db.auto_cases.update_one(
-                {"case_id": case_id},
-                {
-                    "$set": {
-                        "payment_status": "completed",
-                        "payment_info": {
-                            "amount": 0.0,
-                            "original_amount": original_price,
-                            "discount": 100.0,
-                            "voucher_code": "TESTING_MODE",
-                            "payment_date": datetime.utcnow(),
-                            "method": "testing_bypass",
-                            "session_id": fake_session_id
-                        }
-                    }
-                }
-            )
-            
-            # Return success URL (skip actual checkout)
-            frontend_url = os.environ.get('REACT_APP_BACKEND_URL', 'http://localhost:3000')
-            
-            return {
-                "success": True,
-                "testing_mode": True,
-                "message": "🧪 Payment skipped for testing",
-                "session_id": fake_session_id,
-                "redirect_url": f"{frontend_url}/payment/success?session_id={fake_session_id}&case_id={case_id}",
-                "skip_checkout": True
-            }
-        
-        # URLs de redirecionamento
-        frontend_url = os.environ.get('REACT_APP_BACKEND_URL', 'http://localhost:3000')
-        success_url = f"{frontend_url}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&case_id={case_id}"
-        cancel_url = f"{frontend_url}/payment/cancel?case_id={case_id}"
-        
-        # Criar sessão de checkout
-        result = await create_checkout_session(
-            visa_code=visa_code,
-            case_id=case_id,
-            voucher_code=voucher_code if voucher_code else None,
-            success_url=success_url,
-            cancel_url=cancel_url,
-            db=None  # Passar None ao invés de db para evitar erro de comparação
-        )
-        
-        if not result.get('success'):
-            raise HTTPException(status_code=400, detail=result.get('error', 'Erro ao criar checkout'))
-        
-        return result
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Erro ao criar checkout: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.get("/payment/status/{session_id}")
-async def get_payment_status(session_id: str):
-    """
-    Verifica o status de um pagamento
-    """
-    try:
-        result = await verify_payment_status(session_id, db)
-        
-        if not result.get('success'):
-            raise HTTPException(status_code=400, detail=result.get('error', 'Erro ao verificar pagamento'))
-        
-        return result
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Erro ao verificar status: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.post("/webhook/stripe")
-async def stripe_webhook(request: Request):
-    """
-    Webhook do Stripe para receber eventos de pagamento
-    """
-    try:
-        payload = await request.body()
-        sig_header = request.headers.get('stripe-signature')
-        
-        if not sig_header:
-            raise HTTPException(status_code=400, detail="Assinatura ausente")
-        
-        result = await handle_stripe_webhook(payload, sig_header, db)
-        
-        if not result.get('success'):
-            raise HTTPException(status_code=400, detail=result.get('error', 'Erro ao processar webhook'))
-        
-        return result
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Erro no webhook: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.get("/vouchers/validate/{voucher_code}")
-async def validate_voucher_endpoint(voucher_code: str, visa_code: str):
-    """
-    Valida um voucher para um visto específico
-    
-    Query params:
-        visa_code: Código do visto (ex: "H-1B")
-    """
-    try:
-        result = await validate_voucher(voucher_code, visa_code, db)
-        return result.dict()
-        
-    except Exception as e:
-        logger.error(f"Erro ao validar voucher: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.get("/vouchers/active")
-async def get_active_vouchers():
-    """
-    Retorna lista de vouchers ativos
-    """
-    try:
-        vouchers = get_all_active_vouchers()
-        return {
-            'success': True,
-            'vouchers': vouchers
-        }
-    except Exception as e:
-        logger.error(f"Erro ao listar vouchers: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.get("/packages")
-async def get_payment_packages():
-    """
-    Retorna todos os pacotes de pagamento disponíveis
-    """
-    try:
-        packages = get_all_packages()
-        return {
-            'success': True,
-            'packages': packages
-        }
-    except Exception as e:
-        logger.error(f"Erro ao listar pacotes: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.get("/auto-application/case/{case_id}/generate-package")
-async def generate_final_package_endpoint(case_id: str):
-    """
-    Gera pacote final completo com todos os documentos para envio ao USCIS
-    """
-    try:
-        # Buscar case no banco
-        case = await db.auto_application_cases.find_one({"case_id": case_id})
-        
-        if not case:
-            raise HTTPException(status_code=404, detail="Case not found")
-        
-        # Importar gerador de pacotes
-        from package_generator import generate_final_package
-        
-        # Gerar pacote ZIP
-        package_bytes = generate_final_package(case)
-        
-        # Salvar no sistema de arquivos temporariamente
-        temp_path = f"/tmp/{case_id}_USCIS_Package.zip"
-        with open(temp_path, 'wb') as f:
-            f.write(package_bytes)
-        
-        # Retornar arquivo
-        from fastapi.responses import FileResponse
-        return FileResponse(
-            temp_path,
-            media_type='application/zip',
-            filename=f"{case_id}_USCIS_Complete_Package.zip"
-        )
-        
-    except Exception as e:
-        logger.error(f"Erro ao gerar pacote: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# ============================================================================
-# KNOWLEDGE BASE ENDPOINTS (Admin Only)
-# ============================================================================
-
-@api_router.post("/admin/knowledge-base/upload")
-async def upload_knowledge_document(
-    file: UploadFile,
-    category: str = Form(...),
-    subcategory: str = Form(...),
-    form_types: str = Form(...),  # Comma-separated
-    description: str = Form(...),
-    uploaded_by: str = Form("admin"),
-    admin = Depends(require_admin)
-):
-    """
-    Upload documento para a base de conhecimento interna
-    ADMIN ONLY - Não exposto ao usuário final - PROTECTED
-    """
-    try:
-        from knowledge_base_manager import KnowledgeBaseManager
-        
-        kb_manager = KnowledgeBaseManager(db)
-        
-        # Ler arquivo
-        file_data = await file.read()
-        
-        # Parse form types
-        form_types_list = [ft.strip() for ft in form_types.split(",")]
-        
-        # Upload
-        result = await kb_manager.upload_document(
-            file_data=file_data,
-            filename=file.filename,
-            category=category,
-            subcategory=subcategory,
-            form_types=form_types_list,
-            description=description,
-            uploaded_by=uploaded_by
-        )
-        
-        return result
-        
-    except Exception as e:
-        logger.error(f"Erro ao fazer upload: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/admin/knowledge-base/list")
-async def list_knowledge_documents(skip: int = 0, limit: int = 50, admin = Depends(require_admin)):
-    """Lista todos os documentos da base de conhecimento - PROTECTED"""
-    try:
-        from knowledge_base_manager import KnowledgeBaseManager
-        kb_manager = KnowledgeBaseManager(db)
-        return await kb_manager.list_all_documents(skip, limit)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/admin/knowledge-base/categories")
-async def get_knowledge_categories(admin = Depends(require_admin)):
-    """Retorna categorias disponíveis - PROTECTED"""
-    from knowledge_base_manager import KNOWLEDGE_BASE_CATEGORIES, SUPPORTED_FORM_TYPES
-    return {
-        "categories": KNOWLEDGE_BASE_CATEGORIES,
-        "form_types": SUPPORTED_FORM_TYPES
-    }
-
-@api_router.get("/admin/knowledge-base/{document_id}")
-async def get_knowledge_document(document_id: str, admin = Depends(require_admin)):
-    """Busca documento específico por ID - PROTECTED"""
-    try:
-        from knowledge_base_manager import KnowledgeBaseManager
-        kb_manager = KnowledgeBaseManager(db)
-        doc = await kb_manager.get_document_by_id(document_id)
-        
-        if not doc:
-            raise HTTPException(status_code=404, detail="Document not found")
-        
-        return doc
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/admin/knowledge-base/{document_id}/download")
-async def download_knowledge_document(document_id: str, admin = Depends(require_admin)):
-    """Download do arquivo PDF - PROTECTED"""
-    try:
-        from knowledge_base_manager import KnowledgeBaseManager
-        from fastapi.responses import Response
-        
-        kb_manager = KnowledgeBaseManager(db)
-        doc = await kb_manager.get_document_by_id(document_id)
-        
-        if not doc or 'file_data' not in doc:
-            raise HTTPException(status_code=404, detail="Document not found")
-        
-        return Response(
-            content=doc['file_data'],
-            media_type="application/pdf",
-            headers={"Content-Disposition": f"attachment; filename={doc['filename']}"}
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.delete("/admin/knowledge-base/{document_id}")
-async def delete_knowledge_document(document_id: str, admin = Depends(require_admin)):
-    """Deleta documento da base - PROTECTED"""
-    try:
-        from knowledge_base_manager import KnowledgeBaseManager
-        kb_manager = KnowledgeBaseManager(db)
-        return await kb_manager.delete_document(document_id)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/admin/knowledge-base/stats/overview")
-async def get_knowledge_stats(admin = Depends(require_admin)):
-    """Estatísticas da base de conhecimento - PROTECTED"""
-    try:
-        from knowledge_base_manager import KnowledgeBaseManager
-        kb_manager = KnowledgeBaseManager(db)
-        return await kb_manager.get_statistics()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/admin/knowledge-base/search")
-async def search_knowledge_base(q: str, admin = Depends(require_admin)):
-    """Busca na base de conhecimento - PROTECTED"""
-    try:
-        from knowledge_base_manager import KnowledgeBaseManager
-        kb_manager = KnowledgeBaseManager(db)
-        return await kb_manager.search_documents(q)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-# ============================================================================
-# ADMIN - GERENCIAMENTO DE PRODUTOS E PREÇOS
-# ============================================================================
-
-@api_router.get("/admin/products")
-async def admin_get_all_products(admin = Depends(require_admin)):
-    """Lista todos os produtos/vistos - PROTECTED"""
-    try:
-        products = await get_all_products(db)
-        return {
-            "success": True,
-            "products": products,
-            "total": len(products)
-        }
-    except Exception as e:
-        logger.error(f"Erro ao listar produtos: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.get("/admin/products/{visa_code}")
-async def admin_get_product(visa_code: str, admin = Depends(require_admin)):
-    """Busca produto específico - PROTECTED"""
-    try:
-        product = await get_product(db, visa_code)
-        
-        if not product:
-            raise HTTPException(status_code=404, detail=f"Produto {visa_code} não encontrado")
-        
-        return {
-            "success": True,
-            "product": product
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Erro ao buscar produto: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.put("/admin/products/{visa_code}/price")
-async def admin_update_product_price(
-    visa_code: str,
-    request: Request,
-    admin = Depends(require_admin)
-):
-    """Atualiza preço de um produto e sincroniza com Stripe - PROTECTED"""
-    try:
-        body = await request.json()
-        new_price = body.get("price")
-        sync_stripe = body.get("sync_stripe", True)
-        
-        if not new_price:
-            raise HTTPException(status_code=400, detail="Campo 'price' é obrigatório")
-        
-        if not isinstance(new_price, (int, float)) or new_price <= 0:
-            raise HTTPException(status_code=400, detail="Preço deve ser um número maior que zero")
-        
-        result = await update_product_price(db, visa_code, float(new_price), sync_stripe)
-        
-        if not result.get("success"):
-            raise HTTPException(status_code=400, detail=result.get("error", "Erro ao atualizar preço"))
-        
-        return result
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Erro ao atualizar preço: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.post("/admin/products/{visa_code}/sync-stripe")
-async def admin_sync_product_stripe(visa_code: str, admin = Depends(require_admin)):
-    """Sincroniza produto com Stripe - PROTECTED"""
-    try:
-        result = await sync_product_to_stripe(db, visa_code)
-        
-        if not result.get("success"):
-            raise HTTPException(status_code=400, detail=result.get("error", "Erro ao sincronizar"))
-        
-        return result
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Erro ao sincronizar com Stripe: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.post("/admin/products/sync-all-stripe")
-async def admin_sync_all_products_stripe(admin = Depends(require_admin)):
-    """Sincroniza todos os produtos com Stripe - PROTECTED"""
-    try:
-        result = await sync_all_products_to_stripe(db)
-        return result
-    except Exception as e:
-        logger.error(f"Erro ao sincronizar todos produtos: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.get("/packages/{visa_code}")
-async def get_visa_package_info(visa_code: str, voucher_code: Optional[str] = None):
-    """
-    Retorna informações de pacote e preço para um visto específico
-    
-    Query params:
-        voucher_code: Código do voucher (opcional)
-    """
-    try:
-        package = get_visa_package(visa_code)
-        
-        # Se voucher fornecido, validar e calcular desconto
-        discount_percentage = 0.0
-        voucher_info = None
-        
-        if voucher_code:
-            voucher_validation = await validate_voucher(voucher_code, visa_code, db)
-            if voucher_validation.valid:
-                discount_percentage = voucher_validation.discount_percentage
-                voucher_info = {
-                    'code': voucher_validation.voucher_code,
-                    'discount_percentage': discount_percentage,
-                    'message': voucher_validation.message
-                }
-        
-        # Calcular preço
-        price_info = calculate_final_price(visa_code, discount_percentage)
-        
-        return {
-            'success': True,
-            'package': package,
-            'price_info': price_info,
-            'voucher_info': voucher_info
-        }
-        
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        logger.error(f"Erro ao obter pacote: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# ============================================================================
-# EMAIL SERVICE - Resend Integration
-# ============================================================================
-
-import resend
-from fastapi.responses import FileResponse
-
-# Configure Resend
-RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
-SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'noreply@iaimmigration.com')
-
-if RESEND_API_KEY:
-    resend.api_key = RESEND_API_KEY
-    logger.info(f"✅ Resend configured with sender: {SENDER_EMAIL}")
-else:
-    logger.warning("⚠️ RESEND_API_KEY not configured")
-
-class SendPackageEmailRequest(BaseModel):
-    """Request model for sending package via email"""
-    user_email: EmailStr
-    user_name: str
-    package_filename: str
-    application_type: str = "I-539"
-    case_id: str
-
-class RequestPackageEmailRequest(BaseModel):
-    """Request model for user requesting package via email"""
-    case_id: str
-    user_email: EmailStr
-
-@api_router.post("/email/send-package")
-async def send_package_email(request: SendPackageEmailRequest):
-    """
-    Envia o pacote de aplicação por email usando Resend.com
-    OPÇÃO 2 + 3: PDF único consolidado anexado + Link para download
-    """
-    try:
-        if not RESEND_API_KEY:
-            raise HTTPException(
-                status_code=500,
-                detail="Email service not configured. Please contact support."
-            )
-        
-        # Procurar pelo PDF consolidado detalhado primeiro
-        pdf_filename = request.package_filename.replace('.zip', '_DETALHADO.pdf').replace('_F1_COMPLETE_PACKAGE', '_PACOTE_COMPLETO')
-        file_path = f"/app/{pdf_filename}"
-        
-        # Se não encontrar o detalhado, usar o consolidado normal
-        if not os.path.exists(file_path):
-            pdf_filename = request.package_filename.replace('.zip', '.pdf')
-            file_path = f"/app/{pdf_filename}"
-        
-        # Se ainda não encontrar, tentar o ZIP original
-        if not os.path.exists(file_path):
-            file_path = f"/app/{request.package_filename}"
-            pdf_filename = request.package_filename
-        
-        if not os.path.exists(file_path):
-            raise HTTPException(
-                status_code=404,
-                detail=f"Package file not found: {request.package_filename}"
-            )
-        
-        # Ler arquivo e converter para Base64
-        with open(file_path, "rb") as f:
-            file_content = f.read()
-        
-        file_base64 = base64.b64encode(file_content).decode("utf-8")
-        
-        # Gerar link de download direto
-        backend_url = os.environ.get('BACKEND_URL', 'https://formfiller-26.preview.emergentagent.com')
-        download_link = f"{backend_url}/api/download/package/{pdf_filename}"
-        
-        # Template de email em HTML
-        html_content = f"""
-        <html>
-            <head>
-                <style>
-                    body {{
-                        font-family: Arial, sans-serif;
-                        line-height: 1.6;
-                        color: #333;
-                        max-width: 600px;
-                        margin: 0 auto;
-                    }}
-                    .header {{
-                        background-color: #2563eb;
-                        color: white;
-                        padding: 20px;
-                        text-align: center;
-                    }}
-                    .content {{
-                        padding: 30px 20px;
-                        background-color: #f9fafb;
-                    }}
-                    .info-box {{
-                        background-color: white;
-                        border-left: 4px solid #2563eb;
-                        padding: 15px;
-                        margin: 20px 0;
-                    }}
-                    .footer {{
-                        background-color: #1f2937;
-                        color: #9ca3af;
-                        padding: 20px;
-                        text-align: center;
-                        font-size: 12px;
-                    }}
-                    .button {{
-                        display: inline-block;
-                        padding: 12px 24px;
-                        background-color: #2563eb;
-                        color: white;
-                        text-decoration: none;
-                        border-radius: 5px;
-                        margin: 20px 0;
-                    }}
-                </style>
-            </head>
-            <body>
-                <div class="header">
-                    <h1>Seu Pacote de Aplicação Está Pronto!</h1>
-                </div>
-                
-                <div class="content">
-                    <p>Olá <strong>{request.user_name}</strong>,</p>
-                    
-                    <p>Seu pacote de aplicação para <strong>{request.application_type}</strong> foi gerado com sucesso e está anexado a este email.</p>
-                    
-                    <div class="info-box">
-                        <p><strong>📋 Informações do Seu Caso:</strong></p>
-                        <p>
-                            <strong>Case ID:</strong> {request.case_id}<br>
-                            <strong>Tipo de Aplicação:</strong> {request.application_type}<br>
-                            <strong>Nome do Arquivo:</strong> {request.package_filename}
-                        </p>
-                    </div>
-                    
-                    <h3>📦 O que está incluído no pacote:</h3>
-                    <ul>
-                        <li>Informações completas do caso</li>
-                        <li>Dados pessoais e do passaporte</li>
-                        <li>Informações acadêmicas/profissionais</li>
-                        <li>Documentos de suporte (passaporte, cartas, comprovantes)</li>
-                        <li>Timeline do processo</li>
-                        <li>Instruções para submissão ao USCIS</li>
-                    </ul>
-                    
-                    <h3>💾 Como Acessar o Pacote:</h3>
-                    <div style="background-color: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                        <p><strong>OPÇÃO 1:</strong> O arquivo PDF está anexado a este email. Basta abrir o anexo.</p>
-                        <p><strong>OPÇÃO 2:</strong> Clique no botão abaixo para baixar direto do navegador:</p>
-                        <div style="text-align: center;">
-                            <a href="{download_link}" class="button" style="background-color: #10b981; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
-                                📥 BAIXAR PACOTE COMPLETO
-                            </a>
-                        </div>
-                        <p style="font-size: 12px; color: #666; margin-top: 10px;">O arquivo é um PDF único com todas as informações - fácil de abrir e imprimir!</p>
-                    </div>
-                    
-                    <h3>📝 Próximos Passos:</h3>
-                    <ol>
-                        <li>Abra o PDF anexado (ou baixe pelo link acima)</li>
-                        <li>Revise todos os documentos cuidadosamente</li>
-                        <li>Imprima as páginas necessárias em papel branco</li>
-                        <li>Assine onde indicado</li>
-                        <li>Envie ao USCIS conforme as instruções incluídas</li>
-                    </ol>
-                    
-                    <p><strong>⚠️ Aviso Importante:</strong><br>
-                    Este pacote foi gerado automaticamente. Por favor, revise todas as informações para garantir precisão antes de submeter ao USCIS. Para questões complexas, recomendamos consultar um advogado de imigração.</p>
-                    
-                    <p>Se você tiver alguma dúvida, por favor responda a este email ou entre em contato com nossa equipe de suporte.</p>
-                    
-                    <p>Boa sorte com sua aplicação!</p>
-                    
-                    <p>Atenciosamente,<br>
-                    <strong>Equipe OSPREY Immigration</strong></p>
-                </div>
-                
-                <div class="footer">
-                    <p>OSPREY Immigration System<br>
-                    Este é um email automático. Por favor não responda.</p>
-                    <p>© 2025 IA Immigration. Todos os direitos reservados.</p>
-                </div>
-            </body>
-        </html>
-        """
-        
-        # Enviar email com anexo (PDF único)
-        params: resend.Emails.SendParams = {
-            "from": SENDER_EMAIL,
-            "to": [request.user_email],
-            "subject": f"✅ Seu Pacote de Aplicação {request.application_type} - Case ID: {request.case_id}",
-            "html": html_content,
-            "attachments": [
-                {
-                    "content": file_base64,
-                    "filename": pdf_filename,
-                }
-            ]
-        }
-        
-        logger.info(f"Enviando pacote por email para {request.user_email}")
-        email_response = resend.Emails.send(params)
-        
-        logger.info(f"Email enviado com sucesso. Email ID: {email_response.get('id')}")
-        
-        return {
-            "success": True,
-            "email_id": email_response.get("id"),
-            "message": f"Pacote enviado para {request.user_email}",
-            "recipient": request.user_email
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Erro ao enviar email: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Erro ao enviar email: {str(e)}"
-        )
-
-# ============================================================================
-# ORÁCULO JURÍDICO - Endpoints de Consulta
-# ============================================================================
-
-@api_router.post("/oracle/consult")
-async def oracle_consult(query: dict):
-    """
-    Endpoint para consultar o Oráculo Jurídico
-    
-    Tipos de consulta:
-    - form_requirements: Requisitos de um formulário específico
-    - documents: Lista de documentos obrigatórios
-    - general: Consulta geral
-    - processing_times: Tempos de processamento
-    - validate: Validar checklist de documentos
-    """
-    try:
-        query_type = query.get('type')
-        params = query.get('params', {})
-        
-        result = consult_oracle(query_type, **params)
-        
-        return {
-            "success": True,
-            "query_type": query_type,
-            "result": result
-        }
-    except Exception as e:
-        logger.error(f"Erro ao consultar oráculo: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/oracle/form/{form_code}/requirements")
-async def get_form_requirements(form_code: str):
-    """
-    Retorna todos os requisitos para um formulário específico
-    """
-    try:
-        result = oracle.consult_form_requirements(form_code)
-        return {
-            "success": True,
-            "form_code": form_code,
-            "requirements": result
-        }
-    except Exception as e:
-        logger.error(f"Erro ao buscar requisitos: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/oracle/form/{form_code}/documents")
-async def get_required_documents(form_code: str, visa_category: str = None):
-    """
-    Retorna lista de documentos obrigatórios para um formulário
-    """
-    try:
-        documents = oracle.get_required_documents(form_code, visa_category)
-        return {
-            "success": True,
-            "form_code": form_code,
-            "visa_category": visa_category,
-            "required_documents": documents,
-            "total_count": len(documents)
-        }
-    except Exception as e:
-        logger.error(f"Erro ao buscar documentos: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.post("/oracle/validate-checklist")
-async def validate_checklist(data: dict):
-    """
-    Valida se todos os documentos obrigatórios foram submetidos
-    """
-    try:
-        form_code = data.get('form_code')
-        submitted_docs = data.get('submitted_documents', [])
-        
-        result = oracle.validate_document_checklist(form_code, submitted_docs)
-        
-        return {
-            "success": True,
-            "validation": result
-        }
-    except Exception as e:
-        logger.error(f"Erro ao validar checklist: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/oracle/kb/stats")
-async def get_kb_stats():
-    """
-    Retorna estatísticas da base de conhecimento
-    """
-    try:
-        kb = oracle.knowledge_base
-        docs = kb.get('documents', [])
-        
-        categories = {}
-        for doc in docs:
-            cat = doc.get('category', 'unknown')
-            categories[cat] = categories.get(cat, 0) + 1
-        
-        return {
-            "success": True,
-            "total_documents": len(docs),
-            "categories": categories,
-            "total_text_length": sum(doc.get('full_length', 0) for doc in docs)
-        }
-    except Exception as e:
-        logger.error(f"Erro ao buscar estatísticas: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# ============================================================================
-# DOCUMENT ANALYZER AGENT - Endpoints
-# ============================================================================
-
-@api_router.post("/agent/document-analyzer/analyze")
-async def analyze_document_endpoint(file: UploadFile, document_type: str = Form(...)):
-    """
-    Analisa um documento usando OCR e extração de dados
-    """
-    try:
-        if not document_analyzer:
-            raise HTTPException(status_code=503, detail="Document Analyzer not available")
-        
-        file_content = await file.read()
-        result = analyze_uploaded_document(file_content, document_type, file.filename)
-        
-        return result
-    except Exception as e:
-        logger.error(f"Erro no Document Analyzer: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/agent/document-analyzer/supported-types")
-async def get_supported_document_types():
-    """
-    Retorna tipos de documentos suportados pelo analisador
-    """
-    if not document_analyzer:
-        raise HTTPException(status_code=503, detail="Document Analyzer not available")
-    
-    return {
-        "success": True,
-        "supported_types": document_analyzer.supported_documents
-    }
-
-# ============================================================================
-# FORM FILLER AGENT - Endpoints
-# ============================================================================
-
-@api_router.post("/agent/form-filler/fill")
-async def fill_form_endpoint(data: dict):
-    """
-    Preenche um formulário automaticamente com dados do usuário
-    """
-    try:
-        if not form_filler:
-            raise HTTPException(status_code=503, detail="Form Filler not available")
-        
-        form_code = data.get('form_code')
-        user_data = data.get('user_data')
-        
-        result = fill_form_automatically(form_code, user_data)
-        
-        return result
-    except Exception as e:
-        logger.error(f"Erro no Form Filler: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/agent/form-filler/missing-fields/{form_code}")
-async def get_missing_fields_endpoint(form_code: str, user_data: dict = None):
-    """
-    Retorna campos obrigatórios faltantes
-    """
-    try:
-        if not form_filler:
-            raise HTTPException(status_code=503, detail="Form Filler not available")
-        
-        # Se user_data não foi fornecido, retornar campos vazios
-        if not user_data:
-            user_data = {}
-        
-        missing = form_filler.get_missing_fields(form_code, user_data)
-        
-        return {
-            "success": True,
-            "form_code": form_code,
-            "missing_fields": missing,
-            "total_missing": len(missing)
-        }
-    except Exception as e:
-        logger.error(f"Erro ao buscar campos faltantes: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/agent/form-filler/field-map/{form_code}")
-async def get_form_field_map(form_code: str):
-    """
-    Retorna mapa completo de campos do formulário
-    """
-    try:
-        if not form_filler:
-            raise HTTPException(status_code=503, detail="Form Filler not available")
-        
-        field_map = form_filler.generate_field_map(form_code)
-        
-        return {
-            "success": True,
-            "field_map": field_map
-        }
-    except Exception as e:
-        logger.error(f"Erro ao gerar field map: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# ============================================================================
-# TRANSLATION AGENT - Endpoints
-# ============================================================================
-
-@api_router.post("/agent/translator/translate")
-async def translate_endpoint(data: dict):
-    """
-    Traduz texto de um idioma para outro
-    """
-    try:
-        if not translator:
-            raise HTTPException(status_code=503, detail="Translator not available")
-        
-        text = data.get('text')
-        source_lang = data.get('source_lang', 'pt')
-        target_lang = data.get('target_lang', 'en')
-        document_type = data.get('document_type')
-        
-        result = translate_text(text, source_lang, target_lang)
-        
-        return result
-    except Exception as e:
-        logger.error(f"Erro no Translator: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.post("/agent/translator/detect-language")
-async def detect_language_endpoint(data: dict):
-    """
-    Detecta o idioma de um texto
-    """
-    try:
-        if not translator:
-            raise HTTPException(status_code=503, detail="Translator not available")
-        
-        text = data.get('text')
-        result = translator.detect_language(text)
-        
-        return {
-            "success": True,
-            "detection": result
-        }
-    except Exception as e:
-        logger.error(f"Erro ao detectar idioma: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/agent/translator/supported-languages")
-async def get_supported_languages():
-    """
-    Retorna idiomas suportados pelo tradutor
-    """
-    if not translator:
-        raise HTTPException(status_code=503, detail="Translator not available")
-    
-    return {
-        "success": True,
-        "supported_languages": translator.supported_languages
-    }
-
-@api_router.get("/agent/document-analyzer/consult-kb/{document_type}")
-async def consult_kb_for_document(document_type: str):
-    """
-    Consulta a base de conhecimento sobre um tipo de documento
-    """
-    try:
-        if not document_analyzer:
-            raise HTTPException(status_code=503, detail="Document Analyzer not available")
-        
-        result = document_analyzer.consult_kb_for_document(document_type)
-        
-        return {
-            "success": True,
-            "consultation": result
-        }
-    except Exception as e:
-        logger.error(f"Erro ao consultar KB: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/agent/form-filler/guide/{form_code}")
-async def get_form_guide(form_code: str):
-    """
-    Busca o guia completo de preenchimento do formulário na KB
-    """
-    try:
-        if not form_filler:
-            raise HTTPException(status_code=503, detail="Form Filler not available")
-        
-        result = form_filler.get_form_guide_from_kb(form_code)
-        
-        return {
-            "success": True,
-            "guide": result
-        }
-    except Exception as e:
-        logger.error(f"Erro ao buscar guia: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/agent/form-filler/field-instructions/{form_code}/{field_name}")
-async def get_field_instructions(form_code: str, field_name: str):
-    """
-    Busca instruções específicas para um campo
-    """
-    try:
-        if not form_filler:
-            raise HTTPException(status_code=503, detail="Form Filler not available")
-        
-        result = form_filler.get_field_instructions(form_code, field_name)
-        
-        return {
-            "success": True,
-            "instructions": result
-        }
-    except Exception as e:
-        logger.error(f"Erro ao buscar instruções: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/agents/status")
-async def get_all_agents_status():
-    """
-    Retorna status de todos os agentes
-    """
-    agents_status = {
-        "oracle": oracle is not None,
-        "document_analyzer": document_analyzer is not None,
-        "form_filler": form_filler is not None,
-        "translator": translator is not None
-    }
-    
-    return {
-        "success": True,
-        "agents": agents_status,
-        "total_active": sum(agents_status.values()),
-        "total_agents": len(agents_status)
-    }
-
-@api_router.post("/auto-application/case/{case_id}/send-email")
-async def request_package_by_email(case_id: str, request: RequestPackageEmailRequest):
-    """
-    Endpoint para o USUÁRIO solicitar o envio do pacote por email
-    
-    Fluxo:
-    1. Usuário fornece/confirma email
-    2. Sistema busca caso no banco
-    3. Valida se o caso está completo
-    4. Gera/encontra o pacote PDF
-    5. Envia por email
-    """
-    try:
-        # Validar case_id
-        if case_id != request.case_id:
-            raise HTTPException(status_code=400, detail="Case ID não corresponde")
-        
-        # Buscar caso no banco
-        case = await db.auto_application_cases.find_one({"case_id": case_id})
-        
-        if not case:
-            raise HTTPException(status_code=404, detail="Caso não encontrado")
-        
-        # Validar se o caso está completo
-        if case.get('status') != 'completed':
-            raise HTTPException(
-                status_code=400, 
-                detail="O caso precisa estar completo para enviar por email. Complete todas as etapas primeiro."
-            )
-        
-        # Verificar se progresso está em 100%
-        progress = case.get('progress_percentage', 0)
-        if progress < 100:
-            raise HTTPException(
-                status_code=400,
-                detail=f"O caso está {progress}% completo. Complete 100% antes de solicitar envio por email."
-            )
-        
-        # Atualizar email do usuário no caso
-        await db.auto_application_cases.update_one(
-            {"case_id": case_id},
-            {"$set": {"basic_data.email": request.user_email, "updated_at": datetime.utcnow()}}
-        )
-        
-        # Obter nome do usuário
-        user_name = case.get('basic_data', {}).get('full_name', 'Usuário')
-        application_type = case.get('form_code', 'I-539')
-        
-        # Buscar arquivo PDF (priorizar o detalhado)
-        base_filename = user_name.replace(' ', '_')
-        pdf_filenames = [
-            f"{base_filename}_PACOTE_COMPLETO_DETALHADO.pdf",
-            f"{base_filename}_I539_COMPLETE_PACKAGE.pdf",
-            f"{base_filename}_I539_F1_COMPLETE_PACKAGE.zip"
-        ]
-        
-        package_filename = None
-        for filename in pdf_filenames:
-            if os.path.exists(f"/app/{filename}"):
-                package_filename = filename
-                break
-        
-        if not package_filename:
-            # Tentar gerar o pacote
-            logger.info(f"Pacote não encontrado para {case_id}, tentando gerar...")
-            # Aqui você pode chamar a função de geração de pacote
-            raise HTTPException(
-                status_code=404,
-                detail="Pacote não encontrado. Por favor, entre em contato com o suporte."
-            )
-        
-        # Enviar email usando o endpoint existente
-        email_request = SendPackageEmailRequest(
-            user_email=request.user_email,
-            user_name=user_name,
-            package_filename=package_filename,
-            application_type=application_type,
-            case_id=case_id
-        )
-        
-        # Chamar função de envio de email
-        result = await send_package_email(email_request)
-        
-        # Registrar envio no banco
-        await db.auto_application_cases.update_one(
-            {"case_id": case_id},
-            {
-                "$set": {
-                    "email_sent": True,
-                    "email_sent_at": datetime.utcnow(),
-                    "email_sent_to": request.user_email
-                }
-            }
-        )
-        
-        return {
-            "success": True,
-            "message": f"Pacote enviado com sucesso para {request.user_email}",
-            "email_id": result.get("email_id"),
-            "case_id": case_id
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Erro ao solicitar envio de pacote por email: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
 # ============================================================================
 # DOWNLOAD ENDPOINTS - Para arquivos gerados (pacotes, relatórios)
 # ============================================================================
 
-@api_router.get("/auto-application/case/{case_id}/download-package")
-async def download_package_by_case_id(case_id: str):
-    """
-    Download do pacote completo por Case ID
-    Busca o pacote gerado para o case específico e retorna para download
-    """
-    try:
-        from fastapi.responses import FileResponse
-        import os
-        import glob
-        
-        # Buscar caso no banco
-        case = await db.auto_cases.find_one({"case_id": case_id})
-        if not case:
-            raise HTTPException(status_code=404, detail="Case não encontrado")
-        
-        # Tentar encontrar o arquivo PDF gerado
-        # Padrão de busca: qualquer PDF que contenha o case_id
-        search_patterns = [
-            f"/app/*{case_id}*.pdf",
-            f"/app/output/*{case_id}*.pdf",
-            f"/app/packages/*{case_id}*.pdf",
-            f"/app/*PACOTE*.pdf",  # Fallback para pacotes gerais
-        ]
-        
-        file_path = None
-        for pattern in search_patterns:
-            matches = glob.glob(pattern)
-            if matches:
-                file_path = matches[0]  # Pegar o primeiro match
-                break
-        
-        # Se não encontrou arquivo, gerar um PDF simples com informações do caso
-        if not file_path or not os.path.exists(file_path):
-            logger.warning(f"Arquivo do pacote não encontrado para case {case_id}. Gerando PDF básico.")
-            
-            # Importar ReportLab para gerar PDF
-            try:
-                from reportlab.lib.pagesizes import letter
-                from reportlab.pdfgen import canvas
-                from reportlab.lib.units import inch
-                
-                # Criar PDF temporário
-                temp_pdf_path = f"/app/Pacote_Completo_{case_id}.pdf"
-                c = canvas.Canvas(temp_pdf_path, pagesize=letter)
-                
-                # Título
-                c.setFont("Helvetica-Bold", 20)
-                c.drawString(1*inch, 10*inch, f"Pacote Completo - Case {case_id}")
-                
-                # Informações do caso
-                c.setFont("Helvetica", 12)
-                y_position = 9*inch
-                
-                c.drawString(1*inch, y_position, f"Case ID: {case_id}")
-                y_position -= 0.5*inch
-                
-                form_code = case.get('form_code', 'N/A')
-                c.drawString(1*inch, y_position, f"Tipo de Visto: {form_code}")
-                y_position -= 0.5*inch
-                
-                status = case.get('status', 'N/A')
-                c.drawString(1*inch, y_position, f"Status: {status}")
-                y_position -= 0.5*inch
-                
-                # Dados básicos
-                basic_data = case.get('basic_data', {})
-                if basic_data:
-                    y_position -= 0.5*inch
-                    c.setFont("Helvetica-Bold", 14)
-                    c.drawString(1*inch, y_position, "Dados do Aplicante:")
-                    y_position -= 0.3*inch
-                    
-                    c.setFont("Helvetica", 11)
-                    if basic_data.get('full_name'):
-                        c.drawString(1.2*inch, y_position, f"Nome: {basic_data['full_name']}")
-                        y_position -= 0.25*inch
-                    if basic_data.get('email'):
-                        c.drawString(1.2*inch, y_position, f"Email: {basic_data['email']}")
-                        y_position -= 0.25*inch
-                    if basic_data.get('country_of_birth'):
-                        c.drawString(1.2*inch, y_position, f"País: {basic_data['country_of_birth']}")
-                
-                # Nota de rodapé
-                c.setFont("Helvetica-Oblique", 9)
-                c.drawString(1*inch, 1*inch, "Este é um documento gerado automaticamente.")
-                c.drawString(1*inch, 0.7*inch, "Para o pacote completo, aguarde a finalização do processo.")
-                
-                c.save()
-                file_path = temp_pdf_path
-                
-            except ImportError:
-                # Se ReportLab não estiver disponível, retornar erro
-                raise HTTPException(
-                    status_code=404, 
-                    detail="Pacote ainda não foi gerado. Complete o processo de finalização primeiro."
-                )
-        
-        # Retornar arquivo para download
-        filename = os.path.basename(file_path)
-        return FileResponse(
-            path=file_path,
-            media_type="application/pdf",
-            filename=filename,
-            headers={
-                "Content-Disposition": f"attachment; filename={filename}",
-                "X-Case-ID": case_id
-            }
-        )
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Erro ao fazer download do pacote para case {case_id}: {str(e)}")
-        import traceback
-        logger.error(traceback.format_exc())
-        raise HTTPException(status_code=500, detail=f"Erro ao processar download: {str(e)}")
-
-@api_router.get("/download/package/{filename}")
-async def download_package(filename: str):
-    """
-    Download de pacotes gerados (arquivos ZIP ou PDF)
-    Exemplo: /api/download/package/Roberto_Silva_Mendes_PACOTE_COMPLETO_DETALHADO.pdf
-    """
-    try:
-        from fastapi.responses import FileResponse
-        import os
-        
-        file_path = f"/app/{filename}"
-        
-        if not os.path.exists(file_path):
-            raise HTTPException(status_code=404, detail="Arquivo não encontrado")
-        
-        # Verificar se é um arquivo ZIP ou PDF
-        if not (filename.endswith('.zip') or filename.endswith('.pdf')):
-            raise HTTPException(status_code=400, detail="Apenas arquivos ZIP ou PDF são permitidos")
-        
-        # Determinar media type
-        media_type = "application/pdf" if filename.endswith('.pdf') else "application/zip"
-        
-        return FileResponse(
-            path=file_path,
-            media_type=media_type,
-            filename=filename,
-            headers={
-                "Content-Disposition": f"attachment; filename={filename}"
-            }
-        )
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Erro ao fazer download do pacote: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/download/report/{filename}")
-async def download_report(filename: str):
-    """
-    Download de relatórios gerados (arquivos Markdown)
-    Exemplo: /api/download/report/RELATORIO_SIMULACAO_ANA_PAULA_COSTA.md
-    """
-    try:
-        from fastapi.responses import FileResponse
-        import os
-        
-        file_path = f"/app/{filename}"
-        
-        if not os.path.exists(file_path):
-            raise HTTPException(status_code=404, detail="Arquivo não encontrado")
-        
-        # Verificar se é um arquivo MD
-        if not filename.endswith('.md'):
-            raise HTTPException(status_code=400, detail="Apenas arquivos Markdown são permitidos")
-        
-        return FileResponse(
-            path=file_path,
-            media_type="text/markdown",
-            filename=filename,
-            headers={
-                "Content-Disposition": f"attachment; filename={filename}"
-            }
-        )
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Erro ao fazer download do relatório: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/download/list")
-async def list_downloads():
-    """
-    Lista todos os arquivos disponíveis para download
-    """
-    try:
-        import os
-        import glob
-        
-        downloads = {
-            "packages": [],
-            "reports": []
-        }
-        
-        # Buscar arquivos ZIP
-        zip_files = glob.glob("/app/*.zip")
-        for file_path in zip_files:
-            filename = os.path.basename(file_path)
-            size = os.path.getsize(file_path)
-            downloads["packages"].append({
-                "filename": filename,
-                "size": size,
-                "size_human": f"{size / 1024:.1f} KB" if size < 1024*1024 else f"{size / (1024*1024):.1f} MB",
-                "download_url": f"/api/download/package/{filename}"
-            })
-        
-        # Buscar arquivos Markdown
-        md_files = glob.glob("/app/*.md")
-        for file_path in md_files:
-            filename = os.path.basename(file_path)
-            # Ignorar test_result.md e README.md do sistema
-            if filename in ['test_result.md', 'README.md']:
-                continue
-            size = os.path.getsize(file_path)
-            downloads["reports"].append({
-                "filename": filename,
-                "size": size,
-                "size_human": f"{size / 1024:.1f} KB",
-                "download_url": f"/api/download/report/{filename}"
-            })
-        
-        return {
-            "success": True,
-            "total_packages": len(downloads["packages"]),
-            "total_reports": len(downloads["reports"]),
-            "downloads": downloads
-        }
-    except Exception as e:
-        logger.error(f"Erro ao listar downloads: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-# ============================================================================
-# HEALTH CHECK & SYSTEM STATUS
-# ============================================================================
 
 @api_router.get("/health")
 async def health_check():
@@ -12498,69 +3856,58 @@ async def health_check():
     """
     health_status = {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "version": "2.0.0",
-        "services": {}
+        "services": {},
     }
-    
+
     # Check MongoDB
     try:
         await db.command("ping")
         health_status["services"]["mongodb"] = {
             "status": "up",
-            "latency_ms": 0  # Could add actual latency measurement
+            "latency_ms": 0,  # Could add actual latency measurement
         }
     except Exception as e:
-        health_status["services"]["mongodb"] = {
-            "status": "down",
-            "error": str(e)
-        }
+        health_status["services"]["mongodb"] = {"status": "down", "error": str(e)}
         health_status["status"] = "degraded"
-    
+
     # Check Stripe
     try:
-        stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
+        stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
         if stripe.api_key:
             health_status["services"]["stripe"] = {"status": "configured"}
         else:
             health_status["services"]["stripe"] = {"status": "not_configured"}
     except Exception as e:
-        health_status["services"]["stripe"] = {
-            "status": "error",
-            "error": str(e)
-        }
-    
+        health_status["services"]["stripe"] = {"status": "error", "error": str(e)}
+
     # Check Gemini/LLM
     try:
-        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
+        emergent_key = os.environ.get("EMERGENT_LLM_KEY")
         if emergent_key:
             health_status["services"]["llm"] = {"status": "configured"}
         else:
             health_status["services"]["llm"] = {"status": "not_configured"}
     except Exception as e:
-        health_status["services"]["llm"] = {
-            "status": "error",
-            "error": str(e)
-        }
-    
+        health_status["services"]["llm"] = {"status": "error", "error": str(e)}
+
     # Check Maria
     try:
-        from maria_agent import maria
         health_status["services"]["maria"] = {"status": "up"}
     except Exception as e:
-        health_status["services"]["maria"] = {
-            "status": "down",
-            "error": str(e)
-        }
-    
+        health_status["services"]["maria"] = {"status": "down", "error": str(e)}
+
     # Overall status
-    services_down = sum(1 for s in health_status["services"].values() if s.get("status") in ["down", "error"])
+    services_down = sum(
+        1 for s in health_status["services"].values() if s.get("status") in ["down", "error"]
+    )
     if services_down > 0:
         health_status["status"] = "degraded"
-    
+
     # Return appropriate HTTP status code
     status_code = 200 if health_status["status"] == "healthy" else 503
-    
+
     return health_status
 
 
@@ -12576,43 +3923,44 @@ async def system_status():
         total_cases = await db.auto_cases.count_documents({})
         active_cases = await db.auto_cases.count_documents({"status": "in_progress"})
         completed_cases = await db.auto_cases.count_documents({"status": "completed"})
-        
+
         # Recent activity (last 24h)
-        yesterday = datetime.utcnow() - timedelta(days=1)
+        yesterday = datetime.now(timezone.utc) - timedelta(days=1)
         new_users_24h = await db.users.count_documents({"created_at": {"$gte": yesterday}})
         new_cases_24h = await db.auto_cases.count_documents({"created_at": {"$gte": yesterday}})
-        
+
         # Payment stats
         successful_payments = await db.payment_transactions.count_documents({"status": "succeeded"})
-        total_revenue = await db.payment_transactions.aggregate([
-            {"$match": {"status": "succeeded"}},
-            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
-        ]).to_list(length=1)
-        
+        total_revenue = await db.payment_transactions.aggregate(
+            [
+                {"$match": {"status": "succeeded"}},
+                {"$group": {"_id": None, "total": {"$sum": "$amount"}}},
+            ]
+        ).to_list(length=1)
+
         return {
             "success": True,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "metrics": {
-                "users": {
-                    "total": total_users,
-                    "new_24h": new_users_24h
-                },
+                "users": {"total": total_users, "new_24h": new_users_24h},
                 "cases": {
                     "total": total_cases,
                     "active": active_cases,
                     "completed": completed_cases,
-                    "new_24h": new_cases_24h
+                    "new_24h": new_cases_24h,
                 },
                 "payments": {
                     "successful": successful_payments,
-                    "total_revenue": total_revenue[0]["total"] if total_revenue else 0
-                }
+                    "total_revenue": total_revenue[0]["total"] if total_revenue else 0,
+                },
             },
             "services": {
                 "mongodb": "operational",
-                "stripe": "operational" if os.environ.get('STRIPE_SECRET_KEY') else "not_configured",
-                "llm": "operational" if os.environ.get('EMERGENT_LLM_KEY') else "not_configured"
-            }
+                "stripe": (
+                    "operational" if os.environ.get("STRIPE_SECRET_KEY") else "not_configured"
+                ),
+                "llm": "operational" if os.environ.get("EMERGENT_LLM_KEY") else "not_configured",
+            },
         }
     except Exception as e:
         logger.error(f"Error getting system status: {str(e)}")
@@ -12630,42 +3978,49 @@ async def system_dashboard():
         total_users = await db.users.count_documents({})
         total_cases = await db.auto_cases.count_documents({})
         active_cases = await db.auto_cases.count_documents({"status": "in_progress"})
-        
+
         # Revenue (last 30 days)
-        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
-        revenue_30d = await db.payment_transactions.aggregate([
-            {"$match": {"status": "succeeded", "created_at": {"$gte": thirty_days_ago}}},
-            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
-        ]).to_list(length=1)
-        
+        thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+        revenue_30d = await db.payment_transactions.aggregate(
+            [
+                {"$match": {"status": "succeeded", "created_at": {"$gte": thirty_days_ago}}},
+                {"$group": {"_id": None, "total": {"$sum": "$amount"}}},
+            ]
+        ).to_list(length=1)
+
         # Conversion rate
         signups_30d = await db.users.count_documents({"created_at": {"$gte": thirty_days_ago}})
-        payments_30d = await db.payment_transactions.count_documents({
-            "status": "succeeded", 
-            "created_at": {"$gte": thirty_days_ago}
-        })
+        payments_30d = await db.payment_transactions.count_documents(
+            {"status": "succeeded", "created_at": {"$gte": thirty_days_ago}}
+        )
         conversion_rate = (payments_30d / signups_30d * 100) if signups_30d > 0 else 0
-        
+
         # Growth (compare to previous 30 days)
-        sixty_days_ago = datetime.utcnow() - timedelta(days=60)
-        signups_prev_30d = await db.users.count_documents({
-            "created_at": {"$gte": sixty_days_ago, "$lt": thirty_days_ago}
-        })
-        growth_rate = ((signups_30d - signups_prev_30d) / signups_prev_30d * 100) if signups_prev_30d > 0 else 0
-        
+        sixty_days_ago = datetime.now(timezone.utc) - timedelta(days=60)
+        signups_prev_30d = await db.users.count_documents(
+            {"created_at": {"$gte": sixty_days_ago, "$lt": thirty_days_ago}}
+        )
+        growth_rate = (
+            ((signups_30d - signups_prev_30d) / signups_prev_30d * 100)
+            if signups_prev_30d > 0
+            else 0
+        )
+
         return {
             "success": True,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "kpis": {
                 "total_users": total_users,
                 "total_cases": total_cases,
                 "active_cases": active_cases,
-                "revenue_30d": revenue_30d[0]["total"] / 100 if revenue_30d else 0,  # Convert cents to dollars
+                "revenue_30d": (
+                    revenue_30d[0]["total"] / 100 if revenue_30d else 0
+                ),  # Convert cents to dollars
                 "conversion_rate": round(conversion_rate, 2),
                 "growth_rate": round(growth_rate, 2),
                 "signups_30d": signups_30d,
-                "payments_30d": payments_30d
-            }
+                "payments_30d": payments_30d,
+            },
         }
     except Exception as e:
         logger.error(f"Error getting dashboard: {str(e)}")
@@ -12679,7 +4034,8 @@ async def create_backup():
     Admin only
     """
     try:
-        from mongodb_backup import mongodb_backup
+        from backend.scripts.mongodb_backup import mongodb_backup
+
         result = await mongodb_backup.create_backup()
         return result
     except Exception as e:
@@ -12694,13 +4050,10 @@ async def list_backups():
     Admin only
     """
     try:
-        from mongodb_backup import mongodb_backup
+        from backend.scripts.mongodb_backup import mongodb_backup
+
         backups = mongodb_backup.list_backups()
-        return {
-            "success": True,
-            "backups": backups,
-            "total": len(backups)
-        }
+        return {"success": True, "backups": backups, "total": len(backups)}
     except Exception as e:
         logger.error(f"Error listing backups: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -12714,7 +4067,8 @@ async def restore_backup(backup_name: str):
     Admin only
     """
     try:
-        from mongodb_backup import mongodb_backup
+        from backend.scripts.mongodb_backup import mongodb_backup
+
         result = await mongodb_backup.restore_backup(backup_name)
         return result
     except Exception as e:
@@ -12723,7 +4077,8 @@ async def restore_backup(backup_name: str):
 
 
 # ===== INADMISSIBILITY SCREENING ENDPOINTS =====
-from inadmissibility_screening import screening, perform_screening
+from backend.compliance.inadmissibility import perform_screening, screening
+
 
 @api_router.get("/screening/questions")
 async def get_screening_questions():
@@ -12731,14 +4086,15 @@ async def get_screening_questions():
     return {
         "success": True,
         "questions": screening.get_screening_questions(),
-        "message": "Responda honestamente. Suas respostas ajudarão a determinar se você precisa de um advogado."
+        "message": "Responda honestamente. Suas respostas ajudarão a determinar se você precisa de um advogado.",
     }
+
 
 @api_router.post("/screening/assess")
 async def assess_inadmissibility(answers: Dict[str, str]):
     """
     Avalia risco de inadmissibilidade baseado nas respostas
-    
+
     Body:
     {
         "visa_denial": "yes/no",
@@ -12748,26 +4104,26 @@ async def assess_inadmissibility(answers: Dict[str, str]):
     """
     try:
         result = perform_screening(answers)
-        
+
         # Log screening result for analytics
-        await db.screening_results.insert_one({
-            "answers": answers,
-            "result": result,
-            "timestamp": datetime.utcnow()
-        })
-        
-        return {
-            "success": True,
-            **result
-        }
+        await db.screening_results.insert_one(
+            {"answers": answers, "result": result, "timestamp": datetime.now(timezone.utc)}
+        )
+
+        return {"success": True, **result}
     except Exception as e:
         logger.error(f"Error in inadmissibility screening: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 # ===== END INADMISSIBILITY SCREENING =====
 
 # ===== FEEDBACK SYSTEM ENDPOINTS =====
-from feedback_system import FeedbackSystem, FeedbackType, submit_ai_response_feedback, get_nps_score
+from backend.learning.feedback import (
+    FeedbackSystem,
+    get_nps_score,
+)
+
 
 @api_router.post("/feedback/submit")
 async def submit_feedback(
@@ -12776,11 +4132,11 @@ async def submit_feedback(
     thumbs: Optional[str] = None,
     comment: Optional[str] = None,
     metadata: Optional[Dict[str, Any]] = None,
-    current_user = Depends(get_current_user)
+    current_user=Depends(get_current_user),
 ):
     """
     Submeter feedback do usuário
-    
+
     Body:
     {
         "feedback_type": "ai_response" | "form_usability" | "document_upload" | "pdf_generation" | "general_experience",
@@ -12798,39 +4154,34 @@ async def submit_feedback(
             rating=rating,
             thumbs=thumbs,
             comment=comment,
-            metadata=metadata
+            metadata=metadata,
         )
-        
+
         return result
-        
+
     except Exception as e:
         logger.error(f"Error submitting feedback: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @api_router.get("/feedback/stats")
-async def get_feedback_statistics(
-    feedback_type: Optional[str] = None,
-    days: Optional[int] = 30
-):
+async def get_feedback_statistics(feedback_type: Optional[str] = None, days: Optional[int] = 30):
     """Obter estatísticas de feedback (Admin/Analytics)"""
     try:
         feedback_system = FeedbackSystem(db)
-        
-        start_date = datetime.utcnow() - timedelta(days=days) if days else None
-        
+
+        start_date = datetime.now(timezone.utc) - timedelta(days=days) if days else None
+
         stats = await feedback_system.get_feedback_stats(
-            feedback_type=feedback_type,
-            start_date=start_date
+            feedback_type=feedback_type, start_date=start_date
         )
-        
-        return {
-            "success": True,
-            **stats
-        }
-        
+
+        return {"success": True, **stats}
+
     except Exception as e:
         logger.error(f"Error getting feedback stats: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @api_router.get("/feedback/trending-issues")
 async def get_trending_issues(days: int = 7):
@@ -12838,85 +4189,80 @@ async def get_trending_issues(days: int = 7):
     try:
         feedback_system = FeedbackSystem(db)
         issues = await feedback_system.get_trending_issues(days=days)
-        
-        return {
-            "success": True,
-            "issues": issues,
-            "period_days": days
-        }
-        
+
+        return {"success": True, "issues": issues, "period_days": days}
+
     except Exception as e:
         logger.error(f"Error getting trending issues: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @api_router.get("/feedback/nps")
 async def get_nps(days: int = 30):
     """Calcular Net Promoter Score"""
     try:
         nps_data = await get_nps_score(db, days=days)
-        return {
-            "success": True,
-            **nps_data
-        }
+        return {"success": True, **nps_data}
     except Exception as e:
         logger.error(f"Error calculating NPS: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @api_router.get("/feedback/my-history")
-async def get_my_feedback_history(
-    limit: int = 10,
-    current_user = Depends(get_current_user)
-):
+async def get_my_feedback_history(limit: int = 10, current_user=Depends(get_current_user)):
     """Obter histórico de feedback do usuário logado"""
     try:
         feedback_system = FeedbackSystem(db)
         history = await feedback_system.get_user_feedback_history(
-            user_id=current_user["id"],
-            limit=limit
+            user_id=current_user["id"], limit=limit
         )
-        
-        return {
-            "success": True,
-            "feedback": history
-        }
-        
+
+        return {"success": True, "feedback": history}
+
     except Exception as e:
         logger.error(f"Error getting feedback history: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 # ===== END FEEDBACK SYSTEM =====
 
 # Include all API routes
 app.include_router(api_router)
+app.include_router(auth_router)
+app.include_router(auto_application_router)
+app.include_router(auto_application_ai_router)
+app.include_router(auto_application_packages_router)
+app.include_router(auto_application_downloads_router)
+app.include_router(agents_router)
+app.include_router(completeness_router)
+app.include_router(friendly_form_router)
+app.include_router(voice_router)
+app.include_router(voice_ws_router)
+app.include_router(downloads_router)
+app.include_router(email_packages_router)
+app.include_router(knowledge_base_router)
+app.include_router(oracle_router)
+app.include_router(specialized_agents_router)
+app.include_router(visa_updates_admin_router)
+app.include_router(uscis_forms_router)
+app.include_router(education_router)
+app.include_router(documents_router)
+app.include_router(payments_router)
+app.include_router(admin_products_router)
+app.include_router(owl_agent_router)
 
 # Include Visa API router (multi-agent architecture)
 if VISA_API_AVAILABLE:
     app.include_router(visa_router)
-    print("✅ Visa Multi-Agent API registered")
+    logger.info("✅ Visa Multi-Agent API registered")
 
 # Include Maria router
-app.include_router(maria_api.router)
-
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    """Shutdown event to close connections"""
-    # Stop scheduler
-    try:
-        global visa_scheduler
-        if 'visa_scheduler' in globals() and visa_scheduler:
-            visa_scheduler.stop()
-            logger.info("✅ Visa update scheduler stopped")
-    except Exception as e:
-        logger.error(f"Error stopping scheduler: {str(e)}")
-    
-    # Close MongoDB connection
-    client.close()
-    logger.info("✅ MongoDB connection closed")
-
+app.include_router(maria_api_router)
 
 # ============================================================================
 # SIMULATION RESULTS PAGE
 # ============================================================================
+
 
 @app.get("/api/simulation-results", response_class=HTMLResponse)
 async def get_simulation_results():
@@ -12924,13 +4270,13 @@ async def get_simulation_results():
     Serve the simulation results HTML page
     """
     html_path = Path(__file__).parent.parent / "frontend" / "public" / "simulation-results.html"
-    
+
     if not html_path.exists():
         raise HTTPException(status_code=404, detail="Simulation results page not found")
-    
-    with open(html_path, 'r', encoding='utf-8') as f:
+
+    with open(html_path, "r", encoding="utf-8") as f:
         html_content = f.read()
-    
+
     return HTMLResponse(content=html_content)
 
 
@@ -12940,10 +4286,10 @@ async def get_simulation_data():
     Get simulation results JSON data
     """
     json_path = Path(__file__).parent.parent / "frontend" / "public" / "simulation_results.json"
-    
+
     if not json_path.exists():
         raise HTTPException(status_code=404, detail="Simulation data not found")
-    
+
     return FileResponse(json_path, media_type="application/json")
 
 
@@ -12963,27 +4309,27 @@ async def download_file(filename: str):
         "final_test_result",
         "COMPLETE_WITH_IMAGES",
         "FINAL_H1B_PACKAGE_COMPLETE",
-        "I-129_FILLED_OFFICIAL"
+        "I-129_FILLED_OFFICIAL",
     ]
-    
+
     if not any(filename.startswith(pattern) for pattern in allowed_patterns):
         raise HTTPException(status_code=403, detail="Access denied")
-    
+
     file_path = Path(__file__).parent.parent / "frontend" / "public" / filename
-    
+
     if not file_path.exists():
         raise HTTPException(status_code=404, detail=f"File not found: {filename}")
-    
+
     # Determine media type
-    if filename.endswith('.pdf'):
+    if filename.endswith(".pdf"):
         media_type = "application/pdf"
-    elif filename.endswith('.txt'):
+    elif filename.endswith(".txt"):
         media_type = "text/plain"
-    elif filename.endswith('.json'):
+    elif filename.endswith(".json"):
         media_type = "application/json"
     else:
         media_type = "application/octet-stream"
-    
+
     return FileResponse(file_path, media_type=media_type, filename=filename)
 
 
@@ -12993,13 +4339,13 @@ async def get_final_demo():
     Serve the final demo page
     """
     html_path = Path(__file__).parent.parent / "frontend" / "public" / "final-demo.html"
-    
+
     if not html_path.exists():
         raise HTTPException(status_code=404, detail="Final demo page not found")
-    
-    with open(html_path, 'r', encoding='utf-8') as f:
+
+    with open(html_path, "r", encoding="utf-8") as f:
         html_content = f.read()
-    
+
     return HTMLResponse(content=html_content)
 
 
@@ -13009,13 +4355,13 @@ async def get_complete_with_images():
     Serve the complete package with images demo page
     """
     html_path = Path(__file__).parent.parent / "frontend" / "public" / "complete-with-images.html"
-    
+
     if not html_path.exists():
         raise HTTPException(status_code=404, detail="Complete with images page not found")
-    
-    with open(html_path, 'r', encoding='utf-8') as f:
+
+    with open(html_path, "r", encoding="utf-8") as f:
         html_content = f.read()
-    
+
     return HTMLResponse(content=html_content)
 
 
@@ -13025,14 +4371,15 @@ async def get_final_complete_package():
     Serve the final complete package demo page
     """
     html_path = Path(__file__).parent.parent / "frontend" / "public" / "final-complete-package.html"
-    
+
     if not html_path.exists():
         raise HTTPException(status_code=404, detail="Final complete package page not found")
-    
-    with open(html_path, 'r', encoding='utf-8') as f:
+
+    with open(html_path, "r", encoding="utf-8") as f:
         html_content = f.read()
-    
+
     return HTMLResponse(content=html_content)
+
 
 @app.get("/api/enhanced-package-demo", response_class=HTMLResponse)
 async def get_enhanced_package_demo():
@@ -13040,13 +4387,13 @@ async def get_enhanced_package_demo():
     Serve the enhanced package demo page with knowledge base integration
     """
     html_path = Path(__file__).parent.parent / "frontend" / "public" / "enhanced-package-demo.html"
-    
+
     if not html_path.exists():
         raise HTTPException(status_code=404, detail="Enhanced package demo page not found")
-    
-    with open(html_path, 'r', encoding='utf-8') as f:
+
+    with open(html_path, "r", encoding="utf-8") as f:
         html_content = f.read()
-    
+
     return HTMLResponse(content=html_content)
 
 
@@ -13056,13 +4403,13 @@ async def get_ultimate_package_demo():
     Serve the ultimate package demo page - complete integration
     """
     html_path = Path(__file__).parent.parent / "frontend" / "public" / "ultimate-package-demo.html"
-    
+
     if not html_path.exists():
         raise HTTPException(status_code=404, detail="Ultimate package demo page not found")
-    
-    with open(html_path, 'r', encoding='utf-8') as f:
+
+    with open(html_path, "r", encoding="utf-8") as f:
         html_content = f.read()
-    
+
     return HTMLResponse(content=html_content)
 
 
@@ -13072,13 +4419,13 @@ async def get_simulated_case_demo():
     Serve the simulated case demo page - complete test case
     """
     html_path = Path(__file__).parent.parent / "frontend" / "public" / "simulated-case-demo.html"
-    
+
     if not html_path.exists():
         raise HTTPException(status_code=404, detail="Simulated case demo page not found")
-    
-    with open(html_path, 'r', encoding='utf-8') as f:
+
+    with open(html_path, "r", encoding="utf-8") as f:
         html_content = f.read()
-    
+
     return HTMLResponse(content=html_content)
 
 
@@ -13087,15 +4434,17 @@ async def get_simulated_package_pdf():
     """
     Serve the simulated H-1B package PDF
     """
-    pdf_path = Path(__file__).parent.parent / "frontend" / "public" / "SIMULATED_H1B_COMPLETE_PACKAGE.pdf"
-    
+    pdf_path = (
+        Path(__file__).parent.parent / "frontend" / "public" / "SIMULATED_H1B_COMPLETE_PACKAGE.pdf"
+    )
+
     if not pdf_path.exists():
         raise HTTPException(status_code=404, detail="Simulated package PDF not found")
-    
+
     return FileResponse(
         path=str(pdf_path),
         media_type="application/pdf",
-        filename="SIMULATED_H1B_COMPLETE_PACKAGE.pdf"
+        filename="SIMULATED_H1B_COMPLETE_PACKAGE.pdf",
     )
 
 
@@ -13105,13 +4454,13 @@ async def get_b2_extension_demo():
     Serve the B-2 extension demo page
     """
     html_path = Path(__file__).parent.parent / "frontend" / "public" / "b2-extension-demo.html"
-    
+
     if not html_path.exists():
         raise HTTPException(status_code=404, detail="B-2 extension demo page not found")
-    
-    with open(html_path, 'r', encoding='utf-8') as f:
+
+    with open(html_path, "r", encoding="utf-8") as f:
         html_content = f.read()
-    
+
     return HTMLResponse(content=html_content)
 
 
@@ -13120,12 +4469,24 @@ async def get_b2_extension_package_pdf():
     """
     Serve the B-2 extension package PDF
     """
-    pdf_path = Path(__file__).parent.parent / "frontend" / "public" / "MARIA_HELENA_B2_EXTENSION_COMPLETE_PACKAGE.pdf"
-    
+    pdf_path = (
+        Path(__file__).parent.parent
+        / "frontend"
+        / "public"
+        / "MARIA_HELENA_B2_EXTENSION_COMPLETE_PACKAGE.pdf"
+    )
+
     if not pdf_path.exists():
         raise HTTPException(status_code=404, detail="B-2 extension package PDF not found")
-    
-    return FileResponse(pdf_path, media_type="application/pdf", filename="SIMULATED_H1B_COMPLETE_PACKAGE.pdf")
+
+    return FileResponse(
+        pdf_path, media_type="application/pdf", filename="SIMULATED_H1B_COMPLETE_PACKAGE.pdf"
+    )
 
 
+if __name__ == "__main__":
+    import uvicorn
 
+    host = os.environ.get("HOST", "0.0.0.0")
+    port = int(os.environ.get("PORT", "8001"))
+    uvicorn.run(app, host=host, port=port, reload=False)

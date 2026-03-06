@@ -93,15 +93,6 @@ button:disabled, .btn:disabled {
   color: rgb(31, 41, 55) !important; /* text-gray-800 - very dark for small text */
 }
 
-/* Force white background for buttons and remove blue */
-button, .btn, [role="button"] {
-  background-color: white !important;
-}
-
-button:hover, .btn:hover, [role="button"]:hover {
-  background-color: #f9fafb !important;
-}
-
 /* Black buttons should stay black */
 .bg-black {
   background-color: black !important;

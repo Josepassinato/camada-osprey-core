@@ -1,0 +1,463 @@
+# Cursor AI Rules for Osprey Platform
+# Immigration case processing system with multi-agent AI
+# Last Updated: 2026-01-13
+
+## Project Identity
+- **Name**: Osprey
+- **Type**: Enterprise Immigration AI Platform (B2C)
+- **Backend**: Python 3.11+ | FastAPI 0.128.0 | MongoDB 6.0+ (Motor async)
+- **Frontend**: TypeScript 5.8+ | React 18.3 | Vite 5.4 | Tailwind CSS 3.4
+- **Status**: Production-ready with active development
+
+## Core Principles
+1. **Async-first**: All I/O operations MUST use async/await
+2. **Type-safe**: TypeScript on frontend, type hints on backend
+3. **Validated**: Pydantic models for all API requests/responses
+4. **Structured logging**: Never use print(), always use logger with context
+5. **Security-conscious**: No secrets in code, validate all inputs
+6. **Edit over create**: ALWAYS prefer editing existing files to creating new ones
+
+---
+
+## Backend (Python/FastAPI)
+
+### File Organization
+- `backend/server.py` - Main app initialization, DO NOT add routes here
+- `backend/core/` - Infrastructure (auth, database, logging, sentry)
+- `backend/api/` - API routers (domain-organized, 23 modules)
+- `backend/models/` - Pydantic schemas
+- `backend/services/` - Business logic layer
+
+### Mandatory Patterns
+
+#### Database Operations
+```python
+# ✅ ALWAYS
+from core.database import db
+
+async def get_case(case_id: str) -> dict:
+    case = await db.auto_cases.find_one({"case_id": case_id})
+    if not case:
+        raise HTTPException(404, "Case not found")
+    return serialize_doc(case)  # MUST serialize ObjectId
+
+# ❌ NEVER
+def get_case(case_id: str):
+    case = db.auto_cases.find_one({"case_id": case_id})  # Not async!
+    return case  # ObjectId not JSON serializable!
+```
+
+#### API Routes
+```python
+# ✅ ALWAYS use this structure
+from fastapi import APIRouter, Depends, HTTPException
+from core.auth import get_current_user
+from core.database import db
+from core.serialization import serialize_doc
+from models.my_module import RequestModel, ResponseModel
+import logging
+
+router = APIRouter(prefix="/api/my-feature", tags=["My Feature"])
+logger = logging.getLogger(__name__)
+
+@router.post("/", response_model=ResponseModel)
+async def create_item(
+    data: RequestModel,
+    user: dict = Depends(get_current_user)
+):
+    logger.info("Creating item", extra={"user_id": user["id"]})
+    # ... implementation
+    return serialize_doc(result)
+```
+
+#### Datetime Handling
+```python
+# ✅ ALWAYS
+from datetime import datetime, timezone
+created_at = datetime.now(timezone.utc)
+
+# ❌ NEVER (deprecated in Python 3.12+)
+created_at = datetime.utcnow()
+```
+
+#### Logging
+```python
+# ✅ ALWAYS
+import logging
+logger = logging.getLogger(__name__)
+
+logger.info(
+    "Operation completed",
+    extra={
+        "user_id": user_id,
+        "case_id": case_id,
+        "duration_ms": 123
+    }
+)
+
+# ❌ NEVER
+print(f"Case {case_id} created")  # Lost in production
+```
+
+### Error Handling
+```python
+# ✅ Return proper HTTP status codes
+if not case:
+    raise HTTPException(404, "Case not found")
+
+if not user.has_permission("admin"):
+    raise HTTPException(403, "Insufficient permissions")
+
+try:
+    result = await external_api_call()
+except RateLimitError:
+    raise HTTPException(429, "Rate limit exceeded")
+except Exception as e:
+    logger.error("Operation failed", exc_info=True)
+    raise HTTPException(500, "Internal server error")
+```
+
+---
+
+## Frontend (React/TypeScript)
+
+### File Organization
+- `frontend/src/pages/` - Page components (25+)
+- `frontend/src/components/` - Reusable UI components (35+)
+- `frontend/src/lib/api.ts` - **CRITICAL**: API client with makeApiCall
+- `frontend/src/lib/utils.ts` - Helper functions
+- `frontend/src/hooks/` - Custom React hooks
+
+### Mandatory Patterns
+
+#### API Calls
+```typescript
+// ✅ ALWAYS use makeApiCall (NEVER fetch directly)
+import { makeApiCall } from '@/lib/api';
+
+// GET
+const cases = await makeApiCall<Case[]>('/cases', 'GET');
+
+// POST
+const newCase = await makeApiCall<Case>('/cases', 'POST', {
+  form_code: 'I-539',
+  visa_type: 'b2'
+});
+
+// makeApiCall returns parsed JSON, handles errors, auto-prefixes /api
+
+// ❌ NEVER use fetch directly
+const response = await fetch('/api/cases');  // Wrong!
+```
+
+#### Controlled Inputs
+```typescript
+// ✅ ALWAYS initialize with empty string (never undefined)
+const [formData, setFormData] = useState({
+  firstName: data?.firstName || '',
+  lastName: data?.lastName || '',
+  email: data?.email || ''
+});
+
+<input
+  value={formData.firstName}  // Never undefined
+  onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+/>
+
+// ❌ NEVER allow undefined values
+const [formData, setFormData] = useState({
+  firstName: data?.firstName  // Can be undefined!
+});
+```
+
+#### Type Safety
+```typescript
+// ✅ ALWAYS define interfaces
+interface Case {
+  case_id: string;
+  user_id: string;
+  status: 'created' | 'in_progress' | 'completed';
+  form_code: string;
+  created_at: string;
+}
+
+async function getCase(caseId: string): Promise<Case> {
+  return await makeApiCall<Case>(`/cases/${caseId}`, 'GET');
+}
+
+// ❌ NEVER use `any`
+async function getCase(caseId: string): Promise<any> {  // Lost type safety!
+  return await makeApiCall(`/cases/${caseId}`, 'GET');
+}
+```
+
+#### Button Styling
+```typescript
+// ✅ Use native <button> for custom styles (full CSS control)
+<button
+  className="bg-black text-white hover:bg-gray-800 px-4 py-2 rounded"
+  onClick={handleClick}
+>
+  Custom Button
+</button>
+
+// ✅ OR use shadcn Button for standard styles
+import { Button } from '@/components/ui/button';
+
+<Button variant="default" onClick={handleClick}>
+  Standard Button
+</Button>
+
+// ⚠️ NOTE: shadcn Button overrides custom className hover states
+// For full CSS control, use native <button>
+```
+
+---
+
+## Code Style
+
+### Backend (Python)
+- **Formatter**: Black (line length 100)
+- **Linter**: Flake8
+- **Type Checker**: MyPy
+- **Imports**: isort (organized)
+
+```python
+# Order: stdlib, third-party, local
+import os
+from datetime import datetime, timezone
+from typing import Optional, Dict
+
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
+
+from core.auth import get_current_user
+from models.case import CaseCreate
+```
+
+### Frontend (TypeScript)
+- **Formatter**: Prettier
+- **Linter**: ESLint with TypeScript plugin
+- **Type Checker**: tsc --noEmit
+
+```typescript
+// Use named imports, organize by source
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { Button } from '@/components/ui/button';
+import { makeApiCall } from '@/lib/api';
+import { cn } from '@/lib/utils';
+
+import type { Case, CaseStatus } from '@/types';
+```
+
+---
+
+## Security Rules
+
+### NEVER
+- ❌ Hardcode API keys, passwords, or secrets
+- ❌ Use `eval()` or `exec()` on user input
+- ❌ Return raw error messages to users (info leak)
+- ❌ Trust user input without validation (Pydantic/Zod)
+- ❌ Use `dangerouslySetInnerHTML` without sanitization
+
+### ALWAYS
+- ✅ Use environment variables for secrets (`.env` files)
+- ✅ Validate all user input (Pydantic models, Zod schemas)
+- ✅ Use parameterized queries (MongoDB prevents injection by default)
+- ✅ Apply rate limiting to expensive operations
+- ✅ Log security events (failed logins, permission denials)
+
+---
+
+## Anti-Patterns (NEVER DO THIS!)
+
+### ❌ Synchronous Database Calls
+```python
+def get_case(case_id):
+    return db.cases.find_one({"case_id": case_id})  # Blocks event loop!
+```
+
+### ❌ Missing Error Handling
+```python
+# No try/catch around external API calls
+result = await openai_api_call(prompt)
+```
+
+### ❌ Using print() Instead of Logging
+```python
+print(f"Processing case {case_id}")  # Lost in production
+```
+
+### ❌ Returning Unserializable Types
+```python
+case = await db.cases.find_one({"case_id": case_id})
+return case  # ObjectId not JSON serializable!
+```
+
+### ❌ Direct fetch() in Frontend
+```typescript
+const response = await fetch('/api/cases');  # Use makeApiCall!
+```
+
+### ❌ Undefined Controlled Inputs
+```typescript
+const [value, setValue] = useState(data?.field);  # Can be undefined!
+```
+
+---
+
+## Common Tasks
+
+### Adding a New API Endpoint
+1. Create router in `backend/api/my_feature.py`
+2. Define Pydantic models in `backend/models/my_feature.py`
+3. Add business logic in `backend/services/my_feature.py` (if complex)
+4. Register router in `backend/server.py`: `app.include_router(my_feature_router)`
+5. Create TypeScript types and API functions in `frontend/src/lib/api.ts`
+
+### Adding a Database Collection
+1. No schema migration needed (MongoDB is schemaless)
+2. Access via `db.collection_name` in `backend/core/database.py`
+3. Document the schema in `backend/README.md` under "Database Schema"
+
+### Adding an AI Agent
+1. Create agent file in `backend/` (e.g., `my_specialist_agent.py`)
+2. Use OpenAI or Gemini API with async calls
+3. Add API endpoint in `backend/api/agents.py`
+4. Implement error handling and rate limiting
+5. Log all AI calls with costs/tokens
+
+---
+
+## File Naming Conventions
+
+### Backend
+- **API Routers**: `backend/api/feature_name.py` (snake_case)
+- **Models**: `backend/models/feature_name.py` (snake_case)
+- **Services**: `backend/services/feature_name.py` (snake_case)
+- **Tests**: `backend/tests/test_feature_name.py` (snake_case with test_ prefix)
+
+### Frontend
+- **Pages**: `frontend/src/pages/FeatureName.tsx` (PascalCase)
+- **Components**: `frontend/src/components/ComponentName.tsx` (PascalCase)
+- **Utilities**: `frontend/src/lib/utility-name.ts` (kebab-case)
+- **Hooks**: `frontend/src/hooks/useFeatureName.ts` (camelCase with use prefix)
+
+---
+
+## Testing
+
+### Backend (pytest)
+```python
+# tests/test_auth.py
+import pytest
+from core.auth import hash_password, verify_password
+
+@pytest.mark.asyncio
+async def test_password_hashing():
+    password = "secret123"
+    hashed = hash_password(password)
+    assert verify_password(password, hashed)
+    assert not verify_password("wrong", hashed)
+```
+
+Run: `pytest` or `pytest tests/test_auth.py`
+
+### Frontend (if configured)
+```typescript
+// __tests__/Button.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import { Button } from '@/components/ui/button';
+
+test('button click triggers callback', () => {
+  const handleClick = jest.fn();
+  render(<Button onClick={handleClick}>Click Me</Button>);
+
+  fireEvent.click(screen.getByText('Click Me'));
+  expect(handleClick).toHaveBeenCalledTimes(1);
+});
+```
+
+Run: `npm test`
+
+---
+
+## Environment Setup
+
+### Backend
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env  # Edit with your API keys
+python3 server.py
+```
+
+### Frontend
+```bash
+cd frontend
+npm install
+cp .env.example .env  # Edit with VITE_API_URL
+npm run dev
+```
+
+---
+
+## Commit Message Format
+
+Follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+feat(auth): add OAuth2 support
+fix(payments): resolve Stripe webhook validation
+docs(readme): update API documentation
+refactor(api): split monolithic router
+test(auth): add password hashing tests
+chore(deps): update dependencies
+```
+
+Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `perf`, `style`
+
+---
+
+## Documentation References
+
+- **Root README**: [README.md](README.md) - System architecture
+- **Backend README**: [backend/README.md](backend/README.md) - 1830 lines
+- **Frontend README**: [frontend/README.md](frontend/README.md) - 1080 lines
+- **Security Audit**: [backend/SECURITY_AUDIT_2026-01-13.md](backend/SECURITY_AUDIT_2026-01-13.md)
+- **Claude Guide**: [CLAUDE.md](CLAUDE.md)
+- **Gemini Guide**: [GEMINI.md](GEMINI.md)
+- **API Docs**: http://localhost:8001/docs (Swagger UI)
+
+---
+
+## Quick Commands
+
+```bash
+# Backend
+python3 backend/server.py                    # Start server
+pytest                                       # Run tests
+black . && flake8 .                         # Lint & format
+pip-audit                                    # Security audit
+
+# Frontend
+npm run dev                                  # Start dev server
+npm run build                                # Production build
+npm run lint                                 # ESLint
+npm run type-check                           # TypeScript check
+
+# Both
+git status                                   # Check changes
+git add . && git commit -m "feat: ..."      # Commit
+```
+
+---
+
+**Last Updated**: 2026-01-13
+**Version**: 2.0.0
+**Maintained By**: Osprey Development Team

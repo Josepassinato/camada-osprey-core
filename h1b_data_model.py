@@ -285,7 +285,9 @@ if validation_errors:
     for error in validation_errors:
         print(f"  - {error}")
 else:
-    print("✅ Dados validados com sucesso - sem inconsistências")
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info("✅ Dados validados com sucesso - sem inconsistências")
 
 if __name__ == "__main__":
     print("\n" + "="*80)

@@ -3,9 +3,12 @@ B-2 Tourist Visa Extension Specialist Agent
 Especialista em extensões de visto de turista B-2
 """
 
+import logging
 from typing import Dict, Any, List
 from pathlib import Path
 import sys
+
+logger = logging.getLogger(__name__)
 
 # Adicionar path do projeto
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -78,7 +81,7 @@ class B2ExtensionAgent(BaseVisaAgent):
             if req_file.exists():
                 with open(req_file, 'r', encoding='utf-8') as f:
                     knowledge['requirements'] = f.read()
-                print(f"📚 Loaded USCIS requirements knowledge base ({len(knowledge['requirements'])} chars)")
+                logger.info(f"📚 Loaded USCIS requirements knowledge base ({len(knowledge['requirements'])} chars)")
         
         return knowledge
     

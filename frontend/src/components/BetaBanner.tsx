@@ -98,19 +98,32 @@ const BetaBanner: React.FC = () => {
         <button
           onClick={() => setIsVisible(false)}
           style={{
-            background: 'transparent',
-            border: 'none',
+            background: 'rgba(255, 255, 255, 0.2)',
+            border: '1px solid rgba(255, 255, 255, 0.4)',
             color: 'white',
             cursor: 'pointer',
-            padding: '4px 8px',
-            fontSize: '18px',
-            opacity: 0.7,
-            transition: 'opacity 0.3s',
-            marginLeft: 'auto'
+            padding: '6px 10px',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            borderRadius: '4px',
+            transition: 'all 0.3s',
+            marginLeft: 'auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minWidth: '32px',
+            minHeight: '32px'
           }}
-          onMouseOver={(e) => e.currentTarget.style.opacity = '1'}
-          onMouseOut={(e) => e.currentTarget.style.opacity = '0.7'}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)';
+            e.currentTarget.style.transform = 'scale(1.1)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
           title="Fechar banner"
+          aria-label="Fechar banner"
         >
           ✕
         </button>

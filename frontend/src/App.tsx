@@ -10,7 +10,11 @@ import { ProcessTypeProvider } from "./contexts/ProcessTypeContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ClerkLogin from "./pages/ClerkLogin";
+import ClerkSignup from "./pages/ClerkSignup";
+import ClerkDemo from "./pages/ClerkDemo";
 import Dashboard from "./pages/Dashboard";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import Documents from "./pages/Documents";
 import DocumentUpload from "./pages/DocumentUpload";
 import Education from "./pages/Education";
@@ -69,10 +73,22 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
             <Routes>
+            {/* Clerk Authentication Routes */}
+            <Route path="/clerk-login" element={<ClerkLogin />} />
+            <Route path="/clerk-signup" element={<ClerkSignup />} />
+            <Route path="/clerk-demo" element={<ClerkDemo />} />
+            
+            {/* Legacy Authentication Routes (keep for backward compatibility) */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            
+            {/* Protected Routes */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
           <Route path="/documents" element={<Documents />} />
           <Route path="/documents/upload" element={<DocumentUpload />} />
           <Route path="/education" element={<Education />} />
