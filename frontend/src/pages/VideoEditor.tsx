@@ -256,10 +256,17 @@ const VideoEditor = () => {
   const fetchProjects = useCallback(async () => {
     try {
       setIsLoading(true);
+      setError("");
       const data = await makeApiCall("/video/projects", "GET");
       setProjects(data.projects || []);
     } catch (err: any) {
-      setError(err.message);
+      console.warn("Video API not available:", err.message);
+      setProjects([]);
+      if (err.message?.includes("Failed to fetch") || err.message?.includes("NetworkError")) {
+        setError("Backend n\u00e3o dispon\u00edvel. Inicie o servidor: cd backend && python3 server.py");
+      } else {
+        setError(err.message);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -828,8 +835,10 @@ const VideoEditor = () => {
 
           {/* Messages */}
           {error && (
-            <Alert className="mb-4 border-red-200 bg-red-50">
-              <AlertDescription className="text-red-700">{error}</AlertDescription>
+            <Alert className="mb-4 border-yellow-200 bg-yellow-50">
+              <AlertDescription className="text-yellow-800">
+                {error}
+              </AlertDescription>
             </Alert>
           )}
           {successMsg && (
