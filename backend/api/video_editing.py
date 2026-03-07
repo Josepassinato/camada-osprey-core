@@ -532,3 +532,173 @@ async def get_video_capabilities():
             "audio/mpeg", "audio/wav", "audio/ogg", "audio/aac",
         ],
     }
+
+
+# ===== REMOTION INTEGRATION =====
+
+
+@router.get("/remotion/templates")
+async def list_remotion_templates():
+    """List available Remotion project templates."""
+    from backend.services.video_remotion import list_templates
+
+    return {"templates": list_templates()}
+
+
+@router.post("/remotion/projects")
+async def create_remotion_project(
+    data: dict,
+    current_user=Depends(get_current_user),
+):
+    """Create a new Remotion project from a template.
+
+    Body params:
+        name: Project name
+        template: Template ID (blank, text-animation, slideshow, lower-third, countdown)
+        width: Video width (default 1920)
+        height: Video height (default 1080)
+        fps: Frame rate (default 30)
+        duration_seconds: Duration in seconds (default 5)
+    """
+    from backend.services.video_remotion import create_remotion_project as create_project
+
+    try:
+        result = await create_project(
+            project_name=data.get("name", "untitled"),
+            template=data.get("template", "blank"),
+            width=data.get("width", 1920),
+            height=data.get("height", 1080),
+            fps=data.get("fps", 30),
+            duration_seconds=data.get("duration_seconds", 5.0),
+        )
+
+        # Store in DB
+        project_record = {
+            "id": str(uuid.uuid4()),
+            "user_id": current_user["id"],
+            "type": "remotion",
+            "name": data.get("name", "untitled"),
+            "template": data.get("template", "blank"),
+            "project_dir": result["project_dir"],
+            "compositions": result["compositions"],
+            "status": "created",
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
+        }
+
+        await db.video_projects.insert_one(project_record)
+
+        logger.info(
+            "Remotion project created",
+            extra={"project_id": project_record["id"], "template": data.get("template")},
+        )
+
+        return {
+            "message": "Remotion project created",
+            "project_id": project_record["id"],
+            "project_dir": result["project_dir"],
+            "compositions": result["compositions"],
+            "requires_npm_install": True,
+        }
+
+    except Exception as e:
+        logger.error(f"Error creating Remotion project: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/remotion/projects/{project_id}/install")
+async def install_remotion_deps(
+    project_id: str,
+    current_user=Depends(get_current_user),
+):
+    """Install npm dependencies for a Remotion project."""
+    from backend.services.video_remotion import install_dependencies
+
+    try:
+        project = await db.video_projects.find_one(
+            {"id": project_id, "user_id": current_user["id"], "type": "remotion"},
+        )
+        if not project:
+            raise HTTPException(status_code=404, detail="Remotion project not found")
+
+        result = await install_dependencies(project["project_dir"])
+
+        if not result["success"]:
+            raise HTTPException(status_code=500, detail=result.get("error", "npm install failed"))
+
+        await db.video_projects.update_one(
+            {"id": project_id},
+            {"$set": {"status": "ready", "updated_at": datetime.now(timezone.utc)}},
+        )
+
+        return {"message": "Dependencies installed successfully"}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error installing Remotion deps: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/remotion/projects/{project_id}/render")
+async def render_remotion_project(
+    project_id: str,
+    data: dict,
+    current_user=Depends(get_current_user),
+):
+    """Render a Remotion composition to video.
+
+    Body params:
+        composition_id: Composition to render (default "Main")
+        props: Input props for the composition
+        codec: Video codec (default "h264")
+        crf: Quality (0-63, default 18)
+    """
+    from backend.services.video_remotion import render_composition
+
+    try:
+        project = await db.video_projects.find_one(
+            {"id": project_id, "user_id": current_user["id"], "type": "remotion"},
+        )
+        if not project:
+            raise HTTPException(status_code=404, detail="Remotion project not found")
+
+        await db.video_projects.update_one(
+            {"id": project_id},
+            {"$set": {"status": "rendering", "updated_at": datetime.now(timezone.utc)}},
+        )
+
+        result = await render_composition(
+            project_dir=project["project_dir"],
+            composition_id=data.get("composition_id", "Main"),
+            props=data.get("props"),
+            codec=data.get("codec", "h264"),
+            crf=data.get("crf", 18),
+        )
+
+        status = "completed" if result["success"] else "failed"
+        await db.video_projects.update_one(
+            {"id": project_id},
+            {
+                "$set": {
+                    "status": status,
+                    "render_output": result,
+                    "updated_at": datetime.now(timezone.utc),
+                },
+            },
+        )
+
+        if not result["success"]:
+            raise HTTPException(status_code=500, detail=result.get("error", "Render failed"))
+
+        return {
+            "message": "Video rendered successfully",
+            "output_path": result["output_path"],
+            "file_size": result.get("file_size", 0),
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error rendering Remotion project: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
