@@ -233,6 +233,12 @@ numpy==2.4.1  # Updated from 2.3.2
 pandas==2.3.3  # Updated from 2.3.1
 
 # ----------------------------------------------------------------------------
+# Video Processing
+# ----------------------------------------------------------------------------
+# ffmpeg-python: Python bindings for FFmpeg (requires ffmpeg installed on system)
+ffmpeg-python>=0.2.0
+
+# ----------------------------------------------------------------------------
 # Image Processing
 # ----------------------------------------------------------------------------
 # Pillow: Image processing library
