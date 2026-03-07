@@ -140,7 +140,6 @@ from backend.api.payments import router as payments_router
 from backend.api.specialized_agents import router as specialized_agents_router
 from backend.api.uscis_forms import router as uscis_forms_router
 from backend.api.visa_updates_admin import router as visa_updates_admin_router
-from backend.api.video_editing import router as video_editing_router
 from backend.api.voice import router as voice_router
 from backend.api.voice import ws_router as voice_ws_router
 
@@ -4251,7 +4250,6 @@ app.include_router(documents_router)
 app.include_router(payments_router)
 app.include_router(admin_products_router)
 app.include_router(owl_agent_router)
-app.include_router(video_editing_router)
 
 # Include Visa API router (multi-agent architecture)
 if VISA_API_AVAILABLE:
