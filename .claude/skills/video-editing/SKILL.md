@@ -1,3 +1,9 @@
+---
+name: video-editing
+description: Edit videos programmatically using FFmpeg operations (trim, resize, crop, rotate, filters, text overlay, watermark, subtitles, audio) and Remotion (React-based video generation). Use when the user wants to process, transform, or create videos.
+allowed-tools: Read, Grep, Glob, Bash
+---
+
 # Video Editing Skill for Claude Code
 
 ## Overview
