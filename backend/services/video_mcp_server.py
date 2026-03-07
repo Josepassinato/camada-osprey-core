@@ -1,14 +1,17 @@
 """
 MCP (Model Context Protocol) Server for Video Editing.
 
-Exposes video editing tools via the MCP protocol so that Claude Code
+Exposes video editing tools via the official MCP SDK so that Claude Code
 and other MCP-compatible clients can edit videos through natural language.
 
 Usage:
-    # stdio transport (for Claude Code integration)
+    # stdio transport (for Claude Code / Claude Desktop)
     python -m backend.services.video_mcp_server
 
-    # Or add to Claude Code MCP config (~/.claude/mcp.json):
+    # HTTP transport (for network access)
+    python -m backend.services.video_mcp_server --http --port 8002
+
+    # Claude Code MCP config (~/.claude.json or project .mcp.json):
     {
         "mcpServers": {
             "video-editor": {
@@ -18,25 +21,31 @@ Usage:
             }
         }
     }
+
+Prerequisites:
+    pip install "mcp[cli]"
+    apt-get install ffmpeg  (or brew install ffmpeg)
 """
 
-import asyncio
 import json
 import logging
 import os
 import sys
-import uuid
-from pathlib import Path
-from typing import Any
+from typing import List, Optional
+
+from mcp.server.fastmcp import FastMCP
 
 logger = logging.getLogger(__name__)
 
-# MCP protocol constants
-JSONRPC_VERSION = "2.0"
-MCP_PROTOCOL_VERSION = "2024-11-05"
-
 # Video workspace directory
 WORKSPACE_DIR = os.getenv("VIDEO_WORKSPACE_DIR", "/tmp/osprey_mcp_videos")
+
+# Create the MCP server
+mcp = FastMCP(
+    "Osprey Video Editor",
+    version="1.0.0",
+    description="AI-powered video editing tools using FFmpeg. Supports trim, resize, crop, rotate, filters, text overlays, watermarks, subtitles, audio processing, and more.",
+)
 
 
 def _ensure_workspace() -> str:
@@ -45,585 +54,399 @@ def _ensure_workspace() -> str:
     return WORKSPACE_DIR
 
 
-# ===== Tool Definitions =====
-
-TOOLS = [
-    {
-        "name": "video_probe",
-        "description": "Analyze a video file and return metadata (duration, resolution, codecs, fps, file size).",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "file_path": {
-                    "type": "string",
-                    "description": "Absolute path to the video file to analyze.",
-                }
-            },
-            "required": ["file_path"],
-        },
-    },
-    {
-        "name": "video_trim",
-        "description": "Trim a video to a specific time range. Returns the path to the trimmed output file.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "file_path": {
-                    "type": "string",
-                    "description": "Absolute path to the source video file.",
-                },
-                "start_time": {
-                    "type": "number",
-                    "description": "Start time in seconds.",
-                },
-                "end_time": {
-                    "type": "number",
-                    "description": "End time in seconds.",
-                },
-            },
-            "required": ["file_path", "start_time", "end_time"],
-        },
-    },
-    {
-        "name": "video_resize",
-        "description": "Resize a video to a target resolution. Supports presets (720p, 1080p, etc.) or custom width/height.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "file_path": {
-                    "type": "string",
-                    "description": "Absolute path to the source video file.",
-                },
-                "resolution": {
-                    "type": "string",
-                    "description": "Preset resolution: 360p, 480p, 720p, 1080p, 1440p, 2160p.",
-                },
-                "width": {
-                    "type": "integer",
-                    "description": "Custom width in pixels (alternative to resolution preset).",
-                },
-                "height": {
-                    "type": "integer",
-                    "description": "Custom height in pixels (alternative to resolution preset).",
-                },
-            },
-            "required": ["file_path"],
-        },
-    },
-    {
-        "name": "video_concat",
-        "description": "Concatenate multiple videos into one. All videos should have the same codec for stream copy.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "file_paths": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "List of absolute paths to video files, in order.",
-                }
-            },
-            "required": ["file_paths"],
-        },
-    },
-    {
-        "name": "video_add_text",
-        "description": "Add text overlay to a video. Supports positioning, font size, color, and time range.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "file_path": {"type": "string", "description": "Path to source video."},
-                "text": {"type": "string", "description": "Text to overlay."},
-                "x": {"type": "integer", "description": "X position in pixels.", "default": 10},
-                "y": {"type": "integer", "description": "Y position in pixels.", "default": 10},
-                "font_size": {"type": "integer", "description": "Font size.", "default": 24},
-                "font_color": {"type": "string", "description": "Font color name.", "default": "white"},
-                "start_time": {"type": "number", "description": "When to start showing text (seconds)."},
-                "end_time": {"type": "number", "description": "When to stop showing text (seconds)."},
-            },
-            "required": ["file_path", "text"],
-        },
-    },
-    {
-        "name": "video_speed",
-        "description": "Change video playback speed. Factor > 1 speeds up, < 1 slows down.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "file_path": {"type": "string", "description": "Path to source video."},
-                "factor": {
-                    "type": "number",
-                    "description": "Speed multiplier (0.25 to 4.0). 2.0 = 2x speed, 0.5 = half speed.",
-                },
-            },
-            "required": ["file_path", "factor"],
-        },
-    },
-    {
-        "name": "video_extract_audio",
-        "description": "Extract audio track from a video file as AAC.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "file_path": {"type": "string", "description": "Path to source video."},
-            },
-            "required": ["file_path"],
-        },
-    },
-    {
-        "name": "video_apply_filter",
-        "description": "Apply a visual filter to a video. Available filters: grayscale, sepia, blur, sharpen, brightness, contrast, saturation.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "file_path": {"type": "string", "description": "Path to source video."},
-                "filter_name": {
-                    "type": "string",
-                    "description": "Filter name: grayscale, sepia, blur, sharpen, brightness, contrast, saturation.",
-                },
-                "intensity": {
-                    "type": "number",
-                    "description": "Filter intensity from 0.0 to 2.0. Default 1.0.",
-                    "default": 1.0,
-                },
-            },
-            "required": ["file_path", "filter_name"],
-        },
-    },
-    {
-        "name": "video_thumbnail",
-        "description": "Extract a thumbnail image from a video at a specific time.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "file_path": {"type": "string", "description": "Path to source video."},
-                "time": {"type": "number", "description": "Time in seconds to capture thumbnail."},
-                "width": {"type": "integer", "description": "Thumbnail width.", "default": 1280},
-                "height": {"type": "integer", "description": "Thumbnail height.", "default": 720},
-            },
-            "required": ["file_path", "time"],
-        },
-    },
-    {
-        "name": "video_crop",
-        "description": "Crop a region from the video.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "file_path": {"type": "string", "description": "Path to source video."},
-                "x": {"type": "integer", "description": "X offset of crop area."},
-                "y": {"type": "integer", "description": "Y offset of crop area."},
-                "width": {"type": "integer", "description": "Width of crop area."},
-                "height": {"type": "integer", "description": "Height of crop area."},
-            },
-            "required": ["file_path", "x", "y", "width", "height"],
-        },
-    },
-    {
-        "name": "video_rotate",
-        "description": "Rotate a video by a given angle (90, 180, 270 degrees, or arbitrary).",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "file_path": {"type": "string", "description": "Path to source video."},
-                "angle": {"type": "number", "description": "Rotation angle in degrees."},
-            },
-            "required": ["file_path", "angle"],
-        },
-    },
-    {
-        "name": "video_add_subtitles",
-        "description": "Burn subtitles into a video.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "file_path": {"type": "string", "description": "Path to source video."},
-                "subtitles": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "start": {"type": "number"},
-                            "end": {"type": "number"},
-                            "text": {"type": "string"},
-                        },
-                    },
-                    "description": "List of subtitle entries with start, end (seconds), and text.",
-                },
-                "font_size": {"type": "integer", "default": 20},
-            },
-            "required": ["file_path", "subtitles"],
-        },
-    },
-    {
-        "name": "video_export",
-        "description": "Re-encode/export a video with specific codec, format, resolution, and bitrate settings.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "file_path": {"type": "string", "description": "Path to source video."},
-                "format": {
-                    "type": "string",
-                    "description": "Output format: mp4, webm, avi, mov, mkv, gif.",
-                    "default": "mp4",
-                },
-                "video_codec": {
-                    "type": "string",
-                    "description": "Video codec: h264, h265, vp9, av1.",
-                    "default": "h264",
-                },
-                "audio_codec": {
-                    "type": "string",
-                    "description": "Audio codec: aac, mp3, opus, none.",
-                    "default": "aac",
-                },
-                "resolution": {
-                    "type": "string",
-                    "description": "Target resolution preset (720p, 1080p, etc.).",
-                },
-                "bitrate": {
-                    "type": "string",
-                    "description": "Target video bitrate (e.g. '5M', '2500k').",
-                },
-                "fps": {"type": "integer", "description": "Target frame rate."},
-            },
-            "required": ["file_path"],
-        },
-    },
-    {
-        "name": "video_watermark",
-        "description": "Add a text watermark to a video.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "file_path": {"type": "string", "description": "Path to source video."},
-                "text": {"type": "string", "description": "Watermark text."},
-                "position": {
-                    "type": "string",
-                    "description": "Position: top_left, top_right, bottom_left, bottom_right, center.",
-                    "default": "bottom_right",
-                },
-                "opacity": {
-                    "type": "number",
-                    "description": "Opacity from 0.0 to 1.0.",
-                    "default": 0.5,
-                },
-            },
-            "required": ["file_path", "text"],
-        },
-    },
-    {
-        "name": "video_adjust_volume",
-        "description": "Adjust the audio volume of a video. 0 = mute, 1 = original, 2 = double.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "file_path": {"type": "string", "description": "Path to source video."},
-                "volume": {
-                    "type": "number",
-                    "description": "Volume multiplier (0.0 to 3.0).",
-                },
-            },
-            "required": ["file_path", "volume"],
-        },
-    },
-]
-
-
-# ===== Tool Handlers =====
-
-
-async def _handle_tool(name: str, arguments: dict) -> dict:
-    """Route a tool call to the appropriate handler and return the result."""
-    # Import here to avoid circular imports at module level
+def _import_services():
+    """Lazy import of video editing services."""
     from backend.services.video_editing import (
         execute_operation,
         export_video,
         run_ffprobe,
     )
+    return execute_operation, export_video, run_ffprobe
 
+
+def _format_result(result: dict) -> str:
+    """Format a result dict as readable JSON."""
+    return json.dumps(result, indent=2, default=str)
+
+
+# ===== Tools =====
+
+
+@mcp.tool()
+async def video_probe(file_path: str) -> str:
+    """Analyze a video file and return metadata including duration, resolution, codecs, FPS, and file size.
+
+    Args:
+        file_path: Absolute path to the video file to analyze.
+    """
+    _, _, run_ffprobe = _import_services()
+    result = await run_ffprobe(file_path)
+    if not result.get("success"):
+        return f"Error: {result.get('error', 'Probe failed')}"
+    return _format_result(result)
+
+
+@mcp.tool()
+async def video_trim(file_path: str, start_time: float, end_time: float) -> str:
+    """Trim a video to a specific time range using stream copy (fast, no re-encoding).
+
+    Args:
+        file_path: Absolute path to the source video file.
+        start_time: Start time in seconds.
+        end_time: End time in seconds.
+    """
+    execute_operation, _, _ = _import_services()
     workspace = _ensure_workspace()
-    file_path = arguments.get("file_path", "")
-
-    if name == "video_probe":
-        result = await run_ffprobe(file_path)
-        if not result.get("success"):
-            return {"error": result.get("error", "Probe failed")}
-        return result
-
-    elif name == "video_trim":
-        return await execute_operation(
-            source_path=file_path,
-            operation="trim",
-            params={
-                "start_time": arguments["start_time"],
-                "end_time": arguments["end_time"],
-            },
-            output_dir=workspace,
-        )
-
-    elif name == "video_resize":
-        params = {}
-        if arguments.get("resolution"):
-            params["resolution"] = arguments["resolution"]
-        if arguments.get("width"):
-            params["width"] = arguments["width"]
-        if arguments.get("height"):
-            params["height"] = arguments["height"]
-        params["keep_aspect_ratio"] = True
-        return await execute_operation(file_path, "resize", params, workspace)
-
-    elif name == "video_concat":
-        paths = arguments.get("file_paths", [])
-        if len(paths) < 2:
-            return {"success": False, "error": "Need at least 2 files to concatenate"}
-        return await execute_operation(
-            source_path=paths[0],
-            operation="concat",
-            params={"source_paths": paths[1:]},
-            output_dir=workspace,
-        )
-
-    elif name == "video_add_text":
-        params = {
-            "text": arguments["text"],
-            "x": arguments.get("x", 10),
-            "y": arguments.get("y", 10),
-            "font_size": arguments.get("font_size", 24),
-            "font_color": arguments.get("font_color", "white"),
-        }
-        if arguments.get("start_time") is not None:
-            params["start_time"] = arguments["start_time"]
-        if arguments.get("end_time") is not None:
-            params["end_time"] = arguments["end_time"]
-        return await execute_operation(file_path, "overlay_text", params, workspace)
-
-    elif name == "video_speed":
-        return await execute_operation(
-            file_path, "speed",
-            {"factor": arguments["factor"], "adjust_audio": True},
-            workspace,
-        )
-
-    elif name == "video_extract_audio":
-        return await execute_operation(file_path, "audio_extract", {}, workspace)
-
-    elif name == "video_apply_filter":
-        return await execute_operation(
-            file_path, "filter_apply",
-            {
-                "filter_name": arguments["filter_name"],
-                "intensity": arguments.get("intensity", 1.0),
-            },
-            workspace,
-        )
-
-    elif name == "video_thumbnail":
-        return await execute_operation(
-            file_path, "thumbnail",
-            {
-                "time": arguments["time"],
-                "width": arguments.get("width", 1280),
-                "height": arguments.get("height", 720),
-            },
-            workspace,
-        )
-
-    elif name == "video_crop":
-        return await execute_operation(
-            file_path, "crop",
-            {
-                "x": arguments["x"],
-                "y": arguments["y"],
-                "width": arguments["width"],
-                "height": arguments["height"],
-            },
-            workspace,
-        )
-
-    elif name == "video_rotate":
-        return await execute_operation(
-            file_path, "rotate",
-            {"angle": arguments["angle"]},
-            workspace,
-        )
-
-    elif name == "video_add_subtitles":
-        return await execute_operation(
-            file_path, "subtitle",
-            {
-                "subtitles": arguments["subtitles"],
-                "font_size": arguments.get("font_size", 20),
-            },
-            workspace,
-        )
-
-    elif name == "video_export":
-        return await export_video(
-            source_path=file_path,
-            output_dir=workspace,
-            format=arguments.get("format", "mp4"),
-            video_codec=arguments.get("video_codec", "h264"),
-            audio_codec=arguments.get("audio_codec", "aac"),
-            resolution=arguments.get("resolution"),
-            bitrate=arguments.get("bitrate"),
-            fps=arguments.get("fps"),
-        )
-
-    elif name == "video_watermark":
-        return await execute_operation(
-            file_path, "watermark",
-            {
-                "text": arguments["text"],
-                "position": arguments.get("position", "bottom_right"),
-                "opacity": arguments.get("opacity", 0.5),
-            },
-            workspace,
-        )
-
-    elif name == "video_adjust_volume":
-        return await execute_operation(
-            file_path, "audio_volume",
-            {"volume": arguments["volume"]},
-            workspace,
-        )
-
-    else:
-        return {"error": f"Unknown tool: {name}"}
-
-
-# ===== MCP Protocol (JSON-RPC over stdio) =====
-
-
-class MCPVideoServer:
-    """Minimal MCP server implementing the Model Context Protocol over stdio."""
-
-    def __init__(self):
-        self.server_info = {
-            "name": "osprey-video-editor",
-            "version": "1.0.0",
-        }
-
-    async def handle_message(self, message: dict) -> dict | None:
-        """Process a single JSON-RPC message and return a response."""
-        method = message.get("method")
-        msg_id = message.get("id")
-        params = message.get("params", {})
-
-        # Notifications (no id) don't get a response
-        if msg_id is None:
-            if method == "notifications/initialized":
-                logger.info("MCP client initialized")
-            return None
-
-        if method == "initialize":
-            return self._response(msg_id, {
-                "protocolVersion": MCP_PROTOCOL_VERSION,
-                "capabilities": {
-                    "tools": {"listChanged": False},
-                },
-                "serverInfo": self.server_info,
-            })
-
-        elif method == "tools/list":
-            return self._response(msg_id, {"tools": TOOLS})
-
-        elif method == "tools/call":
-            tool_name = params.get("name", "")
-            arguments = params.get("arguments", {})
-
-            try:
-                result = await _handle_tool(tool_name, arguments)
-                text = json.dumps(result, indent=2, default=str)
-                is_error = not result.get("success", True) if isinstance(result, dict) else False
-
-                return self._response(msg_id, {
-                    "content": [{"type": "text", "text": text}],
-                    "isError": is_error,
-                })
-
-            except Exception as e:
-                logger.error(f"Tool execution error: {e}")
-                return self._response(msg_id, {
-                    "content": [{"type": "text", "text": f"Error: {str(e)}"}],
-                    "isError": True,
-                })
-
-        elif method == "ping":
-            return self._response(msg_id, {})
-
-        else:
-            return self._error_response(msg_id, -32601, f"Method not found: {method}")
-
-    def _response(self, msg_id: Any, result: dict) -> dict:
-        return {"jsonrpc": JSONRPC_VERSION, "id": msg_id, "result": result}
-
-    def _error_response(self, msg_id: Any, code: int, message: str) -> dict:
-        return {
-            "jsonrpc": JSONRPC_VERSION,
-            "id": msg_id,
-            "error": {"code": code, "message": message},
-        }
-
-
-async def run_stdio_server():
-    """Run the MCP server over stdio transport."""
-    server = MCPVideoServer()
-    reader = asyncio.StreamReader()
-    protocol = asyncio.StreamReaderProtocol(reader)
-    await asyncio.get_event_loop().connect_read_pipe(lambda: protocol, sys.stdin.buffer)
-
-    writer_transport, writer_protocol = await asyncio.get_event_loop().connect_write_pipe(
-        asyncio.streams.FlowControlMixin, sys.stdout.buffer
+    result = await execute_operation(
+        source_path=file_path,
+        operation="trim",
+        params={"start_time": start_time, "end_time": end_time},
+        output_dir=workspace,
     )
-    writer = asyncio.StreamWriter(writer_transport, writer_protocol, None, asyncio.get_event_loop())
+    return _format_result(result)
 
-    logger.info("MCP Video Editor server started (stdio)")
 
-    buffer = b""
+@mcp.tool()
+async def video_resize(
+    file_path: str,
+    resolution: Optional[str] = None,
+    width: Optional[int] = None,
+    height: Optional[int] = None,
+) -> str:
+    """Resize a video to a target resolution. Use a preset (720p, 1080p, etc.) or custom dimensions.
 
-    while True:
-        try:
-            chunk = await reader.read(4096)
-            if not chunk:
-                break
+    Args:
+        file_path: Absolute path to the source video file.
+        resolution: Preset resolution: 360p, 480p, 720p, 1080p, 1440p, or 2160p.
+        width: Custom width in pixels (alternative to preset).
+        height: Custom height in pixels (alternative to preset).
+    """
+    execute_operation, _, _ = _import_services()
+    workspace = _ensure_workspace()
+    params: dict = {"keep_aspect_ratio": True}
+    if resolution:
+        params["resolution"] = resolution
+    if width:
+        params["width"] = width
+    if height:
+        params["height"] = height
+    result = await execute_operation(file_path, "resize", params, workspace)
+    return _format_result(result)
 
-            buffer += chunk
 
-            while b"\n" in buffer:
-                line, buffer = buffer.split(b"\n", 1)
-                line = line.strip()
-                if not line:
-                    continue
+@mcp.tool()
+async def video_concat(file_paths: List[str]) -> str:
+    """Concatenate multiple videos into one. Videos should have the same codec for best results.
 
-                try:
-                    message = json.loads(line.decode("utf-8"))
-                except json.JSONDecodeError:
-                    logger.warning(f"Invalid JSON received: {line[:200]}")
-                    continue
+    Args:
+        file_paths: List of absolute paths to video files, in the desired order.
+    """
+    if len(file_paths) < 2:
+        return "Error: Need at least 2 files to concatenate"
+    execute_operation, _, _ = _import_services()
+    workspace = _ensure_workspace()
+    result = await execute_operation(
+        source_path=file_paths[0],
+        operation="concat",
+        params={"source_paths": file_paths[1:]},
+        output_dir=workspace,
+    )
+    return _format_result(result)
 
-                response = await server.handle_message(message)
-                if response is not None:
-                    response_bytes = json.dumps(response).encode("utf-8") + b"\n"
-                    writer.write(response_bytes)
-                    await writer.drain()
 
-        except asyncio.CancelledError:
-            break
-        except Exception as e:
-            logger.error(f"Server error: {e}")
-            break
+@mcp.tool()
+async def video_add_text(
+    file_path: str,
+    text: str,
+    x: int = 10,
+    y: int = 10,
+    font_size: int = 24,
+    font_color: str = "white",
+    start_time: Optional[float] = None,
+    end_time: Optional[float] = None,
+) -> str:
+    """Add text overlay to a video with positioning, font size, color, and optional time range.
 
-    logger.info("MCP Video Editor server stopped")
+    Args:
+        file_path: Path to source video.
+        text: Text to overlay on the video.
+        x: X position in pixels from left edge.
+        y: Y position in pixels from top edge.
+        font_size: Font size in pixels.
+        font_color: Font color name (white, black, red, yellow, blue, green).
+        start_time: When to start showing text (seconds). Omit for entire video.
+        end_time: When to stop showing text (seconds). Omit for entire video.
+    """
+    execute_operation, _, _ = _import_services()
+    workspace = _ensure_workspace()
+    params: dict = {
+        "text": text,
+        "x": x,
+        "y": y,
+        "font_size": font_size,
+        "font_color": font_color,
+    }
+    if start_time is not None:
+        params["start_time"] = start_time
+    if end_time is not None:
+        params["end_time"] = end_time
+    result = await execute_operation(file_path, "overlay_text", params, workspace)
+    return _format_result(result)
+
+
+@mcp.tool()
+async def video_speed(file_path: str, factor: float) -> str:
+    """Change video playback speed. Factor > 1 speeds up, < 1 slows down.
+
+    Args:
+        file_path: Path to source video.
+        factor: Speed multiplier (0.25 to 4.0). Examples: 2.0 = 2x speed, 0.5 = half speed.
+    """
+    execute_operation, _, _ = _import_services()
+    workspace = _ensure_workspace()
+    result = await execute_operation(
+        file_path, "speed",
+        {"factor": factor, "adjust_audio": True},
+        workspace,
+    )
+    return _format_result(result)
+
+
+@mcp.tool()
+async def video_extract_audio(file_path: str) -> str:
+    """Extract the audio track from a video file as AAC.
+
+    Args:
+        file_path: Path to source video.
+    """
+    execute_operation, _, _ = _import_services()
+    workspace = _ensure_workspace()
+    result = await execute_operation(file_path, "audio_extract", {}, workspace)
+    return _format_result(result)
+
+
+@mcp.tool()
+async def video_apply_filter(
+    file_path: str,
+    filter_name: str,
+    intensity: float = 1.0,
+) -> str:
+    """Apply a visual filter to a video.
+
+    Args:
+        file_path: Path to source video.
+        filter_name: Filter to apply. Options: grayscale, sepia, blur, sharpen, brightness, contrast, saturation.
+        intensity: Filter intensity from 0.0 to 2.0. Default 1.0.
+    """
+    execute_operation, _, _ = _import_services()
+    workspace = _ensure_workspace()
+    result = await execute_operation(
+        file_path, "filter_apply",
+        {"filter_name": filter_name, "intensity": intensity},
+        workspace,
+    )
+    return _format_result(result)
+
+
+@mcp.tool()
+async def video_thumbnail(
+    file_path: str,
+    time: float,
+    width: int = 1280,
+    height: int = 720,
+) -> str:
+    """Extract a thumbnail image (JPEG) from a video at a specific time.
+
+    Args:
+        file_path: Path to source video.
+        time: Time in seconds to capture the thumbnail.
+        width: Thumbnail width in pixels.
+        height: Thumbnail height in pixels.
+    """
+    execute_operation, _, _ = _import_services()
+    workspace = _ensure_workspace()
+    result = await execute_operation(
+        file_path, "thumbnail",
+        {"time": time, "width": width, "height": height},
+        workspace,
+    )
+    return _format_result(result)
+
+
+@mcp.tool()
+async def video_crop(
+    file_path: str,
+    x: int,
+    y: int,
+    width: int,
+    height: int,
+) -> str:
+    """Crop a rectangular region from the video.
+
+    Args:
+        file_path: Path to source video.
+        x: X offset of crop area (pixels from left).
+        y: Y offset of crop area (pixels from top).
+        width: Width of crop area in pixels.
+        height: Height of crop area in pixels.
+    """
+    execute_operation, _, _ = _import_services()
+    workspace = _ensure_workspace()
+    result = await execute_operation(
+        file_path, "crop",
+        {"x": x, "y": y, "width": width, "height": height},
+        workspace,
+    )
+    return _format_result(result)
+
+
+@mcp.tool()
+async def video_rotate(file_path: str, angle: float) -> str:
+    """Rotate a video by a given angle. Common values: 90, 180, 270 degrees.
+
+    Args:
+        file_path: Path to source video.
+        angle: Rotation angle in degrees (90, 180, 270, or arbitrary).
+    """
+    execute_operation, _, _ = _import_services()
+    workspace = _ensure_workspace()
+    result = await execute_operation(
+        file_path, "rotate",
+        {"angle": angle},
+        workspace,
+    )
+    return _format_result(result)
+
+
+@mcp.tool()
+async def video_add_subtitles(
+    file_path: str,
+    subtitles: List[dict],
+    font_size: int = 20,
+) -> str:
+    """Burn subtitles into a video. Each subtitle entry needs start time, end time, and text.
+
+    Args:
+        file_path: Path to source video.
+        subtitles: List of subtitle entries, each with keys: start (seconds), end (seconds), text.
+        font_size: Subtitle font size.
+    """
+    execute_operation, _, _ = _import_services()
+    workspace = _ensure_workspace()
+    result = await execute_operation(
+        file_path, "subtitle",
+        {"subtitles": subtitles, "font_size": font_size},
+        workspace,
+    )
+    return _format_result(result)
+
+
+@mcp.tool()
+async def video_export(
+    file_path: str,
+    format: str = "mp4",
+    video_codec: str = "h264",
+    audio_codec: str = "aac",
+    resolution: Optional[str] = None,
+    bitrate: Optional[str] = None,
+    fps: Optional[int] = None,
+) -> str:
+    """Re-encode and export a video with specific codec, format, resolution, and quality settings.
+
+    Args:
+        file_path: Path to source video.
+        format: Output format: mp4, webm, avi, mov, mkv, or gif.
+        video_codec: Video codec: h264, h265, vp9, or av1.
+        audio_codec: Audio codec: aac, mp3, opus, or none (to remove audio).
+        resolution: Target resolution preset: 360p, 480p, 720p, 1080p, 1440p, 2160p.
+        bitrate: Target video bitrate (e.g. '5M', '2500k').
+        fps: Target frame rate.
+    """
+    _, export_video_fn, _ = _import_services()
+    workspace = _ensure_workspace()
+    result = await export_video_fn(
+        source_path=file_path,
+        output_dir=workspace,
+        format=format,
+        video_codec=video_codec,
+        audio_codec=audio_codec,
+        resolution=resolution,
+        bitrate=bitrate,
+        fps=fps,
+    )
+    return _format_result(result)
+
+
+@mcp.tool()
+async def video_watermark(
+    file_path: str,
+    text: str,
+    position: str = "bottom_right",
+    opacity: float = 0.5,
+) -> str:
+    """Add a text watermark to a video.
+
+    Args:
+        file_path: Path to source video.
+        text: Watermark text (e.g. '(c) My Company').
+        position: Position on video: top_left, top_right, bottom_left, bottom_right, or center.
+        opacity: Opacity from 0.0 (invisible) to 1.0 (fully opaque).
+    """
+    execute_operation, _, _ = _import_services()
+    workspace = _ensure_workspace()
+    result = await execute_operation(
+        file_path, "watermark",
+        {"text": text, "position": position, "opacity": opacity},
+        workspace,
+    )
+    return _format_result(result)
+
+
+@mcp.tool()
+async def video_adjust_volume(file_path: str, volume: float) -> str:
+    """Adjust the audio volume of a video.
+
+    Args:
+        file_path: Path to source video.
+        volume: Volume multiplier. 0.0 = mute, 1.0 = original, 2.0 = double volume, max 3.0.
+    """
+    execute_operation, _, _ = _import_services()
+    workspace = _ensure_workspace()
+    result = await execute_operation(
+        file_path, "audio_volume",
+        {"volume": volume},
+        workspace,
+    )
+    return _format_result(result)
+
+
+# ===== Entry Point =====
 
 
 def main():
-    """Entry point for the MCP server."""
+    """Entry point for the MCP video editing server."""
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        stream=sys.stderr,  # Log to stderr to keep stdout clean for MCP protocol
+        stream=sys.stderr,
     )
-    asyncio.run(run_stdio_server())
+
+    transport = "stdio"
+    port = 8002
+
+    if "--http" in sys.argv:
+        transport = "streamable-http"
+    if "--port" in sys.argv:
+        idx = sys.argv.index("--port")
+        if idx + 1 < len(sys.argv):
+            port = int(sys.argv[idx + 1])
+
+    logger.info(f"Starting MCP Video Editor server (transport={transport})")
+
+    if transport == "streamable-http":
+        mcp.run(transport="streamable-http", host="127.0.0.1", port=port)
+    else:
+        mcp.run()
 
 
 if __name__ == "__main__":
