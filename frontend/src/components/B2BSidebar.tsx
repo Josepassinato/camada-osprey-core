@@ -5,6 +5,7 @@ const NAV_ITEMS = [
   { path: '/app/dashboard', label: 'Dashboard', icon: '\u2302' },
   { path: '/app/cases', label: 'Cases', icon: '\u2630' },
   { path: '/app/chat', label: 'Chat', icon: '\u2709' },
+  { path: '/app/settings', label: 'Settings', icon: '\u2699' },
 ];
 
 export default function B2BSidebar() {

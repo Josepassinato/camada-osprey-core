@@ -15,6 +15,7 @@ import B2BLogin from "./pages/B2BLogin";
 import B2BRegister from "./pages/B2BRegister";
 import B2BDashboard from "./pages/B2BDashboard";
 import B2BCases from "./pages/B2BCases";
+import B2BSettings from "./pages/B2BSettings";
 import { B2BPrivateRoute } from "./components/B2BPrivateRoute";
 import ClerkLogin from "./pages/ClerkLogin";
 import ClerkSignup from "./pages/ClerkSignup";
@@ -89,6 +90,7 @@ const App = () => (
             <Route path="/app/dashboard" element={<B2BPrivateRoute><B2BDashboard /></B2BPrivateRoute>} />
             <Route path="/app/cases" element={<B2BPrivateRoute><B2BCases /></B2BPrivateRoute>} />
             <Route path="/app/chat" element={<B2BPrivateRoute><OspreyLegalChat /></B2BPrivateRoute>} />
+            <Route path="/app/settings" element={<B2BPrivateRoute><B2BSettings /></B2BPrivateRoute>} />
 
             {/* Clerk Authentication Routes */}
             <Route path="/clerk-login" element={<ClerkLogin />} />
