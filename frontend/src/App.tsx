@@ -6,10 +6,16 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { LocaleProvider } from "./contexts/LocaleContext";
 import { ProcessTypeProvider } from "./contexts/ProcessTypeContext";
+import { AuthProvider } from "./contexts/AuthContext";
 // BetaBanner moved to homepage only
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import B2BLogin from "./pages/B2BLogin";
+import B2BRegister from "./pages/B2BRegister";
+import B2BDashboard from "./pages/B2BDashboard";
+import B2BCases from "./pages/B2BCases";
+import { B2BPrivateRoute } from "./components/B2BPrivateRoute";
 import ClerkLogin from "./pages/ClerkLogin";
 import ClerkSignup from "./pages/ClerkSignup";
 import ClerkDemo from "./pages/ClerkDemo";
@@ -72,15 +78,25 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <AuthProvider>
             <BrowserRouter>
             <Routes>
+            {/* B2B Authentication Routes */}
+            <Route path="/login" element={<B2BLogin />} />
+            <Route path="/register" element={<B2BRegister />} />
+
+            {/* B2B Protected Routes */}
+            <Route path="/app/dashboard" element={<B2BPrivateRoute><B2BDashboard /></B2BPrivateRoute>} />
+            <Route path="/app/cases" element={<B2BPrivateRoute><B2BCases /></B2BPrivateRoute>} />
+            <Route path="/app/chat" element={<B2BPrivateRoute><OspreyLegalChat /></B2BPrivateRoute>} />
+
             {/* Clerk Authentication Routes */}
             <Route path="/clerk-login" element={<ClerkLogin />} />
             <Route path="/clerk-signup" element={<ClerkSignup />} />
             <Route path="/clerk-demo" element={<ClerkDemo />} />
-            
+
             {/* Legacy Authentication Routes (keep for backward compatibility) */}
-            <Route path="/login" element={<Login />} />
+            <Route path="/legacy-login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
             
@@ -162,6 +178,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
+    </AuthProvider>
     </TooltipProvider>
     </ProcessTypeProvider>
     </LanguageProvider>

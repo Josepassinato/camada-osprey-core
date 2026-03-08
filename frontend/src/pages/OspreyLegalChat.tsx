@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || '';
 
@@ -96,14 +97,19 @@ function MessageBubble({ message }: { message: Message }) {
 }
 
 export default function OspreyLegalChat() {
+  const { user, token } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [firmName, setFirmName] = useState('Your Law Firm');
+  const [firmName, setFirmName] = useState(user?.firm_name || 'Your Law Firm');
   const [isEditingFirm, setIsEditingFirm] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (user?.firm_name) setFirmName(user.firm_name);
+  }, [user?.firm_name]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -124,9 +130,12 @@ export default function OspreyLegalChat() {
     setIsLoading(true);
 
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(`${API_URL}/api/osprey-chat/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           message: content.trim(),
           conversation_id: conversationId,

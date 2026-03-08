@@ -4,12 +4,13 @@ B2B Immigration Law Chat for Attorneys — Chief of Staff AI
 Uses Google Gemini directly via google-generativeai
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 import uuid
 import os
+import jwt
 
 import google.generativeai as genai
 
@@ -85,11 +86,17 @@ RESPONSE FORMAT:
 # MODELS
 # ============================================================================
 
+JWT_SECRET = os.environ.get("JWT_SECRET", "osprey-secret-key-change-in-production")
+JWT_ALGORITHM = "HS256"
+
+
 class OspreyChatMessage(BaseModel):
     message: str
     conversation_id: Optional[str] = None
     user_id: Optional[str] = None
     firm_name: Optional[str] = None
+    office_id: Optional[str] = None
+    channel: Optional[str] = "web"
 
 
 class OspreyChatResponse(BaseModel):
@@ -103,14 +110,27 @@ class OspreyChatResponse(BaseModel):
 # ============================================================================
 
 @router.post("/chat", response_model=OspreyChatResponse)
-async def osprey_legal_chat(chat_msg: OspreyChatMessage):
+async def osprey_legal_chat(chat_msg: OspreyChatMessage, authorization: Optional[str] = Header(None)):
     """
     Chat with Osprey Legal AI — Chief of Staff for immigration attorneys.
     Uses Google Gemini 2.0 Flash.
+    Supports optional JWT auth for multi-tenant isolation.
     """
     try:
         if not GEMINI_API_KEY:
             raise HTTPException(status_code=500, detail="Gemini API key not configured")
+
+        # Extract office_id from JWT if present
+        office_id = chat_msg.office_id
+        if authorization and authorization.startswith("Bearer "):
+            try:
+                token = authorization.replace("Bearer ", "")
+                payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+                office_id = payload.get("office_id", office_id)
+                if not chat_msg.user_id:
+                    chat_msg.user_id = payload.get("user_id")
+            except Exception:
+                pass  # Token is optional, continue without it
 
         conversation_id = chat_msg.conversation_id or str(uuid.uuid4())
 
@@ -119,12 +139,15 @@ async def osprey_legal_chat(chat_msg: OspreyChatMessage):
         if chat_msg.firm_name:
             system += f"\n\nYou are the Chief of Staff for {chat_msg.firm_name}."
 
-        # Build conversation history from DB
+        # Build conversation history from DB (filtered by office_id if available)
         gemini_history = []
         if chat_msg.conversation_id and db is not None:
-            history = await db.osprey_chat_conversations.find({
-                "conversation_id": conversation_id
-            }).sort("timestamp", 1).to_list(length=20)
+            history_query = {"conversation_id": conversation_id}
+            if office_id:
+                history_query["office_id"] = office_id
+            history = await db.osprey_chat_conversations.find(
+                history_query
+            ).sort("timestamp", 1).to_list(length=20)
 
             for msg in history:
                 gemini_history.append({"role": "user", "parts": [msg.get("user_message", "")]})
@@ -149,6 +172,8 @@ async def osprey_legal_chat(chat_msg: OspreyChatMessage):
                 "conversation_id": conversation_id,
                 "user_id": chat_msg.user_id,
                 "firm_name": chat_msg.firm_name,
+                "office_id": office_id,
+                "channel": chat_msg.channel or "web",
                 "user_message": chat_msg.message,
                 "ai_response": response_text,
                 "timestamp": now

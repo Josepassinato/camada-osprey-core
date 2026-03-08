@@ -168,6 +168,18 @@ async def _create_indexes(db):
         await safe_create_index(db.maria_conversations, [("conversation_id", 1), ("timestamp", 1)])
         await safe_create_index(db.owl_downloads, "expires_at")
 
+        # B2B Multi-tenant indexes
+        await safe_create_index(db.offices, "office_id", unique=True)
+        await safe_create_index(db.offices, "is_active")
+        await safe_create_index(db.b2b_users, "email", unique=True)
+        await safe_create_index(db.b2b_users, "office_id")
+        await safe_create_index(db.b2b_users, "user_id", unique=True)
+        await safe_create_index(db.b2b_cases, "case_id", unique=True)
+        await safe_create_index(db.b2b_cases, "office_id")
+        await safe_create_index(db.b2b_cases, "status")
+        await safe_create_index(db.b2b_cases, [("office_id", 1), ("status", 1)])
+        await safe_create_index(db.osprey_chat_conversations, "office_id")
+
         logger.info("Database indexes created successfully for optimized performance!")
     except Exception as index_error:
         logger.warning(f"Some indexes may already exist: {str(index_error)}")

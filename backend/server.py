@@ -4264,6 +4264,15 @@ app.include_router(maria_api_router)
 app.include_router(osprey_chat_api.router)
 logger.info("✅ Osprey Legal Chat API registered")
 
+# Include B2B Auth and Offices routers
+from backend.b2b_auth_api import router as b2b_auth_router
+from backend.offices_api import router as offices_router
+from backend.cases_api import router as cases_router
+app.include_router(b2b_auth_router)
+app.include_router(offices_router)
+app.include_router(cases_router)
+logger.info("✅ B2B Auth, Offices, and Cases API registered")
+
 # ============================================================================
 # SIMULATION RESULTS PAGE
 # ============================================================================
