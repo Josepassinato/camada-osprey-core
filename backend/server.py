@@ -39,6 +39,9 @@ from fastapi import (
 )
 from fastapi.responses import FileResponse, HTMLResponse
 from starlette.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from core.rate_limit import limiter
 
 # Load environment variables FIRST before any other imports that might use them
 ROOT_DIR = Path(__file__).parent
@@ -184,6 +187,10 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="OSPREY Immigration API - B2C", version="2.0.0", lifespan=lifespan)
+
+# Register slowapi rate limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")

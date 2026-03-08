@@ -6,12 +6,13 @@ Manage immigration cases per office (multi-tenant).
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 from typing import Optional, List
 
 from backend.core.database import db
 from backend.b2b_auth_api import get_b2b_user
+from core.rate_limit import limiter
 
 router = APIRouter(prefix="/api/cases", tags=["cases"])
 
@@ -84,7 +85,8 @@ async def list_cases(
 
 
 @router.post("")
-async def create_case(data: CaseCreateRequest, current_user: dict = Depends(get_b2b_user)):
+@limiter.limit("30/minute")
+async def create_case(request: Request, data: CaseCreateRequest, current_user: dict = Depends(get_b2b_user)):
     now = datetime.now(timezone.utc)
     case_id = "CASE-" + str(uuid.uuid4())[:8].upper()
 

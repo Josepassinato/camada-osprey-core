@@ -4,7 +4,8 @@ B2B Immigration Law Chat for Attorneys — Chief of Staff AI
 Uses Google Gemini directly via google-generativeai
 """
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 from datetime import datetime
@@ -13,6 +14,8 @@ import os
 import jwt
 
 import google.generativeai as genai
+
+from core.rate_limit import limiter
 
 router = APIRouter(prefix="/api/osprey-chat", tags=["osprey-chat"])
 
@@ -110,7 +113,9 @@ class OspreyChatResponse(BaseModel):
 # ============================================================================
 
 @router.post("/chat", response_model=OspreyChatResponse)
-async def osprey_legal_chat(chat_msg: OspreyChatMessage, authorization: Optional[str] = Header(None)):
+@limiter.limit("20/minute")
+@limiter.limit("200/day")
+async def osprey_legal_chat(request: Request, chat_msg: OspreyChatMessage, authorization: Optional[str] = Header(None)):
     """
     Chat with Osprey Legal AI — Chief of Staff for immigration attorneys.
     Uses Google Gemini 2.0 Flash.
@@ -131,6 +136,21 @@ async def osprey_legal_chat(chat_msg: OspreyChatMessage, authorization: Optional
                     chat_msg.user_id = payload.get("user_id")
             except Exception:
                 pass  # Token is optional, continue without it
+
+        # Per-office daily rate limit (500 messages/day)
+        if office_id and db is not None:
+            today = datetime.utcnow().strftime("%Y-%m-%d")
+            rate_doc = await db.rate_limits.find_one({"office_id": office_id, "date": today})
+            if rate_doc and rate_doc.get("message_count", 0) >= 500:
+                return JSONResponse(
+                    status_code=429,
+                    content={"detail": "Limite diário de 500 mensagens atingido. Renova amanhã ou contate o suporte."}
+                )
+            await db.rate_limits.update_one(
+                {"office_id": office_id, "date": today},
+                {"$inc": {"message_count": 1}, "$set": {"last_request": datetime.utcnow()}},
+                upsert=True,
+            )
 
         conversation_id = chat_msg.conversation_id or str(uuid.uuid4())
 

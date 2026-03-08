@@ -10,9 +10,11 @@ from datetime import datetime, timedelta, timezone
 
 import bcrypt
 import jwt
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from pydantic import BaseModel, EmailStr
 from typing import Optional
+
+from core.rate_limit import limiter
 
 from backend.core.database import db
 
@@ -94,7 +96,9 @@ async def get_b2b_user(authorization: Optional[str] = Header(None)):
 # ============================================================================
 
 @router.post("/register")
-async def b2b_register(data: RegisterRequest):
+@limiter.limit("10/minute")
+@limiter.limit("50/day")
+async def b2b_register(request: Request, data: RegisterRequest):
     existing = await db.b2b_users.find_one({"email": data.email})
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -149,7 +153,9 @@ async def b2b_register(data: RegisterRequest):
 
 
 @router.post("/login")
-async def b2b_login(data: LoginRequest):
+@limiter.limit("10/minute")
+@limiter.limit("50/day")
+async def b2b_login(request: Request, data: LoginRequest):
     user = await db.b2b_users.find_one({"email": data.email})
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
