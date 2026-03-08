@@ -184,6 +184,37 @@ async def osprey_legal_chat(request: Request, chat_msg: OspreyChatMessage, autho
         response = chat.send_message(chat_msg.message)
         response_text = response.text
 
+        # Auto-detect cover letter requests and generate
+        letter_keywords = ["cover letter", "carta", "gerar carta", "letter", "cover-letter"]
+        msg_lower = chat_msg.message.lower()
+        if office_id and db is not None and any(kw in msg_lower for kw in letter_keywords):
+            try:
+                from letter_generator import LetterGenerator
+                # Find the most recent active case for this office
+                recent_case = await db.b2b_cases.find_one(
+                    {"office_id": office_id, "status": {"$nin": ["approved", "denied", "withdrawn"]}},
+                    {"_id": 0},
+                    sort=[("updated_at", -1)],
+                )
+                if recent_case:
+                    letter_content = await LetterGenerator.generate_cover_letter(
+                        recent_case, "initial_filing"
+                    )
+                    letter_id = "LTR-" + str(uuid.uuid4())[:8].upper()
+                    await db.letters.insert_one({
+                        "letter_id": letter_id,
+                        "case_id": recent_case["case_id"],
+                        "office_id": office_id,
+                        "letter_type": "initial_filing",
+                        "content": letter_content,
+                        "created_at": datetime.utcnow(),
+                        "created_by_user_id": chat_msg.user_id,
+                    })
+                    case_id = recent_case["case_id"]
+                    response_text += f"\n\n---\n📄 **Cover letter gerada.** Acesse em: /app/cases/{case_id}/letters"
+            except Exception as letter_err:
+                print(f"⚠️ Auto letter generation failed: {letter_err}")
+
         now = datetime.utcnow()
 
         # Save to MongoDB

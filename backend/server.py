@@ -4278,7 +4278,10 @@ from backend.cases_api import router as cases_router
 app.include_router(b2b_auth_router)
 app.include_router(offices_router)
 app.include_router(cases_router)
-logger.info("✅ B2B Auth, Offices, and Cases API registered")
+
+from backend.letters_api import router as letters_router
+app.include_router(letters_router)
+logger.info("✅ B2B Auth, Offices, Cases, and Letters API registered")
 
 # ============================================================================
 # SIMULATION RESULTS PAGE

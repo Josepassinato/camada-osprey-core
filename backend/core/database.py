@@ -180,6 +180,11 @@ async def _create_indexes(db):
         await safe_create_index(db.b2b_cases, [("office_id", 1), ("status", 1)])
         await safe_create_index(db.osprey_chat_conversations, "office_id")
 
+        # Letters
+        await safe_create_index(db.letters, "letter_id", unique=True)
+        await safe_create_index(db.letters, "case_id")
+        await safe_create_index(db.letters, "office_id")
+
         # Rate limits per office per day
         await safe_create_index(db.rate_limits, [("office_id", 1), ("date", 1)], unique=True)
 

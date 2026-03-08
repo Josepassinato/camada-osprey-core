@@ -28,6 +28,21 @@ const STATUS_COLORS: Record<string, string> = {
   approved: '#22c55e', denied: '#ef4444', withdrawn: '#6b7280',
 };
 
+interface LetterItem {
+  letter_id: string;
+  letter_type: string;
+  created_at: string;
+  preview: string;
+}
+
+const LETTER_TYPES = [
+  { value: 'initial_filing', label: 'Initial Filing' },
+  { value: 'rfe_response', label: 'RFE Response' },
+  { value: 'appeal', label: 'Appeal' },
+  { value: 'withdrawal', label: 'Withdrawal' },
+  { value: 'status_inquiry', label: 'Status Inquiry' },
+];
+
 export default function B2BCases() {
   const { token } = useAuth();
   const navigate = useNavigate();
@@ -36,6 +51,16 @@ export default function B2BCases() {
   const [showModal, setShowModal] = useState(false);
   const [newCase, setNewCase] = useState({ client_name: '', visa_type: 'H-1B', notes: '' });
   const [creating, setCreating] = useState(false);
+
+  // Case detail / letters state
+  const [selectedCase, setSelectedCase] = useState<CaseItem | null>(null);
+  const [detailTab, setDetailTab] = useState<'info' | 'letters'>('info');
+  const [letters, setLetters] = useState<LetterItem[]>([]);
+  const [letterContent, setLetterContent] = useState('');
+  const [generatingLetter, setGeneratingLetter] = useState(false);
+  const [letterType, setLetterType] = useState('initial_filing');
+  const [specialInstructions, setSpecialInstructions] = useState('');
+  const [loadingLetters, setLoadingLetters] = useState(false);
 
   const fetchCases = () => {
     if (!token) return;
@@ -66,6 +91,75 @@ export default function B2BCases() {
     } finally {
       setCreating(false);
     }
+  };
+
+  const openCaseDetail = (c: CaseItem) => {
+    setSelectedCase(c);
+    setDetailTab('info');
+    setLetterContent('');
+    setLetters([]);
+    fetchLetters(c.case_id);
+  };
+
+  const fetchLetters = (caseId: string) => {
+    if (!token) return;
+    setLoadingLetters(true);
+    fetch(`${API_URL}/api/letters/${caseId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data)) setLetters(data); })
+      .catch(() => {})
+      .finally(() => setLoadingLetters(false));
+  };
+
+  const generateLetter = async () => {
+    if (!selectedCase || !token) return;
+    setGeneratingLetter(true);
+    setLetterContent('');
+    try {
+      const res = await fetch(`${API_URL}/api/letters/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ case_id: selectedCase.case_id, letter_type: letterType, special_instructions: specialInstructions || undefined }),
+      });
+      const data = await res.json();
+      if (res.ok && data.content) {
+        setLetterContent(data.content);
+        fetchLetters(selectedCase.case_id);
+      } else {
+        setLetterContent(`Error: ${data.detail || 'Failed to generate letter'}`);
+      }
+    } catch {
+      setLetterContent('Error: Failed to connect to server');
+    } finally {
+      setGeneratingLetter(false);
+    }
+  };
+
+  const viewLetter = async (letterId: string) => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_URL}/api/letters/content/${letterId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) setLetterContent(data.content);
+    } catch {}
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(letterContent);
+  };
+
+  const downloadTxt = () => {
+    const blob = new Blob([letterContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cover-letter-${selectedCase?.case_id || 'letter'}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const inputStyle: React.CSSProperties = {
@@ -133,7 +227,7 @@ export default function B2BCases() {
                 cases.map((c) => (
                   <tr
                     key={c.case_id}
-                    onClick={() => navigate(`/app/chat?case=${c.case_id}`)}
+                    onClick={() => openCaseDetail(c)}
                     style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer' }}
                     onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)')}
                     onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
@@ -163,6 +257,102 @@ export default function B2BCases() {
             </tbody>
           </table>
         </div>
+
+        {/* Case Detail Modal */}
+        {selectedCase && (
+          <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+            <div style={{ backgroundColor: '#0f1a2e', border: '1px solid rgba(201,168,76,0.2)', borderRadius: 16, padding: '32px', width: '100%', maxWidth: 700, maxHeight: '85vh', overflowY: 'auto' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: '#C9A84C', margin: 0 }}>
+                  {selectedCase.client_name} — {selectedCase.visa_type}
+                </h2>
+                <button onClick={() => setSelectedCase(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: 20, cursor: 'pointer' }}>✕</button>
+              </div>
+
+              {/* Tabs */}
+              <div style={{ display: 'flex', gap: 0, marginBottom: 20, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                {(['info', 'letters'] as const).map((tab) => (
+                  <button key={tab} onClick={() => setDetailTab(tab)} style={{
+                    padding: '10px 20px', background: 'none', border: 'none', borderBottom: detailTab === tab ? '2px solid #C9A84C' : '2px solid transparent',
+                    color: detailTab === tab ? '#C9A84C' : 'rgba(255,255,255,0.4)', fontSize: 14, fontWeight: 500, cursor: 'pointer',
+                  }}>
+                    {tab === 'info' ? 'Case Info' : 'Letters'}
+                  </button>
+                ))}
+              </div>
+
+              {detailTab === 'info' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div><span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>Case ID</span><br /><span style={{ fontFamily: 'monospace', fontSize: 13 }}>{selectedCase.case_id}</span></div>
+                  <div><span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>Status</span><br />
+                    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 500, backgroundColor: `${STATUS_COLORS[selectedCase.status] || '#6b7280'}22`, color: STATUS_COLORS[selectedCase.status] || '#6b7280', border: `1px solid ${STATUS_COLORS[selectedCase.status] || '#6b7280'}44` }}>
+                      {selectedCase.status.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+                  <div><span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>Updated</span><br /><span style={{ fontSize: 13 }}>{selectedCase.updated_at ? new Date(selectedCase.updated_at).toLocaleDateString() : '-'}</span></div>
+                  <button onClick={() => navigate(`/app/chat?case=${selectedCase.case_id}`)} style={{ marginTop: 10, padding: '10px 20px', backgroundColor: '#C9A84C', color: '#060d14', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', alignSelf: 'flex-start' }}>
+                    Open in Chat
+                  </button>
+                </div>
+              )}
+
+              {detailTab === 'letters' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {/* Generate */}
+                  <div style={{ padding: 16, backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 12, color: '#C9A84C' }}>Generate Cover Letter</div>
+                    <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+                      <select value={letterType} onChange={(e) => setLetterType(e.target.value)} style={{ ...inputStyle, flex: 1, appearance: 'auto' as any }}>
+                        {LETTER_TYPES.map((lt) => <option key={lt.value} value={lt.value}>{lt.label}</option>)}
+                      </select>
+                    </div>
+                    <textarea value={specialInstructions} onChange={(e) => setSpecialInstructions(e.target.value)} placeholder="Special instructions (optional)..." rows={2} style={{ ...inputStyle, resize: 'vertical', marginBottom: 10 }} />
+                    <button onClick={generateLetter} disabled={generatingLetter} style={{ padding: '10px 20px', backgroundColor: '#C9A84C', color: '#060d14', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', opacity: generatingLetter ? 0.6 : 1 }}>
+                      {generatingLetter ? 'Generating...' : 'Generate Cover Letter'}
+                    </button>
+                  </div>
+
+                  {/* Generated content */}
+                  {letterContent && (
+                    <div style={{ padding: 16, backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                        <span style={{ fontSize: 14, fontWeight: 500, color: '#C9A84C' }}>Letter Content</span>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button onClick={copyToClipboard} style={{ padding: '6px 14px', backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, color: '#e2e8f0', fontSize: 12, cursor: 'pointer' }}>Copy</button>
+                          <button onClick={downloadTxt} style={{ padding: '6px 14px', backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, color: '#e2e8f0', fontSize: 12, cursor: 'pointer' }}>Download .txt</button>
+                        </div>
+                      </div>
+                      <textarea value={letterContent} onChange={(e) => setLetterContent(e.target.value)} rows={15} style={{ ...inputStyle, fontFamily: 'monospace', fontSize: 12, lineHeight: 1.6, resize: 'vertical' }} />
+                    </div>
+                  )}
+
+                  {/* Previous letters */}
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 10, color: 'rgba(255,255,255,0.5)' }}>Previous Letters</div>
+                    {loadingLetters ? (
+                      <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>Loading...</div>
+                    ) : letters.length === 0 ? (
+                      <div style={{ color: 'rgba(255,255,255,0.25)', fontSize: 13 }}>No letters generated yet.</div>
+                    ) : (
+                      letters.map((lt) => (
+                        <div key={lt.letter_id} onClick={() => viewLetter(lt.letter_id)} style={{ padding: '10px 14px', backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.04)', marginBottom: 6, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)')}
+                          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)')}
+                        >
+                          <div>
+                            <span style={{ fontSize: 13, fontWeight: 500 }}>{lt.letter_type.replace(/_/g, ' ')}</span>
+                            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginLeft: 10 }}>{new Date(lt.created_at).toLocaleDateString()}</span>
+                          </div>
+                          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>{lt.letter_id}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* New Case Modal */}
         {showModal && (
