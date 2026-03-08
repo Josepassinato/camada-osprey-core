@@ -8,6 +8,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from backend.admin.products import initialize_products_in_db
 from backend.admin.security import init_db as init_admin_security_db
 from backend.agents.maria import api as maria_api
+import osprey_chat_api
 from backend.utils.proactive_alerts import ProactiveAlertSystem
 from backend.core.auth import set_db as set_auth_db
 
@@ -60,6 +61,9 @@ async def startup_db_client():
 
         maria_api.init_db(db)
         logger.info("✅ Maria - Assistente Virtual initialized!")
+
+        osprey_chat_api.init_db(db)
+        logger.info("✅ Osprey Legal Chat initialized!")
 
         init_admin_security_db(db)
         logger.info("✅ Admin Security (RBAC) initialized!")

@@ -60,6 +60,7 @@ import TermsOfUse from "./pages/TermsOfUse";
 import LegalDisclaimer from "./pages/LegalDisclaimer";
 import FAQ from "./pages/FAQ";
 import GoogleAuthCallback from "./components/GoogleAuthCallback";
+import OspreyLegalChat from "./pages/OspreyLegalChat";
 
 const queryClient = new QueryClient();
 
@@ -154,6 +155,9 @@ const App = () => (
           <Route path="/terms-of-use" element={<TermsOfUse />} />
           <Route path="/legal-disclaimer" element={<LegalDisclaimer />} />
           
+          {/* Osprey Legal Chat */}
+          <Route path="/legal-chat" element={<OspreyLegalChat />} />
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

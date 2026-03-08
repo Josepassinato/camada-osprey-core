@@ -109,6 +109,7 @@ from admin.security import (
     require_admin,
 )
 from backend.agents.maria.api import router as maria_api_router
+import osprey_chat_api
 
 # Professional QA Agent - Quality Assurance System
 from backend.agents.qa import get_qa_agent
@@ -4258,6 +4259,10 @@ if VISA_API_AVAILABLE:
 
 # Include Maria router
 app.include_router(maria_api_router)
+
+# Include Osprey Legal Chat router
+app.include_router(osprey_chat_api.router)
+logger.info("✅ Osprey Legal Chat API registered")
 
 # ============================================================================
 # SIMULATION RESULTS PAGE
