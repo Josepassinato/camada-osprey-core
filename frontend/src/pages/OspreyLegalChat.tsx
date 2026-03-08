@@ -200,7 +200,7 @@ export default function OspreyLegalChat() {
           </div>
           <div>
             <h1 className="text-lg font-semibold tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-              Osprey Legal Chat
+              Imigrai Legal Chat
             </h1>
             <div className="flex items-center gap-2">
               {isEditingFirm ? (
@@ -256,7 +256,7 @@ export default function OspreyLegalChat() {
               className="text-2xl font-semibold mb-2"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
-              Osprey Legal Chat
+              Imigrai Legal Chat
             </h2>
             <p className="text-sm opacity-50 mb-8 max-w-md">
               Your AI Chief of Staff for immigration law. Ask about case strategy, filing procedures,
