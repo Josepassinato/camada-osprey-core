@@ -433,6 +433,45 @@ TOOL_DECLARATIONS = [
         },
     },
     {
+        "name": "send_email",
+        "description": (
+            "Send an email to a client, attorney, or any recipient. "
+            "Supports custom messages, case updates, deadline alerts, and package notifications. "
+            "Use when attorney says enviar email, send email, mandar email, "
+            "notificar cliente por email, email update, avisar por email."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "to": {
+                    "type": "string",
+                    "description": "Recipient email address (e.g. client@example.com)",
+                },
+                "subject": {
+                    "type": "string",
+                    "description": "Email subject line",
+                },
+                "message": {
+                    "type": "string",
+                    "description": "Email body content (plain text, will be formatted in HTML template)",
+                },
+                "case_id": {
+                    "type": "string",
+                    "description": "Optional case ID to link the email to",
+                },
+                "client_name_search": {
+                    "type": "string",
+                    "description": "Client name to find the case (if case_id unknown)",
+                },
+                "template": {
+                    "type": "string",
+                    "description": "Optional template: custom (default), deadline_alert, package_ready",
+                },
+            },
+            "required": ["to", "subject", "message"],
+        },
+    },
+    {
         "name": "legal_research",
         "description": (
             "Search the immigration law knowledge base for legal guidance. "

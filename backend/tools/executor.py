@@ -950,6 +950,81 @@ async def _generate_package(args: dict, db, office_id: str) -> dict:
         return {"error": f"Erro ao gerar pacote: {str(e)}"}
 
 
+async def _send_email(args: dict, db, office_id: str) -> dict:
+    """Send an email via Resend API."""
+    try:
+        from email_service import send_custom_email, send_deadline_alert, send_package_ready
+
+        to = args.get("to", "")
+        subject = args.get("subject", "")
+        message = args.get("message", "")
+        template = args.get("template", "custom")
+
+        if not to or not subject:
+            return {"error": "Parâmetros 'to' e 'subject' são obrigatórios."}
+
+        # If case linked, get case info
+        case = None
+        if args.get("case_id") or args.get("client_name_search"):
+            case = await _resolve_case(args, db, office_id)
+
+        if template == "deadline_alert" and case:
+            # Find nearest deadline
+            deadlines = case.get("deadlines", [])
+            nearest = deadlines[0] if deadlines else {}
+            result = await send_deadline_alert(
+                to=to,
+                client_name=case.get("client_name", "Client"),
+                visa_type=case.get("visa_type", ""),
+                deadline_title=nearest.get("title", subject),
+                due_date=nearest.get("due_date", "TBD"),
+                case_id=case.get("case_id", ""),
+            )
+        elif template == "package_ready" and case:
+            result = await send_package_ready(
+                to=to,
+                client_name=case.get("client_name", "Client"),
+                visa_type=case.get("visa_type", ""),
+                case_id=case.get("case_id", ""),
+                package_id=case.get("package_id", ""),
+                files_count=case.get("package_files_count", 0),
+            )
+        else:
+            result = await send_custom_email(to=to, subject=subject, message=message)
+
+        if result.get("success"):
+            # Log in case history if linked
+            if case:
+                now = datetime.now(timezone.utc)
+                await db.b2b_cases.update_one(
+                    {"case_id": case["case_id"], "office_id": office_id},
+                    {
+                        "$push": {
+                            "history": {
+                                "action": "email_sent",
+                                "timestamp": now.isoformat(),
+                                "detail": f"Email para {to}: {subject}",
+                            }
+                        },
+                        "$set": {"updated_at": now},
+                    },
+                )
+
+            return {
+                "success": True,
+                "email_id": result.get("id"),
+                "to": to,
+                "subject": subject,
+                "case_id": case["case_id"] if case else None,
+                "message": f"Email enviado com sucesso para {to}.",
+            }
+        else:
+            return {"error": f"Falha ao enviar email: {result.get('error', 'unknown')}"}
+
+    except Exception as e:
+        return {"error": f"Erro ao enviar email: {str(e)}"}
+
+
 async def _legal_research(args: dict, db, office_id: str) -> dict:
     """Search immigration law knowledge base."""
     import httpx as _httpx
@@ -1021,4 +1096,5 @@ EXECUTORS = {
     "generate_package": _generate_package,
     "validate_case": _validate_case,
     "legal_research": _legal_research,
+    "send_email": _send_email,
 }

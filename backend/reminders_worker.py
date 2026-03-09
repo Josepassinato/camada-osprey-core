@@ -182,6 +182,123 @@ async def process_deadline_alerts(db):
         print(f"📅 Deadline alerts sent to office {office_id}: {len(deadlines)} deadlines")
 
 
+async def process_daily_email_summary(db):
+    """Send daily email summary at 13:30 UTC (~8:30 AM EST)."""
+    now = datetime.now(timezone.utc)
+
+    # Only run at 13:30-13:35 UTC
+    if now.hour != 13 or now.minute < 30 or now.minute > 35:
+        return
+
+    today_str = now.strftime("%Y-%m-%d")
+    dedup_key = f"daily_email_{today_str}"
+    if dedup_key in _sent_today:
+        return
+    _sent_today.add(dedup_key)
+
+    try:
+        from email_service import send_daily_summary
+    except ImportError:
+        print("⚠️ email_service not available, skipping daily email summary")
+        return
+
+    # Get all offices with email configured
+    offices = await db.offices.find(
+        {"email_contacts": {"$exists": True, "$ne": []}},
+        {"_id": 0, "office_id": 1, "name": 1, "email_contacts": 1},
+    ).to_list(length=100)
+
+    if not offices:
+        # Fallback: get offices with any data
+        offices = await db.offices.find(
+            {},
+            {"_id": 0, "office_id": 1, "name": 1, "email_contacts": 1},
+        ).to_list(length=100)
+
+    for office in offices:
+        office_id = office.get("office_id")
+        if not office_id:
+            continue
+
+        emails = [
+            e.get("email") for e in office.get("email_contacts", [])
+            if e.get("email")
+        ]
+        if not emails:
+            continue
+
+        active_statuses = [
+            "intake", "docs_pending", "docs_review", "forms_gen",
+            "attorney_review", "ready_to_file", "filed",
+            "rfe_received", "rfe_response",
+        ]
+
+        # Gather stats
+        active = await db.b2b_cases.count_documents(
+            {"office_id": office_id, "status": {"$in": active_statuses}}
+        )
+        pending_review = await db.b2b_cases.count_documents(
+            {"office_id": office_id, "status": "attorney_review"}
+        )
+        ready = await db.b2b_cases.count_documents(
+            {"office_id": office_id, "status": "ready_to_file"}
+        )
+        rfe = await db.b2b_cases.count_documents(
+            {"office_id": office_id, "status": {"$in": ["rfe_received", "rfe_response"]}}
+        )
+
+        stats = {
+            "active": active,
+            "pending_review": pending_review,
+            "ready_to_file": ready,
+            "rfe_pending": rfe,
+        }
+
+        # Deadlines next 7 days
+        week = now + timedelta(days=7)
+        deadline_pipeline = [
+            {"$match": {"office_id": office_id, "status": {"$in": active_statuses}}},
+            {"$unwind": {"path": "$deadlines", "preserveNullAndEmptyArrays": False}},
+            {"$addFields": {
+                "deadline_date": {
+                    "$cond": {
+                        "if": {"$eq": [{"$type": "$deadlines.due_date"}, "string"]},
+                        "then": {"$dateFromString": {"dateString": "$deadlines.due_date", "onError": None}},
+                        "else": "$deadlines.due_date",
+                    }
+                }
+            }},
+            {"$match": {"deadline_date": {"$gte": now, "$lte": week}}},
+            {"$project": {
+                "_id": 0, "client_name": 1, "visa_type": 1,
+                "deadline_title": "$deadlines.title",
+                "deadline_date": "$deadlines.due_date",
+            }},
+            {"$sort": {"deadline_date": 1}},
+        ]
+        deadlines = await db.b2b_cases.aggregate(deadline_pipeline).to_list(length=20)
+
+        # Idle cases
+        idle_cutoff = now - timedelta(days=14)
+        idle_cases = await db.b2b_cases.find(
+            {"office_id": office_id, "status": {"$in": active_statuses}, "updated_at": {"$lt": idle_cutoff}},
+            {"_id": 0, "client_name": 1, "visa_type": 1, "updated_at": 1},
+        ).to_list(length=10)
+
+        result = await send_daily_summary(
+            to=emails,
+            office_name=office.get("name", "Your Firm"),
+            stats=stats,
+            deadlines=deadlines,
+            idle_cases=idle_cases,
+        )
+
+        if result.get("success"):
+            print(f"📧 Daily email summary sent to {office_id}: {len(emails)} recipients")
+        else:
+            print(f"❌ Daily email summary failed for {office_id}: {result.get('error')}")
+
+
 async def process_idle_case_alerts(db):
     """Weekly check: cases with no activity in 14+ days."""
     now = datetime.now(timezone.utc)
@@ -238,6 +355,7 @@ async def reminders_loop(db):
         try:
             await process_reminders(db)
             await process_deadline_alerts(db)
+            await process_daily_email_summary(db)
             await process_idle_case_alerts(db)
         except Exception as e:
             print(f"❌ Reminders Worker error: {e}")
