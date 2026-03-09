@@ -56,7 +56,8 @@ class USCISFormFiller:
     """
 
     def __init__(self):
-        self.forms_dir = "/app/official_forms/uscis_forms"
+        _base = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        self.forms_dir = os.path.join(_base, "official_forms", "uscis_forms")
 
     def fill_i539(self, case_data: Dict[str, Any]) -> bytes:
         """
@@ -425,7 +426,6 @@ class USCISFormFiller:
             # ===== NEW OVERLAY SYSTEM =====
             # Use i129_overlay_filler for coordinate-based filling
             try:
-                import os
                 import tempfile
 
                 from backend.forms.i129_overlay import fill_i129_form

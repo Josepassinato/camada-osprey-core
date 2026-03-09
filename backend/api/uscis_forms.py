@@ -1,7 +1,9 @@
 import base64
 import logging
 import os
+import os.path as osp
 from datetime import datetime, timezone
+from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
@@ -22,8 +24,12 @@ async def generate_uscis_form(case_id: str):
     Generate filled USCIS form PDF for a case.
     """
     try:
-        case = await db.application_cases.find_one({"case_id": case_id})
-        case_collection = "application_cases"
+        case = await db.b2b_cases.find_one({"case_id": case_id})
+        case_collection = "b2b_cases"
+
+        if not case:
+            case = await db.application_cases.find_one({"case_id": case_id})
+            case_collection = "application_cases"
 
         if not case:
             case = await db.auto_cases.find_one({"case_id": case_id})
@@ -80,18 +86,21 @@ async def generate_uscis_form(case_id: str):
 
         pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8")
 
-        download_dir = "/app/downloads/forms"
-        os.makedirs(download_dir, exist_ok=True)
+        download_path = Path("/var/www/visa-application/osprey-core/downloads/forms")
+        download_path.mkdir(parents=True, exist_ok=True)
 
-        pdf_path = os.path.join(download_dir, filename)
+        pdf_path = str(download_path / filename)
         with open(pdf_path, "wb") as f:
             f.write(pdf_bytes)
 
         logger.info(f"💾 PDF saved to disk: {pdf_path}")
 
-        collection = (
-            db.application_cases if case_collection == "application_cases" else db.auto_cases
-        )
+        collection_map = {
+            "b2b_cases": db.b2b_cases,
+            "application_cases": db.application_cases,
+            "auto_cases": db.auto_cases,
+        }
+        collection = collection_map[case_collection]
         await collection.update_one(
             {"case_id": case_id},
             {
@@ -112,7 +121,10 @@ async def generate_uscis_form(case_id: str):
 
         logger.info(f"✅ Form generated: {filename} ({len(pdf_bytes)} bytes)")
 
-        await update_case_status_and_progress(case_id, "form_generated", case_collection)
+        try:
+            await update_case_status_and_progress(case_id, "form_generated", case_collection)
+        except Exception as status_err:
+            logger.warning(f"⚠️ Could not update case status: {status_err}")
 
         return {
             "success": True,
@@ -135,7 +147,9 @@ async def generate_uscis_form(case_id: str):
 async def download_uscis_form(case_id: str):
     """Download a pre-generated USCIS form PDF."""
     try:
-        case = await db.application_cases.find_one({"case_id": case_id})
+        case = await db.b2b_cases.find_one({"case_id": case_id})
+        if not case:
+            case = await db.application_cases.find_one({"case_id": case_id})
         if not case:
             case = await db.auto_cases.find_one({"case_id": case_id})
 
