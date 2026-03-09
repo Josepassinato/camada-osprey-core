@@ -378,6 +378,60 @@ TOOL_DECLARATIONS = [
             "required": [],
         },
     },
+    {
+        "name": "generate_package",
+        "description": (
+            "Generate a complete USCIS filing package (ZIP) for a case. "
+            "Includes: filled form PDF, cover letter, document checklist, case summary. "
+            "Use when attorney says gerar pacote, prepare filing package, montar dossiê, "
+            "pacote de documentos, prepare submission."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "case_id": {
+                    "type": "string",
+                    "description": "The case ID (e.g. CASE-A1B2C3D4)",
+                },
+                "client_name_search": {
+                    "type": "string",
+                    "description": "Client name to find the case (if case_id unknown)",
+                },
+                "include_cover_letter": {
+                    "type": "boolean",
+                    "description": "Include cover letter in the package (default true)",
+                },
+            },
+            "required": [],
+        },
+    },
+    {
+        "name": "validate_case",
+        "description": (
+            "Run QA validation on a case before filing. Checks completeness of data, "
+            "documents, and USCIS requirements. Returns score and issues. "
+            "Use when attorney says validar caso, check readiness, revisar completude, "
+            "QA review, está pronto para filing, verificar documentos."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "case_id": {
+                    "type": "string",
+                    "description": "The case ID (e.g. CASE-A1B2C3D4)",
+                },
+                "client_name_search": {
+                    "type": "string",
+                    "description": "Client name to find the case (if case_id unknown)",
+                },
+                "strict": {
+                    "type": "boolean",
+                    "description": "Strict mode requires 95%+ score (default false = 85%)",
+                },
+            },
+            "required": [],
+        },
+    },
 ]
 
 

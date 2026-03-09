@@ -758,6 +758,198 @@ async def _generate_form(args: dict, db, office_id: str) -> dict:
     except Exception as e:
         return {"error": f"Erro ao gerar formulário: {str(e)}"}
 
+async def _validate_case(args: dict, db, office_id: str) -> dict:
+    """Run QA validation on a case."""
+    case = await _resolve_case(args, db, office_id)
+    if not case:
+        return {"error": "Caso não encontrado."}
+
+    try:
+        from agents.qa import get_qa_agent
+
+        visa_type = (case.get("visa_type") or case.get("form_code") or "").upper()
+        if not visa_type:
+            return {"error": "Caso sem visa_type definido. Não é possível validar."}
+
+        # Normalize for QA agent
+        norm_map = {
+            "H1B": "H-1B", "O1": "O-1", "L1": "L-1", "EB1A": "EB-1A",
+            "F1": "F-1", "O-1A": "O-1", "O-1B": "O-1", "L-1A": "L-1", "L-1B": "L-1",
+        }
+        case_for_qa = dict(case)
+        case_for_qa["form_code"] = norm_map.get(visa_type, visa_type)
+
+        qa_agent = get_qa_agent()
+        report = qa_agent.comprehensive_review(case_for_qa)
+
+        strict = args.get("strict", False)
+        if strict and report["overall_score"] < 95:
+            report["approval"]["approved"] = False
+            report["approval"]["reason"] = f"Strict mode: {report['overall_score']:.1f}% < 95%"
+
+        now = datetime.now(timezone.utc)
+        await db.b2b_cases.update_one(
+            {"case_id": case["case_id"], "office_id": office_id},
+            {
+                "$set": {
+                    "qa_review": report,
+                    "qa_approved": report["approval"]["approved"],
+                    "qa_score": report["overall_score"],
+                    "qa_review_date": now,
+                    "updated_at": now,
+                },
+                "$push": {
+                    "history": {
+                        "action": "qa_validation",
+                        "timestamp": now.isoformat(),
+                        "detail": f"QA: {report['overall_score']:.1f}% — "
+                                  f"{'APROVADO' if report['approval']['approved'] else 'PENDENTE'}",
+                    }
+                },
+            },
+        )
+
+        return {
+            "success": True,
+            "case_id": case["case_id"],
+            "client_name": case.get("client_name"),
+            "visa_type": visa_type,
+            "overall_score": report["overall_score"],
+            "approved": report["approval"]["approved"],
+            "approval_reason": report["approval"].get("reason", ""),
+            "critical_issues": report.get("critical_issues", []),
+            "missing_items": report.get("missing_items", []),
+            "warnings": report.get("warnings", []),
+            "recommendations": report.get("recommendations", []),
+            "message": (
+                f"Validação QA concluída: {report['overall_score']:.1f}% — "
+                f"{'Aprovado para filing' if report['approval']['approved'] else 'Precisa de correções'}."
+            ),
+        }
+
+    except Exception as e:
+        return {"error": f"Erro na validação QA: {str(e)}"}
+
+
+async def _generate_package(args: dict, db, office_id: str) -> dict:
+    """Generate a complete USCIS filing package (ZIP) for a case."""
+    case = await _resolve_case(args, db, office_id)
+    if not case:
+        return {"error": "Caso não encontrado."}
+
+    try:
+        from backend.packages_api import (
+            _build_checklist,
+            _build_summary,
+            _get_filing_info,
+        )
+        import io
+        import zipfile
+        import base64
+
+        case_id = case["case_id"]
+        visa_type = (case.get("visa_type") or case.get("form_code") or "").upper()
+        client_name = case.get("client_name", "client")
+        safe_name = client_name.replace(" ", "_")
+
+        zip_buffer = io.BytesIO()
+        files_included = []
+
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+            # Form PDF
+            try:
+                from forms.filler import form_filler
+                pdf_bytes = None
+                form_name = visa_type
+                if visa_type in {"H-1B", "H1B"}:
+                    pdf_bytes = form_filler.fill_h1b(case)
+                    form_name = "I-129_H-1B"
+                elif visa_type in {"O-1", "O1"}:
+                    pdf_bytes = form_filler.fill_o1(case)
+                    form_name = "I-129_O-1"
+                elif visa_type in {"L-1", "L1"}:
+                    pdf_bytes = form_filler.fill_l1(case)
+                    form_name = "I-129_L-1"
+                elif visa_type in {"EB-1A", "EB1A", "I-140"}:
+                    pdf_bytes = form_filler.fill_i140(case)
+                    form_name = "I-140"
+                elif visa_type == "I-539" or "B-" in visa_type:
+                    pdf_bytes = form_filler.fill_i539(case)
+                    form_name = "I-539"
+
+                if pdf_bytes:
+                    fname = f"{form_name}_{safe_name}.pdf"
+                    zf.writestr(fname, pdf_bytes)
+                    files_included.append(fname)
+            except Exception as e:
+                logger.warning(f"Could not add form PDF to package: {e}")
+
+            # Cover letter
+            if args.get("include_cover_letter", True):
+                try:
+                    from letter_generator import LetterGenerator
+                    office = await db.offices.find_one({"office_id": office_id})
+                    case["office_name"] = office["name"] if office else "Immigration Law Office"
+                    content = await LetterGenerator.generate_cover_letter(case, "initial_filing", "")
+                    zf.writestr(f"Cover_Letter_{safe_name}.txt", content)
+                    files_included.append(f"Cover_Letter_{safe_name}.txt")
+                except Exception:
+                    pass
+
+            # Checklist + Summary
+            zf.writestr(f"Document_Checklist_{safe_name}.txt", _build_checklist(case))
+            files_included.append(f"Document_Checklist_{safe_name}.txt")
+            zf.writestr(f"Case_Summary_{safe_name}.txt", _build_summary(case))
+            files_included.append(f"Case_Summary_{safe_name}.txt")
+
+        zip_bytes = zip_buffer.getvalue()
+
+        # Save to disk
+        from pathlib import Path
+        dl_dir = Path("/var/www/visa-application/osprey-core/downloads/packages")
+        dl_dir.mkdir(parents=True, exist_ok=True)
+        pkg_id = "PKG-" + str(uuid.uuid4())[:8].upper()
+        zip_path = dl_dir / f"{pkg_id}_{safe_name}.zip"
+        with open(zip_path, "wb") as f:
+            f.write(zip_bytes)
+
+        now = datetime.now(timezone.utc)
+        await db.b2b_cases.update_one(
+            {"case_id": case_id, "office_id": office_id},
+            {
+                "$set": {
+                    "package_generated": True,
+                    "package_id": pkg_id,
+                    "package_path": str(zip_path),
+                    "package_generated_at": now,
+                    "updated_at": now,
+                },
+                "$push": {
+                    "history": {
+                        "action": "package_generated",
+                        "timestamp": now.isoformat(),
+                        "detail": f"Filing package: {len(files_included)} files",
+                    }
+                },
+            },
+        )
+
+        return {
+            "success": True,
+            "case_id": case_id,
+            "client_name": client_name,
+            "package_id": pkg_id,
+            "files": files_included,
+            "total_files": len(files_included),
+            "size_bytes": len(zip_bytes),
+            "download_url": f"/api/packages/{case_id}/download",
+            "message": f"Pacote de filing gerado com {len(files_included)} arquivos para {client_name}.",
+        }
+
+    except Exception as e:
+        return {"error": f"Erro ao gerar pacote: {str(e)}"}
+
+
 EXECUTORS = {
     "get_firm_overview": _get_firm_overview,
     "list_cases": _list_cases,
@@ -774,4 +966,6 @@ EXECUTORS = {
     "create_reminder": _create_reminder,
     "generate_letter": _generate_letter,
     "generate_form": _generate_form,
+    "generate_package": _generate_package,
+    "validate_case": _validate_case,
 }
