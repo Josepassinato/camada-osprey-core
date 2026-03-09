@@ -73,6 +73,10 @@ async def startup_db_client():
         start_reminders_worker(db)
         logger.info("✅ Reminders Worker initialized!")
 
+        from backend import firm_reports_api
+        firm_reports_api.init_db(db)
+        logger.info("✅ Firm Reports API initialized!")
+
         init_admin_security_db(db)
         logger.info("✅ Admin Security (RBAC) initialized!")
 
