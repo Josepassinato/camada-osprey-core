@@ -4282,9 +4282,19 @@ app.include_router(cases_router)
 from backend.letters_api import router as letters_router
 app.include_router(letters_router)
 
+from backend.documents_api import router as documents_b2b_router
+app.include_router(documents_b2b_router)
+
 from backend.settings_api import router as settings_router
 app.include_router(settings_router)
-logger.info("✅ B2B Auth, Offices, Cases, Letters, and Settings API registered")
+
+from backend.reports_api import router as reports_router
+app.include_router(reports_router)
+
+from backend.firm_reports_api import router as firm_reports_router
+app.include_router(firm_reports_router)
+
+logger.info("✅ B2B Auth, Offices, Cases, Letters, Documents, Settings, Reports API registered")
 
 # ============================================================================
 # SIMULATION RESULTS PAGE

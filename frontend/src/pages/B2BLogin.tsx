@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function B2BLogin() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -17,13 +17,19 @@ export default function B2BLogin() {
     setIsLoading(true);
     try {
       await login(email, password);
-      navigate('/app/dashboard');
     } catch (err: any) {
       setError(err.message || 'Invalid credentials');
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Redirect after login based on onboarding status
+  React.useEffect(() => {
+    if (user) {
+      navigate(user.onboarding_completed ? '/app/dashboard' : '/onboarding');
+    }
+  }, [user, navigate]);
 
   return (
     <div style={styles.container}>

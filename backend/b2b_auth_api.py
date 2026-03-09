@@ -127,6 +127,7 @@ async def b2b_register(request: Request, data: RegisterRequest):
         "role": "owner",
         "password_hash": hash_password(data.password),
         "is_active": True,
+        "onboarding_completed": False,
         "created_at": now,
         "last_login": now,
     }
@@ -148,6 +149,7 @@ async def b2b_register(request: Request, data: RegisterRequest):
             "role": "owner",
             "firm_name": data.firm_name,
             "plan": "trial",
+            "onboarding_completed": False,
         },
     }
 
@@ -188,6 +190,7 @@ async def b2b_login(request: Request, data: LoginRequest):
             "role": user["role"],
             "firm_name": office["name"],
             "plan": office.get("plan", "trial"),
+            "onboarding_completed": user.get("onboarding_completed", False),
         },
     }
 
@@ -209,8 +212,21 @@ async def b2b_me(current_user: dict = Depends(get_b2b_user)):
         "firm_name": office["name"],
         "plan": office.get("plan", "trial"),
         "is_active": office.get("is_active", True),
+        "onboarding_completed": user.get("onboarding_completed", False),
         "trial_ends_at": office.get("trial_ends_at", "").isoformat() if office.get("trial_ends_at") else None,
     }
+
+
+@router.put("/onboarding-complete")
+async def b2b_onboarding_complete(
+    request: Request,
+    current_user: dict = Depends(get_b2b_user),
+):
+    await db.b2b_users.update_one(
+        {"user_id": current_user["user_id"]},
+        {"$set": {"onboarding_completed": True}},
+    )
+    return {"ok": True}
 
 
 @router.post("/invite")

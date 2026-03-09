@@ -29,7 +29,7 @@ export default function B2BRegister() {
     setIsLoading(true);
     try {
       await register(firmName, ownerName, email, password);
-      navigate('/app/dashboard');
+      navigate('/onboarding');
     } catch (err: any) {
       setError(err.message || 'Registration failed');
     } finally {

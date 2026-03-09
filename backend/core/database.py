@@ -9,6 +9,7 @@ from backend.admin.products import initialize_products_in_db
 from backend.admin.security import init_db as init_admin_security_db
 from backend.agents.maria import api as maria_api
 import osprey_chat_api
+import documents_api
 from backend.utils.proactive_alerts import ProactiveAlertSystem
 from backend.core.auth import set_db as set_auth_db
 
@@ -65,6 +66,13 @@ async def startup_db_client():
         osprey_chat_api.init_db(db)
         logger.info("✅ Osprey Legal Chat initialized!")
 
+        documents_api.init_db(db)
+        logger.info("✅ Documents API initialized!")
+
+        from backend.reminders_worker import start_reminders_worker
+        start_reminders_worker(db)
+        logger.info("✅ Reminders Worker initialized!")
+
         init_admin_security_db(db)
         logger.info("✅ Admin Security (RBAC) initialized!")
 
@@ -76,6 +84,14 @@ async def startup_db_client():
         await _start_visa_scheduler(db)
         await _start_backup_scheduler()
         await _start_rate_limiter_cleanup()
+
+        # Start reminders worker
+        try:
+            from reminders_worker import start_reminders_worker
+            start_reminders_worker(db)
+            logger.info("✅ Reminders Worker started!")
+        except Exception as rw_err:
+            logger.warning(f"⚠️ Reminders Worker not started: {rw_err}")
 
         set_auth_db(db)
     except Exception as e:

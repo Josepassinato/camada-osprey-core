@@ -10,6 +10,7 @@ interface User {
   role: string;
   firm_name: string;
   plan: string;
+  onboarding_completed: boolean;
 }
 
 interface AuthContextType {
@@ -80,6 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           role: data.role,
           firm_name: data.firm_name,
           plan: data.plan,
+          onboarding_completed: data.onboarding_completed ?? false,
         });
       })
       .catch(() => {
@@ -102,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     localStorage.setItem('imigrai_token', data.token);
     setToken(data.token);
-    setUser(data.user);
+    setUser({ ...data.user, onboarding_completed: data.user.onboarding_completed ?? false });
   };
 
   const register = async (firm_name: string, owner_name: string, email: string, password: string) => {
@@ -117,7 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     localStorage.setItem('imigrai_token', data.token);
     setToken(data.token);
-    setUser(data.user);
+    setUser({ ...data.user, onboarding_completed: data.user.onboarding_completed ?? false });
   };
 
   const getToken = () => token;

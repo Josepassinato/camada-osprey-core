@@ -11,6 +11,8 @@ import B2BCases from "./pages/B2BCases";
 import B2BSettings from "./pages/B2BSettings";
 import { B2BPrivateRoute } from "./components/B2BPrivateRoute";
 import OspreyLegalChat from "./pages/OspreyLegalChat";
+import OnboardingWizard from "./pages/OnboardingWizard";
+import OnboardingRoute from "./components/OnboardingRoute";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +31,9 @@ const App = () => (
             {/* Authentication */}
             <Route path="/login" element={<B2BLogin />} />
             <Route path="/register" element={<B2BRegister />} />
+
+            {/* Onboarding (requires auth but not onboarding_completed) */}
+            <Route path="/onboarding" element={<OnboardingRoute />} />
 
             {/* B2B Protected Routes */}
             <Route path="/app/dashboard" element={<B2BPrivateRoute><B2BDashboard /></B2BPrivateRoute>} />

@@ -1,12 +1,10 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import OnboardingWizard from '../pages/OnboardingWizard';
 
-interface B2BPrivateRouteProps {
-  children: React.ReactNode;
-}
-
-export function B2BPrivateRoute({ children }: B2BPrivateRouteProps) {
+export default function OnboardingRoute() {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -34,13 +32,18 @@ export function B2BPrivateRoute({ children }: B2BPrivateRouteProps) {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
 
-  if (user && !user.onboarding_completed) {
-    return <Navigate to="/onboarding" replace />;
+  if (user.onboarding_completed) {
+    return <Navigate to="/app/dashboard" replace />;
   }
 
-  return <>{children}</>;
+  return (
+    <OnboardingWizard
+      firmName={user.firm_name}
+      onComplete={() => navigate('/app/dashboard')}
+    />
+  );
 }
