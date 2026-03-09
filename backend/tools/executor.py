@@ -950,6 +950,58 @@ async def _generate_package(args: dict, db, office_id: str) -> dict:
         return {"error": f"Erro ao gerar pacote: {str(e)}"}
 
 
+async def _legal_research(args: dict, db, office_id: str) -> dict:
+    """Search immigration law knowledge base."""
+    import httpx as _httpx
+
+    payload = {
+        "query": args.get("query", ""),
+        "visa_type": args.get("visa_type"),
+        "source_filter": args.get("source_filter"),
+        "max_results": 5,
+        "min_similarity": 0.3,
+    }
+
+    try:
+        async with _httpx.AsyncClient() as client:
+            resp = await client.post(
+                "http://localhost:8001/api/legal/research",
+                json=payload,
+                headers={"x-internal-token": "imigrai-internal-2024"},
+                timeout=30,
+            )
+            result = resp.json()
+
+        if not result.get("results"):
+            return {
+                "found": False,
+                "message": "No relevant legal guidance found for this query.",
+                "query": payload["query"],
+            }
+
+        formatted = []
+        for r in result["results"]:
+            formatted.append(
+                {
+                    "source": r["source"],
+                    "relevance": r["similarity"],
+                    "excerpt": r["text"][:600],
+                    "url": r["url"],
+                    "metadata": r["metadata"],
+                }
+            )
+
+        return {
+            "found": True,
+            "query": payload["query"],
+            "total_sources": len(formatted),
+            "legal_guidance": formatted,
+        }
+
+    except Exception as e:
+        return {"error": f"Legal research failed: {str(e)}"}
+
+
 EXECUTORS = {
     "get_firm_overview": _get_firm_overview,
     "list_cases": _list_cases,
@@ -968,4 +1020,5 @@ EXECUTORS = {
     "generate_form": _generate_form,
     "generate_package": _generate_package,
     "validate_case": _validate_case,
+    "legal_research": _legal_research,
 }

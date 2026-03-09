@@ -432,6 +432,38 @@ TOOL_DECLARATIONS = [
             "required": [],
         },
     },
+    {
+        "name": "legal_research",
+        "description": (
+            "Search the immigration law knowledge base for legal guidance. "
+            "Sources: USCIS Policy Manual (official guidance), CFR Title 8 (federal regulations), "
+            "AAO Decisions (Administrative Appeals Office precedent decisions). "
+            "Use when attorney asks about immigration law, policy, criteria, precedents, "
+            "regulations. Examples: 'quais os critérios para EB-1A?', "
+            "'o que diz a lei sobre H-1B specialty occupation?', "
+            "'tem algum precedente de AAO para NIW?', 'qual é o framework Dhanasar?', "
+            "'what are the requirements for adjustment of status?'. "
+            "Always cite the source and apply findings to the specific case if provided."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Legal research query in English or Portuguese",
+                },
+                "visa_type": {
+                    "type": "string",
+                    "description": "Filter for visa type: H-1B, EB-1A, EB-2 NIW, O-1A, L-1A, I-130, I-485, F-1",
+                },
+                "source_filter": {
+                    "type": "string",
+                    "description": "Filter by source: uscis_policy_manual, cfr_title_8, aao_decisions",
+                },
+            },
+            "required": ["query"],
+        },
+    },
 ]
 
 

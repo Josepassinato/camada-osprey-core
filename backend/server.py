@@ -147,6 +147,11 @@ from backend.packages_api import router as packages_router
 from backend.qa_pipeline_api import router as qa_pipeline_router
 from backend.intake_wizard_api import router as intake_wizard_router
 from backend.document_extractor_api import router as document_extractor_router
+try:
+    from backend.legal_research_api import router as legal_router
+    LEGAL_API_AVAILABLE = True
+except Exception as _legal_err:
+    LEGAL_API_AVAILABLE = False
 from backend.api.visa_updates_admin import router as visa_updates_admin_router
 from backend.api.voice import router as voice_router
 from backend.api.voice import ws_router as voice_ws_router
@@ -4261,6 +4266,8 @@ app.include_router(packages_router)  # B2B filing packages
 app.include_router(qa_pipeline_router)  # B2B QA validation pipeline
 app.include_router(intake_wizard_router)  # B2B guided case intake
 app.include_router(document_extractor_router)  # B2B document extraction
+if LEGAL_API_AVAILABLE:
+    app.include_router(legal_router)  # Legal Research RAG
 # DISABLED B2C: app.include_router(education_router)
 # DISABLED B2C: app.include_router(documents_router)
 # DISABLED B2C: app.include_router(payments_router)
