@@ -4294,6 +4294,9 @@ app.include_router(reports_router)
 from backend.firm_reports_api import router as firm_reports_router
 app.include_router(firm_reports_router)
 
+from backend.firm_memory_api import router as firm_memory_router
+app.include_router(firm_memory_router)
+
 logger.info("✅ B2B Auth, Offices, Cases, Letters, Documents, Settings, Reports API registered")
 
 # ============================================================================

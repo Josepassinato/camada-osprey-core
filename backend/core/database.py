@@ -77,6 +77,10 @@ async def startup_db_client():
         firm_reports_api.init_db(db)
         logger.info("✅ Firm Reports API initialized!")
 
+        from backend import firm_memory_api
+        firm_memory_api.init_db(db)
+        logger.info("✅ Firm Memory API initialized!")
+
         init_admin_security_db(db)
         logger.info("✅ Admin Security (RBAC) initialized!")
 
