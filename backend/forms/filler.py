@@ -430,8 +430,83 @@ class USCISFormFiller:
 
                 from backend.forms.i129_overlay import fill_i129_form
 
-                # Preparar dados para overlay
-                friendly_data = {**basic_data, **simplified_form, "visa_type": visa_category}
+                # Preparar dados para overlay — flatten nested dicts
+                # basic_data pode ter: {beneficiary: {...}, employer: {...}, position: {...}}
+                friendly_data = {}
+                beneficiary = basic_data.get("beneficiary", {})
+                employer = basic_data.get("employer", {})
+                position = basic_data.get("position", {})
+                case_info = basic_data.get("case", {})
+
+                # Map beneficiary fields
+                friendly_data["last_name"] = beneficiary.get("last_name")
+                friendly_data["first_name"] = beneficiary.get("first_name")
+                friendly_data["date_of_birth"] = beneficiary.get("dob")
+                friendly_data["country_of_birth"] = beneficiary.get("country_of_birth")
+                friendly_data["citizenship"] = beneficiary.get("nationality")
+                friendly_data["passport_number"] = beneficiary.get("passport_number")
+                friendly_data["passport_expiry"] = beneficiary.get("passport_expiry")
+                friendly_data["passport_country"] = beneficiary.get("country_of_birth")
+                friendly_data["us_address"] = beneficiary.get("address", "")
+                # Parse address components
+                addr = beneficiary.get("address", "")
+                if addr:
+                    parts = [p.strip() for p in addr.split(",")]
+                    if len(parts) >= 3:
+                        friendly_data["us_address"] = parts[0]
+                        friendly_data["us_city"] = parts[1]
+                        state_zip = parts[2].split()
+                        if state_zip:
+                            friendly_data["us_state"] = state_zip[0]
+                        if len(state_zip) > 1:
+                            friendly_data["us_zip"] = state_zip[1]
+
+                # Map employer fields
+                friendly_data["employer_name"] = employer.get("company_name")
+                friendly_data["employer_ein"] = employer.get("ein")
+                friendly_data["employer_phone"] = employer.get("contact_phone")
+                emp_addr = employer.get("address", "")
+                if emp_addr:
+                    parts = [p.strip() for p in emp_addr.split(",")]
+                    if len(parts) >= 3:
+                        friendly_data["employer_address"] = parts[0]
+                        friendly_data["employer_city"] = parts[1]
+                        state_zip = parts[2].split()
+                        if state_zip:
+                            friendly_data["employer_state"] = state_zip[0]
+                        if len(state_zip) > 1:
+                            friendly_data["employer_zip"] = state_zip[1]
+
+                # Map position fields
+                friendly_data["job_title"] = position.get("job_title")
+                friendly_data["salary"] = position.get("wage")
+                friendly_data["job_start_date"] = position.get("start_date")
+                friendly_data["job_end_date"] = position.get("end_date")
+                friendly_data["hours_per_week"] = position.get("hours_per_week", "")
+                friendly_data["lca_number"] = case_info.get("lca_number", "")
+                work_addr = position.get("worksite", "")
+                if work_addr:
+                    parts = [p.strip() for p in work_addr.split(",")]
+                    if len(parts) >= 3:
+                        friendly_data["work_address"] = parts[0]
+                        friendly_data["work_city"] = parts[1]
+                        state_zip = parts[2].split()
+                        if state_zip:
+                            friendly_data["work_state"] = state_zip[0]
+                        if len(state_zip) > 1:
+                            friendly_data["work_zip"] = state_zip[1]
+
+                friendly_data["requested_action"] = "new employment"
+
+                # Merge simplified_form on top (if user filled friendly form)
+                friendly_data.update(simplified_form)
+
+                # Also merge any flat basic_data keys (backward compat)
+                for k, v in basic_data.items():
+                    if not isinstance(v, dict) and k not in friendly_data:
+                        friendly_data[k] = v
+
+                friendly_data["visa_type"] = visa_category
 
                 # Criar arquivo temporário para output
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_output:
