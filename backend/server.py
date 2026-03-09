@@ -4252,7 +4252,7 @@ app.include_router(knowledge_base_router)
 app.include_router(oracle_router)
 app.include_router(specialized_agents_router)
 app.include_router(visa_updates_admin_router)
-# DISABLED B2C: app.include_router(uscis_forms_router)
+app.include_router(uscis_forms_router)  # RE-ENABLED for B2B form generation
 # DISABLED B2C: app.include_router(education_router)
 # DISABLED B2C: app.include_router(documents_router)
 # DISABLED B2C: app.include_router(payments_router)

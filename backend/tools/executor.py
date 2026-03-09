@@ -676,6 +676,88 @@ async def _resolve_case(args: dict, db, office_id: str) -> dict | None:
 # EXECUTOR MAP
 # =============================================================================
 
+
+async def _generate_form(args: dict, db, office_id: str) -> dict:
+    """Generate filled USCIS form PDF for a case."""
+    case = await _resolve_case(args, db, office_id)
+    if not case:
+        return {"error": "Caso não encontrado."}
+
+    try:
+        from forms.filler import form_filler
+
+        if not form_filler:
+            return {"error": "Form Filler não disponível no servidor."}
+
+        visa_type = (case.get("visa_type") or case.get("form_code") or "").upper()
+        case_id = case["case_id"]
+
+        if visa_type == "I-539" or "B-" in visa_type or "TOURIST" in visa_type or "EXTENSION" in visa_type:
+            pdf_bytes = form_filler.fill_i539(case)
+            form_name = "I-539"
+        elif visa_type == "I-589" or "ASYLUM" in visa_type or "ASILO" in visa_type:
+            pdf_bytes = form_filler.fill_i589(case)
+            form_name = "I-589"
+        elif visa_type in {"EB-1A", "EB1A", "I-140"}:
+            pdf_bytes = form_filler.fill_i140(case)
+            form_name = "I-140"
+        elif visa_type in {"O-1", "O1", "O-1A", "O-1B"}:
+            pdf_bytes = form_filler.fill_o1(case)
+            form_name = "I-129 (O-1)"
+        elif visa_type in {"H-1B", "H1B"}:
+            pdf_bytes = form_filler.fill_h1b(case)
+            form_name = "I-129 (H-1B)"
+        elif visa_type in {"L-1", "L1", "L-1A", "L-1B"}:
+            pdf_bytes = form_filler.fill_l1(case)
+            form_name = "I-129 (L-1)"
+        elif visa_type in {"F-1", "F1"}:
+            pdf_bytes = form_filler.fill_f1(case)
+            form_name = "I-539 (F-1)"
+        elif visa_type == "I-129":
+            pdf_bytes = form_filler.fill_i129(case)
+            form_name = "I-129"
+        else:
+            return {
+                "error": f"Geração de formulário não suportada para tipo: {visa_type}. "
+                         f"Tipos suportados: I-539, I-589, I-140, O-1, H-1B, L-1, F-1, I-129"
+            }
+
+        if not pdf_bytes:
+            return {"error": "Formulário gerado está vazio."}
+
+        import base64
+        pdf_b64 = base64.b64encode(pdf_bytes).decode()
+        filename = f"{form_name.replace(' ', '_')}_{case_id}.pdf"
+
+        now = datetime.now(timezone.utc)
+        await db.b2b_cases.update_one(
+            {"case_id": case_id, "office_id": office_id},
+            {
+                "$push": {
+                    "history": {
+                        "action": "form_generated",
+                        "timestamp": now.isoformat(),
+                        "detail": f"Formulário {form_name} gerado",
+                    }
+                },
+                "$set": {"updated_at": now},
+            },
+        )
+
+        return {
+            "success": True,
+            "case_id": case_id,
+            "client_name": case.get("client_name"),
+            "form_name": form_name,
+            "filename": filename,
+            "pdf_base64": pdf_b64,
+            "size_bytes": len(pdf_bytes),
+            "message": f"Formulário {form_name} gerado com sucesso para {case.get('client_name', case_id)}.",
+        }
+
+    except Exception as e:
+        return {"error": f"Erro ao gerar formulário: {str(e)}"}
+
 EXECUTORS = {
     "get_firm_overview": _get_firm_overview,
     "list_cases": _list_cases,
@@ -691,4 +773,5 @@ EXECUTORS = {
     "attach_document": _attach_document,
     "create_reminder": _create_reminder,
     "generate_letter": _generate_letter,
+    "generate_form": _generate_form,
 }

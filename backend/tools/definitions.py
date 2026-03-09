@@ -355,6 +355,29 @@ TOOL_DECLARATIONS = [
             "required": ["letter_type"],
         },
     },
+    {
+        "name": "generate_form",
+        "description": (
+            "Generate a filled USCIS form PDF for a case. Returns a downloadable PDF. "
+            "Supported: I-539, I-589, I-140, I-129 (O-1, H-1B, L-1), F-1. "
+            "Use when attorney says gerar formulario, generate form, preencher I-539, "
+            "fill form, preparar peticao, gerar PDF do caso."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "case_id": {
+                    "type": "string",
+                    "description": "The case ID (e.g. CASE-A1B2C3D4)",
+                },
+                "client_name_search": {
+                    "type": "string",
+                    "description": "Client name to find the case (if case_id unknown)",
+                },
+            },
+            "required": [],
+        },
+    },
 ]
 
 
