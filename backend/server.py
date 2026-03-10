@@ -156,6 +156,14 @@ from backend.api.visa_updates_admin import router as visa_updates_admin_router
 from backend.api.voice import router as voice_router
 from backend.api.voice import ws_router as voice_ws_router
 
+# Claude-powered agents (Carlos, Miguel, Patricia, Dr. Ricardo)
+try:
+    from backend.claude_agents_api import router as claude_agents_router
+    CLAUDE_AGENTS_AVAILABLE = True
+except Exception as _claude_err:
+    CLAUDE_AGENTS_AVAILABLE = False
+    logger.warning(f"Claude agents not available: {_claude_err}")
+
 # Auth helpers
 from backend.core.auth import (
     get_current_user,
@@ -4268,6 +4276,8 @@ app.include_router(intake_wizard_router)  # B2B guided case intake
 app.include_router(document_extractor_router)  # B2B document extraction
 if LEGAL_API_AVAILABLE:
     app.include_router(legal_router)  # Legal Research RAG
+if CLAUDE_AGENTS_AVAILABLE:
+    app.include_router(claude_agents_router)  # Claude agents (Carlos, Miguel, Patricia, Ricardo)
 # DISABLED B2C: app.include_router(education_router)
 # DISABLED B2C: app.include_router(documents_router)
 # DISABLED B2C: app.include_router(payments_router)
@@ -4310,7 +4320,9 @@ from backend.firm_reports_api import router as firm_reports_router
 app.include_router(firm_reports_router)
 
 from backend.firm_memory_api import router as firm_memory_router
+from backend.whatsapp_sessions_api import router as whatsapp_sessions_router
 app.include_router(firm_memory_router)
+app.include_router(whatsapp_sessions_router)
 
 logger.info("✅ B2B Auth, Offices, Cases, Letters, Documents, Settings, Reports API registered")
 

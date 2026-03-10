@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import B2BSidebar from '../components/B2BSidebar';
+import WhatsAppConnect from '../components/WhatsAppConnect';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || '';
 
@@ -353,6 +354,18 @@ export default function B2BSettings() {
         {tab === 'whatsapp' && (
           <div style={{ maxWidth: 600 }}>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 0, marginBottom: 20 }}>
+
+            {/* WhatsApp QR Inline Connect */}
+            <div style={{ marginBottom: 32, padding: 24, backgroundColor: "rgba(255,255,255,0.02)", borderRadius: 16, border: "1px solid rgba(255,255,255,0.06)" }}>
+              <h3 style={{ fontSize: 16, fontWeight: 500, color: "#fff", margin: "0 0 16px" }}>Connect WhatsApp to Imigrai</h3>
+              <WhatsAppConnect
+                officeId={user?.office_id || "demo"}
+                onConnected={(phone) => {
+                  fetchOffice();
+                }}
+              />
+            </div>
+            <hr style={{ border: "none", borderTop: "1px solid rgba(255,255,255,0.06)", margin: "24px 0" }} />
               Add phone numbers of attorneys and paralegals who will interact via WhatsApp.
             </p>
 

@@ -605,8 +605,12 @@ async def _generate_letter(args: dict, db, office_id: str) -> dict:
         if office:
             case["office_name"] = office.get("name", "")
 
+        # Pass the COMPLETE case dict with all data for rich letter generation
+        full_case = dict(case)
+        full_case["office_name"] = full_case.get("office_name", "")
+
         content = await LetterGenerator.generate_cover_letter(
-            case, letter_type, special_instructions
+            full_case, letter_type, special_instructions
         )
 
         letter_id = "LTR-" + str(uuid.uuid4())[:8].upper()

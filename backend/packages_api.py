@@ -67,6 +67,14 @@ FILING_INFO = {
         "premium": "$2,805 (optional, 15 business days)",
         "processing": "4-8 months (regular)",
     },
+    "EB-2 NIW": {
+        "form": "I-140",
+        "office": "USCIS Texas or Nebraska Service Center",
+        "address": "Check USCIS website for current filing address",
+        "fee": "$700",
+        "premium": "$2,805 (optional, 15 business days)",
+        "processing": "4-8 months (regular)",
+    },
     "I-539": {
         "form": "I-539",
         "office": "USCIS Lockbox",
@@ -120,6 +128,20 @@ REQUIRED_DOCS = {
         ("Cópia do passaporte (válido 6+ meses)", True),
         ("Currículo detalhado", True),
         ("Publicações, citações, prêmios", False),
+    ],
+    "EB-2 NIW": [
+        ("Formulário I-140 preenchido e assinado", True),
+        ("Evidência de grau avançado (PhD/Master) ou habilidade excepcional", True),
+        ("Cartas de recomendação de especialistas independentes", True),
+        ("Currículo detalhado / CV", True),
+        ("Lista de publicações com contagem de citações", True),
+        ("Cópia do passaporte (válido 6+ meses)", True),
+        ("Evidência do mérito e importância nacional do endeavor proposto", True),
+        ("Evidência de posição privilegiada para avançar o endeavor", True),
+        ("Registro I-94 (se nos EUA)", False),
+        ("Cobertura de mídia", False),
+        ("Patentes", False),
+        ("Documentação de grants/financiamento", False),
     ],
 }
 
@@ -255,9 +277,12 @@ def _build_summary(case: dict) -> str:
     if notes:
         lines.extend(["", "NOTES:"])
         for n in notes[-5:]:  # last 5 notes
-            ts = n.get("timestamp", "")
-            text = n.get("text", "")
-            lines.append(f"  [{ts}] {text}")
+            if isinstance(n, dict):
+                ts = n.get("timestamp", "")
+                text = n.get("text", "")
+                lines.append(f"  [{ts}] {text}")
+            else:
+                lines.append(f"  - {n}")
 
     return "\n".join(lines)
 
@@ -301,7 +326,7 @@ async def generate_package(
             elif visa_type in {"L-1", "L1"}:
                 pdf_bytes = form_filler.fill_l1(case)
                 form_name = "I-129_L-1"
-            elif visa_type in {"EB-1A", "EB1A", "I-140"}:
+            elif visa_type in {"EB-1A", "EB1A", "I-140", "EB-2 NIW", "EB2 NIW"}:
                 pdf_bytes = form_filler.fill_i140(case)
                 form_name = "I-140"
             elif visa_type == "I-539" or "B-" in visa_type:
@@ -325,7 +350,7 @@ async def generate_package(
         # 2. Cover letter
         if body.include_cover_letter:
             try:
-                from letter_generator import LetterGenerator
+                from backend.letter_generator import LetterGenerator
 
                 office = await db.offices.find_one({"office_id": office_id})
                 case["office_name"] = office["name"] if office else "Immigration Law Office"

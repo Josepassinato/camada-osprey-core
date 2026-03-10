@@ -266,6 +266,52 @@ class ProfessionalQAAgent:
                 "processing_time": "12-24 months depending on relationship",
                 "filing_fee": "$535",
             },
+            "EB-2 NIW": {
+                "form": "I-140",
+                "category_weights": {
+                    "personal_data": 0.10,
+                    "professional_data": 0.40,
+                    "documents": 0.35,
+                    "critical_criteria": 0.15,
+                },
+                "required_documents": [
+                    "Form I-140 Immigrant Petition for Alien Workers",
+                    "Evidence of advanced degree (PhD, Master's) or exceptional ability",
+                    "Curriculum Vitae / Resume",
+                    "Publications list with citation counts",
+                    "Letters of recommendation from independent experts",
+                    "Evidence of proposed endeavor's national importance:",
+                    "- Research impact documentation",
+                    "- Media coverage of work",
+                    "- Patents or intellectual property",
+                    "- Grant documentation",
+                    "Evidence of being well-positioned to advance the endeavor:",
+                    "- Track record of success",
+                    "- Future research plan",
+                    "Evidence that waiver benefits the United States",
+                    "Passport copy (valid 6+ months)",
+                    "I-94 Arrival/Departure Record (if in US)",
+                ],
+                "critical_checks": [
+                    "Must satisfy all three Dhanasar prongs (Matter of Dhanasar, 26 I&N Dec. 884)",
+                    "Prong 1: Proposed endeavor has substantial merit and national importance",
+                    "Prong 2: Petitioner is well positioned to advance the proposed endeavor",
+                    "Prong 3: On balance, it would be beneficial to the US to waive job offer requirement",
+                    "Must hold advanced degree or demonstrate exceptional ability",
+                    "Letters must be from independent experts in the field",
+                    "Evidence must demonstrate national (not just local) importance",
+                ],
+                "common_mistakes": [
+                    "Insufficient evidence of national importance (too narrowly scoped)",
+                    "Letters of recommendation from non-independent sources",
+                    "Failing to clearly articulate the proposed endeavor",
+                    "Weak evidence for Prong 3 (waiver justification)",
+                    "Missing citation evidence or publication metrics",
+                    "Not connecting evidence to specific Dhanasar prongs",
+                ],
+                "processing_time": "4-8 months (15 business days with premium processing)",
+                "filing_fee": "$700 + $2,805 (premium processing optional)",
+            },
             "I-765": {
                 "form": "I-765",
                 "required_documents": [
@@ -469,6 +515,36 @@ class ProfessionalQAAgent:
                 issues.append("Limited publications for extraordinary ability claim")
                 score -= 0.15
 
+        elif form_code == "EB-2 NIW":
+            # Verificar qualificações para NIW
+            qualifications = case_data.get("qualifications", {})
+            # Check advanced degree
+            degree = qualifications.get("degree", "") or form_responses.get("degree", "")
+            if degree and ("PhD" in degree or "Master" in degree or "Doctorate" in degree):
+                pass  # OK
+            elif not degree:
+                issues.append("Missing evidence of advanced degree (PhD or Master's required)")
+                score -= 0.30
+            # Check publications/citations
+            pubs = qualifications.get("publications", 0) or form_responses.get("publications", 0)
+            citations = qualifications.get("citations", 0) or form_responses.get("citations", 0)
+            if pubs < 5:
+                issues.append(f"Limited publications ({pubs}) for NIW claim")
+                score -= 0.15
+            if citations < 50:
+                issues.append(f"Limited citations ({citations}) for NIW claim")
+                score -= 0.10
+            # Check national impact
+            impact = qualifications.get("national_impact", "") or form_responses.get("national_impact", "")
+            if not impact:
+                issues.append("Missing evidence of national importance of proposed endeavor")
+                score -= 0.20
+            # Check recommenders
+            recommenders = qualifications.get("recommenders", []) or form_responses.get("recommenders", [])
+            if len(recommenders) < 3:
+                issues.append(f"Only {len(recommenders)} recommendation letters (minimum 3 recommended)")
+                score -= 0.15
+
         elif form_code == "H-1B":
             # Verificar specialty occupation
             education = form_responses.get("education", [])
@@ -589,7 +665,7 @@ class ProfessionalQAAgent:
                 score -= 0.02
 
         # Verificar quantidade mínima de documentos (ajustado por tipo)
-        min_docs = 5 if form_code in ["O-1", "EB-1A"] else 3
+        min_docs = 5 if form_code in ["O-1", "EB-1A", "EB-2 NIW"] else 3
         if len(documents) < min_docs:
             issues.append(
                 f"⚠️ Only {len(documents)} documents uploaded (minimum {min_docs} expected for {form_code})"
@@ -662,10 +738,10 @@ class ProfessionalQAAgent:
             "category_breakdown": {},  # 🆕 Breakdown detalhado por categoria
         }
 
-        # Processos críticos (O-1, EB-1A) exigem score mais alto
+        # Processos críticos (O-1, EB-1A, EB-2 NIW) exigem score mais alto
         threshold = (
             self.critical_threshold
-            if form_code in ["O-1", "EB-1A"]
+            if form_code in ["O-1", "EB-1A", "EB-2 NIW"]
             else self.minimum_approval_score
         )
 
